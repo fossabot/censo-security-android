@@ -27,6 +27,9 @@ android {
         buildConfigField "int", "versionNameMinor", versionNameMinor
         buildConfigField "int", "versionNamePatch", versionNamePatch
         versionName versionNameMajor + "." + versionNameMinor + "." + versionNamePatch
+        signingConfig signingConfigs.debug
+
+        proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -37,8 +40,35 @@ android {
     buildTypes {
         release {
             resValue "string", "app_name", appName
+            minifyEnabled true
+            buildConfigField "String", "BASE_URL", "\"https://strikeprotocols.com/\""
+            debuggable false
+        }
+        demoOne {
+            resValue "string", "app_name", "$appName (Demo)"
+            applicationIdSuffix ".demo"
+            minifyEnabled true
+            buildConfigField "String", "BASE_URL", "\"https://strikeprotocols.com/\""
+            debuggable false
+        }
+        demoTwo {
+            initWith demoOne
+            resValue "string", "app_name", "$appName (Demo2)"
+            applicationIdSuffix ".demo2"
+            buildConfigField "String", "BASE_URL", "\"https://strikeprotocols.com/\""
+        }
+        preRelease {
+            resValue "string", "app_name", "$appName (Develop)"
+            applicationIdSuffix ".prerelease"
+            minifyEnabled true
+            buildConfigField "String", "BASE_URL", "\"https://strikeprotocols.com/\""
+            debuggable false
+        }
+        debug {
+            initWith preRelease
+            applicationIdSuffix ".debug"
             minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            debuggable true
         }
     }
     compileOptions {
