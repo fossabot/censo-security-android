@@ -1,0 +1,12 @@
+<lint>
+    <issue id="InvalidPackage">
+        <ignore path="**/bcpkix-jdk15on*.jar" />
+    </issue>
+    <issue id="InvalidPackage">
+        <ignore path="**/httpclient*.jar" />
+    </issue>
+    <issue id="TrustAllX509TrustManager">
+        <ignore path="**/JcaJceUtils$1.class" />
+        <ignore path="**/JcaJceUtils$2.class" />
+    </issue>
+</lint>
