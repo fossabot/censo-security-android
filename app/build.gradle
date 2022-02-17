@@ -31,6 +31,10 @@ android {
 
         proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
 
+        manifestPlaceholders = [
+                "appAuthRedirectScheme": "com.strikeprotocols.mobile"
+        ]
+
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
             useSupportLibrary true
@@ -88,9 +92,12 @@ android {
     packagingOptions {
         resources {
             excludes += '/META-INF/{AL2.0,LGPL2.1}'
+            excludes += 'META-INF/okta/*'
+            excludes += 'META-INF/DEPENDENCIES'
         }
     }
     lintOptions {
+        lintConfig file("lint.xml")
         checkAllWarnings true
         warningsAsErrors true
     }
@@ -135,6 +142,15 @@ dependencies {
     implementation "com.squareup.okhttp3:logging-interceptor:$okhttp_version"
 
     implementation platform('com.google.firebase:firebase-bom:29.1.0')
+
+    //Okta
+    implementation 'com.okta.android:okta-oidc-android:1.2.2'
+
+    implementation 'com.okta.authn.sdk:okta-authn-sdk-api:2.0.4'
+    runtimeOnly 'com.okta.authn.sdk:okta-authn-sdk-impl:2.0.4'
+    runtimeOnly('com.okta.sdk:okta-sdk-httpclient:8.1.0') {
+        exclude group: 'commons-logging'
+    }
 
 
     //Unit testing
