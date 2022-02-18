@@ -1,0 +1,25 @@
+name: Android CI
+
+on:
+  push:
+    branches: [ staging ]
+  workflow_dispatch:
+    inputs:
+      logLevel:
+        description: 'Log level'
+        required: true
+        default: 'warning'
+
+
+jobs:
+  call-workflow-passing-data:
+    uses: ./.github/workflows/core_workflow.yml
+    with:
+      variant: DemoOne
+    secrets:
+      googleServices: ${{ secrets.GOOGLE_SERVICES }}
+      firebaseToken: ${{ secrets.FIREBASE_TOKEN }}
+      keystore: ${{ secrets.RELEASE_KEYSTORE }}
+      passphrase: ${{ secrets.PASSPHRASE }}
+      keyPassword: ${{ secrets.RELEASE_STORE_PASSWORD }}
+      alias: ${{ secrets.RELEASE_KEY_ALIAS }}
