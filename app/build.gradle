@@ -3,6 +3,7 @@ plugins {
     id 'org.jetbrains.kotlin.android'
     id 'kotlin-kapt'
     id 'dagger.hilt.android.plugin'
+    id 'com.google.gms.google-services'
     id 'com.google.firebase.appdistribution'
     id 'com.adarshr.test-logger' version '3.1.0'
 }
@@ -14,8 +15,21 @@ String versionNameMinor = 0
 String versionNamePatch = 1
 
 android {
+    Properties localProps = new Properties()
+    localProps.load(new FileInputStream(file('../local.properties')))
+
     compileSdkVersion 31
     buildToolsVersion "30.0.3"
+
+    signingConfigs {
+        config_release {
+
+            keyAlias localProps['RELEASE_KEY_ALIAS']
+            keyPassword localProps["RELEASE_STORE_PASSWORD"]
+            storeFile file("keystore.jks")
+            storePassword localProps["RELEASE_STORE_PASSWORD"]
+        }
+    }
 
     defaultConfig {
         applicationId "com.strikeprotocols.mobile"
@@ -27,7 +41,7 @@ android {
         buildConfigField "int", "versionNameMinor", versionNameMinor
         buildConfigField "int", "versionNamePatch", versionNamePatch
         versionName versionNameMajor + "." + versionNameMinor + "." + versionNamePatch
-        signingConfig signingConfigs.debug
+        signingConfig signingConfigs.config_release
 
         proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
 
