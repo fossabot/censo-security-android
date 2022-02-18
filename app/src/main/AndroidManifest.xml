@@ -3,11 +3,13 @@
     package="com.strikeprotocols.mobile">
 
     <application
+        android:name=".StrikeApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
+        android:screenOrientation="portrait"
         android:theme="@style/Theme.StrikeMobile">
         <activity
             android:name=".MainActivity"
