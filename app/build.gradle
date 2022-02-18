@@ -96,6 +96,7 @@ android {
     kotlinOptions {
         jvmTarget = '1.8'
         useIR = true
+        freeCompilerArgs += "-Xopt-in=kotlin.RequiresOptIn"
     }
     buildFeatures {
         compose true
@@ -131,7 +132,12 @@ dependencies {
     // Compose Specific dependencies
     implementation "androidx.lifecycle:lifecycle-viewmodel-compose:$compose_lifecycle"
     implementation "androidx.navigation:navigation-compose:$compose_lifecycle"
+    implementation "androidx.compose.material:material-icons-extended:$compose_version"
+
+
+    //Compose Accompanist
     implementation "com.google.accompanist:accompanist-flowlayout:0.17.0"
+    implementation "com.google.accompanist:accompanist-systemuicontroller:0.17.0"
 
     // Coroutines
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutines_version"
