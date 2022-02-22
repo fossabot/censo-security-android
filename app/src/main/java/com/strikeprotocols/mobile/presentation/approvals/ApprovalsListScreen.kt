@@ -31,7 +31,7 @@ fun ApprovalsListScreen(
             onClick = {
                 viewModel.checkToken()
             }) {
-            Text("Go Check Access Token")
+            Text("Go Check Token")
         }
     }
 }
