@@ -10,4 +10,16 @@
     <string name="ok">OK</string>
     <string name="login_failed_title">Login Failed</string>
     <string name="login_failed_message">User with email and password not found.\n\nPlease try again.</string>
+
+    <string name="bio_prompt_title">Biometric login for my app</string>
+    <string name="bio_prompt_subtitle">Log in using your biometric credential</string>
+    <string name="cancel">Cancel</string>
+    <string name="setup_two_factor_auth">Setup Two Factor Auth</string>
+    <string name="content_des_strike_logo">Strike Logo</string>
+    <string name="content_des_finger_print">Biometric Fingerprint Logo</string>
+    <string name="content_des_face_id">Biometric Face Id Logo</string>
+    <string name="two_factor_auth_request">Complete the Strike Security App setup by activating two factor authentication with biometry.</string>
+    <string name="you_are_set">You\'re all set!</string>
+    <string name="activating_auth">Activating authentication…</string>
+    <string name="dismiss">Dismiss</string>
 </resources>

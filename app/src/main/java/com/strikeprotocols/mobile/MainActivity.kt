@@ -1,10 +1,10 @@
 package com.strikeprotocols.mobile
 
 import android.os.Bundle
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.material.Surface
 import androidx.navigation.NavController
+import androidx.fragment.app.FragmentActivity
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -13,6 +13,7 @@ import com.strikeprotocols.mobile.data.UserState
 import com.strikeprotocols.mobile.data.UserStateListener
 import com.strikeprotocols.mobile.presentation.Screen
 import com.strikeprotocols.mobile.presentation.approvals.ApprovalsListScreen
+import com.strikeprotocols.mobile.presentation.auth.AuthScreen
 import com.strikeprotocols.mobile.presentation.sign_in.SignInScreen
 import com.strikeprotocols.mobile.ui.theme.BackgroundBlack
 import com.strikeprotocols.mobile.ui.theme.StrikeMobileTheme
@@ -20,7 +21,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class MainActivity : ComponentActivity() {
+class MainActivity : FragmentActivity() {
 
     @Inject
     lateinit var authProvider: AuthProvider
@@ -51,6 +52,11 @@ class MainActivity : ComponentActivity() {
                             route = Screen.ApprovalListRoute.route
                         ) {
                             ApprovalsListScreen()
+                        }
+                        composable(
+                            route = Screen.AuthRoute.route
+                        ) {
+                            AuthScreen(navController = navController)
                         }
                     }
                 }

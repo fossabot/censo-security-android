@@ -8,9 +8,10 @@ buildscript {
         ktx_version = '1.7.0'
         appcompat_version = '1.4.1'
         material_version = '1.5.0'
-        hilt_version = '2.39.1'
+        hilt_version = '2.40.5'
         compose_activity = '1.4.0'
-        compose_lifecycle = "2.5.0-alpha02"
+        //Had to stay on 2.4.x per this issue: https://github.com/google/dagger/issues/3226
+        compose_lifecycle = "2.4.1"
     }
     repositories {
         google()
@@ -19,7 +20,7 @@ buildscript {
     dependencies {
         classpath 'com.android.tools.build:gradle:7.1.1'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.6.10"
-        classpath "com.google.dagger:hilt-android-gradle-plugin:2.39.1"
+        classpath "com.google.dagger:hilt-android-gradle-plugin:$hilt_version"
         classpath "com.google.gms:google-services:4.3.10"
         //Need to stay on 2.2.0 until this issue is fixed by their team: https://github.com/firebase/firebase-android-sdk/issues/3403
         classpath 'com.google.firebase:firebase-appdistribution-gradle:2.2.0'
