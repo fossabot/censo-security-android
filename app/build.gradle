@@ -9,6 +9,7 @@ plugins {
 }
 
 def final appName = 'Strike Mobile'
+def final coreAppId = "com.strikeprotocols.mobile"
 
 String versionNameMajor = 0
 String versionNameMinor = 0
@@ -32,7 +33,7 @@ android {
     }
 
     defaultConfig {
-        applicationId "com.strikeprotocols.mobile"
+        applicationId coreAppId
         minSdk 24
         targetSdk 32
         versionCode 1
@@ -40,10 +41,15 @@ android {
         buildConfigField "int", "versionNameMajor", versionNameMajor
         buildConfigField "int", "versionNameMinor", versionNameMinor
         buildConfigField "int", "versionNamePatch", versionNamePatch
+        buildConfigField "String", "CORE_APP_ID", "\"$coreAppId\""
+
         versionName versionNameMajor + "." + versionNameMinor + "." + versionNamePatch
         signingConfig signingConfigs.config_release
 
         proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+
+        buildConfigField "String", "OKTA_BASE_URL", "\"https://login.strikeprotocols.com\""
+        buildConfigField "String", "OKTA_DOMAIN", "\"https://strike-prime.okta.com\""
 
         manifestPlaceholders = [
                 "appAuthRedirectScheme": "com.strikeprotocols.mobile"
@@ -60,6 +66,8 @@ android {
             resValue "string", "app_name", appName
             minifyEnabled true
             buildConfigField "String", "BASE_URL", "\"https://strikeprotocols.com/\""
+            buildConfigField "String", "OKTA_CLIENT_ID", "\"0oa7ajzug1y8O0CPe357\""
+            buildConfigField "String", "REDIRECT_SUFFIX", "\"\""
             debuggable false
         }
         demoOne {
@@ -67,6 +75,8 @@ android {
             applicationIdSuffix ".demo"
             minifyEnabled true
             buildConfigField "String", "BASE_URL", "\"https://strikeprotocols.com/\""
+            buildConfigField "String", "OKTA_CLIENT_ID", "\"0oa7ajsmclS0GyzMw357\""
+            buildConfigField "String", "REDIRECT_SUFFIX", "\"-demo\""
             debuggable false
         }
         demoTwo {
@@ -74,12 +84,16 @@ android {
             resValue "string", "app_name", "$appName (Demo2)"
             applicationIdSuffix ".demo2"
             buildConfigField "String", "BASE_URL", "\"https://strikeprotocols.com/\""
+            buildConfigField "String", "OKTA_CLIENT_ID", "\"0oa7ajsmclS0GyzMw357\""
+            buildConfigField "String", "REDIRECT_SUFFIX", "\"-demo-2\""
         }
         preRelease {
             resValue "string", "app_name", "$appName (Develop)"
             applicationIdSuffix ".prerelease"
             minifyEnabled true
             buildConfigField "String", "BASE_URL", "\"https://strikeprotocols.com/\""
+            buildConfigField "String", "OKTA_CLIENT_ID", "\"0oa73mddnlx5MMo7j357\""
+            buildConfigField "String", "REDIRECT_SUFFIX", "\"-dev\""
             debuggable false
         }
         debug {
@@ -167,11 +181,11 @@ dependencies {
     implementation 'com.okta.android:okta-oidc-android:1.2.2'
 
     implementation 'com.okta.authn.sdk:okta-authn-sdk-api:2.0.4'
-    runtimeOnly 'com.okta.authn.sdk:okta-authn-sdk-impl:2.0.4'
-    runtimeOnly('com.okta.sdk:okta-sdk-httpclient:8.1.0') {
-        exclude group: 'commons-logging'
+    implementation('com.okta.authn.sdk:okta-authn-sdk-impl:2.0.4') {
+        exclude group: 'com.okta.sdk', module: 'okta-sdk-httpclient'
     }
 
+    implementation 'com.okta.sdk:okta-sdk-okhttp:2.0.0'
 
     //Unit testing
     testImplementation 'junit:junit:4.13.2'

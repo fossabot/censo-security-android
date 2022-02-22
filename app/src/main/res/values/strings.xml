@@ -1,10 +1,13 @@
 <resources>
     <string name="sign_in_button">Sign in</string>
-    <string name="holder_text">Coming Soon…</string>
+    <string name="holder_text">&#128077;</string>
     <string name="email_hint">Email</string>
     <string name="password_hint">Password</string>
     <string name="hide_password_content_description">hide password</string>
     <string name="show_password_content_description">show password</string>
     <string name="invalid_password_error">Please enter a password</string>
     <string name="invalid_email_error">Please enter a valid email</string>
+    <string name="ok">OK</string>
+    <string name="login_failed_title">Login Failed</string>
+    <string name="login_failed_message">User with email and password not found.\n\nPlease try again.</string>
 </resources>
