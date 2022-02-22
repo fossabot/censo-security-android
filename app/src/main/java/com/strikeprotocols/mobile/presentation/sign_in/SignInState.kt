@@ -8,7 +8,7 @@ data class SignInState(
     val password: String = "",
     val emailErrorEnabled: Boolean = false,
     val passwordErrorEnabled: Boolean = false,
-    val loginResult: Resource<Boolean> = Resource.Uninitialized,
+    val loginResult: Resource<String> = Resource.Uninitialized,
 ) {
     val signInButtonEnabled = email.isNotEmpty() && password.isNotEmpty()
 

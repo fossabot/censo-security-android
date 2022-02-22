@@ -8,7 +8,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.viewModelScope
 import com.strikeprotocols.mobile.common.Resource
+import com.strikeprotocols.mobile.data.NoInternetException
+import com.strikeprotocols.mobile.data.NoInternetException.Companion.NO_INTERNET_ERROR
 import com.strikeprotocols.mobile.domain.use_case.SignInUseCase
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 
@@ -30,20 +33,28 @@ class SignInViewModel @Inject constructor(
 
     fun attemptLogin() {
         if (state.signInButtonEnabled) {
-            signInUseCase.execute().onEach { result ->
-                when (result) {
-                    is Resource.Success -> {
-                        state = state.copy(loginResult = result)
-                    }
-                    is Resource.Error -> {
-                        throw NotImplementedError()
-                    }
-                    else -> {
-                        state = state.copy(loginResult = Resource.Loading())
-                    }
-                }
 
-            }.launchIn(viewModelScope)
+            val coroutineExceptionHandler = CoroutineExceptionHandler { _, _ ->
+                state = state.copy(
+                    loginResult = Resource.Error(
+                        NoInternetException().message ?: NO_INTERNET_ERROR
+                    )
+                )
+            }
+
+            viewModelScope.launch(Dispatchers.IO + coroutineExceptionHandler) {
+                signInUseCase.execute(state.email, state.password).onEach { result ->
+                    state = when (result) {
+                        is Resource.Success, is Resource.Error -> {
+                            state.copy(loginResult = result)
+                        }
+                        else -> {
+                            state.copy(loginResult = Resource.Loading())
+                        }
+                    }
+                }.launchIn(this)
+            }
+
         } else {
             state = state.copy(
                 emailErrorEnabled = !state.emailValid(),

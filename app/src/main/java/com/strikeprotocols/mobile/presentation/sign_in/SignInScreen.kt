@@ -12,7 +12,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -25,9 +24,7 @@ import com.strikeprotocols.mobile.R
 import com.strikeprotocols.mobile.common.Resource
 import com.strikeprotocols.mobile.presentation.Screen
 import com.strikeprotocols.mobile.presentation.components.SignInTextField
-import com.strikeprotocols.mobile.ui.theme.DisabledButtonTextColor
-import com.strikeprotocols.mobile.ui.theme.StrikePurple
-import com.strikeprotocols.mobile.ui.theme.StrikeWhite
+import com.strikeprotocols.mobile.ui.theme.*
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
@@ -110,5 +107,34 @@ fun SignInScreen(
             }
         }
         Spacer(modifier = Modifier.height(24.dp))
+    }
+
+    if (state.loginResult is Resource.Error) {
+        AlertDialog(
+            backgroundColor = UnfocusedGrey,
+            onDismissRequest = viewModel::resetLoginCall,
+            confirmButton = {
+                TextButton(
+                    onClick = viewModel::resetLoginCall
+                )
+                {
+                    Text(text = stringResource(R.string.ok))
+                }
+            },
+            title = {
+                Text(
+                    text = stringResource(R.string.login_failed_title),
+                    color = StrikeWhite,
+                    fontSize = 20.sp
+                )
+            },
+            text = {
+                Text(
+                    text = stringResource(R.string.login_failed_message),
+                    color = StrikeWhite,
+                    fontSize = 16.sp
+                )
+            }
+        )
     }
 }
