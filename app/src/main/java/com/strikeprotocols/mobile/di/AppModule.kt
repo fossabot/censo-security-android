@@ -1,8 +1,7 @@
 package com.strikeprotocols.mobile.di
 
 import android.content.Context
-import com.strikeprotocols.mobile.data.UserRepository
-import com.strikeprotocols.mobile.data.UserRepositoryImpl
+import com.strikeprotocols.mobile.data.*
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -16,8 +15,25 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideUserRepository(@ApplicationContext context: Context): UserRepository {
-        return UserRepositoryImpl(context)
+    fun provideAuthProvider(@ApplicationContext applicationContext: Context): AuthProvider {
+        return OktaAuth(applicationContext)
     }
 
+    @Provides
+    @Singleton
+    fun provideApiService(authProvider: AuthProvider): BrooklynApiService {
+        return BrooklynApiService.create(authProvider)
+    }
+
+    @Provides
+    @Singleton
+    fun provideUserRepository(authProvider: AuthProvider): UserRepository {
+        return UserRepositoryImpl(authProvider)
+    }
+
+    @Provides
+    @Singleton
+    fun provideApprovalsRepository(api: BrooklynApiService): ApprovalsRepository {
+        return ApprovalsRepositoryImpl(api)
+    }
 }

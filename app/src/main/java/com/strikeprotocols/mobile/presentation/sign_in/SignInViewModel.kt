@@ -45,7 +45,10 @@ class SignInViewModel @Inject constructor(
             viewModelScope.launch(Dispatchers.IO + coroutineExceptionHandler) {
                 signInUseCase.execute(state.email, state.password).onEach { result ->
                     state = when (result) {
-                        is Resource.Success, is Resource.Error -> {
+                        is Resource.Success -> {
+                            state.copy(loginResult = result)
+                        }
+                        is Resource.Error -> {
                             state.copy(loginResult = result)
                         }
                         else -> {
