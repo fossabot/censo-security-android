@@ -45,9 +45,6 @@ fun SignInScreen(
 //            }
             viewModel.resetLoginCall()
         }
-        if (state.verifyResult is Resource.Success) {
-            strikeLog("lighthouse", state.verifyResult.data.toString())
-        }
     }
 
     Column(
