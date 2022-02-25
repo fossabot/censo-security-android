@@ -2,6 +2,7 @@ package com.strikeprotocols.mobile.presentation.sign_in
 
 import android.util.Patterns
 import com.strikeprotocols.mobile.common.Resource
+import com.strikeprotocols.mobile.data.models.VerifyUser
 
 data class SignInState(
     val email: String = "",
@@ -9,6 +10,7 @@ data class SignInState(
     val emailErrorEnabled: Boolean = false,
     val passwordErrorEnabled: Boolean = false,
     val loginResult: Resource<String> = Resource.Uninitialized,
+    val verifyResult: Resource<VerifyUser> = Resource.Uninitialized
 ) {
     val signInButtonEnabled = email.isNotEmpty() && password.isNotEmpty()
 

@@ -11,13 +11,15 @@ import com.strikeprotocols.mobile.common.Resource
 import com.strikeprotocols.mobile.data.NoInternetException
 import com.strikeprotocols.mobile.data.NoInternetException.Companion.NO_INTERNET_ERROR
 import com.strikeprotocols.mobile.domain.use_case.SignInUseCase
+import com.strikeprotocols.mobile.domain.use_case.VerifyUserUseCase
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 
 @HiltViewModel
 class SignInViewModel @Inject constructor(
-    private val signInUseCase: SignInUseCase
+    private val signInUseCase: SignInUseCase,
+    private val verifyUserUseCase: VerifyUserUseCase
 ) : ViewModel() {
 
     var state by mutableStateOf(SignInState())
@@ -29,6 +31,24 @@ class SignInViewModel @Inject constructor(
 
     fun updatePassword(updatedPassword: String) {
         state = state.copy(password = updatedPassword, passwordErrorEnabled = false)
+    }
+
+    fun attemptVerify() {
+        viewModelScope.launch(Dispatchers.IO) {
+            verifyUserUseCase.execute().onEach { result ->
+                state = when (result) {
+                    is Resource.Success -> {
+                        state.copy(verifyResult = result)
+                    }
+                    is Resource.Error -> {
+                        state.copy(verifyResult = result)
+                    }
+                    else -> {
+                        state.copy(verifyResult = Resource.Loading())
+                    }
+                }
+            }.launchIn(this)
+        }
     }
 
     fun attemptLogin() {

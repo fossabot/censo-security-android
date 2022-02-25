@@ -10,7 +10,7 @@ import com.okta.oidc.clients.AuthClient
 import com.okta.oidc.storage.SharedPreferenceStorage
 import com.okta.oidc.util.AuthorizationException
 import com.strikeprotocols.mobile.BuildConfig
-import com.strikeprotocols.mobile.data.OktaAuth.Companion.DISCOVERY_URI
+import com.strikeprotocols.mobile.data.OktaAuth.Companion.ISSUER_URL
 import com.strikeprotocols.mobile.data.OktaAuth.Companion.LOGIN_REDIRECT_URI
 import com.strikeprotocols.mobile.data.OktaAuth.Companion.LOGOUT_REDIRECT_URI
 import com.strikeprotocols.mobile.data.OktaAuth.Companion.OIDC_SCOPES
@@ -50,7 +50,7 @@ class OktaAuth(applicationContext: Context) : AuthProvider {
     override val isExpired: Boolean
         get() = authClient.sessionClient.tokens.isAccessTokenExpired
     override val token: String?
-        get() = authClient.sessionClient.tokens.accessToken
+        get() = authClient.sessionClient.tokens.idToken
 
     fun setupAuthenticationClient() {
         authenticationClient =
@@ -62,7 +62,7 @@ class OktaAuth(applicationContext: Context) : AuthProvider {
 
         val config = OIDCConfig.Builder()
             .clientId(BuildConfig.OKTA_CLIENT_ID)
-            .discoveryUri(DISCOVERY_URI)
+            .discoveryUri(ISSUER_URL)
             .redirectUri(LOGIN_REDIRECT_URI)
             .endSessionRedirectUri(LOGOUT_REDIRECT_URI)
             .scopes(*OIDC_SCOPES)
@@ -72,6 +72,7 @@ class OktaAuth(applicationContext: Context) : AuthProvider {
             .withConfig(config)
             .withContext(applicationContext)
             .withStorage(SharedPreferenceStorage(applicationContext))
+            .setRequireHardwareBackedKeyStore(!BuildConfig.DEBUG)
             .create()
     }
 
@@ -128,7 +129,7 @@ class OktaAuth(applicationContext: Context) : AuthProvider {
         }
     }
 
-    fun retrieveValidToken(tokens: Tokens) = tokens.accessToken ?: throw TokenExpiredException()
+    fun retrieveValidToken(tokens: Tokens) = tokens.idToken ?: throw TokenExpiredException()
 
     private suspend fun refreshToken(): String = suspendCoroutine { cont ->
         authClient.sessionClient.refreshToken(object :
@@ -190,10 +191,10 @@ class OktaAuth(applicationContext: Context) : AuthProvider {
 
     object Companion {
         private const val REDIRECT_URI = "${BuildConfig.CORE_APP_ID}${BuildConfig.REDIRECT_SUFFIX}"
-        const val DISCOVERY_URI = "${BuildConfig.OKTA_DOMAIN}/oauth2/default"
         const val LOGIN_REDIRECT_URI = "$REDIRECT_URI:/login"
         const val LOGOUT_REDIRECT_URI = "$REDIRECT_URI:/logout"
         val OIDC_SCOPES = arrayOf("openid", "profile", "email", "offline_access")
+        val ISSUER_URL = "${BuildConfig.OKTA_DOMAIN}/oauth2/${BuildConfig.OKTA_ISSUER_ID}"
     }
 
 }

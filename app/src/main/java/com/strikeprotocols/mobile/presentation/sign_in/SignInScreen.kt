@@ -22,6 +22,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.strikeprotocols.mobile.R
 import com.strikeprotocols.mobile.common.Resource
+import com.strikeprotocols.mobile.common.strikeLog
 import com.strikeprotocols.mobile.presentation.Screen
 import com.strikeprotocols.mobile.presentation.components.SignInTextField
 import com.strikeprotocols.mobile.ui.theme.*
@@ -36,12 +37,16 @@ fun SignInScreen(
 
     LaunchedEffect(key1 = state) {
         if (state.loginResult is Resource.Success) {
-            navController.navigate(Screen.ApprovalListRoute.route) {
-                popUpTo(Screen.SignInRoute.route) {
-                    inclusive = true
-                }
-            }
+            viewModel.attemptVerify()
+//            navController.navigate(Screen.ApprovalListRoute.route) {
+//                popUpTo(Screen.SignInRoute.route) {
+//                    inclusive = true
+//                }
+//            }
             viewModel.resetLoginCall()
+        }
+        if (state.verifyResult is Resource.Success) {
+            strikeLog("lighthouse", state.verifyResult.data.toString())
         }
     }
 
