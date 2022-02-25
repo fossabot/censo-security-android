@@ -2,6 +2,7 @@ package com.strikeprotocols.mobile.data
 
 import com.strikeprotocols.mobile.BuildConfig
 import com.strikeprotocols.mobile.data.BrooklynApiService.Companion.AUTH
+import com.strikeprotocols.mobile.data.models.VerifyUser
 import kotlinx.coroutines.runBlocking
 import okhttp3.*
 import okhttp3.logging.HttpLoggingInterceptor
@@ -52,6 +53,10 @@ interface BrooklynApiService {
     @GET("/approvals")
     @Headers(AUTH_REQUIRED)
     suspend fun getApprovals(): ResponseBody
+
+    @GET("v1/users")
+    @Headers(AUTH_REQUIRED)
+    suspend fun verifyUser(): VerifyUser
 }
 
 class AuthInterceptor(private val authProvider: AuthProvider) : Interceptor {

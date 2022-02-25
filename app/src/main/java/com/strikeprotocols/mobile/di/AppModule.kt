@@ -27,8 +27,8 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideUserRepository(authProvider: AuthProvider): UserRepository {
-        return UserRepositoryImpl(authProvider)
+    fun provideUserRepository(authProvider: AuthProvider, api: BrooklynApiService): UserRepository {
+        return UserRepositoryImpl(authProvider, api)
     }
 
     @Provides
