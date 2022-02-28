@@ -3,6 +3,7 @@ package com.strikeprotocols.mobile.data
 import com.strikeprotocols.mobile.BuildConfig
 import com.strikeprotocols.mobile.data.BrooklynApiService.Companion.AUTH
 import com.strikeprotocols.mobile.data.models.VerifyUser
+import com.strikeprotocols.mobile.data.models.WalletSigner
 import com.strikeprotocols.mobile.data.models.WalletSigners
 import kotlinx.coroutines.runBlocking
 import okhttp3.*
@@ -46,11 +47,6 @@ interface BrooklynApiService {
         }
     }
 
-    //example non auth API call
-    @POST("/nonauth")
-    suspend fun registerUser(): ResponseBody
-
-    //example auth api call
     @GET("/approvals")
     @Headers(AUTH_REQUIRED)
     suspend fun getApprovals(): ResponseBody
@@ -62,6 +58,11 @@ interface BrooklynApiService {
     @GET("v1/wallet-signers")
     @Headers(AUTH_REQUIRED)
     suspend fun walletSigners(): WalletSigners
+
+    @POST("v1/wallet-signers")
+    @Headers(AUTH_REQUIRED)
+    suspend fun addWalletSigner(@Body walletSignerBody: WalletSigner) : WalletSigner
+
 }
 
 class AuthInterceptor(private val authProvider: AuthProvider) : Interceptor {

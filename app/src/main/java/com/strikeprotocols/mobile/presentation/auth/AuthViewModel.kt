@@ -31,7 +31,7 @@ class AuthViewModel @Inject constructor() : ViewModel() {
                     state = state.copy(authStep = AuthStep.FINISHED)
                 }
                 AuthStep.FINISHED -> state = state.copy(authStep = AuthStep.LEAVE_SCREEN)
-                AuthStep.PROCESSING -> {}
+                AuthStep.PROCESSING, AuthStep.LEAVE_SCREEN -> {}
             }
         }
     }
