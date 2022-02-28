@@ -8,10 +8,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.viewModelScope
 import com.strikeprotocols.mobile.common.Resource
+import com.strikeprotocols.mobile.common.strikeLog
 import com.strikeprotocols.mobile.data.NoInternetException
 import com.strikeprotocols.mobile.data.NoInternetException.Companion.NO_INTERNET_ERROR
 import com.strikeprotocols.mobile.domain.use_case.SignInUseCase
 import com.strikeprotocols.mobile.domain.use_case.VerifyUserUseCase
+import com.strikeprotocols.mobile.domain.use_case.WalletSignersUseCase
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -19,7 +21,8 @@ import kotlinx.coroutines.flow.onEach
 @HiltViewModel
 class SignInViewModel @Inject constructor(
     private val signInUseCase: SignInUseCase,
-    private val verifyUserUseCase: VerifyUserUseCase
+    private val verifyUserUseCase: VerifyUserUseCase,
+    private val walletSignersUseCase: WalletSignersUseCase
 ) : ViewModel() {
 
     var state by mutableStateOf(SignInState())
@@ -31,6 +34,24 @@ class SignInViewModel @Inject constructor(
 
     fun updatePassword(updatedPassword: String) {
         state = state.copy(password = updatedPassword, passwordErrorEnabled = false)
+    }
+
+    fun attemptGetWalletSigners() {
+        viewModelScope.launch(Dispatchers.IO) {
+            walletSignersUseCase.execute().onEach { result ->
+                state = when (result) {
+                    is Resource.Success -> {
+                        state.copy(walletSignersResult = result)
+                    }
+                    is Resource.Error -> {
+                        state.copy(walletSignersResult = result)
+                    }
+                    else -> {
+                        state.copy(walletSignersResult = Resource.Loading())
+                    }
+                }
+            }.launchIn(this)
+        }
     }
 
     fun attemptVerify() {
@@ -88,6 +109,14 @@ class SignInViewModel @Inject constructor(
 
     fun resetLoginCall() {
         state = state.copy(loginResult = Resource.Uninitialized)
+    }
+
+    fun resetVerifyCall() {
+        state = state.copy(verifyResult = Resource.Uninitialized)
+    }
+
+    fun resetWalletSignersCall() {
+        state = state.copy(walletSignersResult = Resource.Uninitialized)
     }
 
 }

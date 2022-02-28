@@ -3,6 +3,7 @@ package com.strikeprotocols.mobile.data
 import com.strikeprotocols.mobile.BuildConfig
 import com.strikeprotocols.mobile.data.BrooklynApiService.Companion.AUTH
 import com.strikeprotocols.mobile.data.models.VerifyUser
+import com.strikeprotocols.mobile.data.models.WalletSigners
 import kotlinx.coroutines.runBlocking
 import okhttp3.*
 import okhttp3.logging.HttpLoggingInterceptor
@@ -57,6 +58,10 @@ interface BrooklynApiService {
     @GET("v1/users")
     @Headers(AUTH_REQUIRED)
     suspend fun verifyUser(): VerifyUser
+
+    @GET("v1/wallet-signers")
+    @Headers(AUTH_REQUIRED)
+    suspend fun walletSigners(): WalletSigners
 }
 
 class AuthInterceptor(private val authProvider: AuthProvider) : Interceptor {
