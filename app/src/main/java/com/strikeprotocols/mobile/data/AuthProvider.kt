@@ -10,12 +10,11 @@ import com.okta.oidc.clients.AuthClient
 import com.okta.oidc.storage.SharedPreferenceStorage
 import com.okta.oidc.util.AuthorizationException
 import com.strikeprotocols.mobile.BuildConfig
+import com.strikeprotocols.mobile.data.OktaAuth.Companion.AUTH_FAILED
 import com.strikeprotocols.mobile.data.OktaAuth.Companion.ISSUER_URL
 import com.strikeprotocols.mobile.data.OktaAuth.Companion.LOGIN_REDIRECT_URI
 import com.strikeprotocols.mobile.data.OktaAuth.Companion.LOGOUT_REDIRECT_URI
 import com.strikeprotocols.mobile.data.OktaAuth.Companion.OIDC_SCOPES
-import com.strikeprotocols.mobile.domain.use_case.SessionTokenException
-import com.strikeprotocols.mobile.domain.use_case.SignInUseCase
 import kotlin.coroutines.suspendCoroutine
 import com.okta.oidc.results.Result as OktaResult
 
@@ -88,7 +87,7 @@ class OktaAuth(applicationContext: Context) : AuthProvider {
             try {
                 authenticationClient.authenticate(username, password.toCharArray(), null, null)
                     ?.run {
-                        if (statusString == SignInUseCase.Companion.SUCCESS_STATUS) {
+                        if (statusString == Companion.SUCCESS_STATUS) {
                             cont.resumeWith(Result.success(sessionToken))
                         } else {
                             cont.resumeWith(Result.failure(SessionTokenException()))
@@ -190,16 +189,20 @@ class OktaAuth(applicationContext: Context) : AuthProvider {
     }
 
     object Companion {
+        const val SUCCESS_STATUS = "SUCCESS"
+        const val AUTH_FAILED = "AUTH_FAILED"
+
         private const val REDIRECT_URI = "${BuildConfig.CORE_APP_ID}${BuildConfig.REDIRECT_SUFFIX}"
         const val LOGIN_REDIRECT_URI = "$REDIRECT_URI:/login"
         const val LOGOUT_REDIRECT_URI = "$REDIRECT_URI:/logout"
         val OIDC_SCOPES = arrayOf("openid", "profile", "email", "offline_access")
-        val ISSUER_URL = "${BuildConfig.OKTA_DOMAIN}/oauth2/${BuildConfig.OKTA_ISSUER_ID}"
+        const val ISSUER_URL = "${BuildConfig.OKTA_DOMAIN}/oauth2/${BuildConfig.OKTA_ISSUER_ID}"
     }
 
 }
 
 class TokenExpiredException : Exception("Token No Longer Valid")
+class SessionTokenException : Exception(AUTH_FAILED)
 
 interface UserStateListener {
     fun onUserStateChanged(userState: UserState)
