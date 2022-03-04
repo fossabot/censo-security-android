@@ -1,6 +1,7 @@
 package com.strikeprotocols.mobile.data
 
 import com.strikeprotocols.mobile.BuildConfig
+import com.strikeprotocols.mobile.common.generateVerifyUserDummyData
 import com.strikeprotocols.mobile.data.BrooklynApiService.Companion.AUTH
 import com.strikeprotocols.mobile.data.models.VerifyUser
 import com.strikeprotocols.mobile.data.models.WalletSigner
@@ -53,7 +54,7 @@ interface BrooklynApiService {
 
     @GET("v1/users")
     @Headers(AUTH_REQUIRED)
-    suspend fun verifyUser(): VerifyUser
+    suspend fun verifyUser(): VerifyUser = generateVerifyUserDummyData()
 
     @GET("v1/wallet-signers")
     @Headers(AUTH_REQUIRED)

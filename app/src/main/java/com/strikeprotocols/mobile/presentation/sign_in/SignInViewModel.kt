@@ -11,20 +11,12 @@ import com.strikeprotocols.mobile.common.Resource
 import com.strikeprotocols.mobile.data.NoInternetException
 import com.strikeprotocols.mobile.data.NoInternetException.Companion.NO_INTERNET_ERROR
 import com.strikeprotocols.mobile.data.models.WalletSigner
-import com.strikeprotocols.mobile.domain.use_case.AddWalletSignerUseCase
-import com.strikeprotocols.mobile.domain.use_case.SignInUseCase
-import com.strikeprotocols.mobile.domain.use_case.VerifyUserUseCase
-import com.strikeprotocols.mobile.domain.use_case.GetWalletSignersUseCase
+import com.strikeprotocols.mobile.data.UserRepository
 import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
 
 @HiltViewModel
 class SignInViewModel @Inject constructor(
-    private val signInUseCase: SignInUseCase,
-    private val verifyUserUseCase: VerifyUserUseCase,
-    private val getWalletSignersUseCase: GetWalletSignersUseCase,
-    private val addWalletSignerUseCase: AddWalletSignerUseCase
+    private val userRepository: UserRepository
 ) : ViewModel() {
 
     var state by mutableStateOf(SignInState())
@@ -38,62 +30,37 @@ class SignInViewModel @Inject constructor(
         state = state.copy(password = updatedPassword, passwordErrorEnabled = false)
     }
 
-    fun attemptAddWalletSigner(walletSignerBody: WalletSigner) {
+    private fun attemptAddWalletSigner(walletSignerBody: WalletSigner) {
         viewModelScope.launch(Dispatchers.IO) {
-            addWalletSignerUseCase.execute(walletSignerBody).onEach { result ->
-                state = when (result) {
-                    is Resource.Success -> {
-                        state.copy(addWalletSignerResult = result)
-                    }
-                    is Resource.Error -> {
-                        state.copy(addWalletSignerResult = result)
-                    }
-                    else -> {
-                        state.copy(addWalletSignerResult = Resource.Loading())
-                    }
-                }
-            }.launchIn(this)
+            //Do not want to make actual call yet.
+//            val addWalletSignerData = userRepository.addWalletSigner(walletSignerBody = walletSignerBody)
         }
     }
 
     fun attemptGetWalletSigners() {
         viewModelScope.launch(Dispatchers.IO) {
-            getWalletSignersUseCase.execute().onEach { result ->
-                state = when (result) {
-                    is Resource.Success -> {
-                        state.copy(walletSignersResult = result)
-                    }
-                    is Resource.Error -> {
-                        state.copy(walletSignersResult = result)
-                    }
-                    else -> {
-                        state.copy(walletSignersResult = Resource.Loading())
-                    }
-                }
-            }.launchIn(this)
+            state = state.copy(walletSignersResult = Resource.Loading())
+            val walletSigners = userRepository.getWalletSigners()
+            state = state.copy(walletSignersResult = Resource.Success(walletSigners))
         }
     }
 
-    fun attemptVerify() {
+    private fun attemptVerify() {
         viewModelScope.launch(Dispatchers.IO) {
-            verifyUserUseCase.execute().onEach { result ->
-                state = when (result) {
-                    is Resource.Success -> {
-                        state.copy(verifyResult = result)
-                    }
-                    is Resource.Error -> {
-                        state.copy(verifyResult = result)
-                    }
-                    else -> {
-                        state.copy(verifyResult = Resource.Loading())
-                    }
-                }
-            }.launchIn(this)
+
+            val verifyUserData = userRepository.verifyUser()
+
+            if (verifyUserData.publicKeys.isNullOrEmpty()) {
+                handleFirstTimeLoginAuthFlow()
+            } else {
+                //Call repo methods to do next steps
+            }
         }
     }
 
     fun attemptLogin() {
         if (state.signInButtonEnabled) {
+            state = state.copy(loginResult = Resource.Loading())
 
             val coroutineExceptionHandler = CoroutineExceptionHandler { _, _ ->
                 state = state.copy(
@@ -104,21 +71,10 @@ class SignInViewModel @Inject constructor(
             }
 
             viewModelScope.launch(Dispatchers.IO + coroutineExceptionHandler) {
-                signInUseCase.execute(state.email, state.password).onEach { result ->
-                    state = when (result) {
-                        is Resource.Success -> {
-                            state.copy(loginResult = result)
-                        }
-                        is Resource.Error -> {
-                            state.copy(loginResult = result)
-                        }
-                        else -> {
-                            state.copy(loginResult = Resource.Loading())
-                        }
-                    }
-                }.launchIn(this)
+                val sessionToken = userRepository.retrieveSessionToken(state.email, state.password)
+                val token = userRepository.authenticate(sessionToken)
+                state = state.copy(loginResult = Resource.Success(token))
             }
-
         } else {
             state = state.copy(
                 emailErrorEnabled = !state.emailValid(),
@@ -132,7 +88,7 @@ class SignInViewModel @Inject constructor(
     }
 
     fun resetVerifyCall() {
-        state = state.copy(verifyResult = Resource.Uninitialized)
+        state = state.copy(verifyUserResult = Resource.Uninitialized)
     }
 
     fun resetWalletSignersCall() {
@@ -141,6 +97,28 @@ class SignInViewModel @Inject constructor(
 
     fun resetAddWalletSignersCall() {
         state = state.copy(addWalletSignerResult = Resource.Uninitialized)
+    }
+
+    private suspend fun handleFirstTimeLoginAuthFlow() {
+        val keyPair = userRepository.generateKeyPair()
+
+        val randomPassword = userRepository.generateRandomPassword()
+
+        val encryptedPrivateKey = encryptKey(keyPair.second)
+
+        attemptAddWalletSigner(
+            walletSignerBody = WalletSigner(
+                encryptedKey = encryptedPrivateKey,
+                publicKey = keyPair.first,
+                walletType = WalletSigner.WALLET_TYPE_SOLANA
+            )
+        )
+
+        userRepository.saveRandomPasswordToCloud(randomPassword = randomPassword)
+    }
+
+    private fun encryptKey(key: String): String {
+        return key.reversed()
     }
 
 }
