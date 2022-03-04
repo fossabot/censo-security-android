@@ -45,7 +45,7 @@ class SignInViewModel @Inject constructor(
         }
     }
 
-    private fun attemptVerify() {
+    fun attemptVerify() {
         viewModelScope.launch(Dispatchers.IO) {
 
             val verifyUserData = userRepository.verifyUser()
@@ -99,26 +99,12 @@ class SignInViewModel @Inject constructor(
         state = state.copy(addWalletSignerResult = Resource.Uninitialized)
     }
 
-    private suspend fun handleFirstTimeLoginAuthFlow() {
-        val keyPair = userRepository.generateKeyPair()
-
-        val randomPassword = userRepository.generateRandomPassword()
-
-        val encryptedPrivateKey = encryptKey(keyPair.second)
-
-        attemptAddWalletSigner(
-            walletSignerBody = WalletSigner(
-                encryptedKey = encryptedPrivateKey,
-                publicKey = keyPair.first,
-                walletType = WalletSigner.WALLET_TYPE_SOLANA
-            )
-        )
-
-        userRepository.saveRandomPasswordToCloud(randomPassword = randomPassword)
+    private fun handleFirstTimeLoginAuthFlow() {
+        viewModelScope.launch {
+            //todo: add loading, exception logic, and corresponding VM state:
+            // str-68: https://linear.app/strike-android/issue/STR-68/add-exception-logic-to-initial-auth-data-in-userrepository
+            val walletData = userRepository.generateInitialAuthData()
+            val addWalletData = attemptAddWalletSigner(walletData)
+        }
     }
-
-    private fun encryptKey(key: String): String {
-        return key.reversed()
-    }
-
 }
