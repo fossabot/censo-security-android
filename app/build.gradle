@@ -128,9 +128,9 @@ android {
             excludes += 'META-INF/DEPENDENCIES'
         }
     }
-    lintOptions {
-        lintConfig file("lint.xml")
+    lint {
         checkAllWarnings true
+        lintConfig file('lint.xml')
         warningsAsErrors true
     }
 }
@@ -178,7 +178,11 @@ dependencies {
     implementation "com.squareup.okhttp3:okhttp:$okhttp_version"
     implementation "com.squareup.okhttp3:logging-interceptor:$okhttp_version"
 
+    //Firebase BOM
     implementation platform('com.google.firebase:firebase-bom:29.1.0')
+
+    //Encrypted Preferences
+    implementation 'androidx.security:security-crypto-ktx:1.1.0-alpha03'
 
     //Okta
     implementation 'com.okta.android:okta-oidc-android:1.2.2'

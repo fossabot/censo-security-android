@@ -29,13 +29,30 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideUserRepository(authProvider: AuthProvider, api: BrooklynApiService): UserRepository {
-        return UserRepositoryImpl(authProvider, api)
+    fun provideUserRepository(
+        authProvider: AuthProvider,
+        api: BrooklynApiService,
+        encryptionManager: EncryptionManager,
+        securePreferences: SecurePreferences
+    ): UserRepository {
+        return UserRepositoryImpl(authProvider, api, encryptionManager, securePreferences)
     }
 
     @Provides
     @Singleton
     fun provideApprovalsRepository(api: BrooklynApiService): ApprovalsRepository {
         return ApprovalsRepositoryImpl(api)
+    }
+
+    @Provides
+    @Singleton
+    fun provideEncryptionManager(): EncryptionManager {
+        return EncryptionManagerImpl()
+    }
+
+    @Provides
+    @Singleton
+    fun provideSecurePrefs(@ApplicationContext applicationContext: Context): SecurePreferences {
+        return StrikeEncryptedSharedPreferences(applicationContext)
     }
 }
