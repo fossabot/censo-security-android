@@ -8,6 +8,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.viewModelScope
 import com.strikeprotocols.mobile.common.Resource
+import com.strikeprotocols.mobile.common.strikeLog
 import com.strikeprotocols.mobile.data.NoInternetException
 import com.strikeprotocols.mobile.data.NoInternetException.Companion.NO_INTERNET_ERROR
 import com.strikeprotocols.mobile.data.models.WalletSigner
@@ -83,8 +84,16 @@ class SignInViewModel @Inject constructor(
         }
     }
 
-    fun resetLoginCall() {
+    fun resetLoginCallAndHandleUserAuthFlow() {
         state = state.copy(loginResult = Resource.Uninitialized)
+
+
+
+        handleFirstTimeLoginAuthFlow()
+    }
+
+    fun resetSaveCredential() {
+        state = state.copy(saveCredential = Resource.Uninitialized)
     }
 
     fun resetVerifyCall() {
@@ -99,12 +108,58 @@ class SignInViewModel @Inject constructor(
         state = state.copy(addWalletSignerResult = Resource.Uninitialized)
     }
 
+    //region smartLock methods
+    fun launchSmartLockRetrieveFlow() {
+        if (state.retrieveCredential !is Resource.Loading) {
+            state = state.copy(retrieveCredential = Resource.Loading())
+        }
+    }
+
+    fun launchSmartLockSaveFlow() {
+        if (state.saveCredential !is Resource.Loading) {
+            state = state.copy(saveCredential = Resource.Loading())
+        }
+    }
+
+    fun saveCredentialSuccess() {
+        strikeLog(message = "Save credential request success")
+        state = state.copy(saveCredential = Resource.Success(Unit))
+        viewModelScope.launch {
+            state.initialAuthData?.let { safeInitialAuthData ->
+                userRepository.addWalletSigner(safeInitialAuthData.walletSignerBody)
+            }
+        }
+    }
+
+    fun retrieveCredentialSuccess(credential: String?) {
+        strikeLog(message = "Retrieve credential request: $credential")
+        state = state.copy(retrieveCredential = Resource.Success(credential))
+    }
+
+    fun saveCredentialFailed(exception: Exception?) {
+        strikeLog(message = "Save credential failed: $exception")
+        state = state.copy(saveCredential = Resource.Error(
+            exception?.message ?: "DEFAULT_SAVE_CREDENTIAL_ERROR"))
+    }
+
+    fun retrieveCredentialFailed(exception: Exception?) {
+        strikeLog(message = "Retrieve credential failed: $exception")
+        state = state.copy(retrieveCredential = Resource.Error(
+            exception?.message ?: "DEFAULT_RETRIEVE_CREDENTIAL_ERROR"))
+
+    }
+    //endregion
+
     private fun handleFirstTimeLoginAuthFlow() {
         viewModelScope.launch {
             //todo: add loading, exception logic, and corresponding VM state:
             // str-68: https://linear.app/strike-android/issue/STR-68/add-exception-logic-to-initial-auth-data-in-userrepository
-            val walletData = userRepository.generateInitialAuthData()
-            val addWalletData = attemptAddWalletSigner(walletData)
+            val initialAuthData = userRepository.generateInitialAuthData()
+            state = state.copy(
+                saveCredential = Resource.Loading(),
+                initialAuthData = initialAuthData
+            )
+            launchSmartLockSaveFlow()
         }
     }
 }
