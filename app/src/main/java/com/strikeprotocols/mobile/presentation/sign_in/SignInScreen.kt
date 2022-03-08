@@ -1,12 +1,12 @@
 package com.strikeprotocols.mobile.presentation.sign_in
 
 import android.app.Activity.RESULT_OK
-import androidx.activity.compose.ManagedActivityResultLauncher
+import android.util.Log
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.ActivityResult
-import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
@@ -23,29 +23,36 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.google.android.gms.auth.api.credentials.*
+import com.strikeprotocols.mobile.BuildConfig
 import com.strikeprotocols.mobile.R
 import com.strikeprotocols.mobile.common.BaseWrapper
 import com.strikeprotocols.mobile.common.Resource
+import com.strikeprotocols.mobile.common.strikeLog
 import com.strikeprotocols.mobile.data.CredentialsProvider
 import com.strikeprotocols.mobile.data.CredentialsProviderImpl
 import com.strikeprotocols.mobile.data.CredentialsProviderImpl.Companion.INTENT_FAILED
+import com.strikeprotocols.mobile.data.CredentialsProviderImpl.Companion.NO_CREDENTIAL_EXTRA_DATA
+import com.strikeprotocols.mobile.data.UserRepository
 import com.strikeprotocols.mobile.presentation.Screen
 import com.strikeprotocols.mobile.presentation.components.SignInTextField
 import com.strikeprotocols.mobile.ui.theme.*
-import kotlin.random.Random
 
-@OptIn(ExperimentalComposeUiApi::class)
+@OptIn(ExperimentalComposeUiApi::class,
+    androidx.compose.foundation.ExperimentalFoundationApi::class
+)
 @Composable
 fun SignInScreen(
     navController: NavController,
     viewModel: SignInViewModel = hiltViewModel(),
 ) {
     val state = viewModel.state
+    val context = LocalContext.current
 
     val credentialsProvider: CredentialsProvider = CredentialsProviderImpl(LocalContext.current)
 
@@ -68,15 +75,19 @@ fun SignInScreen(
             return@rememberLauncherForActivityResult
         }
 
-        val credential = it.data?.extras?.get(Credential.EXTRA_KEY) as String?
-        viewModel.retrieveCredentialSuccess(credential)
+        val credentialExtra = it.data?.extras?.get(Credential.EXTRA_KEY)
+        if (credentialExtra is Credential?) {
+            viewModel.retrieveCredentialSuccess(credentialExtra?.password)
+        } else {
+            viewModel.retrieveCredentialFailed(NO_CREDENTIAL_EXTRA_DATA)
+        }
     }
     //endregion
 
     //region LaunchedEffect
     LaunchedEffect(key1 = state) {
         if (state.loginResult is Resource.Success) {
-            viewModel.resetLoginCallAndHandleUserAuthFlow()
+            viewModel.resetLoginCallAndRetrieveUserInformation()
         }
 
         if (state.saveCredential is Resource.Success) {
@@ -85,13 +96,23 @@ fun SignInScreen(
                     inclusive = true
                 }
             }
+            viewModel.loadingFinished()
             viewModel.resetSaveCredential()
+        }
+
+        if (state.keyValid is Resource.Success) {
+            navController.navigate(Screen.AuthRoute.route) {
+                popUpTo(Screen.SignInRoute.route) {
+                    inclusive = true
+                }
+            }
+            viewModel.resetValidKey()
         }
 
         if (state.saveCredential is Resource.Loading) {
             state.initialAuthData?.generatedPassword?.let { generatedPassword ->
                 credentialsProvider.saveCredential(
-                    email = state.email, //"samiam${Random.nextInt(0,10000)}@jkxajkfadd.com",
+                    email = state.email,
                     password = BaseWrapper.encode(generatedPassword),
                     launcher = saveCredentialLauncher,
                     saveSuccess = viewModel::saveCredentialSuccess,
@@ -106,6 +127,10 @@ fun SignInScreen(
                 retrievalSuccess = viewModel::retrieveCredentialSuccess,
                 retrievalFailed = viewModel::retrieveCredentialFailed
             )
+        }
+
+        if (state.shouldAbortUserFromAuthFlow) {
+            navController.navigate(Screen.ContactStrikeRoute.route) { popUpToId }
         }
     }
     //endregion
@@ -124,6 +149,20 @@ fun SignInScreen(
         Image(
             modifier = Modifier
                 .fillMaxWidth()
+                .combinedClickable(
+                    onClick = {
+                        if (BuildConfig.DEBUG) {
+                            Toast.makeText(context, "DEBUG: Setting Local Key", Toast.LENGTH_LONG).show()
+                            viewModel.setCredentialLocallySaved()
+                        }
+                    },
+                    onLongClick = {
+                        if (BuildConfig.DEBUG) {
+                            Toast.makeText(context, "DEBUG: Clearing Local Password", Toast.LENGTH_LONG).show()
+                            viewModel.clearCredential()
+                        }
+                    },
+                )
                 .padding(horizontal = 36.dp, vertical = 36.dp),
             painter = painterResource(R.drawable.strike_main_logo),
             contentDescription = "",
@@ -182,10 +221,10 @@ fun SignInScreen(
     if (state.loginResult is Resource.Error) {
         AlertDialog(
             backgroundColor = UnfocusedGrey,
-            onDismissRequest = viewModel::resetLoginCallAndHandleUserAuthFlow,
+            onDismissRequest = viewModel::resetLoginCallAndRetrieveUserInformation,
             confirmButton = {
                 TextButton(
-                    onClick = viewModel::resetLoginCallAndHandleUserAuthFlow
+                    onClick = viewModel::resetLoginCallAndRetrieveUserInformation
                 )
                 {
                     Text(text = stringResource(R.string.ok))

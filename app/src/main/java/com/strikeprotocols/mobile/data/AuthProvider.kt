@@ -118,13 +118,13 @@ class OktaAuth(applicationContext: Context) : AuthProvider {
                     }
                 })
         } else {
-            token
-                ?.let { cont.resumeWith(Result.success(it)) }
-                ?: cont.resumeWith(
-                    Result.failure(
-                        TokenExpiredException()
-                    )
-                )
+            val safeToken = token
+
+            if(safeToken != null) {
+                cont.resumeWith(Result.success(safeToken))
+            } else {
+                cont.resumeWith(Result.failure(TokenExpiredException()))
+            }
         }
     }
 
@@ -137,12 +137,12 @@ class OktaAuth(applicationContext: Context) : AuthProvider {
                 if (!result.isAccessTokenExpired) {
                     cont.resumeWith(Result.success(retrieveValidToken(result)))
                 } else {
-                    throw TokenExpiredException()
+                    cont.resumeWith(Result.failure(TokenExpiredException()))
                 }
             }
 
             override fun onError(error: String?, exception: AuthorizationException?) {
-                throw TokenExpiredException()
+                cont.resumeWith(Result.failure(TokenExpiredException()))
             }
         })
     }

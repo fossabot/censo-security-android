@@ -1,6 +1,7 @@
 package com.strikeprotocols.mobile.data
 
 import com.strikeprotocols.mobile.common.BaseWrapper
+import com.strikeprotocols.mobile.data.EncryptionManagerImpl.Companion.DATA_CHECK
 import com.strikeprotocols.mobile.data.EncryptionManagerImpl.Companion.IV_AND_KEY_COMBINED_LENGTH
 import com.strikeprotocols.mobile.data.EncryptionManagerImpl.Companion.IV_LENGTH
 import com.strikeprotocols.mobile.data.EncryptionManagerImpl.Companion.NO_OFFSET_INDEX
@@ -22,6 +23,7 @@ interface EncryptionManager {
     fun encrypt(message: String, generatedPassword: ByteArray): String
     fun decrypt(encryptedMessage: String, generatedPassword: ByteArray): String
     fun generatePassword(): ByteArray
+    fun verifyKeyPair(encryptedPrivateKey: String?, publicKey: String?, symmetricKey: String?): Boolean
 }
 
 class EncryptionManagerImpl : EncryptionManager {
@@ -75,6 +77,22 @@ class EncryptionManagerImpl : EncryptionManager {
 
     override fun generatePassword(): ByteArray =
         SecureRandom().generateSeed(IV_AND_KEY_COMBINED_LENGTH)
+
+    override fun verifyKeyPair(
+        encryptedPrivateKey: String?,
+        publicKey: String?,
+        symmetricKey: String?
+    ): Boolean {
+        if (encryptedPrivateKey.isNullOrEmpty()
+            || publicKey.isNullOrEmpty() || symmetricKey.isNullOrEmpty()) {
+            return false
+        }
+
+        val decryptionKey = BaseWrapper.decode(symmetricKey)
+        val decryptedPrivateKey = decrypt(encryptedPrivateKey, decryptionKey)
+        val signData = signData(DATA_CHECK, decryptedPrivateKey)
+        return verifyData(DATA_CHECK, signData, publicKey)
+    }
     //endregion
 
     //region helper methods
@@ -101,6 +119,7 @@ class EncryptionManagerImpl : EncryptionManager {
         const val IV_LENGTH = 12
         const val IV_AND_KEY_COMBINED_LENGTH = PASSWORD_BYTE_LENGTH + IV_LENGTH
         const val NO_OFFSET_INDEX = 0
+        const val DATA_CHECK = "VerificationCheck"
     }
     //endregion
 }

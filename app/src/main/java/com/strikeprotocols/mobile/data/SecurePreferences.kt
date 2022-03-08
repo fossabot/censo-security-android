@@ -12,6 +12,7 @@ import javax.inject.Inject
 interface SecurePreferences {
     fun saveGeneratedPassword(generatedPassword: ByteArray)
     fun retrieveGeneratedPassword(): String
+    fun clearSavedPassword()
 }
 
 
@@ -40,6 +41,10 @@ class StrikeEncryptedSharedPreferences @Inject constructor(applicationContext: C
 
     override fun retrieveGeneratedPassword() =
         sharedPreferences.getString(GENERATED_PASSWORD, "") ?: ""
+
+    override fun clearSavedPassword() {
+        sharedPreferences.edit().putString(GENERATED_PASSWORD, "").apply()
+    }
 
     object Companion {
         const val SHARED_PREF_NAME = "strike_secure_shared_pref"

@@ -6,7 +6,7 @@ data class VerifyUser(
     val id: String?,
     val loginName: String?,
     val organization: Organization?,
-    val publicKeys: List<PublicKey>?,
+    val publicKeys: List<PublicKey?>?,
     val useStaticKey: Boolean?
 )
 

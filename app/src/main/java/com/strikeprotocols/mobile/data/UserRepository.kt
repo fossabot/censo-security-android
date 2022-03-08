@@ -1,6 +1,8 @@
 package com.strikeprotocols.mobile.data
 
-import com.strikeprotocols.mobile.common.BaseWrapper
+import com.strikeprotocols.mobile.common.*
+import com.strikeprotocols.mobile.common.ValidDummyData.generateVerifyUserDummyDataWithValidPublicKey
+import com.strikeprotocols.mobile.common.ValidDummyData.generateVerifyWalletSignersDummyDataWithValidPublicKey
 import com.strikeprotocols.mobile.data.models.VerifyUser
 import com.strikeprotocols.mobile.data.models.WalletSigner
 import com.strikeprotocols.mobile.data.models.WalletSigners
@@ -14,6 +16,12 @@ interface UserRepository {
     suspend fun addWalletSigner(walletSignerBody: WalletSigner): WalletSigner
     suspend fun generateInitialAuthData(): InitialAuthData
     suspend fun getSavedPassword(): String
+    suspend fun clearSavedPassword()
+    suspend fun savePassword()
+    suspend fun doesUserHaveValidLocalKey(
+        verifyUser: VerifyUser,
+        walletSigners: WalletSigners
+    ): Boolean
 }
 
 class UserRepositoryImpl(
@@ -29,13 +37,19 @@ class UserRepositoryImpl(
     override suspend fun authenticate(sessionToken: String): String =
         authProvider.authenticate(sessionToken)
 
-    override suspend fun verifyUser(): VerifyUser = api.verifyUser()
+    override suspend fun verifyUser(): VerifyUser {
+        delay(3000)
+        return generateVerifyUserDummyDataWithValidPublicKey() //api.verifyUser()
+    }
 
-    override suspend fun getWalletSigners(): WalletSigners = api.walletSigners()
+    override suspend fun getWalletSigners(): WalletSigners {
+        delay(3000)
+        return generateVerifyWalletSignersDummyDataWithValidPublicKey() //api.walletSigners()
+    }
 
     override suspend fun addWalletSigner(walletSignerBody: WalletSigner): WalletSigner {
         delay(3000)
-        return WalletSigner(encryptedKey = "", publicKey = "", walletType = "")
+        return walletSignerBody
         //api.addWalletSigner(walletSignerBody = walletSignerBody)
     }
 
@@ -43,7 +57,7 @@ class UserRepositoryImpl(
 
     //todo: add exception logic in here
     // str-68: https://linear.app/strike-android/issue/STR-68/add-exception-logic-to-initial-auth-data-in-userrepository
-    override suspend fun generateInitialAuthData() : InitialAuthData {
+    override suspend fun generateInitialAuthData(): InitialAuthData {
         val keyPair = encryptionManager.createKeyPair()
         val generatedPassword = encryptionManager.generatePassword()
 
@@ -63,6 +77,45 @@ class UserRepositoryImpl(
             ),
             generatedPassword = generatedPassword
         )
+    }
+
+    override suspend fun clearSavedPassword() = securePreferences.clearSavedPassword()
+    override suspend fun savePassword() {
+        securePreferences.saveGeneratedPassword(Base58.decode(ValidDummyData.decryptionKey))
+    }
+
+    override suspend fun doesUserHaveValidLocalKey(
+        verifyUser: VerifyUser,
+        walletSigners: WalletSigners
+    ): Boolean {
+        val generatedPassword = securePreferences.retrieveGeneratedPassword()
+
+        if (generatedPassword.isEmpty()) {
+            return false
+        }
+
+        val publicKey = verifyUser.publicKeys?.firstOrNull { !it?.key.isNullOrEmpty() }?.key
+
+        if (publicKey.isNullOrEmpty()) {
+            return false
+        }
+
+        //api call to get wallet signer
+        walletSigners.items?.let { _ ->
+            for (walletSigner in walletSigners.items) {
+                if (walletSigner?.publicKey != null && walletSigner.publicKey == publicKey) {
+                    val validPair = encryptionManager.verifyKeyPair(
+                        encryptedPrivateKey = walletSigner.encryptedKey,
+                        publicKey = walletSigner.publicKey,
+                        symmetricKey = generatedPassword
+                    )
+
+                    if (validPair) return@doesUserHaveValidLocalKey true
+                }
+            }
+        }
+
+        return false
     }
 }
 
@@ -84,4 +137,9 @@ data class InitialAuthData(val walletSignerBody: WalletSigner, val generatedPass
         result = 31 * result + generatedPassword.contentHashCode()
         return result
     }
+}
+
+enum class UserAuthFlow {
+    FIRST_LOGIN, LOCAL_KEY_PRESENT_NO_BACKEND_KEYS, KEY_VALIDATED,
+    EXISTING_BACKEND_KEY_LOCAL_KEY_MISSING, NO_LOCAL_KEY_AVAILABLE, NO_VALID_KEY
 }

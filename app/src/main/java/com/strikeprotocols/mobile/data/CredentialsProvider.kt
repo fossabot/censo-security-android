@@ -77,9 +77,13 @@ class CredentialsProviderImpl(
         credentialsClient.request(credentialsRequest).addOnCompleteListener { task ->
             try {
                 if (task.isSuccessful) {
-                    val credentialPassword =
-                        (task.result as CredentialRequestResponse).credential?.password
-                    retrievalSuccess(credentialPassword)
+                    if(task.result is CredentialRequestResponse) {
+                        val credentialPassword =
+                            (task.result as CredentialRequestResponse).credential?.password
+                        retrievalSuccess(credentialPassword)
+                    } else {
+                        retrievalFailed(NO_CREDENTIAL_EXTRA_DATA)
+                    }
                 } else {
                     val error = task.exception
                     if (error is ResolvableApiException) {
@@ -127,5 +131,6 @@ class CredentialsProviderImpl(
 
     companion object {
         val INTENT_FAILED = Exception("INTENT_RESULT_NOT_OK")
+        val NO_CREDENTIAL_EXTRA_DATA = Exception("NO_CREDENTIAL_EXTRA_DATA")
     }
 }

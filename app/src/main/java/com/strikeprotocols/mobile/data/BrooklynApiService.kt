@@ -1,7 +1,6 @@
 package com.strikeprotocols.mobile.data
 
 import com.strikeprotocols.mobile.BuildConfig
-import com.strikeprotocols.mobile.common.generateVerifyUserDummyData
 import com.strikeprotocols.mobile.data.BrooklynApiService.Companion.AUTH
 import com.strikeprotocols.mobile.data.models.VerifyUser
 import com.strikeprotocols.mobile.data.models.WalletSigner
@@ -54,7 +53,7 @@ interface BrooklynApiService {
 
     @GET("v1/users")
     @Headers(AUTH_REQUIRED)
-    suspend fun verifyUser(): VerifyUser = generateVerifyUserDummyData()
+    suspend fun verifyUser(): VerifyUser
 
     @GET("v1/wallet-signers")
     @Headers(AUTH_REQUIRED)
@@ -73,7 +72,9 @@ class AuthInterceptor(private val authProvider: AuthProvider) : Interceptor {
 
         if (request.header(AUTH) != null) {
             try {
-                val token = runBlocking { authProvider.retrieveToken() }
+                val token = runBlocking {
+                    authProvider.retrieveToken()
+                }
                 request = chain.request().newBuilder()
                     .removeHeader(AUTH)
                     .addHeader(AUTH, "Bearer $token")
