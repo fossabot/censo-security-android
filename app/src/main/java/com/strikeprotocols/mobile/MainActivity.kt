@@ -14,6 +14,7 @@ import com.strikeprotocols.mobile.data.UserStateListener
 import com.strikeprotocols.mobile.presentation.Screen
 import com.strikeprotocols.mobile.presentation.approvals.ApprovalsListScreen
 import com.strikeprotocols.mobile.presentation.auth.AuthScreen
+import com.strikeprotocols.mobile.presentation.contact_strike.ContactStrikeScreen
 import com.strikeprotocols.mobile.presentation.sign_in.SignInScreen
 import com.strikeprotocols.mobile.ui.theme.BackgroundBlack
 import com.strikeprotocols.mobile.ui.theme.StrikeMobileTheme
@@ -57,6 +58,11 @@ class MainActivity : FragmentActivity() {
                             route = Screen.AuthRoute.route
                         ) {
                             AuthScreen(navController = navController)
+                        }
+                        composable(
+                            route = Screen.ContactStrikeRoute.route
+                        ) {
+                            ContactStrikeScreen()
                         }
                     }
                 }

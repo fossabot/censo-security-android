@@ -13,6 +13,8 @@ data class SignInState(
     val emailErrorEnabled: Boolean = false,
     val passwordErrorEnabled: Boolean = false,
     val initialAuthData: InitialAuthData? = null,
+    val loadingData : Boolean = false,
+    val shouldAbortUserFromAuthFlow: Boolean = false,
 
     //Async Data
     val loginResult: Resource<String> = Resource.Uninitialized,
@@ -20,14 +22,10 @@ data class SignInState(
     val walletSignersResult: Resource<WalletSigners> = Resource.Uninitialized,
     val addWalletSignerResult: Resource<WalletSigner> = Resource.Uninitialized,
     val saveCredential: Resource<Unit> = Resource.Uninitialized,
-    val retrieveCredential: Resource<String> = Resource.Uninitialized
+    val retrieveCredential: Resource<String> = Resource.Uninitialized,
+    val keyValid: Resource<Unit> = Resource.Uninitialized
 ) {
     val signInButtonEnabled = email.isNotEmpty() && password.isNotEmpty()
-
-    val userHasPublicKey = verifyUserResult is Resource.Success && !verifyUserResult.data?.publicKeys.isNullOrEmpty()
-
-    val loadingData = loginResult is Resource.Loading || verifyUserResult is Resource.Loading
-            || addWalletSignerResult is Resource.Loading || saveCredential is Resource.Loading
 
     fun emailValid() = Patterns.EMAIL_ADDRESS.matcher(email).matches()
     fun passwordValid() = password.isNotEmpty()

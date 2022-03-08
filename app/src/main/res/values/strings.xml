@@ -22,4 +22,5 @@
     <string name="you_are_set">You\'re all set!</string>
     <string name="activating_auth">Activating authentication…</string>
     <string name="dismiss">Dismiss</string>
+    <string name="contact_strike">Please contact Strike to resolve this issue</string>
 </resources>

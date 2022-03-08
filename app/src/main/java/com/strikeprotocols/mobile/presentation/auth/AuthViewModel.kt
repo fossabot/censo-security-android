@@ -15,15 +15,13 @@ import kotlinx.coroutines.launch
 
 @HiltViewModel
 class AuthViewModel @Inject constructor(
-    val userRepository: UserRepository
+    private val userRepository: UserRepository
 ) : ViewModel() {
 
     var state by mutableStateOf(AuthState())
         private set
 
-
     init {
-
         viewModelScope.launch {
             strikeLog(message = "Saved password to device: ${userRepository.getSavedPassword()}")
         }
