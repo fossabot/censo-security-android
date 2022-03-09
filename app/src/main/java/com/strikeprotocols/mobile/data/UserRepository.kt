@@ -1,15 +1,9 @@
 package com.strikeprotocols.mobile.data
 
 import com.strikeprotocols.mobile.common.BaseWrapper
-import com.strikeprotocols.mobile.common.strikeLog
 import com.strikeprotocols.mobile.data.models.VerifyUser
 import com.strikeprotocols.mobile.data.models.WalletSigner
 import com.strikeprotocols.mobile.data.models.WalletSigners
-import org.bouncycastle.crypto.AsymmetricCipherKeyPair
-import org.bouncycastle.crypto.params.Ed25519PrivateKeyParameters
-import org.bouncycastle.crypto.params.Ed25519PublicKeyParameters
-import java.lang.Exception
-import java.util.*
 
 interface UserRepository {
     suspend fun authenticate(sessionToken: String): String
@@ -46,20 +40,17 @@ class UserRepositoryImpl(
         val keyPair = encryptionManager.createKeyPair()
         val generatedPassword = encryptionManager.generatePassword()
 
-        val privateKey = keyPair.private as Ed25519PrivateKeyParameters
-        val publicKey = keyPair.public as Ed25519PublicKeyParameters
-
         securePreferences.saveGeneratedPassword(generatedPassword)
 
         val encryptedPrivateKey =
             encryptionManager.encrypt(
-                message = BaseWrapper.encode(privateKey.encoded),
+                message = BaseWrapper.encode(keyPair.privateKey),
                 generatedPassword = generatedPassword
             )
 
         return WalletSigner(
             encryptedKey = encryptedPrivateKey,
-            publicKey = BaseWrapper.encode(publicKey.encoded),
+            publicKey = BaseWrapper.encode(keyPair.publicKey),
             walletType = WalletSigner.WALLET_TYPE_SOLANA
         )
     }
