@@ -1,10 +1,15 @@
 package com.strikeprotocols.mobile.data
 
-import com.strikeprotocols.mobile.common.generateKeyPairDummyData
+import com.strikeprotocols.mobile.common.BaseWrapper
+import com.strikeprotocols.mobile.common.strikeLog
 import com.strikeprotocols.mobile.data.models.VerifyUser
 import com.strikeprotocols.mobile.data.models.WalletSigner
 import com.strikeprotocols.mobile.data.models.WalletSigners
-import kotlin.random.Random
+import org.bouncycastle.crypto.AsymmetricCipherKeyPair
+import org.bouncycastle.crypto.params.Ed25519PrivateKeyParameters
+import org.bouncycastle.crypto.params.Ed25519PublicKeyParameters
+import java.lang.Exception
+import java.util.*
 
 interface UserRepository {
     suspend fun authenticate(sessionToken: String): String
@@ -12,14 +17,15 @@ interface UserRepository {
     suspend fun verifyUser(): VerifyUser
     suspend fun getWalletSigners(): WalletSigners
     suspend fun addWalletSigner(walletSignerBody: WalletSigner): WalletSigner
-    suspend fun generateKeyPair(): Pair<String, String>
-    suspend fun generateRandomPassword(): String
-    suspend fun saveRandomPasswordToCloud(randomPassword: String)
+    suspend fun generateInitialAuthData(): WalletSigner
 }
 
 class UserRepositoryImpl(
-    val authProvider: AuthProvider,
-    val api: BrooklynApiService
+    private val authProvider: AuthProvider,
+    private val api: BrooklynApiService,
+    private val encryptionManager: EncryptionManager,
+    private val securePreferences: SecurePreferences
+
 ) : UserRepository {
     override suspend fun retrieveSessionToken(username: String, password: String): String =
         authProvider.getSessionToken(username, password)
@@ -34,10 +40,27 @@ class UserRepositoryImpl(
     override suspend fun addWalletSigner(walletSignerBody: WalletSigner): WalletSigner =
         api.addWalletSigner(walletSignerBody = walletSignerBody)
 
-    override suspend fun generateKeyPair(): Pair<String, String> = generateKeyPairDummyData()
+    //todo: add exception logic in here
+    // str-68: https://linear.app/strike-android/issue/STR-68/add-exception-logic-to-initial-auth-data-in-userrepository
+    override suspend fun generateInitialAuthData() : WalletSigner {
+        val keyPair = encryptionManager.createKeyPair()
+        val generatedPassword = encryptionManager.generatePassword()
 
-    override suspend fun generateRandomPassword(): String =
-        Random.nextInt(from = 1000, until = 9999).toString()
+        val privateKey = keyPair.private as Ed25519PrivateKeyParameters
+        val publicKey = keyPair.public as Ed25519PublicKeyParameters
 
-    override suspend fun saveRandomPasswordToCloud(randomPassword: String) {}
-}
+        securePreferences.saveGeneratedPassword(generatedPassword)
+
+        val encryptedPrivateKey =
+            encryptionManager.encrypt(
+                message = BaseWrapper.encode(privateKey.encoded),
+                generatedPassword = generatedPassword
+            )
+
+        return WalletSigner(
+            encryptedKey = encryptedPrivateKey,
+            publicKey = BaseWrapper.encode(publicKey.encoded),
+            walletType = WalletSigner.WALLET_TYPE_SOLANA
+        )
+    }
+ }
