@@ -9,7 +9,7 @@ import com.google.android.gms.auth.api.credentials.*
 import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.tasks.RuntimeExecutionException
-import java.lang.Exception
+import kotlin.Exception
 
 interface CredentialsProvider {
     fun saveCredential(
@@ -132,5 +132,6 @@ class CredentialsProviderImpl(
     companion object {
         val INTENT_FAILED = Exception("INTENT_RESULT_NOT_OK")
         val NO_CREDENTIAL_EXTRA_DATA = Exception("NO_CREDENTIAL_EXTRA_DATA")
+        val CREDENTIAL_DATA_EMPTY = Exception("CREDENTIAL_DATA_EMPTY")
     }
 }

@@ -7,13 +7,13 @@ import javax.inject.Inject
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.viewModelScope
+import com.strikeprotocols.mobile.common.BaseWrapper
 import com.strikeprotocols.mobile.common.Resource
 import com.strikeprotocols.mobile.common.strikeLog
-import com.strikeprotocols.mobile.data.NoInternetException
+import com.strikeprotocols.mobile.data.*
+import com.strikeprotocols.mobile.data.CredentialsProviderImpl.Companion.CREDENTIAL_DATA_EMPTY
 import com.strikeprotocols.mobile.data.NoInternetException.Companion.NO_INTERNET_ERROR
-import com.strikeprotocols.mobile.data.UserAuthFlow
 import com.strikeprotocols.mobile.data.models.WalletSigner
-import com.strikeprotocols.mobile.data.UserRepository
 import com.strikeprotocols.mobile.data.models.VerifyUser
 import kotlinx.coroutines.*
 
@@ -79,11 +79,9 @@ class SignInViewModel @Inject constructor(
         viewModelScope.launch(Dispatchers.IO) {
 
             val verifyUserData = userRepository.verifyUser()
-            strikeLog(message = "Verify User Data: $verifyUserData")
-            val userAuthState = getUserAuthFlowState(verifyUserData)
-            strikeLog(message = "User Auth Flow: $userAuthState")
+            state = state.copy(verifyUserResult = Resource.Success(verifyUserData))
 
-            respondToUserAuthFlow(userAuthState)
+            handleAuthFlow(verifyUserData)
         }
     }
     //endregion
@@ -158,6 +156,19 @@ class SignInViewModel @Inject constructor(
     fun retrieveCredentialSuccess(credential: String?) {
         strikeLog(message = "Retrieve credential request: $credential")
         state = state.copy(retrieveCredential = Resource.Success(credential))
+
+        if (credential != null) {
+            viewModelScope.launch {
+                userRepository.saveGeneratedPassword(BaseWrapper.decode(credential))
+
+                //Restart AuthFlow
+                state.verifyUserResult.data?.let { safeVerifyUser ->
+                    handleAuthFlow(safeVerifyUser)
+                }
+            }
+        } else {
+            retrieveCredentialFailed(CREDENTIAL_DATA_EMPTY)
+        }
     }
 
     fun saveCredentialFailed(exception: Exception?) {
@@ -175,6 +186,15 @@ class SignInViewModel @Inject constructor(
     //endregion
 
     //region Get Auth Flow State + Respond to Auth Flow State
+    private suspend fun handleAuthFlow(
+        verifyUser: VerifyUser,
+    ) {
+        val userAuthFlowState = getUserAuthFlowState(
+            verifyUser = verifyUser
+        )
+        respondToUserAuthFlow(userAuthFlow = userAuthFlowState)
+    }
+
     private suspend fun getUserAuthFlowState(verifyUser: VerifyUser) : UserAuthFlow {
         val savedEncryption = userRepository.getSavedPassword()
         val publicKeysPresent = !verifyUser.publicKeys.isNullOrEmpty()
