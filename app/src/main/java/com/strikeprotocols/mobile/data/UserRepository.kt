@@ -15,6 +15,7 @@ interface UserRepository {
     suspend fun getWalletSigners(): WalletSigners
     suspend fun addWalletSigner(walletSignerBody: WalletSigner): WalletSigner
     suspend fun generateInitialAuthData(): InitialAuthData
+    suspend fun saveGeneratedPassword(generatedPassword: ByteArray)
     suspend fun getSavedPassword(): String
     suspend fun clearSavedPassword()
     suspend fun savePassword()
@@ -52,6 +53,9 @@ class UserRepositoryImpl(
         return walletSignerBody
         //api.addWalletSigner(walletSignerBody = walletSignerBody)
     }
+
+    override suspend fun saveGeneratedPassword(generatedPassword: ByteArray) =
+        securePreferences.saveGeneratedPassword(generatedPassword = generatedPassword)
 
     override suspend fun getSavedPassword(): String = securePreferences.retrieveGeneratedPassword()
 

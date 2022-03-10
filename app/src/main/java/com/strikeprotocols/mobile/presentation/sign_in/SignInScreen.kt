@@ -116,7 +116,7 @@ fun SignInScreen(
                     password = BaseWrapper.encode(generatedPassword),
                     launcher = saveCredentialLauncher,
                     saveSuccess = viewModel::saveCredentialSuccess,
-                    saveFailed = viewModel::retrieveCredentialFailed
+                    saveFailed = viewModel::saveCredentialFailed
                 )
             }
         }
