@@ -73,6 +73,8 @@ class UserRepositoryImpl(
                 generatedPassword = generatedPassword
             )
 
+        securePreferences.savePrivateKey(encryptedPrivateKey)
+
         return InitialAuthData(
             walletSignerBody = WalletSigner(
                 encryptedKey = encryptedPrivateKey,
@@ -114,7 +116,12 @@ class UserRepositoryImpl(
                         symmetricKey = generatedPassword
                     )
 
-                    if (validPair) return@doesUserHaveValidLocalKey true
+                    if (validPair) {
+                        walletSigner.encryptedKey?.let { encryptedKey ->
+                            securePreferences.savePrivateKey(encryptedKey)
+                        }
+                        return@doesUserHaveValidLocalKey true
+                    }
                 }
             }
         }

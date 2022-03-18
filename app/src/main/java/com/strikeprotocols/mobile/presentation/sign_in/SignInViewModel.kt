@@ -119,7 +119,7 @@ class SignInViewModel @Inject constructor(
 
     //region Smart Lock Save + Retrieval
     //
-    fun launchSmartLockRetrieveFlow() {
+    private fun launchSmartLockRetrieveFlow() {
         if (state.retrieveCredential !is Resource.Loading) {
             state = state.copy(retrieveCredential = Resource.Loading())
         }
@@ -203,7 +203,8 @@ class SignInViewModel @Inject constructor(
         if(!publicKeysPresent && savedEncryption.isEmpty()) {
             return UserAuthFlow.FIRST_LOGIN
         }  else if (!publicKeysPresent) {
-            //do we need to regenerate data here and send up to backend?
+                // todo: we need to regenerate data here and send up to backend
+                // https://linear.app/strike-android/issue/STR-71/regenerate-key-data-if-we-have-local-key-saved-on-device-and-backend
             return UserAuthFlow.LOCAL_KEY_PRESENT_NO_BACKEND_KEYS
         }
 
@@ -239,7 +240,8 @@ class SignInViewModel @Inject constructor(
                 state = state.copy(shouldAbortUserFromAuthFlow = true)
             }
             UserAuthFlow.LOCAL_KEY_PRESENT_NO_BACKEND_KEYS -> {
-                //todo: need to ask Ata what to do here again. Believe it is to regenerate data somehow.
+                //todo: Regenerate data
+                // https://linear.app/strike-android/issue/STR-71/regenerate-key-data-if-we-have-local-key-saved-on-device-and-backend
             }
         }
     }
