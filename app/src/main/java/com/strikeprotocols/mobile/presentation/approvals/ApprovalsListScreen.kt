@@ -29,7 +29,7 @@ fun ApprovalsListScreen(
         Spacer(modifier = Modifier.height(24.dp))
         TextButton(
             onClick = {
-                viewModel.checkToken()
+//                viewModel.checkToken()
             }) {
             Text("Go Check Token")
         }
