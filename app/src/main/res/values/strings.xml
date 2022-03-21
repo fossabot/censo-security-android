@@ -1,6 +1,5 @@
 <resources>
     <string name="sign_in_button">Sign in</string>
-    <string name="holder_text">&#128077;</string>
     <string name="email_hint">Email</string>
     <string name="password_hint">Password</string>
     <string name="hide_password_content_description">hide password</string>
@@ -23,4 +22,7 @@
     <string name="activating_auth">Activating authentication…</string>
     <string name="dismiss">Dismiss</string>
     <string name="contact_strike">Please contact Strike to resolve this issue</string>
+
+    <string name="approvals">Approvals</string>
+    <string name="content_des_account_icon">Account Icon</string>
 </resources>

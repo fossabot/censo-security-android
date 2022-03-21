@@ -19,6 +19,10 @@ class ApprovalsViewModel @Inject constructor(
     var state by mutableStateOf(ApprovalsState())
         private set
 
+    init {
+        refreshData()
+    }
+
     fun refreshData() {
         retrieveWalletApprovals()
     }

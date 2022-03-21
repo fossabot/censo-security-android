@@ -9,4 +9,5 @@ val TopBlack = Color(0x40000000)
 val StrikeWhite = Color.White
 val UnfocusedGrey = Color(0xFF373737)
 val FocusedGrey = Color(0xFFFFFFFF)
+val HeaderBlack = Color(0xFF131313)
 val DisabledButtonTextColor = Color(0xFFbfa1ff)

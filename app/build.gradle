@@ -155,6 +155,7 @@ dependencies {
     //Compose Accompanist
     implementation "com.google.accompanist:accompanist-flowlayout:0.17.0"
     implementation "com.google.accompanist:accompanist-systemuicontroller:0.17.0"
+    implementation "com.google.accompanist:accompanist-swiperefresh:0.23.1"
 
     // Coroutines
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutines_version"
