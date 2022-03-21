@@ -1,7 +1,9 @@
 package com.strikeprotocols.mobile.data
 
+import com.strikeprotocols.mobile.common.generateWalletApprovalsDummyData
 import com.strikeprotocols.mobile.common.strikeLog
 import com.strikeprotocols.mobile.data.models.WalletApprovals
+import kotlinx.coroutines.delay
 import okhttp3.ResponseBody
 import javax.inject.Inject
 
@@ -14,7 +16,15 @@ class ApprovalsRepositoryImpl @Inject constructor(
 ) : ApprovalsRepository {
 
     override suspend fun getWalletApprovals(): WalletApprovals {
-        return api.getWalletApprovals()
+        delay(3000)
+        return WalletApprovals(
+            listOf(
+                generateWalletApprovalsDummyData(),
+                generateWalletApprovalsDummyData(),
+                generateWalletApprovalsDummyData()
+            )
+        )
+        //api.getWalletApprovals()
     }
 
 }
