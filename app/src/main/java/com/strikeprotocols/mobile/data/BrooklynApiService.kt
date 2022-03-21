@@ -3,6 +3,7 @@ package com.strikeprotocols.mobile.data
 import com.strikeprotocols.mobile.BuildConfig
 import com.strikeprotocols.mobile.data.BrooklynApiService.Companion.AUTH
 import com.strikeprotocols.mobile.data.models.VerifyUser
+import com.strikeprotocols.mobile.data.models.WalletApprovals
 import com.strikeprotocols.mobile.data.models.WalletSigner
 import com.strikeprotocols.mobile.data.models.WalletSigners
 import kotlinx.coroutines.runBlocking
@@ -47,10 +48,6 @@ interface BrooklynApiService {
         }
     }
 
-    @GET("/approvals")
-    @Headers(AUTH_REQUIRED)
-    suspend fun getApprovals(): ResponseBody
-
     @GET("v1/users")
     @Headers(AUTH_REQUIRED)
     suspend fun verifyUser(): VerifyUser
@@ -61,7 +58,11 @@ interface BrooklynApiService {
 
     @POST("v1/wallet-signers")
     @Headers(AUTH_REQUIRED)
-    suspend fun addWalletSigner(@Body walletSignerBody: WalletSigner) : WalletSigner
+    suspend fun addWalletSigner(@Body walletSignerBody: WalletSigner): WalletSigner
+
+    @GET("v1/wallet-approvals")
+    @Headers(AUTH_REQUIRED)
+    suspend fun getWalletApprovals(): WalletApprovals
 
 }
 
