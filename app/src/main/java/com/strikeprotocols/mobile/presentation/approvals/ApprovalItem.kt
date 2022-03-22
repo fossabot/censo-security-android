@@ -18,12 +18,16 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.strikeprotocols.mobile.R
+import com.strikeprotocols.mobile.common.strikeLog
 import com.strikeprotocols.mobile.presentation.components.StrikeTag
 import com.strikeprotocols.mobile.ui.theme.*
 import java.util.*
 
 @Composable
-fun ApprovalItem() {
+fun ApprovalItem(
+    onApproveClicked: () -> Unit,
+    onMoreInfoClicked: () -> Unit
+) {
     Column(
         modifier = Modifier
             .clip(RoundedCornerShape(8.dp))
@@ -33,7 +37,10 @@ fun ApprovalItem() {
     ) {
         ApprovalItemHeader()
         ApprovalContent()
-        ApprovalButtonRow()
+        ApprovalButtonRow(
+            onApproveClicked = { onApproveClicked() },
+            onMoreInfoClicked = { onMoreInfoClicked() }
+        )
     }
 }
 
@@ -87,7 +94,10 @@ fun ApprovalContent() {
 }
 
 @Composable
-fun ApprovalButtonRow() {
+fun ApprovalButtonRow(
+    onApproveClicked: () -> Unit,
+    onMoreInfoClicked: () -> Unit
+) {
     Column {
         Spacer(modifier = Modifier.height(24.dp))
         Divider(color = DividerGrey, modifier = Modifier.height(0.5.dp))
@@ -99,7 +109,7 @@ fun ApprovalButtonRow() {
                 modifier = Modifier
                     .weight(1f)
                     .padding(top = 4.dp, bottom = 4.dp),
-                onClick = { /*TODO*/ }) {
+                onClick = { onApproveClicked() }) {
                 Text(
                     stringResource(R.string.approve),
                     color = ApprovalGreen,
@@ -116,7 +126,7 @@ fun ApprovalButtonRow() {
             TextButton(
                 modifier = Modifier
                     .weight(1f),
-                onClick = { /*TODO*/ }) {
+                onClick = { onMoreInfoClicked() }) {
                 Text(
                     stringResource(R.string.more_info),
                     color = StrikeWhite,
@@ -154,5 +164,8 @@ fun ApprovalType(
 @Preview(showBackground = true)
 @Composable
 fun ApprovalItemPreview() {
-    ApprovalItem()
+    ApprovalItem(
+        onApproveClicked = { strikeLog(message = "Approve clicked")},
+        onMoreInfoClicked = { strikeLog(message = "More info clicked") }
+    )
 }

@@ -12,6 +12,7 @@ import com.strikeprotocols.mobile.data.AuthProvider
 import com.strikeprotocols.mobile.data.UserState
 import com.strikeprotocols.mobile.data.UserStateListener
 import com.strikeprotocols.mobile.presentation.Screen
+import com.strikeprotocols.mobile.presentation.approvals.ApprovalDetailsScreen
 import com.strikeprotocols.mobile.presentation.approvals.ApprovalsListScreen
 import com.strikeprotocols.mobile.presentation.auth.AuthScreen
 import com.strikeprotocols.mobile.presentation.contact_strike.ContactStrikeScreen
@@ -47,12 +48,17 @@ class MainActivity : FragmentActivity() {
                         composable(
                             route = Screen.SignInRoute.route
                         ) {
-                            SignInScreen(navController)
+                            SignInScreen(navController = navController)
                         }
                         composable(
                             route = Screen.ApprovalListRoute.route
                         ) {
-                            ApprovalsListScreen()
+                            ApprovalsListScreen(navController = navController)
+                        }
+                        composable(
+                            route = Screen.ApprovalDetailRoute.route
+                        ) {
+                            ApprovalDetailsScreen(navController = navController)
                         }
                         composable(
                             route = Screen.AuthRoute.route
