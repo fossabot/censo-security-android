@@ -19,14 +19,16 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.strikeprotocols.mobile.R
 import com.strikeprotocols.mobile.common.strikeLog
+import com.strikeprotocols.mobile.common.convertSecondsIntoCountdownText
 import com.strikeprotocols.mobile.presentation.components.StrikeTag
 import com.strikeprotocols.mobile.ui.theme.*
 import java.util.*
 
 @Composable
 fun ApprovalItem(
+    timeRemainingInSeconds: Int,
     onApproveClicked: () -> Unit,
-    onMoreInfoClicked: () -> Unit
+    onMoreInfoClicked: () -> Unit,
 ) {
     Column(
         modifier = Modifier
@@ -35,7 +37,7 @@ fun ApprovalItem(
             .background(color = HeaderBlack),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        ApprovalItemHeader()
+        ApprovalItemHeader(timeRemainingInSeconds)
         ApprovalContent()
         ApprovalButtonRow(
             onApproveClicked = { onApproveClicked() },
@@ -45,7 +47,7 @@ fun ApprovalItem(
 }
 
 @Composable
-fun ApprovalItemHeader() {
+fun ApprovalItemHeader(timeRemainingInSeconds: Int) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -56,7 +58,7 @@ fun ApprovalItemHeader() {
     ) {
         ApprovalType(approvalImageVector = Icons.Filled.SyncAlt, approvalType = "Transfer")
         Text(
-            text = "23:59:54",
+            text = convertSecondsIntoCountdownText(timeRemainingInSeconds),
             color = GreyText
         )
     }
@@ -166,6 +168,7 @@ fun ApprovalType(
 fun ApprovalItemPreview() {
     ApprovalItem(
         onApproveClicked = { strikeLog(message = "Approve clicked")},
-        onMoreInfoClicked = { strikeLog(message = "More info clicked") }
+        onMoreInfoClicked = { strikeLog(message = "More info clicked") },
+        timeRemainingInSeconds = 110022
     )
 }
