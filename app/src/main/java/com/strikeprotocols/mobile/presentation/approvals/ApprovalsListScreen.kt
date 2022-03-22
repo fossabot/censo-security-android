@@ -9,15 +9,19 @@ import androidx.compose.material.icons.outlined.AccountCircle
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.SwipeRefreshIndicator
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import com.strikeprotocols.mobile.R
 import com.strikeprotocols.mobile.common.strikeLog
 import com.strikeprotocols.mobile.data.models.WalletApprovals
+import com.strikeprotocols.mobile.presentation.Screen
+import com.strikeprotocols.mobile.presentation.components.StrikeTopAppBar
 import com.strikeprotocols.mobile.ui.theme.BackgroundBlack
 import com.strikeprotocols.mobile.ui.theme.HeaderBlack
 import com.strikeprotocols.mobile.ui.theme.StrikeWhite
@@ -28,6 +32,7 @@ import java.util.*
 
 @Composable
 fun ApprovalsListScreen(
+    navController: NavController,
     viewModel: ApprovalsViewModel = hiltViewModel()
 ) {
     val state = viewModel.state
@@ -36,14 +41,22 @@ fun ApprovalsListScreen(
         modifier = Modifier.fillMaxSize(),
         topBar = {
             ApprovalsListTopAppBar(
-                onAppBarIconClick = { strikeLog(message = "Profile Icon clicked") }
+                title = stringResource(id = R.string.approvals),
+                onAppBarIconClick = {},
+                navigationIcon = Icons.Outlined.AccountCircle,
+                navigationIconContentDes = stringResource(id = R.string.content_des_account_icon)
             )
         },
         content = {
             ApprovalsList(
                 isRefreshing = state.loadingData,
                 onRefresh = viewModel::refreshData,
-                walletApprovals = state.walletApprovalsResult.data
+                walletApprovals = state.walletApprovalsResult.data,
+                onApproveClicked = {
+                    //TODO Connect to VM
+                    strikeLog(message = "Approve clicked")
+                },
+                onMoreInfoClicked = { navController.navigate(Screen.ApprovalDetailRoute.route) }
             )
         }
     )
@@ -51,21 +64,16 @@ fun ApprovalsListScreen(
 
 @Composable
 fun ApprovalsListTopAppBar(
-    onAppBarIconClick: () -> Unit
+    title: String,
+    onAppBarIconClick: () -> Unit,
+    navigationIcon: ImageVector,
+    navigationIconContentDes: String
 ) {
-    TopAppBar(
-        title = { Text(text = stringResource(id = R.string.approvals)) },
-        backgroundColor = HeaderBlack,
-        contentColor = StrikeWhite,
-        navigationIcon = {
-            IconButton(onClick = { onAppBarIconClick() }) {
-                Icon(
-                    Icons.Outlined.AccountCircle,
-                    stringResource(id = R.string.content_des_account_icon),
-                    tint = StrikeWhite
-                )
-            }
-        }
+    StrikeTopAppBar(
+        title = title,
+        onAppBarIconClick = { onAppBarIconClick() },
+        navigationIcon = navigationIcon,
+        navigationIconContentDes = navigationIconContentDes
     )
 }
 
@@ -73,7 +81,9 @@ fun ApprovalsListTopAppBar(
 fun ApprovalsList(
     isRefreshing: Boolean,
     onRefresh: () -> Unit,
-    walletApprovals: WalletApprovals?
+    walletApprovals: WalletApprovals?,
+    onApproveClicked: () -> Unit,
+    onMoreInfoClicked: () -> Unit
 ) {
     SwipeRefresh(
         modifier = Modifier.fillMaxSize(),
@@ -103,7 +113,10 @@ fun ApprovalsList(
             if (walletApprovals != null && !walletApprovals.approvals.isNullOrEmpty()) {
                 items(walletApprovals.approvals.size) { index ->
                     Spacer(modifier = Modifier.height(12.dp))
-                    ApprovalItem()
+                    ApprovalItem(
+                        onApproveClicked = { onApproveClicked() },
+                        onMoreInfoClicked = { onMoreInfoClicked() }
+                    )
                     Spacer(modifier = Modifier.height(12.dp))
                 }
             }
