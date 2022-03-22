@@ -25,4 +25,8 @@
 
     <string name="approvals">Approvals</string>
     <string name="content_des_account_icon">Account Icon</string>
+    <string name="content_des_transfer_icon">Transfer Icon</string>
+    <string name="approve">Approve</string>
+    <string name="more_info">More Info…</string>
+    <string name="equivalent">equivalent</string>
 </resources>
