@@ -21,6 +21,10 @@ import com.strikeprotocols.mobile.data.models.WalletApprovals
 import com.strikeprotocols.mobile.ui.theme.BackgroundBlack
 import com.strikeprotocols.mobile.ui.theme.HeaderBlack
 import com.strikeprotocols.mobile.ui.theme.StrikeWhite
+import java.time.*
+import java.time.format.DateTimeFormatter
+import java.time.format.DateTimeFormatter.ISO_DATE_TIME
+import java.util.*
 
 @Composable
 fun ApprovalsListScreen(
@@ -98,10 +102,9 @@ fun ApprovalsList(
 
             if (walletApprovals != null && !walletApprovals.approvals.isNullOrEmpty()) {
                 items(walletApprovals.approvals.size) { index ->
-                    Text(
-                        text = "Approval: ${walletApprovals.approvals[index]?.id ?: ""}",
-                        color = StrikeWhite
-                    )
+                    Spacer(modifier = Modifier.height(12.dp))
+                    ApprovalItem()
+                    Spacer(modifier = Modifier.height(12.dp))
                 }
             }
         }

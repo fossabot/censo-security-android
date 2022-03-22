@@ -16,7 +16,6 @@ class ApprovalsRepositoryImpl @Inject constructor(
 ) : ApprovalsRepository {
 
     override suspend fun getWalletApprovals(): WalletApprovals {
-        delay(3000)
         return WalletApprovals(
             listOf(
                 generateWalletApprovalsDummyData(),
