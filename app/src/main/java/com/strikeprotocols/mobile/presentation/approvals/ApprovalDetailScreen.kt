@@ -22,6 +22,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.strikeprotocols.mobile.R
 import com.strikeprotocols.mobile.common.strikeLog
+import com.strikeprotocols.mobile.presentation.approvals.approval_type_components.ApprovalDetailsTransferContent
 import com.strikeprotocols.mobile.presentation.components.StrikeTopAppBar
 import com.strikeprotocols.mobile.ui.theme.*
 
@@ -76,22 +77,9 @@ fun ApprovalDetails(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         ApprovalDetailsTimer()
+        Spacer(modifier = Modifier.height(24.dp))
 
-        Spacer(modifier = Modifier.height(36.dp))
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(450.dp)
-                .background(color = Color.DarkGray),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            Text(
-                text = "Approval Content",
-                fontSize = 36.sp,
-                color = StrikeWhite
-            )
-        }
+        ApprovalDetailsTransferContent()
 
         ApprovalDetailsButtons(
             onApproveClicked = { onApproveClicked() },

@@ -13,7 +13,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -21,6 +20,7 @@ import com.strikeprotocols.mobile.R
 import com.strikeprotocols.mobile.common.strikeLog
 import com.strikeprotocols.mobile.common.convertSecondsIntoCountdownText
 import com.strikeprotocols.mobile.presentation.components.StrikeTag
+import com.strikeprotocols.mobile.presentation.components.StrikeTransactionCurrency
 import com.strikeprotocols.mobile.ui.theme.*
 import java.util.*
 
@@ -68,20 +68,22 @@ fun ApprovalItemHeader(timeRemainingInSeconds: Int) {
 fun ApprovalContent() {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Spacer(Modifier.height(16.dp))
-        Text(
-            "2.000000000 SOL",
-            color = StrikeWhite, fontSize = 24.sp, textAlign = TextAlign.Center
-        )
-        Spacer(Modifier.height(24.dp))
-        Text(
-            "177.54 USD ${stringResource(id = R.string.equivalent)}",
-            textAlign = TextAlign.Center,
-            color = GreyText,
-            fontSize = 14.sp
+        StrikeTransactionCurrency(
+            cryptoValue = "2.000000000 SOL",
+            currencyEquivalentValue = "177.54 USD",
+            contentSpacerHeight = 20,
+            fontSize = 24
         )
         Spacer(Modifier.height(28.dp))
         Row(verticalAlignment = Alignment.CenterVertically) {
-            StrikeTag(text = "Transfers")
+            val strikeTagPaddingValues =
+                PaddingValues(top = 12.dp, bottom = 12.dp, start = 44.dp, end = 44.dp)
+
+            StrikeTag(
+                text = "Transfers",
+                paddingValues = strikeTagPaddingValues,
+                backgroundColor = SectionBlack
+            )
             Icon(
                 modifier = Modifier
                     .padding(end = 2.dp, start = 2.dp)
@@ -90,7 +92,11 @@ fun ApprovalContent() {
                 tint = StrikeWhite,
                 contentDescription = stringResource(id = R.string.content_des_transfer_icon)
             )
-            StrikeTag(text = "Coinbase")
+            StrikeTag(
+                text = "Coinbase",
+                paddingValues = strikeTagPaddingValues,
+                backgroundColor = SectionBlack
+            )
         }
     }
 }

@@ -34,4 +34,10 @@
     <string name="expires_in">Expires in</string>
     <string name="transfer_details">Transfer Details</string>
     <string name="content_des_back_icon">Back Icon</string>
+    <string name="requested_by">Requested By</string>
+    <string name="requested_date">Requested Date</string>
+    <string name="address">Address</string>
+    <string name="no_more_approvals_needed">No more approvals needed</string>
+    <string name="more_approval_needed">more approval needed</string>
+    <string name="more_approvals_needed">more approvals needed</string>
 </resources>
