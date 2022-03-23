@@ -2,10 +2,7 @@ package com.strikeprotocols.mobile.data
 
 import com.strikeprotocols.mobile.BuildConfig
 import com.strikeprotocols.mobile.data.BrooklynApiService.Companion.AUTH
-import com.strikeprotocols.mobile.data.models.VerifyUser
-import com.strikeprotocols.mobile.data.models.WalletApprovals
-import com.strikeprotocols.mobile.data.models.WalletSigner
-import com.strikeprotocols.mobile.data.models.WalletSigners
+import com.strikeprotocols.mobile.data.models.*
 import kotlinx.coroutines.runBlocking
 import okhttp3.*
 import okhttp3.logging.HttpLoggingInterceptor
@@ -64,6 +61,9 @@ interface BrooklynApiService {
     @Headers(AUTH_REQUIRED)
     suspend fun getWalletApprovals(): WalletApprovals
 
+    @POST("notification-tokens")
+    @Headers(AUTH_REQUIRED)
+    suspend fun addPushNotificationToken(@Body pushData: PushBody): PushBody
 }
 
 class AuthInterceptor(private val authProvider: AuthProvider) : Interceptor {
