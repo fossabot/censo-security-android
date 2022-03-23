@@ -46,6 +46,12 @@ object AppModule {
 
     @Provides
     @Singleton
+    fun providePushRepository(api: BrooklynApiService): PushRepository {
+        return PushRepositoryImpl(api)
+    }
+
+    @Provides
+    @Singleton
     fun provideEncryptionManager(): EncryptionManager {
         return EncryptionManagerImpl()
     }

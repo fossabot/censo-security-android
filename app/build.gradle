@@ -182,6 +182,10 @@ dependencies {
     //Firebase BOM
     implementation platform('com.google.firebase:firebase-bom:29.1.0')
 
+    //Push Notifications
+    implementation 'com.google.firebase:firebase-messaging-ktx'
+    implementation 'com.google.firebase:firebase-analytics-ktx'
+
     //Encrypted Preferences
     implementation 'androidx.security:security-crypto-ktx:1.1.0-alpha03'
 

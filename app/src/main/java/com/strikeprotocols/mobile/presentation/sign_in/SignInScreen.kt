@@ -91,7 +91,7 @@ fun SignInScreen(
         }
 
         if (state.saveCredential is Resource.Success) {
-            navController.navigate(Screen.AuthRoute.route) {
+            navController.navigate(Screen.ApprovalListRoute.route) {
                 popUpTo(Screen.SignInRoute.route) {
                     inclusive = true
                 }
@@ -101,7 +101,7 @@ fun SignInScreen(
         }
 
         if (state.keyValid is Resource.Success) {
-            navController.navigate(Screen.AuthRoute.route) {
+            navController.navigate(Screen.ApprovalListRoute.route) {
                 popUpTo(Screen.SignInRoute.route) {
                     inclusive = true
                 }

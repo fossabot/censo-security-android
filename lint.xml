@@ -9,4 +9,7 @@
         <ignore path="**/JcaJceUtils$1.class" />
         <ignore path="**/JcaJceUtils$2.class" />
     </issue>
+    <issue id="DuplicateStrings">
+        <ignore path="**/strings.xml" />
+    </issue>
 </lint>
