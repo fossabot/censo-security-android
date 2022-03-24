@@ -56,7 +56,11 @@ fun ApprovalsListScreen(
                     //TODO Connect to VM
                     strikeLog(message = "Approve clicked")
                 },
-                onMoreInfoClicked = { navController.navigate(Screen.ApprovalDetailRoute.route) },
+                onMoreInfoClicked = { approval ->
+                    approval?.let { safeApproval ->
+                        navController.navigate("${Screen.ApprovalDetailRoute.route}/${WalletApproval.toJson(safeApproval)}" )
+                    }
+                },
                 walletApprovals = state.approvals,
             )
         }
@@ -83,7 +87,7 @@ fun ApprovalsList(
     isRefreshing: Boolean,
     onRefresh: () -> Unit,
     onApproveClicked: () -> Unit,
-    onMoreInfoClicked: () -> Unit,
+    onMoreInfoClicked: (WalletApproval?) -> Unit,
     walletApprovals: List<WalletApproval?>
 ) {
     SwipeRefresh(
@@ -100,7 +104,8 @@ fun ApprovalsList(
                 // Change the color and shape
                 backgroundColor = Color.Transparent,
                 contentColor = Color.White,
-                largeIndication = true
+                largeIndication = true,
+                elevation = 0.dp
             )
         }
     ) {
@@ -117,7 +122,7 @@ fun ApprovalsList(
                     Spacer(modifier = Modifier.height(12.dp))
                     ApprovalItem(
                         onApproveClicked = { onApproveClicked() },
-                        onMoreInfoClicked = { onMoreInfoClicked() },
+                        onMoreInfoClicked = { onMoreInfoClicked(walletApprovals[index]) },
                         timeRemainingInSeconds = walletApproval?.approvalTimeoutInSeconds ?: 0
                     )
                     Spacer(modifier = Modifier.height(12.dp))

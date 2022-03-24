@@ -19,6 +19,8 @@ import androidx.compose.ui.unit.sp
 import com.strikeprotocols.mobile.R
 import com.strikeprotocols.mobile.common.strikeLog
 import com.strikeprotocols.mobile.common.convertSecondsIntoCountdownText
+import com.strikeprotocols.mobile.common.generateWalletApprovalsDummyData
+import com.strikeprotocols.mobile.data.models.WalletApproval
 import com.strikeprotocols.mobile.presentation.components.StrikeTag
 import com.strikeprotocols.mobile.presentation.components.StrikeTransactionCurrency
 import com.strikeprotocols.mobile.ui.theme.*
@@ -28,7 +30,7 @@ import java.util.*
 fun ApprovalItem(
     timeRemainingInSeconds: Int,
     onApproveClicked: () -> Unit,
-    onMoreInfoClicked: () -> Unit,
+    onMoreInfoClicked: (WalletApproval?) -> Unit,
 ) {
     Column(
         modifier = Modifier
@@ -41,7 +43,7 @@ fun ApprovalItem(
         ApprovalContent()
         ApprovalButtonRow(
             onApproveClicked = { onApproveClicked() },
-            onMoreInfoClicked = { onMoreInfoClicked() }
+            onMoreInfoClicked = { onMoreInfoClicked(generateWalletApprovalsDummyData()) }
         )
     }
 }
