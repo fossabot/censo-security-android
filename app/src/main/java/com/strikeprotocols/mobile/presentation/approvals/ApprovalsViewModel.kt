@@ -50,17 +50,27 @@ class ApprovalsViewModel @Inject constructor(
         timer?.start()
     }
 
+    fun resetShouldShowErrorSnackbar() {
+        state = state.copy(shouldShowErrorSnackbar = false)
+    }
+
     //region API Calls
     private fun retrieveWalletApprovals() {
         viewModelScope.launch {
             state = state.copy(walletApprovalsResult = Resource.Loading())
 
-            val walletApprovals = approvalsRepository.getWalletApprovals()
-            state = state.copy(
-                walletApprovalsResult = Resource.Success(walletApprovals),
-                approvals = walletApprovals.approvals ?: emptyList()
-            )
-            //TODO Need to handle scenarios where result data is bad
+            state = try {
+                val walletApprovals = approvalsRepository.getWalletApprovals()
+                state.copy(
+                    walletApprovalsResult = Resource.Success(walletApprovals),
+                    approvals = walletApprovals.approvals ?: emptyList()
+                )
+            } catch (e: Exception) {
+                state.copy(
+                    walletApprovalsResult = Resource.Error(e.message ?: ""),
+                    shouldShowErrorSnackbar = true
+                )
+            }
         }
     }
 

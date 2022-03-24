@@ -47,4 +47,8 @@
     <string name="no_more_approvals_needed">No more approvals needed</string>
     <string name="more_approval_needed">more approval needed</string>
     <string name="more_approvals_needed">more approvals needed</string>
+    <string name="nothing_to_approve">Nothing to approve</string>
+    <string name="pull_to_refresh">Pull down to refresh approvals</string>
+    <string name="content_des_pull_to_refresh_icon">Pull down to refresh icon</string>
+    <string name="snackbar_refresh_error">Something went wrong, please try again</string>
 </resources>
