@@ -1,4 +1,4 @@
-package com.strikeprotocols.mobile.presentation.approvals
+package com.strikeprotocols.mobile.presentation.approval_detail
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -14,22 +14,34 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.icons.rounded.ArrowBack
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.strikeprotocols.mobile.R
+import com.strikeprotocols.mobile.common.convertSecondsIntoCountdownText
 import com.strikeprotocols.mobile.common.strikeLog
+import com.strikeprotocols.mobile.data.models.WalletApproval
 import com.strikeprotocols.mobile.presentation.approvals.approval_type_components.ApprovalDetailsTransferContent
 import com.strikeprotocols.mobile.presentation.components.StrikeTopAppBar
 import com.strikeprotocols.mobile.ui.theme.*
 
 @Composable
 fun ApprovalDetailsScreen(
-    navController: NavController
+    navController: NavController,
+    viewModel: ApprovalDetailsViewModel = hiltViewModel(),
+    approval: WalletApproval?
 ) {
+    val state = viewModel.state
+
+    DisposableEffect(key1 = viewModel) {
+        viewModel.onStart(approval)
+        onDispose { viewModel.onStop() }
+    }
+
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
@@ -43,7 +55,8 @@ fun ApprovalDetailsScreen(
         content = {
             ApprovalDetails(
                 onApproveClicked = { strikeLog(message = "Approve clicked") },
-                onDenyClicked = { strikeLog(message = "Deny clicked") }
+                onDenyClicked = { strikeLog(message = "Deny clicked") },
+                timeRemainingInSeconds = state.approval?.approvalTimeoutInSeconds ?: 0
             )
         }
     )
@@ -67,7 +80,8 @@ fun ApprovalDetailsTopAppBar(
 @Composable
 fun ApprovalDetails(
     onApproveClicked: () -> Unit,
-    onDenyClicked: () -> Unit
+    onDenyClicked: () -> Unit,
+    timeRemainingInSeconds: Int
 ) {
     Column(
         modifier = Modifier
@@ -76,7 +90,7 @@ fun ApprovalDetails(
             .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        ApprovalDetailsTimer()
+        ApprovalDetailsTimer(timeRemainingInSeconds = timeRemainingInSeconds)
         Spacer(modifier = Modifier.height(24.dp))
 
         ApprovalDetailsTransferContent()
@@ -89,13 +103,13 @@ fun ApprovalDetails(
 }
 
 @Composable
-fun ApprovalDetailsTimer() {
+fun ApprovalDetailsTimer(timeRemainingInSeconds: Int) {
     Text(
         modifier = Modifier
             .fillMaxWidth()
             .background(SectionBlack)
             .padding(vertical = 6.dp),
-        text = "${stringResource(id = R.string.expires_in)} 23:59:21",
+        text = "${stringResource(id = R.string.expires_in)} ${convertSecondsIntoCountdownText(timeRemainingInSeconds)}",
         textAlign = TextAlign.Center,
         color = StrikeWhite,
         fontSize = 18.sp
@@ -160,7 +174,8 @@ fun StatelessApprovalDetailsScreen() {
         content = {
             ApprovalDetails(
                 onApproveClicked = { strikeLog(message = "Approve clicked") },
-                onDenyClicked = { strikeLog(message = "Deny clicked") }
+                onDenyClicked = { strikeLog(message = "Deny clicked") },
+                timeRemainingInSeconds = 1000
             )
         }
     )

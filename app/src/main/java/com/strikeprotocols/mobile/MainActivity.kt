@@ -5,14 +5,17 @@ import androidx.activity.compose.setContent
 import androidx.compose.material.Surface
 import androidx.navigation.NavController
 import androidx.fragment.app.FragmentActivity
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.strikeprotocols.mobile.data.AuthProvider
 import com.strikeprotocols.mobile.data.UserState
 import com.strikeprotocols.mobile.data.UserStateListener
+import com.strikeprotocols.mobile.data.models.WalletApproval
 import com.strikeprotocols.mobile.presentation.Screen
-import com.strikeprotocols.mobile.presentation.approvals.ApprovalDetailsScreen
+import com.strikeprotocols.mobile.presentation.approval_detail.ApprovalDetailsScreen
 import com.strikeprotocols.mobile.presentation.approvals.ApprovalsListScreen
 import com.strikeprotocols.mobile.presentation.auth.AuthScreen
 import com.strikeprotocols.mobile.presentation.contact_strike.ContactStrikeScreen
@@ -56,9 +59,11 @@ class MainActivity : FragmentActivity() {
                             ApprovalsListScreen(navController = navController)
                         }
                         composable(
-                            route = Screen.ApprovalDetailRoute.route
-                        ) {
-                            ApprovalDetailsScreen(navController = navController)
+                            route = "${Screen.ApprovalDetailRoute.route}/{${Screen.ApprovalDetailRoute.APPROVAL_ARG}}",
+                            arguments = listOf(navArgument(Screen.ApprovalDetailRoute.APPROVAL_ARG) { type = NavType.StringType })
+                        ) { backStackEntry ->
+                            val approvalArg = backStackEntry.arguments?.get(Screen.ApprovalDetailRoute.APPROVAL_ARG) as String
+                            ApprovalDetailsScreen(navController = navController, approval = WalletApproval.fromJson(approvalArg))
                         }
                         composable(
                             route = Screen.AuthRoute.route
