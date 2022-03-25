@@ -1,4 +1,4 @@
-package com.strikeprotocols.mobile.presentation.approvals.approval_type_components
+package com.strikeprotocols.mobile.presentation.approval_detail.approval_type_components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
