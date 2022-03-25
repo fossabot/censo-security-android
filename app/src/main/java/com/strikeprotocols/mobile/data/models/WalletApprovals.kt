@@ -2,10 +2,6 @@ package com.strikeprotocols.mobile.data.models
 
 import com.google.gson.Gson
 
-data class WalletApprovals(
-    val approvals: List<WalletApproval?>?
-)
-
 data class WalletApproval(
     val approvalTimeoutInSeconds: Int?,
     val details: Details?,

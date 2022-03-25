@@ -1,27 +1,27 @@
 package com.strikeprotocols.mobile.data
 
 import com.strikeprotocols.mobile.common.*
-import com.strikeprotocols.mobile.common.ValidDummyData.generateVerifyUserDummyDataWithValidPublicKey
-import com.strikeprotocols.mobile.common.ValidDummyData.generateVerifyWalletSignersDummyDataWithValidPublicKey
 import com.strikeprotocols.mobile.data.models.VerifyUser
 import com.strikeprotocols.mobile.data.models.WalletSigner
-import com.strikeprotocols.mobile.data.models.WalletSigners
-import kotlinx.coroutines.delay
 
 interface UserRepository {
     suspend fun authenticate(sessionToken: String): String
     suspend fun retrieveSessionToken(username: String, password: String): String
     suspend fun verifyUser(): VerifyUser
-    suspend fun getWalletSigners(): WalletSigners
+    suspend fun getWalletSigners(): List<WalletSigner?>
     suspend fun addWalletSigner(walletSignerBody: WalletSigner): WalletSigner
     suspend fun generateInitialAuthData(): InitialAuthData
     suspend fun saveGeneratedPassword(generatedPassword: ByteArray)
     suspend fun getSavedPassword(): String
     suspend fun clearSavedPassword()
-    suspend fun savePassword()
+    suspend fun savePassword(generatedPassword: ByteArray)
+    suspend fun userLoggedIn(): Boolean
+    suspend fun setUserLoggedIn()
+    suspend fun logOut() : Boolean
+    suspend fun clearGeneratedAuthData()
     suspend fun doesUserHaveValidLocalKey(
         verifyUser: VerifyUser,
-        walletSigners: WalletSigners
+        walletSigners: List<WalletSigner?>
     ): Boolean
 }
 
@@ -39,19 +39,15 @@ class UserRepositoryImpl(
         authProvider.authenticate(sessionToken)
 
     override suspend fun verifyUser(): VerifyUser {
-        delay(3000)
-        return generateVerifyUserDummyDataWithValidPublicKey() //api.verifyUser()
+        return api.verifyUser()
     }
 
-    override suspend fun getWalletSigners(): WalletSigners {
-        delay(3000)
-        return generateVerifyWalletSignersDummyDataWithValidPublicKey() //api.walletSigners()
+    override suspend fun getWalletSigners(): List<WalletSigner?> {
+        return api.walletSigners()
     }
 
     override suspend fun addWalletSigner(walletSignerBody: WalletSigner): WalletSigner {
-        delay(3000)
-        return walletSignerBody
-        //api.addWalletSigner(walletSignerBody = walletSignerBody)
+        return api.addWalletSigner(walletSignerBody = walletSignerBody)
     }
 
     override suspend fun saveGeneratedPassword(generatedPassword: ByteArray) =
@@ -85,14 +81,31 @@ class UserRepositoryImpl(
         )
     }
 
+    override suspend fun clearGeneratedAuthData() {
+        securePreferences.clearPrivateKey()
+        securePreferences.clearSavedPassword()
+    }
+
     override suspend fun clearSavedPassword() = securePreferences.clearSavedPassword()
-    override suspend fun savePassword() {
-        securePreferences.saveGeneratedPassword(Base58.decode(ValidDummyData.decryptionKey))
+    override suspend fun savePassword(generatedPassword: ByteArray) {
+        securePreferences.saveGeneratedPassword(generatedPassword)
+    }
+
+    override suspend fun userLoggedIn() = SharedPrefsHelper.isUserLoggedIn()
+    override suspend fun setUserLoggedIn() = SharedPrefsHelper.setUserLoggedIn(true)
+
+    override suspend fun logOut(): Boolean {
+        return try {
+            authProvider.signOut()
+            true
+        } catch (e: Exception) {
+            false
+        }
     }
 
     override suspend fun doesUserHaveValidLocalKey(
         verifyUser: VerifyUser,
-        walletSigners: WalletSigners
+        walletSigners: List<WalletSigner?>
     ): Boolean {
         val generatedPassword = securePreferences.retrieveGeneratedPassword()
 
@@ -107,21 +120,19 @@ class UserRepositoryImpl(
         }
 
         //api call to get wallet signer
-        walletSigners.items?.let { _ ->
-            for (walletSigner in walletSigners.items) {
-                if (walletSigner?.publicKey != null && walletSigner.publicKey == publicKey) {
-                    val validPair = encryptionManager.verifyKeyPair(
-                        encryptedPrivateKey = walletSigner.encryptedKey,
-                        publicKey = walletSigner.publicKey,
-                        symmetricKey = generatedPassword
-                    )
+        for (walletSigner in walletSigners) {
+            if (walletSigner?.publicKey != null && walletSigner.publicKey == publicKey) {
+                val validPair = encryptionManager.verifyKeyPair(
+                    encryptedPrivateKey = walletSigner.encryptedKey,
+                    publicKey = walletSigner.publicKey,
+                    symmetricKey = generatedPassword
+                )
 
-                    if (validPair) {
-                        walletSigner.encryptedKey?.let { encryptedKey ->
-                            securePreferences.savePrivateKey(encryptedKey)
-                        }
-                        return@doesUserHaveValidLocalKey true
+                if (validPair) {
+                    walletSigner.encryptedKey?.let { encryptedKey ->
+                        securePreferences.savePrivateKey(encryptedKey)
                     }
+                    return true
                 }
             }
         }
