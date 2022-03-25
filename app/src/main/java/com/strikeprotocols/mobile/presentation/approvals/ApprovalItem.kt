@@ -19,8 +19,6 @@ import androidx.compose.ui.unit.sp
 import com.strikeprotocols.mobile.R
 import com.strikeprotocols.mobile.common.strikeLog
 import com.strikeprotocols.mobile.common.convertSecondsIntoCountdownText
-import com.strikeprotocols.mobile.common.generateWalletApprovalsDummyData
-import com.strikeprotocols.mobile.data.models.WalletApproval
 import com.strikeprotocols.mobile.presentation.components.StrikeTag
 import com.strikeprotocols.mobile.presentation.components.StrikeTransactionCurrency
 import com.strikeprotocols.mobile.ui.theme.*
@@ -30,7 +28,7 @@ import java.util.*
 fun ApprovalItem(
     timeRemainingInSeconds: Int,
     onApproveClicked: () -> Unit,
-    onMoreInfoClicked: (WalletApproval?) -> Unit,
+    onMoreInfoClicked: () -> Unit,
 ) {
     Column(
         modifier = Modifier
@@ -42,8 +40,8 @@ fun ApprovalItem(
         ApprovalItemHeader(timeRemainingInSeconds)
         ApprovalContent()
         ApprovalButtonRow(
-            onApproveClicked = { onApproveClicked() },
-            onMoreInfoClicked = { onMoreInfoClicked(generateWalletApprovalsDummyData()) }
+            onApproveClicked = onApproveClicked,
+            onMoreInfoClicked = onMoreInfoClicked
         )
     }
 }
@@ -119,7 +117,7 @@ fun ApprovalButtonRow(
                 modifier = Modifier
                     .weight(1f)
                     .padding(top = 4.dp, bottom = 4.dp),
-                onClick = { onApproveClicked() }) {
+                onClick = onApproveClicked) {
                 Text(
                     stringResource(R.string.approve),
                     color = ApprovalGreen,
@@ -136,7 +134,7 @@ fun ApprovalButtonRow(
             TextButton(
                 modifier = Modifier
                     .weight(1f),
-                onClick = { onMoreInfoClicked() }) {
+                onClick = onMoreInfoClicked) {
                 Text(
                     stringResource(R.string.more_info),
                     color = StrikeWhite,

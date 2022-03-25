@@ -51,7 +51,7 @@ interface BrooklynApiService {
 
     @GET("v1/wallet-signers")
     @Headers(AUTH_REQUIRED)
-    suspend fun walletSigners(): WalletSigners
+    suspend fun walletSigners(): List<WalletSigner?>
 
     @POST("v1/wallet-signers")
     @Headers(AUTH_REQUIRED)
@@ -59,7 +59,7 @@ interface BrooklynApiService {
 
     @GET("v1/wallet-approvals")
     @Headers(AUTH_REQUIRED)
-    suspend fun getWalletApprovals(): WalletApprovals
+    suspend fun getWalletApprovals(): List<WalletApproval?>
 
     @POST("notification-tokens")
     @Headers(AUTH_REQUIRED)

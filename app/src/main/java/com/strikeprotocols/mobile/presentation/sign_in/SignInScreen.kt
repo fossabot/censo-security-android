@@ -54,6 +54,8 @@ fun SignInScreen(
     val state = viewModel.state
     val context = LocalContext.current
 
+    val failedRetrieveMessage = stringResource(id = R.string.failed_retrieve_cred_default)
+
     val credentialsProvider: CredentialsProvider = CredentialsProviderImpl(LocalContext.current)
 
     //region Credentials Launchers
@@ -96,8 +98,15 @@ fun SignInScreen(
                     inclusive = true
                 }
             }
+            viewModel.setUserLoggedInSuccess()
             viewModel.loadingFinished()
             viewModel.resetSaveCredential()
+        }
+
+        if(state.retrieveCredential is Resource.Error) {
+            Toast.makeText(context, failedRetrieveMessage, Toast.LENGTH_SHORT).show()
+            viewModel.loadingFinished()
+            viewModel.resetRetrieveCredential()
         }
 
         if (state.keyValid is Resource.Success) {
@@ -106,6 +115,7 @@ fun SignInScreen(
                     inclusive = true
                 }
             }
+            viewModel.setUserLoggedInSuccess()
             viewModel.resetValidKey()
         }
 
@@ -141,6 +151,20 @@ fun SignInScreen(
         verticalArrangement = Arrangement.SpaceBetween,
         modifier = Modifier
             .fillMaxSize()
+            .combinedClickable(
+                onClick = {
+                    if (BuildConfig.DEBUG) {
+                        Toast.makeText(context, "DEBUG: Setting Local Key", Toast.LENGTH_LONG).show()
+                        viewModel.setCredentialLocallySaved()
+                    }
+                },
+                onLongClick = {
+                    if (BuildConfig.DEBUG) {
+                        Toast.makeText(context, "DEBUG: Clearing Local Password", Toast.LENGTH_LONG).show()
+                        viewModel.clearCredential()
+                    }
+                },
+            )
             .padding(horizontal = 12.dp)
     ) {
         val passwordVisibility = remember { mutableStateOf(false) }
@@ -149,20 +173,6 @@ fun SignInScreen(
         Image(
             modifier = Modifier
                 .fillMaxWidth()
-                .combinedClickable(
-                    onClick = {
-                        if (BuildConfig.DEBUG) {
-                            Toast.makeText(context, "DEBUG: Setting Local Key", Toast.LENGTH_LONG).show()
-                            viewModel.setCredentialLocallySaved()
-                        }
-                    },
-                    onLongClick = {
-                        if (BuildConfig.DEBUG) {
-                            Toast.makeText(context, "DEBUG: Clearing Local Password", Toast.LENGTH_LONG).show()
-                            viewModel.clearCredential()
-                        }
-                    },
-                )
                 .padding(horizontal = 36.dp, vertical = 36.dp),
             painter = painterResource(R.drawable.strike_main_logo),
             contentDescription = "",
@@ -221,10 +231,10 @@ fun SignInScreen(
     if (state.loginResult is Resource.Error) {
         AlertDialog(
             backgroundColor = UnfocusedGrey,
-            onDismissRequest = viewModel::resetLoginCallAndRetrieveUserInformation,
+            onDismissRequest = viewModel::resetLoginCall,
             confirmButton = {
                 TextButton(
-                    onClick = viewModel::resetLoginCallAndRetrieveUserInformation
+                    onClick = viewModel::resetLoginCall
                 )
                 {
                     Text(text = stringResource(R.string.ok))
@@ -245,6 +255,56 @@ fun SignInScreen(
                 )
             }
         )
+        viewModel.loadingFinished()
+    }
+
+    if (state.shouldDisplaySmartLockDialog) {
+        SmartLockAlertDialog(
+            dialogText = stringResource(R.string.smart_lock_dialog_save),
+            onConfirm = viewModel::launchSmartLockSaveFlow
+        )
+    }
+
+    if(state.saveCredential is Resource.Error) {
+        viewModel.loadingFinished()
+        SmartLockAlertDialog(
+            dialogText = stringResource(R.string.smart_lock_save_fail),
+            onConfirm = {
+                viewModel.resetSaveCredential()
+            }
+        )
     }
     //endregion
+}
+
+@Composable
+fun SmartLockAlertDialog(
+    dialogText: String,
+    onConfirm: () -> Unit,
+) {
+    AlertDialog(
+        backgroundColor = UnfocusedGrey,
+        onDismissRequest = onConfirm,
+        confirmButton = {
+            TextButton(
+                onClick = onConfirm
+            ) {
+                Text(text = stringResource(R.string.ok))
+            }
+        },
+        title = {
+            Text(
+                text = stringResource(id = R.string.smart_lock_dialog_title),
+                color = StrikeWhite,
+                fontSize = 24.sp
+            )
+        },
+        text = {
+            Text(
+                text = dialogText,
+                color = StrikeWhite,
+                fontSize = 18.sp
+            )
+        }
+    )
 }

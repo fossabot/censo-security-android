@@ -8,15 +8,19 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.strikeprotocols.mobile.common.Resource
 import com.strikeprotocols.mobile.data.ApprovalsRepository
+import com.strikeprotocols.mobile.data.UserRepository
 import com.strikeprotocols.mobile.data.models.WalletApproval
 import com.strikeprotocols.mobile.presentation.approvals.ApprovalsViewModel.Companion.UPDATE_COUNTDOWN
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.lang.Exception
 import javax.inject.Inject
 
 @HiltViewModel
 class ApprovalsViewModel @Inject constructor(
-    private val approvalsRepository: ApprovalsRepository
+    private val approvalsRepository: ApprovalsRepository,
+    private val userRepository: UserRepository
 ) : ViewModel() {
 
     private var timer: CountDownTimer? = null
@@ -54,16 +58,32 @@ class ApprovalsViewModel @Inject constructor(
         state = state.copy(shouldShowErrorSnackbar = false)
     }
 
+    fun logout() {
+        viewModelScope.launch {
+            state = state.copy(logoutResult = Resource.Loading())
+            try {
+                val loggedOut = userRepository.logOut()
+                state = state.copy(logoutResult = Resource.Success(loggedOut))
+            } catch (e: Exception) {
+                state = state.copy(logoutResult = Resource.Success(false))
+            }
+        }
+    }
+
+    fun resetLogoutResource() {
+        state = state.copy(logoutResult = Resource.Uninitialized)
+    }
+
     //region API Calls
     private fun retrieveWalletApprovals() {
         viewModelScope.launch {
             state = state.copy(walletApprovalsResult = Resource.Loading())
-
+            delay(500)
             state = try {
                 val walletApprovals = approvalsRepository.getWalletApprovals()
                 state.copy(
                     walletApprovalsResult = Resource.Success(walletApprovals),
-                    approvals = walletApprovals.approvals ?: emptyList()
+                    approvals = walletApprovals
                 )
             } catch (e: Exception) {
                 state.copy(

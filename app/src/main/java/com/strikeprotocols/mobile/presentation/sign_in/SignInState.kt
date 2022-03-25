@@ -5,7 +5,6 @@ import com.strikeprotocols.mobile.common.Resource
 import com.strikeprotocols.mobile.data.InitialAuthData
 import com.strikeprotocols.mobile.data.models.VerifyUser
 import com.strikeprotocols.mobile.data.models.WalletSigner
-import com.strikeprotocols.mobile.data.models.WalletSigners
 
 data class SignInState(
     val email: String = "",
@@ -15,11 +14,12 @@ data class SignInState(
     val initialAuthData: InitialAuthData? = null,
     val loadingData : Boolean = false,
     val shouldAbortUserFromAuthFlow: Boolean = false,
+    val shouldDisplaySmartLockDialog: Boolean = false,
 
     //Async Data
     val loginResult: Resource<String> = Resource.Uninitialized,
     val verifyUserResult: Resource<VerifyUser> = Resource.Uninitialized,
-    val walletSignersResult: Resource<WalletSigners> = Resource.Uninitialized,
+    val walletSignersResult: Resource<List<WalletSigner?>> = Resource.Uninitialized,
     val addWalletSignerResult: Resource<WalletSigner> = Resource.Uninitialized,
     val saveCredential: Resource<Unit> = Resource.Uninitialized,
     val retrieveCredential: Resource<String> = Resource.Uninitialized,

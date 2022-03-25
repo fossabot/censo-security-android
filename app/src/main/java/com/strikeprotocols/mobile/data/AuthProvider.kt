@@ -41,15 +41,15 @@ class OktaAuth(applicationContext: Context) : AuthProvider {
 
     private val listeners: MutableList<UserStateListener> = mutableListOf()
 
-    private val authClient: AuthClient
+    private val authClient: AuthClient?
     private lateinit var authenticationClient: AuthenticationClient
 
     override val isAuthenticated: Boolean
-        get() = authClient.sessionClient.isAuthenticated
+        get() = authClient?.sessionClient?.isAuthenticated == true
     override val isExpired: Boolean
-        get() = authClient.sessionClient.tokens.isAccessTokenExpired
+        get() = authClient?.sessionClient?.tokens?.isAccessTokenExpired == true
     override val token: String?
-        get() = authClient.sessionClient.tokens.idToken
+        get() = authClient?.sessionClient?.tokens?.idToken
 
     fun setupAuthenticationClient() {
         authenticationClient =
@@ -77,7 +77,7 @@ class OktaAuth(applicationContext: Context) : AuthProvider {
 
     override suspend fun retrieveToken() =
         if (!isExpired) {
-            retrieveValidToken(authClient.sessionClient.tokens)
+            retrieveValidToken(authClient?.sessionClient?.tokens)
         } else {
             refreshToken()
         }
@@ -100,7 +100,7 @@ class OktaAuth(applicationContext: Context) : AuthProvider {
 
     override suspend fun authenticate(sessionToken: String): String = suspendCoroutine { cont ->
         if (!isAuthenticated) {
-            authClient.signIn(
+            authClient?.signIn(
                 sessionToken, null, object : RequestCallback<OktaResult, AuthorizationException> {
                     override fun onSuccess(result: OktaResult) {
                         cont.resumeWith(Result.success(sessionToken))
@@ -128,10 +128,10 @@ class OktaAuth(applicationContext: Context) : AuthProvider {
         }
     }
 
-    fun retrieveValidToken(tokens: Tokens) = tokens.idToken ?: throw TokenExpiredException()
+    fun retrieveValidToken(tokens: Tokens?) = tokens?.idToken ?: throw TokenExpiredException()
 
     private suspend fun refreshToken(): String = suspendCoroutine { cont ->
-        authClient.sessionClient.refreshToken(object :
+        authClient?.sessionClient?.refreshToken(object :
             RequestCallback<Tokens, AuthorizationException> {
             override fun onSuccess(result: Tokens) {
                 if (!result.isAccessTokenExpired) {
@@ -148,9 +148,10 @@ class OktaAuth(applicationContext: Context) : AuthProvider {
     }
 
     override suspend fun signOut() {
-        authClient.sessionClient.clear()
+        SharedPrefsHelper.setUserLoggedIn(false)
+        authClient?.sessionClient?.clear()
         return suspendCoroutine { cont ->
-            authClient.signOut(object : ResultCallback<Int, AuthorizationException> {
+            authClient?.signOut(object : ResultCallback<Int, AuthorizationException> {
                 override fun onSuccess(result: Int) {
                     setupAuthenticationClient()
                     cont.resumeWith(Result.success(Unit))

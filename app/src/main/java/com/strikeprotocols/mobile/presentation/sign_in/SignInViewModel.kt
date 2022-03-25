@@ -7,9 +7,8 @@ import javax.inject.Inject
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.viewModelScope
-import com.strikeprotocols.mobile.common.BaseWrapper
-import com.strikeprotocols.mobile.common.Resource
-import com.strikeprotocols.mobile.common.strikeLog
+import com.strikeprotocols.mobile.BuildConfig
+import com.strikeprotocols.mobile.common.*
 import com.strikeprotocols.mobile.data.*
 import com.strikeprotocols.mobile.data.CredentialsProviderImpl.Companion.CREDENTIAL_DATA_EMPTY
 import com.strikeprotocols.mobile.data.NoInternetException.Companion.NO_INTERNET_ERROR
@@ -39,19 +38,15 @@ class SignInViewModel @Inject constructor(
     fun attemptLogin() {
         if (state.signInButtonEnabled) {
             state = state.copy(loginResult = Resource.Loading(), loadingData = true)
-
-            val coroutineExceptionHandler = CoroutineExceptionHandler { _, _ ->
-                state = state.copy(
-                    loginResult = Resource.Error(
-                        NoInternetException().message ?: NO_INTERNET_ERROR
-                    )
-                )
-            }
-
-            viewModelScope.launch(Dispatchers.IO + coroutineExceptionHandler) {
-                val sessionToken = userRepository.retrieveSessionToken(state.email, state.password)
-                val token = userRepository.authenticate(sessionToken)
-                state = state.copy(loginResult = Resource.Success(token))
+            viewModelScope.launch(Dispatchers.IO) {
+                state = try {
+                    val sessionToken =
+                        userRepository.retrieveSessionToken(state.email, state.password)
+                    val token = userRepository.authenticate(sessionToken)
+                    state.copy(loginResult = Resource.Success(token))
+                } catch (e: Exception) {
+                    state.copy(loginResult = Resource.Error(e.message ?: NO_INTERNET_ERROR))
+                }
             }
         } else {
             state = state.copy(
@@ -61,39 +56,44 @@ class SignInViewModel @Inject constructor(
         }
     }
 
-    private fun attemptAddWalletSigner(walletSignerBody: WalletSigner) {
-        viewModelScope.launch(Dispatchers.IO) {
-            val addWalletSignerData = userRepository.addWalletSigner(walletSignerBody = walletSignerBody)
-        }
-    }
-
-    fun attemptGetWalletSigners() {
-        viewModelScope.launch(Dispatchers.IO) {
-            state = state.copy(walletSignersResult = Resource.Loading())
-            val walletSigners = userRepository.getWalletSigners()
-            state = state.copy(walletSignersResult = Resource.Success(walletSigners))
-        }
-    }
-
     private fun retrieveUserVerifyDetails() {
-        viewModelScope.launch(Dispatchers.IO) {
+        val coroutineExceptionHandler = CoroutineExceptionHandler { _, e ->
+            state = state.copy(
+                verifyUserResult = Resource.Error(
+                    e.message ?: NO_INTERNET_ERROR
+                )
+            )
+        }
 
+        viewModelScope.launch(Dispatchers.IO + coroutineExceptionHandler) {
             val verifyUserData = userRepository.verifyUser()
             state = state.copy(verifyUserResult = Resource.Success(verifyUserData))
 
             handleAuthFlow(verifyUserData)
         }
     }
+
+    fun setUserLoggedInSuccess() {
+        viewModelScope.launch { userRepository.setUserLoggedIn() }
+    }
     //endregion
 
     //region Reset Resource State
     fun resetLoginCallAndRetrieveUserInformation() {
-        state = state.copy(loginResult = Resource.Uninitialized)
+        resetLoginCall()
         retrieveUserVerifyDetails()
+    }
+
+    fun resetLoginCall() {
+        state = state.copy(loginResult = Resource.Uninitialized)
     }
 
     fun resetSaveCredential() {
         state = state.copy(saveCredential = Resource.Uninitialized)
+    }
+
+    fun resetRetrieveCredential() {
+        state = state.copy(retrieveCredential = Resource.Uninitialized)
     }
 
     fun resetVerifyCall() {
@@ -112,6 +112,10 @@ class SignInViewModel @Inject constructor(
         state = state.copy(keyValid = Resource.Uninitialized)
     }
 
+    fun resetShouldDisplaySmartLockDialog() {
+        state = state.copy(shouldDisplaySmartLockDialog = false)
+    }
+
     fun loadingFinished() {
         state = state.copy(loadingData = false)
     }
@@ -119,27 +123,37 @@ class SignInViewModel @Inject constructor(
 
     //region Smart Lock Save + Retrieval
     //
-    private fun launchSmartLockRetrieveFlow() {
+    fun launchSmartLockRetrieveFlow() {
         if (state.retrieveCredential !is Resource.Loading) {
             state = state.copy(retrieveCredential = Resource.Loading())
         }
     }
 
-    private fun launchSmartLockSaveFlow() {
+    fun launchSmartLockSaveFlow() {
         if (state.saveCredential !is Resource.Loading) {
             state = state.copy(saveCredential = Resource.Loading())
         }
     }
 
+    private fun launchSmartLockDialog() {
+        if(!state.shouldDisplaySmartLockDialog) {
+            state = state.copy(shouldDisplaySmartLockDialog = true)
+        }
+    }
+
     fun setCredentialLocallySaved() {
-        viewModelScope.launch {
-            userRepository.savePassword()
+        if(BuildConfig.DEBUG) {
+            viewModelScope.launch {
+                userRepository.savePassword(Base58.decode(ValidDummyData.decryptionKey))
+            }
         }
     }
 
     fun clearCredential() {
-        viewModelScope.launch {
-            userRepository.clearSavedPassword()
+        if(BuildConfig.DEBUG) {
+            viewModelScope.launch {
+                userRepository.clearSavedPassword()
+            }
         }
     }
 
@@ -173,13 +187,20 @@ class SignInViewModel @Inject constructor(
 
     fun saveCredentialFailed(exception: Exception?) {
         strikeLog(message = "Save credential failed: $exception")
-        state = state.copy(saveCredential = Resource.Error(
-            exception?.message ?: "DEFAULT_SAVE_CREDENTIAL_ERROR"))
+        viewModelScope.launch {
+            userRepository.clearGeneratedAuthData()
+            state = state.copy(
+                saveCredential = Resource.Error(
+                    exception?.message ?: "DEFAULT_SAVE_CREDENTIAL_ERROR"
+                )
+            )
+        }
     }
 
     fun retrieveCredentialFailed(exception: Exception?) {
         strikeLog(message = "Retrieve credential failed: $exception")
-        state = state.copy(retrieveCredential = Resource.Error(
+        state = state.copy(
+            retrieveCredential = Resource.Error(
             exception?.message ?: "DEFAULT_RETRIEVE_CREDENTIAL_ERROR"))
 
     }
@@ -254,7 +275,7 @@ class SignInViewModel @Inject constructor(
             state = state.copy(
                 initialAuthData = initialAuthData
             )
-            launchSmartLockSaveFlow()
+            launchSmartLockDialog()
         }
     }
     //endregion

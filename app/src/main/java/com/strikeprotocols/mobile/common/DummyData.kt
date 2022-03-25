@@ -39,9 +39,9 @@ fun generateWalletApprovalsDummyData() = WalletApproval(
 
 object ValidDummyData {
 
-    const val publicKey = "2HW9sVHwgirkdh5Exzoz7QAoQx3gC7LX2xJtF5ESHk87"
-    const val encryptedPrivateKey = "Ym8Aqz1xuYS7s6ahcodFVrJJoUaMLq54nxgXVQy1EtAxeKYbUvoaAsWDJr7tUKrQUxgTsEn2JVVQn7sQAB"
-    const val decryptionKey = "Md27x1XnpF166Te2PNrR9rGr2V3uTH9my4eRpzcUzvEfYZSE75ijbFq4TcdM"
+    const val publicKey = "9uBGYQoZr6otJGU1FkBiRuabZPJsH8XdMckeSz9Bk8kn"
+    const val encryptedPrivateKey = "4JtcoutZwfkKiu1vD5vNwNhCi6DgNZECSwCfESmY9VWYmoPn7VnzNnDnBYye2bEVk1TK8Pe2zaxDcFRdtF"
+    const val decryptionKey = "R6mtQEi3MXEDhDVjduAhfdfCDWVhfWYACwRmZU2caCY1f6fHdszEsoMqvPx5"
 
     //Secret Key for this flow: Md27x1XnpF166Te2PNrR9rGr2V3uTH9my4eRpzcUzvEfYZSE75ijbFq4TcdM
     fun generateVerifyUserDummyDataWithValidPublicKey() = VerifyUser(
@@ -62,14 +62,12 @@ object ValidDummyData {
         useStaticKey = false
     )
 
-    fun generateVerifyWalletSignersDummyDataWithValidPublicKey() = WalletSigners(
-        items = listOf<WalletSigner>(
+    fun generateVerifyWalletSignersDummyDataWithValidPublicKey() =
+        listOf<WalletSigner>(
             WalletSigner(
                 publicKey = publicKey,
                 encryptedKey = encryptedPrivateKey,
                 walletType = WalletSigner.WALLET_TYPE_SOLANA
             )
         )
-    )
-
 }

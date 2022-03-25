@@ -23,6 +23,7 @@ import com.strikeprotocols.mobile.presentation.approvals.ApprovalsListScreen
 import com.strikeprotocols.mobile.presentation.auth.AuthScreen
 import com.strikeprotocols.mobile.presentation.contact_strike.ContactStrikeScreen
 import com.strikeprotocols.mobile.presentation.sign_in.SignInScreen
+import com.strikeprotocols.mobile.presentation.splash.SplashScreen
 import com.strikeprotocols.mobile.ui.theme.BackgroundBlack
 import com.strikeprotocols.mobile.ui.theme.StrikeMobileTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -60,8 +61,13 @@ class MainActivity : FragmentActivity() {
                 Surface(color = BackgroundBlack) {
                     NavHost(
                         navController = navController,
-                        startDestination = Screen.ApprovalListRoute.route
+                        startDestination = Screen.SplashRoute.route
                     ) {
+                        composable(
+                            route = Screen.SplashRoute.route
+                        ) {
+                            SplashScreen(navController = navController)
+                        }
                         composable(
                             route = Screen.SignInRoute.route
                         ) {

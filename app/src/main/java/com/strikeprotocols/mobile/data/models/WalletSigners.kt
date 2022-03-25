@@ -9,7 +9,3 @@ data class WalletSigner(
         const val WALLET_TYPE_SOLANA = "Solana"
     }
 }
-
-data class WalletSigners(
-    val items: List<WalletSigner?>?
-)

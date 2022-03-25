@@ -34,6 +34,8 @@ import com.strikeprotocols.mobile.data.models.WalletApproval
 import com.strikeprotocols.mobile.presentation.components.StrikeSnackbar
 import com.strikeprotocols.mobile.ui.theme.*
 import kotlinx.coroutines.launch
+import com.strikeprotocols.mobile.ui.theme.BackgroundBlack
+import com.strikeprotocols.mobile.ui.theme.StrikeWhite
 
 @Composable
 fun ApprovalsListScreen(
@@ -63,6 +65,14 @@ fun ApprovalsListScreen(
             }
             viewModel.resetShouldShowErrorSnackbar()
         }
+        if (state.logoutResult is Resource.Success) {
+            navController.navigate(Screen.SplashRoute.route) {
+                popUpTo(Screen.ApprovalListRoute.route) {
+                    inclusive = true
+                }
+            }
+            viewModel.resetLogoutResource()
+        }
     }
 
     Scaffold(
@@ -74,7 +84,8 @@ fun ApprovalsListScreen(
                 title = stringResource(id = R.string.approvals),
                 onAppBarIconClick = {},
                 navigationIcon = Icons.Outlined.AccountCircle,
-                navigationIconContentDes = stringResource(id = R.string.content_des_account_icon)
+                navigationIconContentDes = stringResource(id = R.string.content_des_account_icon),
+                onLogout = viewModel::logout
             )
         },
         content = { innerPadding ->
@@ -109,6 +120,7 @@ fun ApprovalsListScreen(
 fun ApprovalsListTopAppBar(
     title: String,
     onAppBarIconClick: () -> Unit,
+    onLogout: () -> Unit,
     navigationIcon: ImageVector,
     navigationIconContentDes: String
 ) {
@@ -116,7 +128,12 @@ fun ApprovalsListTopAppBar(
         title = title,
         onAppBarIconClick = { onAppBarIconClick() },
         navigationIcon = navigationIcon,
-        navigationIconContentDes = navigationIconContentDes
+        navigationIconContentDes = navigationIconContentDes,
+        actions = {
+            TextButton(onClick = onLogout) {
+                Text(stringResource(R.string.logout), color = StrikeWhite)
+            }
+        }
     )
 }
 
