@@ -84,32 +84,42 @@ fun ApprovalDetails(
     timeRemainingInSeconds: Int
 ) {
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(BackgroundBlack)
-            .verticalScroll(rememberScrollState()),
-        horizontalAlignment = Alignment.CenterHorizontally
+        modifier = Modifier.fillMaxSize()
     ) {
         ApprovalDetailsTimer(timeRemainingInSeconds = timeRemainingInSeconds)
-        Spacer(modifier = Modifier.height(24.dp))
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(BackgroundBlack)
+                .verticalScroll(rememberScrollState()),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Spacer(modifier = Modifier.height(24.dp))
 
-        ApprovalDetailsTransferContent()
+            ApprovalDetailsTransferContent()
 
-        ApprovalDetailsButtons(
-            onApproveClicked = { onApproveClicked() },
-            onDenyClicked = { onDenyClicked() }
-        )
+            ApprovalDetailsButtons(
+                onApproveClicked = { onApproveClicked() },
+                onDenyClicked = { onDenyClicked() }
+            )
+        }
     }
 }
 
 @Composable
 fun ApprovalDetailsTimer(timeRemainingInSeconds: Int) {
+    val timerFinished = timeRemainingInSeconds <= 0
+
+    val background = if (timerFinished) DenyRed else SectionBlack
+    val text = if (timerFinished) stringResource(R.string.approval_expired) else
+        "${stringResource(id = R.string.expires_in)} ${convertSecondsIntoCountdownText(timeRemainingInSeconds)}"
+
     Text(
         modifier = Modifier
             .fillMaxWidth()
-            .background(SectionBlack)
+            .background(background)
             .padding(vertical = 6.dp),
-        text = "${stringResource(id = R.string.expires_in)} ${convertSecondsIntoCountdownText(timeRemainingInSeconds)}",
+        text = text,
         textAlign = TextAlign.Center,
         color = StrikeWhite,
         fontSize = 18.sp
