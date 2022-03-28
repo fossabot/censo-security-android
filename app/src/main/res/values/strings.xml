@@ -51,10 +51,13 @@
     <string name="pull_to_refresh">Pull down to refresh approvals</string>
     <string name="content_des_pull_to_refresh_icon">Pull down to refresh icon</string>
     <string name="snackbar_refresh_error">Something went wrong, please try again</string>
+
     <string name="failed_retrieve_cred_default">Failed to retrieve credential</string>
     <string name="logout">Sign Out</string>
 
     <string name="smart_lock_dialog_title">Google SmartLock</string>
     <string name="smart_lock_dialog_save">We need to save an important account credential to the cloud in case you lose access to this device in the future.\n\nYou will be prompted to save this credential to a Google account.\n\nYou will not be able to continue into the app until you save this credential to your preferred Google account.</string>
     <string name="smart_lock_save_fail">Unable to save account credential to Google Smart Lock.\nWe must save this credential to continue to the app.\n\nPlease try again.</string>
+
+    <string name="approval_expired">Approval Expired</string>
 </resources>

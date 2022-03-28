@@ -50,10 +50,14 @@ class ApprovalDetailsViewModel @Inject constructor(
 
     fun countdownApprovalOneSecond() {
         val approval = state.approval
-        if (approval?.approvalTimeoutInSeconds != null) {
-            val countdownApproval =
-                approval.copy(approvalTimeoutInSeconds = approval.approvalTimeoutInSeconds - 1)
-            state = state.copy(approval = countdownApproval)
+        approval?.approvalTimeoutInSeconds?.let { safeApprovalTimeoutInSeconds ->
+            if (safeApprovalTimeoutInSeconds > 0) {
+                val countdownApproval =
+                    approval.copy(approvalTimeoutInSeconds = approval.approvalTimeoutInSeconds - 1)
+                state = state.copy(approval = countdownApproval)
+            } else if (safeApprovalTimeoutInSeconds == 0) {
+                onStop()
+            }
         }
     }
 
