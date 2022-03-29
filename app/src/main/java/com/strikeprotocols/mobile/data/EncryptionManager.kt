@@ -29,11 +29,8 @@ interface EncryptionManager {
     fun encrypt(message: String, generatedPassword: ByteArray): String
     fun decrypt(encryptedMessage: String, generatedPassword: ByteArray): String
     fun generatePassword(): ByteArray
-    fun verifyKeyPair(
-        encryptedPrivateKey: String?,
-        publicKey: String?,
-        symmetricKey: String?
-    ): Boolean
+    fun verifyKeyPair(encryptedPrivateKey: String?, publicKey: String?, symmetricKey: String?): Boolean
+    fun regeneratePublicKey(encryptedPrivateKey: String, decryptionKey: String): String
 }
 
 class EncryptionManagerImpl : EncryptionManager {
@@ -122,6 +119,19 @@ class EncryptionManagerImpl : EncryptionManager {
         val decryptedPrivateKey = decrypt(encryptedPrivateKey, decryptionKey)
         val signData = signData(DATA_CHECK, decryptedPrivateKey)
         return verifyData(DATA_CHECK, signData, publicKey)
+    }
+
+    override fun regeneratePublicKey(encryptedPrivateKey: String, decryptionKey: String): String {
+        val generatedPassword = BaseWrapper.decode(decryptionKey)
+        val privateKey =
+            decrypt(encryptedMessage = encryptedPrivateKey, generatedPassword = generatedPassword)
+
+        val privateKeyByteArray = BaseWrapper.decode(privateKey)
+        val privateKeyParam = Ed25519PrivateKeyParameters(privateKeyByteArray.inputStream())
+
+        val publicKey = privateKeyParam.generatePublicKey()
+
+        return BaseWrapper.encode(publicKey.encoded)
     }
     //endregion
 

@@ -145,7 +145,6 @@ class MessagingService : FirebaseMessagingService() {
         }
 
         val notificationId = abs(Date().time.toInt())
-        strikeLog(message = notificationId.toString())
         notificationManager.notify(notificationId, notificationBuilder.build())
     }
 

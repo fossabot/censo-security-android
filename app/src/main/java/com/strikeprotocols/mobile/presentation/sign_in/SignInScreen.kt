@@ -89,6 +89,7 @@ fun SignInScreen(
     //region LaunchedEffect
     LaunchedEffect(key1 = state) {
         if (state.loginResult is Resource.Success) {
+            viewModel.setUserLoggedInSuccess()
             viewModel.resetLoginCallAndRetrieveUserInformation()
         }
 
@@ -107,6 +108,23 @@ fun SignInScreen(
             Toast.makeText(context, failedRetrieveMessage, Toast.LENGTH_SHORT).show()
             viewModel.loadingFinished()
             viewModel.resetRetrieveCredential()
+        }
+
+        if (state.regenerateData is Resource.Success) {
+            navController.navigate(Screen.ApprovalListRoute.route) {
+                popUpTo(Screen.SignInRoute.route) {
+                    inclusive = true
+                }
+            }
+            viewModel.setUserLoggedInSuccess()
+            viewModel.loadingFinished()
+            viewModel.resetRegenerateData()
+        }
+
+        if(state.regenerateData is Resource.Error) {
+            Toast.makeText(context, "FAILED TO REGENERATE DATA", Toast.LENGTH_LONG).show()
+            viewModel.loadingFinished()
+            viewModel.resetRegenerateData()
         }
 
         if (state.keyValid is Resource.Success) {
@@ -151,20 +169,6 @@ fun SignInScreen(
         verticalArrangement = Arrangement.SpaceBetween,
         modifier = Modifier
             .fillMaxSize()
-            .combinedClickable(
-                onClick = {
-                    if (BuildConfig.DEBUG) {
-                        Toast.makeText(context, "DEBUG: Setting Local Key", Toast.LENGTH_LONG).show()
-                        viewModel.setCredentialLocallySaved()
-                    }
-                },
-                onLongClick = {
-                    if (BuildConfig.DEBUG) {
-                        Toast.makeText(context, "DEBUG: Clearing Local Password", Toast.LENGTH_LONG).show()
-                        viewModel.clearCredential()
-                    }
-                },
-            )
             .padding(horizontal = 12.dp)
     ) {
         val passwordVisibility = remember { mutableStateOf(false) }

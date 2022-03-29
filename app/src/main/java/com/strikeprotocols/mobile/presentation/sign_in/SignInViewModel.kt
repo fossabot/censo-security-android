@@ -43,6 +43,7 @@ class SignInViewModel @Inject constructor(
                     val sessionToken =
                         userRepository.retrieveSessionToken(state.email, state.password)
                     val token = userRepository.authenticate(sessionToken)
+                    userRepository.saveUserEmail(state.email)
                     state.copy(loginResult = Resource.Success(token))
                 } catch (e: Exception) {
                     state.copy(loginResult = Resource.Error(e.message ?: NO_INTERNET_ERROR))
@@ -74,7 +75,10 @@ class SignInViewModel @Inject constructor(
     }
 
     fun setUserLoggedInSuccess() {
-        viewModelScope.launch { userRepository.setUserLoggedIn() }
+        viewModelScope.launch {
+            userRepository.saveUserEmail(state.email)
+            userRepository.setUserLoggedIn()
+        }
     }
     //endregion
 
@@ -94,6 +98,10 @@ class SignInViewModel @Inject constructor(
 
     fun resetRetrieveCredential() {
         state = state.copy(retrieveCredential = Resource.Uninitialized)
+    }
+
+    fun resetRegenerateData() {
+        state = state.copy(regenerateData = Resource.Uninitialized)
     }
 
     fun resetVerifyCall() {
@@ -141,24 +149,7 @@ class SignInViewModel @Inject constructor(
         }
     }
 
-    fun setCredentialLocallySaved() {
-        if(BuildConfig.DEBUG) {
-            viewModelScope.launch {
-                userRepository.savePassword(Base58.decode(ValidDummyData.decryptionKey))
-            }
-        }
-    }
-
-    fun clearCredential() {
-        if(BuildConfig.DEBUG) {
-            viewModelScope.launch {
-                userRepository.clearSavedPassword()
-            }
-        }
-    }
-
     fun saveCredentialSuccess() {
-        strikeLog(message = "Save credential request success")
         state = state.copy(saveCredential = Resource.Success(Unit))
         viewModelScope.launch {
             state.initialAuthData?.let { safeInitialAuthData ->
@@ -168,7 +159,6 @@ class SignInViewModel @Inject constructor(
     }
 
     fun retrieveCredentialSuccess(credential: String?) {
-        strikeLog(message = "Retrieve credential request: $credential")
         state = state.copy(retrieveCredential = Resource.Success(credential))
 
         if (credential != null) {
@@ -186,7 +176,6 @@ class SignInViewModel @Inject constructor(
     }
 
     fun saveCredentialFailed(exception: Exception?) {
-        strikeLog(message = "Save credential failed: $exception")
         viewModelScope.launch {
             userRepository.clearGeneratedAuthData()
             state = state.copy(
@@ -198,7 +187,6 @@ class SignInViewModel @Inject constructor(
     }
 
     fun retrieveCredentialFailed(exception: Exception?) {
-        strikeLog(message = "Retrieve credential failed: $exception")
         state = state.copy(
             retrieveCredential = Resource.Error(
             exception?.message ?: "DEFAULT_RETRIEVE_CREDENTIAL_ERROR"))
@@ -213,6 +201,7 @@ class SignInViewModel @Inject constructor(
         val userAuthFlowState = getUserAuthFlowState(
             verifyUser = verifyUser
         )
+
         respondToUserAuthFlow(userAuthFlow = userAuthFlowState)
     }
 
@@ -224,8 +213,6 @@ class SignInViewModel @Inject constructor(
         if(!publicKeysPresent && savedEncryption.isEmpty()) {
             return UserAuthFlow.FIRST_LOGIN
         }  else if (!publicKeysPresent) {
-                // todo: we need to regenerate data here and send up to backend
-                // https://linear.app/strike-android/issue/STR-71/regenerate-key-data-if-we-have-local-key-saved-on-device-and-backend
             return UserAuthFlow.LOCAL_KEY_PRESENT_NO_BACKEND_KEYS
         }
 
@@ -246,7 +233,6 @@ class SignInViewModel @Inject constructor(
     }
 
     private fun respondToUserAuthFlow(userAuthFlow: UserAuthFlow) {
-        strikeLog(message = "USER AUTH FLOW RECEIVED: $userAuthFlow")
         when (userAuthFlow) {
             UserAuthFlow.FIRST_LOGIN -> {
                 handleFirstTimeLoginAuthFlow()
@@ -261,8 +247,19 @@ class SignInViewModel @Inject constructor(
                 state = state.copy(shouldAbortUserFromAuthFlow = true)
             }
             UserAuthFlow.LOCAL_KEY_PRESENT_NO_BACKEND_KEYS -> {
-                //todo: Regenerate data
-                // https://linear.app/strike-android/issue/STR-71/regenerate-key-data-if-we-have-local-key-saved-on-device-and-backend
+                regenerateData()
+            }
+        }
+    }
+
+    private fun regenerateData() {
+        state = state.copy(regenerateData = Resource.Loading())
+        viewModelScope.launch {
+            state = try {
+                val walletSigner = userRepository.regenerateDataAndUploadToBackend()
+                state.copy(regenerateData = Resource.Success(walletSigner))
+            } catch (e: Exception) {
+                state.copy(regenerateData = Resource.Error(e.message ?: ""))
             }
         }
     }

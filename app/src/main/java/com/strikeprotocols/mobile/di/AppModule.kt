@@ -64,7 +64,7 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideSecurePrefs(@ApplicationContext applicationContext: Context): SecurePreferences {
-        return StrikeEncryptedSharedPreferences(applicationContext)
+    fun provideSecurePrefs(): SecurePreferences {
+        return SecurePreferencesImpl()
     }
 }
