@@ -1,6 +1,5 @@
 package com.strikeprotocols.mobile.presentation.auth
 
-import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -8,7 +7,6 @@ import javax.inject.Inject
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.viewModelScope
-import com.strikeprotocols.mobile.common.strikeLog
 import com.strikeprotocols.mobile.data.UserRepository
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -20,12 +18,6 @@ class AuthViewModel @Inject constructor(
 
     var state by mutableStateOf(AuthState())
         private set
-
-    init {
-        viewModelScope.launch {
-            strikeLog(message = "Saved password to device: ${userRepository.getSavedPassword()}")
-        }
-    }
 
     fun goBackToSetup() {
         state = state.copy(authStep = AuthStep.SETUP)

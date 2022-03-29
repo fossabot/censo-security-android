@@ -3,6 +3,7 @@ package com.strikeprotocols.mobile.data
 import com.strikeprotocols.mobile.common.*
 import com.strikeprotocols.mobile.data.models.VerifyUser
 import com.strikeprotocols.mobile.data.models.WalletSigner
+import com.strikeprotocols.mobile.data.models.WalletSigner.Companion.WALLET_TYPE_SOLANA
 
 interface UserRepository {
     suspend fun authenticate(sessionToken: String): String
@@ -14,11 +15,13 @@ interface UserRepository {
     suspend fun saveGeneratedPassword(generatedPassword: ByteArray)
     suspend fun getSavedPassword(): String
     suspend fun clearSavedPassword()
-    suspend fun savePassword(generatedPassword: ByteArray)
     suspend fun userLoggedIn(): Boolean
     suspend fun setUserLoggedIn()
     suspend fun logOut() : Boolean
     suspend fun clearGeneratedAuthData()
+    suspend fun regenerateDataAndUploadToBackend(): WalletSigner
+    suspend fun retrieveUserEmail(): String
+    suspend fun saveUserEmail(email: String)
     suspend fun doesUserHaveValidLocalKey(
         verifyUser: VerifyUser,
         walletSigners: List<WalletSigner?>
@@ -50,18 +53,30 @@ class UserRepositoryImpl(
         return api.addWalletSigner(walletSignerBody = walletSignerBody)
     }
 
-    override suspend fun saveGeneratedPassword(generatedPassword: ByteArray) =
-        securePreferences.saveGeneratedPassword(generatedPassword = generatedPassword)
+    override suspend fun saveGeneratedPassword(generatedPassword: ByteArray) {
+        val userEmail = retrieveUserEmail()
+        if (userEmail.isNotEmpty()) {
+            securePreferences.saveGeneratedPassword(
+                email = userEmail, generatedPassword = generatedPassword
+            )
+        }
+    }
 
-    override suspend fun getSavedPassword(): String = securePreferences.retrieveGeneratedPassword()
+    override suspend fun getSavedPassword(): String {
+        val userEmail = retrieveUserEmail()
+        return securePreferences.retrieveGeneratedPassword(email = userEmail)
+    }
 
     //todo: add exception logic in here
     // str-68: https://linear.app/strike-android/issue/STR-68/add-exception-logic-to-initial-auth-data-in-userrepository
     override suspend fun generateInitialAuthData(): InitialAuthData {
+        val userEmail = retrieveUserEmail()
+
         val keyPair = encryptionManager.createKeyPair()
         val generatedPassword = encryptionManager.generatePassword()
 
-        securePreferences.saveGeneratedPassword(generatedPassword)
+        securePreferences.saveGeneratedPassword(
+            email = userEmail, generatedPassword = generatedPassword)
 
         val encryptedPrivateKey =
             encryptionManager.encrypt(
@@ -69,7 +84,7 @@ class UserRepositoryImpl(
                 generatedPassword = generatedPassword
             )
 
-        securePreferences.savePrivateKey(encryptedPrivateKey)
+        securePreferences.savePrivateKey(email = userEmail, privateKey = encryptedPrivateKey)
 
         return InitialAuthData(
             walletSignerBody = WalletSigner(
@@ -82,13 +97,55 @@ class UserRepositoryImpl(
     }
 
     override suspend fun clearGeneratedAuthData() {
-        securePreferences.clearPrivateKey()
-        securePreferences.clearSavedPassword()
+        val userEmail = retrieveUserEmail()
+        saveUserEmail("")
+        securePreferences.clearPrivateKey(email = userEmail)
+        securePreferences.clearSavedPassword(email = userEmail)
     }
 
-    override suspend fun clearSavedPassword() = securePreferences.clearSavedPassword()
-    override suspend fun savePassword(generatedPassword: ByteArray) {
-        securePreferences.saveGeneratedPassword(generatedPassword)
+    override suspend fun regenerateDataAndUploadToBackend() : WalletSigner {
+        val userEmail = retrieveUserEmail()
+        val encryptedKey = securePreferences.retrievePrivateKey(userEmail)
+        val decryptionKey = securePreferences.retrieveGeneratedPassword(userEmail)
+
+        val publicKey = encryptionManager.regeneratePublicKey(
+            encryptedPrivateKey = encryptedKey,
+            decryptionKey = decryptionKey
+        )
+
+        val walletSigner = WalletSigner(
+            publicKey = publicKey,
+            encryptedKey = encryptedKey,
+            walletType = WALLET_TYPE_SOLANA
+        )
+
+        return walletSigner
+
+        //api.addWalletSigner(walletSigner)
+    }
+
+    override suspend fun retrieveUserEmail(): String {
+        val email = SharedPrefsHelper.retrieveUserEmail()
+
+        if(email.isNotEmpty()) return email
+
+        return try {
+            val oktaEmail = authProvider.getUserEmail()
+            ""
+        } catch (e: Exception) {
+            ""
+        }
+    }
+
+    override suspend fun saveUserEmail(email: String) {
+        SharedPrefsHelper.saveUserEmail(email)
+    }
+
+    override suspend fun clearSavedPassword() {
+        val userEmail = retrieveUserEmail()
+        if(userEmail.isNotEmpty()) {
+            securePreferences.clearSavedPassword(email = userEmail)
+        }
     }
 
     override suspend fun userLoggedIn() = SharedPrefsHelper.isUserLoggedIn()
@@ -107,7 +164,8 @@ class UserRepositoryImpl(
         verifyUser: VerifyUser,
         walletSigners: List<WalletSigner?>
     ): Boolean {
-        val generatedPassword = securePreferences.retrieveGeneratedPassword()
+        val userEmail = retrieveUserEmail()
+        val generatedPassword = securePreferences.retrieveGeneratedPassword(email = userEmail)
 
         if (generatedPassword.isEmpty()) {
             return false
@@ -130,7 +188,9 @@ class UserRepositoryImpl(
 
                 if (validPair) {
                     walletSigner.encryptedKey?.let { encryptedKey ->
-                        securePreferences.savePrivateKey(encryptedKey)
+                        securePreferences.savePrivateKey(
+                            email = userEmail, privateKey = encryptedKey
+                        )
                     }
                     return true
                 }

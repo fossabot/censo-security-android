@@ -7,6 +7,7 @@ import com.okta.authn.sdk.client.AuthenticationClient
 import com.okta.authn.sdk.client.AuthenticationClients
 import com.okta.oidc.*
 import com.okta.oidc.clients.AuthClient
+import com.okta.oidc.net.response.UserInfo
 import com.okta.oidc.storage.SharedPreferenceStorage
 import com.okta.oidc.util.AuthorizationException
 import com.strikeprotocols.mobile.BuildConfig
@@ -14,7 +15,9 @@ import com.strikeprotocols.mobile.data.OktaAuth.Companion.AUTH_FAILED
 import com.strikeprotocols.mobile.data.OktaAuth.Companion.ISSUER_URL
 import com.strikeprotocols.mobile.data.OktaAuth.Companion.LOGIN_REDIRECT_URI
 import com.strikeprotocols.mobile.data.OktaAuth.Companion.LOGOUT_REDIRECT_URI
+import com.strikeprotocols.mobile.data.OktaAuth.Companion.NO_EMAIL_EXCEPTION
 import com.strikeprotocols.mobile.data.OktaAuth.Companion.OIDC_SCOPES
+import com.strikeprotocols.mobile.data.OktaAuth.Companion.OKTA_EMAIL_KEY
 import kotlin.coroutines.suspendCoroutine
 import com.okta.oidc.results.Result as OktaResult
 
@@ -30,6 +33,7 @@ interface AuthProvider {
     suspend fun getSessionToken(username: String, password: String): String
     suspend fun authenticate(sessionToken: String): String
     suspend fun signOut()
+    suspend fun getUserEmail(): String
 
     //UserState Notifying Functionality
     fun setUserState(userState: UserState)
@@ -73,6 +77,25 @@ class OktaAuth(applicationContext: Context) : AuthProvider {
             .withStorage(SharedPreferenceStorage(applicationContext))
             .setRequireHardwareBackedKeyStore(!BuildConfig.DEBUG)
             .create()
+    }
+
+    override suspend fun getUserEmail(): String = suspendCoroutine { cont ->
+        authClient?.sessionClient?.getUserProfile(object :
+            RequestCallback<UserInfo, AuthorizationException> {
+            override fun onSuccess(result: UserInfo) {
+                if (result.get(OKTA_EMAIL_KEY) != null) {
+                    cont.resumeWith(Result.success(result[OKTA_EMAIL_KEY] as String))
+                } else {
+                    cont.resumeWith(Result.failure(NO_EMAIL_EXCEPTION))
+                }
+            }
+
+            override fun onError(error: String?, exception: AuthorizationException?) {
+                cont.resumeWith(
+                    Result.failure(exception ?: NO_EMAIL_EXCEPTION)
+                )
+            }
+        })
     }
 
     override suspend fun retrieveToken() =
@@ -149,6 +172,7 @@ class OktaAuth(applicationContext: Context) : AuthProvider {
 
     override suspend fun signOut() {
         SharedPrefsHelper.setUserLoggedIn(false)
+        SharedPrefsHelper.clearEmail()
         authClient?.sessionClient?.clear()
         return suspendCoroutine { cont ->
             authClient?.signOut(object : ResultCallback<Int, AuthorizationException> {
@@ -192,6 +216,10 @@ class OktaAuth(applicationContext: Context) : AuthProvider {
     object Companion {
         const val SUCCESS_STATUS = "SUCCESS"
         const val AUTH_FAILED = "AUTH_FAILED"
+
+        const val OKTA_EMAIL_KEY = "email"
+
+        val NO_EMAIL_EXCEPTION = Exception("Email Not Available")
 
         private const val REDIRECT_URI = "${BuildConfig.CORE_APP_ID}${BuildConfig.REDIRECT_SUFFIX}"
         const val LOGIN_REDIRECT_URI = "$REDIRECT_URI:/login"

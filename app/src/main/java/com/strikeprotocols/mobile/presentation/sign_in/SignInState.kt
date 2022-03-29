@@ -7,8 +7,8 @@ import com.strikeprotocols.mobile.data.models.VerifyUser
 import com.strikeprotocols.mobile.data.models.WalletSigner
 
 data class SignInState(
-    val email: String = "",
-    val password: String = "",
+    val email: String = "sharris@blue.rock",
+    val password: String = "ez4GK8testing",
     val emailErrorEnabled: Boolean = false,
     val passwordErrorEnabled: Boolean = false,
     val initialAuthData: InitialAuthData? = null,
@@ -23,7 +23,8 @@ data class SignInState(
     val addWalletSignerResult: Resource<WalletSigner> = Resource.Uninitialized,
     val saveCredential: Resource<Unit> = Resource.Uninitialized,
     val retrieveCredential: Resource<String> = Resource.Uninitialized,
-    val keyValid: Resource<Unit> = Resource.Uninitialized
+    val keyValid: Resource<Unit> = Resource.Uninitialized,
+    val regenerateData: Resource<WalletSigner> = Resource.Uninitialized
 ) {
     val signInButtonEnabled = email.isNotEmpty() && password.isNotEmpty()
 
