@@ -66,6 +66,8 @@ android {
             resValue "string", "app_name", appName
             minifyEnabled true
             buildConfigField "String", "BASE_URL", "\"\""
+            buildConfigField "String", "SOLANA_URL", "\"https://solana-validator.strikeprotocols.com\""
+            buildConfigField "String", "SOLANA_COMMITMENT", "\"finalized\""
             buildConfigField "String", "OKTA_CLIENT_ID", "\"0oa7ajzug1y8O0CPe357\""
             buildConfigField "String", "OKTA_ISSUER_ID", "\"aus7834x2w3eqeZSr357\""
             buildConfigField "String", "REDIRECT_SUFFIX", "\"\""
@@ -76,6 +78,8 @@ android {
             applicationIdSuffix ".demo"
             minifyEnabled true
             buildConfigField "String", "BASE_URL", "\"\""
+            buildConfigField "String", "SOLANA_URL", "\"https://solana-validator-demo1.strikeprotocols.com\""
+            buildConfigField "String", "SOLANA_COMMITMENT", "\"confirmed\""
             buildConfigField "String", "OKTA_CLIENT_ID", "\"0oa7ajsmclS0GyzMw357\""
             buildConfigField "String", "OKTA_ISSUER_ID", "\"aus7834x2w3eqeZSr357\""
             buildConfigField "String", "REDIRECT_SUFFIX", "\"-demo\""
@@ -86,6 +90,8 @@ android {
             resValue "string", "app_name", "$appName (Demo2)"
             applicationIdSuffix ".demo2"
             buildConfigField "String", "BASE_URL", "\"\""
+            buildConfigField "String", "SOLANA_URL", "\"https://solana-validator-demo2.strikeprotocols.com\""
+            buildConfigField "String", "SOLANA_COMMITMENT", "\"confirmed\""
             buildConfigField "String", "OKTA_CLIENT_ID", "\"0oa7ajsmclS0GyzMw357\""
             buildConfigField "String", "REDIRECT_SUFFIX", "\"-demo-2\""
         }
@@ -94,6 +100,8 @@ android {
             applicationIdSuffix ".prerelease"
             minifyEnabled true
             buildConfigField "String", "BASE_URL", "\"https://brooklyn-prerelease.strikeprotocols.com/\""
+            buildConfigField "String", "SOLANA_URL", "\"https://solana-validator-prerelease.strikeprotocols.com\""
+            buildConfigField "String", "SOLANA_COMMITMENT", "\"confirmed\""
             buildConfigField "String", "OKTA_CLIENT_ID", "\"0oa73mddnlx5MMo7j357\""
             buildConfigField "String", "OKTA_ISSUER_ID", "\"aus783fl9oAoVKJv7357\""
             buildConfigField "String", "REDIRECT_SUFFIX", "\"-dev\""

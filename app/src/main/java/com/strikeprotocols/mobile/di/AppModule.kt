@@ -29,6 +29,12 @@ object AppModule {
 
     @Provides
     @Singleton
+    fun provideSolanaService(): SolanaApiService {
+        return SolanaApiService.create()
+    }
+
+    @Provides
+    @Singleton
     fun provideUserRepository(
         authProvider: AuthProvider,
         api: BrooklynApiService,
@@ -40,8 +46,8 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideApprovalsRepository(api: BrooklynApiService): ApprovalsRepository {
-        return ApprovalsRepositoryImpl(api)
+    fun provideApprovalsRepository(api: BrooklynApiService, solanaApiService: SolanaApiService): ApprovalsRepository {
+        return ApprovalsRepositoryImpl(api, solanaApiService)
     }
 
     @Provides
