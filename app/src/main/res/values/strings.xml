@@ -60,4 +60,5 @@
     <string name="smart_lock_save_fail">Unable to save account credential to Google Smart Lock.\nWe must save this credential to continue to the app.\n\nPlease try again.</string>
 
     <string name="approval_expired">Approval Expired</string>
+    <string name="confirm">Confirm</string>
 </resources>

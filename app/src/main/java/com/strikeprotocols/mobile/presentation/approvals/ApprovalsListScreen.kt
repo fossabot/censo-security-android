@@ -31,6 +31,7 @@ import com.strikeprotocols.mobile.common.strikeLog
 import com.strikeprotocols.mobile.presentation.Screen
 import com.strikeprotocols.mobile.presentation.components.StrikeTopAppBar
 import com.strikeprotocols.mobile.data.models.WalletApproval
+import com.strikeprotocols.mobile.presentation.approval_detail.ConfirmDispositionAlertDialog
 import com.strikeprotocols.mobile.presentation.components.StrikeSnackbar
 import com.strikeprotocols.mobile.ui.theme.*
 import kotlinx.coroutines.launch
@@ -93,8 +94,12 @@ fun ApprovalsListScreen(
                 isRefreshing = state.loadingData,
                 onRefresh = viewModel::refreshData,
                 onApproveClicked = {
-                    //TODO Connect to VM
                     strikeLog(message = "Approve clicked")
+                    viewModel.setShouldDisplayConfirmDispositionDialog(
+                        isApproving = true,
+                        dialogTitle = "Confirm Approval",
+                        dialogText = "Please confirm you want to approve this transfer"
+                    )
                 },
                 onMoreInfoClicked = { approval ->
                     approval?.let { safeApproval ->
@@ -111,6 +116,23 @@ fun ApprovalsListScreen(
                     snackbarHostState = scaffoldState.snackbarHostState,
                     modifier = Modifier.align(Alignment.BottomCenter)
                 )
+            }
+
+            if (state.shouldDisplayConfirmDispositionDialog != null) {
+                state.shouldDisplayConfirmDispositionDialog.let { safeDialogDetails ->
+                    ConfirmDispositionAlertDialog(
+                        dialogTitle = safeDialogDetails.dialogTitle,
+                        dialogText = safeDialogDetails.dialogText,
+                        onConfirm = {
+                            strikeLog(message = "Confirming disposition")
+                            viewModel.resetShouldDisplayConfirmDispositionDialog()
+                        },
+                        onDismiss = {
+                            strikeLog(message = "Dismissing dialog")
+                            viewModel.resetShouldDisplayConfirmDispositionDialog()
+                        }
+                    )
+                }
             }
         }
     )

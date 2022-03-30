@@ -23,6 +23,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.strikeprotocols.mobile.R
 import com.strikeprotocols.mobile.common.convertSecondsIntoCountdownText
+import com.strikeprotocols.mobile.common.generateWalletApprovalsDummyData
 import com.strikeprotocols.mobile.common.strikeLog
 import com.strikeprotocols.mobile.data.models.WalletApproval
 import com.strikeprotocols.mobile.presentation.approval_detail.approval_type_components.ApprovalDetailsTransferContent
@@ -54,10 +55,40 @@ fun ApprovalDetailsScreen(
         },
         content = {
             ApprovalDetails(
-                onApproveClicked = { strikeLog(message = "Approve clicked") },
-                onDenyClicked = { strikeLog(message = "Deny clicked") },
+                onApproveClicked = {
+                    viewModel.setShouldDisplayConfirmDispositionDialog(
+                        isApproving = true,
+                        dialogTitle = "Confirm Approval",
+                        dialogText = "Please confirm you want to approve this transfer"
+                    )
+                },
+                onDenyClicked = {
+                    viewModel.setShouldDisplayConfirmDispositionDialog(
+                        isApproving = false,
+                        dialogTitle = "Confirm Deny",
+                        dialogText = "Please confirm you want to deny this transfer"
+                    )
+                },
                 timeRemainingInSeconds = state.approval?.approvalTimeoutInSeconds ?: 0
             )
+
+            if (state.shouldDisplayConfirmDispositionDialog != null) {
+                state.shouldDisplayConfirmDispositionDialog.let { safeDialogDetails ->
+                    //TODO Refine this after the flow is done
+                    ConfirmDispositionAlertDialog(
+                        dialogTitle = safeDialogDetails.dialogTitle,
+                        dialogText = safeDialogDetails.dialogText,
+                        onConfirm = {
+                            strikeLog(message = "Confirming disposition")
+                            viewModel.resetShouldDisplayConfirmDispositionDialog()
+                        },
+                        onDismiss = {
+                            strikeLog(message = "Dismissing dialog")
+                            viewModel.resetShouldDisplayConfirmDispositionDialog()
+                        }
+                    )
+                }
+            }
         }
     )
 }
@@ -163,6 +194,47 @@ fun ApprovalDetailsButtons(
             fontSize = 24.sp
         )
     }
+}
+
+@Composable
+fun ConfirmDispositionAlertDialog(
+    dialogTitle: String,
+    dialogText: String,
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        backgroundColor = UnfocusedGrey,
+        onDismissRequest = onDismiss,
+        title = {
+            Text(
+                text = dialogTitle,
+                color = StrikeWhite,
+                fontSize = 24.sp
+            )
+        },
+        text = {
+            Text(
+                text = dialogText,
+                color = StrikeWhite,
+                fontSize = 18.sp
+            )
+        },
+        dismissButton = {
+            TextButton(
+                onClick = onDismiss
+            ) {
+                Text(text = stringResource(R.string.dismiss))
+            }
+        },
+        confirmButton = {
+            TextButton(
+                onClick = onConfirm
+            ) {
+                Text(text = stringResource(R.string.confirm))
+            }
+        }
+    )
 }
 
 //region Preview
