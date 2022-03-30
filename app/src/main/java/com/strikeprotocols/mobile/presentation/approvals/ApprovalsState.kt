@@ -7,6 +7,7 @@ import com.strikeprotocols.mobile.presentation.approval_detail.ConfirmDispositio
 data class ApprovalsState(
     val shouldShowErrorSnackbar: Boolean = false,
     val shouldDisplayConfirmDispositionDialog: ConfirmDispositionDialogDetails? = null,
+    val triggerBioPrompt: Boolean = false,
 
     //Async Data
     val walletApprovalsResult: Resource<List<WalletApproval?>> = Resource.Uninitialized,

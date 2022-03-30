@@ -1,5 +1,7 @@
 package com.strikeprotocols.mobile.presentation.approval_detail
 
+import android.widget.Toast
+import androidx.biometric.BiometricPrompt
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -15,13 +17,18 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.icons.rounded.ArrowBack
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.fragment.app.FragmentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.strikeprotocols.mobile.R
+import com.strikeprotocols.mobile.common.BiometricUtil.createBioPrompt
+import com.strikeprotocols.mobile.common.BiometricUtil.getBasicBiometricPromptBuilder
 import com.strikeprotocols.mobile.common.convertSecondsIntoCountdownText
 import com.strikeprotocols.mobile.common.generateWalletApprovalsDummyData
 import com.strikeprotocols.mobile.common.strikeLog
@@ -29,6 +36,7 @@ import com.strikeprotocols.mobile.data.models.WalletApproval
 import com.strikeprotocols.mobile.presentation.approval_detail.approval_type_components.ApprovalDetailsTransferContent
 import com.strikeprotocols.mobile.presentation.components.StrikeTopAppBar
 import com.strikeprotocols.mobile.ui.theme.*
+import kotlin.concurrent.fixedRateTimer
 
 @Composable
 fun ApprovalDetailsScreen(
@@ -37,10 +45,34 @@ fun ApprovalDetailsScreen(
     approval: WalletApproval?
 ) {
     val state = viewModel.state
+    val context = LocalContext.current as FragmentActivity
+
+    fun showToast(text: String) = Toast.makeText(context, text, Toast.LENGTH_SHORT).show()
+
+    val promptInfo = getBasicBiometricPromptBuilder(context).build()
+
+    val bioPrompt = createBioPrompt(
+        fragmentActivity = context,
+        onSuccess = {
+            showToast("Authentication success")
+            //Let VM handle this
+        },
+        onFail = {
+            showToast("Authentication failed")
+            //Let VM handle this
+        }
+    )
 
     DisposableEffect(key1 = viewModel) {
         viewModel.onStart(approval)
         onDispose { viewModel.onStop() }
+    }
+
+    LaunchedEffect(key1 = state) {
+        if (state.triggerBioPrompt) {
+            viewModel.resetPromptTrigger()
+            bioPrompt.authenticate(promptInfo)
+        }
     }
 
     Scaffold(
@@ -81,6 +113,7 @@ fun ApprovalDetailsScreen(
                         onConfirm = {
                             strikeLog(message = "Confirming disposition")
                             viewModel.resetShouldDisplayConfirmDispositionDialog()
+                            viewModel.setPromptTrigger()
                         },
                         onDismiss = {
                             strikeLog(message = "Dismissing dialog")

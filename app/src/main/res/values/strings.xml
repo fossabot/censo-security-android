@@ -61,4 +61,6 @@
 
     <string name="approval_expired">Approval Expired</string>
     <string name="confirm">Confirm</string>
+    <string name="biometry_check">Biometric Check</string>
+    <string name="performing_biometry_check">Performing biometric check before submitting disposition</string>
 </resources>

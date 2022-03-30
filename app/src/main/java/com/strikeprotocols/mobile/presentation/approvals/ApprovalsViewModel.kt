@@ -75,6 +75,14 @@ class ApprovalsViewModel @Inject constructor(
         state = state.copy(shouldDisplayConfirmDispositionDialog = null)
     }
 
+    fun setPromptTrigger() {
+        state = state.copy(triggerBioPrompt = true)
+    }
+
+    fun resetPromptTrigger() {
+        state = state.copy(triggerBioPrompt = false)
+    }
+
     fun resetShouldShowErrorSnackbar() {
         state = state.copy(shouldShowErrorSnackbar = false)
     }

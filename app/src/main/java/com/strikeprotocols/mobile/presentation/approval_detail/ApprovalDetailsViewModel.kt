@@ -56,6 +56,14 @@ class ApprovalDetailsViewModel @Inject constructor(
         state = state.copy(shouldDisplayConfirmDispositionDialog = null)
     }
 
+    fun setPromptTrigger() {
+        state = state.copy(triggerBioPrompt = true)
+    }
+
+    fun resetPromptTrigger() {
+        state = state.copy(triggerBioPrompt = false)
+    }
+
     private fun startCountDown() {
         timer = object : CountDownTimer(Long.MAX_VALUE, UPDATE_COUNTDOWN) {
             override fun onTick(millisecs: Long) {
