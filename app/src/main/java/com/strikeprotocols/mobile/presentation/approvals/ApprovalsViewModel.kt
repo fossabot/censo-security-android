@@ -7,9 +7,11 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.strikeprotocols.mobile.common.Resource
+import com.strikeprotocols.mobile.common.generateWalletApprovalsDummyData
 import com.strikeprotocols.mobile.data.ApprovalsRepository
 import com.strikeprotocols.mobile.data.UserRepository
 import com.strikeprotocols.mobile.data.models.WalletApproval
+import com.strikeprotocols.mobile.presentation.approval_detail.ConfirmDispositionDialogDetails
 import com.strikeprotocols.mobile.presentation.approvals.ApprovalsViewModel.Companion.UPDATE_COUNTDOWN
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
@@ -54,6 +56,25 @@ class ApprovalsViewModel @Inject constructor(
         timer?.start()
     }
 
+    fun setShouldDisplayConfirmDispositionDialog(
+        isApproving: Boolean,
+        dialogTitle: String,
+        dialogText: String
+    ) {
+        val dialogDetails = ConfirmDispositionDialogDetails(
+            shouldDisplay = true,
+            isApproving = isApproving,
+            dialogTitle = dialogTitle,
+            dialogText = dialogText
+        )
+
+        state = state.copy(shouldDisplayConfirmDispositionDialog = dialogDetails)
+    }
+
+    fun resetShouldDisplayConfirmDispositionDialog() {
+        state = state.copy(shouldDisplayConfirmDispositionDialog = null)
+    }
+
     fun resetShouldShowErrorSnackbar() {
         state = state.copy(shouldShowErrorSnackbar = false)
     }
@@ -83,7 +104,8 @@ class ApprovalsViewModel @Inject constructor(
                 val walletApprovals = approvalsRepository.getWalletApprovals()
                 state.copy(
                     walletApprovalsResult = Resource.Success(walletApprovals),
-                    approvals = walletApprovals
+                    //TODO Revert this back to real data after flow is done
+                    approvals = listOf(generateWalletApprovalsDummyData())//walletApprovals
                 )
             } catch (e: Exception) {
                 state.copy(

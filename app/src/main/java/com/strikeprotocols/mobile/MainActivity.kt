@@ -61,7 +61,7 @@ class MainActivity : FragmentActivity() {
                 Surface(color = BackgroundBlack) {
                     NavHost(
                         navController = navController,
-                        startDestination = Screen.SplashRoute.route
+                        startDestination = Screen.ApprovalListRoute.route
                     ) {
                         composable(
                             route = Screen.SplashRoute.route

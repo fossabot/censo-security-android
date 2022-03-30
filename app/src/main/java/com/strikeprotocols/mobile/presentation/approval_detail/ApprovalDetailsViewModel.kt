@@ -37,6 +37,25 @@ class ApprovalDetailsViewModel @Inject constructor(
         state = state.copy(approval = approval)
     }
 
+    fun setShouldDisplayConfirmDispositionDialog(
+        isApproving: Boolean,
+        dialogTitle: String,
+        dialogText: String
+    ) {
+        val dialogDetails = ConfirmDispositionDialogDetails(
+            shouldDisplay = true,
+            isApproving = isApproving,
+            dialogTitle = dialogTitle,
+            dialogText = dialogText
+        )
+
+        state = state.copy(shouldDisplayConfirmDispositionDialog = dialogDetails)
+    }
+
+    fun resetShouldDisplayConfirmDispositionDialog() {
+        state = state.copy(shouldDisplayConfirmDispositionDialog = null)
+    }
+
     private fun startCountDown() {
         timer = object : CountDownTimer(Long.MAX_VALUE, UPDATE_COUNTDOWN) {
             override fun onTick(millisecs: Long) {
