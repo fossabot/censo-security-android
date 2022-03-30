@@ -1,5 +1,7 @@
 package com.strikeprotocols.mobile.presentation.approvals
 
+import android.widget.Toast
+import androidx.biometric.BiometricPrompt
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -17,15 +19,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.fragment.app.FragmentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.SwipeRefreshIndicator
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import com.strikeprotocols.mobile.R
+import com.strikeprotocols.mobile.common.BiometricUtil
 import com.strikeprotocols.mobile.common.Resource
 import com.strikeprotocols.mobile.common.strikeLog
 import com.strikeprotocols.mobile.presentation.Screen
@@ -44,9 +49,26 @@ fun ApprovalsListScreen(
     viewModel: ApprovalsViewModel = hiltViewModel()
 ) {
     val state = viewModel.state
+    val context = LocalContext.current as FragmentActivity
 
     val scaffoldState = rememberScaffoldState()
     val coroutineScope = rememberCoroutineScope()
+
+    fun showToast(text: String) = Toast.makeText(context, text, Toast.LENGTH_SHORT).show()
+
+    val promptInfo = BiometricUtil.getBasicBiometricPromptBuilder(context).build()
+
+    val bioPrompt = BiometricUtil.createBioPrompt(
+        fragmentActivity = context,
+        onSuccess = {
+            showToast("Authentication success")
+            //Let VM handle this
+        },
+        onFail = {
+            showToast("Authentication failed")
+            //Let VM handle this
+        }
+    )
 
     //region DisposableEffect
     DisposableEffect(key1 = viewModel) {
@@ -73,6 +95,10 @@ fun ApprovalsListScreen(
                 }
             }
             viewModel.resetLogoutResource()
+        }
+        if (state.triggerBioPrompt) {
+            viewModel.resetPromptTrigger()
+            bioPrompt.authenticate(promptInfo)
         }
     }
 
@@ -126,6 +152,7 @@ fun ApprovalsListScreen(
                         onConfirm = {
                             strikeLog(message = "Confirming disposition")
                             viewModel.resetShouldDisplayConfirmDispositionDialog()
+                            viewModel.setPromptTrigger()
                         },
                         onDismiss = {
                             strikeLog(message = "Dismissing dialog")

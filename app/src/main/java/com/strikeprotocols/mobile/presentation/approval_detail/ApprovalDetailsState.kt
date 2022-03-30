@@ -4,7 +4,8 @@ import com.strikeprotocols.mobile.data.models.WalletApproval
 
 data class ApprovalDetailsState(
     val approval: WalletApproval? = null,
-    val shouldDisplayConfirmDispositionDialog: ConfirmDispositionDialogDetails? = null
+    val shouldDisplayConfirmDispositionDialog: ConfirmDispositionDialogDetails? = null,
+    val triggerBioPrompt: Boolean = false
 )
 
 data class ConfirmDispositionDialogDetails(
