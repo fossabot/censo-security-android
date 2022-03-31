@@ -19,6 +19,7 @@ import androidx.compose.material.icons.rounded.ArrowBack
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -29,6 +30,7 @@ import androidx.navigation.NavController
 import com.strikeprotocols.mobile.R
 import com.strikeprotocols.mobile.common.BiometricUtil.createBioPrompt
 import com.strikeprotocols.mobile.common.BiometricUtil.getBasicBiometricPromptBuilder
+import com.strikeprotocols.mobile.common.Resource
 import com.strikeprotocols.mobile.common.convertSecondsIntoCountdownText
 import com.strikeprotocols.mobile.common.generateWalletApprovalsDummyData
 import com.strikeprotocols.mobile.common.strikeLog
@@ -56,6 +58,7 @@ fun ApprovalDetailsScreen(
         onSuccess = {
             showToast("Authentication success")
             //Let VM handle this
+            viewModel.registerApprovalDisposition()
         },
         onFail = {
             showToast("Authentication failed")
@@ -72,6 +75,11 @@ fun ApprovalDetailsScreen(
         if (state.triggerBioPrompt) {
             viewModel.resetPromptTrigger()
             bioPrompt.authenticate(promptInfo)
+        }
+
+        if (state.registerApprovalDispositionResult is Resource.Success && state.registerApprovalDispositionResult.data == true) {
+            viewModel.resetApprovalDispositionAPICalls()
+            showToast("registered approval disposition")
         }
     }
 
@@ -101,7 +109,8 @@ fun ApprovalDetailsScreen(
                         dialogText = "Please confirm you want to deny this transfer"
                     )
                 },
-                timeRemainingInSeconds = state.approval?.approvalTimeoutInSeconds ?: 0
+                timeRemainingInSeconds = state.approval?.approvalTimeoutInSeconds ?: 0,
+                isLoading = state.loadingData
             )
 
             if (state.shouldDisplayConfirmDispositionDialog != null) {
@@ -145,12 +154,17 @@ fun ApprovalDetailsTopAppBar(
 fun ApprovalDetails(
     onApproveClicked: () -> Unit,
     onDenyClicked: () -> Unit,
-    timeRemainingInSeconds: Int
+    timeRemainingInSeconds: Int,
+    isLoading: Boolean
 ) {
     Column(
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier.fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
         ApprovalDetailsTimer(timeRemainingInSeconds = timeRemainingInSeconds)
+        if (isLoading) {
+            CircularProgressIndicator()
+        }
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -164,7 +178,8 @@ fun ApprovalDetails(
 
             ApprovalDetailsButtons(
                 onApproveClicked = { onApproveClicked() },
-                onDenyClicked = { onDenyClicked() }
+                onDenyClicked = { onDenyClicked() },
+                isLoading = isLoading
             )
         }
     }
@@ -193,7 +208,8 @@ fun ApprovalDetailsTimer(timeRemainingInSeconds: Int) {
 @Composable
 fun ApprovalDetailsButtons(
     onApproveClicked: () -> Unit,
-    onDenyClicked: () -> Unit
+    onDenyClicked: () -> Unit,
+    isLoading: Boolean
 ) {
     Spacer(modifier = Modifier.height(24.dp))
     Button(
@@ -202,7 +218,8 @@ fun ApprovalDetailsButtons(
             .fillMaxWidth(),
         onClick = { onDenyClicked() },
         shape = MaterialTheme.shapes.medium,
-        colors = ButtonDefaults.buttonColors(backgroundColor = DenyRedBackground)
+        colors = ButtonDefaults.buttonColors(backgroundColor = DenyRedBackground),
+        enabled = !isLoading
     ) {
         Text(
             modifier = Modifier.padding(all = 4.dp),
@@ -218,7 +235,8 @@ fun ApprovalDetailsButtons(
             .fillMaxWidth(),
         onClick = { onApproveClicked() },
         shape = MaterialTheme.shapes.medium,
-        colors = ButtonDefaults.buttonColors(backgroundColor = ApprovalGreenBackground)
+        colors = ButtonDefaults.buttonColors(backgroundColor = ApprovalGreenBackground),
+        enabled = !isLoading
     ) {
         Text(
             modifier = Modifier.padding(all = 6.dp),
@@ -290,7 +308,8 @@ fun StatelessApprovalDetailsScreen() {
             ApprovalDetails(
                 onApproveClicked = { strikeLog(message = "Approve clicked") },
                 onDenyClicked = { strikeLog(message = "Deny clicked") },
-                timeRemainingInSeconds = 1000
+                timeRemainingInSeconds = 1000,
+                isLoading = false
             )
         }
     )
