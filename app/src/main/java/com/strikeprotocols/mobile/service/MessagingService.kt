@@ -60,7 +60,7 @@ class MessagingService : FirebaseMessagingService() {
      * FCM registration token is initially generated so this is where you would retrieve the token.
      */
     override fun onNewToken(token: String) {
-        sendRegistrationToServer(token)
+        //sendRegistrationToServer(token)
     }
 
     /**

@@ -101,10 +101,14 @@ fun ApprovalsListScreen(
             viewModel.resetPromptTrigger()
             bioPrompt.authenticate(promptInfo)
         }
-        if (state.registerApprovalDispositionResult is Resource.Success && state.registerApprovalDispositionResult.data == true) {
+        if (state.approvalDispositionState?.registerApprovalDispositionResult is Resource.Success) {
             showToast("registered approval disposition")
             viewModel.resetApprovalDispositionAPICalls()
             viewModel.refreshData()
+        }
+        if (state.approvalDispositionState?.registerApprovalDispositionResult is Resource.Error) {
+            showToast("Failed to registered approval disposition")
+            viewModel.resetApprovalDispositionAPICalls()
         }
     }
 
@@ -125,9 +129,10 @@ fun ApprovalsListScreen(
             ApprovalsList(
                 isRefreshing = state.loadingData,
                 onRefresh = viewModel::refreshData,
-                onApproveClicked = {
+                onApproveClicked = { approval ->
                     strikeLog(message = "Approve clicked")
                     viewModel.setShouldDisplayConfirmDispositionDialog(
+                        approval = approval,
                         isApproving = true,
                         dialogTitle = "Confirm Approval",
                         dialogText = "Please confirm you want to approve this transfer"
@@ -196,7 +201,7 @@ fun ApprovalsListTopAppBar(
 fun ApprovalsList(
     isRefreshing: Boolean,
     onRefresh: () -> Unit,
-    onApproveClicked: () -> Unit,
+    onApproveClicked: (WalletApproval?) -> Unit,
     onMoreInfoClicked: (WalletApproval?) -> Unit,
     walletApprovals: List<WalletApproval?>
 ) {
@@ -232,7 +237,7 @@ fun ApprovalsList(
                     val walletApproval = walletApprovals[index]
                     Spacer(modifier = Modifier.height(12.dp))
                     ApprovalItem(
-                        onApproveClicked = { onApproveClicked() },
+                        onApproveClicked = { onApproveClicked(walletApprovals[index]) },
                         onMoreInfoClicked = { onMoreInfoClicked(walletApprovals[index]) },
                         timeRemainingInSeconds = walletApproval?.approvalTimeoutInSeconds ?: 0
                     )

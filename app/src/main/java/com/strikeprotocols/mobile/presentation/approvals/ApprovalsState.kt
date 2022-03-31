@@ -1,8 +1,12 @@
 package com.strikeprotocols.mobile.presentation.approvals
 
 import com.strikeprotocols.mobile.common.Resource
+import com.strikeprotocols.mobile.data.models.ApprovalDisposition
+import com.strikeprotocols.mobile.data.models.RecentBlockHashResponse
+import com.strikeprotocols.mobile.data.models.RegisterApprovalDisposition
 import com.strikeprotocols.mobile.data.models.WalletApproval
 import com.strikeprotocols.mobile.presentation.approval_detail.ConfirmDispositionDialogDetails
+import com.strikeprotocols.mobile.presentation.approval_disposition.ApprovalDispositionState
 
 data class ApprovalsState(
     val shouldShowErrorSnackbar: Boolean = false,
@@ -10,16 +14,13 @@ data class ApprovalsState(
     val triggerBioPrompt: Boolean = false,
 
     //Async Data
-    val recentBlockhashResult: Resource<Any> = Resource.Uninitialized,
-    val registerApprovalDispositionResult: Resource<Any> = Resource.Uninitialized,
-    val signingDataResult: Resource<Any> = Resource.Uninitialized,
+    val approvalDispositionState: ApprovalDispositionState? = ApprovalDispositionState(),
     val walletApprovalsResult: Resource<List<WalletApproval?>> = Resource.Uninitialized,
     val logoutResult: Resource<Boolean> = Resource.Uninitialized,
     val approvals: List<WalletApproval?> = emptyList(),
+    val selectedApproval: WalletApproval? = null
 ) {
     val loadingData = walletApprovalsResult is Resource.Loading ||
             logoutResult is Resource.Loading ||
-            recentBlockhashResult is Resource.Loading ||
-            registerApprovalDispositionResult is Resource.Loading ||
-            signingDataResult is Resource.Loading
+            approvalDispositionState?.loadingData == true
 }

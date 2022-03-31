@@ -7,10 +7,13 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.strikeprotocols.mobile.common.Resource
-import com.strikeprotocols.mobile.common.strikeLog
 import com.strikeprotocols.mobile.data.ApprovalsRepository
+import com.strikeprotocols.mobile.data.models.ApprovalDisposition
+import com.strikeprotocols.mobile.data.models.RegisterApprovalDisposition
 import com.strikeprotocols.mobile.data.models.WalletApproval
 import com.strikeprotocols.mobile.presentation.approval_detail.ApprovalDetailsViewModel.Companion.UPDATE_COUNTDOWN
+import com.strikeprotocols.mobile.presentation.approval_disposition.ApprovalDispositionError
+import com.strikeprotocols.mobile.presentation.approval_disposition.ApprovalDispositionState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -54,7 +57,15 @@ class ApprovalDetailsViewModel @Inject constructor(
             dialogText = dialogText
         )
 
-        state = state.copy(shouldDisplayConfirmDispositionDialog = dialogDetails)
+        val approvalDisposition =
+            if(isApproving) ApprovalDisposition.APPROVE else ApprovalDisposition.DENY
+
+        state = state.copy(
+            shouldDisplayConfirmDispositionDialog = dialogDetails,
+            approvalDispositionState = state.approvalDispositionState?.copy(
+                approvalDisposition = Resource.Success(approvalDisposition)
+            )
+        )
     }
 
     fun resetShouldDisplayConfirmDispositionDialog() {
@@ -94,64 +105,122 @@ class ApprovalDetailsViewModel @Inject constructor(
     }
 
     fun resetApprovalDispositionAPICalls() {
-        resetRecentBlockHashResult()
-        resetRegisterApprovalDispositionResult()
+        resetDispositionState()
     }
 
-    fun resetRecentBlockHashResult() {
-        state = state.copy(recentBlockhashResult = Resource.Uninitialized)
-    }
-
-    fun resetRegisterApprovalDispositionResult() {
-        state = state.copy(registerApprovalDispositionResult = Resource.Uninitialized)
+    private fun resetDispositionState() {
+        state = state.copy(
+            approvalDispositionState = ApprovalDispositionState()
+        )
     }
 
     //region API calls
-    private fun retrieveRecentBlockhash() {
-        viewModelScope.launch {
-            state = state.copy(recentBlockhashResult = Resource.Loading())
-            state = try {
-                val recentBlockhash = approvalsRepository.getRecentBlockHash()
-                state.copy(
+    private suspend fun retrieveRecentBlockhash() {
+        state = state.copy(
+            approvalDispositionState = state.approvalDispositionState?.copy(
+                recentBlockhashResult = Resource.Loading()
+            )
+        )
+        state = try {
+            val recentBlockhash = approvalsRepository.getRecentBlockHash()
+            state.copy(
+                approvalDispositionState = state.approvalDispositionState?.copy(
                     recentBlockhashResult = Resource.Success(recentBlockhash)
                 )
-            } catch (e: Exception) {
-                state.copy(
+            )
+        } catch (e: Exception) {
+            state.copy(
+                approvalDispositionState = state.approvalDispositionState?.copy(
                     recentBlockhashResult = Resource.Error(e.message ?: "")
                 )
-            }
+            )
         }
     }
 
-    private fun signData() {
-        viewModelScope.launch {
-            state = state.copy(signingDataResult = Resource.Loading())
-            delay(3000)
-            state = state.copy(signingDataResult = Resource.Success(Any()))
-        }
+    private suspend fun signData() {
+        state = state.copy(
+            approvalDispositionState = state.approvalDispositionState?.copy(
+                signingDataResult = Resource.Loading()
+            )
+        )
+        delay(250)
+        state = state.copy(
+            approvalDispositionState = state.approvalDispositionState?.copy(
+                signingDataResult = Resource.Success("I am signed data")
+            )
+        )
     }
 
     fun registerApprovalDisposition() {
         viewModelScope.launch {
-            state = state.copy(registerApprovalDispositionResult = Resource.Loading())
-            strikeLog(message = "Starting approval disposition work")
-            state = try {
-                val recentBlockhash = approvalsRepository.getRecentBlockHash()
-                state = state.copy(
-                    recentBlockhashResult = Resource.Success(recentBlockhash)
+            state = state.copy(
+                approvalDispositionState = state.approvalDispositionState?.copy(
+                    registerApprovalDispositionResult = Resource.Loading()
                 )
-                strikeLog(message = "Signing data")
-                //signing data delay
-                delay(3000)
+            )
+            try {
+                //Data retrieval and checks
+                retrieveRecentBlockhash()
+                val blockHashResult = state.approvalDispositionState?.recentBlockhashResult
+                val recentBlockHash = if (blockHashResult is Resource.Success) blockHashResult.data?.result?.value?.blockhash else null
+                if (recentBlockHash == null) {
+                    state = state.copy(
+                        approvalDispositionState = state.approvalDispositionState?.copy(
+                            approvalDispositionError = ApprovalDispositionError.BLOCKHASH_FAILURE,
+                            registerApprovalDispositionResult = Resource.Error(ApprovalDispositionError.BLOCKHASH_FAILURE.error)
+                        )
+                    )
+                    return@launch
+                }
 
-                strikeLog(message = "registering disposition")
-                val approvalDispositionResponse = approvalsRepository.registerApprovalDisposition()
-                state.copy(
-                    registerApprovalDispositionResult = Resource.Success(approvalDispositionResponse)
+                signData()
+                val signResult = state.approvalDispositionState?.signingDataResult
+                val signature = if (signResult is Resource.Success) signResult.data else null
+                if (signature == null) {
+                    state = state.copy(
+                        approvalDispositionState = state.approvalDispositionState?.copy(
+                            approvalDispositionError = ApprovalDispositionError.SIGNING_DATA_FAILURE,
+                            registerApprovalDispositionResult = Resource.Error(ApprovalDispositionError.SIGNING_DATA_FAILURE.error)
+                        )
+                    )
+                    return@launch
+                }
+
+                val recentApprovalDisposition = state.approvalDispositionState?.approvalDisposition
+                val approvalDisposition = if (recentApprovalDisposition is Resource.Success) recentApprovalDisposition.data else null
+                if (approvalDisposition == null) {
+                    state = state.copy(
+                        approvalDispositionState = state.approvalDispositionState?.copy(
+                            approvalDispositionError = ApprovalDispositionError.APPROVAL_DISPOSITION_FAILURE,
+                            registerApprovalDispositionResult = Resource.Error(ApprovalDispositionError.APPROVAL_DISPOSITION_FAILURE.error)
+                        )
+                    )
+                    return@launch
+                }
+
+                val registerApprovalDisposition = RegisterApprovalDisposition(
+                    approvalDisposition = approvalDisposition,
+                    signature = signature,
+                    recentBlockhash = recentBlockHash
                 )
-            } catch (e: Exception) {
-                state.copy(
-                    registerApprovalDispositionResult = Resource.Error(e.message ?: "")
+
+                val approvalDispositionResponse =
+                    approvalsRepository.approveOrDenyDisposition(
+                        state.approval?.id, registerApprovalDisposition
+                    )
+                state = state.copy(
+                    approvalDispositionState = state.approvalDispositionState?.copy(
+                        registerApprovalDispositionResult = Resource.Success(
+                            approvalDispositionResponse
+                        )
+                    )
+                )
+            } catch (e: java.lang.Exception) {
+                state = state.copy(
+                    approvalDispositionState = state.approvalDispositionState?.copy(
+                        approvalDispositionError = ApprovalDispositionError.SUBMIT_FAILURE,
+                        registerApprovalDispositionResult = Resource.Error(e.message ?: "")
+                    )
                 )
             }
         }
