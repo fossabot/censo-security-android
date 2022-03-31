@@ -63,6 +63,7 @@ fun ApprovalsListScreen(
         onSuccess = {
             showToast("Authentication success")
             //Let VM handle this
+            viewModel.registerApprovalDisposition()
         },
         onFail = {
             showToast("Authentication failed")
@@ -99,6 +100,11 @@ fun ApprovalsListScreen(
         if (state.triggerBioPrompt) {
             viewModel.resetPromptTrigger()
             bioPrompt.authenticate(promptInfo)
+        }
+        if (state.registerApprovalDispositionResult is Resource.Success && state.registerApprovalDispositionResult.data == true) {
+            showToast("registered approval disposition")
+            viewModel.resetApprovalDispositionAPICalls()
+            viewModel.refreshData()
         }
     }
 

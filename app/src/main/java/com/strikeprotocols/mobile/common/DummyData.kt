@@ -36,6 +36,8 @@ fun generateWalletApprovalsDummyData() = WalletApproval(
     walletType = "Solana"
 )
 
+fun generateRecentBlockhashDummyData() =
+    "JtcoutZwsH8Xd6mtQEi3MXEDhDVMckeSfWYoPn7VnzNnDnBYACwRmZU2caCY1BGYQoZ"
 
 object ValidDummyData {
 

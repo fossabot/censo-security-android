@@ -8,6 +8,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.strikeprotocols.mobile.common.Resource
 import com.strikeprotocols.mobile.common.generateWalletApprovalsDummyData
+import com.strikeprotocols.mobile.common.strikeLog
 import com.strikeprotocols.mobile.data.ApprovalsRepository
 import com.strikeprotocols.mobile.data.UserRepository
 import com.strikeprotocols.mobile.data.models.WalletApproval
@@ -139,6 +140,68 @@ class ApprovalsViewModel @Inject constructor(
         }
     }
     //endregion
+    fun resetApprovalDispositionAPICalls() {
+        resetRecentBlockHashResult()
+        resetRegisterApprovalDispositionResult()
+    }
+
+    fun resetRecentBlockHashResult() {
+        state = state.copy(recentBlockhashResult = Resource.Uninitialized)
+    }
+
+    fun resetRegisterApprovalDispositionResult() {
+        state = state.copy(registerApprovalDispositionResult = Resource.Uninitialized)
+    }
+
+    private fun retrieveRecentBlockhash() {
+        viewModelScope.launch {
+            state = state.copy(recentBlockhashResult = Resource.Loading())
+            state = try {
+                val recentBlockhash = approvalsRepository.getRecentBlockHash()
+                state.copy(
+                    recentBlockhashResult = Resource.Success(recentBlockhash)
+                )
+            } catch (e: Exception) {
+                state.copy(
+                    recentBlockhashResult = Resource.Error(e.message ?: "")
+                )
+            }
+        }
+    }
+
+    private fun signData() {
+        viewModelScope.launch {
+            state = state.copy(signingDataResult = Resource.Loading())
+            delay(3000)
+            state = state.copy(signingDataResult = Resource.Success(Any()))
+        }
+    }
+
+    fun registerApprovalDisposition() {
+        viewModelScope.launch {
+            state = state.copy(registerApprovalDispositionResult = Resource.Loading())
+            strikeLog(message = "Starting approval disposition work")
+            state = try {
+                val recentBlockhash = approvalsRepository.getRecentBlockHash()
+                state = state.copy(
+                    recentBlockhashResult = Resource.Success(recentBlockhash)
+                )
+                strikeLog(message = "Signing data")
+                //signing data delay
+                delay(3000)
+
+                strikeLog(message = "registering disposition")
+                val approvalDispositionResponse = approvalsRepository.registerApprovalDisposition()
+                state.copy(
+                    registerApprovalDispositionResult = Resource.Success(approvalDispositionResponse)
+                )
+            } catch (e: Exception) {
+                state.copy(
+                    registerApprovalDispositionResult = Resource.Error(e.message ?: "")
+                )
+            }
+        }
+    }
 
     object Companion {
         const val UPDATE_COUNTDOWN = 1000L
