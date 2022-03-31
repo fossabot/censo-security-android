@@ -1,7 +1,6 @@
 package com.strikeprotocols.mobile.presentation.approval_detail
 
 import android.widget.Toast
-import androidx.biometric.BiometricPrompt
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -19,7 +18,6 @@ import androidx.compose.material.icons.rounded.ArrowBack
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -32,13 +30,12 @@ import com.strikeprotocols.mobile.common.BiometricUtil.createBioPrompt
 import com.strikeprotocols.mobile.common.BiometricUtil.getBasicBiometricPromptBuilder
 import com.strikeprotocols.mobile.common.Resource
 import com.strikeprotocols.mobile.common.convertSecondsIntoCountdownText
-import com.strikeprotocols.mobile.common.generateWalletApprovalsDummyData
 import com.strikeprotocols.mobile.common.strikeLog
 import com.strikeprotocols.mobile.data.models.WalletApproval
 import com.strikeprotocols.mobile.presentation.approval_detail.approval_type_components.ApprovalDetailsTransferContent
 import com.strikeprotocols.mobile.presentation.components.StrikeTopAppBar
 import com.strikeprotocols.mobile.ui.theme.*
-import kotlin.concurrent.fixedRateTimer
+import java.util.*
 
 @Composable
 fun ApprovalDetailsScreen(
@@ -77,9 +74,13 @@ fun ApprovalDetailsScreen(
             bioPrompt.authenticate(promptInfo)
         }
 
-        if (state.registerApprovalDispositionResult is Resource.Success && state.registerApprovalDispositionResult.data == true) {
+        if (state.approvalDispositionState?.registerApprovalDispositionResult is Resource.Success) {
             viewModel.resetApprovalDispositionAPICalls()
             showToast("registered approval disposition")
+        }
+        if (state.approvalDispositionState?.registerApprovalDispositionResult is Resource.Error) {
+            showToast("Failed to registered approval disposition")
+            viewModel.resetApprovalDispositionAPICalls()
         }
     }
 
@@ -162,9 +163,6 @@ fun ApprovalDetails(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         ApprovalDetailsTimer(timeRemainingInSeconds = timeRemainingInSeconds)
-        if (isLoading) {
-            CircularProgressIndicator()
-        }
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -180,6 +178,15 @@ fun ApprovalDetails(
                 onApproveClicked = { onApproveClicked() },
                 onDenyClicked = { onDenyClicked() },
                 isLoading = isLoading
+            )
+        }
+    }
+
+    if(isLoading) {
+        Box(modifier = Modifier.fillMaxWidth().padding(top = 12.dp)) {
+            CircularProgressIndicator(
+                modifier = Modifier.align(Alignment.Center),
+                color = StrikeWhite
             )
         }
     }

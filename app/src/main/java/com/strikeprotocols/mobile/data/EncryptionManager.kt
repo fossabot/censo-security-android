@@ -18,12 +18,22 @@ import javax.crypto.spec.SecretKeySpec
 
 interface EncryptionManager {
     fun createKeyPair(): StrikeKeyPair
+    fun signApprovalDispositionMessage(
+        encryptedPrivateKey: String?,
+        publicKey: String?,
+        symmetricKey: String?
+    ): String
+
     fun signData(data: String, privateKey: String): ByteArray
     fun verifyData(data: String, signature: ByteArray, publicKey: String): Boolean
     fun encrypt(message: String, generatedPassword: ByteArray): String
     fun decrypt(encryptedMessage: String, generatedPassword: ByteArray): String
     fun generatePassword(): ByteArray
-    fun verifyKeyPair(encryptedPrivateKey: String?, publicKey: String?, symmetricKey: String?): Boolean
+    fun verifyKeyPair(
+        encryptedPrivateKey: String?,
+        publicKey: String?,
+        symmetricKey: String?
+    ): Boolean
 }
 
 class EncryptionManagerImpl : EncryptionManager {
@@ -61,6 +71,26 @@ class EncryptionManagerImpl : EncryptionManager {
         val publicKey = (keyPair.public as Ed25519PublicKeyParameters).encoded
 
         return StrikeKeyPair(privateKey = privateKey, publicKey = publicKey)
+    }
+
+    override fun signApprovalDispositionMessage(
+        encryptedPrivateKey: String?,
+        publicKey: String?,
+        symmetricKey: String?
+    ): String {
+        //todo: need to learn how ios signs this data
+        val messageToSign = "well we made this"
+
+        val decryptedPrivateKey = decrypt(
+            encryptedMessage = encryptedPrivateKey ?: "",
+            generatedPassword = BaseWrapper.decode(symmetricKey ?: "")
+        )
+
+        val signedData = signData(
+            data = messageToSign, privateKey = decryptedPrivateKey
+        )
+
+        return BaseWrapper.encode(signedData)
     }
 
     override fun encrypt(message: String, generatedPassword: ByteArray): String {

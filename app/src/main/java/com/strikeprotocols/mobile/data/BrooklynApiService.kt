@@ -64,6 +64,14 @@ interface BrooklynApiService {
     @POST("notification-tokens")
     @Headers(AUTH_REQUIRED)
     suspend fun addPushNotificationToken(@Body pushData: PushBody): PushBody
+
+    @POST("v1/wallet-approvals/{request_id}/dispositions")
+    @Headers(AUTH_REQUIRED)
+    suspend fun approveOrDenyDisposition(
+        @Path("request_id") requestId: String,
+        @Body registerApprovalDisposition: RegisterApprovalDisposition
+    ): RegisterApprovalDisposition
+
 }
 
 class AuthInterceptor(private val authProvider: AuthProvider) : Interceptor {
