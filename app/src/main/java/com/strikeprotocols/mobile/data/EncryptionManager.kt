@@ -5,6 +5,7 @@ import com.strikeprotocols.mobile.data.EncryptionManagerImpl.Companion.DATA_CHEC
 import com.strikeprotocols.mobile.data.EncryptionManagerImpl.Companion.IV_AND_KEY_COMBINED_LENGTH
 import com.strikeprotocols.mobile.data.EncryptionManagerImpl.Companion.IV_LENGTH
 import com.strikeprotocols.mobile.data.EncryptionManagerImpl.Companion.NO_OFFSET_INDEX
+import com.strikeprotocols.mobile.data.EncryptionManagerImpl.Companion.NoKeyDataException
 import org.bouncycastle.crypto.AsymmetricCipherKeyPairGenerator
 import org.bouncycastle.crypto.generators.Ed25519KeyPairGenerator
 import org.bouncycastle.crypto.params.Ed25519KeyGenerationParameters
@@ -15,13 +16,13 @@ import java.security.SecureRandom
 import javax.crypto.Cipher
 import javax.crypto.spec.IvParameterSpec
 import javax.crypto.spec.SecretKeySpec
+import javax.inject.Inject
 
 interface EncryptionManager {
     fun createKeyPair(): StrikeKeyPair
     fun signApprovalDispositionMessage(
-        encryptedPrivateKey: String?,
-        publicKey: String?,
-        symmetricKey: String?
+        signable: Signable,
+        userEmail: String
     ): String
 
     fun signData(data: String, privateKey: String): ByteArray
@@ -33,7 +34,7 @@ interface EncryptionManager {
     fun regeneratePublicKey(encryptedPrivateKey: String, decryptionKey: String): String
 }
 
-class EncryptionManagerImpl : EncryptionManager {
+class EncryptionManagerImpl @Inject constructor(private val securePreferences: SecurePreferences) : EncryptionManager {
 
     //region interface methods
     override fun signData(data: String, privateKey: String): ByteArray {
@@ -70,24 +71,31 @@ class EncryptionManagerImpl : EncryptionManager {
         return StrikeKeyPair(privateKey = privateKey, publicKey = publicKey)
     }
 
-    override fun signApprovalDispositionMessage(
-        encryptedPrivateKey: String?,
-        publicKey: String?,
-        symmetricKey: String?
-    ): String {
-        //todo: need to learn how ios signs this data
-        val messageToSign = "well we made this"
+    override fun signApprovalDispositionMessage(signable: Signable, userEmail: String): String {
+        val encryptedPrivateKey = securePreferences.retrievePrivateKey(userEmail)
+        val decryptionKey = securePreferences.retrieveGeneratedPassword(userEmail)
+
+        if(encryptedPrivateKey.isEmpty() || decryptionKey.isEmpty()) {
+            throw NoKeyDataException
+        }
 
         val decryptedPrivateKey = decrypt(
-            encryptedMessage = encryptedPrivateKey ?: "",
-            generatedPassword = BaseWrapper.decode(symmetricKey ?: "")
+            encryptedMessage = encryptedPrivateKey,
+            generatedPassword = BaseWrapper.decode(decryptionKey)
         )
+
+        val publicKey = regeneratePublicKey(
+            encryptedPrivateKey = encryptedPrivateKey,
+            decryptionKey = decryptionKey
+        )
+
+        val messageToSign = signable.retrieveSignableData(approverPublicKey = publicKey)
 
         val signedData = signData(
             data = messageToSign, privateKey = decryptedPrivateKey
         )
 
-        return BaseWrapper.encode(signedData)
+        return BaseWrapper.encodeToBase64(signedData)
     }
 
     override fun encrypt(message: String, generatedPassword: ByteArray): String {
@@ -160,6 +168,8 @@ class EncryptionManagerImpl : EncryptionManager {
         const val IV_AND_KEY_COMBINED_LENGTH = PASSWORD_BYTE_LENGTH + IV_LENGTH
         const val NO_OFFSET_INDEX = 0
         const val DATA_CHECK = "VerificationCheck"
+
+        val NoKeyDataException = Exception("Unable to retrieve key data")
     }
     //endregion
 }
@@ -182,4 +192,8 @@ data class StrikeKeyPair(val privateKey: ByteArray, val publicKey: ByteArray) {
         result = 31 * result + publicKey.contentHashCode()
         return result
     }
+}
+
+interface Signable {
+    fun retrieveSignableData(approverPublicKey: String?): String
 }
