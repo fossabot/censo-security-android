@@ -1,17 +1,15 @@
 package com.strikeprotocols.mobile.presentation.approvals
 
 import com.strikeprotocols.mobile.common.Resource
-import com.strikeprotocols.mobile.data.models.ApprovalDisposition
-import com.strikeprotocols.mobile.data.models.RecentBlockHashResponse
-import com.strikeprotocols.mobile.data.models.RegisterApprovalDisposition
 import com.strikeprotocols.mobile.data.models.WalletApproval
 import com.strikeprotocols.mobile.presentation.approval_detail.ConfirmDispositionDialogDetails
 import com.strikeprotocols.mobile.presentation.approval_disposition.ApprovalDispositionState
+import com.strikeprotocols.mobile.presentation.blockhash.BlockHashViewModel.BlockHash
 
 data class ApprovalsState(
     val shouldShowErrorSnackbar: Boolean = false,
     val shouldDisplayConfirmDispositionDialog: ConfirmDispositionDialogDetails? = null,
-    val triggerBioPrompt: Boolean = false,
+    val blockHash: BlockHash? = null,
 
     //Async Data
     val approvalDispositionState: ApprovalDispositionState? = ApprovalDispositionState(),

@@ -1,8 +1,9 @@
 package com.strikeprotocols.mobile.data
 
 import com.strikeprotocols.mobile.BuildConfig
-import com.strikeprotocols.mobile.data.models.RecentBlockHashBody
+
 import com.strikeprotocols.mobile.data.models.RecentBlockHashResponse
+import com.strikeprotocols.mobile.presentation.blockhash.BlockHashViewModel.RecentBlockHashBody
 import okhttp3.*
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit

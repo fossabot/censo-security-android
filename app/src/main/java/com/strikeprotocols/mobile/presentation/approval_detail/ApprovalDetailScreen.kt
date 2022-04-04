@@ -33,6 +33,7 @@ import com.strikeprotocols.mobile.common.convertSecondsIntoCountdownText
 import com.strikeprotocols.mobile.common.strikeLog
 import com.strikeprotocols.mobile.data.models.WalletApproval
 import com.strikeprotocols.mobile.presentation.approval_detail.approval_type_components.ApprovalDetailsTransferContent
+import com.strikeprotocols.mobile.presentation.blockhash.BlockHashViewModel
 import com.strikeprotocols.mobile.presentation.components.StrikeTopAppBar
 import com.strikeprotocols.mobile.ui.theme.*
 import java.util.*
@@ -40,10 +41,13 @@ import java.util.*
 @Composable
 fun ApprovalDetailsScreen(
     navController: NavController,
-    viewModel: ApprovalDetailsViewModel = hiltViewModel(),
+    approvalDetailsViewModel: ApprovalDetailsViewModel = hiltViewModel(),
+    blockHashViewModel: BlockHashViewModel = hiltViewModel(),
     approval: WalletApproval?
 ) {
-    val state = viewModel.state
+    val approvalDetailsState = approvalDetailsViewModel.state
+    val blockHashState = blockHashViewModel.state
+
     val context = LocalContext.current as FragmentActivity
 
     fun showToast(text: String) = Toast.makeText(context, text, Toast.LENGTH_SHORT).show()
@@ -55,32 +59,43 @@ fun ApprovalDetailsScreen(
         onSuccess = {
             showToast("Authentication success")
             //Let VM handle this
-            viewModel.registerApprovalDisposition()
+            blockHashViewModel.setUserBiometricVerified(isVerified = true)
         },
         onFail = {
             showToast("Authentication failed")
             //Let VM handle this
+            blockHashViewModel.setUserBiometricVerified(isVerified = false)
         }
     )
 
-    DisposableEffect(key1 = viewModel) {
-        viewModel.onStart(approval)
-        onDispose { viewModel.onStop() }
+    DisposableEffect(key1 = approvalDetailsViewModel) {
+        approvalDetailsViewModel.onStart(approval)
+        onDispose { approvalDetailsViewModel.onStop() }
     }
 
-    LaunchedEffect(key1 = state) {
-        if (state.triggerBioPrompt) {
-            viewModel.resetPromptTrigger()
+    LaunchedEffect(key1 = approvalDetailsState, key2 = blockHashState) {
+        if (blockHashState.triggerBioPrompt) {
+            blockHashViewModel.resetPromptTrigger()
             bioPrompt.authenticate(promptInfo)
         }
-
-        if (state.approvalDispositionState?.registerApprovalDispositionResult is Resource.Success) {
-            viewModel.resetApprovalDispositionAPICalls()
+        if (blockHashState.recentBlockhashResult is Resource.Success) {
+            strikeLog(message = "Success retrieving blockhash. BlockHash: ${blockHashState.blockHash?.blockHashString} ")
+            if (blockHashState.blockHash != null) {
+                approvalDetailsViewModel.setBlockHash(blockHashState.blockHash)
+                blockHashViewModel.resetState()
+            }
+        }
+        if (blockHashState.recentBlockhashResult is Resource.Error) {
+            strikeLog(message = "Failure retrieving blockhash")
+            //TODO: Handle failure
+        }
+        if (approvalDetailsState.approvalDispositionState?.registerApprovalDispositionResult is Resource.Success) {
+            approvalDetailsViewModel.resetApprovalDispositionAPICalls()
             showToast("registered approval disposition")
         }
-        if (state.approvalDispositionState?.registerApprovalDispositionResult is Resource.Error) {
+        if (approvalDetailsState.approvalDispositionState?.registerApprovalDispositionResult is Resource.Error) {
             showToast("Failed to registered approval disposition")
-            viewModel.resetApprovalDispositionAPICalls()
+            approvalDetailsViewModel.resetApprovalDispositionAPICalls()
         }
     }
 
@@ -97,37 +112,37 @@ fun ApprovalDetailsScreen(
         content = {
             ApprovalDetails(
                 onApproveClicked = {
-                    viewModel.setShouldDisplayConfirmDispositionDialog(
+                    approvalDetailsViewModel.setShouldDisplayConfirmDispositionDialog(
                         isApproving = true,
                         dialogTitle = "Confirm Approval",
                         dialogText = "Please confirm you want to approve this transfer"
                     )
                 },
                 onDenyClicked = {
-                    viewModel.setShouldDisplayConfirmDispositionDialog(
+                    approvalDetailsViewModel.setShouldDisplayConfirmDispositionDialog(
                         isApproving = false,
                         dialogTitle = "Confirm Deny",
                         dialogText = "Please confirm you want to deny this transfer"
                     )
                 },
-                timeRemainingInSeconds = state.approval?.approvalTimeoutInSeconds ?: 0,
-                isLoading = state.loadingData
+                timeRemainingInSeconds = approvalDetailsState.approval?.approvalTimeoutInSeconds ?: 0,
+                isLoading = approvalDetailsState.loadingData
             )
 
-            if (state.shouldDisplayConfirmDispositionDialog != null) {
-                state.shouldDisplayConfirmDispositionDialog.let { safeDialogDetails ->
+            if (approvalDetailsState.shouldDisplayConfirmDispositionDialog != null) {
+                approvalDetailsState.shouldDisplayConfirmDispositionDialog.let { safeDialogDetails ->
                     //TODO Refine this after the flow is done
                     ConfirmDispositionAlertDialog(
                         dialogTitle = safeDialogDetails.dialogTitle,
                         dialogText = safeDialogDetails.dialogText,
                         onConfirm = {
                             strikeLog(message = "Confirming disposition")
-                            viewModel.resetShouldDisplayConfirmDispositionDialog()
-                            viewModel.setPromptTrigger()
+                            approvalDetailsViewModel.resetShouldDisplayConfirmDispositionDialog()
+                            blockHashViewModel.setPromptTrigger()
                         },
                         onDismiss = {
                             strikeLog(message = "Dismissing dialog")
-                            viewModel.resetShouldDisplayConfirmDispositionDialog()
+                            approvalDetailsViewModel.resetShouldDisplayConfirmDispositionDialog()
                         }
                     )
                 }

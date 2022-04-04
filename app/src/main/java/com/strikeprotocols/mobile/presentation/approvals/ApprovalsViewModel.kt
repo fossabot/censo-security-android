@@ -8,6 +8,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.strikeprotocols.mobile.common.Resource
 import com.strikeprotocols.mobile.common.generateWalletApprovalsDummyData
+import com.strikeprotocols.mobile.common.strikeLog
 import com.strikeprotocols.mobile.data.ApprovalsRepository
 import com.strikeprotocols.mobile.data.UserRepository
 import com.strikeprotocols.mobile.data.models.ApprovalDisposition
@@ -17,6 +18,7 @@ import com.strikeprotocols.mobile.presentation.approval_detail.ConfirmDispositio
 import com.strikeprotocols.mobile.presentation.approval_disposition.ApprovalDispositionError
 import com.strikeprotocols.mobile.presentation.approval_disposition.ApprovalDispositionState
 import com.strikeprotocols.mobile.presentation.approvals.ApprovalsViewModel.Companion.UPDATE_COUNTDOWN
+import com.strikeprotocols.mobile.presentation.blockhash.BlockHashViewModel.BlockHash
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -91,14 +93,6 @@ class ApprovalsViewModel @Inject constructor(
         state = state.copy(shouldDisplayConfirmDispositionDialog = null)
     }
 
-    fun setPromptTrigger() {
-        state = state.copy(triggerBioPrompt = true)
-    }
-
-    fun resetPromptTrigger() {
-        state = state.copy(triggerBioPrompt = false)
-    }
-
     fun resetShouldShowErrorSnackbar() {
         state = state.copy(shouldShowErrorSnackbar = false)
     }
@@ -117,6 +111,17 @@ class ApprovalsViewModel @Inject constructor(
 
     fun resetLogoutResource() {
         state = state.copy(logoutResult = Resource.Uninitialized)
+    }
+
+    fun setBlockHash(blockHash: BlockHash) {
+        state = state.copy(blockHash = blockHash)
+        if (state.blockHash != null) {
+            registerApprovalDisposition()
+        }
+    }
+
+    fun resetBlockHash() {
+        state = state.copy(blockHash = null)
     }
 
     //region API Calls
@@ -155,6 +160,7 @@ class ApprovalsViewModel @Inject constructor(
         }
     }
     //endregion
+
     fun resetApprovalDispositionAPICalls() {
         resetDispositionState()
     }
@@ -165,27 +171,6 @@ class ApprovalsViewModel @Inject constructor(
         )
     }
 
-    private suspend fun retrieveRecentBlockHash() {
-        state = state.copy(
-            approvalDispositionState = state.approvalDispositionState?.copy(
-                recentBlockhashResult = Resource.Loading()
-            )
-        )
-        state = try {
-            val recentBlockhash = approvalsRepository.getRecentBlockHash()
-            state.copy(
-                approvalDispositionState = state.approvalDispositionState?.copy(
-                    recentBlockhashResult = Resource.Success(recentBlockhash)
-                )
-            )
-        } catch (e: Exception) {
-            state.copy(
-                approvalDispositionState = state.approvalDispositionState?.copy(
-                    recentBlockhashResult = Resource.Error(e.message ?: "")
-                )
-            )
-        }
-    }
 
     private suspend fun signData() {
         state = state.copy(
@@ -210,9 +195,7 @@ class ApprovalsViewModel @Inject constructor(
             )
             try {
                 //Data retrieval and checks
-                retrieveRecentBlockHash()
-                val blockHashResult = state.approvalDispositionState?.recentBlockhashResult
-                val recentBlockHash = if (blockHashResult is Resource.Success) blockHashResult.data?.result?.value?.blockhash else null
+                val recentBlockHash = state.blockHash?.blockHashString
                 if (recentBlockHash == null) {
                     state = state.copy(
                         approvalDispositionState = state.approvalDispositionState?.copy(
