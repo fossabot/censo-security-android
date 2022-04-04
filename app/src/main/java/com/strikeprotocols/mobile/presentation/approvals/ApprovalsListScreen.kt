@@ -1,7 +1,6 @@
 package com.strikeprotocols.mobile.presentation.approvals
 
 import android.widget.Toast
-import androidx.biometric.BiometricPrompt
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -37,6 +36,7 @@ import com.strikeprotocols.mobile.presentation.Screen
 import com.strikeprotocols.mobile.presentation.components.StrikeTopAppBar
 import com.strikeprotocols.mobile.data.models.WalletApproval
 import com.strikeprotocols.mobile.presentation.approval_detail.ConfirmDispositionAlertDialog
+import com.strikeprotocols.mobile.presentation.blockhash.BlockHashViewModel
 import com.strikeprotocols.mobile.presentation.components.StrikeSnackbar
 import com.strikeprotocols.mobile.ui.theme.*
 import kotlinx.coroutines.launch
@@ -46,9 +46,12 @@ import com.strikeprotocols.mobile.ui.theme.StrikeWhite
 @Composable
 fun ApprovalsListScreen(
     navController: NavController,
-    viewModel: ApprovalsViewModel = hiltViewModel()
+    approvalsViewModel: ApprovalsViewModel = hiltViewModel(),
+    blockHashViewModel: BlockHashViewModel = hiltViewModel()
 ) {
-    val state = viewModel.state
+    val approvalsState = approvalsViewModel.state
+    val blockHashState = blockHashViewModel.state
+
     val context = LocalContext.current as FragmentActivity
 
     val scaffoldState = rememberScaffoldState()
@@ -63,52 +66,64 @@ fun ApprovalsListScreen(
         onSuccess = {
             showToast("Authentication success")
             //Let VM handle this
-            viewModel.registerApprovalDisposition()
+            blockHashViewModel.setUserBiometricVerified(isVerified = true)
         },
         onFail = {
             showToast("Authentication failed")
             //Let VM handle this
+            blockHashViewModel.setUserBiometricVerified(isVerified = false)
         }
     )
 
     //region DisposableEffect
-    DisposableEffect(key1 = viewModel) {
-        viewModel.onStart()
-        onDispose { viewModel.onStop() }
+    DisposableEffect(key1 = approvalsViewModel) {
+        approvalsViewModel.onStart()
+        onDispose { approvalsViewModel.onStop() }
     }
     //endregion
 
     val snackbarRefreshErrorString = stringResource(R.string.snackbar_refresh_error)
 
-    LaunchedEffect(key1 = state) {
-        if (state.shouldShowErrorSnackbar) {
+    LaunchedEffect(key1 = approvalsState, key2 = blockHashState) {
+        if (approvalsState.shouldShowErrorSnackbar) {
             coroutineScope.launch {
                 scaffoldState.snackbarHostState.showSnackbar(
                     message = snackbarRefreshErrorString
                 )
             }
-            viewModel.resetShouldShowErrorSnackbar()
+            approvalsViewModel.resetShouldShowErrorSnackbar()
         }
-        if (state.logoutResult is Resource.Success) {
+        if (approvalsState.logoutResult is Resource.Success) {
             navController.navigate(Screen.SplashRoute.route) {
                 popUpTo(Screen.ApprovalListRoute.route) {
                     inclusive = true
                 }
             }
-            viewModel.resetLogoutResource()
+            approvalsViewModel.resetLogoutResource()
         }
-        if (state.triggerBioPrompt) {
-            viewModel.resetPromptTrigger()
+        if (blockHashState.triggerBioPrompt) {
+            blockHashViewModel.resetPromptTrigger()
             bioPrompt.authenticate(promptInfo)
         }
-        if (state.approvalDispositionState?.registerApprovalDispositionResult is Resource.Success) {
-            showToast("registered approval disposition")
-            viewModel.resetApprovalDispositionAPICalls()
-            viewModel.refreshData()
+        if (blockHashState.recentBlockhashResult is Resource.Success) {
+            strikeLog(message = "Success retrieving blockhash. BlockHash: ${blockHashState.blockHash?.blockHashString} ")
+            if (blockHashState.blockHash != null) {
+                approvalsViewModel.setBlockHash(blockHashState.blockHash)
+                blockHashViewModel.resetState()
+            }
         }
-        if (state.approvalDispositionState?.registerApprovalDispositionResult is Resource.Error) {
+        if (blockHashState.recentBlockhashResult is Resource.Error) {
+            strikeLog(message = "Failure retrieving blockhash")
+            //TODO: Handle failure
+        }
+        if (approvalsState.approvalDispositionState?.registerApprovalDispositionResult is Resource.Success) {
+            showToast("registered approval disposition")
+            approvalsViewModel.resetApprovalDispositionAPICalls()
+            approvalsViewModel.refreshData()
+        }
+        if (approvalsState.approvalDispositionState?.registerApprovalDispositionResult is Resource.Error) {
             showToast("Failed to registered approval disposition")
-            viewModel.resetApprovalDispositionAPICalls()
+            approvalsViewModel.resetApprovalDispositionAPICalls()
         }
     }
 
@@ -122,16 +137,16 @@ fun ApprovalsListScreen(
                 onAppBarIconClick = {},
                 navigationIcon = Icons.Outlined.AccountCircle,
                 navigationIconContentDes = stringResource(id = R.string.content_des_account_icon),
-                onLogout = viewModel::logout
+                onLogout = approvalsViewModel::logout
             )
         },
         content = { innerPadding ->
             ApprovalsList(
-                isRefreshing = state.loadingData,
-                onRefresh = viewModel::refreshData,
+                isRefreshing = approvalsState.loadingData,
+                onRefresh = approvalsViewModel::refreshData,
                 onApproveClicked = { approval ->
                     strikeLog(message = "Approve clicked")
-                    viewModel.setShouldDisplayConfirmDispositionDialog(
+                    approvalsViewModel.setShouldDisplayConfirmDispositionDialog(
                         approval = approval,
                         isApproving = true,
                         dialogTitle = "Confirm Approval",
@@ -143,7 +158,7 @@ fun ApprovalsListScreen(
                         navController.navigate("${Screen.ApprovalDetailRoute.route}/${WalletApproval.toJson(safeApproval)}" )
                     }
                 },
-                walletApprovals = state.approvals
+                walletApprovals = approvalsState.approvals
             )
             
             Box(
@@ -155,19 +170,19 @@ fun ApprovalsListScreen(
                 )
             }
 
-            if (state.shouldDisplayConfirmDispositionDialog != null) {
-                state.shouldDisplayConfirmDispositionDialog.let { safeDialogDetails ->
+            if (approvalsState.shouldDisplayConfirmDispositionDialog != null) {
+                approvalsState.shouldDisplayConfirmDispositionDialog.let { safeDialogDetails ->
                     ConfirmDispositionAlertDialog(
                         dialogTitle = safeDialogDetails.dialogTitle,
                         dialogText = safeDialogDetails.dialogText,
                         onConfirm = {
                             strikeLog(message = "Confirming disposition")
-                            viewModel.resetShouldDisplayConfirmDispositionDialog()
-                            viewModel.setPromptTrigger()
+                            approvalsViewModel.resetShouldDisplayConfirmDispositionDialog()
+                            blockHashViewModel.setPromptTrigger()
                         },
                         onDismiss = {
                             strikeLog(message = "Dismissing dialog")
-                            viewModel.resetShouldDisplayConfirmDispositionDialog()
+                            approvalsViewModel.resetShouldDisplayConfirmDispositionDialog()
                         }
                     )
                 }

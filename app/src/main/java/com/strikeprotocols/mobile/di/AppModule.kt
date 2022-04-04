@@ -46,8 +46,8 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideApprovalsRepository(api: BrooklynApiService, solanaApiService: SolanaApiService): ApprovalsRepository {
-        return ApprovalsRepositoryImpl(api, solanaApiService)
+    fun provideApprovalsRepository(api: BrooklynApiService): ApprovalsRepository {
+        return ApprovalsRepositoryImpl(api)
     }
 
     @Provides
