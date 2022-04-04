@@ -58,8 +58,8 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideEncryptionManager(): EncryptionManager {
-        return EncryptionManagerImpl()
+    fun provideEncryptionManager(securePreferences: SecurePreferences): EncryptionManager {
+        return EncryptionManagerImpl(securePreferences)
     }
 
     @Provides
