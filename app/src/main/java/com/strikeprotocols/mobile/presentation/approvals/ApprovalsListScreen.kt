@@ -75,6 +75,11 @@ fun ApprovalsListScreen(
         }
     )
 
+    checkForHardRefreshAfterBackNavigation(
+        navController = navController,
+        approvalsViewModel = approvalsViewModel
+    )
+
     //region DisposableEffect
     DisposableEffect(key1 = approvalsViewModel) {
         approvalsViewModel.onStart()
@@ -118,12 +123,11 @@ fun ApprovalsListScreen(
         }
         if (approvalsState.approvalDispositionState?.registerApprovalDispositionResult is Resource.Success) {
             showToast("registered approval disposition")
-            approvalsViewModel.resetApprovalDispositionAPICalls()
-            approvalsViewModel.refreshData()
+            approvalsViewModel.wipeDataAfterDispositionSuccess()
         }
         if (approvalsState.approvalDispositionState?.registerApprovalDispositionResult is Resource.Error) {
             showToast("Failed to registered approval disposition")
-            approvalsViewModel.resetApprovalDispositionAPICalls()
+            approvalsViewModel.resetApprovalDispositionState()
         }
     }
 
@@ -162,7 +166,9 @@ fun ApprovalsListScreen(
             )
             
             Box(
-                modifier = Modifier.padding(innerPadding).fillMaxHeight()
+                modifier = Modifier
+                    .padding(innerPadding)
+                    .fillMaxHeight()
             ) {
                 StrikeSnackbar(
                     snackbarHostState = scaffoldState.snackbarHostState,
@@ -291,5 +297,23 @@ fun ListDataEmptyState() {
             contentDescription = stringResource(R.string.content_des_pull_to_refresh_icon),
             tint = GreyText
         )
+    }
+}
+
+fun checkForHardRefreshAfterBackNavigation(
+    navController: NavController,
+    approvalsViewModel: ApprovalsViewModel
+) {
+    if (navController.currentBackStackEntry?.savedStateHandle?.contains(ApprovalsViewModel.Companion.KEY_SHOULD_REFRESH_DATA) == false) {
+        return
+    }
+
+    val shouldRefreshData =
+        navController.currentBackStackEntry?.savedStateHandle?.get<Boolean>(ApprovalsViewModel.Companion.KEY_SHOULD_REFRESH_DATA)
+    //Have to remove data immediately or else the composable will keep grabbing it.
+    navController.currentBackStackEntry?.savedStateHandle?.remove<Boolean>(ApprovalsViewModel.Companion.KEY_SHOULD_REFRESH_DATA)
+
+    if (shouldRefreshData != null) {
+        approvalsViewModel.wipeDataAfterDispositionSuccess()
     }
 }

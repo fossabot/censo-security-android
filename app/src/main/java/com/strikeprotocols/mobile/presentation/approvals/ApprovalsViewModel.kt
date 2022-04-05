@@ -8,7 +8,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.strikeprotocols.mobile.common.Resource
 import com.strikeprotocols.mobile.common.generateWalletApprovalsDummyData
-import com.strikeprotocols.mobile.common.strikeLog
 import com.strikeprotocols.mobile.data.ApprovalsRepository
 import com.strikeprotocols.mobile.data.UserRepository
 import com.strikeprotocols.mobile.data.models.ApprovalDisposition
@@ -42,6 +41,15 @@ class ApprovalsViewModel @Inject constructor(
 
     fun refreshData() {
         retrieveWalletApprovals()
+    }
+
+    private fun resetApprovalsData() {
+        state = state.copy(
+            approvals = emptyList(),
+            walletApprovalsResult = Resource.Uninitialized,
+            selectedApproval = null,
+            blockHash = null
+        )
     }
 
     fun onStart() {
@@ -100,11 +108,11 @@ class ApprovalsViewModel @Inject constructor(
     fun logout() {
         viewModelScope.launch {
             state = state.copy(logoutResult = Resource.Loading())
-            try {
+            state = try {
                 val loggedOut = userRepository.logOut()
-                state = state.copy(logoutResult = Resource.Success(loggedOut))
+                state.copy(logoutResult = Resource.Success(loggedOut))
             } catch (e: Exception) {
-                state = state.copy(logoutResult = Resource.Success(false))
+                state.copy(logoutResult = Resource.Success(false))
             }
         }
     }
@@ -123,6 +131,20 @@ class ApprovalsViewModel @Inject constructor(
     fun resetBlockHash() {
         state = state.copy(blockHash = null)
     }
+
+    fun wipeDataAfterDispositionSuccess() {
+        resetApprovalsData()
+        resetApprovalDispositionState()
+
+        refreshData()
+    }
+
+    fun resetApprovalDispositionState() {
+        state = state.copy(
+            approvalDispositionState = ApprovalDispositionState()
+        )
+    }
+
 
     //region API Calls
     private fun retrieveWalletApprovals() {
@@ -159,34 +181,8 @@ class ApprovalsViewModel @Inject constructor(
             state = state.copy(approvals = countdownList)
         }
     }
-    //endregion
 
-    fun resetApprovalDispositionAPICalls() {
-        resetDispositionState()
-    }
-
-    private fun resetDispositionState() {
-        state = state.copy(
-            approvalDispositionState = ApprovalDispositionState()
-        )
-    }
-
-
-    private suspend fun signData() {
-        state = state.copy(
-            approvalDispositionState = state.approvalDispositionState?.copy(
-                signingDataResult = Resource.Loading()
-            )
-        )
-        delay(250)
-        state = state.copy(
-            approvalDispositionState = state.approvalDispositionState?.copy(
-                signingDataResult = Resource.Success("I am signed data")
-            )
-        )
-    }
-
-    fun registerApprovalDisposition() {
+    private fun registerApprovalDisposition() {
         viewModelScope.launch {
             state = state.copy(
                 approvalDispositionState = state.approvalDispositionState?.copy(
@@ -258,9 +254,26 @@ class ApprovalsViewModel @Inject constructor(
             }
         }
     }
+    //endregion
+
+    private suspend fun signData() {
+        state = state.copy(
+            approvalDispositionState = state.approvalDispositionState?.copy(
+                signingDataResult = Resource.Loading()
+            )
+        )
+        delay(250)
+        state = state.copy(
+            approvalDispositionState = state.approvalDispositionState?.copy(
+                signingDataResult = Resource.Success("I am signed data")
+            )
+        )
+    }
 
     object Companion {
         const val UPDATE_COUNTDOWN = 1000L
+
+        const val KEY_SHOULD_REFRESH_DATA = "KEY_SHOULD_REFRESH_DATA"
     }
 
 }

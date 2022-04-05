@@ -95,11 +95,20 @@ class ApprovalDetailsViewModel @Inject constructor(
         }
     }
 
-    fun resetApprovalDispositionAPICalls() {
-        resetDispositionState()
+    fun resetShouldKickOutUser() {
+        state = state.copy(
+            shouldKickOutUserToApprovalsScreen = false
+        )
     }
 
-    private fun resetDispositionState() {
+    fun wipeDataAndKickUserOutToApprovalsScreen() {
+        resetDispositionState()
+        state = state.copy(
+            shouldKickOutUserToApprovalsScreen = true
+        )
+    }
+
+    fun resetDispositionState() {
         state = state.copy(
             approvalDispositionState = ApprovalDispositionState()
         )
