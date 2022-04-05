@@ -23,7 +23,6 @@ data class RegisterApprovalDisposition(
 }
 
 enum class ApprovalDisposition(val value: String) {
-    @SerializedName("None") NONE("None"),
     @SerializedName("Approve") APPROVE("Approve"),
     @SerializedName("Deny") DENY("Deny")
 }

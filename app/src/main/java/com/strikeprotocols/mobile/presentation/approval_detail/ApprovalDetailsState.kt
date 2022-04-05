@@ -1,6 +1,6 @@
 package com.strikeprotocols.mobile.presentation.approval_detail
 
-import com.strikeprotocols.mobile.data.models.WalletApproval
+import com.strikeprotocols.mobile.data.models.approval.WalletApproval
 import com.strikeprotocols.mobile.presentation.approval_disposition.ApprovalDispositionState
 import com.strikeprotocols.mobile.presentation.blockhash.BlockHashViewModel
 

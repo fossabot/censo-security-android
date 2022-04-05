@@ -90,7 +90,12 @@ fun SignInScreen(
     LaunchedEffect(key1 = state) {
         if (state.loginResult is Resource.Success) {
             viewModel.setUserLoggedInSuccess()
-            viewModel.resetLoginCallAndRetrieveUserInformation()
+            navController.navigate(Screen.ApprovalListRoute.route) {
+                popUpTo(Screen.SignInRoute.route) {
+                    inclusive = true
+                }
+            }
+            //viewModel.resetLoginCallAndRetrieveUserInformation()
         }
 
         if (state.saveCredential is Resource.Success) {

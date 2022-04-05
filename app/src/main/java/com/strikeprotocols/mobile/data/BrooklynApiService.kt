@@ -1,9 +1,12 @@
 package com.strikeprotocols.mobile.data
 
+import com.google.gson.*
 import com.strikeprotocols.mobile.BuildConfig
 import com.strikeprotocols.mobile.data.BrooklynApiService.Companion.AUTH
 import com.strikeprotocols.mobile.data.models.*
 import com.strikeprotocols.mobile.data.ApprovalsRepositoryImpl.RegisterApprovalDispositionBody
+import com.strikeprotocols.mobile.data.models.approval.WalletApproval
+import com.strikeprotocols.mobile.data.models.approval.WalletApprovalDeserializer
 import kotlinx.coroutines.runBlocking
 import okhttp3.*
 import okhttp3.logging.HttpLoggingInterceptor
@@ -37,10 +40,14 @@ interface BrooklynApiService {
                 client.addInterceptor(logger)
             }
 
+            val customGson = GsonBuilder()
+                .registerTypeAdapter(WalletApproval::class.java, WalletApprovalDeserializer())
+                .create()
+
             return Retrofit.Builder()
                 .baseUrl(BuildConfig.BASE_URL)
                 .client(client.build())
-                .addConverterFactory(GsonConverterFactory.create())
+                .addConverterFactory(GsonConverterFactory.create(customGson))
                 .build()
                 .create(BrooklynApiService::class.java)
         }
@@ -90,7 +97,7 @@ class AuthInterceptor(private val authProvider: AuthProvider) : Interceptor {
                     .addHeader(AUTH, "Bearer $token")
                     .build()
             } catch (e: TokenExpiredException) {
-                runBlocking {  authProvider.signOut() }
+                runBlocking { authProvider.signOut() }
                 authProvider.setUserState(userState = UserState.REFRESH_TOKEN_EXPIRED)
             }
         }

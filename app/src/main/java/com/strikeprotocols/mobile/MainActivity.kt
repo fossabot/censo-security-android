@@ -2,8 +2,6 @@ package com.strikeprotocols.mobile
 
 import android.app.NotificationChannel
 import android.app.NotificationManager
-import android.content.pm.PackageManager
-import android.os.Build
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.compose.material.Surface
@@ -20,11 +18,10 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.strikeprotocols.mobile.common.BiometricUtil
-import com.strikeprotocols.mobile.common.strikeLog
 import com.strikeprotocols.mobile.data.AuthProvider
 import com.strikeprotocols.mobile.data.UserState
 import com.strikeprotocols.mobile.data.UserStateListener
-import com.strikeprotocols.mobile.data.models.WalletApproval
+import com.strikeprotocols.mobile.data.models.approval.WalletApproval
 import com.strikeprotocols.mobile.presentation.Screen
 import com.strikeprotocols.mobile.presentation.approval_detail.ApprovalDetailsScreen
 import com.strikeprotocols.mobile.presentation.approvals.ApprovalsListScreen
@@ -117,7 +114,7 @@ class MainActivity : FragmentActivity() {
     private fun StrikeNavHost(navController: NavHostController) {
         NavHost(
             navController = navController,
-            startDestination = Screen.ApprovalListRoute.route
+            startDestination = Screen.SplashRoute.route
         ) {
             composable(
                 route = Screen.SplashRoute.route

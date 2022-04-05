@@ -7,13 +7,11 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.strikeprotocols.mobile.common.Resource
-import com.strikeprotocols.mobile.common.generateWalletApprovalsDummyData
-import com.strikeprotocols.mobile.common.strikeLog
 import com.strikeprotocols.mobile.data.ApprovalsRepository
 import com.strikeprotocols.mobile.data.UserRepository
 import com.strikeprotocols.mobile.data.models.ApprovalDisposition
 import com.strikeprotocols.mobile.data.models.RegisterApprovalDisposition
-import com.strikeprotocols.mobile.data.models.WalletApproval
+import com.strikeprotocols.mobile.data.models.approval.WalletApproval
 import com.strikeprotocols.mobile.presentation.approval_detail.ConfirmDispositionDialogDetails
 import com.strikeprotocols.mobile.presentation.approval_disposition.ApprovalDispositionError
 import com.strikeprotocols.mobile.presentation.approval_disposition.ApprovalDispositionState
@@ -159,7 +157,7 @@ class ApprovalsViewModel @Inject constructor(
     private fun retrieveWalletApprovals() {
         viewModelScope.launch {
             state = state.copy(walletApprovalsResult = Resource.Loading())
-            delay(500)
+            delay(250)
             state = try {
                 val walletApprovals = approvalsRepository.getWalletApprovals()
                 state.copy(
