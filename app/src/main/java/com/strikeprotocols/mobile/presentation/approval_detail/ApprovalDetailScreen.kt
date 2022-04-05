@@ -33,10 +33,10 @@ import com.strikeprotocols.mobile.common.convertSecondsIntoCountdownText
 import com.strikeprotocols.mobile.common.strikeLog
 import com.strikeprotocols.mobile.data.models.WalletApproval
 import com.strikeprotocols.mobile.presentation.approval_detail.approval_type_components.ApprovalDetailsTransferContent
+import com.strikeprotocols.mobile.presentation.approvals.ApprovalsViewModel
 import com.strikeprotocols.mobile.presentation.blockhash.BlockHashViewModel
 import com.strikeprotocols.mobile.presentation.components.StrikeTopAppBar
 import com.strikeprotocols.mobile.ui.theme.*
-import java.util.*
 
 @Composable
 fun ApprovalDetailsScreen(
@@ -90,12 +90,21 @@ fun ApprovalDetailsScreen(
             //TODO: Handle failure
         }
         if (approvalDetailsState.approvalDispositionState?.registerApprovalDispositionResult is Resource.Success) {
-            approvalDetailsViewModel.resetApprovalDispositionAPICalls()
+            approvalDetailsViewModel.wipeDataAndKickUserOutToApprovalsScreen()
             showToast("registered approval disposition")
         }
         if (approvalDetailsState.approvalDispositionState?.registerApprovalDispositionResult is Resource.Error) {
             showToast("Failed to registered approval disposition")
-            approvalDetailsViewModel.resetApprovalDispositionAPICalls()
+            approvalDetailsViewModel.resetDispositionState()
+        }
+        if (approvalDetailsState.shouldKickOutUserToApprovalsScreen) {
+            approvalDetailsViewModel.resetShouldKickOutUser()
+
+            navController.previousBackStackEntry
+                ?.savedStateHandle
+                ?.set(ApprovalsViewModel.Companion.KEY_SHOULD_REFRESH_DATA, true)
+
+            navController.navigateUp()
         }
     }
 
@@ -198,7 +207,9 @@ fun ApprovalDetails(
     }
 
     if(isLoading) {
-        Box(modifier = Modifier.fillMaxWidth().padding(top = 12.dp)) {
+        Box(modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 12.dp)) {
             CircularProgressIndicator(
                 modifier = Modifier.align(Alignment.Center),
                 color = StrikeWhite
