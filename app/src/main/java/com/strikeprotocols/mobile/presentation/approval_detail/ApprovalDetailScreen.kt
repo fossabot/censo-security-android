@@ -32,7 +32,7 @@ import com.strikeprotocols.mobile.common.Resource
 import com.strikeprotocols.mobile.common.convertSecondsIntoCountdownText
 import com.strikeprotocols.mobile.common.retrieveApprovalDispositionDialogErrorText
 import com.strikeprotocols.mobile.common.strikeLog
-import com.strikeprotocols.mobile.data.models.WalletApproval
+import com.strikeprotocols.mobile.data.models.approval.WalletApproval
 import com.strikeprotocols.mobile.presentation.approval_detail.approval_type_components.ApprovalDetailsTransferContent
 import com.strikeprotocols.mobile.presentation.approvals.ApprovalsViewModel
 import com.strikeprotocols.mobile.presentation.blockhash.BlockHashViewModel

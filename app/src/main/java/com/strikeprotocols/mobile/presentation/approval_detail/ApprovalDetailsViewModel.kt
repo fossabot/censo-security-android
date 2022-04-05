@@ -9,6 +9,7 @@ import androidx.lifecycle.viewModelScope
 import com.strikeprotocols.mobile.common.Resource
 import com.strikeprotocols.mobile.data.ApprovalsRepository
 import com.strikeprotocols.mobile.data.models.*
+import com.strikeprotocols.mobile.data.models.approval.WalletApproval
 import com.strikeprotocols.mobile.presentation.approval_detail.ApprovalDetailsViewModel.Companion.UPDATE_COUNTDOWN
 import com.strikeprotocols.mobile.presentation.approval_disposition.ApprovalDispositionError
 import com.strikeprotocols.mobile.presentation.approval_disposition.ApprovalDispositionState

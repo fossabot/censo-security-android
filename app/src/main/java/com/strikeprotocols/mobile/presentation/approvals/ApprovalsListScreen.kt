@@ -15,16 +15,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.fragment.app.FragmentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
-import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.SwipeRefreshIndicator
@@ -34,8 +30,9 @@ import com.strikeprotocols.mobile.common.BiometricUtil
 import com.strikeprotocols.mobile.common.Resource
 import com.strikeprotocols.mobile.common.retrieveApprovalDispositionDialogErrorText
 import com.strikeprotocols.mobile.common.strikeLog
+import com.strikeprotocols.mobile.data.models.approval.WalletApproval
 import com.strikeprotocols.mobile.presentation.Screen
-import com.strikeprotocols.mobile.data.models.WalletApproval
+import com.strikeprotocols.mobile.presentation.components.StrikeTopAppBar
 import com.strikeprotocols.mobile.presentation.blockhash.BlockHashViewModel
 import com.strikeprotocols.mobile.presentation.components.*
 import com.strikeprotocols.mobile.ui.theme.*

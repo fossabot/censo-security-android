@@ -2,8 +2,8 @@ package com.strikeprotocols.mobile.data
 
 import com.strikeprotocols.mobile.data.models.ApprovalDisposition
 import com.strikeprotocols.mobile.data.models.RegisterApprovalDisposition
-import com.strikeprotocols.mobile.data.models.WalletApproval
 import com.strikeprotocols.mobile.data.ApprovalsRepositoryImpl.RegisterApprovalDispositionBody
+import com.strikeprotocols.mobile.data.models.approval.WalletApproval
 import com.strikeprotocols.mobile.presentation.approval_disposition.ApprovalDispositionError
 import javax.inject.Inject
 

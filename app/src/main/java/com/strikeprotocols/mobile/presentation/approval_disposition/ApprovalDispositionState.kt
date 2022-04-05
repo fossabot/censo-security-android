@@ -3,9 +3,8 @@ package com.strikeprotocols.mobile.presentation.approval_disposition
 import com.strikeprotocols.mobile.common.Resource
 import com.strikeprotocols.mobile.data.ApprovalsRepositoryImpl.RegisterApprovalDispositionBody
 import com.strikeprotocols.mobile.data.models.ApprovalDisposition
-import com.strikeprotocols.mobile.data.models.RecentBlockHashResponse
 import com.strikeprotocols.mobile.data.models.RegisterApprovalDisposition
-import com.strikeprotocols.mobile.data.models.WalletApproval
+import com.strikeprotocols.mobile.data.models.approval.WalletApproval
 
 data class ApprovalDispositionState(
     val approvalDisposition: Resource<ApprovalDisposition> = Resource.Uninitialized,
