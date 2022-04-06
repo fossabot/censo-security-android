@@ -6,7 +6,8 @@ import com.strikeprotocols.mobile.presentation.blockhash.BlockHashViewModel
 
 data class ApprovalDetailsState(
     val shouldKickOutUserToApprovalsScreen: Boolean = false,
-    val shouldDisplayConfirmDispositionDialog: ConfirmDispositionDialogDetails? = null,
+    val shouldDisplayConfirmDisposition: ConfirmDispositionDialogDetails? = null,
+    val shouldDisplayApprovalDispositionError: Boolean = false,
     val approval: WalletApproval? = null,
     val blockHash: BlockHashViewModel.BlockHash? = null,
 

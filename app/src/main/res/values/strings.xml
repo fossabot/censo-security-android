@@ -63,4 +63,12 @@
     <string name="confirm">Confirm</string>
     <string name="biometry_check">Biometric Check</string>
     <string name="performing_biometry_check">Performing biometric check before submitting disposition</string>
+
+    <string name="approval_disposition_error_general">Something bad went wrong that should not have</string>
+    <string name="approval_disposition_error">Failure with recording approval disposition</string>
+    <string name="approval_disposition_error_signing_data">Failure signing disposition data</string>
+    <string name="approval_disposition_error_blockhash">Failure retrieving blockHash from blockchain</string>
+    <string name="approval_disposition_error_submit">Failure submitting data to the server</string>
+    <string name="approval_disposition_error_title">Something went wrong</string>
+
 </resources>
