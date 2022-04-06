@@ -1,6 +1,5 @@
 package com.strikeprotocols.mobile.presentation.approvals
 
-import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -31,12 +30,14 @@ import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import com.strikeprotocols.mobile.R
 import com.strikeprotocols.mobile.common.BiometricUtil
 import com.strikeprotocols.mobile.common.Resource
+import com.strikeprotocols.mobile.common.retrieveApprovalDispositionDialogErrorText
 import com.strikeprotocols.mobile.common.strikeLog
 import com.strikeprotocols.mobile.presentation.Screen
 import com.strikeprotocols.mobile.presentation.components.StrikeTopAppBar
 import com.strikeprotocols.mobile.data.models.WalletApproval
-import com.strikeprotocols.mobile.presentation.approval_detail.ConfirmDispositionAlertDialog
 import com.strikeprotocols.mobile.presentation.blockhash.BlockHashViewModel
+import com.strikeprotocols.mobile.presentation.components.StrikeApprovalDispositionErrorAlertDialog
+import com.strikeprotocols.mobile.presentation.components.StrikeConfirmDispositionAlertDialog
 import com.strikeprotocols.mobile.presentation.components.StrikeSnackbar
 import com.strikeprotocols.mobile.ui.theme.*
 import kotlinx.coroutines.launch
@@ -57,20 +58,14 @@ fun ApprovalsListScreen(
     val scaffoldState = rememberScaffoldState()
     val coroutineScope = rememberCoroutineScope()
 
-    fun showToast(text: String) = Toast.makeText(context, text, Toast.LENGTH_SHORT).show()
-
     val promptInfo = BiometricUtil.getBasicBiometricPromptBuilder(context).build()
 
     val bioPrompt = BiometricUtil.createBioPrompt(
         fragmentActivity = context,
         onSuccess = {
-            showToast("Authentication success")
-            //Let VM handle this
             blockHashViewModel.setUserBiometricVerified(isVerified = true)
         },
         onFail = {
-            showToast("Authentication failed")
-            //Let VM handle this
             blockHashViewModel.setUserBiometricVerified(isVerified = false)
         }
     )
@@ -111,23 +106,16 @@ fun ApprovalsListScreen(
             bioPrompt.authenticate(promptInfo)
         }
         if (blockHashState.recentBlockhashResult is Resource.Success) {
-            strikeLog(message = "Success retrieving blockhash. BlockHash: ${blockHashState.blockHash?.blockHashString} ")
             if (blockHashState.blockHash != null) {
                 approvalsViewModel.setBlockHash(blockHashState.blockHash)
                 blockHashViewModel.resetState()
             }
         }
-        if (blockHashState.recentBlockhashResult is Resource.Error) {
-            strikeLog(message = "Failure retrieving blockhash")
-            //TODO: Handle failure
-        }
         if (approvalsState.approvalDispositionState?.registerApprovalDispositionResult is Resource.Success) {
-            showToast("registered approval disposition")
             approvalsViewModel.wipeDataAfterDispositionSuccess()
         }
         if (approvalsState.approvalDispositionState?.registerApprovalDispositionResult is Resource.Error) {
-            showToast("Failed to registered approval disposition")
-            approvalsViewModel.resetApprovalDispositionState()
+            approvalsViewModel.setShouldDisplayApprovalDispositionError()
         }
     }
 
@@ -176,19 +164,31 @@ fun ApprovalsListScreen(
                 )
             }
 
-            if (approvalsState.shouldDisplayConfirmDispositionDialog != null) {
-                approvalsState.shouldDisplayConfirmDispositionDialog.let { safeDialogDetails ->
-                    ConfirmDispositionAlertDialog(
+            if (approvalsState.shouldDisplayConfirmDisposition != null) {
+                approvalsState.shouldDisplayConfirmDisposition.let { safeDialogDetails ->
+                    StrikeConfirmDispositionAlertDialog(
                         dialogTitle = safeDialogDetails.dialogTitle,
                         dialogText = safeDialogDetails.dialogText,
                         onConfirm = {
-                            strikeLog(message = "Confirming disposition")
-                            approvalsViewModel.resetShouldDisplayConfirmDispositionDialog()
+                            approvalsViewModel.resetShouldDisplayConfirmDisposition()
                             blockHashViewModel.setPromptTrigger()
                         },
                         onDismiss = {
-                            strikeLog(message = "Dismissing dialog")
-                            approvalsViewModel.resetShouldDisplayConfirmDispositionDialog()
+                            approvalsViewModel.resetShouldDisplayConfirmDisposition()
+                        }
+                    )
+                }
+            }
+
+            if (approvalsState.shouldDisplayApprovalDispositionError) {
+                val approvalDispositionError = approvalsState.approvalDispositionState?.approvalDispositionError
+                approvalDispositionError?.let { safeApprovalDispositionError ->
+                    val dialogErrorText = retrieveApprovalDispositionDialogErrorText(safeApprovalDispositionError, context)
+                    StrikeApprovalDispositionErrorAlertDialog(
+                        dialogTitle = stringResource(R.string.approval_disposition_error_title),
+                        dialogText = dialogErrorText,
+                        onConfirm = {
+                            approvalsViewModel.dismissApprovalDispositionError()
                         }
                     )
                 }
@@ -197,6 +197,7 @@ fun ApprovalsListScreen(
     )
 }
 
+//region Screen Composables
 @Composable
 fun ApprovalsListTopAppBar(
     title: String,
@@ -317,3 +318,4 @@ fun checkForHardRefreshAfterBackNavigation(
         approvalsViewModel.wipeDataAfterDispositionSuccess()
     }
 }
+//endregion

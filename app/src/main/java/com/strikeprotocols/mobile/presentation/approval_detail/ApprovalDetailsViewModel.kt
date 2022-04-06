@@ -60,15 +60,23 @@ class ApprovalDetailsViewModel @Inject constructor(
             if(isApproving) ApprovalDisposition.APPROVE else ApprovalDisposition.DENY
 
         state = state.copy(
-            shouldDisplayConfirmDispositionDialog = dialogDetails,
+            shouldDisplayConfirmDisposition = dialogDetails,
             approvalDispositionState = state.approvalDispositionState?.copy(
                 approvalDisposition = Resource.Success(approvalDisposition)
             )
         )
     }
 
-    fun resetShouldDisplayConfirmDispositionDialog() {
-        state = state.copy(shouldDisplayConfirmDispositionDialog = null)
+    fun resetShouldDisplayConfirmDisposition() {
+        state = state.copy(shouldDisplayConfirmDisposition = null)
+    }
+
+    fun setShouldDisplayApprovalDispositionError() {
+        state = state.copy(shouldDisplayApprovalDispositionError = true)
+    }
+
+    private fun resetShouldDisplayApprovalDispositionError() {
+        state = state.copy(shouldDisplayApprovalDispositionError = false)
     }
 
     private fun startCountDown() {
@@ -102,13 +110,18 @@ class ApprovalDetailsViewModel @Inject constructor(
     }
 
     fun wipeDataAndKickUserOutToApprovalsScreen() {
-        resetDispositionState()
+        resetApprovalDispositionState()
         state = state.copy(
             shouldKickOutUserToApprovalsScreen = true
         )
     }
 
-    fun resetDispositionState() {
+    fun dismissApprovalDispositionError() {
+        resetShouldDisplayApprovalDispositionError()
+        resetApprovalDispositionState()
+    }
+
+    fun resetApprovalDispositionState() {
         state = state.copy(
             approvalDispositionState = ApprovalDispositionState()
         )
@@ -116,9 +129,7 @@ class ApprovalDetailsViewModel @Inject constructor(
 
     fun setBlockHash(blockHash: BlockHash) {
         state = state.copy(blockHash = blockHash)
-        if (state.blockHash != null) {
-            registerApprovalDisposition()
-        }
+        registerApprovalDisposition()
     }
 
     fun resetBlockHash() {
@@ -140,7 +151,7 @@ class ApprovalDetailsViewModel @Inject constructor(
         )
     }
 
-    fun registerApprovalDisposition() {
+    private fun registerApprovalDisposition() {
         viewModelScope.launch {
             state = state.copy(
                 approvalDispositionState = state.approvalDispositionState?.copy(
@@ -202,7 +213,7 @@ class ApprovalDetailsViewModel @Inject constructor(
                         )
                     )
                 )
-            } catch (e: java.lang.Exception) {
+            } catch (e: Exception) {
                 state = state.copy(
                     approvalDispositionState = state.approvalDispositionState?.copy(
                         approvalDispositionError = ApprovalDispositionError.SUBMIT_FAILURE,

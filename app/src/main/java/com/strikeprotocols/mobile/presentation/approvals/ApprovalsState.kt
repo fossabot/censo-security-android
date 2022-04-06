@@ -8,7 +8,8 @@ import com.strikeprotocols.mobile.presentation.blockhash.BlockHashViewModel.Bloc
 
 data class ApprovalsState(
     val shouldShowErrorSnackbar: Boolean = false,
-    val shouldDisplayConfirmDispositionDialog: ConfirmDispositionDialogDetails? = null,
+    val shouldDisplayConfirmDisposition: ConfirmDispositionDialogDetails? = null,
+    val shouldDisplayApprovalDispositionError: Boolean = false,
     val blockHash: BlockHash? = null,
 
     //Async Data

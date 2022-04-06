@@ -2,8 +2,9 @@ package com.strikeprotocols.mobile.common
 
 import android.content.Context
 import com.strikeprotocols.mobile.R
+import com.strikeprotocols.mobile.presentation.approval_disposition.ApprovalDispositionError
 
-fun Int.convertApprovalsNeededToDisplayMessage(context: Context) : String {
+fun Int.convertApprovalsNeededToDisplayMessage(context: Context): String {
     return when (this) {
         0 -> {
             context.getString(R.string.no_more_approvals_needed)
@@ -16,3 +17,16 @@ fun Int.convertApprovalsNeededToDisplayMessage(context: Context) : String {
         }
     }
 }
+
+fun retrieveApprovalDispositionDialogErrorText(
+    approvalDispositionError: ApprovalDispositionError,
+    context: Context
+) = when (approvalDispositionError) {
+        ApprovalDispositionError.SUBMIT_FAILURE -> context.getString(R.string.approval_disposition_error_submit)
+        ApprovalDispositionError.BLOCKHASH_FAILURE -> context.getString(R.string.approval_disposition_error_blockhash)
+        ApprovalDispositionError.SIGNING_DATA_FAILURE -> context.getString(R.string.approval_disposition_error_signing_data)
+        ApprovalDispositionError.APPROVAL_DISPOSITION_FAILURE -> context.getString(R.string.approval_disposition_error)
+        else -> {
+            context.getString(R.string.approval_disposition_error_general)
+        }
+    }

@@ -87,7 +87,7 @@ class ApprovalsViewModel @Inject constructor(
             if(isApproving) ApprovalDisposition.APPROVE else ApprovalDisposition.DENY
 
         state = state.copy(
-            shouldDisplayConfirmDispositionDialog = dialogDetails,
+            shouldDisplayConfirmDisposition = dialogDetails,
             selectedApproval = approval,
             approvalDispositionState = state.approvalDispositionState?.copy(
                 approvalDisposition = Resource.Success(
@@ -97,8 +97,16 @@ class ApprovalsViewModel @Inject constructor(
         )
     }
 
-    fun resetShouldDisplayConfirmDispositionDialog() {
-        state = state.copy(shouldDisplayConfirmDispositionDialog = null)
+    fun resetShouldDisplayConfirmDisposition() {
+        state = state.copy(shouldDisplayConfirmDisposition = null)
+    }
+
+    fun setShouldDisplayApprovalDispositionError() {
+        state = state.copy(shouldDisplayApprovalDispositionError = true)
+    }
+
+    private fun resetShouldDisplayApprovalDispositionError() {
+        state = state.copy(shouldDisplayApprovalDispositionError = false)
     }
 
     fun resetShouldShowErrorSnackbar() {
@@ -123,9 +131,7 @@ class ApprovalsViewModel @Inject constructor(
 
     fun setBlockHash(blockHash: BlockHash) {
         state = state.copy(blockHash = blockHash)
-        if (state.blockHash != null) {
-            registerApprovalDisposition()
-        }
+        registerApprovalDisposition()
     }
 
     fun resetBlockHash() {
@@ -138,6 +144,12 @@ class ApprovalsViewModel @Inject constructor(
 
         refreshData()
     }
+
+    fun dismissApprovalDispositionError() {
+        resetShouldDisplayApprovalDispositionError()
+        resetApprovalDispositionState()
+    }
+
 
     fun resetApprovalDispositionState() {
         state = state.copy(

@@ -59,7 +59,7 @@ class BlockHashViewModel @Inject constructor(
                     blockHash = blockHash
                 )
             } catch (e: Exception) {
-                state.copy(recentBlockhashResult = Resource.Error(e.message ?: ""))
+                state.copy(recentBlockhashResult = Resource.Success(null))
             }
         }
     }
