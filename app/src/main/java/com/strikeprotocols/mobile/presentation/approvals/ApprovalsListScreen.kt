@@ -134,7 +134,7 @@ fun ApprovalsListScreen(
         },
         content = { innerPadding ->
             ApprovalsList(
-                isRefreshing = approvalsState.loadingData,
+                isRefreshing = approvalsState.loadingData || blockHashState.isLoading,
                 onRefresh = approvalsViewModel::refreshData,
                 onApproveClicked = { approval ->
                     strikeLog(message = "Approve clicked")

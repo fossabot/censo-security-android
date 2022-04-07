@@ -167,8 +167,7 @@ class ApprovalsViewModel @Inject constructor(
                 val walletApprovals = approvalsRepository.getWalletApprovals()
                 state.copy(
                     walletApprovalsResult = Resource.Success(walletApprovals),
-                    //TODO Revert this back to real data after flow is done
-                    approvals = listOf(generateWalletApprovalsDummyData())//walletApprovals
+                    approvals = walletApprovals
                 )
             } catch (e: Exception) {
                 state.copy(
@@ -214,10 +213,8 @@ class ApprovalsViewModel @Inject constructor(
                     return@launch
                 }
 
-                signData()
-                val signResult = state.approvalDispositionState?.signingDataResult
-                val signature = if (signResult is Resource.Success) signResult.data else null
-                if (signature == null) {
+                val signable = state.selectedApproval
+                if (signable == null) {
                     state = state.copy(
                         approvalDispositionState = state.approvalDispositionState?.copy(
                             approvalDispositionError = ApprovalDispositionError.SIGNING_DATA_FAILURE,
@@ -241,7 +238,7 @@ class ApprovalsViewModel @Inject constructor(
 
                 val registerApprovalDisposition = RegisterApprovalDisposition(
                     approvalDisposition = approvalDisposition,
-                    signature = signature,
+                    signable = signable,
                     recentBlockhash = recentBlockHash
                 )
 
@@ -267,20 +264,6 @@ class ApprovalsViewModel @Inject constructor(
         }
     }
     //endregion
-
-    private suspend fun signData() {
-        state = state.copy(
-            approvalDispositionState = state.approvalDispositionState?.copy(
-                signingDataResult = Resource.Loading()
-            )
-        )
-        delay(250)
-        state = state.copy(
-            approvalDispositionState = state.approvalDispositionState?.copy(
-                signingDataResult = Resource.Success("I am signed data")
-            )
-        )
-    }
 
     object Companion {
         const val UPDATE_COUNTDOWN = 1000L

@@ -1,6 +1,7 @@
 package com.strikeprotocols.mobile.data.models
 
 import com.google.gson.Gson
+import com.strikeprotocols.mobile.data.Signable
 
 data class WalletApproval(
     val approvalTimeoutInSeconds: Int?,
@@ -13,7 +14,7 @@ data class WalletApproval(
     val submitterEmail: String?,
     val submitterName: String?,
     val walletType: String?
-) {
+) : Signable {
     companion object {
         fun toJson(approval: WalletApproval) : String {
             return Gson().toJson(approval)
@@ -22,6 +23,11 @@ data class WalletApproval(
         fun fromJson(json: String) : WalletApproval {
             return Gson().fromJson(json, WalletApproval::class.java)
         }
+    }
+
+    override fun retrieveSignableData(approverPublicKey: String?): String {
+        //TODO Implement the signable data here
+        return "TODO"
     }
 }
 

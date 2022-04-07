@@ -3,6 +3,7 @@ package com.strikeprotocols.mobile.data
 import com.strikeprotocols.mobile.BuildConfig
 import com.strikeprotocols.mobile.data.BrooklynApiService.Companion.AUTH
 import com.strikeprotocols.mobile.data.models.*
+import com.strikeprotocols.mobile.data.ApprovalsRepositoryImpl.RegisterApprovalDispositionBody
 import kotlinx.coroutines.runBlocking
 import okhttp3.*
 import okhttp3.logging.HttpLoggingInterceptor
@@ -69,8 +70,8 @@ interface BrooklynApiService {
     @Headers(AUTH_REQUIRED)
     suspend fun approveOrDenyDisposition(
         @Path("request_id") requestId: String,
-        @Body registerApprovalDisposition: RegisterApprovalDisposition
-    ): RegisterApprovalDisposition
+        @Body registerApprovalDispositionBody: RegisterApprovalDispositionBody
+    ): RegisterApprovalDispositionBody
 
 }
 
