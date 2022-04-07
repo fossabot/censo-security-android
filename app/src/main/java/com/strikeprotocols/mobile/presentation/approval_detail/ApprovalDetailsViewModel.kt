@@ -137,20 +137,6 @@ class ApprovalDetailsViewModel @Inject constructor(
     }
 
     //region API calls
-    private suspend fun signData() {
-        state = state.copy(
-            approvalDispositionState = state.approvalDispositionState?.copy(
-                signingDataResult = Resource.Loading()
-            )
-        )
-        delay(250)
-        state = state.copy(
-            approvalDispositionState = state.approvalDispositionState?.copy(
-                signingDataResult = Resource.Success("I am signed data")
-            )
-        )
-    }
-
     private fun registerApprovalDisposition() {
         viewModelScope.launch {
             state = state.copy(
@@ -171,10 +157,8 @@ class ApprovalDetailsViewModel @Inject constructor(
                     return@launch
                 }
 
-                signData()
-                val signResult = state.approvalDispositionState?.signingDataResult
-                val signature = if (signResult is Resource.Success) signResult.data else null
-                if (signature == null) {
+                val signable = state.approval
+                if (signable == null) {
                     state = state.copy(
                         approvalDispositionState = state.approvalDispositionState?.copy(
                             approvalDispositionError = ApprovalDispositionError.SIGNING_DATA_FAILURE,
@@ -198,7 +182,7 @@ class ApprovalDetailsViewModel @Inject constructor(
 
                 val registerApprovalDisposition = RegisterApprovalDisposition(
                     approvalDisposition = approvalDisposition,
-                    signature = signature,
+                    signable = signable,
                     recentBlockhash = recentBlockHash
                 )
 

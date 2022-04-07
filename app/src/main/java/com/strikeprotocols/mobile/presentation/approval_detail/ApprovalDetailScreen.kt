@@ -124,7 +124,7 @@ fun ApprovalDetailsScreen(
                     )
                 },
                 timeRemainingInSeconds = approvalDetailsState.approval?.approvalTimeoutInSeconds ?: 0,
-                isLoading = approvalDetailsState.loadingData
+                isLoading = approvalDetailsState.loadingData || blockHashState.isLoading
             )
 
             if (approvalDetailsState.shouldDisplayConfirmDisposition != null) {

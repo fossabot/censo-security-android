@@ -46,8 +46,8 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideApprovalsRepository(api: BrooklynApiService): ApprovalsRepository {
-        return ApprovalsRepositoryImpl(api)
+    fun provideApprovalsRepository(api: BrooklynApiService, encryptionManager: EncryptionManager, userRepository: UserRepository): ApprovalsRepository {
+        return ApprovalsRepositoryImpl(api, encryptionManager, userRepository)
     }
 
     @Provides

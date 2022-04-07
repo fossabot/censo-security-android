@@ -130,8 +130,7 @@ class UserRepositoryImpl(
         if(email.isNotEmpty()) return email
 
         return try {
-            val oktaEmail = authProvider.getUserEmail()
-            ""
+            authProvider.getUserEmail()
         } catch (e: Exception) {
             ""
         }
