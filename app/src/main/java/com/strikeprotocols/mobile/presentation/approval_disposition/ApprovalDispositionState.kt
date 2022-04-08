@@ -1,14 +1,13 @@
 package com.strikeprotocols.mobile.presentation.approval_disposition
 
 import com.strikeprotocols.mobile.common.Resource
-import com.strikeprotocols.mobile.data.ApprovalsRepositoryImpl.RegisterApprovalDispositionBody
 import com.strikeprotocols.mobile.data.models.ApprovalDisposition
-import com.strikeprotocols.mobile.data.models.RegisterApprovalDisposition
+import com.strikeprotocols.mobile.data.models.approval.ApprovalDispositionRequest
 import com.strikeprotocols.mobile.data.models.approval.WalletApproval
 
 data class ApprovalDispositionState(
     val approvalDisposition: Resource<ApprovalDisposition> = Resource.Uninitialized,
-    val registerApprovalDispositionResult: Resource<RegisterApprovalDispositionBody> = Resource.Uninitialized,
+    val registerApprovalDispositionResult: Resource<ApprovalDispositionRequest.RegisterApprovalDispositionBody> = Resource.Uninitialized,
     val selectedApproval: WalletApproval? = null,
     val approvalDispositionError: ApprovalDispositionError = ApprovalDispositionError.NONE
 ) {

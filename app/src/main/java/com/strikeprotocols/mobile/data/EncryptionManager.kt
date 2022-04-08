@@ -14,6 +14,7 @@ import org.bouncycastle.crypto.params.Ed25519PublicKeyParameters
 import org.bouncycastle.crypto.signers.Ed25519Signer
 import java.security.SecureRandom
 import javax.crypto.Cipher
+import javax.crypto.spec.GCMParameterSpec
 import javax.crypto.spec.IvParameterSpec
 import javax.crypto.spec.SecretKeySpec
 import javax.inject.Inject
@@ -39,7 +40,7 @@ class EncryptionManagerImpl @Inject constructor(private val securePreferences: S
     //region interface methods
     override fun signData(data: String, privateKey: String): ByteArray {
         val decodedData = BaseWrapper.decodeFromUTF8(data)
-        val privateKeyByteArray = BaseWrapper.decode(privateKey)
+        val privateKeyByteArray = BaseWrapper.decodeFromUTF8(privateKey)
         val privateKeyParam = Ed25519PrivateKeyParameters(privateKeyByteArray.inputStream())
 
         val signer = Ed25519Signer()
@@ -92,7 +93,7 @@ class EncryptionManagerImpl @Inject constructor(private val securePreferences: S
         val messageToSign = signable.retrieveSignableData(approverPublicKey = publicKey)
 
         val signedData = signData(
-            data = messageToSign, privateKey = decryptedPrivateKey
+            data = BaseWrapper.encodeToUTF8(messageToSign), privateKey = decryptedPrivateKey
         )
 
         return BaseWrapper.encodeToBase64(signedData)
@@ -134,7 +135,7 @@ class EncryptionManagerImpl @Inject constructor(private val securePreferences: S
         val privateKey =
             decrypt(encryptedMessage = encryptedPrivateKey, generatedPassword = generatedPassword)
 
-        val privateKeyByteArray = BaseWrapper.decode(privateKey)
+        val privateKeyByteArray = BaseWrapper.decodeFromUTF8(privateKey)
         val privateKeyParam = Ed25519PrivateKeyParameters(privateKeyByteArray.inputStream())
 
         val publicKey = privateKeyParam.generatePublicKey()
@@ -156,7 +157,7 @@ class EncryptionManagerImpl @Inject constructor(private val securePreferences: S
         val cipher = Cipher.getInstance("AES/GCM/NoPadding")
         val secretKeySpec = SecretKeySpec(key, "AES")
 
-        cipher.init(opMode, secretKeySpec, IvParameterSpec(ivParameter))
+        cipher.init(opMode, secretKeySpec, GCMParameterSpec(128, ivParameter))
         return cipher
     }
     //endregion
@@ -195,5 +196,5 @@ data class StrikeKeyPair(val privateKey: ByteArray, val publicKey: ByteArray) {
 }
 
 interface Signable {
-    fun retrieveSignableData(approverPublicKey: String?): String
+    fun retrieveSignableData(approverPublicKey: String?): ByteArray
 }

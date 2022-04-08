@@ -4,7 +4,7 @@ import com.google.gson.*
 import com.strikeprotocols.mobile.BuildConfig
 import com.strikeprotocols.mobile.data.BrooklynApiService.Companion.AUTH
 import com.strikeprotocols.mobile.data.models.*
-import com.strikeprotocols.mobile.data.ApprovalsRepositoryImpl.RegisterApprovalDispositionBody
+import com.strikeprotocols.mobile.data.models.approval.ApprovalDispositionRequest
 import com.strikeprotocols.mobile.data.models.approval.WalletApproval
 import com.strikeprotocols.mobile.data.models.approval.WalletApprovalDeserializer
 import kotlinx.coroutines.runBlocking
@@ -77,8 +77,8 @@ interface BrooklynApiService {
     @Headers(AUTH_REQUIRED)
     suspend fun approveOrDenyDisposition(
         @Path("request_id") requestId: String,
-        @Body registerApprovalDispositionBody: RegisterApprovalDispositionBody
-    ): RegisterApprovalDispositionBody
+        @Body registerApprovalDispositionBody: ApprovalDispositionRequest.RegisterApprovalDispositionBody
+    ): ApprovalDispositionRequest.RegisterApprovalDispositionBody
 
 }
 

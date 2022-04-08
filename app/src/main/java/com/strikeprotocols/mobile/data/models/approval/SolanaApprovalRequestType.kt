@@ -4,6 +4,13 @@ import com.google.gson.JsonElement
 import com.google.gson.JsonObject
 import com.google.gson.JsonPrimitive
 import com.google.gson.annotations.SerializedName
+import com.strikeprotocols.mobile.common.BaseWrapper
+import java.io.ByteArrayOutputStream
+import org.web3j.crypto.Hash
+import java.lang.NumberFormatException
+import java.nio.ByteBuffer
+import java.nio.ByteOrder
+import kotlin.math.pow
 
 sealed class SolanaApprovalRequestDetails {
     data class ApprovalRequestDetails(val requestType: SolanaApprovalRequestType) :
@@ -66,13 +73,28 @@ data class MultiSigOpInitiation(
 }
 
 sealed class SolanaApprovalRequestType {
+    abstract fun serialize(): ByteArray
+
     data class WithdrawalRequest(
         val type: String,
         val account: AccountInfo,
         val symbolAndAmountInfo: SymbolAndAmountInfo,
         val destination: DestinationAddress,
         val signingData: SolanaSigningData
-    ) : SolanaApprovalRequestType()
+    ) : SolanaApprovalRequestType() {
+        override fun serialize(): ByteArray {
+            val buffer = ByteArrayOutputStream()
+
+            buffer.write(byteArrayOf(retrieveOpCode()))
+            buffer.write(signingData.walletAddress.base58Bytes())
+            buffer.write(account.identifier.sha256HashBytes())
+            buffer.write(destination.address.base58Bytes())
+            buffer.write(symbolAndAmountInfo.fundamentalAmount().bytes())
+            buffer.write(symbolAndAmountInfo.symbolInfo.tokenMintAddress.base58Bytes())
+
+            return buffer.toByteArray()
+        }
+    }
 
     data class ConversionRequest(
         val type: String,
@@ -81,14 +103,38 @@ sealed class SolanaApprovalRequestType {
         val destination: DestinationAddress,
         val destinationSymbolInfo: SymbolInfo,
         val signingData: SolanaSigningData
-    ) : SolanaApprovalRequestType()
+    ) : SolanaApprovalRequestType() {
+        override fun serialize(): ByteArray {
+            val buffer = ByteArrayOutputStream()
+
+            buffer.write(byteArrayOf(retrieveOpCode()))
+            buffer.write(account.identifier.sha256HashBytes())
+            buffer.write(destination.address.base58Bytes())
+            buffer.write(symbolAndAmountInfo.fundamentalAmount().bytes())
+            buffer.write(symbolAndAmountInfo.symbolInfo.tokenMintAddress.base58Bytes())
+
+            return buffer.toByteArray()
+        }
+    }
 
     data class SignersUpdate(
         val type: String,
         val slotUpdateType: SlotUpdateType,
         val signer: SlotSignerInfo,
         val signingData: SolanaSigningData
-    ) : SolanaApprovalRequestType()
+    ) : SolanaApprovalRequestType() {
+        override fun serialize(): ByteArray {
+            val buffer = ByteArrayOutputStream()
+
+            buffer.write(byteArrayOf(retrieveOpCode()))
+            buffer.write(signingData.walletAddress.base58Bytes())
+            buffer.write(byteArrayOf(slotUpdateType.toSolanaProgramValue()))
+            buffer.write(signer.combinedBytes())
+
+            return buffer.toByteArray()
+
+        }
+    }
 
     data class BalanceAccountCreation(
         val type: String,
@@ -101,7 +147,25 @@ sealed class SolanaApprovalRequestType {
         var dappsEnabled: BooleanSetting,
         var addressBookSlot: Byte,
         var signingData: SolanaSigningData
-    ) : SolanaApprovalRequestType()
+    ) : SolanaApprovalRequestType() {
+        override fun serialize(): ByteArray {
+            val buffer = ByteArrayOutputStream()
+
+            buffer.write(byteArrayOf(retrieveOpCode()))
+            buffer.write(signingData.walletAddress.base58Bytes())
+            buffer.write(byteArrayOf(accountSlot))
+            buffer.write(accountInfo.identifier.sha256HashBytes())
+            buffer.write(byteArrayOf(approvalsRequired))
+            buffer.write(approvalTimeout.convertToSeconds().bytes())
+            buffer.write(byteArrayOf(approvers.size.toByte()))
+            buffer.write(approvers.flatMap { it.combinedBytes().toList() }.toByteArray())
+            buffer.write(byteArrayOf(whitelistEnabled.toSolanaProgramValue()))
+            buffer.write(byteArrayOf(dappsEnabled.toSolanaProgramValue()))
+            buffer.write(byteArrayOf(addressBookSlot))
+
+            return buffer.toByteArray()
+        }
+    }
 
     data class DAppTransactionRequest(
         val type: String,
@@ -110,9 +174,31 @@ sealed class SolanaApprovalRequestType {
         var balanceChanges: List<SymbolAndAmountInfo>,
         var instructions: List<SolanaInstructionBatch>,
         var signingData: SolanaSigningData
-    ) : SolanaApprovalRequestType()
+    ) : SolanaApprovalRequestType() {
+        override fun serialize(): ByteArray {
+            throw Exception(INVALID_REQUEST_APPROVAL)
+        }
+    }
 
-    object UnknownApprovalType : SolanaApprovalRequestType()
+    object UnknownApprovalType : SolanaApprovalRequestType() {
+        override fun serialize() : ByteArray {
+            throw Exception(UNKNOWN_REQUEST_APPROVAL)
+        }
+    }
+
+    fun retrieveOpCode(): Byte {
+        return when (this) {
+            is BalanceAccountCreation -> 1
+            is WithdrawalRequest, is ConversionRequest -> 3
+            is SignersUpdate -> 5
+            else -> 0
+        }
+    }
+
+    companion object {
+        const val INVALID_REQUEST_APPROVAL = "Invalid request for Approval"
+        const val UNKNOWN_REQUEST_APPROVAL = "Unknown Approval"
+    }
 }
 
 enum class ApprovalType(val value: String) {
@@ -168,7 +254,23 @@ data class SymbolAndAmountInfo(
     val symbolInfo: SymbolInfo,
     val amount: String,
     val usdEquivalent: String?
-)
+) {
+
+    //todo: need verify this with data coming down. Get some examples.
+    fun fundamentalAmount(): Long {
+        val amountAsFloat = amount.toFloatOrNull() ?: throw NumberFormatException()
+
+        return if (symbolInfo.symbol == "SOL") {
+            (amountAsFloat * 1_000_000_000).toLong()
+        } else {
+            val parts = amount.split(".")
+            val decimals = if (parts.size == 1) 0 else parts[1].count()
+
+            val calculatedAmount = amountAsFloat * (10.toDouble().pow(decimals.toDouble()))
+            calculatedAmount.toLong()
+        }
+    }
+}
 
 data class SymbolInfo(
     val symbol: String,

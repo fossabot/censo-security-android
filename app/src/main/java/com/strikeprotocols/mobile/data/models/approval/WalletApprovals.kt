@@ -1,7 +1,7 @@
 package com.strikeprotocols.mobile.data.models.approval
 
 import com.google.gson.GsonBuilder
-import com.strikeprotocols.mobile.data.Signable
+import com.strikeprotocols.mobile.data.models.approval.SolanaApprovalRequestType.Companion.UNKNOWN_REQUEST_APPROVAL
 
 data class WalletApproval(
     val approvalTimeoutInSeconds: Int?,
@@ -14,12 +14,14 @@ data class WalletApproval(
     val submitterName: String?,
     val walletType: String?,
     @Transient val details: SolanaApprovalRequestDetails?
-) : Signable {
+) {
 
-    override fun retrieveSignableData(approverPublicKey: String?): String {
-        //TODO Implement the signable data here
-        return "TODO"
-    }
+    fun getSolanaApprovalRequestType() =
+        when(details) {
+            is SolanaApprovalRequestDetails.ApprovalRequestDetails -> details.requestType
+            is SolanaApprovalRequestDetails.MultiSignOpInitiationDetails -> details.requestType
+            else -> throw Exception(UNKNOWN_REQUEST_APPROVAL)
+        }
 
     companion object {
         fun toJson(approval: WalletApproval): String {
