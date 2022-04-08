@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.fragment.app.FragmentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
 import androidx.navigation.NavController
 import com.strikeprotocols.mobile.R
 import com.strikeprotocols.mobile.common.BiometricUtil.createBioPrompt
@@ -35,6 +36,7 @@ import com.strikeprotocols.mobile.data.models.WalletApproval
 import com.strikeprotocols.mobile.presentation.approval_detail.approval_type_components.ApprovalDetailsTransferContent
 import com.strikeprotocols.mobile.presentation.approvals.ApprovalsViewModel
 import com.strikeprotocols.mobile.presentation.blockhash.BlockHashViewModel
+import com.strikeprotocols.mobile.presentation.components.OnLifecycleEvent
 import com.strikeprotocols.mobile.presentation.components.StrikeApprovalDispositionErrorAlertDialog
 import com.strikeprotocols.mobile.presentation.components.StrikeConfirmDispositionAlertDialog
 import com.strikeprotocols.mobile.presentation.components.StrikeTopAppBar
@@ -97,6 +99,23 @@ fun ApprovalDetailsScreen(
         }
     }
 
+    OnLifecycleEvent { _, event ->
+        when (event) {
+            Lifecycle.Event.ON_START
+            -> {
+                if (approvalDetailsState.screenWasBackgrounded) {
+                    approvalDetailsViewModel.resetDetailsScreenWasBackgrounded()
+                    approvalDetailsViewModel.wipeDataAndKickUserOutToApprovalsScreen()
+                }
+            }
+            Lifecycle.Event.ON_PAUSE -> {
+                approvalDetailsViewModel.setDetailsScreenWasBackgrounded()
+            }
+            else -> Unit
+        }
+    }
+
+    //region Screen Content
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
@@ -158,6 +177,7 @@ fun ApprovalDetailsScreen(
             }
         }
     )
+    //endregion
 }
 
 //region Screen Composables

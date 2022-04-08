@@ -8,6 +8,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.strikeprotocols.mobile.common.Resource
 import com.strikeprotocols.mobile.common.generateWalletApprovalsDummyData
+import com.strikeprotocols.mobile.common.strikeLog
 import com.strikeprotocols.mobile.data.ApprovalsRepository
 import com.strikeprotocols.mobile.data.UserRepository
 import com.strikeprotocols.mobile.data.models.ApprovalDisposition
@@ -34,10 +35,6 @@ class ApprovalsViewModel @Inject constructor(
 
     var state by mutableStateOf(ApprovalsState())
         private set
-
-    init {
-        refreshData()
-    }
 
     fun refreshData() {
         retrieveWalletApprovals()

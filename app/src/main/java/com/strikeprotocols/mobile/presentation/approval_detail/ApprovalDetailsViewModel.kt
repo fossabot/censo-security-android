@@ -79,6 +79,14 @@ class ApprovalDetailsViewModel @Inject constructor(
         state = state.copy(shouldDisplayApprovalDispositionError = false)
     }
 
+    fun setDetailsScreenWasBackgrounded() {
+        state = state.copy(screenWasBackgrounded = true)
+    }
+
+    fun resetDetailsScreenWasBackgrounded() {
+        state = state.copy(screenWasBackgrounded = false)
+    }
+
     private fun startCountDown() {
         timer = object : CountDownTimer(Long.MAX_VALUE, UPDATE_COUNTDOWN) {
             override fun onTick(millisecs: Long) {
