@@ -1,18 +1,15 @@
 package com.strikeprotocols.mobile.data
 
-import com.strikeprotocols.mobile.data.models.ApprovalDisposition
 import com.strikeprotocols.mobile.data.models.RegisterApprovalDisposition
-import com.strikeprotocols.mobile.data.ApprovalsRepositoryImpl.RegisterApprovalDispositionBody
+import com.strikeprotocols.mobile.data.models.approval.ApprovalDispositionRequest
 import com.strikeprotocols.mobile.data.models.approval.WalletApproval
-import com.strikeprotocols.mobile.presentation.approval_disposition.ApprovalDispositionError
 import javax.inject.Inject
 
 interface ApprovalsRepository {
     suspend fun getWalletApprovals(): List<WalletApproval?>
     suspend fun approveOrDenyDisposition(
-        requestId: String?,
         registerApprovalDisposition: RegisterApprovalDisposition
-    ): RegisterApprovalDispositionBody
+    ): ApprovalDispositionRequest.RegisterApprovalDispositionBody
 }
 
 class ApprovalsRepositoryImpl @Inject constructor(
@@ -26,9 +23,8 @@ class ApprovalsRepositoryImpl @Inject constructor(
     }
 
     override suspend fun approveOrDenyDisposition(
-        requestId: String?,
         registerApprovalDisposition: RegisterApprovalDisposition
-    ): RegisterApprovalDispositionBody {
+    ): ApprovalDispositionRequest.RegisterApprovalDispositionBody {
         // Helper method anyItemNull() will check if any of the disposition properties are null,
         // this allows us to use !! operator later in this method without worrying of NPE
         if (registerApprovalDisposition.anyItemNull()) {
@@ -37,30 +33,23 @@ class ApprovalsRepositoryImpl @Inject constructor(
 
         val userEmail = userRepository.retrieveUserEmail()
 
-        val signature = try {
-            encryptionManager.signApprovalDispositionMessage(
-                signable = registerApprovalDisposition.signable!!,
-                userEmail = userEmail
-            )
-        } catch (e: Exception) {
-            throw Exception(ApprovalDispositionError.SIGNING_DATA_FAILURE.error)
+        if (userEmail.isEmpty()) {
+            throw Exception("MISSING USER EMAIL")
         }
 
-        val registerApprovalDispositionBody = RegisterApprovalDispositionBody(
+        val approvalDispositionRequest = ApprovalDispositionRequest(
             approvalDisposition = registerApprovalDisposition.approvalDisposition!!,
-            recentBlockHash = registerApprovalDisposition.recentBlockhash!!,
-            signature = signature
+            blockhash = registerApprovalDisposition.recentBlockhash!!,
+            email = userEmail,
+            requestType = registerApprovalDisposition.solanaApprovalRequestType!!
         )
 
+        val registerApprovalDispositionBody =
+            approvalDispositionRequest.convertToApiBody(encryptionManager)
+
         return api.approveOrDenyDisposition(
-            requestId = requestId ?: "",
+            requestId = approvalDispositionRequest.requestId,
             registerApprovalDispositionBody = registerApprovalDispositionBody
         )
     }
-
-    inner class RegisterApprovalDispositionBody(
-        val approvalDisposition: ApprovalDisposition,
-        val recentBlockHash: String,
-        val signature: String
-    )
 }

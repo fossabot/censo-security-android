@@ -208,8 +208,9 @@ class ApprovalsViewModel @Inject constructor(
                     return@launch
                 }
 
-                val signable = state.selectedApproval
-                if (signable == null) {
+                val solanaApprovalRequestType =
+                    state.selectedApproval?.getSolanaApprovalRequestType()
+                if (solanaApprovalRequestType == null) {
                     state = state.copy(
                         approvalDispositionState = state.approvalDispositionState?.copy(
                             approvalDispositionError = ApprovalDispositionError.SIGNING_DATA_FAILURE,
@@ -233,14 +234,12 @@ class ApprovalsViewModel @Inject constructor(
 
                 val registerApprovalDisposition = RegisterApprovalDisposition(
                     approvalDisposition = approvalDisposition,
-                    signable = signable,
+                    solanaApprovalRequestType = solanaApprovalRequestType,
                     recentBlockhash = recentBlockHash
                 )
 
                 val approvalDispositionResponse =
-                    approvalsRepository.approveOrDenyDisposition(
-                        state.selectedApproval?.id, registerApprovalDisposition
-                    )
+                    approvalsRepository.approveOrDenyDisposition(registerApprovalDisposition)
                 state = state.copy(
                     approvalDispositionState = state.approvalDispositionState?.copy(
                         registerApprovalDispositionResult = Resource.Success(
