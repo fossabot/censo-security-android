@@ -9,4 +9,14 @@ sealed class Screen(val route: String) {
     }
     object AuthRoute : Screen("auth_screen")
     object ContactStrikeRoute : Screen("contact_strike_screen")
+    object BiometryDisabledRoute : Screen("biometry_disabled_screen") {
+        const val MESSAGE_ARG = "message"
+        const val BIOMETRY_AVAILABLE_ARG = "biometry available"
+    }
+
+    companion object {
+        //This val is used to check if the current destination route matches up with the biometry disabled screen.
+        //If the biometry disabled screen route changes, then update this key to match it.
+        val BIOMETRY_DISABLED_ROUTE_KEY = "${BiometryDisabledRoute.route}/{${BiometryDisabledRoute.MESSAGE_ARG}}/{${BiometryDisabledRoute.BIOMETRY_AVAILABLE_ARG}}"
+    }
 }
