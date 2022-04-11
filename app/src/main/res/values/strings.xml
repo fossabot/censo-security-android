@@ -71,4 +71,8 @@
     <string name="approval_disposition_error_submit">Failure submitting data to the server</string>
     <string name="approval_disposition_error_title">Something went wrong</string>
 
+    <string name="biometry_disabled_message">This app requires biometry functionality to be enabled, please enable biometric security in the device settings.</string>
+    <string name="biometry_unavailable_message">This app requires biometry functionality to be used, unfortunately this device does not have biometry functionality.</string>
+    <string name="biometry_deeplink_device_settings">Device Biometry Settings</string>
+
 </resources>
