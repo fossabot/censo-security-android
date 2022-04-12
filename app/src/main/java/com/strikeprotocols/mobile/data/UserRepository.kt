@@ -80,15 +80,16 @@ class UserRepositoryImpl(
 
         val encryptedPrivateKey =
             encryptionManager.encrypt(
-                message = BaseWrapper.encode(keyPair.privateKey),
+                message = keyPair.privateKey,
                 generatedPassword = generatedPassword
             )
 
-        securePreferences.savePrivateKey(email = userEmail, privateKey = encryptedPrivateKey)
+        securePreferences.savePrivateKey(
+            email = userEmail, privateKey = encryptedPrivateKey)
 
         return InitialAuthData(
             walletSignerBody = WalletSigner(
-                encryptedKey = encryptedPrivateKey,
+                encryptedKey = BaseWrapper.encode(encryptedPrivateKey),
                 publicKey = BaseWrapper.encode(keyPair.publicKey),
                 walletType = WalletSigner.WALLET_TYPE_SOLANA
             ),
@@ -119,9 +120,7 @@ class UserRepositoryImpl(
             walletType = WALLET_TYPE_SOLANA
         )
 
-        return walletSigner
-
-        //api.addWalletSigner(walletSigner)
+        return api.addWalletSigner(walletSigner)
     }
 
     override suspend fun retrieveUserEmail(): String {
@@ -188,7 +187,7 @@ class UserRepositoryImpl(
                 if (validPair) {
                     walletSigner.encryptedKey?.let { encryptedKey ->
                         securePreferences.savePrivateKey(
-                            email = userEmail, privateKey = encryptedKey
+                            email = userEmail, privateKey = BaseWrapper.decode(encryptedKey)
                         )
                     }
                     return true

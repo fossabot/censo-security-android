@@ -107,10 +107,12 @@ fun ApprovalsListScreen(
                 blockHashViewModel.resetState()
             }
         }
-        if (approvalsState.approvalDispositionState?.registerApprovalDispositionResult is Resource.Success) {
+        if (approvalsState.approvalDispositionState?.registerApprovalDispositionResult is Resource.Success ||
+            approvalsState.approvalDispositionState?.initiationDispositionResult is Resource.Success) {
             approvalsViewModel.wipeDataAfterDispositionSuccess()
         }
-        if (approvalsState.approvalDispositionState?.registerApprovalDispositionResult is Resource.Error) {
+        if (approvalsState.approvalDispositionState?.registerApprovalDispositionResult is Resource.Error ||
+            approvalsState.approvalDispositionState?.initiationDispositionResult is Resource.Error) {
             approvalsViewModel.setShouldDisplayApprovalDispositionError()
         }
     }
