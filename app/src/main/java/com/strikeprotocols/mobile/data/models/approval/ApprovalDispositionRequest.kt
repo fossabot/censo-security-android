@@ -3,6 +3,7 @@ package com.strikeprotocols.mobile.data.models.approval
 import com.strikeprotocols.mobile.data.EncryptionManager
 import com.strikeprotocols.mobile.data.Signable
 import com.strikeprotocols.mobile.data.models.ApprovalDisposition
+import com.strikeprotocols.mobile.data.models.approval.PublicKey.Companion.SYSVAR_CLOCK_PUBKEY
 import com.strikeprotocols.mobile.data.models.approval.SolanaApprovalRequestType.Companion.INVALID_REQUEST_APPROVAL
 import com.strikeprotocols.mobile.data.models.approval.SolanaApprovalRequestType.Companion.UNKNOWN_REQUEST_APPROVAL
 import com.strikeprotocols.mobile.presentation.approval_disposition.ApprovalDispositionError
@@ -11,24 +12,90 @@ import java.io.ByteArrayOutputStream
 import java.util.*
 import kotlin.Exception
 
-class ApprovalDispositionRequest(
-    val requestId: String = UUID.randomUUID().toString(),
+data class ApprovalDispositionRequest(
+    val requestId: String,
     val approvalDisposition: ApprovalDisposition,
     val requestType: SolanaApprovalRequestType,
     val blockhash: String,
     val email: String
 ) : Signable {
 
-    private val opIndex: Byte = 9
+    val opIndex: Byte = 9
 
-    private val solanaProgramValue: Byte =
+    val solanaProgramValue: Byte =
         if (approvalDisposition == ApprovalDisposition.APPROVE) 1 else 2
 
-    private val opHashData: ByteArray = requestType.serialize()
+    fun retrieveOpCode(): Byte {
+        return when (requestType) {
+            is SolanaApprovalRequestType.BalanceAccountCreation -> 1
+            is SolanaApprovalRequestType.WithdrawalRequest, is SolanaApprovalRequestType.ConversionRequest -> 3
+            is SolanaApprovalRequestType.SignersUpdate -> 5
+            else -> 0
+        }
+    }
 
-    private val transactionInstructionData: ByteArray = generateTransactionInstructionData()
+    val opHashData: ByteArray = when(requestType) {
+        is SolanaApprovalRequestType.BalanceAccountCreation -> {
+            val buffer = ByteArrayOutputStream()
 
-    private fun signingData(): SolanaSigningData =
+            buffer.write(byteArrayOf(retrieveOpCode()))
+            buffer.write(requestType.signingData.walletAddress.base58Bytes())
+            buffer.write(byteArrayOf(requestType.accountSlot))
+            buffer.write(requestType.accountInfo.identifier.sha256HashBytes())
+            buffer.write(byteArrayOf(requestType.approvalsRequired))
+            buffer.writeLongLE(requestType.approvalTimeout.convertToSeconds())
+            buffer.write(byteArrayOf(requestType.approvers.size.toByte()))
+            buffer.write(requestType.approvers.flatMap { it.combinedBytes().toList() }.toByteArray())
+            buffer.write(byteArrayOf(requestType.whitelistEnabled.toSolanaProgramValue()))
+            buffer.write(byteArrayOf(requestType.dappsEnabled.toSolanaProgramValue()))
+            buffer.write(byteArrayOf(requestType.addressBookSlot))
+
+            buffer.toByteArray()
+        }
+        is SolanaApprovalRequestType.WithdrawalRequest -> {
+            val buffer = ByteArrayOutputStream()
+
+            buffer.write(byteArrayOf(retrieveOpCode()))
+            buffer.write(requestType.signingData.walletAddress.base58Bytes())
+            buffer.write(requestType.account.identifier.sha256HashBytes())
+            buffer.write(requestType.destination.address.base58Bytes())
+            buffer.writeLongLE(requestType.symbolAndAmountInfo.fundamentalAmount())
+            buffer.write(requestType.symbolAndAmountInfo.symbolInfo.tokenMintAddress.base58Bytes())
+
+            buffer.toByteArray()
+        }
+        is SolanaApprovalRequestType.ConversionRequest -> {
+            val buffer = ByteArrayOutputStream()
+
+            buffer.write(byteArrayOf(retrieveOpCode()))
+            buffer.write(requestType.account.identifier.sha256HashBytes())
+            buffer.write(requestType.destination.address.base58Bytes())
+            buffer.writeLongLE(requestType.symbolAndAmountInfo.fundamentalAmount())
+            buffer.write(requestType.symbolAndAmountInfo.symbolInfo.tokenMintAddress.base58Bytes())
+
+            buffer.toByteArray()
+        }
+        is SolanaApprovalRequestType.SignersUpdate -> {
+            val buffer = ByteArrayOutputStream()
+
+            buffer.write(byteArrayOf(retrieveOpCode()))
+            buffer.write(requestType.signingData.walletAddress.base58Bytes())
+            buffer.write(byteArrayOf(requestType.slotUpdateType.toSolanaProgramValue()))
+            buffer.write(requestType.signer.combinedBytes())
+
+            buffer.toByteArray()
+        }
+        is SolanaApprovalRequestType.DAppTransactionRequest -> throw Exception(
+            INVALID_REQUEST_APPROVAL
+        )
+        is SolanaApprovalRequestType.UnknownApprovalType -> throw Exception(
+            UNKNOWN_REQUEST_APPROVAL
+        )
+    }
+
+    val transactionInstructionData: ByteArray = generateTransactionInstructionData()
+
+    fun signingData(): SolanaSigningData =
         when (requestType) {
             is SolanaApprovalRequestType.BalanceAccountCreation -> requestType.signingData
             is SolanaApprovalRequestType.WithdrawalRequest -> requestType.signingData
@@ -42,7 +109,7 @@ class ApprovalDispositionRequest(
             )
         }
 
-    private fun generateTransactionInstructionData(): ByteArray {
+    fun generateTransactionInstructionData(): ByteArray {
         val buffer = ByteArrayOutputStream()
         buffer.write(byteArrayOf(opIndex))
         buffer.write(byteArrayOf(solanaProgramValue))
@@ -65,7 +132,7 @@ class ApprovalDispositionRequest(
                 publicKey = PublicKey(approverPublicKey), isSigner = true, isWritable = false
             ),
             AccountMeta(
-                publicKey = PublicKey(SYSVAR_CLOCK_PUBKEY),
+                publicKey = SYSVAR_CLOCK_PUBKEY,
                 isSigner = false,
                 isWritable = false
             )
@@ -100,18 +167,14 @@ class ApprovalDispositionRequest(
 
         return RegisterApprovalDispositionBody(
             approvalDisposition = approvalDisposition,
-            recentBlockHash = blockhash,
+            recentBlockhash = blockhash,
             signature = signature
         )
     }
 
     inner class RegisterApprovalDispositionBody(
         val approvalDisposition: ApprovalDisposition,
-        val recentBlockHash: String,
+        val recentBlockhash: String,
         val signature: String
     )
-
-    companion object {
-        const val SYSVAR_CLOCK_PUBKEY = "SysvarC1ock11111111111111111111111111111111"
-    }
 }

@@ -5,6 +5,7 @@ import com.strikeprotocols.mobile.BuildConfig
 import com.strikeprotocols.mobile.data.BrooklynApiService.Companion.AUTH
 import com.strikeprotocols.mobile.data.models.*
 import com.strikeprotocols.mobile.data.models.approval.ApprovalDispositionRequest
+import com.strikeprotocols.mobile.data.models.approval.InitiationRequest
 import com.strikeprotocols.mobile.data.models.approval.WalletApproval
 import com.strikeprotocols.mobile.data.models.approval.WalletApprovalDeserializer
 import kotlinx.coroutines.runBlocking
@@ -79,6 +80,13 @@ interface BrooklynApiService {
         @Path("request_id") requestId: String,
         @Body registerApprovalDispositionBody: ApprovalDispositionRequest.RegisterApprovalDispositionBody
     ): ApprovalDispositionRequest.RegisterApprovalDispositionBody
+
+    @POST("v1/wallet-approvals/{request_id}/initiations")
+    @Headers(AUTH_REQUIRED)
+    suspend fun approveOrDenyInitiation(
+        @Path("request_id") requestId: String,
+        @Body initiationRequestBody: InitiationRequest.InitiateRequestBody
+    ) : InitiationRequest.InitiateRequestBody
 
 }
 

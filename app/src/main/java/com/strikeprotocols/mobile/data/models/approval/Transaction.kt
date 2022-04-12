@@ -40,14 +40,14 @@ object Transaction {
         accountMetas.sortWith(object : Comparator<AccountMeta> {
             override fun compare(x: AccountMeta?, y: AccountMeta?): Int {
                 if (x?.isSigner != y?.isSigner) {
-                    return if (x?.isSigner == true) 1 else -1
+                    return if (x?.isSigner == true) -1 else 1
                 }
 
                 if (x?.isWritable != y?.isWritable) {
-                    return if (x?.isWritable == true) 1 else -1
+                    return if (x?.isWritable == true) -1 else 1
                 }
 
-                return 0
+                return 1
             }
         })
 

@@ -51,7 +51,7 @@ data class TransactionMessage(
     private fun encodeAccountKeys() : ByteArray {
         val buffer = ByteArrayOutputStream()
 
-        val keyLength = encodeLength(accountKeys.size)
+        val keyLength = ShortvecEncoding.encodeLength(accountKeys.size)
 
         val signedKeys = accountKeys.filter { it.isSigner }
         val unsignedKeys = accountKeys.filter { !it.isSigner }
@@ -91,16 +91,16 @@ data class TransactionMessage(
 
             val compiledInstruction = CompiledInstruction(
                 programIdIndex = programIdIndex.toByte(),
-                keyIndicesCount = encodeLength(keySize),
+                keyIndicesCount = ShortvecEncoding.encodeLength(keySize),
                 keyIndices = keyIndicesBuffer.toByteArray(),
-                dataLength = encodeLength(instruction.data.size),
+                dataLength = ShortvecEncoding.encodeLength(instruction.data.size),
                 data = instruction.data
             )
 
             compiledInstructions.add(compiledInstruction)
         }
 
-        val instructionLength = encodeLength(compiledInstructions.size)
+        val instructionLength = ShortvecEncoding.encodeLength(compiledInstructions.size)
 
         buffer.write(instructionLength)
 
@@ -113,32 +113,6 @@ data class TransactionMessage(
         buffer.write(compiledInstructionBuffer.toByteArray())
 
         return buffer.toByteArray()
-    }
-
-    private fun encodeLength(len: Int): ByteArray {
-        val out = ByteArray(10)
-        var remLen = len
-        var cursor = 0
-        while (true) {
-            var elem = remLen and 0x7f
-            remLen = remLen shr 7
-            if (remLen == 0) {
-                uint16ToByteArrayLE(elem, out, cursor)
-                break
-            } else {
-                elem = elem or 0x80
-                uint16ToByteArrayLE(elem, out, cursor)
-                cursor += 1
-            }
-        }
-        val bytes = ByteArray(cursor + 1)
-        System.arraycopy(out, 0, bytes, 0, cursor + 1)
-        return bytes
-    }
-
-    private fun uint16ToByteArrayLE(value: Int, out: ByteArray, offset: Int) {
-        out[offset] = (0xFF and value).toByte()
-        out[offset + 1] = (0xFF and (value shr 8)).toByte()
     }
 }
 

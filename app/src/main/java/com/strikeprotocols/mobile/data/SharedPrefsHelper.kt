@@ -45,14 +45,16 @@ object SharedPrefsHelper {
     fun retrieveGeneratedPassword(email: String) =
         sharedPrefs.getString("$email$GENERATED_PASSWORD", "") ?: ""
 
-    fun saveEncryptedKey(email: String, encryptedKey: String) {
+    fun saveEncryptedKey(email: String, encryptedKey: ByteArray) {
+        val data = if(encryptedKey.isEmpty()) "" else BaseWrapper.encode(encryptedKey)
         val editor = sharedPrefs.edit()
-        editor.putString("$email$ENCRYPTED_KEY", encryptedKey)
+        editor.putString("$email$ENCRYPTED_KEY", data)
         editor.apply()
     }
 
-    fun retrieveEncryptedKey(email: String) =
-        sharedPrefs.getString("$email$ENCRYPTED_KEY", "") ?: ""
+    fun retrieveEncryptedKey(email: String) : String {
+        return sharedPrefs.getString("$email$ENCRYPTED_KEY", "") ?: ""
+    }
 
     fun saveUserEmail(email: String) {
         val editor = sharedPrefs.edit()

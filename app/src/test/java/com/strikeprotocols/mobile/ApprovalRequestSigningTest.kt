@@ -10,7 +10,7 @@ import com.strikeprotocols.mobile.data.StrikeKeyPair
 import com.strikeprotocols.mobile.data.models.ApprovalDisposition
 import com.strikeprotocols.mobile.data.models.approval.ApprovalDispositionRequest
 import com.strikeprotocols.mobile.data.models.approval.WalletApprovalDeserializer
-import junit.framework.Assert.assertNotNull
+import org.junit.Assert.assertNotNull
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mock
@@ -34,7 +34,7 @@ class ApprovalRequestSigningTest {
 
     private lateinit var approverPublicKey: String
 
-    private lateinit var encryptedPrivateKey: String
+    private lateinit var encryptedPrivateKey: ByteArray
     private lateinit var decyptionKey: ByteArray
 
     @Before
@@ -46,12 +46,12 @@ class ApprovalRequestSigningTest {
 
         decyptionKey = encryptionManager.generatePassword()
         encryptedPrivateKey = encryptionManager.encrypt(
-            message = BaseWrapper.encodeToUTF8(keyPair.privateKey),
+            message = keyPair.privateKey,
             generatedPassword = decyptionKey
         )
 
         whenever(securePreferences.retrievePrivateKey(userEmail)).then {
-            encryptedPrivateKey
+            BaseWrapper.encode(encryptedPrivateKey)
         }
 
         whenever(securePreferences.retrieveGeneratedPassword(userEmail)).then {
@@ -66,7 +66,7 @@ class ApprovalRequestSigningTest {
             deserializer.parseData(JsonParser.parseString(balanceAccountCreationJson.trim()))
 
         val approvalDispositionRequest = ApprovalDispositionRequest(
-            requestId = UUID.randomUUID().toString(),
+            requestId = balanceAccountCreationWalletApproval.id!!,
             approvalDisposition = if (Random().nextBoolean()) ApprovalDisposition.APPROVE else ApprovalDisposition.DENY,
             requestType = balanceAccountCreationWalletApproval.getSolanaApprovalRequestType(),
             blockhash = exampleBlockHash,
@@ -81,12 +81,16 @@ class ApprovalRequestSigningTest {
     }
 
     private fun generateSignWithdrawalRequestSignableData(): ByteArray {
+        val withdrawalJson = """{"id":"dc063f04-46e9-4933-9276-d37f676bc9a3","walletType":"Solana","submitDate":"2022-04-13T19:34:55.319+00:00","submitterName":"Ata Namvari","submitterEmail":"anamvari@blue.rock","approvalTimeoutInSeconds":86535,"numberOfDispositionsRequired":2,"numberOfApprovalsReceived":1,"numberOfDeniesReceived":0,"details":{"type":"WithdrawalRequest","account":{"identifier":"e175003a-659c-424b-8cbf-22cae783150b","name":"Reserves","accountType":"BalanceAccount","address":"2VYdyt85KMyTxMXcwngZowEMMZkk4z9ELy9RVMaUBRyM"},"symbolAndAmountInfo":{"symbolInfo":{"symbol":"SOL","symbolDescription":"Solana","tokenMintAddress":"11111111111111111111111111111111"},"amount":"2.000000000","nativeAmount":"2.000000000","usdEquivalent":"177.54"},"destination":{"name":"Transfers","address":"DHn5zByDkkv2sAs7YaWoQQMV95LmrjDm5ozDGCyau7xG"},"signingData":{"feePayer":"DUcwYFXaSp3te5B56KtdXwaQGAj39MSYFzRznf2J1g3p","walletProgramId":"4867yjdmvKAcwJWYheXBGJy68tciAoWCaJHCy3RX4CLD","multisigOpAccountAddress":"8anJfhBNFv9An5hXQGu1enuxHLeYR1JqXqbxUUoviDqp","walletAddress":"EPo4D4BfNJuJBhxGg9GE9LiXb5CrT4TWJW6FLpPnfW1Q"}}}
+""".trim()
+
+
         val withdrawalRequestWalletApproval =
-            deserializer.parseData(JsonParser.parseString(withdrawalRequestJson.trim()))
+            deserializer.parseData(JsonParser.parseString(withdrawalJson.trim()))
 
         val approvalDispositionRequest = ApprovalDispositionRequest(
-            requestId = UUID.randomUUID().toString(),
-            approvalDisposition = if (Random().nextBoolean()) ApprovalDisposition.APPROVE else ApprovalDisposition.DENY,
+            requestId = withdrawalRequestWalletApproval.id!!,
+            approvalDisposition = ApprovalDisposition.APPROVE,
             requestType = withdrawalRequestWalletApproval.getSolanaApprovalRequestType(),
             blockhash = exampleBlockHash,
             email = userEmail
@@ -104,7 +108,7 @@ class ApprovalRequestSigningTest {
             deserializer.parseData(JsonParser.parseString(conversionRequestJson.trim()))
 
         val approvalDispositionRequest = ApprovalDispositionRequest(
-            requestId = UUID.randomUUID().toString(),
+            requestId = conversionRequestWalletApproval.id!!,
             approvalDisposition = if (Random().nextBoolean()) ApprovalDisposition.APPROVE else ApprovalDisposition.DENY,
             requestType = conversionRequestWalletApproval.getSolanaApprovalRequestType(),
             blockhash = exampleBlockHash,
@@ -123,7 +127,7 @@ class ApprovalRequestSigningTest {
             deserializer.parseData(JsonParser.parseString(signersUpdateJson.trim()))
 
         val approvalDispositionRequest = ApprovalDispositionRequest(
-            requestId = UUID.randomUUID().toString(),
+            requestId = signersUpdateWalletApproval.id!!,
             approvalDisposition = if (Random().nextBoolean()) ApprovalDisposition.APPROVE else ApprovalDisposition.DENY,
             requestType = signersUpdateWalletApproval.getSolanaApprovalRequestType(),
             blockhash = exampleBlockHash,
@@ -142,7 +146,7 @@ class ApprovalRequestSigningTest {
             deserializer.parseData(JsonParser.parseString(signersUpdateRemovalJson.trim()))
 
         val approvalDispositionRequest = ApprovalDispositionRequest(
-            requestId = UUID.randomUUID().toString(),
+            requestId = signersUpdateRemovalWalletApproval.id!!,
             approvalDisposition = if (Random().nextBoolean()) ApprovalDisposition.APPROVE else ApprovalDisposition.DENY,
             requestType = signersUpdateRemovalWalletApproval.getSolanaApprovalRequestType(),
             blockhash = exampleBlockHash,
@@ -192,7 +196,7 @@ class ApprovalRequestSigningTest {
             deserializer.parseData(JsonParser.parseString(balanceAccountCreationJson.trim()))
 
         val approvalDispositionRequest = ApprovalDispositionRequest(
-            requestId = UUID.randomUUID().toString(),
+            requestId = balanceAccountCreationWalletApproval.id!!,
             approvalDisposition = if (Random().nextBoolean()) ApprovalDisposition.APPROVE else ApprovalDisposition.DENY,
             requestType = balanceAccountCreationWalletApproval.getSolanaApprovalRequestType(),
             blockhash = exampleBlockHash,
@@ -214,7 +218,7 @@ class ApprovalRequestSigningTest {
             deserializer.parseData(JsonParser.parseString(withdrawalRequestJson.trim()))
 
         val approvalDispositionRequest = ApprovalDispositionRequest(
-            requestId = UUID.randomUUID().toString(),
+            requestId = withdrawalRequestWalletApproval.id!!,
             approvalDisposition = if (Random().nextBoolean()) ApprovalDisposition.APPROVE else ApprovalDisposition.DENY,
             requestType = withdrawalRequestWalletApproval.getSolanaApprovalRequestType(),
             blockhash = exampleBlockHash,
@@ -237,7 +241,7 @@ class ApprovalRequestSigningTest {
 
 
         val approvalDispositionRequest = ApprovalDispositionRequest(
-            requestId = UUID.randomUUID().toString(),
+            requestId = conversionRequestWalletApproval.id!!,
             approvalDisposition = if (Random().nextBoolean()) ApprovalDisposition.APPROVE else ApprovalDisposition.DENY,
             requestType = conversionRequestWalletApproval.getSolanaApprovalRequestType(),
             blockhash = exampleBlockHash,
@@ -260,7 +264,7 @@ class ApprovalRequestSigningTest {
 
 
         val approvalDispositionRequest = ApprovalDispositionRequest(
-            requestId = UUID.randomUUID().toString(),
+            requestId = signersUpdateWalletApproval.id!!,
             approvalDisposition = ApprovalDisposition.APPROVE,
             requestType = signersUpdateWalletApproval.getSolanaApprovalRequestType(),
             blockhash = exampleBlockHash,
@@ -283,7 +287,7 @@ class ApprovalRequestSigningTest {
 
 
         val approvalDispositionRequest = ApprovalDispositionRequest(
-            requestId = UUID.randomUUID().toString(),
+            requestId = signersUpdateRemovalWalletApproval.id!!,
             approvalDisposition = ApprovalDisposition.APPROVE,
             requestType = signersUpdateRemovalWalletApproval.getSolanaApprovalRequestType(),
             blockhash = exampleBlockHash,

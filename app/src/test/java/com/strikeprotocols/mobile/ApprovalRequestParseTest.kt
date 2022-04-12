@@ -9,6 +9,61 @@ import org.junit.Test
 class ParseApprovalRequestTypes {
     @Test
     fun parseAllApprovalRequestTypes() {
+        val allApprovalRequests = getFullListOfApprovalItems()
+
+        assertEquals(allApprovalRequests.size, 10)
+
+        allApprovalRequests.forEach { approvalRequest ->
+            assertNotNull(approvalRequest)
+            assertNotNull(approvalRequest.details)
+
+            val details = approvalRequest.details
+
+            if (details is SolanaApprovalRequestDetails.MultiSignOpInitiationDetails) {
+                assertNotEquals(details.requestType, SolanaApprovalRequestType.UnknownApprovalType)
+            } else if (details is SolanaApprovalRequestDetails.ApprovalRequestDetails) {
+                assertNotEquals(details.requestType, SolanaApprovalRequestType.UnknownApprovalType)
+            }
+        }
+    }
+
+    @Test
+    fun testSerializingAndDeserializingWalletApproval() {
+        val allApprovalRequests = getFullListOfApprovalItems()
+
+        allApprovalRequests.forEach { walletApproval ->
+            val details = walletApproval.details
+
+            if (details is SolanaApprovalRequestDetails.MultiSignOpInitiationDetails) {
+                assertNotEquals(details.requestType, SolanaApprovalRequestType.UnknownApprovalType)
+
+                val asString = WalletApproval.toJson(walletApproval)
+                assertNotNull(asString)
+
+                val parsedWalletApproval = WalletApproval.fromJson(asString)
+                assertEquals(walletApproval, parsedWalletApproval)
+
+                val parsedDetails =
+                    parsedWalletApproval.details as SolanaApprovalRequestDetails.MultiSignOpInitiationDetails
+                assertNotNull(parsedDetails.multisigOpInitiation)
+                assert(parsedDetails.requestType !is SolanaApprovalRequestType.UnknownApprovalType)
+            } else if (details is SolanaApprovalRequestDetails.ApprovalRequestDetails) {
+                assertNotEquals(details.requestType, SolanaApprovalRequestType.UnknownApprovalType)
+
+                val asString = WalletApproval.toJson(walletApproval)
+                assertNotNull(asString)
+
+                val parsedWalletApproval = WalletApproval.fromJson(asString)
+                assertEquals(walletApproval, parsedWalletApproval)
+
+                val parsedDetails =
+                    parsedWalletApproval.details as SolanaApprovalRequestDetails.ApprovalRequestDetails
+                assert(parsedDetails.requestType !is SolanaApprovalRequestType.UnknownApprovalType)
+            }
+        }
+    }
+
+    private fun getFullListOfApprovalItems(): List<WalletApproval> {
         val deserializer = WalletApprovalDeserializer()
 
         val allApprovalRequests = mutableListOf<WalletApproval>()
@@ -46,7 +101,8 @@ class ParseApprovalRequestTypes {
             deserializer.parseData(multiSigWithWithdrawalRequestJson)
         allApprovalRequests.add(multiSigWithWithdrawalRequestWalletApproval)
 
-        val withdrawalRequestJson: JsonElement = JsonParser.parseString(withdrawalRequestJson.trim())
+        val withdrawalRequestJson: JsonElement =
+            JsonParser.parseString(withdrawalRequestJson.trim())
         val withdrawalRequestWalletApproval = deserializer.parseData(withdrawalRequestJson)
         allApprovalRequests.add(withdrawalRequestWalletApproval)
 
@@ -56,7 +112,8 @@ class ParseApprovalRequestTypes {
             deserializer.parseData(multiSigWithConversionRequestJson)
         allApprovalRequests.add(multiSigWithConversionRequestWalletApproval)
 
-        val conversionRequestJson: JsonElement = JsonParser.parseString(conversionRequestJson.trim())
+        val conversionRequestJson: JsonElement =
+            JsonParser.parseString(conversionRequestJson.trim())
         val conversionRequestWalletApproval = deserializer.parseData(conversionRequestJson)
         allApprovalRequests.add(conversionRequestWalletApproval)
 
@@ -66,30 +123,6 @@ class ParseApprovalRequestTypes {
             deserializer.parseData(multiSignWithDAppRequestJson)
         allApprovalRequests.add(multiSignWithDAppRequestWalletApproval)
 
-        println("$signersUpdateWalletApproval")
-        println("$multiSigWithBalanceAccountCreationWalletApproval")
-        println("$balanceAccountCreationWalletApproval")
-        println("$multiSigWithSignersUpdateWalletApproval")
-        println("$signersUpdateRemovalWalletApproval")
-        println("$multiSigWithWithdrawalRequestWalletApproval")
-        println("$withdrawalRequestWalletApproval")
-        println("$multiSigWithConversionRequestWalletApproval")
-        println("$conversionRequestWalletApproval")
-        println("$multiSignWithDAppRequestWalletApproval")
-
-        assertEquals(allApprovalRequests.size, 10)
-
-        allApprovalRequests.forEach { approvalRequest ->
-            assertNotNull(approvalRequest)
-            assertNotNull(approvalRequest.details)
-
-            val details = approvalRequest.details
-
-            if (details is SolanaApprovalRequestDetails.MultiSignOpInitiationDetails) {
-                assertNotEquals(details.requestType, SolanaApprovalRequestType.UnknownApprovalType)
-            } else if (details is SolanaApprovalRequestDetails.ApprovalRequestDetails) {
-                assertNotEquals(details.requestType, SolanaApprovalRequestType.UnknownApprovalType)
-            }
-        }
+        return allApprovalRequests
     }
 }

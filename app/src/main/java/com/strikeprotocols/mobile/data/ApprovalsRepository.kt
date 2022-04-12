@@ -1,15 +1,22 @@
 package com.strikeprotocols.mobile.data
 
+import com.strikeprotocols.mobile.data.models.InitiationDisposition
 import com.strikeprotocols.mobile.data.models.RegisterApprovalDisposition
 import com.strikeprotocols.mobile.data.models.approval.ApprovalDispositionRequest
+import com.strikeprotocols.mobile.data.models.approval.InitiationRequest
 import com.strikeprotocols.mobile.data.models.approval.WalletApproval
 import javax.inject.Inject
 
 interface ApprovalsRepository {
     suspend fun getWalletApprovals(): List<WalletApproval?>
     suspend fun approveOrDenyDisposition(
+        requestId: String,
         registerApprovalDisposition: RegisterApprovalDisposition
     ): ApprovalDispositionRequest.RegisterApprovalDispositionBody
+    suspend fun approveOrDenyInitiation(
+        requestId: String,
+        initialDisposition: InitiationDisposition
+    ) : InitiationRequest.InitiateRequestBody
 }
 
 class ApprovalsRepositoryImpl @Inject constructor(
@@ -23,6 +30,7 @@ class ApprovalsRepositoryImpl @Inject constructor(
     }
 
     override suspend fun approveOrDenyDisposition(
+        requestId: String,
         registerApprovalDisposition: RegisterApprovalDisposition
     ): ApprovalDispositionRequest.RegisterApprovalDispositionBody {
         // Helper method anyItemNull() will check if any of the disposition properties are null,
@@ -38,6 +46,7 @@ class ApprovalsRepositoryImpl @Inject constructor(
         }
 
         val approvalDispositionRequest = ApprovalDispositionRequest(
+            requestId = requestId,
             approvalDisposition = registerApprovalDisposition.approvalDisposition!!,
             blockhash = registerApprovalDisposition.recentBlockhash!!,
             email = userEmail,
@@ -50,6 +59,40 @@ class ApprovalsRepositoryImpl @Inject constructor(
         return api.approveOrDenyDisposition(
             requestId = approvalDispositionRequest.requestId,
             registerApprovalDispositionBody = registerApprovalDispositionBody
+        )
+    }
+
+    override suspend fun approveOrDenyInitiation(
+        requestId: String,
+        initialDisposition: InitiationDisposition
+    ) : InitiationRequest.InitiateRequestBody {
+        // Helper method anyItemNull() will check if any of the disposition properties are null,
+        // this allows us to use !! operator later in this method without worrying of NPE
+        if (initialDisposition.anyItemNull()) {
+            throw Exception(initialDisposition.getError().error)
+        }
+
+        val userEmail = userRepository.retrieveUserEmail()
+
+        if (userEmail.isEmpty()) {
+            throw Exception("MISSING USER EMAIL")
+        }
+
+        val initiationRequest = InitiationRequest(
+            requestId = requestId,
+            approvalDisposition = initialDisposition.approvalDisposition!!,
+            blockhash = initialDisposition.recentBlockhash!!,
+            email = userEmail,
+            initiation = initialDisposition.multiSigOpInitiationDetails!!.multisigOpInitiation,
+            requestType = initialDisposition.multiSigOpInitiationDetails.requestType
+        )
+
+        val initiationRequestBody =
+            initiationRequest.convertToApiBody(encryptionManager)
+
+        return api.approveOrDenyInitiation(
+            requestId = requestId,
+            initiationRequestBody = initiationRequestBody
         )
     }
 }

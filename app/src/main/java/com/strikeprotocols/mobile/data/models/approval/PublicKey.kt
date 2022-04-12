@@ -9,6 +9,14 @@ import java.nio.ByteOrder
 
 data class PublicKey(val bytes: ByteArray) {
     companion object {
+
+        val SYSVAR_CLOCK_PUBKEY = PublicKey("SysvarC1ock11111111111111111111111111111111")
+        val SYSVAR_RENT_PUBKEY = PublicKey("SysvarRent111111111111111111111111111111111")
+        val SYS_PROGRAM_ID = PublicKey("11111111111111111111111111111111")
+        val TOKEN_PROGRAM_ID = PublicKey("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA")
+        val ASSOCIATED_TOKEN_PROGRAM_ID = PublicKey("ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL")
+        val EMPTY_KEY = PublicKey("11111111111111111111111111111111")
+
         const val SIZE = 32
 
         fun deserialize(byteBuffer: ByteBuffer): PublicKey {
@@ -61,6 +69,12 @@ data class PublicKey(val bytes: ByteArray) {
             throw RuntimeException("Unable to find a viable program address nonce")
         }
 
+        fun tokenAddress(wallet: PublicKey, tokenMint: PublicKey) =
+            findProgramAddress(
+                listOf(wallet.bytes, TOKEN_PROGRAM_ID.bytes, tokenMint.bytes),
+                ATokenProgram.PROGRAM_ID
+            ).address
+
         val empty = PublicKey("11111111111111111111111111111111")
     }
 
@@ -99,6 +113,10 @@ data class PublicKey(val bytes: ByteArray) {
 
     val isEmpty: Boolean
         get() = this == empty
+}
+
+object ATokenProgram {
+    val PROGRAM_ID = PublicKey("ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL")
 }
 
 data class ProgramDerivedAddress(

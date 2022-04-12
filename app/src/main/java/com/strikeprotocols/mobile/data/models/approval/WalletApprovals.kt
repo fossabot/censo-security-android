@@ -1,7 +1,8 @@
 package com.strikeprotocols.mobile.data.models.approval
 
-import com.google.gson.GsonBuilder
+import com.google.gson.*
 import com.strikeprotocols.mobile.data.models.approval.SolanaApprovalRequestType.Companion.UNKNOWN_REQUEST_APPROVAL
+import java.lang.reflect.Modifier
 
 data class WalletApproval(
     val approvalTimeoutInSeconds: Int?,
@@ -23,19 +24,25 @@ data class WalletApproval(
             else -> throw Exception(UNKNOWN_REQUEST_APPROVAL)
         }
 
+    fun unknownApprovalType() : WalletApproval {
+        return copy(
+            details = SolanaApprovalRequestDetails.ApprovalRequestDetails(
+                requestType = SolanaApprovalRequestType.UnknownApprovalType
+            )
+        )
+    }
+
     companion object {
         fun toJson(approval: WalletApproval): String {
-            val customGson = GsonBuilder()
-                .registerTypeAdapter(WalletApproval::class.java, WalletApprovalDeserializer())
+            return GsonBuilder()
+                .excludeFieldsWithModifiers(Modifier.STATIC)
                 .create()
-            return customGson.toJson(approval)
+                .toJson(approval)
         }
 
         fun fromJson(json: String): WalletApproval {
-            val customGson = GsonBuilder()
-                .registerTypeAdapter(WalletApproval::class.java, WalletApprovalDeserializer())
-                .create()
-            return customGson.fromJson(json, WalletApproval::class.java)
+            val walletApprovalDeserializer = WalletApprovalDeserializer()
+            return walletApprovalDeserializer.toObjectWithParsedDetails(json)
         }
     }
 }

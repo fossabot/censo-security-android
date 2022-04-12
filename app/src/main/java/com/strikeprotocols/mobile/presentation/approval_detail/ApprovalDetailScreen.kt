@@ -82,10 +82,12 @@ fun ApprovalDetailsScreen(
                 blockHashViewModel.resetState()
             }
         }
-        if (approvalDetailsState.approvalDispositionState?.registerApprovalDispositionResult is Resource.Success) {
+        if (approvalDetailsState.approvalDispositionState?.registerApprovalDispositionResult is Resource.Success
+            || approvalDetailsState.approvalDispositionState?.initiationDispositionResult is Resource.Success) {
             approvalDetailsViewModel.wipeDataAndKickUserOutToApprovalsScreen()
         }
-        if (approvalDetailsState.approvalDispositionState?.registerApprovalDispositionResult is Resource.Error) {
+        if (approvalDetailsState.approvalDispositionState?.registerApprovalDispositionResult is Resource.Error
+            || approvalDetailsState.approvalDispositionState?.initiationDispositionResult is Resource.Error) {
             approvalDetailsViewModel.setShouldDisplayApprovalDispositionError()
         }
         if (approvalDetailsState.shouldKickOutUserToApprovalsScreen) {

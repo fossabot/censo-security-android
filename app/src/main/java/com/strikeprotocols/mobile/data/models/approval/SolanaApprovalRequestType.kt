@@ -6,10 +6,7 @@ import com.google.gson.JsonPrimitive
 import com.google.gson.annotations.SerializedName
 import com.strikeprotocols.mobile.common.BaseWrapper
 import java.io.ByteArrayOutputStream
-import org.web3j.crypto.Hash
 import java.lang.NumberFormatException
-import java.nio.ByteBuffer
-import java.nio.ByteOrder
 import kotlin.math.pow
 
 sealed class SolanaApprovalRequestDetails {
@@ -24,21 +21,21 @@ sealed class SolanaApprovalRequestDetails {
     companion object {
         fun getTypeAndDetailsFromJson(json: JsonElement?): ApprovalTypeMetaData {
 
-            if (json == null || json !is JsonObject || !json.asJsonObject.has(ApprovalTypeMetaData.Companion.DETAILS_KEY)) {
+            if (json == null || json !is JsonObject || !json.asJsonObject.has(ApprovalTypeMetaData.Companion.DETAILS_JSON_KEY)) {
                 return ApprovalTypeMetaData(type = "", details = null)
             }
 
             val detailsData : JsonElement? =
-                json.asJsonObject?.get(ApprovalTypeMetaData.Companion.DETAILS_KEY)
+                json.asJsonObject?.get(ApprovalTypeMetaData.Companion.DETAILS_JSON_KEY)
 
             val details : JsonObject? =
                 if (detailsData is JsonObject) detailsData.asJsonObject else null
 
             val type : String =
                 if (details != null &&
-                    details.asJsonObject.has(ApprovalTypeMetaData.Companion.TYPE_KEY)) {
+                    details.asJsonObject.has(ApprovalTypeMetaData.Companion.TYPE_JSON_KEY)) {
                     val typeData =
-                        details.asJsonObject?.get(ApprovalTypeMetaData.Companion.TYPE_KEY)
+                        details.asJsonObject?.get(ApprovalTypeMetaData.Companion.TYPE_JSON_KEY)
                     if (typeData is JsonPrimitive && typeData.isString) {
                         typeData.asString
                     } else {
@@ -58,43 +55,30 @@ data class ApprovalTypeMetaData(
     val details: JsonObject?
 ) {
     object Companion {
-        const val DETAILS_KEY = "details"
-        const val TYPE_KEY = "type"
+        const val DETAILS_JSON_KEY = "details"
+        const val TYPE_JSON_KEY = "type"
+        const val MULTI_SIG_JSON_KEY = "multisigOpInitiation"
+        const val REQUEST_TYPE_JSON_KEY = "requestType"
     }
 }
 
 data class MultiSigOpInitiation(
-    val opAccountCreationInfo: OpAccountCreationInfo,
-    val dataAccountCreationInfo: DataAccountCreationInfo?,
+    val opAccountCreationInfo: MultiSigAccountCreationInfo,
+    val dataAccountCreationInfo: MultiSigAccountCreationInfo?,
 ) {
     companion object {
-        const val MULTI_SIG_KEY = "MultisigOpInitiation"
+        const val MULTI_SIG_TYPE = "MultisigOpInitiation"
     }
 }
 
 sealed class SolanaApprovalRequestType {
-    abstract fun serialize(): ByteArray
-
     data class WithdrawalRequest(
         val type: String,
         val account: AccountInfo,
         val symbolAndAmountInfo: SymbolAndAmountInfo,
         val destination: DestinationAddress,
         val signingData: SolanaSigningData
-    ) : SolanaApprovalRequestType() {
-        override fun serialize(): ByteArray {
-            val buffer = ByteArrayOutputStream()
-
-            buffer.write(byteArrayOf(retrieveOpCode()))
-            buffer.write(signingData.walletAddress.base58Bytes())
-            buffer.write(account.identifier.sha256HashBytes())
-            buffer.write(destination.address.base58Bytes())
-            buffer.write(symbolAndAmountInfo.fundamentalAmount().bytes())
-            buffer.write(symbolAndAmountInfo.symbolInfo.tokenMintAddress.base58Bytes())
-
-            return buffer.toByteArray()
-        }
-    }
+    ) : SolanaApprovalRequestType()
 
     data class ConversionRequest(
         val type: String,
@@ -103,38 +87,14 @@ sealed class SolanaApprovalRequestType {
         val destination: DestinationAddress,
         val destinationSymbolInfo: SymbolInfo,
         val signingData: SolanaSigningData
-    ) : SolanaApprovalRequestType() {
-        override fun serialize(): ByteArray {
-            val buffer = ByteArrayOutputStream()
-
-            buffer.write(byteArrayOf(retrieveOpCode()))
-            buffer.write(account.identifier.sha256HashBytes())
-            buffer.write(destination.address.base58Bytes())
-            buffer.write(symbolAndAmountInfo.fundamentalAmount().bytes())
-            buffer.write(symbolAndAmountInfo.symbolInfo.tokenMintAddress.base58Bytes())
-
-            return buffer.toByteArray()
-        }
-    }
+    ) : SolanaApprovalRequestType()
 
     data class SignersUpdate(
         val type: String,
         val slotUpdateType: SlotUpdateType,
         val signer: SlotSignerInfo,
         val signingData: SolanaSigningData
-    ) : SolanaApprovalRequestType() {
-        override fun serialize(): ByteArray {
-            val buffer = ByteArrayOutputStream()
-
-            buffer.write(byteArrayOf(retrieveOpCode()))
-            buffer.write(signingData.walletAddress.base58Bytes())
-            buffer.write(byteArrayOf(slotUpdateType.toSolanaProgramValue()))
-            buffer.write(signer.combinedBytes())
-
-            return buffer.toByteArray()
-
-        }
-    }
+    ) : SolanaApprovalRequestType()
 
     data class BalanceAccountCreation(
         val type: String,
@@ -147,53 +107,18 @@ sealed class SolanaApprovalRequestType {
         var dappsEnabled: BooleanSetting,
         var addressBookSlot: Byte,
         var signingData: SolanaSigningData
-    ) : SolanaApprovalRequestType() {
-        override fun serialize(): ByteArray {
-            val buffer = ByteArrayOutputStream()
-
-            buffer.write(byteArrayOf(retrieveOpCode()))
-            buffer.write(signingData.walletAddress.base58Bytes())
-            buffer.write(byteArrayOf(accountSlot))
-            buffer.write(accountInfo.identifier.sha256HashBytes())
-            buffer.write(byteArrayOf(approvalsRequired))
-            buffer.write(approvalTimeout.convertToSeconds().bytes())
-            buffer.write(byteArrayOf(approvers.size.toByte()))
-            buffer.write(approvers.flatMap { it.combinedBytes().toList() }.toByteArray())
-            buffer.write(byteArrayOf(whitelistEnabled.toSolanaProgramValue()))
-            buffer.write(byteArrayOf(dappsEnabled.toSolanaProgramValue()))
-            buffer.write(byteArrayOf(addressBookSlot))
-
-            return buffer.toByteArray()
-        }
-    }
+    ) : SolanaApprovalRequestType()
 
     data class DAppTransactionRequest(
         val type: String,
         var account: AccountInfo,
-        var dAppInfo: SolanaDApp,
+        var dappInfo: SolanaDApp,
         var balanceChanges: List<SymbolAndAmountInfo>,
         var instructions: List<SolanaInstructionBatch>,
         var signingData: SolanaSigningData
-    ) : SolanaApprovalRequestType() {
-        override fun serialize(): ByteArray {
-            throw Exception(INVALID_REQUEST_APPROVAL)
-        }
-    }
+    ) : SolanaApprovalRequestType()
 
-    object UnknownApprovalType : SolanaApprovalRequestType() {
-        override fun serialize() : ByteArray {
-            throw Exception(UNKNOWN_REQUEST_APPROVAL)
-        }
-    }
-
-    fun retrieveOpCode(): Byte {
-        return when (this) {
-            is BalanceAccountCreation -> 1
-            is WithdrawalRequest, is ConversionRequest -> 3
-            is SignersUpdate -> 5
-            else -> 0
-        }
-    }
+    object UnknownApprovalType : SolanaApprovalRequestType()
 
     companion object {
         const val INVALID_REQUEST_APPROVAL = "Invalid request for Approval"
@@ -222,13 +147,9 @@ enum class ApprovalType(val value: String) {
     }
 }
 
-data class OpAccountCreationInfo(
-    val accountSize: Int,
-    val minBalanceForRentExemption: Int
-)
-
-data class DataAccountCreationInfo(
-    val missing: String?
+data class MultiSigAccountCreationInfo(
+    val accountSize: Long,
+    val minBalanceForRentExemption: Long
 )
 
 data class AccountInfo(
@@ -256,17 +177,15 @@ data class SymbolAndAmountInfo(
     val usdEquivalent: String?
 ) {
 
-    //todo: need verify this with data coming down. Get some examples.
     fun fundamentalAmount(): Long {
-        val amountAsFloat = amount.toFloatOrNull() ?: throw NumberFormatException()
+        val amountAsBigDecimal = amount.toBigDecimalOrNull() ?: throw NumberFormatException()
 
         return if (symbolInfo.symbol == "SOL") {
-            (amountAsFloat * 1_000_000_000).toLong()
+            (amountAsBigDecimal * 1_000_000_000.toBigDecimal()).toLong()
         } else {
             val parts = amount.split(".")
             val decimals = if (parts.size == 1) 0 else parts[1].count()
-
-            val calculatedAmount = amountAsFloat * (10.toDouble().pow(decimals.toDouble()))
+            val calculatedAmount = amountAsBigDecimal * (10.toBigDecimal().pow(decimals))
             calculatedAmount.toLong()
         }
     }
@@ -326,17 +245,51 @@ data class SolanaDApp(
 
 data class SolanaInstructionBatch(
     val from: Byte,
-    val instructions: List<SolanaInstruction>
-)
+    val instructions: List<SolanaInstruction>) {
+
+    fun combinedBytes(): ByteArray {
+        val buffer = ByteArrayOutputStream()
+        buffer.write(byteArrayOf(28))
+        buffer.write(byteArrayOf(from))
+        buffer.writeShortLE(instructions.size.toShort())
+        buffer.write(instructions.flatMap { it.combinedBytes().toList() }.toByteArray())
+
+        return buffer.toByteArray()
+    }
+}
 
 data class SolanaInstruction(
     val programId: String,
     val accountMetas: List<SolanaAccountMeta>,
     val data: String
-)
+) {
+    fun combinedBytes(): ByteArray {
+        val b64DecodedData: ByteArray =
+            if (data.isEmpty()) byteArrayOf() else BaseWrapper.decodeFromBase64(data)
+
+        val buffer = ByteArrayOutputStream()
+        buffer.write(programId.base58Bytes())
+        buffer.writeShortLE(accountMetas.size.toShort())
+        buffer.write(accountMetas.flatMap { it.combinedBytes().toList() }.toByteArray())
+        buffer.writeShortLE(b64DecodedData.size.toShort())
+        buffer.write(b64DecodedData)
+
+        return byteArrayOf()
+    }
+}
 
 data class SolanaAccountMeta(
     val address: String,
     val signer: Boolean,
     val writeable: Boolean
-)
+) {
+    fun combinedBytes(): ByteArray {
+        return byteArrayOf(flags()) + address.base58Bytes()
+    }
+
+    private fun flags(): Byte {
+        val writeValue = if (writeable) 1 else 0
+        val signValue = if (signer) 2 else 0
+        return (writeValue + signValue).toByte()
+    }
+}

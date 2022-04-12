@@ -2,6 +2,7 @@ package com.strikeprotocols.mobile.data.models.approval
 
 import com.strikeprotocols.mobile.common.BaseWrapper
 import org.web3j.crypto.Hash
+import java.io.ByteArrayOutputStream
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
@@ -11,19 +12,22 @@ fun String.sha256HashBytes() : ByteArray = Hash.sha256(toByteArray())
 
 fun Long.convertToSeconds() : Long = this / 1000
 
-fun Int.bytes() : ByteArray {
-    val bytes = ByteBuffer.allocate(Int.SIZE_BYTES).putInt(this).array()
-    val buffer = ByteBuffer.wrap(bytes)
-    buffer.order(ByteOrder.LITTLE_ENDIAN)
-
-    return buffer.array()
+fun ByteArrayOutputStream.writeShortLE(value: Short) {
+    this.write(
+        ByteBuffer.allocate(2)
+            .order(ByteOrder.LITTLE_ENDIAN)
+            .putShort(value)
+            .array()
+    )
 }
 
-fun Long.bytes() : ByteArray {
-    val bytes = ByteBuffer.allocate(Long.SIZE_BYTES).putLong(this).array()
-    val buffer = ByteBuffer.wrap(bytes)
-    buffer.order(ByteOrder.LITTLE_ENDIAN)
-    return buffer.array()
+fun ByteArrayOutputStream.writeLongLE(value: Long) {
+    this.write(
+        ByteBuffer.allocate(8)
+            .order(ByteOrder.LITTLE_ENDIAN)
+            .putLong(value)
+            .array()
+    )
 }
 
 fun SlotSignerInfo.combinedBytes(): ByteArray {

@@ -1,10 +1,11 @@
 package com.strikeprotocols.mobile.data.models.approval
 
-import com.google.gson.Gson
-import com.google.gson.JsonDeserializationContext
-import com.google.gson.JsonDeserializer
-import com.google.gson.JsonElement
-import com.strikeprotocols.mobile.data.models.approval.MultiSigOpInitiation.Companion.MULTI_SIG_KEY
+import com.google.gson.*
+import com.strikeprotocols.mobile.data.models.approval.ApprovalTypeMetaData.Companion.DETAILS_JSON_KEY
+import com.strikeprotocols.mobile.data.models.approval.ApprovalTypeMetaData.Companion.MULTI_SIG_JSON_KEY
+import com.strikeprotocols.mobile.data.models.approval.ApprovalTypeMetaData.Companion.REQUEST_TYPE_JSON_KEY
+import com.strikeprotocols.mobile.data.models.approval.ApprovalTypeMetaData.Companion.TYPE_JSON_KEY
+import com.strikeprotocols.mobile.data.models.approval.MultiSigOpInitiation.Companion.MULTI_SIG_TYPE
 import java.lang.reflect.Type
 
 class WalletApprovalDeserializer : JsonDeserializer<WalletApproval> {
@@ -16,6 +17,70 @@ class WalletApprovalDeserializer : JsonDeserializer<WalletApproval> {
         return parseData(json = json)
     }
 
+    fun toObjectWithParsedDetails(json: String?) : WalletApproval {
+        val jsonElement = JsonParser.parseString(json)
+        var walletApproval = Gson().fromJson(json, WalletApproval::class.java)
+
+        if(jsonElement !is JsonObject) {
+            return walletApproval.unknownApprovalType()
+        }
+
+        val jsonObject = jsonElement.asJsonObject.get(DETAILS_JSON_KEY)
+
+        if(jsonObject !is JsonObject) {
+            return walletApproval.unknownApprovalType()
+        }
+
+        if(jsonObject.has(MULTI_SIG_JSON_KEY)) {
+            val multiSigOpJson = jsonObject.get(MULTI_SIG_JSON_KEY)
+
+            if(multiSigOpJson !is JsonObject) {
+                return walletApproval.unknownApprovalType()
+            }
+            val multiSigInitiation =
+                Gson().fromJson(multiSigOpJson, MultiSigOpInitiation::class.java)
+
+            val requestType = getRequestTypeFromParsedDetails(jsonObject)
+
+            val multiSignOpInitiationDetails =
+                SolanaApprovalRequestDetails.MultiSignOpInitiationDetails(
+                    requestType = requestType,
+                    multisigOpInitiation = multiSigInitiation
+                )
+            walletApproval = walletApproval.copy(details = multiSignOpInitiationDetails)
+        } else {
+            val requestType = getRequestTypeFromParsedDetails(jsonObject)
+
+            val approvalRequestDetails =
+                SolanaApprovalRequestDetails.ApprovalRequestDetails(requestType = requestType)
+            walletApproval = walletApproval.copy(details = approvalRequestDetails)
+        }
+
+        return walletApproval
+    }
+
+    private fun getRequestTypeFromParsedDetails(jsonObject: JsonObject) : SolanaApprovalRequestType {
+        if (!jsonObject.has(REQUEST_TYPE_JSON_KEY)) {
+            return SolanaApprovalRequestType.UnknownApprovalType
+        }
+        val requestTypeJson = jsonObject.get(REQUEST_TYPE_JSON_KEY)
+
+        if (requestTypeJson !is JsonObject) {
+            return SolanaApprovalRequestType.UnknownApprovalType
+        }
+
+        val requestString = requestTypeJson.get(TYPE_JSON_KEY)
+
+        if(requestString !is JsonPrimitive) {
+            return SolanaApprovalRequestType.UnknownApprovalType
+        }
+
+        val approvalType =
+            ApprovalType.fromString(requestString.asString)
+
+        return getStandardApprovalType(approvalType, requestTypeJson)
+    }
+
     fun parseData(json: JsonElement?): WalletApproval {
         try {
             val approvalTypeAndDetails =
@@ -23,7 +88,7 @@ class WalletApprovalDeserializer : JsonDeserializer<WalletApproval> {
             val approvalType = ApprovalType.fromString(approvalTypeAndDetails.type)
 
             val solanaApprovalRequestDetails: SolanaApprovalRequestDetails =
-                if (approvalTypeAndDetails.type == MULTI_SIG_KEY) {
+                if (approvalTypeAndDetails.type == MULTI_SIG_TYPE) {
                     val multiSigOp =
                         Gson().fromJson(
                             approvalTypeAndDetails.details,
