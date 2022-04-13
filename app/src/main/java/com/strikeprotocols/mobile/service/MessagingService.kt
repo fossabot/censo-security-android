@@ -7,9 +7,10 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.media.RingtoneManager
-import android.os.Build
 import android.provider.Settings
 import androidx.core.app.NotificationCompat
+import androidx.core.app.TaskStackBuilder
+import androidx.core.net.toUri
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import com.strikeprotocols.mobile.MainActivity
@@ -17,6 +18,8 @@ import com.strikeprotocols.mobile.R
 import com.strikeprotocols.mobile.common.strikeLog
 import com.strikeprotocols.mobile.data.PushRepository
 import com.strikeprotocols.mobile.data.models.PushBody
+import com.strikeprotocols.mobile.presentation.Screen
+import com.strikeprotocols.mobile.presentation.Screen.Companion.STRIKE_PROTOCOLS_URI
 import com.strikeprotocols.mobile.service.MessagingService.Companion.BODY_KEY
 import com.strikeprotocols.mobile.service.MessagingService.Companion.DEFAULT_BODY
 import com.strikeprotocols.mobile.service.MessagingService.Companion.DEFAULT_KEY_ONE
@@ -112,14 +115,18 @@ class MessagingService : FirebaseMessagingService() {
      * @param messageBody FCM message body received.
      */
     private fun sendNotification(pushData: PushData) {
-        val intent = Intent(this, MainActivity::class.java)
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-        val pendingIntent = PendingIntent.getActivity(
+        val splashScreenIntent = Intent(
+            Intent.ACTION_VIEW,
+            Screen.ApprovalListRoute.buildScreenDeepLinkUri().toUri(),
             this,
-            0 /* Request code */,
-            intent,
-            PendingIntent.FLAG_IMMUTABLE
+            MainActivity::class.java
         )
+
+        splashScreenIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+        val pendingIntent: PendingIntent? = TaskStackBuilder.create(this).run {
+            addNextIntentWithParentStack(splashScreenIntent)
+            getPendingIntent(0, PendingIntent.FLAG_IMMUTABLE)
+        }
 
         val channelId = getString(R.string.default_notification_channel_id)
         val defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
@@ -137,7 +144,7 @@ class MessagingService : FirebaseMessagingService() {
         val channel = NotificationChannel(
             channelId,
             getString(R.string.default_notification_channel_name),
-            NotificationManager.IMPORTANCE_DEFAULT
+            NotificationManager.IMPORTANCE_HIGH
         )
         notificationManager.createNotificationChannel(channel)
 
