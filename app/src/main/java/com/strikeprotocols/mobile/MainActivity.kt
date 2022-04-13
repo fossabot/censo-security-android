@@ -8,21 +8,19 @@ import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.navigation.NavController
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.Lifecycle
-import androidx.navigation.NavHostController
-import androidx.navigation.NavType
+import androidx.navigation.*
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navArgument
 import com.strikeprotocols.mobile.common.BiometricUtil
 import com.strikeprotocols.mobile.data.AuthProvider
 import com.strikeprotocols.mobile.data.UserState
 import com.strikeprotocols.mobile.data.UserStateListener
 import com.strikeprotocols.mobile.data.models.approval.WalletApproval
 import com.strikeprotocols.mobile.presentation.Screen
+import com.strikeprotocols.mobile.presentation.Screen.Companion.STRIKE_PROTOCOLS_URI
 import com.strikeprotocols.mobile.presentation.approval_detail.ApprovalDetailsScreen
 import com.strikeprotocols.mobile.presentation.approvals.ApprovalsListScreen
 import com.strikeprotocols.mobile.presentation.auth.AuthScreen
@@ -54,7 +52,7 @@ class MainActivity : FragmentActivity() {
         val notificationManager = getSystemService(NotificationManager::class.java)
         notificationManager?.createNotificationChannel(
             NotificationChannel(channelId,
-            channelName, NotificationManager.IMPORTANCE_LOW)
+            channelName, NotificationManager.IMPORTANCE_HIGH)
         )
 
         setContent {
@@ -112,6 +110,7 @@ class MainActivity : FragmentActivity() {
 
     @Composable
     private fun StrikeNavHost(navController: NavHostController) {
+
         NavHost(
             navController = navController,
             startDestination = Screen.SplashRoute.route
@@ -127,7 +126,8 @@ class MainActivity : FragmentActivity() {
                 SignInScreen(navController = navController)
             }
             composable(
-                route = Screen.ApprovalListRoute.route
+                route = Screen.ApprovalListRoute.route,
+                deepLinks = listOf(navDeepLink { uriPattern = Screen.ApprovalListRoute.buildScreenDeepLinkUri() })
             ) {
                 ApprovalsListScreen(navController = navController)
             }

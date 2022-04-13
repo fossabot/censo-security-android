@@ -14,7 +14,12 @@ sealed class Screen(val route: String) {
         const val BIOMETRY_AVAILABLE_ARG = "biometry available"
     }
 
+    fun buildScreenDeepLinkUri() = "$STRIKE_PROTOCOLS_URI${this.route}"
+
     companion object {
+        //Used for setting up deep linking options for composable screens
+        const val STRIKE_PROTOCOLS_URI = "data://strikeprotocols/"
+
         //This val is used to check if the current destination route matches up with the biometry disabled screen.
         //If the biometry disabled screen route changes, then update this key to match it.
         val BIOMETRY_DISABLED_ROUTE_KEY = "${BiometryDisabledRoute.route}/{${BiometryDisabledRoute.MESSAGE_ARG}}/{${BiometryDisabledRoute.BIOMETRY_AVAILABLE_ARG}}"
