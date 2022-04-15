@@ -13,13 +13,13 @@ import androidx.core.app.TaskStackBuilder
 import androidx.core.net.toUri
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
+import com.strikeprotocols.mobile.BuildConfig
 import com.strikeprotocols.mobile.MainActivity
 import com.strikeprotocols.mobile.R
 import com.strikeprotocols.mobile.common.strikeLog
 import com.strikeprotocols.mobile.data.PushRepository
 import com.strikeprotocols.mobile.data.models.PushBody
 import com.strikeprotocols.mobile.presentation.Screen
-import com.strikeprotocols.mobile.presentation.Screen.Companion.STRIKE_PROTOCOLS_URI
 import com.strikeprotocols.mobile.service.MessagingService.Companion.BODY_KEY
 import com.strikeprotocols.mobile.service.MessagingService.Companion.DEFAULT_BODY
 import com.strikeprotocols.mobile.service.MessagingService.Companion.DEFAULT_KEY_ONE
@@ -27,6 +27,7 @@ import com.strikeprotocols.mobile.service.MessagingService.Companion.DEFAULT_KEY
 import com.strikeprotocols.mobile.service.MessagingService.Companion.DEFAULT_TITLE
 import com.strikeprotocols.mobile.service.MessagingService.Companion.KEY_ONE_KEY
 import com.strikeprotocols.mobile.service.MessagingService.Companion.KEY_TWO_KEY
+import com.strikeprotocols.mobile.service.MessagingService.Companion.NOTIFICATION_DISPLAYED_KEY
 import com.strikeprotocols.mobile.service.MessagingService.Companion.TITLE_KEY
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
@@ -150,6 +151,11 @@ class MessagingService : FirebaseMessagingService() {
 
         val notificationId = abs(Date().time.toInt())
         notificationManager.notify(notificationId, notificationBuilder.build())
+
+        //Send a broadcast to the main activity to update the approvals data
+        val notificationDisplayedIntent = Intent(BuildConfig.APPLICATION_ID)
+        notificationDisplayedIntent.putExtra(NOTIFICATION_DISPLAYED_KEY, true)
+        sendBroadcast(notificationDisplayedIntent)
     }
 
     override fun onDestroy() {
@@ -158,6 +164,8 @@ class MessagingService : FirebaseMessagingService() {
     }
 
     object Companion {
+        const val NOTIFICATION_DISPLAYED_KEY = "Notification Displayed Key"
+
         const val TITLE_KEY = "title"
         const val BODY_KEY = "body"
         const val KEY_ONE_KEY = "key_1"
