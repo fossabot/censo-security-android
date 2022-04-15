@@ -2,8 +2,13 @@ package com.strikeprotocols.mobile
 
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.os.Bundle
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
@@ -20,15 +25,16 @@ import com.strikeprotocols.mobile.data.UserState
 import com.strikeprotocols.mobile.data.UserStateListener
 import com.strikeprotocols.mobile.data.models.approval.WalletApproval
 import com.strikeprotocols.mobile.presentation.Screen
-import com.strikeprotocols.mobile.presentation.Screen.Companion.STRIKE_PROTOCOLS_URI
 import com.strikeprotocols.mobile.presentation.approval_detail.ApprovalDetailsScreen
 import com.strikeprotocols.mobile.presentation.approvals.ApprovalsListScreen
+import com.strikeprotocols.mobile.presentation.approvals.ApprovalsViewModel
 import com.strikeprotocols.mobile.presentation.auth.AuthScreen
 import com.strikeprotocols.mobile.presentation.biometry_disabled.BiometryDisabledScreen
 import com.strikeprotocols.mobile.presentation.components.OnLifecycleEvent
 import com.strikeprotocols.mobile.presentation.contact_strike.ContactStrikeScreen
 import com.strikeprotocols.mobile.presentation.sign_in.SignInScreen
 import com.strikeprotocols.mobile.presentation.splash.SplashScreen
+import com.strikeprotocols.mobile.service.MessagingService.Companion.NOTIFICATION_DISPLAYED_KEY
 import com.strikeprotocols.mobile.ui.theme.BackgroundBlack
 import com.strikeprotocols.mobile.ui.theme.StrikeMobileTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -40,7 +46,21 @@ class MainActivity : FragmentActivity() {
     @Inject
     lateinit var authProvider: AuthProvider
 
+    val approvalsViewModel: ApprovalsViewModel by viewModels()
+
     private var userStateListener: UserStateListener? = null
+
+    private val notificationDisplayedBroadcastReceiver: BroadcastReceiver = object : BroadcastReceiver() {
+        override fun onReceive(p0: Context?, intent: Intent?) {
+            intent?.let { safeIntent ->
+                if (safeIntent.hasExtra(NOTIFICATION_DISPLAYED_KEY)
+                    && safeIntent.getBooleanExtra(NOTIFICATION_DISPLAYED_KEY, false)
+                ) {
+                    approvalsViewModel.refreshData()
+                }
+            }
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -129,7 +149,7 @@ class MainActivity : FragmentActivity() {
                 route = Screen.ApprovalListRoute.route,
                 deepLinks = listOf(navDeepLink { uriPattern = Screen.ApprovalListRoute.buildScreenDeepLinkUri() })
             ) {
-                ApprovalsListScreen(navController = navController)
+                ApprovalsListScreen(navController = navController, approvalsViewModel = approvalsViewModel)
             }
             composable(
                 route = "${Screen.ApprovalDetailRoute.route}/{${Screen.ApprovalDetailRoute.APPROVAL_ARG}}",
@@ -175,6 +195,18 @@ class MainActivity : FragmentActivity() {
             }
         }
 
+
+    override fun onResume() {
+        super.onResume()
+        val intentFilter = IntentFilter()
+        intentFilter.addAction(BuildConfig.APPLICATION_ID)
+        registerReceiver(notificationDisplayedBroadcastReceiver, intentFilter)
+    }
+
+    override fun onStop() {
+        super.onStop()
+        unregisterReceiver(notificationDisplayedBroadcastReceiver)
+    }
 
     override fun onDestroy() {
         super.onDestroy()

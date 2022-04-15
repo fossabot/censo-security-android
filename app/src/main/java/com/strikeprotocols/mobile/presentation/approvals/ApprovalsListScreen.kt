@@ -43,7 +43,7 @@ import com.strikeprotocols.mobile.ui.theme.StrikeWhite
 @Composable
 fun ApprovalsListScreen(
     navController: NavController,
-    approvalsViewModel: ApprovalsViewModel = hiltViewModel(),
+    approvalsViewModel: ApprovalsViewModel,
     blockHashViewModel: BlockHashViewModel = hiltViewModel()
 ) {
     val approvalsState = approvalsViewModel.state
