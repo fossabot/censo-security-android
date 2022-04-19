@@ -80,8 +80,7 @@ data class InitiationRequest(
 
     fun createOpAccounTransactionInstructionData(): ByteArray {
         val buffer = ByteArrayOutputStream()
-        //todo: Do not think this is best way to handle this
-        buffer.write(Int.MIN_VALUE)
+        buffer.write(0)
         buffer.writeLongLE(initiation.opAccountCreationInfo.minBalanceForRentExemption)
         buffer.writeLongLE(initiation.opAccountCreationInfo.accountSize)
         buffer.write(signingData.walletProgramId.base58Bytes())
@@ -115,8 +114,7 @@ data class InitiationRequest(
             initiation.dataAccountCreationInfo ?: throw Exception("Missing data account creation")
 
         val buffer = ByteArrayOutputStream()
-        //todo: is this the same as UInt32(0)
-        buffer.write(Int.MIN_VALUE)
+        buffer.write(0)
         buffer.writeLongLE(dataAccountCreationInfo.minBalanceForRentExemption)
         buffer.writeLongLE(dataAccountCreationInfo.accountSize)
         buffer.write(signingData.walletProgramId.base58Bytes())
