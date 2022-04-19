@@ -5,8 +5,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.android.gms.tasks.OnCompleteListener
+import com.google.firebase.messaging.FirebaseMessaging
 import com.strikeprotocols.mobile.common.Resource
+import com.strikeprotocols.mobile.common.strikeLog
+import com.strikeprotocols.mobile.data.PushRepository
 import com.strikeprotocols.mobile.data.UserRepository
+import com.strikeprotocols.mobile.data.models.PushBody
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -28,7 +33,6 @@ class SplashViewModel @Inject constructor(
             } catch (e: Exception) {
                 false
             }
-
             state = state.copy(userLoggedInResult = Resource.Success(userLoggedIn))
         }
     }

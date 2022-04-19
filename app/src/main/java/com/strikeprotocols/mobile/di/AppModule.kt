@@ -4,6 +4,7 @@ import android.content.Context
 import com.strikeprotocols.mobile.data.*
 import com.strikeprotocols.mobile.data.UserRepository
 import com.strikeprotocols.mobile.data.UserRepositoryImpl
+import com.strikeprotocols.mobile.service.MessagingService
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -54,8 +55,8 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun providePushRepository(api: BrooklynApiService): PushRepository {
-        return PushRepositoryImpl(api)
+    fun providePushRepository(api: BrooklynApiService, @ApplicationContext applicationContext: Context): PushRepository {
+        return PushRepositoryImpl(api, applicationContext)
     }
 
     @Provides
@@ -69,4 +70,5 @@ object AppModule {
     fun provideSecurePrefs(): SecurePreferences {
         return SecurePreferencesImpl()
     }
+
 }

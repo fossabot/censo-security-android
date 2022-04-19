@@ -33,7 +33,6 @@ class UserRepositoryImpl(
     private val api: BrooklynApiService,
     private val encryptionManager: EncryptionManager,
     private val securePreferences: SecurePreferences
-
 ) : UserRepository {
     override suspend fun retrieveSessionToken(username: String, password: String): String =
         authProvider.getSessionToken(username, password)

@@ -7,18 +7,20 @@ import javax.inject.Inject
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.viewModelScope
-import com.strikeprotocols.mobile.BuildConfig
+import com.google.firebase.messaging.FirebaseMessaging
 import com.strikeprotocols.mobile.common.*
 import com.strikeprotocols.mobile.data.*
 import com.strikeprotocols.mobile.data.CredentialsProviderImpl.Companion.CREDENTIAL_DATA_EMPTY
 import com.strikeprotocols.mobile.data.NoInternetException.Companion.NO_INTERNET_ERROR
-import com.strikeprotocols.mobile.data.models.WalletSigner
+import com.strikeprotocols.mobile.data.models.PushBody
 import com.strikeprotocols.mobile.data.models.VerifyUser
 import kotlinx.coroutines.*
+import kotlinx.coroutines.tasks.await
 
 @HiltViewModel
 class SignInViewModel @Inject constructor(
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
+    private val pushRepository: PushRepository
 ) : ViewModel() {
 
     var state by mutableStateOf(SignInState())
@@ -78,6 +80,25 @@ class SignInViewModel @Inject constructor(
         viewModelScope.launch {
             userRepository.saveUserEmail(state.email)
             userRepository.setUserLoggedIn()
+            submitNotificationTokenForRegistration()
+        }
+    }
+
+    private suspend fun submitNotificationTokenForRegistration() {
+        try {
+            val token = FirebaseMessaging.getInstance().token.await()
+
+            val deviceId = pushRepository.getDeviceId()
+
+            if (token.isNotEmpty() && deviceId.isNotEmpty()) {
+                val pushBody = PushBody(
+                    deviceId = deviceId,
+                    token = token
+                )
+                pushRepository.addPushNotification(pushBody = pushBody)
+            }
+        } catch (e: Exception) {
+
         }
     }
     //endregion

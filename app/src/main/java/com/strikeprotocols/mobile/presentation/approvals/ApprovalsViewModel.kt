@@ -9,6 +9,7 @@ import androidx.lifecycle.viewModelScope
 import com.strikeprotocols.mobile.common.Resource
 import com.strikeprotocols.mobile.common.strikeLog
 import com.strikeprotocols.mobile.data.ApprovalsRepository
+import com.strikeprotocols.mobile.data.PushRepository
 import com.strikeprotocols.mobile.data.UserRepository
 import com.strikeprotocols.mobile.data.models.ApprovalDisposition
 import com.strikeprotocols.mobile.data.models.InitiationDisposition
@@ -29,7 +30,8 @@ import kotlin.Exception
 @HiltViewModel
 class ApprovalsViewModel @Inject constructor(
     private val approvalsRepository: ApprovalsRepository,
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
+    private val pushRepository: PushRepository
 ) : ViewModel() {
 
     private var timer: CountDownTimer? = null
@@ -114,6 +116,11 @@ class ApprovalsViewModel @Inject constructor(
     fun logout() {
         viewModelScope.launch {
             state = state.copy(logoutResult = Resource.Loading())
+            try {
+                pushRepository.removePushNotification()
+            } catch(e: Exception) {
+                //continue logging out
+            }
             state = try {
                 val loggedOut = userRepository.logOut()
                 state.copy(logoutResult = Resource.Success(loggedOut))
