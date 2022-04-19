@@ -11,6 +11,7 @@ import android.provider.Settings
 import androidx.core.app.NotificationCompat
 import androidx.core.app.TaskStackBuilder
 import androidx.core.net.toUri
+import com.google.firebase.installations.FirebaseInstallations
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import com.strikeprotocols.mobile.BuildConfig
@@ -18,6 +19,7 @@ import com.strikeprotocols.mobile.MainActivity
 import com.strikeprotocols.mobile.R
 import com.strikeprotocols.mobile.common.strikeLog
 import com.strikeprotocols.mobile.data.PushRepository
+import com.strikeprotocols.mobile.data.UserRepository
 import com.strikeprotocols.mobile.data.models.PushBody
 import com.strikeprotocols.mobile.presentation.Screen
 import com.strikeprotocols.mobile.service.MessagingService.Companion.BODY_KEY
@@ -30,10 +32,7 @@ import com.strikeprotocols.mobile.service.MessagingService.Companion.KEY_TWO_KEY
 import com.strikeprotocols.mobile.service.MessagingService.Companion.NOTIFICATION_DISPLAYED_KEY
 import com.strikeprotocols.mobile.service.MessagingService.Companion.TITLE_KEY
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import java.util.*
 import javax.inject.Inject
 import kotlin.math.abs
@@ -46,6 +45,9 @@ class MessagingService : FirebaseMessagingService() {
 
     @Inject
     lateinit var pushRepository: PushRepository
+
+    @Inject
+    lateinit var userRepository: UserRepository
 
     /**
      * Called when message is received.
@@ -64,7 +66,18 @@ class MessagingService : FirebaseMessagingService() {
      * FCM registration token is initially generated so this is where you would retrieve the token.
      */
     override fun onNewToken(token: String) {
-        //sendRegistrationToServer(token)
+        scope.launch {
+            val userLoggedIn = try {
+                userRepository.userLoggedIn()
+            } catch (e: Exception) {
+                false
+            }
+
+            if (userLoggedIn) {
+                strikeLog(message = "New Token received, sending to strike backend")
+                sendRegistrationToServer(token)
+            }
+        }
     }
 
     /**

@@ -76,9 +76,16 @@ interface BrooklynApiService {
     @Headers(AUTH_REQUIRED, X_STRIKE_REQUIRED)
     suspend fun getWalletApprovals(): List<WalletApproval?>
 
-    @POST("notification-tokens")
+    @POST("v1/notification-tokens")
     @Headers(AUTH_REQUIRED, X_STRIKE_REQUIRED)
     suspend fun addPushNotificationToken(@Body pushData: PushBody): PushBody
+
+    @DELETE("v1/notification-tokens/{deviceId}/{deviceType}")
+    @Headers(AUTH_REQUIRED, X_STRIKE_REQUIRED)
+    suspend fun removePushNotificationToken(
+        @Path("deviceId") deviceId: String,
+        @Path("deviceType") deviceType: String
+    )
 
     @POST("v1/wallet-approvals/{request_id}/dispositions")
     @Headers(AUTH_REQUIRED, X_STRIKE_REQUIRED)
