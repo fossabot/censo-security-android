@@ -34,7 +34,7 @@ data class ApprovalDispositionRequest(
         }
     }
 
-    val opHashData: ByteArray = when(requestType) {
+    fun opHashData(): ByteArray = when(requestType) {
         is SolanaApprovalRequestType.BalanceAccountCreation -> {
             val buffer = ByteArrayOutputStream()
 
@@ -85,7 +85,8 @@ data class ApprovalDispositionRequest(
 
             buffer.toByteArray()
         }
-        is SolanaApprovalRequestType.DAppTransactionRequest -> throw Exception(
+        is SolanaApprovalRequestType.DAppTransactionRequest,
+        is SolanaApprovalRequestType.LoginApprovalRequest -> throw Exception(
             INVALID_REQUEST_APPROVAL
         )
         is SolanaApprovalRequestType.UnknownApprovalType -> throw Exception(
@@ -93,15 +94,14 @@ data class ApprovalDispositionRequest(
         )
     }
 
-    val transactionInstructionData: ByteArray = generateTransactionInstructionData()
-
     fun signingData(): SolanaSigningData =
         when (requestType) {
             is SolanaApprovalRequestType.BalanceAccountCreation -> requestType.signingData
             is SolanaApprovalRequestType.WithdrawalRequest -> requestType.signingData
             is SolanaApprovalRequestType.ConversionRequest -> requestType.signingData
             is SolanaApprovalRequestType.SignersUpdate -> requestType.signingData
-            is SolanaApprovalRequestType.DAppTransactionRequest -> throw Exception(
+            is SolanaApprovalRequestType.DAppTransactionRequest,
+            is SolanaApprovalRequestType.LoginApprovalRequest -> throw Exception(
                 INVALID_REQUEST_APPROVAL
             )
             is SolanaApprovalRequestType.UnknownApprovalType -> throw Exception(
@@ -113,46 +113,50 @@ data class ApprovalDispositionRequest(
         val buffer = ByteArrayOutputStream()
         buffer.write(byteArrayOf(opIndex))
         buffer.write(byteArrayOf(solanaProgramValue))
-        buffer.write(Hash.sha256(opHashData))
+        buffer.write(Hash.sha256(opHashData()))
         return buffer.toByteArray()
     }
 
     override fun retrieveSignableData(approverPublicKey: String?): ByteArray {
-        if (approverPublicKey == null) throw Exception("Missing Key")
+        if (requestType is SolanaApprovalRequestType.LoginApprovalRequest) {
+            return requestType.jwtToken.toByteArray(charset = Charsets.UTF_8)
+        } else {
+            if (approverPublicKey == null) throw Exception("Missing Key")
 
-        val signingData = signingData()
+            val signingData = signingData()
 
-        val keyList = listOf(
-            AccountMeta(
-                publicKey = PublicKey(signingData.multisigOpAccountAddress),
-                isSigner = false,
-                isWritable = true
-            ),
-            AccountMeta(
-                publicKey = PublicKey(approverPublicKey), isSigner = true, isWritable = false
-            ),
-            AccountMeta(
-                publicKey = SYSVAR_CLOCK_PUBKEY,
-                isSigner = false,
-                isWritable = false
-            )
-        )
-
-        val programId = PublicKey(signingData.walletProgramId)
-
-        val transactionMessage = Transaction.compileMessage(
-            feePayer = PublicKey(signingData.feePayer),
-            recentBlockhash = blockhash,
-            instructions = listOf(
-                TransactionInstruction(
-                    keys = keyList,
-                    programId = programId,
-                    data = transactionInstructionData
+            val keyList = listOf(
+                AccountMeta(
+                    publicKey = PublicKey(signingData.multisigOpAccountAddress),
+                    isSigner = false,
+                    isWritable = true
+                ),
+                AccountMeta(
+                    publicKey = PublicKey(approverPublicKey), isSigner = true, isWritable = false
+                ),
+                AccountMeta(
+                    publicKey = SYSVAR_CLOCK_PUBKEY,
+                    isSigner = false,
+                    isWritable = false
                 )
             )
-        )
 
-        return transactionMessage.serialize()
+            val programId = PublicKey(signingData.walletProgramId)
+
+            val transactionMessage = Transaction.compileMessage(
+                feePayer = PublicKey(signingData.feePayer),
+                recentBlockhash = blockhash,
+                instructions = listOf(
+                    TransactionInstruction(
+                        keys = keyList,
+                        programId = programId,
+                        data = generateTransactionInstructionData()
+                    )
+                )
+            )
+
+            return transactionMessage.serialize()
+        }
     }
 
     fun convertToApiBody(encryptionManager: EncryptionManager): RegisterApprovalDispositionBody {

@@ -10,6 +10,7 @@ import com.strikeprotocols.mobile.data.StrikeKeyPair
 import com.strikeprotocols.mobile.data.models.ApprovalDisposition
 import com.strikeprotocols.mobile.data.models.approval.ApprovalDispositionRequest
 import com.strikeprotocols.mobile.data.models.approval.WalletApprovalDeserializer
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Before
 import org.junit.Test
@@ -76,6 +77,25 @@ class ApprovalRequestSigningTest {
         val signableData = approvalDispositionRequest.retrieveSignableData(approverPublicKey)
 
         println("BalanceAccount Signed Data: $signableData")
+
+        return signableData
+    }
+
+    private fun generateLoginApprovalSignableData(): ByteArray {
+        val loginApprovalWalletApproval =
+            deserializer.parseData(JsonParser.parseString(loginApprovalJson.trim()))
+
+        val approvalDispositionRequest = ApprovalDispositionRequest(
+            requestId = loginApprovalWalletApproval.id!!,
+            approvalDisposition = if (Random().nextBoolean()) ApprovalDisposition.APPROVE else ApprovalDisposition.DENY,
+            requestType = loginApprovalWalletApproval.getSolanaApprovalRequestType(),
+            blockhash = exampleBlockHash,
+            email = userEmail
+        )
+
+        val signableData = approvalDispositionRequest.retrieveSignableData(approverPublicKey)
+
+        println("Login Approval: $signableData")
 
         return signableData
     }
@@ -191,6 +211,13 @@ class ApprovalRequestSigningTest {
     }
 
     @Test
+    fun testLoginApprovalIsNotNull() {
+        val loginApprovalSignableData = generateLoginApprovalSignableData()
+        assertNotNull(loginApprovalSignableData)
+        assertEquals(loginApprovalSignableData.toString(Charsets.UTF_8), EXAMPLE_JWT_TOKEN)
+    }
+
+    @Test
     fun generateSignatureForBalanceAccountCreation() {
         val balanceAccountCreationWalletApproval =
             deserializer.parseData(JsonParser.parseString(balanceAccountCreationJson.trim()))
@@ -285,7 +312,6 @@ class ApprovalRequestSigningTest {
         val signersUpdateRemovalWalletApproval =
             deserializer.parseData(JsonParser.parseString(signersUpdateRemovalJson.trim()))
 
-
         val approvalDispositionRequest = ApprovalDispositionRequest(
             requestId = signersUpdateRemovalWalletApproval.id!!,
             approvalDisposition = ApprovalDisposition.APPROVE,
@@ -299,6 +325,29 @@ class ApprovalRequestSigningTest {
         )
 
         println("Signature from signers update removal: $signature")
+
+        assertNotNull(signature)
+    }
+
+    @Test
+    fun generateSignatureForLoginApproval() {
+        val loginApprovalWalletApproval =
+            deserializer.parseData(JsonParser.parseString(loginApprovalJson.trim()))
+
+
+        val approvalDispositionRequest = ApprovalDispositionRequest(
+            requestId = loginApprovalWalletApproval.id!!,
+            approvalDisposition = ApprovalDisposition.APPROVE,
+            requestType = loginApprovalWalletApproval.getSolanaApprovalRequestType(),
+            blockhash = exampleBlockHash,
+            email = userEmail
+        )
+
+        val signature = encryptionManager.signApprovalDispositionMessage(
+            signable = approvalDispositionRequest, userEmail = userEmail
+        )
+
+        println("Signature from login approval: $signature")
 
         assertNotNull(signature)
     }

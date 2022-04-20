@@ -12,6 +12,7 @@ import com.strikeprotocols.mobile.data.models.approval.PublicKey.Companion.SYSVA
 import com.strikeprotocols.mobile.data.models.approval.PublicKey.Companion.SYSVAR_RENT_PUBKEY
 import com.strikeprotocols.mobile.data.models.approval.PublicKey.Companion.SYS_PROGRAM_ID
 import com.strikeprotocols.mobile.data.models.approval.PublicKey.Companion.TOKEN_PROGRAM_ID
+import com.strikeprotocols.mobile.data.models.approval.SolanaApprovalRequestType.Companion.UNKNOWN_INITIATION
 import com.strikeprotocols.mobile.data.models.approval.SolanaApprovalRequestType.Companion.UNKNOWN_REQUEST_APPROVAL
 import com.strikeprotocols.mobile.presentation.approval_disposition.ApprovalDispositionError
 import org.bouncycastle.crypto.params.Ed25519PrivateKeyParameters
@@ -36,7 +37,7 @@ data class InitiationRequest(
             is SolanaApprovalRequestType.ConversionRequest -> requestType.signingData
             is SolanaApprovalRequestType.SignersUpdate -> requestType.signingData
             is SolanaApprovalRequestType.DAppTransactionRequest -> requestType.signingData
-            is SolanaApprovalRequestType.UnknownApprovalType -> throw Exception(UNKNOWN_REQUEST_APPROVAL)
+            else -> throw Exception(UNKNOWN_INITIATION)
         }
 
     private val opCode : Byte = when(requestType) {
@@ -170,7 +171,6 @@ data class InitiationRequest(
                 return buffer.toByteArray()
             }
             is SolanaApprovalRequestType.DAppTransactionRequest -> {
-                byteArrayOf(requestType.instructions.sumOf { it.instructions.size }.toByte())
                 val buffer = ByteArrayOutputStream()
                 buffer.write(byteArrayOf(opCode))
                 buffer.write(requestType.account.identifier.sha256HashBytes())
