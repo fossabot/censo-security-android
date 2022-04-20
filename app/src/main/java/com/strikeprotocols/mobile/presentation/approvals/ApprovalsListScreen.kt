@@ -1,5 +1,7 @@
 package com.strikeprotocols.mobile.presentation.approvals
 
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -18,6 +20,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat.startActivity
 import androidx.fragment.app.FragmentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
@@ -30,8 +33,10 @@ import com.strikeprotocols.mobile.common.BiometricUtil
 import com.strikeprotocols.mobile.common.Resource
 import com.strikeprotocols.mobile.common.retrieveApprovalDispositionDialogErrorText
 import com.strikeprotocols.mobile.common.strikeLog
+import com.strikeprotocols.mobile.data.models.approval.SolanaApprovalRequestType
 import com.strikeprotocols.mobile.data.models.approval.WalletApproval
 import com.strikeprotocols.mobile.presentation.Screen
+import com.strikeprotocols.mobile.presentation.approvals.approval_type_items.UnknownApprovalItem
 import com.strikeprotocols.mobile.presentation.components.StrikeTopAppBar
 import com.strikeprotocols.mobile.presentation.blockhash.BlockHashViewModel
 import com.strikeprotocols.mobile.presentation.components.*
@@ -237,6 +242,8 @@ fun ApprovalsList(
     onMoreInfoClicked: (WalletApproval?) -> Unit,
     walletApprovals: List<WalletApproval?>
 ) {
+    val context = LocalContext.current
+
     SwipeRefresh(
         modifier = Modifier.fillMaxSize(),
         state = rememberSwipeRefreshState(isRefreshing = isRefreshing),
@@ -256,6 +263,7 @@ fun ApprovalsList(
             )
         }
     ) {
+        //region Approvals List
         if (walletApprovals.isNullOrEmpty() && !isRefreshing) {
             ListDataEmptyState()
         } else {
@@ -268,15 +276,42 @@ fun ApprovalsList(
                 items(walletApprovals.size) { index ->
                     val walletApproval = walletApprovals[index]
                     Spacer(modifier = Modifier.height(12.dp))
-                    ApprovalItem(
-                        onApproveClicked = { onApproveClicked(walletApprovals[index]) },
-                        onMoreInfoClicked = { onMoreInfoClicked(walletApprovals[index]) },
-                        timeRemainingInSeconds = walletApproval?.approvalTimeoutInSeconds ?: 0
-                    )
+
+                    walletApproval?.let { safeApproval ->
+                        when (safeApproval.getSolanaApprovalRequestType()) {
+                            is SolanaApprovalRequestType.BalanceAccountCreation -> TODO()
+                            is SolanaApprovalRequestType.ConversionRequest -> TODO()
+                            is SolanaApprovalRequestType.DAppTransactionRequest -> TODO()
+                            is SolanaApprovalRequestType.SignersUpdate -> TODO()
+
+                            is SolanaApprovalRequestType.WithdrawalRequest -> {
+                                ApprovalItem(
+                                    onApproveClicked = { onApproveClicked(walletApprovals[index]) },
+                                    onMoreInfoClicked = { onMoreInfoClicked(walletApprovals[index]) },
+                                    timeRemainingInSeconds = walletApproval.approvalTimeoutInSeconds ?: 0
+                                )
+                            }
+
+                            SolanaApprovalRequestType.UnknownApprovalType -> {
+                                UnknownApprovalItem(
+                                    timeRemainingInSeconds = safeApproval.approvalTimeoutInSeconds ?: 0,
+                                    onUpdateAppClicked = {
+                                        val playStoreIntent = Intent(Intent.ACTION_VIEW).apply {
+                                            data = Uri.parse("http://play.google.com/store/apps/details?id=com.strikeprotocols.mobile")
+                                            setPackage("com.android.vending")
+                                        }
+                                        startActivity(context, playStoreIntent, null)
+                                    }
+                                )
+                            }
+                        }
+                    }
+
                     Spacer(modifier = Modifier.height(12.dp))
                 }
             }
         }
+        //endregion
     }
 }
 
