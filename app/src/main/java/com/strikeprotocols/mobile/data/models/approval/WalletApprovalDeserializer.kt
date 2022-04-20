@@ -153,6 +153,12 @@ class WalletApprovalDeserializer : JsonDeserializer<WalletApproval> {
                     details,
                     SolanaApprovalRequestType.DAppTransactionRequest::class.java
                 )
+            ApprovalType.LOGIN_TYPE -> {
+                Gson().fromJson(
+                    details,
+                    SolanaApprovalRequestType.LoginApprovalRequest::class.java
+                )
+            }
             else -> SolanaApprovalRequestType.UnknownApprovalType
         }
     }

@@ -118,11 +118,17 @@ sealed class SolanaApprovalRequestType {
         var signingData: SolanaSigningData
     ) : SolanaApprovalRequestType()
 
+    data class LoginApprovalRequest(
+        val type: String,
+        var jwtToken: String
+    ) : SolanaApprovalRequestType()
+
     object UnknownApprovalType : SolanaApprovalRequestType()
 
     companion object {
         const val INVALID_REQUEST_APPROVAL = "Invalid request for Approval"
         const val UNKNOWN_REQUEST_APPROVAL = "Unknown Approval"
+        const val UNKNOWN_INITIATION = "Unknown Initiation"
     }
 }
 
@@ -132,6 +138,7 @@ enum class ApprovalType(val value: String) {
     SIGNERS_UPDATE_TYPE("SignersUpdate"),
     BALANCE_ACCOUNT_CREATION_TYPE("BalanceAccountCreation"),
     DAPP_TRANSACTION_REQUEST_TYPE("DAppTransactionRequest"),
+    LOGIN_TYPE("LoginApproval"),
     UNKNOWN_TYPE("");
 
     companion object {
@@ -142,6 +149,7 @@ enum class ApprovalType(val value: String) {
                 SIGNERS_UPDATE_TYPE.value -> SIGNERS_UPDATE_TYPE
                 BALANCE_ACCOUNT_CREATION_TYPE.value -> BALANCE_ACCOUNT_CREATION_TYPE
                 DAPP_TRANSACTION_REQUEST_TYPE.value -> DAPP_TRANSACTION_REQUEST_TYPE
+                LOGIN_TYPE.value -> LOGIN_TYPE
                 else -> UNKNOWN_TYPE
             }
     }
