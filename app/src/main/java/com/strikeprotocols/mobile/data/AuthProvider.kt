@@ -2,6 +2,7 @@ package com.strikeprotocols.mobile.data
 
 import android.content.Context
 import androidx.annotation.AnyThread
+import com.auth0.android.jwt.JWT
 import com.okta.authn.sdk.AuthenticationFailureException
 import com.okta.authn.sdk.client.AuthenticationClient
 import com.okta.authn.sdk.client.AuthenticationClients
@@ -11,6 +12,9 @@ import com.okta.oidc.net.response.UserInfo
 import com.okta.oidc.storage.SharedPreferenceStorage
 import com.okta.oidc.util.AuthorizationException
 import com.strikeprotocols.mobile.BuildConfig
+import com.strikeprotocols.mobile.common.Base58
+import com.strikeprotocols.mobile.common.BaseWrapper
+import com.strikeprotocols.mobile.common.strikeLog
 import com.strikeprotocols.mobile.data.OktaAuth.Companion.AUTH_FAILED
 import com.strikeprotocols.mobile.data.OktaAuth.Companion.ISSUER_URL
 import com.strikeprotocols.mobile.data.OktaAuth.Companion.LOGIN_REDIRECT_URI
@@ -18,6 +22,8 @@ import com.strikeprotocols.mobile.data.OktaAuth.Companion.LOGOUT_REDIRECT_URI
 import com.strikeprotocols.mobile.data.OktaAuth.Companion.NO_EMAIL_EXCEPTION
 import com.strikeprotocols.mobile.data.OktaAuth.Companion.OIDC_SCOPES
 import com.strikeprotocols.mobile.data.OktaAuth.Companion.OKTA_EMAIL_KEY
+import org.bouncycastle.crypto.params.Ed25519PrivateKeyParameters
+import java.util.*
 import kotlin.coroutines.suspendCoroutine
 import com.okta.oidc.results.Result as OktaResult
 
@@ -28,6 +34,7 @@ interface AuthProvider {
     val token: String?
 
     suspend fun retrieveToken(): String
+    suspend fun signToken(token: String): String
 
     //Sign In Methods
     suspend fun getSessionToken(username: String, password: String): String
@@ -41,7 +48,10 @@ interface AuthProvider {
     fun clearAllListeners()
 }
 
-class OktaAuth(applicationContext: Context) : AuthProvider {
+class OktaAuth(
+    applicationContext: Context,
+    val encryptionManager: EncryptionManager,
+    val securePreferences: SecurePreferences) : AuthProvider {
 
     private val listeners: MutableList<UserStateListener> = mutableListOf()
 
@@ -98,6 +108,50 @@ class OktaAuth(applicationContext: Context) : AuthProvider {
         })
     }
 
+    override suspend fun signToken(token: String): String {
+        try {
+            val tokenByteArray = token.toByteArray(charset = Charsets.UTF_8)
+
+            val userEmail = retrieveJwtEmail(jwt = token)
+            val generatedPassword = securePreferences.retrieveGeneratedPassword(email = userEmail)
+            val encryptedPrivateKey = securePreferences.retrievePrivateKey(email = userEmail)
+
+            val decryptedPrivateKey = encryptionManager.decrypt(
+                encryptedMessage = Base58.decode(encryptedPrivateKey),
+                generatedPassword = Base58.decode(generatedPassword)
+            )
+
+            val authHeader = encryptionManager.signData(
+                data = tokenByteArray,
+                privateKey = decryptedPrivateKey
+            )
+
+            return BaseWrapper.encodeToBase64(authHeader)
+        } catch (e: Exception) {
+            throw TokenExpiredException()
+        }
+    }
+
+    private suspend fun retrieveJwtEmail(jwt: String): String {
+        return try {
+            val jwtDecoded = JWT(jwt)
+            val jwtEmail =
+                if (jwtDecoded.claims.containsKey("email")) {
+                    jwtDecoded.claims["email"]?.asString()
+                } else {
+                    ""
+                }
+
+            if (jwtEmail.isNullOrEmpty()) {
+                getUserEmail()
+            } else {
+                jwtEmail
+            }
+        } catch (e: Exception) {
+            getUserEmail()
+        }
+    }
+
     override suspend fun retrieveToken() =
         if (!isExpired) {
             retrieveValidToken(authClient?.sessionClient?.tokens)
@@ -133,6 +187,7 @@ class OktaAuth(applicationContext: Context) : AuthProvider {
                         error: String?,
                         exception: AuthorizationException?
                     ) {
+                        authClient.sessionClient.clear()
                         cont.resumeWith(
                             Result.failure(
                                 exception ?: AuthorizationException.GeneralErrors.NETWORK_ERROR
@@ -143,9 +198,10 @@ class OktaAuth(applicationContext: Context) : AuthProvider {
         } else {
             val safeToken = token
 
-            if(safeToken != null) {
+            if (safeToken != null) {
                 cont.resumeWith(Result.success(safeToken))
             } else {
+                authClient?.sessionClient?.clear()
                 cont.resumeWith(Result.failure(TokenExpiredException()))
             }
         }

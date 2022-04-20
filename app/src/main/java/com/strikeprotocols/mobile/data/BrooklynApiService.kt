@@ -2,7 +2,11 @@ package com.strikeprotocols.mobile.data
 
 import com.google.gson.*
 import com.strikeprotocols.mobile.BuildConfig
+import com.strikeprotocols.mobile.common.strikeLog
 import com.strikeprotocols.mobile.data.BrooklynApiService.Companion.AUTH
+import com.strikeprotocols.mobile.data.BrooklynApiService.Companion.AUTH_REQUIRED
+import com.strikeprotocols.mobile.data.BrooklynApiService.Companion.X_STRIKE_HEADER
+import com.strikeprotocols.mobile.data.BrooklynApiService.Companion.X_STRIKE_REQUIRED
 import com.strikeprotocols.mobile.data.models.*
 import com.strikeprotocols.mobile.data.models.approval.ApprovalDispositionRequest
 import com.strikeprotocols.mobile.data.models.approval.InitiationRequest
@@ -24,6 +28,8 @@ interface BrooklynApiService {
 
         const val AUTH = "Authorization"
         const val AUTH_REQUIRED = "$AUTH: "
+        const val X_STRIKE_HEADER = "X-Strike-Authorization-Signature"
+        const val X_STRIKE_REQUIRED = "$X_STRIKE_HEADER: "
 
         private const val TIMEOUT_LENGTH_SECONDS = 60L
 
@@ -63,26 +69,26 @@ interface BrooklynApiService {
     suspend fun walletSigners(): List<WalletSigner?>
 
     @POST("v1/wallet-signers")
-    @Headers(AUTH_REQUIRED)
+    @Headers(AUTH_REQUIRED, X_STRIKE_REQUIRED)
     suspend fun addWalletSigner(@Body walletSignerBody: WalletSigner): WalletSigner
 
     @GET("v1/wallet-approvals")
-    @Headers(AUTH_REQUIRED)
+    @Headers(AUTH_REQUIRED, X_STRIKE_REQUIRED)
     suspend fun getWalletApprovals(): List<WalletApproval?>
 
     @POST("notification-tokens")
-    @Headers(AUTH_REQUIRED)
+    @Headers(AUTH_REQUIRED, X_STRIKE_REQUIRED)
     suspend fun addPushNotificationToken(@Body pushData: PushBody): PushBody
 
     @POST("v1/wallet-approvals/{request_id}/dispositions")
-    @Headers(AUTH_REQUIRED)
+    @Headers(AUTH_REQUIRED, X_STRIKE_REQUIRED)
     suspend fun approveOrDenyDisposition(
         @Path("request_id") requestId: String,
         @Body registerApprovalDispositionBody: ApprovalDispositionRequest.RegisterApprovalDispositionBody
     ): ApprovalDispositionRequest.RegisterApprovalDispositionBody
 
     @POST("v1/wallet-approvals/{request_id}/initiations")
-    @Headers(AUTH_REQUIRED)
+    @Headers(AUTH_REQUIRED, X_STRIKE_REQUIRED)
     suspend fun approveOrDenyInitiation(
         @Path("request_id") requestId: String,
         @Body initiationRequestBody: InitiationRequest.InitiateRequestBody
@@ -100,10 +106,23 @@ class AuthInterceptor(private val authProvider: AuthProvider) : Interceptor {
                 val token = runBlocking {
                     authProvider.retrieveToken()
                 }
-                request = chain.request().newBuilder()
-                    .removeHeader(AUTH)
-                    .addHeader(AUTH, "Bearer $token")
-                    .build()
+                request = if (request.header(X_STRIKE_HEADER) != null) {
+                    val signedToken = runBlocking {
+                        authProvider.signToken(token)
+                    }
+
+                    chain.request().newBuilder()
+                        .removeHeader(X_STRIKE_HEADER)
+                        .removeHeader(AUTH)
+                        .addHeader(AUTH, "Bearer $token")
+                        .addHeader(X_STRIKE_HEADER, signedToken)
+                        .build()
+                } else {
+                    chain.request().newBuilder()
+                        .removeHeader(AUTH)
+                        .addHeader(AUTH, "Bearer $token")
+                        .build()
+                }
             } catch (e: TokenExpiredException) {
                 runBlocking { authProvider.signOut() }
                 authProvider.setUserState(userState = UserState.REFRESH_TOKEN_EXPIRED)

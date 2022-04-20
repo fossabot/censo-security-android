@@ -17,8 +17,10 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideAuthProvider(@ApplicationContext applicationContext: Context): AuthProvider {
-        return OktaAuth(applicationContext)
+    fun provideAuthProvider(@ApplicationContext applicationContext: Context,
+                            encryptionManager: EncryptionManager,
+                            securePreferences: SecurePreferences): AuthProvider {
+        return OktaAuth(applicationContext, encryptionManager, securePreferences)
     }
 
     @Provides

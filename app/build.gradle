@@ -203,12 +203,14 @@ dependencies {
     // Crypto utils
     implementation "org.web3j:core:4.8.6"
 
+    //Okta + Auth utils
     implementation 'com.okta.authn.sdk:okta-authn-sdk-api:2.0.4'
     implementation('com.okta.authn.sdk:okta-authn-sdk-impl:2.0.4') {
         exclude group: 'com.okta.sdk', module: 'okta-sdk-httpclient'
     }
 
     implementation 'com.okta.sdk:okta-sdk-okhttp:2.0.0'
+    implementation 'com.auth0.android:jwtdecode:2.0.1'
 
     //Biometrics
     implementation("androidx.biometric:biometric:1.1.0")
