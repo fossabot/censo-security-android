@@ -37,7 +37,12 @@ fun ApprovalItem(
             .background(color = HeaderBlack),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        ApprovalItemHeader(timeRemainingInSeconds)
+        ApprovalItemHeader(
+            timeRemainingInSeconds = timeRemainingInSeconds,
+            approvalImageVector = Icons.Filled.SyncAlt,
+            approvalImageContentDescription = stringResource(R.string.transfer_icon_content_des),
+            approvalType = stringResource(R.string.approval_type_transfer)
+        )
         ApprovalContent()
         ApprovalButtonRow(
             onApproveClicked = onApproveClicked,
@@ -47,7 +52,12 @@ fun ApprovalItem(
 }
 
 @Composable
-fun ApprovalItemHeader(timeRemainingInSeconds: Int) {
+fun ApprovalItemHeader(
+    timeRemainingInSeconds: Int,
+    approvalImageVector: ImageVector,
+    approvalImageContentDescription: String,
+    approvalType: String
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -56,7 +66,7 @@ fun ApprovalItemHeader(timeRemainingInSeconds: Int) {
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        ApprovalType(approvalImageVector = Icons.Filled.SyncAlt, approvalType = "Transfer")
+        ApprovalType(approvalImageVector = approvalImageVector, approvalImageContentDescription = approvalImageContentDescription, approvalType = approvalType)
         Text(
             text = convertSecondsIntoCountdownText(timeRemainingInSeconds),
             color = GreyText
@@ -150,6 +160,7 @@ fun ApprovalButtonRow(
 @Composable
 fun ApprovalType(
     approvalImageVector: ImageVector,
+    approvalImageContentDescription: String,
     approvalType: String
 ) {
     Row(
@@ -159,7 +170,7 @@ fun ApprovalType(
             modifier = Modifier.padding(end = 2.dp),
             imageVector = approvalImageVector,
             tint = StrikeWhite,
-            contentDescription = stringResource(id = R.string.content_des_transfer_icon)
+            contentDescription = approvalImageContentDescription
         )
         Text(
             modifier = Modifier.padding(start = 2.dp),
