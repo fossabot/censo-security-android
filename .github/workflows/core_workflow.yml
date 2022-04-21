@@ -37,10 +37,12 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
-      - name: Setup local.properties
+      - name: Setup config.properties
         run: |
-          echo RELEASE_STORE_PASSWORD="${{ secrets.keyPassword }}" >> ./local.properties
-          echo RELEASE_KEY_ALIAS="${{ secrets.alias }}" >> ./local.properties
+          touch ./config.properties
+          echo SIGN_BUILD=true >> ./config.properties
+          echo RELEASE_STORE_PASSWORD="${{ secrets.keyPassword }}" >> ./config.properties
+          echo RELEASE_KEY_ALIAS="${{ secrets.alias }}" >> ./config.properties
 
           echo "${{ secrets.keystore }}" > keystore.jks.asc
           gpg -d --passphrase "${{ secrets.passphrase }}" --batch keystore.jks.asc > app/keystore.jks

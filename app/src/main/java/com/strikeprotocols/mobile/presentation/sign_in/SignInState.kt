@@ -7,8 +7,8 @@ import com.strikeprotocols.mobile.data.models.VerifyUser
 import com.strikeprotocols.mobile.data.models.WalletSigner
 
 data class SignInState(
-    val email: String = "sharris@blue.rock",
-    val password: String = "ez4GK8testing",
+    val email: String = "",
+    val password: String = "",
     val emailErrorEnabled: Boolean = false,
     val passwordErrorEnabled: Boolean = false,
     val initialAuthData: InitialAuthData? = null,

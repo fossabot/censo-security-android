@@ -16,19 +16,27 @@ String versionNameMinor = 0
 String versionNamePatch = 1
 
 android {
-    Properties localProps = new Properties()
-    localProps.load(new FileInputStream(file('../local.properties')))
+    Boolean signBuild = false
+    Properties configProperties = new Properties()
+
+    if (file('../config.properties').exists()) {
+        configProperties.load(new FileInputStream(file('../config.properties')))
+
+        signBuild = configProperties['SIGN_BUILD'].toBoolean()
+    }
 
     compileSdkVersion 31
     buildToolsVersion "30.0.3"
 
-    signingConfigs {
-        config_release {
+    if (signBuild) {
+        signingConfigs {
+            config_release {
 
-            keyAlias localProps['RELEASE_KEY_ALIAS']
-            keyPassword localProps["RELEASE_STORE_PASSWORD"]
-            storeFile file("keystore.jks")
-            storePassword localProps["RELEASE_STORE_PASSWORD"]
+                keyAlias configProperties['RELEASE_KEY_ALIAS']
+                keyPassword configProperties["RELEASE_STORE_PASSWORD"]
+                storeFile file("keystore.jks")
+                storePassword configProperties["RELEASE_STORE_PASSWORD"]
+            }
         }
     }
 
@@ -44,7 +52,11 @@ android {
         buildConfigField "String", "CORE_APP_ID", "\"$coreAppId\""
 
         versionName versionNameMajor + "." + versionNameMinor + "." + versionNamePatch
-        signingConfig signingConfigs.config_release
+        if (signBuild) {
+            signingConfig signingConfigs.config_release
+        } else {
+            signingConfig signingConfigs.debug
+        }
 
         proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
 
