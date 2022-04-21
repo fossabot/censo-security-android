@@ -1,5 +1,6 @@
 # Default .gitignore
 /local.properties
+/config.properties
 .DS_Store
 
 # Gradle files
