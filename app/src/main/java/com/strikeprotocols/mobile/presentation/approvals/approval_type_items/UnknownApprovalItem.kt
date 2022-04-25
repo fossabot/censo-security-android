@@ -27,6 +27,7 @@ import com.strikeprotocols.mobile.ui.theme.StrikeWhite
 @Composable
 fun UnknownApprovalItem(
     timeRemainingInSeconds: Int,
+    accountRowMetaData: ApprovalRowMetaData,
     onUpdateAppClicked: () -> Unit
 ) {
     Column(
@@ -38,9 +39,9 @@ fun UnknownApprovalItem(
     ) {
         ApprovalItemHeader(
             timeRemainingInSeconds = timeRemainingInSeconds,
-            approvalImageVector = Icons.Filled.HelpOutline,
-            approvalImageContentDescription = stringResource(id = R.string.unknown_approval_type_content_des),
-            approvalType = stringResource(R.string.unknown_approval_type)
+            approvalImageVector = accountRowMetaData.approvalImageVector,
+            approvalImageContentDescription = accountRowMetaData.approvalImageContentDescription,
+            approvalType = accountRowMetaData.approvalTypeTitle
         )
 
         Text(
@@ -86,13 +87,4 @@ fun UnknownApprovalButtonRow(
             }
         }
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun UnknownApprovalItemPreview() {
-    UnknownApprovalItem(
-        timeRemainingInSeconds = 110022,
-        onUpdateAppClicked = {}
-    )
 }

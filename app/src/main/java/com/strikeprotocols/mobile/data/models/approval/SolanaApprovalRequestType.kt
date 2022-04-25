@@ -6,6 +6,7 @@ import com.google.gson.JsonPrimitive
 import com.google.gson.annotations.SerializedName
 import com.strikeprotocols.mobile.common.BaseWrapper
 import com.strikeprotocols.mobile.common.strikeLog
+import org.web3j.abi.datatypes.Bool
 import java.io.ByteArrayOutputStream
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
@@ -216,13 +217,13 @@ data class SymbolAndAmountInfo(
         return split.joinToString(separator = ".")
     }
 
-    fun formattedUSDEquivalent(): String {
+    fun formattedUSDEquivalent(hideSymbol: Boolean = true): String {
         if (usdEquivalent == null) {
             return ""
         }
 
         val decimal = usdEquivalent.toBigDecimal()
-        val usdEquivalent = usdFormatter().format(decimal)
+        val usdEquivalent = usdFormatter(hideSymbol).format(decimal)
         return usdEquivalent
     }
 
@@ -230,12 +231,28 @@ data class SymbolAndAmountInfo(
         return String.format("%,d", number)
     }
 
-    private fun usdFormatter(): DecimalFormat {
+    private fun usdFormatter(hideSymbol: Boolean = true): DecimalFormat {
         val formatter = NumberFormat.getCurrencyInstance(Locale.US) as DecimalFormat
-        val symbols: DecimalFormatSymbols = formatter.decimalFormatSymbols
-        symbols.currencySymbol = ""
-        formatter.decimalFormatSymbols = symbols
+        if (hideSymbol) {
+            val symbols: DecimalFormatSymbols = formatter.decimalFormatSymbols
+            symbols.currencySymbol = ""
+            formatter.decimalFormatSymbols = symbols
+        }
         return formatter
+    }
+
+    fun isAmountPositive(): Boolean {
+        return try {
+            val amountAsDecimal = amount.toBigDecimal()
+
+            amountAsDecimal >= 0.toBigDecimal()
+        } catch (e: Exception) {
+            try {
+                !amount.contains("-")
+            } catch (innerException: Exception) {
+                true
+            }
+        }
     }
 }
 

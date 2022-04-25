@@ -76,11 +76,9 @@
     <string name="biometry_deeplink_device_settings">Device Biometry Settings</string>
 
     <string name="update_strike_mobile">Update Strike Mobile…</string>
-    <string name="unknown_approval_type">Unknown Request</string>
-    <string name="unknown_approval_type_content_des">Unknown Request Icon</string>
     <string name="unknown_approval_tip">You have an unknown approval request. Please update this app to see the request details</string>
-    <string name="transfer_icon_content_des">Transfer Icon</string>
-    <string name="approval_type_transfer">Transfer</string>
+    <string name="approval_type_unknown">Unknown Request</string>
+    <string name="approval_type_unknown_content_des">Unknown Request Icon</string>
     <string name="unknown_dialog_message">an unknown approval request</string>
     <string name="a_transfer_of_dialog_message">a transfer of</string>
     <string name="a_conversion_of_dialog_message">a conversion of</string>
@@ -99,6 +97,29 @@
     <string name="stake_account_creation_dialog_title">Stake Account Creation</string>
     <string name="dapp_transaction_dialog_title">dApp Transaction</string>
     <string name="login_approval_dialog_title">Login Approval</string>
+    <string name="approval_type_dapp_transaction">DApp Transaction</string>
+    <string name="approval_type_dapp_content_des">DApp Transaction Icon</string>
+    <string name="arrow_forward_content_des">Arrow Forward Icon</string>
+    <string name="arrow_back_content_des">Arrow Back Icon</string>
+    <string name="usd_equivalent_na">~N/A</string>
+    <string name="signers_update_icon_content_desc">Signers Update Icon</string>
+    <string name="approval_type_signers_update_title">SIGNERS UPDATE</string>
+    <string name="removing_signer">Remove Signer</string>
+    <string name="new_signer">New Signer</string>
+    <string name="new_balance_account">New Balance Account</string>
+    <string name="balance_account_title">Balance Account</string>
+    <string name="stake_account_title">Stake Account</string>
+    <string name="balance_account_creation_title">Balance Account Creation</string>
+    <string name="balance_account_creation_icon_content_desc">balance account creation icon</string>
+    <string name="conversion_icon_desc">Conversion Icon</string>
+    <string name="conversion_row_title">Conversion</string>
+    <string name="login_approval_title">Login Approval</string>
+    <string name="login_icon_content_desc">Login Icon</string>
+    <string name="transfer_icon_content_desc">Transfer Icon</string>
+    <string name="withdrawal_type_title">Transfer</string>
+
+    <string name="usd_equivalent">USD equivalent</string>
+    <string name="unknown_approval_item">Unknown Approval</string>
 
 
 </resources>
