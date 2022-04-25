@@ -24,14 +24,14 @@ fun StrikeConfirmDispositionAlertDialog(
             Text(
                 text = dialogTitle,
                 color = StrikeWhite,
-                fontSize = 24.sp
+                fontSize = 22.sp
             )
         },
         text = {
             Text(
                 text = dialogText,
                 color = StrikeWhite,
-                fontSize = 18.sp
+                fontSize = 16.sp
             )
         },
         dismissButton = {

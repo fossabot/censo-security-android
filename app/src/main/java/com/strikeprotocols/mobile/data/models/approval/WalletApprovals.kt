@@ -1,6 +1,7 @@
 package com.strikeprotocols.mobile.data.models.approval
 
 import com.google.gson.*
+import com.strikeprotocols.mobile.common.UriWrapper
 import com.strikeprotocols.mobile.data.models.approval.SolanaApprovalRequestType.Companion.UNKNOWN_REQUEST_APPROVAL
 import java.lang.reflect.Modifier
 
@@ -33,11 +34,12 @@ data class WalletApproval(
     }
 
     companion object {
-        fun toJson(approval: WalletApproval): String {
-            return GsonBuilder()
+        fun toJson(approval: WalletApproval, uriWrapper: UriWrapper): String {
+            val jsonString = GsonBuilder()
                 .excludeFieldsWithModifiers(Modifier.STATIC)
                 .create()
                 .toJson(approval)
+            return uriWrapper.encode(jsonString)
         }
 
         fun fromJson(json: String): WalletApproval {

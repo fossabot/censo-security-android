@@ -2,16 +2,20 @@ package com.strikeprotocols.mobile
 
 import com.google.gson.JsonElement
 import com.google.gson.JsonParser
+import com.strikeprotocols.mobile.common.MockedApprovals
 import com.strikeprotocols.mobile.data.models.approval.*
 import org.junit.Assert.*
 import org.junit.Test
 
 class ParseApprovalRequestTypes {
+
+    private val mockUriWrapper = MockUriWrapper()
+
     @Test
     fun parseAllApprovalRequestTypes() {
         val allApprovalRequests = getFullListOfApprovalItems()
 
-        assertEquals(allApprovalRequests.size, 10)
+        assertEquals(allApprovalRequests.size, 11)
 
         allApprovalRequests.forEach { approvalRequest ->
             assertNotNull(approvalRequest)
@@ -37,7 +41,7 @@ class ParseApprovalRequestTypes {
             if (details is SolanaApprovalRequestDetails.MultiSignOpInitiationDetails) {
                 assertNotEquals(details.requestType, SolanaApprovalRequestType.UnknownApprovalType)
 
-                val asString = WalletApproval.toJson(walletApproval)
+                val asString = WalletApproval.toJson(walletApproval, mockUriWrapper)
                 assertNotNull(asString)
 
                 val parsedWalletApproval = WalletApproval.fromJson(asString)
@@ -50,7 +54,7 @@ class ParseApprovalRequestTypes {
             } else if (details is SolanaApprovalRequestDetails.ApprovalRequestDetails) {
                 assertNotEquals(details.requestType, SolanaApprovalRequestType.UnknownApprovalType)
 
-                val asString = WalletApproval.toJson(walletApproval)
+                val asString = WalletApproval.toJson(walletApproval, mockUriWrapper)
                 assertNotNull(asString)
 
                 val parsedWalletApproval = WalletApproval.fromJson(asString)
@@ -59,6 +63,10 @@ class ParseApprovalRequestTypes {
                 val parsedDetails =
                     parsedWalletApproval.details as SolanaApprovalRequestDetails.ApprovalRequestDetails
                 assert(parsedDetails.requestType !is SolanaApprovalRequestType.UnknownApprovalType)
+
+                if(details.requestType is SolanaApprovalRequestType.DAppTransactionRequest) {
+                    println(details.requestType)
+                }
             }
         }
     }
@@ -97,7 +105,7 @@ class ParseApprovalRequestTypes {
 
         assertNotEquals(details.requestType, SolanaApprovalRequestType.UnknownApprovalType)
 
-        val asString = WalletApproval.toJson(loginApprovalWalletApproval)
+        val asString = WalletApproval.toJson(loginApprovalWalletApproval, mockUriWrapper)
         assertNotNull(asString)
 
         val parsedWalletApproval = WalletApproval.fromJson(asString)
@@ -173,6 +181,11 @@ class ParseApprovalRequestTypes {
         val multiSignWithDAppRequestWalletApproval =
             deserializer.parseData(multiSignWithDAppRequestJson)
         allApprovalRequests.add(multiSignWithDAppRequestWalletApproval)
+
+        val dAppJson: JsonElement =
+            JsonParser.parseString(MockedApprovals.dAppJson.trim())
+        val dAppWalletApproval = deserializer.parseData(dAppJson)
+        allApprovalRequests.add(dAppWalletApproval)
 
         return allApprovalRequests
     }

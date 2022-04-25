@@ -32,15 +32,19 @@ import com.strikeprotocols.mobile.common.Resource
 import com.strikeprotocols.mobile.common.convertSecondsIntoCountdownText
 import com.strikeprotocols.mobile.common.retrieveApprovalDispositionDialogErrorText
 import com.strikeprotocols.mobile.common.strikeLog
+import com.strikeprotocols.mobile.data.models.ApprovalDisposition
 import com.strikeprotocols.mobile.data.models.approval.WalletApproval
 import com.strikeprotocols.mobile.presentation.approval_detail.approval_type_components.ApprovalDetailsTransferContent
 import com.strikeprotocols.mobile.presentation.approvals.ApprovalsViewModel
+import com.strikeprotocols.mobile.presentation.approvals.approval_type_items.getApprovalTypeDialogTitle
+import com.strikeprotocols.mobile.presentation.approvals.approval_type_items.getDialogFullMessage
 import com.strikeprotocols.mobile.presentation.blockhash.BlockHashViewModel
 import com.strikeprotocols.mobile.presentation.components.OnLifecycleEvent
 import com.strikeprotocols.mobile.presentation.components.StrikeApprovalDispositionErrorAlertDialog
 import com.strikeprotocols.mobile.presentation.components.StrikeConfirmDispositionAlertDialog
 import com.strikeprotocols.mobile.presentation.components.StrikeTopAppBar
 import com.strikeprotocols.mobile.ui.theme.*
+import com.strikeprotocols.mobile.data.models.approval.SolanaApprovalRequestType.*
 
 @Composable
 fun ApprovalDetailsScreen(
@@ -96,7 +100,6 @@ fun ApprovalDetailsScreen(
             navController.previousBackStackEntry
                 ?.savedStateHandle
                 ?.set(ApprovalsViewModel.Companion.KEY_SHOULD_REFRESH_DATA, true)
-
             navController.navigateUp()
         }
     }
@@ -133,15 +136,19 @@ fun ApprovalDetailsScreen(
                 onApproveClicked = {
                     approvalDetailsViewModel.setShouldDisplayConfirmDispositionDialog(
                         isApproving = true,
-                        dialogTitle = "Confirm Approval",
-                        dialogText = "Please confirm you want to approve this transfer"
+                        dialogTitle = approval?.getSolanaApprovalRequestType()?.getApprovalTypeDialogTitle(context)
+                            ?: UnknownApprovalType.getApprovalTypeDialogTitle(context),
+                        dialogText = approval?.getSolanaApprovalRequestType()?.getDialogFullMessage(context, ApprovalDisposition.APPROVE)
+                            ?: UnknownApprovalType.getDialogFullMessage(context, ApprovalDisposition.APPROVE)
                     )
                 },
                 onDenyClicked = {
                     approvalDetailsViewModel.setShouldDisplayConfirmDispositionDialog(
                         isApproving = false,
-                        dialogTitle = "Confirm Deny",
-                        dialogText = "Please confirm you want to deny this transfer"
+                        dialogTitle = approval?.getSolanaApprovalRequestType()?.getApprovalTypeDialogTitle(context)
+                            ?: UnknownApprovalType.getApprovalTypeDialogTitle(context),
+                        dialogText = approval?.getSolanaApprovalRequestType()?.getDialogFullMessage(context, ApprovalDisposition.DENY)
+                            ?: UnknownApprovalType.getDialogFullMessage(context, ApprovalDisposition.DENY)
                     )
                 },
                 timeRemainingInSeconds = approvalDetailsState.approval?.approvalTimeoutInSeconds ?: 0,
