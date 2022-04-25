@@ -14,7 +14,6 @@ interface UserRepository {
     suspend fun generateInitialAuthData(): InitialAuthData
     suspend fun saveGeneratedPassword(generatedPassword: ByteArray)
     suspend fun getSavedPassword(): String
-    suspend fun clearSavedPassword()
     suspend fun userLoggedIn(): Boolean
     suspend fun setUserLoggedIn()
     suspend fun logOut() : Boolean
@@ -84,7 +83,7 @@ class UserRepositoryImpl(
             )
 
         securePreferences.savePrivateKey(
-            email = userEmail, privateKey = encryptedPrivateKey)
+            email = userEmail, privateKey = keyPair.privateKey)
 
         return InitialAuthData(
             walletSignerBody = WalletSigner(
@@ -105,17 +104,20 @@ class UserRepositoryImpl(
 
     override suspend fun regenerateDataAndUploadToBackend() : WalletSigner {
         val userEmail = retrieveUserEmail()
-        val encryptedKey = securePreferences.retrievePrivateKey(userEmail)
-        val decryptionKey = securePreferences.retrieveGeneratedPassword(userEmail)
+        val mainKey = securePreferences.retrievePrivateKey(userEmail)
+        val generatedPassword = securePreferences.retrieveGeneratedPassword(userEmail)
 
-        val publicKey = encryptionManager.regeneratePublicKey(
-            encryptedPrivateKey = encryptedKey,
-            decryptionKey = decryptionKey
-        )
+        val publicKey = encryptionManager.regeneratePublicKey(mainKey = mainKey)
+
+        val encryptedKey =
+            encryptionManager.encrypt(
+                message = BaseWrapper.decode(mainKey),
+                generatedPassword = BaseWrapper.decode(generatedPassword)
+            )
 
         val walletSigner = WalletSigner(
             publicKey = publicKey,
-            encryptedKey = encryptedKey,
+            encryptedKey = BaseWrapper.encode(encryptedKey),
             walletType = WALLET_TYPE_SOLANA
         )
 
@@ -123,12 +125,8 @@ class UserRepositoryImpl(
     }
 
     override suspend fun retrieveUserEmail(): String {
-        val email = SharedPrefsHelper.retrieveUserEmail()
-
-        if(email.isNotEmpty()) return email
-
         return try {
-            authProvider.getUserEmail()
+            authProvider.retrieveUserEmail()
         } catch (e: Exception) {
             ""
         }
@@ -136,13 +134,6 @@ class UserRepositoryImpl(
 
     override suspend fun saveUserEmail(email: String) {
         SharedPrefsHelper.saveUserEmail(email)
-    }
-
-    override suspend fun clearSavedPassword() {
-        val userEmail = retrieveUserEmail()
-        if(userEmail.isNotEmpty()) {
-            securePreferences.clearSavedPassword(email = userEmail)
-        }
     }
 
     override suspend fun userLoggedIn() = SharedPrefsHelper.isUserLoggedIn()
@@ -185,8 +176,13 @@ class UserRepositoryImpl(
 
                 if (validPair) {
                     walletSigner.encryptedKey?.let { encryptedKey ->
+                        val decryptedKey = encryptionManager.decrypt(
+                            encryptedMessage = BaseWrapper.decode(encryptedKey),
+                            generatedPassword = BaseWrapper.decode(generatedPassword)
+                        )
+
                         securePreferences.savePrivateKey(
-                            email = userEmail, privateKey = BaseWrapper.decode(encryptedKey)
+                            email = userEmail, privateKey = decryptedKey
                         )
                     }
                     return true

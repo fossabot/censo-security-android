@@ -57,19 +57,18 @@ class EncryptionTest {
 
         val encryptionManager = EncryptionManagerImpl(securePreferences)
 
+        val decryptedPrivateKey = encryptionManager.decrypt(
+            encryptedMessage = encryptedKey,
+            generatedPassword = decryptionKey
+        )
+
         val publicKey = encryptionManager.regeneratePublicKey(
-            encryptedPrivateKey = BaseWrapper.encode(encryptedKey),
-            decryptionKey = BaseWrapper.encode(decryptionKey)
+            mainKey = BaseWrapper.encode(decryptedPrivateKey)
         )
 
         val publicKeyHardcoded = "BrEiGBArXzSXkNmyTKiNb754qqqHHYi26Dh4F2ypnJR5"
 
         assertEquals(publicKey, publicKeyHardcoded)
-
-        val decryptedPrivateKey = encryptionManager.decrypt(
-            encryptedMessage = encryptedKey,
-            generatedPassword = decryptionKey
-        )
 
         val keyPair = StrikeKeyPair(
             privateKey = decryptedPrivateKey,

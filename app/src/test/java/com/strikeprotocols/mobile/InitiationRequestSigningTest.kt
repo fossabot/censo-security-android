@@ -11,7 +11,7 @@ import com.strikeprotocols.mobile.data.models.ApprovalDisposition
 import com.strikeprotocols.mobile.data.models.approval.InitiationRequest
 import com.strikeprotocols.mobile.data.models.approval.SolanaApprovalRequestDetails
 import com.strikeprotocols.mobile.data.models.approval.WalletApprovalDeserializer
-import junit.framework.Assert.assertNotNull
+import org.junit.Assert.assertNotNull
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mock
@@ -202,7 +202,7 @@ class InitiationRequestSigningTest {
     //endregion
 
     //region create initiation requests
-    fun generateBalanceAccountInitiationSignableData() : InitiationRequest {
+    private fun generateBalanceAccountInitiationSignableData() : InitiationRequest {
         val multiSigBalanceAccountCreationWalletApproval =
             deserializer.parseData(JsonParser.parseString(multiSigWithBalanceAccountCreationJson.trim()))
 
@@ -219,7 +219,7 @@ class InitiationRequestSigningTest {
         )
     }
 
-    fun generateSignersUpdateInitiationSignableData() : InitiationRequest {
+    private fun generateSignersUpdateInitiationSignableData() : InitiationRequest {
         val multiSigSignersUpdateWalletApproval =
             deserializer.parseData(JsonParser.parseString(multiSigWithSignersUpdateJson.trim()))
 
@@ -236,7 +236,7 @@ class InitiationRequestSigningTest {
         )
     }
 
-    fun generateWithdrawalRequestInitiationSignableData() : InitiationRequest {
+    private fun generateWithdrawalRequestInitiationSignableData() : InitiationRequest {
         val multiSigWithdrawalRequestWalletApproval =
             deserializer.parseData(JsonParser.parseString(multiSigWithWithdrawalRequestJson.trim()))
 
@@ -253,7 +253,7 @@ class InitiationRequestSigningTest {
         )
     }
 
-    fun generateDAppTransactionInitiationSignableData() : InitiationRequest {
+    private fun generateDAppTransactionInitiationSignableData() : InitiationRequest {
         val multiSigDAppTransactionWalletApproval =
             deserializer.parseData(JsonParser.parseString(multiSignWithDAppRequestJson.trim()))
 
@@ -270,7 +270,7 @@ class InitiationRequestSigningTest {
         )
     }
 
-    fun generateConversionRequestInitiationSignableData() : InitiationRequest {
+    private fun generateConversionRequestInitiationSignableData() : InitiationRequest {
         val multiSigConversionRequestWalletApproval =
             deserializer.parseData(JsonParser.parseString(multiSigWithConversionRequestJson.trim()))
 

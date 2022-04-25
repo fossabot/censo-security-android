@@ -3,7 +3,6 @@ package com.strikeprotocols.mobile.data
 import android.content.Context
 import android.content.SharedPreferences
 import com.strikeprotocols.mobile.common.BaseWrapper
-import com.strikeprotocols.mobile.common.strikeLog
 
 object SharedPrefsHelper {
 
@@ -12,7 +11,7 @@ object SharedPrefsHelper {
     private const val USER_LOGGED_IN = "skipped_login"
     private const val USER_EMAIL = "user_email"
     private const val GENERATED_PASSWORD = "_generated_password"
-    private const val ENCRYPTED_KEY = "_encrypted_key"
+    private const val MAIN_KEY = "_main_key"
 
     private lateinit var appContext: Context
     private lateinit var sharedPrefs: SharedPreferences
@@ -45,16 +44,21 @@ object SharedPrefsHelper {
     fun retrieveGeneratedPassword(email: String) =
         sharedPrefs.getString("$email$GENERATED_PASSWORD", "") ?: ""
 
-    fun saveEncryptedKey(email: String, encryptedKey: ByteArray) {
-        val data = if(encryptedKey.isEmpty()) "" else BaseWrapper.encode(encryptedKey)
+    fun saveMainKey(email: String, mainKey: ByteArray) {
+        val data = if(mainKey.isEmpty()) "" else BaseWrapper.encode(mainKey)
         val editor = sharedPrefs.edit()
-        editor.putString("$email$ENCRYPTED_KEY", data)
+        editor.putString("$email$MAIN_KEY", data)
         editor.apply()
     }
 
-    fun retrieveEncryptedKey(email: String) : String {
-        return sharedPrefs.getString("$email$ENCRYPTED_KEY", "") ?: ""
+    fun retrieveMainKey(email: String) : String {
+        return sharedPrefs.getString("$email$MAIN_KEY", "") ?: ""
     }
+
+    fun clearMainKey(email: String) {
+        val editor = sharedPrefs.edit()
+        editor.putString("$email$MAIN_KEY", "")
+        editor.apply()    }
 
     fun saveUserEmail(email: String) {
         val editor = sharedPrefs.edit()
