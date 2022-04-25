@@ -12,9 +12,7 @@ import com.okta.oidc.net.response.UserInfo
 import com.okta.oidc.storage.SharedPreferenceStorage
 import com.okta.oidc.util.AuthorizationException
 import com.strikeprotocols.mobile.BuildConfig
-import com.strikeprotocols.mobile.common.Base58
 import com.strikeprotocols.mobile.common.BaseWrapper
-import com.strikeprotocols.mobile.common.strikeLog
 import com.strikeprotocols.mobile.data.OktaAuth.Companion.AUTH_FAILED
 import com.strikeprotocols.mobile.data.OktaAuth.Companion.ISSUER_URL
 import com.strikeprotocols.mobile.data.OktaAuth.Companion.LOGIN_REDIRECT_URI
@@ -22,7 +20,6 @@ import com.strikeprotocols.mobile.data.OktaAuth.Companion.LOGOUT_REDIRECT_URI
 import com.strikeprotocols.mobile.data.OktaAuth.Companion.NO_EMAIL_EXCEPTION
 import com.strikeprotocols.mobile.data.OktaAuth.Companion.OIDC_SCOPES
 import com.strikeprotocols.mobile.data.OktaAuth.Companion.OKTA_EMAIL_KEY
-import org.bouncycastle.crypto.params.Ed25519PrivateKeyParameters
 import java.util.*
 import kotlin.coroutines.suspendCoroutine
 import com.okta.oidc.results.Result as OktaResult
@@ -40,7 +37,8 @@ interface AuthProvider {
     suspend fun getSessionToken(username: String, password: String): String
     suspend fun authenticate(sessionToken: String): String
     suspend fun signOut()
-    suspend fun getUserEmail(): String
+    suspend fun getEmailFromOkta(): String
+    suspend fun retrieveUserEmail() : String
 
     //UserState Notifying Functionality
     fun setUserState(userState: UserState)
@@ -61,9 +59,20 @@ class OktaAuth(
     override val isAuthenticated: Boolean
         get() = authClient?.sessionClient?.isAuthenticated == true
     override val isExpired: Boolean
-        get() = authClient?.sessionClient?.tokens?.isAccessTokenExpired == true
+        get() =
+            try {
+                authClient?.sessionClient?.tokens?.isAccessTokenExpired == true
+            } catch (e: AuthorizationException) {
+                authClient?.sessionClient?.clear()
+                false
+            }
     override val token: String?
-        get() = authClient?.sessionClient?.tokens?.idToken
+        get() = try {
+            authClient?.sessionClient?.tokens?.idToken
+        } catch (e: AuthorizationException) {
+            authClient?.sessionClient?.clear()
+            ""
+        }
 
     fun setupAuthenticationClient() {
         authenticationClient =
@@ -89,7 +98,19 @@ class OktaAuth(
             .create()
     }
 
-    override suspend fun getUserEmail(): String = suspendCoroutine { cont ->
+    override suspend fun retrieveUserEmail() : String {
+        val email = SharedPrefsHelper.retrieveUserEmail()
+
+        if (email.isNotEmpty()) return email
+
+        return try {
+            getEmailFromOkta()
+        } catch (e: Exception) {
+            ""
+        }
+    }
+
+    override suspend fun getEmailFromOkta(): String = suspendCoroutine { cont ->
         authClient?.sessionClient?.getUserProfile(object :
             RequestCallback<UserInfo, AuthorizationException> {
             override fun onSuccess(result: UserInfo) {
@@ -113,17 +134,11 @@ class OktaAuth(
             val tokenByteArray = token.toByteArray(charset = Charsets.UTF_8)
 
             val userEmail = retrieveJwtEmail(jwt = token)
-            val generatedPassword = securePreferences.retrieveGeneratedPassword(email = userEmail)
-            val encryptedPrivateKey = securePreferences.retrievePrivateKey(email = userEmail)
-
-            val decryptedPrivateKey = encryptionManager.decrypt(
-                encryptedMessage = Base58.decode(encryptedPrivateKey),
-                generatedPassword = Base58.decode(generatedPassword)
-            )
+            val mainKey = securePreferences.retrievePrivateKey(email = userEmail)
 
             val authHeader = encryptionManager.signData(
                 data = tokenByteArray,
-                privateKey = decryptedPrivateKey
+                privateKey = BaseWrapper.decode(mainKey)
             )
 
             return BaseWrapper.encodeToBase64(authHeader)
@@ -143,12 +158,12 @@ class OktaAuth(
                 }
 
             if (jwtEmail.isNullOrEmpty()) {
-                getUserEmail()
+                getEmailFromOkta()
             } else {
                 jwtEmail
             }
         } catch (e: Exception) {
-            getUserEmail()
+            getEmailFromOkta()
         }
     }
 
@@ -196,18 +211,29 @@ class OktaAuth(
                     }
                 })
         } else {
-            val safeToken = token
+            try {
+                val safeToken = token
 
-            if (safeToken != null) {
-                cont.resumeWith(Result.success(safeToken))
-            } else {
+                if (!safeToken.isNullOrEmpty()) {
+                    cont.resumeWith(Result.success(safeToken))
+                } else {
+                    authClient?.sessionClient?.clear()
+                    cont.resumeWith(Result.failure(TokenExpiredException()))
+                }
+            } catch(e: AuthorizationException) {
                 authClient?.sessionClient?.clear()
                 cont.resumeWith(Result.failure(TokenExpiredException()))
             }
         }
     }
 
-    fun retrieveValidToken(tokens: Tokens?) = tokens?.idToken ?: throw TokenExpiredException()
+    fun retrieveValidToken(tokens: Tokens?) =
+        try {
+            tokens?.idToken ?: throw TokenExpiredException()
+        } catch(e: AuthorizationException) {
+            authClient?.sessionClient?.clear()
+            throw TokenExpiredException()
+        }
 
     private suspend fun refreshToken(): String = suspendCoroutine { cont ->
         authClient?.sessionClient?.refreshToken(object :
@@ -227,6 +253,10 @@ class OktaAuth(
     }
 
     override suspend fun signOut() {
+        val userEmail = retrieveUserEmail()
+        if (userEmail.isNotEmpty()) {
+            securePreferences.clearPrivateKey(userEmail)
+        }
         SharedPrefsHelper.setUserLoggedIn(false)
         SharedPrefsHelper.clearEmail()
         authClient?.sessionClient?.clear()

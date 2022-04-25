@@ -47,7 +47,7 @@ interface EncryptionManager {
     fun decrypt(encryptedMessage: ByteArray, generatedPassword: ByteArray): ByteArray
     fun generatePassword(): ByteArray
     fun verifyKeyPair(encryptedPrivateKey: String?, publicKey: String?, symmetricKey: String?): Boolean
-    fun regeneratePublicKey(encryptedPrivateKey: String, decryptionKey: String): String
+    fun regeneratePublicKey(mainKey: String): String
 }
 
 class EncryptionManagerImpl @Inject constructor(private val securePreferences: SecurePreferences) : EncryptionManager {
@@ -84,27 +84,18 @@ class EncryptionManagerImpl @Inject constructor(private val securePreferences: S
     }
 
     override fun signApprovalDispositionMessage(signable: Signable, userEmail: String): String {
-        val encryptedPrivateKey = securePreferences.retrievePrivateKey(userEmail)
-        val decryptionKey = securePreferences.retrieveGeneratedPassword(userEmail)
+        val mainKey = securePreferences.retrievePrivateKey(userEmail)
 
-        if(encryptedPrivateKey.isEmpty() || decryptionKey.isEmpty()) {
+        if(mainKey.isEmpty()) {
             throw NoKeyDataException
         }
 
-        val decryptedPrivateKey = decrypt(
-            encryptedMessage = BaseWrapper.decode(encryptedPrivateKey),
-            generatedPassword = BaseWrapper.decode(decryptionKey)
-        )
-
-        val publicKey = regeneratePublicKey(
-            encryptedPrivateKey = encryptedPrivateKey,
-            decryptionKey = decryptionKey
-        )
+        val publicKey = regeneratePublicKey(mainKey = mainKey)
 
         val messageToSign = signable.retrieveSignableData(approverPublicKey = publicKey)
 
         val signedData = signData(
-            data = messageToSign, privateKey = decryptedPrivateKey
+            data = messageToSign, privateKey = BaseWrapper.decode(mainKey)
         )
 
         return BaseWrapper.encodeToBase64(signedData)
@@ -115,17 +106,12 @@ class EncryptionManagerImpl @Inject constructor(private val securePreferences: S
         signable: Signable,
         userEmail: String
     ): String {
-        val encryptedPrivateKey = securePreferences.retrievePrivateKey(userEmail)
-        val decryptionKey = securePreferences.retrieveGeneratedPassword(userEmail)
-
-        if(encryptedPrivateKey.isEmpty() || decryptionKey.isEmpty()) {
+        val privateKey = securePreferences.retrievePrivateKey(userEmail)
+        if (privateKey.isEmpty()) {
             throw NoKeyDataException
         }
 
-        val publicKey = regeneratePublicKey(
-            encryptedPrivateKey = encryptedPrivateKey,
-            decryptionKey = decryptionKey
-        )
+        val publicKey = regeneratePublicKey(mainKey = privateKey)
 
         val messageToSign = signable.retrieveSignableData(approverPublicKey = publicKey)
 
@@ -141,26 +127,17 @@ class EncryptionManagerImpl @Inject constructor(private val securePreferences: S
         userEmail: String,
         signableSupplyInstructions: SignableSupplyInstructions
     ): List<String> {
-        val encryptedPrivateKey = securePreferences.retrievePrivateKey(userEmail)
-        val decryptionKey = securePreferences.retrieveGeneratedPassword(userEmail)
+        val mainKey = securePreferences.retrievePrivateKey(userEmail)
 
-        if (encryptedPrivateKey.isEmpty() || decryptionKey.isEmpty()) {
+        if (mainKey.isEmpty()) {
             throw NoKeyDataException
         }
 
-        val decryptedPrivateKey = decrypt(
-            encryptedMessage = BaseWrapper.decode(encryptedPrivateKey),
-            generatedPassword = BaseWrapper.decode(decryptionKey)
-        )
-
-        val publicKey = regeneratePublicKey(
-            encryptedPrivateKey = encryptedPrivateKey,
-            decryptionKey = decryptionKey
-        )
+        val publicKey = regeneratePublicKey(mainKey = mainKey)
 
         return signableSupplyInstructions.signableSupplyInstructions(approverPublicKey = publicKey)
             .map {
-                val signature = signData(it, decryptedPrivateKey)
+                val signature = signData(it, BaseWrapper.decode(mainKey))
                 BaseWrapper.encodeToBase64(signature)
             }
             .toList()
@@ -195,13 +172,9 @@ class EncryptionManagerImpl @Inject constructor(private val securePreferences: S
         return verifyData(DATA_CHECK, signData, base58PublicKey)
     }
 
-    override fun regeneratePublicKey(encryptedPrivateKey: String, decryptionKey: String): String {
-        val generatedPassword = BaseWrapper.decode(decryptionKey)
-        val base58PrivateKey = BaseWrapper.decode(encryptedPrivateKey)
-        val privateKey =
-            decrypt(encryptedMessage = base58PrivateKey, generatedPassword = generatedPassword)
-
-        val privateKeyParam = Ed25519PrivateKeyParameters(privateKey.inputStream())
+    override fun regeneratePublicKey(mainKey: String): String {
+        val base58PrivateKey = BaseWrapper.decode(mainKey)
+        val privateKeyParam = Ed25519PrivateKeyParameters(base58PrivateKey.inputStream())
 
         val publicKey = privateKeyParam.generatePublicKey()
 

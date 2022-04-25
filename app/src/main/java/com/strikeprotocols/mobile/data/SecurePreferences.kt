@@ -26,13 +26,13 @@ class SecurePreferencesImpl @Inject constructor() :
     }
 
     override fun savePrivateKey(email: String, privateKey: ByteArray) {
-        SharedPrefsHelper.saveEncryptedKey(email = email, encryptedKey = privateKey)
+        SharedPrefsHelper.saveMainKey(email = email, mainKey = privateKey)
     }
 
     override fun retrievePrivateKey(email: String) =
-        SharedPrefsHelper.retrieveEncryptedKey(email)
+        SharedPrefsHelper.retrieveMainKey(email)
 
     override fun clearPrivateKey(email: String) {
-        SharedPrefsHelper.saveEncryptedKey(email = email, encryptedKey = byteArrayOf())
+        SharedPrefsHelper.clearMainKey(email = email)
     }
 }
