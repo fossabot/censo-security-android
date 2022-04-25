@@ -5,9 +5,12 @@ import com.google.gson.JsonObject
 import com.google.gson.JsonPrimitive
 import com.google.gson.annotations.SerializedName
 import com.strikeprotocols.mobile.common.BaseWrapper
+import com.strikeprotocols.mobile.common.strikeLog
 import java.io.ByteArrayOutputStream
-import java.lang.NumberFormatException
-import kotlin.math.pow
+import java.text.DecimalFormat
+import java.text.DecimalFormatSymbols
+import java.text.NumberFormat
+import java.util.*
 
 sealed class SolanaApprovalRequestDetails {
     data class ApprovalRequestDetails(val requestType: SolanaApprovalRequestType) :
@@ -196,6 +199,43 @@ data class SymbolAndAmountInfo(
             val calculatedAmount = amountAsBigDecimal * (10.toBigDecimal().pow(decimals))
             calculatedAmount.toLong()
         }
+    }
+
+    fun formattedAmount(): String {
+        val split = amount.split(".").toMutableList()
+
+        val wholePart =
+            if (split.isNotEmpty() && split.size > 1) {
+                split.removeAt(0)
+            } else {
+                amount
+            }
+
+        val wholePartString = formatSeparator(wholePart.toInt())
+        split.add(0, wholePartString)
+        return split.joinToString(separator = ".")
+    }
+
+    fun formattedUSDEquivalent(): String {
+        if (usdEquivalent == null) {
+            return ""
+        }
+
+        val decimal = usdEquivalent.toBigDecimal()
+        val usdEquivalent = usdFormatter().format(decimal)
+        return usdEquivalent
+    }
+
+    private fun formatSeparator(number: Int): String {
+        return String.format("%,d", number)
+    }
+
+    private fun usdFormatter(): DecimalFormat {
+        val formatter = NumberFormat.getCurrencyInstance(Locale.US) as DecimalFormat
+        val symbols: DecimalFormatSymbols = formatter.decimalFormatSymbols
+        symbols.currencySymbol = ""
+        formatter.decimalFormatSymbols = symbols
+        return formatter
     }
 }
 

@@ -81,6 +81,24 @@
     <string name="unknown_approval_tip">You have an unknown approval request. Please update this app to see the request details</string>
     <string name="transfer_icon_content_des">Transfer Icon</string>
     <string name="approval_type_transfer">Transfer</string>
+    <string name="unknown_dialog_message">an unknown approval request</string>
+    <string name="a_transfer_of_dialog_message">a transfer of</string>
+    <string name="a_conversion_of_dialog_message">a conversion of</string>
+    <string name="the_removal_of_dialog_message">the removal of</string>
+    <string name="the_addition_of_dialog_message">the addition of</string>
+    <string name="an_account_creation_of_dialog_message">an account creation of</string>
+    <string name="a_dapp_transaction_with_dialog_message">a dApp transaction with</string>
+    <string name="login_approval_dialog_message">Login Approval</string>
+    <string name="you_are_about_to_approve">You are about to approve</string>
+    <string name="you_are_about_to_deny">You are about to deny</string>
+    <string name="transfer_dialog_title">Transfer</string>
+    <string name="unknown_dialog_title">Unknown</string>
+    <string name="conversion_dialog_title">Conversion</string>
+    <string name="signers_update_dialog_title">Signers Update</string>
+    <string name="balance_account_creation_dialog_title">Balance Account Creation</string>
+    <string name="stake_account_creation_dialog_title">Stake Account Creation</string>
+    <string name="dapp_transaction_dialog_title">dApp Transaction</string>
+    <string name="login_approval_dialog_title">Login Approval</string>
 
 
 </resources>

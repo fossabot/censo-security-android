@@ -1,5 +1,6 @@
 package com.strikeprotocols.mobile.data
 
+import com.strikeprotocols.mobile.common.MockedApprovals
 import com.strikeprotocols.mobile.data.models.InitiationDisposition
 import com.strikeprotocols.mobile.data.models.RegisterApprovalDisposition
 import com.strikeprotocols.mobile.data.models.approval.ApprovalDispositionRequest
@@ -26,7 +27,9 @@ class ApprovalsRepositoryImpl @Inject constructor(
 ) : ApprovalsRepository {
 
     override suspend fun getWalletApprovals(): List<WalletApproval?> {
-        return api.getWalletApprovals()
+        //todo: get rid of this when we merge approval_ui_tickets onto develop
+        return MockedApprovals.getFullListOfApprovalItems()
+        //return api.getWalletApprovals()
     }
 
     override suspend fun approveOrDenyDisposition(

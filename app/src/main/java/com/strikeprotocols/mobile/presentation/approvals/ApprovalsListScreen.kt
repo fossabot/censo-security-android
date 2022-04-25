@@ -1,12 +1,14 @@
+//todo: Using this for combined clickable, remove this OptIn when we have all UI types
+// implemented and do not need combined clickable to test approve/deny flow
+@file:OptIn(ExperimentalFoundationApi::class)
+
 package com.strikeprotocols.mobile.presentation.approvals
 
 import android.content.Intent
 import android.net.Uri
-import androidx.compose.foundation.background
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.AccountCircle
@@ -29,14 +31,17 @@ import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.SwipeRefreshIndicator
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import com.strikeprotocols.mobile.R
+import com.strikeprotocols.mobile.common.AndroidUriWrapper
 import com.strikeprotocols.mobile.common.BiometricUtil
 import com.strikeprotocols.mobile.common.Resource
 import com.strikeprotocols.mobile.common.retrieveApprovalDispositionDialogErrorText
-import com.strikeprotocols.mobile.common.strikeLog
-import com.strikeprotocols.mobile.data.models.approval.SolanaApprovalRequestType
+import com.strikeprotocols.mobile.data.models.ApprovalDisposition
+import com.strikeprotocols.mobile.data.models.approval.SolanaApprovalRequestType.*
 import com.strikeprotocols.mobile.data.models.approval.WalletApproval
 import com.strikeprotocols.mobile.presentation.Screen
 import com.strikeprotocols.mobile.presentation.approvals.approval_type_items.UnknownApprovalItem
+import com.strikeprotocols.mobile.presentation.approvals.approval_type_items.getApprovalTypeDialogTitle
+import com.strikeprotocols.mobile.presentation.approvals.approval_type_items.getDialogFullMessage
 import com.strikeprotocols.mobile.presentation.components.StrikeTopAppBar
 import com.strikeprotocols.mobile.presentation.blockhash.BlockHashViewModel
 import com.strikeprotocols.mobile.presentation.components.*
@@ -151,17 +156,18 @@ fun ApprovalsListScreen(
                 isRefreshing = approvalsState.loadingData || blockHashState.isLoading,
                 onRefresh = approvalsViewModel::refreshData,
                 onApproveClicked = { approval ->
-                    strikeLog(message = "Approve clicked")
                     approvalsViewModel.setShouldDisplayConfirmDispositionDialog(
                         approval = approval,
                         isApproving = true,
-                        dialogTitle = "Confirm Approval",
-                        dialogText = "Please confirm you want to approve this transfer"
+                        dialogTitle = approval?.getSolanaApprovalRequestType()?.getApprovalTypeDialogTitle(context)
+                            ?: UnknownApprovalType.getApprovalTypeDialogTitle(context),
+                        dialogText = approval?.getSolanaApprovalRequestType()?.getDialogFullMessage(context, ApprovalDisposition.APPROVE)
+                            ?: UnknownApprovalType.getDialogFullMessage(context, ApprovalDisposition.APPROVE)
                     )
                 },
                 onMoreInfoClicked = { approval ->
                     approval?.let { safeApproval ->
-                        navController.navigate("${Screen.ApprovalDetailRoute.route}/${WalletApproval.toJson(safeApproval)}" )
+                        navController.navigate("${Screen.ApprovalDetailRoute.route}/${WalletApproval.toJson(safeApproval, AndroidUriWrapper())}" )
                     }
                 },
                 walletApprovals = approvalsState.approvals
@@ -278,26 +284,88 @@ fun ApprovalsList(
                     Spacer(modifier = Modifier.height(12.dp))
 
                     walletApproval?.let { safeApproval ->
-                        when (safeApproval.getSolanaApprovalRequestType()) {
-                            is SolanaApprovalRequestType.BalanceAccountCreation -> TODO()
-                            is SolanaApprovalRequestType.ConversionRequest -> TODO()
-                            is SolanaApprovalRequestType.DAppTransactionRequest -> TODO()
-                            is SolanaApprovalRequestType.SignersUpdate -> TODO()
-
-                            is SolanaApprovalRequestType.WithdrawalRequest -> {
-                                ApprovalItem(
-                                    onApproveClicked = { onApproveClicked(walletApprovals[index]) },
-                                    onMoreInfoClicked = { onMoreInfoClicked(walletApprovals[index]) },
-                                    timeRemainingInSeconds = walletApproval.approvalTimeoutInSeconds ?: 0
-                                )
-                            }
-
-                            SolanaApprovalRequestType.UnknownApprovalType -> {
+                        val type = safeApproval.getSolanaApprovalRequestType()
+                        when (type) {
+                            is BalanceAccountCreation ->
+                                Text(
+                                    modifier = Modifier
+                                        .combinedClickable(
+                                            onClick = { onApproveClicked(safeApproval) },
+                                            onLongClick = { onMoreInfoClicked(safeApproval) }
+                                        )
+                                        .fillMaxWidth()
+                                        .background(color = Color.Red)
+                                        .padding(top = 24.dp, bottom = 24.dp, start = 12.dp),
+                                    text = type.type,
+                                    color = Color.Black)
+                            is ConversionRequest ->
+                                Text(
+                                    modifier = Modifier
+                                        .combinedClickable(
+                                            onClick = { onApproveClicked(safeApproval) },
+                                            onLongClick = { onMoreInfoClicked(safeApproval) }
+                                        )
+                                        .fillMaxWidth()
+                                        .background(color = Color.Green)
+                                        .padding(top = 24.dp, bottom = 24.dp, start = 12.dp),
+                                    text = type.type,
+                                    color = Color.Black)
+                            is DAppTransactionRequest ->
+                                Text(
+                                    modifier = Modifier
+                                        .combinedClickable(
+                                            onClick = { onApproveClicked(safeApproval) },
+                                            onLongClick = { onMoreInfoClicked(safeApproval) }
+                                        )
+                                        .fillMaxWidth()
+                                        .background(color = Color.Magenta)
+                                        .padding(top = 24.dp, bottom = 24.dp, start = 12.dp),
+                                    text = type.type,
+                                    color = Color.Black)
+                            is SignersUpdate ->
+                                Text(
+                                    modifier = Modifier
+                                        .combinedClickable(
+                                            onClick = { onApproveClicked(safeApproval) },
+                                            onLongClick = { onMoreInfoClicked(safeApproval) }
+                                        )
+                                        .fillMaxWidth()
+                                        .background(color = Color.Yellow)
+                                        .padding(top = 24.dp, bottom = 24.dp, start = 12.dp),
+                                    text = type.type,
+                                    color = Color.Black)
+                            is WithdrawalRequest ->
+                                Text(
+                                    modifier = Modifier
+                                        .combinedClickable(
+                                            onClick = { onApproveClicked(safeApproval) },
+                                            onLongClick = { onMoreInfoClicked(safeApproval) }
+                                        )
+                                        .fillMaxWidth()
+                                        .background(color = Color.Blue)
+                                        .padding(top = 24.dp, bottom = 24.dp, start = 12.dp),
+                                    text = type.type,
+                                    color = Color.Black)
+                            is LoginApprovalRequest ->
+                                Text(
+                                    modifier = Modifier
+                                        .combinedClickable(
+                                            onClick = { onApproveClicked(safeApproval) },
+                                            onLongClick = { onMoreInfoClicked(safeApproval) }
+                                        )
+                                        .fillMaxWidth()
+                                        .background(color = Color.Cyan)
+                                        .padding(top = 24.dp, bottom = 24.dp, start = 12.dp),
+                                    text = type.type,
+                                    color = Color.Black)
+                            is UnknownApprovalType -> {
                                 UnknownApprovalItem(
-                                    timeRemainingInSeconds = safeApproval.approvalTimeoutInSeconds ?: 0,
+                                    timeRemainingInSeconds = safeApproval.approvalTimeoutInSeconds
+                                        ?: 0,
                                     onUpdateAppClicked = {
                                         val playStoreIntent = Intent(Intent.ACTION_VIEW).apply {
-                                            data = Uri.parse("http://play.google.com/store/apps/details?id=com.strikeprotocols.mobile")
+                                            data =
+                                                Uri.parse("http://play.google.com/store/apps/details?id=com.strikeprotocols.mobile")
                                             setPackage("com.android.vending")
                                         }
                                         startActivity(context, playStoreIntent, null)
