@@ -19,8 +19,10 @@ import androidx.navigation.*
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.strikeprotocols.mobile.common.BaseWrapper
 import com.strikeprotocols.mobile.common.BiometricUtil
 import com.strikeprotocols.mobile.data.AuthProvider
+import com.strikeprotocols.mobile.data.SharedPrefsHelper
 import com.strikeprotocols.mobile.data.UserState
 import com.strikeprotocols.mobile.data.UserStateListener
 import com.strikeprotocols.mobile.data.models.approval.WalletApproval
@@ -64,7 +66,6 @@ class MainActivity : FragmentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
 
         // Create channel to show notifications.
         val channelId = getString(R.string.default_notification_channel_id)

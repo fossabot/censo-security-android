@@ -1,7 +1,3 @@
-//todo: Using this for combined clickable, remove this OptIn when we have all UI types
-// implemented and do not need combined clickable to test approve/deny flow
-@file:OptIn(ExperimentalFoundationApi::class)
-
 package com.strikeprotocols.mobile.presentation.approvals
 
 import android.content.Intent
@@ -36,12 +32,11 @@ import com.strikeprotocols.mobile.common.BiometricUtil
 import com.strikeprotocols.mobile.common.Resource
 import com.strikeprotocols.mobile.common.retrieveApprovalDispositionDialogErrorText
 import com.strikeprotocols.mobile.data.models.ApprovalDisposition
+import com.strikeprotocols.mobile.data.models.approval.SolanaApprovalRequestType
 import com.strikeprotocols.mobile.data.models.approval.SolanaApprovalRequestType.*
 import com.strikeprotocols.mobile.data.models.approval.WalletApproval
 import com.strikeprotocols.mobile.presentation.Screen
-import com.strikeprotocols.mobile.presentation.approvals.approval_type_items.UnknownApprovalItem
-import com.strikeprotocols.mobile.presentation.approvals.approval_type_items.getApprovalTypeDialogTitle
-import com.strikeprotocols.mobile.presentation.approvals.approval_type_items.getDialogFullMessage
+import com.strikeprotocols.mobile.presentation.approvals.approval_type_items.*
 import com.strikeprotocols.mobile.presentation.components.StrikeTopAppBar
 import com.strikeprotocols.mobile.presentation.blockhash.BlockHashViewModel
 import com.strikeprotocols.mobile.presentation.components.*
@@ -285,103 +280,42 @@ fun ApprovalsList(
 
                     walletApproval?.let { safeApproval ->
                         val type = safeApproval.getSolanaApprovalRequestType()
-                        when (type) {
-                            is BalanceAccountCreation ->
-                                Text(
-                                    modifier = Modifier
-                                        .combinedClickable(
-                                            onClick = { onApproveClicked(safeApproval) },
-                                            onLongClick = { onMoreInfoClicked(safeApproval) }
-                                        )
-                                        .fillMaxWidth()
-                                        .background(color = Color.Red)
-                                        .padding(top = 24.dp, bottom = 24.dp, start = 12.dp),
-                                    text = type.type,
-                                    color = Color.Black)
-                            is ConversionRequest ->
-                                Text(
-                                    modifier = Modifier
-                                        .combinedClickable(
-                                            onClick = { onApproveClicked(safeApproval) },
-                                            onLongClick = { onMoreInfoClicked(safeApproval) }
-                                        )
-                                        .fillMaxWidth()
-                                        .background(color = Color.Green)
-                                        .padding(top = 24.dp, bottom = 24.dp, start = 12.dp),
-                                    text = type.type,
-                                    color = Color.Black)
-                            is DAppTransactionRequest ->
-                                Text(
-                                    modifier = Modifier
-                                        .combinedClickable(
-                                            onClick = { onApproveClicked(safeApproval) },
-                                            onLongClick = { onMoreInfoClicked(safeApproval) }
-                                        )
-                                        .fillMaxWidth()
-                                        .background(color = Color.Magenta)
-                                        .padding(top = 24.dp, bottom = 24.dp, start = 12.dp),
-                                    text = type.type,
-                                    color = Color.Black)
-                            is SignersUpdate ->
-                                Text(
-                                    modifier = Modifier
-                                        .combinedClickable(
-                                            onClick = { onApproveClicked(safeApproval) },
-                                            onLongClick = { onMoreInfoClicked(safeApproval) }
-                                        )
-                                        .fillMaxWidth()
-                                        .background(color = Color.Yellow)
-                                        .padding(top = 24.dp, bottom = 24.dp, start = 12.dp),
-                                    text = type.type,
-                                    color = Color.Black)
-                            is WithdrawalRequest ->
-                                Text(
-                                    modifier = Modifier
-                                        .combinedClickable(
-                                            onClick = { onApproveClicked(safeApproval) },
-                                            onLongClick = { onMoreInfoClicked(safeApproval) }
-                                        )
-                                        .fillMaxWidth()
-                                        .background(color = Color.Blue)
-                                        .padding(top = 24.dp, bottom = 24.dp, start = 12.dp),
-                                    text = type.type,
-                                    color = Color.Black)
-                            is LoginApprovalRequest ->
-                                Text(
-                                    modifier = Modifier
-                                        .combinedClickable(
-                                            onClick = { onApproveClicked(safeApproval) },
-                                            onLongClick = { onMoreInfoClicked(safeApproval) }
-                                        )
-                                        .fillMaxWidth()
-                                        .background(color = Color.Cyan)
-                                        .padding(top = 24.dp, bottom = 24.dp, start = 12.dp),
-                                    text = type.type,
-                                    color = Color.Black)
-                            is UnknownApprovalType -> {
-                                UnknownApprovalItem(
-                                    timeRemainingInSeconds = safeApproval.approvalTimeoutInSeconds
-                                        ?: 0,
-                                    onUpdateAppClicked = {
-                                        val playStoreIntent = Intent(Intent.ACTION_VIEW).apply {
-                                            data =
-                                                Uri.parse("http://play.google.com/store/apps/details?id=com.strikeprotocols.mobile")
-                                            setPackage("com.android.vending")
-                                        }
-                                        startActivity(context, playStoreIntent, null)
+                        val rowMetaData = type.getApprovalRowMetaData(LocalContext.current)
+
+                        if (type == UnknownApprovalType) {
+                            UnknownApprovalItem(
+                                timeRemainingInSeconds = safeApproval.approvalTimeoutInSeconds
+                                    ?: 0,
+                                accountRowMetaData = rowMetaData,
+                                onUpdateAppClicked = {
+                                    val playStoreIntent = Intent(Intent.ACTION_VIEW).apply {
+                                        data =
+                                            Uri.parse("http://play.google.com/store/apps/details?id=com.strikeprotocols.mobile")
+                                        setPackage("com.android.vending")
                                     }
-                                )
+                                    startActivity(context, playStoreIntent, null)
+                                }
+                            )
+                        } else {
+                            ApprovalRowItem(
+                                timeRemainingInSeconds = safeApproval.approvalTimeoutInSeconds
+                                    ?: 0,
+                                onApproveClicked = { onApproveClicked(walletApprovals[index]) },
+                                onMoreInfoClicked = { onMoreInfoClicked(walletApprovals[index]) },
+                                rowMetaData = rowMetaData,
+                            ) {
+                                ApprovalRowDetailContent(type = type)
                             }
                         }
                     }
-
-                    Spacer(modifier = Modifier.height(12.dp))
                 }
             }
+
+            Spacer(modifier = Modifier.height(12.dp))
         }
-        //endregion
     }
 }
+//endregion
 
 @Composable
 fun ListDataEmptyState() {

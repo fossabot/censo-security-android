@@ -1,11 +1,18 @@
 package com.strikeprotocols.mobile.presentation.approvals.approval_type_items
 
 import android.content.Context
+import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.*
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.res.stringResource
 import com.strikeprotocols.mobile.R
 import com.strikeprotocols.mobile.data.models.ApprovalDisposition
 import com.strikeprotocols.mobile.data.models.approval.AccountType
+import com.strikeprotocols.mobile.data.models.approval.AccountType.*
 import com.strikeprotocols.mobile.data.models.approval.SlotUpdateType
 import com.strikeprotocols.mobile.data.models.approval.SolanaApprovalRequestType
+import com.strikeprotocols.mobile.data.models.approval.SymbolAndAmountInfo
 
 fun SolanaApprovalRequestType.getApprovalTypeDialogTitle(context: Context): String {
     return when (this) {
@@ -18,7 +25,7 @@ fun SolanaApprovalRequestType.getApprovalTypeDialogTitle(context: Context): Stri
         is SolanaApprovalRequestType.SignersUpdate ->
             context.getString(R.string.signers_update_dialog_title)
         is SolanaApprovalRequestType.BalanceAccountCreation -> {
-            if (accountInfo.accountType == AccountType.BalanceAccount) {
+            if (accountInfo.accountType == BalanceAccount) {
                 context.getString(R.string.balance_account_creation_dialog_title)
             } else {
                 context.getString(R.string.stake_account_creation_dialog_title)
@@ -36,6 +43,57 @@ fun SolanaApprovalRequestType.getDialogFullMessage(
     approvalDisposition: ApprovalDisposition
 ): String {
     return "${approvalDisposition.getDialogMessage(context)} ${getApprovalTypeDialogMessage(context)}"
+}
+
+fun SolanaApprovalRequestType.getApprovalRowMetaData(context: Context): ApprovalRowMetaData {
+    return when (this) {
+        is SolanaApprovalRequestType.WithdrawalRequest -> {
+            ApprovalRowMetaData(
+                approvalImageVector = Icons.Filled.SyncAlt,
+                approvalImageContentDescription = context.getString(R.string.transfer_icon_content_desc),
+                approvalTypeTitle = context.getString(R.string.withdrawal_type_title),
+            )
+        }
+        is SolanaApprovalRequestType.UnknownApprovalType -> {
+            ApprovalRowMetaData(
+                approvalImageVector = Icons.Filled.HelpOutline,
+                approvalImageContentDescription = context.getString(R.string.approval_type_unknown_content_des),
+                approvalTypeTitle = context.getString(R.string.approval_type_unknown)
+            )
+        }
+        is SolanaApprovalRequestType.ConversionRequest -> {
+            ApprovalRowMetaData(
+                approvalImageVector = Icons.Filled.Refresh,
+                approvalImageContentDescription = context.getString(R.string.conversion_icon_desc),
+                approvalTypeTitle = context.getString(R.string.conversion_row_title),
+            )
+        }
+        is SolanaApprovalRequestType.SignersUpdate ->
+            ApprovalRowMetaData(
+                approvalImageVector = Icons.Filled.PhoneAndroid,
+                approvalImageContentDescription = context.getString(R.string.signers_update_icon_content_desc),
+                approvalTypeTitle = context.getString(R.string.approval_type_signers_update_title),
+            )
+        is SolanaApprovalRequestType.BalanceAccountCreation ->
+            ApprovalRowMetaData(
+                approvalImageVector = Icons.Filled.Lock,
+                approvalImageContentDescription = context.getString(R.string.balance_account_creation_icon_content_desc),
+                approvalTypeTitle = context.getString(R.string.balance_account_creation_title),
+            )
+        is SolanaApprovalRequestType.DAppTransactionRequest ->
+            ApprovalRowMetaData(
+                approvalImageVector = Icons.Filled.Refresh,
+                approvalImageContentDescription = context.getString(R.string.approval_type_dapp_content_des),
+                approvalTypeTitle = context.getString(R.string.approval_type_dapp_transaction)
+            )
+        is SolanaApprovalRequestType.LoginApprovalRequest -> {
+            ApprovalRowMetaData(
+                approvalImageVector = Icons.Filled.Login,
+                approvalImageContentDescription = context.getString(R.string.login_icon_content_desc),
+                approvalTypeTitle = context.getString(R.string.login_approval_title),
+            )
+        }
+    }
 }
 
 fun ApprovalDisposition.getDialogMessage(context: Context): String {
@@ -69,4 +127,17 @@ private fun SolanaApprovalRequestType.getApprovalTypeDialogMessage(context: Cont
             context.getString(R.string.login_approval_dialog_message)
     }
 }
+
+fun AccountType.getUITitle(context: Context) =
+    when(this) {
+        BalanceAccount -> context.getString(R.string.balance_account_title)
+        StakeAccount -> context.getString(R.string.stake_account_title)
+    }
+
+fun SymbolAndAmountInfo.getMainValueText(): String {
+    return "${formattedAmount()} ${symbolInfo.symbol}"
+}
+
+fun SymbolAndAmountInfo.getUSDEquivalentText(context: Context, hideSymbol: Boolean = false) =
+    "${formattedUSDEquivalent(hideSymbol = hideSymbol)} ${context.getString(R.string.usd_equivalent)}"
 

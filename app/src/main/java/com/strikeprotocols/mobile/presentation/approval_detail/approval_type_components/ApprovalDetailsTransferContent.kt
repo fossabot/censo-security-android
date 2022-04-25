@@ -2,14 +2,17 @@ package com.strikeprotocols.mobile.presentation.approval_detail.approval_type_co
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Divider
 import androidx.compose.material.Icon
+import androidx.compose.material.SnackbarDefaults.backgroundColor
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ArrowForward
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -110,9 +113,11 @@ fun TagColumn(
         Text(text = title, textAlign = TextAlign.Center, color = StrikeWhite, fontSize = 12.sp)
         Spacer(modifier = Modifier.height(14.dp))
         StrikeTag(
+            modifier = Modifier
+                .clip(RoundedCornerShape(8.dp))
+                .background(color = DetailInfoDarkBackground),
             text = tag,
-            paddingValues = PaddingValues(top = 24.dp, bottom = 24.dp, start = 50.dp, end = 50.dp),
-            backgroundColor = DetailInfoDarkBackground
+            paddingValues = PaddingValues(top = 24.dp, bottom = 24.dp, start = 50.dp, end = 50.dp)
         )
     }
 }
