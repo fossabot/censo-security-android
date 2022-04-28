@@ -26,18 +26,14 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.navigation.NavController
 import com.strikeprotocols.mobile.R
+import com.strikeprotocols.mobile.common.*
 import com.strikeprotocols.mobile.common.BiometricUtil.createBioPrompt
 import com.strikeprotocols.mobile.common.BiometricUtil.getBasicBiometricPromptBuilder
-import com.strikeprotocols.mobile.common.Resource
-import com.strikeprotocols.mobile.common.convertSecondsIntoCountdownText
-import com.strikeprotocols.mobile.common.retrieveApprovalDispositionDialogErrorText
-import com.strikeprotocols.mobile.common.strikeLog
 import com.strikeprotocols.mobile.data.models.ApprovalDisposition
 import com.strikeprotocols.mobile.data.models.approval.WalletApproval
-import com.strikeprotocols.mobile.presentation.approval_detail.approval_type_components.ApprovalDetailsTransferContent
 import com.strikeprotocols.mobile.presentation.approvals.ApprovalsViewModel
-import com.strikeprotocols.mobile.presentation.approvals.approval_type_items.getApprovalTypeDialogTitle
-import com.strikeprotocols.mobile.presentation.approvals.approval_type_items.getDialogFullMessage
+import com.strikeprotocols.mobile.presentation.approvals.approval_type_row_items.getApprovalTypeDialogTitle
+import com.strikeprotocols.mobile.presentation.approvals.approval_type_row_items.getDialogFullMessage
 import com.strikeprotocols.mobile.presentation.blockhash.BlockHashViewModel
 import com.strikeprotocols.mobile.presentation.components.OnLifecycleEvent
 import com.strikeprotocols.mobile.presentation.components.StrikeApprovalDispositionErrorAlertDialog
@@ -45,6 +41,8 @@ import com.strikeprotocols.mobile.presentation.components.StrikeConfirmDispositi
 import com.strikeprotocols.mobile.presentation.components.StrikeTopAppBar
 import com.strikeprotocols.mobile.ui.theme.*
 import com.strikeprotocols.mobile.data.models.approval.SolanaApprovalRequestType.*
+import com.strikeprotocols.mobile.presentation.approvals.ApprovalDetailContent
+import com.strikeprotocols.mobile.presentation.approvals.approval_type_row_items.getApprovalRowMetaData
 
 @Composable
 fun ApprovalDetailsScreen(
@@ -120,12 +118,18 @@ fun ApprovalDetailsScreen(
         }
     }
 
+
+    val approvalRowMetadata = approvalDetailsState.approval?.getSolanaApprovalRequestType()
+        ?.getApprovalRowMetaData(context = context)
+    val title = approvalRowMetadata?.approvalTypeTitle
+        ?: stringResource(id = R.string.generic_approval_title)
+
     //region Screen Content
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
             ApprovalDetailsTopAppBar(
-                title = stringResource(id = R.string.transfer_details),
+                title = title,
                 onAppBarIconClick = { navController.navigateUp() },
                 navigationIcon = Icons.Rounded.ArrowBack,
                 navigationIconContentDes = stringResource(id = R.string.content_des_back_icon)
@@ -152,7 +156,8 @@ fun ApprovalDetailsScreen(
                     )
                 },
                 timeRemainingInSeconds = approvalDetailsState.approval?.approvalTimeoutInSeconds ?: 0,
-                isLoading = approvalDetailsState.loadingData || blockHashState.isLoading
+                isLoading = approvalDetailsState.loadingData || blockHashState.isLoading,
+                approval = approvalDetailsState.approval
             )
 
             if (approvalDetailsState.shouldDisplayConfirmDisposition != null) {
@@ -210,7 +215,8 @@ fun ApprovalDetails(
     onApproveClicked: () -> Unit,
     onDenyClicked: () -> Unit,
     timeRemainingInSeconds: Int,
-    isLoading: Boolean
+    isLoading: Boolean,
+    approval: WalletApproval?
 ) {
     Column(
         modifier = Modifier.fillMaxSize(),
@@ -226,7 +232,16 @@ fun ApprovalDetails(
         ) {
             Spacer(modifier = Modifier.height(24.dp))
 
-            ApprovalDetailsTransferContent()
+            approval?.let { safeApproval ->
+                val type = safeApproval.getSolanaApprovalRequestType()
+                val approvalsNeeded = safeApproval.numberOfDispositionsRequired ?: 0
+
+                //Defensive coding,
+                // we should never have an unknown approval in the details screen
+                if (type != UnknownApprovalType) {
+                    ApprovalDetailContent(type = type, approvalsNeeded = approvalsNeeded)
+                }
+            }
 
             ApprovalDetailsButtons(
                 onApproveClicked = { onApproveClicked() },
@@ -332,7 +347,8 @@ fun StatelessApprovalDetailsScreen() {
                 onApproveClicked = { strikeLog(message = "Approve clicked") },
                 onDenyClicked = { strikeLog(message = "Deny clicked") },
                 timeRemainingInSeconds = 1000,
-                isLoading = false
+                isLoading = false,
+                approval = generateWalletApprovalsDummyData()
             )
         }
     )
