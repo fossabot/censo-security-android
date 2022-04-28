@@ -28,7 +28,7 @@ fun DAppRowContent(dAppWalletApproval: SolanaApprovalRequestType.DAppTransaction
         modifier = Modifier.background(DetailInfoLightBackground),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        ApprovalRowTitleText(title = dAppWalletApproval.account.name)
+        ApprovalRowTitleText(title = dAppWalletApproval.dappInfo.name)
 
         if (!dAppWalletApproval.balanceChanges.isNullOrEmpty()) {
             dAppWalletApproval.balanceChanges.forEachIndexed { index, symbolAndAmountInfo ->
