@@ -14,9 +14,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.strikeprotocols.mobile.R
 import com.strikeprotocols.mobile.common.convertSecondsIntoCountdownText
-import com.strikeprotocols.mobile.data.models.approval.AccountType
 import com.strikeprotocols.mobile.data.models.approval.SolanaApprovalRequestType
-import com.strikeprotocols.mobile.presentation.approvals.approval_type_items.*
+import com.strikeprotocols.mobile.presentation.approval_detail.approval_type_detail_items.DAppDetailContent
+import com.strikeprotocols.mobile.presentation.approvals.approval_type_row_items.*
 import com.strikeprotocols.mobile.ui.theme.*
 import java.util.*
 
@@ -124,7 +124,7 @@ fun ApprovalType(
 }
 
 @Composable
-fun ApprovalRowDetailContent(
+fun ApprovalRowContent(
     type: SolanaApprovalRequestType
 ) {
     when (type) {
@@ -140,6 +140,28 @@ fun ApprovalRowDetailContent(
             DAppRowContent(dAppWalletApproval = type)
         is SolanaApprovalRequestType.LoginApprovalRequest ->
             LoginApprovalRowContent(loginApproval = type)
+        else -> Text(text = stringResource(R.string.unknown_approval_item))
+    }
+}
+
+@Composable
+fun ApprovalDetailContent(
+    type: SolanaApprovalRequestType,
+    approvalsNeeded: Int
+) {
+    when (type) {
+        is SolanaApprovalRequestType.BalanceAccountCreation ->
+            Text(text = "Implement Balance Account Creation Detail UI", color = StrikeWhite)
+        is SolanaApprovalRequestType.ConversionRequest ->
+            Text(text = "Implement Conversion Request Detail UI", color = StrikeWhite)
+        is SolanaApprovalRequestType.DAppTransactionRequest -> 
+            DAppDetailContent(dAppWalletApproval = type, approvalsNeeded = approvalsNeeded)
+        is SolanaApprovalRequestType.LoginApprovalRequest ->
+            Text(text = "Implement Login Approval Request Detail UI", color = StrikeWhite)
+        is SolanaApprovalRequestType.SignersUpdate ->
+            Text(text = "Implement Signers Update Detail UI", color = StrikeWhite)
+        is SolanaApprovalRequestType.WithdrawalRequest ->
+            Text(text = "Implement Withdrawal Detail UI", color = StrikeWhite)
         else -> Text(text = stringResource(R.string.unknown_approval_item))
     }
 }

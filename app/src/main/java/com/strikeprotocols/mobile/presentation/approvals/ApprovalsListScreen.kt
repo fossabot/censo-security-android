@@ -32,11 +32,10 @@ import com.strikeprotocols.mobile.common.BiometricUtil
 import com.strikeprotocols.mobile.common.Resource
 import com.strikeprotocols.mobile.common.retrieveApprovalDispositionDialogErrorText
 import com.strikeprotocols.mobile.data.models.ApprovalDisposition
-import com.strikeprotocols.mobile.data.models.approval.SolanaApprovalRequestType
 import com.strikeprotocols.mobile.data.models.approval.SolanaApprovalRequestType.*
 import com.strikeprotocols.mobile.data.models.approval.WalletApproval
 import com.strikeprotocols.mobile.presentation.Screen
-import com.strikeprotocols.mobile.presentation.approvals.approval_type_items.*
+import com.strikeprotocols.mobile.presentation.approvals.approval_type_row_items.*
 import com.strikeprotocols.mobile.presentation.components.StrikeTopAppBar
 import com.strikeprotocols.mobile.presentation.blockhash.BlockHashViewModel
 import com.strikeprotocols.mobile.presentation.components.*
@@ -304,7 +303,7 @@ fun ApprovalsList(
                                 onMoreInfoClicked = { onMoreInfoClicked(walletApprovals[index]) },
                                 rowMetaData = rowMetaData,
                             ) {
-                                ApprovalRowDetailContent(type = type)
+                                ApprovalRowContent(type = type)
                             }
                         }
                     }

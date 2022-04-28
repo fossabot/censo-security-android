@@ -1,11 +1,8 @@
-package com.strikeprotocols.mobile.presentation.approvals.approval_type_items
+package com.strikeprotocols.mobile.presentation.approvals.approval_type_row_items
 
 import android.content.Context
-import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.res.stringResource
 import com.strikeprotocols.mobile.R
 import com.strikeprotocols.mobile.data.models.ApprovalDisposition
 import com.strikeprotocols.mobile.data.models.approval.AccountType

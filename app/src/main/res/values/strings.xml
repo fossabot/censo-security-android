@@ -117,6 +117,7 @@
     <string name="login_icon_content_desc">Login Icon</string>
     <string name="transfer_icon_content_desc">Transfer Icon</string>
     <string name="withdrawal_type_title">Transfer</string>
+    <string name="generic_approval_title">Approval</string>
 
     <string name="usd_equivalent">USD equivalent</string>
     <string name="unknown_approval_item">Unknown Approval</string>

@@ -1,4 +1,4 @@
-package com.strikeprotocols.mobile.presentation.approvals.approval_type_items
+package com.strikeprotocols.mobile.presentation.approvals.approval_type_row_items
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column

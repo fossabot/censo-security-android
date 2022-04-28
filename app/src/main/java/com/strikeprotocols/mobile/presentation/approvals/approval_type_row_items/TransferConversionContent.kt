@@ -1,17 +1,15 @@
-package com.strikeprotocols.mobile.presentation.approvals.approval_type_items
+package com.strikeprotocols.mobile.presentation.approvals.approval_type_row_items
 
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.strikeprotocols.mobile.presentation.components.ApprovalRowTitleText
 import com.strikeprotocols.mobile.presentation.components.StrikeTagRow
 import com.strikeprotocols.mobile.ui.theme.GreyText
-import com.strikeprotocols.mobile.ui.theme.StrikeWhite
 
 @Composable
 fun TransferConversionContent(

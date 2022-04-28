@@ -1,4 +1,4 @@
-package com.strikeprotocols.mobile.presentation.approvals.approval_type_items
+package com.strikeprotocols.mobile.presentation.approvals.approval_type_row_items
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -10,7 +10,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import com.strikeprotocols.mobile.R
 import com.strikeprotocols.mobile.data.models.approval.SolanaApprovalRequestType
-import com.strikeprotocols.mobile.presentation.approvals.approval_type_items.getUITitle
 import com.strikeprotocols.mobile.presentation.components.AccountChangeItem
 import com.strikeprotocols.mobile.ui.theme.DetailInfoLightBackground
 
