@@ -37,8 +37,8 @@ fun DAppDetailContent(
                     symbol = symbolAndAmountInfo.symbolInfo.symbol,
                     amount = symbolAndAmountInfo.formattedAmount(),
                     usdEquivalent = symbolAndAmountInfo.formattedUSDEquivalent(false),
-                    fromDestination = dAppWalletApproval.account.name,
-                    toDestination = dAppWalletApproval.dappInfo.name,
+                    fromDestination = dAppWalletApproval.dappInfo.name,
+                    toDestination = dAppWalletApproval.account.name,
                     positiveChange = symbolAndAmountInfo.isAmountPositive()
                 )
 

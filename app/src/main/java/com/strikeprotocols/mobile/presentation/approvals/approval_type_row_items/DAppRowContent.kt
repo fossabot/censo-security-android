@@ -33,13 +33,12 @@ fun DAppRowContent(dAppWalletApproval: SolanaApprovalRequestType.DAppTransaction
         if (!dAppWalletApproval.balanceChanges.isNullOrEmpty()) {
             dAppWalletApproval.balanceChanges.forEachIndexed { index, symbolAndAmountInfo ->
                 Spacer(modifier = Modifier.height(16.dp))
-                //todo: check the values grabbed here are correct.
                 BalanceChange(
                     symbol = symbolAndAmountInfo.symbolInfo.symbol,
                     amount = symbolAndAmountInfo.formattedAmount(),
                     usdEquivalent = symbolAndAmountInfo.formattedUSDEquivalent(false),
-                    fromDestination = dAppWalletApproval.account.name,
-                    toDestination = dAppWalletApproval.dappInfo.name,
+                    fromDestination = dAppWalletApproval.dappInfo.name,
+                    toDestination = dAppWalletApproval.account.name,
                     positiveChange = symbolAndAmountInfo.isAmountPositive()
                 )
 
