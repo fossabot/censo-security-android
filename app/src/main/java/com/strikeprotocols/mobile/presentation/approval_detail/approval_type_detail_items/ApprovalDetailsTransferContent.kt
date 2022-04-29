@@ -62,7 +62,7 @@ fun ApprovalDetailsTransferContent() {
         Divider(modifier = Modifier.height(0.5.dp), color = DividerGrey)
         ApprovalInfoRow(
             backgroundColor = DetailInfoLightBackground,
-            title = stringResource(R.string.address),
+            title = stringResource(R.string.public_key),
             //Keep this character encoding for the bullet symbol
             value = "\u2022•••••••••••CXT65D7aw9"
         )
@@ -178,7 +178,7 @@ fun ApprovalInfoRowPreview() {
         Divider(modifier = Modifier.height(1.dp), color = DividerGrey)
         ApprovalInfoRow(
             backgroundColor = DetailInfoLightBackground,
-            title = stringResource(R.string.address),
+            title = stringResource(R.string.public_key),
             //Keep this character encoding for the bullet symbol
             value = "\u2022•••••••••••CXT65D7aw9"
         )

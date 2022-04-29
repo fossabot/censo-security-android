@@ -239,7 +239,7 @@ fun ApprovalDetails(
                 //Defensive coding,
                 // we should never have an unknown approval in the details screen
                 if (type != UnknownApprovalType) {
-                    ApprovalDetailContent(type = type, approvalsNeeded = approvalsNeeded)
+                    ApprovalDetailContent(approval = safeApproval, type = type, approvalsNeeded = approvalsNeeded)
                 }
             }
 
