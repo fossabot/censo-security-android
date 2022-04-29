@@ -24,4 +24,5 @@ val GreyText = Color(0xFF8c8c8c)
 val SnackbarBackground = Color(0xFF363636)
 val DividerGrey = Color(0xFF3c3c3c)
 val DividerDarkGrey = Color(0xFF262626)
+val AccountTextGrey = Color(0xFFb2b2b2)
 

@@ -17,6 +17,7 @@ import com.strikeprotocols.mobile.common.convertSecondsIntoCountdownText
 import com.strikeprotocols.mobile.data.models.approval.SolanaApprovalRequestType
 import com.strikeprotocols.mobile.data.models.approval.WalletApproval
 import com.strikeprotocols.mobile.presentation.approval_detail.approval_type_detail_items.ConversionDetailContent
+import com.strikeprotocols.mobile.presentation.approval_detail.approval_type_detail_items.BalanceAccountDetailContent
 import com.strikeprotocols.mobile.presentation.approval_detail.approval_type_detail_items.DAppDetailContent
 import com.strikeprotocols.mobile.presentation.approval_detail.approval_type_detail_items.SignersUpdateDetailContent
 import com.strikeprotocols.mobile.presentation.approval_detail.approval_type_detail_items.WithdrawalRequestDetailContent
@@ -156,7 +157,7 @@ fun ApprovalDetailContent(
 ) {
     when (type) {
         is SolanaApprovalRequestType.BalanceAccountCreation ->
-            Text(text = "Implement Balance Account Creation Detail UI", color = StrikeWhite)
+            BalanceAccountDetailContent(balanceAccountCreation = type, approvalsNeeded = approvalsNeeded)
         is SolanaApprovalRequestType.ConversionRequest ->
             ConversionDetailContent(
                 conversionRequest = type,
