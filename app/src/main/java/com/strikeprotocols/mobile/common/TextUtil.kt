@@ -18,6 +18,15 @@ fun Int.convertApprovalsNeededToDisplayMessage(context: Context): String {
     }
 }
 
+fun String.convertPublicKeyToDisplayText(): String {
+    //Only want to keep the last 8 characters
+    val startIndex = this.length - 9
+    val subStringedPublicKey = this.substring(startIndex = startIndex)
+
+    return StringBuilder().append("••••••••••••").append(subStringedPublicKey).toString()
+}
+
+
 fun retrieveApprovalDispositionDialogErrorText(
     approvalDispositionError: ApprovalDispositionError,
     context: Context

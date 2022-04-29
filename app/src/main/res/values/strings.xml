@@ -43,7 +43,7 @@
     <string name="content_des_back_icon">Back Icon</string>
     <string name="requested_by">Requested By</string>
     <string name="requested_date">Requested Date</string>
-    <string name="address">Address</string>
+    <string name="public_key">Public Key</string>
     <string name="no_more_approvals_needed">No more approvals needed</string>
     <string name="more_approval_needed">more approval needed</string>
     <string name="more_approvals_needed">more approvals needed</string>
@@ -118,6 +118,8 @@
     <string name="transfer_icon_content_desc">Transfer Icon</string>
     <string name="withdrawal_type_title">Transfer</string>
     <string name="generic_approval_title">Approval</string>
+    <string name="requested_by_email_na">N/A</string>
+    <string name="requested_by_date_na">N/A</string>
 
     <string name="usd_equivalent">USD equivalent</string>
     <string name="unknown_approval_item">Unknown Approval</string>
