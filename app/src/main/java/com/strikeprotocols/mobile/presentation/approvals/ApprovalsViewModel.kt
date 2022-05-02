@@ -7,6 +7,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.strikeprotocols.mobile.common.Resource
+import com.strikeprotocols.mobile.common.formatISO8601IntoSeconds
 import com.strikeprotocols.mobile.common.strikeLog
 import com.strikeprotocols.mobile.data.ApprovalsRepository
 import com.strikeprotocols.mobile.data.PushRepository
@@ -24,6 +25,7 @@ import com.strikeprotocols.mobile.presentation.blockhash.BlockHashViewModel.Bloc
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.util.*
 import javax.inject.Inject
 import kotlin.Exception
 
@@ -63,11 +65,15 @@ class ApprovalsViewModel @Inject constructor(
     private fun startCountDown() {
         timer = object : CountDownTimer(Long.MAX_VALUE, UPDATE_COUNTDOWN) {
             override fun onTick(millisecs: Long) {
-                countdownApprovalsOneSecond()
+                updateShouldRefreshTimers()
             }
             override fun onFinish() {}
         }
         timer?.start()
+    }
+
+    fun updateShouldRefreshTimers() {
+        state = state.copy(shouldRefreshTimers = !state.shouldRefreshTimers)
     }
 
     fun setShouldDisplayConfirmDispositionDialog(
@@ -180,21 +186,6 @@ class ApprovalsViewModel @Inject constructor(
                     shouldShowErrorSnackbar = true
                 )
             }
-        }
-    }
-
-    fun countdownApprovalsOneSecond() {
-        if (state.approvals.isNotEmpty()) {
-            val countdownList = mutableListOf<WalletApproval>()
-            for (approval in state.approvals) {
-                if (approval?.approvalTimeoutInSeconds != null) {
-                    val countdownApproval = approval.copy(
-                        approvalTimeoutInSeconds = approval.approvalTimeoutInSeconds - 1
-                    )
-                    countdownList.add(countdownApproval)
-                }
-            }
-            state = state.copy(approvals = countdownList)
         }
     }
 

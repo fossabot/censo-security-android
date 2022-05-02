@@ -7,6 +7,9 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.strikeprotocols.mobile.common.Resource
+import com.strikeprotocols.mobile.common.calculateSecondsLeftUntilCountdownIsOver
+import com.strikeprotocols.mobile.common.formatISO8601IntoSeconds
+import com.strikeprotocols.mobile.common.strikeLog
 import com.strikeprotocols.mobile.data.ApprovalsRepository
 import com.strikeprotocols.mobile.data.models.*
 import com.strikeprotocols.mobile.data.models.approval.SolanaApprovalRequestDetails
@@ -18,6 +21,7 @@ import com.strikeprotocols.mobile.presentation.blockhash.BlockHashViewModel.Bloc
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.util.*
 import javax.inject.Inject
 
 @HiltViewModel
@@ -92,7 +96,7 @@ class ApprovalDetailsViewModel @Inject constructor(
     private fun startCountDown() {
         timer = object : CountDownTimer(Long.MAX_VALUE, UPDATE_COUNTDOWN) {
             override fun onTick(millisecs: Long) {
-                countdownApprovalOneSecond()
+                updateRemainingTimeInSeconds()
             }
 
             override fun onFinish() {}
@@ -100,17 +104,13 @@ class ApprovalDetailsViewModel @Inject constructor(
         timer?.start()
     }
 
-    fun countdownApprovalOneSecond() {
-        val approval = state.approval
-        approval?.approvalTimeoutInSeconds?.let { safeApprovalTimeoutInSeconds ->
-            if (safeApprovalTimeoutInSeconds > 0) {
-                val countdownApproval =
-                    approval.copy(approvalTimeoutInSeconds = approval.approvalTimeoutInSeconds - 1)
-                state = state.copy(approval = countdownApproval)
-            } else if (safeApprovalTimeoutInSeconds == 0) {
-                onStop()
-            }
-        }
+    fun updateRemainingTimeInSeconds() {
+        state = state.copy(
+            remainingTimeInSeconds = calculateSecondsLeftUntilCountdownIsOver(
+                submitDate = state.submitDate,
+                totalTimeInSeconds = state.approvalTimeoutInSeconds ?: 0
+            )
+        )
     }
 
     fun resetShouldKickOutUser() {

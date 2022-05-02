@@ -15,7 +15,8 @@ import com.strikeprotocols.mobile.ui.theme.*
 
 @Composable
 fun ApprovalRowItem(
-    timeRemainingInSeconds: Int,
+    timeRemainingInSeconds: Long,
+    submitDate: String?,
     onApproveClicked: () -> Unit,
     onMoreInfoClicked: () -> Unit,
     rowMetaData: ApprovalRowMetaData,
