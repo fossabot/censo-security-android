@@ -136,14 +136,23 @@ fun ApprovalDetailsScreen(
             )
         },
         content = {
+            val isInitiationRequest = approval?.isInitiationRequest() == true
             ApprovalDetails(
                 onApproveClicked = {
                     approvalDetailsViewModel.setShouldDisplayConfirmDispositionDialog(
                         isApproving = true,
                         dialogTitle = approval?.getSolanaApprovalRequestType()?.getApprovalTypeDialogTitle(context)
                             ?: UnknownApprovalType.getApprovalTypeDialogTitle(context),
-                        dialogText = approval?.getSolanaApprovalRequestType()?.getDialogFullMessage(context, ApprovalDisposition.APPROVE)
-                            ?: UnknownApprovalType.getDialogFullMessage(context, ApprovalDisposition.APPROVE)
+                        dialogText = approval?.getSolanaApprovalRequestType()?.getDialogFullMessage(
+                            context = context,
+                            approvalDisposition = ApprovalDisposition.APPROVE,
+                            initiationRequest = isInitiationRequest
+                        )
+                            ?: UnknownApprovalType.getDialogFullMessage(
+                                context = context,
+                                approvalDisposition = ApprovalDisposition.APPROVE,
+                                initiationRequest = isInitiationRequest
+                            )
                     )
                 },
                 onDenyClicked = {
@@ -151,13 +160,22 @@ fun ApprovalDetailsScreen(
                         isApproving = false,
                         dialogTitle = approval?.getSolanaApprovalRequestType()?.getApprovalTypeDialogTitle(context)
                             ?: UnknownApprovalType.getApprovalTypeDialogTitle(context),
-                        dialogText = approval?.getSolanaApprovalRequestType()?.getDialogFullMessage(context, ApprovalDisposition.DENY)
-                            ?: UnknownApprovalType.getDialogFullMessage(context, ApprovalDisposition.DENY)
+                        dialogText = approval?.getSolanaApprovalRequestType()?.getDialogFullMessage(
+                            context = context,
+                            approvalDisposition = ApprovalDisposition.DENY,
+                            initiationRequest = isInitiationRequest
+                        )
+                            ?: UnknownApprovalType.getDialogFullMessage(
+                                context = context,
+                                approvalDisposition = ApprovalDisposition.DENY,
+                                initiationRequest = isInitiationRequest
+                            )
                     )
                 },
                 timeRemainingInSeconds = approvalDetailsState.remainingTimeInSeconds,
                 isLoading = approvalDetailsState.loadingData || blockHashState.isLoading,
-                approval = approvalDetailsState.approval
+                approval = approvalDetailsState.approval,
+                initiationRequest = approvalDetailsState.approval?.isInitiationRequest() == true
             )
 
             if (approvalDetailsState.shouldDisplayConfirmDisposition != null) {
@@ -216,8 +234,9 @@ fun ApprovalDetails(
     onDenyClicked: () -> Unit,
     timeRemainingInSeconds: Long,
     isLoading: Boolean,
-    approval: WalletApproval?
-) {
+    approval: WalletApproval?,
+    initiationRequest: Boolean
+    ) {
     Column(
         modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -249,7 +268,8 @@ fun ApprovalDetails(
             ApprovalDetailsButtons(
                 onApproveClicked = { onApproveClicked() },
                 onDenyClicked = { onDenyClicked() },
-                isLoading = isLoading
+                isLoading = isLoading,
+                initiationRequest = initiationRequest
             )
         }
     }
@@ -292,7 +312,8 @@ fun ApprovalDetailsTimer(
 fun ApprovalDetailsButtons(
     onApproveClicked: () -> Unit,
     onDenyClicked: () -> Unit,
-    isLoading: Boolean
+    isLoading: Boolean,
+    initiationRequest: Boolean = false
 ) {
     Spacer(modifier = Modifier.height(24.dp))
     Button(
@@ -306,7 +327,7 @@ fun ApprovalDetailsButtons(
     ) {
         Text(
             modifier = Modifier.padding(all = 4.dp),
-            text = stringResource(id = R.string.deny),
+            text = if (initiationRequest) stringResource(id = R.string.cancel) else stringResource(id = R.string.deny),
             color = DenyRed,
             fontSize = 16.sp
         )
@@ -353,7 +374,8 @@ fun StatelessApprovalDetailsScreen() {
                 onDenyClicked = { strikeLog(message = "Deny clicked") },
                 timeRemainingInSeconds = 1000,
                 isLoading = false,
-                approval = generateWalletApprovalsDummyData()
+                approval = generateWalletApprovalsDummyData(),
+                initiationRequest = generateWalletApprovalsDummyData().isInitiationRequest()
             )
         }
     )

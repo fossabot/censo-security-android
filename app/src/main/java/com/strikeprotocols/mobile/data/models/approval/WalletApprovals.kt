@@ -25,6 +25,13 @@ data class WalletApproval(
             else -> throw Exception(UNKNOWN_REQUEST_APPROVAL)
         }
 
+    fun isInitiationRequest() : Boolean =
+        when(details) {
+            is SolanaApprovalRequestDetails.ApprovalRequestDetails -> false
+            is SolanaApprovalRequestDetails.MultiSignOpInitiationDetails -> true
+            else -> throw Exception(UNKNOWN_REQUEST_APPROVAL)
+        }
+
     fun unknownApprovalType() : WalletApproval {
         return copy(
             details = SolanaApprovalRequestDetails.ApprovalRequestDetails(

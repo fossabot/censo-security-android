@@ -152,8 +152,16 @@ fun ApprovalsListScreen(
                         isApproving = true,
                         dialogTitle = approval?.getSolanaApprovalRequestType()?.getApprovalTypeDialogTitle(context)
                             ?: UnknownApprovalType.getApprovalTypeDialogTitle(context),
-                        dialogText = approval?.getSolanaApprovalRequestType()?.getDialogFullMessage(context, ApprovalDisposition.APPROVE)
-                            ?: UnknownApprovalType.getDialogFullMessage(context, ApprovalDisposition.APPROVE)
+                        dialogText = approval?.getSolanaApprovalRequestType()?.getDialogFullMessage(
+                            context = context,
+                            approvalDisposition = ApprovalDisposition.APPROVE,
+                            initiationRequest = approval.isInitiationRequest()
+                        )
+                            ?: UnknownApprovalType.getDialogFullMessage(
+                                context = context,
+                                approvalDisposition = ApprovalDisposition.APPROVE,
+                                initiationRequest = approval?.isInitiationRequest() == true
+                            )
                     )
                 },
                 onMoreInfoClicked = { approval ->

@@ -41,9 +41,10 @@ fun SolanaApprovalRequestType.getApprovalTypeDialogTitle(context: Context): Stri
 
 fun SolanaApprovalRequestType.getDialogFullMessage(
     context: Context,
-    approvalDisposition: ApprovalDisposition
+    approvalDisposition: ApprovalDisposition,
+    initiationRequest: Boolean
 ): String {
-    return "${approvalDisposition.getDialogMessage(context)} ${getApprovalTypeDialogMessage(context)}"
+    return "${approvalDisposition.getDialogMessage(context, initiationRequest)} ${getApprovalTypeDialogMessage(context)}"
 }
 
 fun SolanaApprovalRequestType.getApprovalRowMetaData(context: Context): ApprovalRowMetaData {
@@ -97,11 +98,15 @@ fun SolanaApprovalRequestType.getApprovalRowMetaData(context: Context): Approval
     }
 }
 
-fun ApprovalDisposition.getDialogMessage(context: Context): String {
+fun ApprovalDisposition.getDialogMessage(context: Context, initiationRequest: Boolean): String {
     return if (this == ApprovalDisposition.APPROVE) {
         context.getString(R.string.you_are_about_to_approve)
     } else {
-        context.getString(R.string.you_are_about_to_deny)
+        if(initiationRequest) {
+            context.getString(R.string.you_are_about_to_cancel)
+        } else {
+            context.getString(R.string.you_are_about_to_deny)
+        }
     }
 }
 
