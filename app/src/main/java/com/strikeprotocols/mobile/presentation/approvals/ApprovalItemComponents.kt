@@ -7,6 +7,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -28,7 +29,7 @@ import java.util.*
 
 @Composable
 fun ApprovalItemHeader(
-    timeRemainingInSeconds: Int,
+    timeRemainingInSeconds: Long,
     approvalImageVector: ImageVector,
     approvalImageContentDescription: String,
     approvalType: String
@@ -49,7 +50,7 @@ fun ApprovalItemHeader(
         )
         Text(
             modifier = Modifier.weight(2.5f),
-            text = convertSecondsIntoCountdownText(timeRemainingInSeconds),
+            text = convertSecondsIntoCountdownText(LocalContext.current, timeRemainingInSeconds),
             textAlign = TextAlign.End,
             color = GreyText
         )

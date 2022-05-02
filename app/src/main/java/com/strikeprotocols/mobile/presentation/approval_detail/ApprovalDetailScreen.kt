@@ -155,7 +155,7 @@ fun ApprovalDetailsScreen(
                             ?: UnknownApprovalType.getDialogFullMessage(context, ApprovalDisposition.DENY)
                     )
                 },
-                timeRemainingInSeconds = approvalDetailsState.approval?.approvalTimeoutInSeconds ?: 0,
+                timeRemainingInSeconds = approvalDetailsState.remainingTimeInSeconds,
                 isLoading = approvalDetailsState.loadingData || blockHashState.isLoading,
                 approval = approvalDetailsState.approval
             )
@@ -214,7 +214,7 @@ fun ApprovalDetailsTopAppBar(
 fun ApprovalDetails(
     onApproveClicked: () -> Unit,
     onDenyClicked: () -> Unit,
-    timeRemainingInSeconds: Int,
+    timeRemainingInSeconds: Long,
     isLoading: Boolean,
     approval: WalletApproval?
 ) {
@@ -222,7 +222,10 @@ fun ApprovalDetails(
         modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        ApprovalDetailsTimer(timeRemainingInSeconds = timeRemainingInSeconds)
+
+        ApprovalDetailsTimer(
+            timeRemainingInSeconds = timeRemainingInSeconds
+        )
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -264,12 +267,14 @@ fun ApprovalDetails(
 }
 
 @Composable
-fun ApprovalDetailsTimer(timeRemainingInSeconds: Int) {
+fun ApprovalDetailsTimer(
+    timeRemainingInSeconds: Long
+) {
     val timerFinished = timeRemainingInSeconds <= 0
 
     val background = if (timerFinished) DenyRed else SectionBlack
     val text = if (timerFinished) stringResource(R.string.approval_expired) else
-        "${stringResource(id = R.string.expires_in)} ${convertSecondsIntoCountdownText(timeRemainingInSeconds)}"
+        "${stringResource(id = R.string.expires_in)} ${convertSecondsIntoCountdownText(LocalContext.current, timeRemainingInSeconds)}"
 
     Text(
         modifier = Modifier

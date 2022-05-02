@@ -10,11 +10,15 @@ data class ApprovalDetailsState(
     val shouldDisplayApprovalDispositionError: Boolean = false,
     val screenWasBackgrounded: Boolean = false,
     val approval: WalletApproval? = null,
+    val remainingTimeInSeconds: Long = 0L,
     val blockHash: BlockHashViewModel.BlockHash? = null,
 
     val approvalDispositionState: ApprovalDispositionState? = ApprovalDispositionState()
 ) {
     val loadingData = approvalDispositionState?.loadingData == true
+
+    val approvalTimeoutInSeconds = approval?.approvalTimeoutInSeconds
+    val submitDate = approval?.submitDate
 }
 
 data class ConfirmDispositionDialogDetails(

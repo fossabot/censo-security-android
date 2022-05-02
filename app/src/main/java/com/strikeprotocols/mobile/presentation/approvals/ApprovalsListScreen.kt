@@ -27,10 +27,7 @@ import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.SwipeRefreshIndicator
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import com.strikeprotocols.mobile.R
-import com.strikeprotocols.mobile.common.AndroidUriWrapper
-import com.strikeprotocols.mobile.common.BiometricUtil
-import com.strikeprotocols.mobile.common.Resource
-import com.strikeprotocols.mobile.common.retrieveApprovalDispositionDialogErrorText
+import com.strikeprotocols.mobile.common.*
 import com.strikeprotocols.mobile.data.models.ApprovalDisposition
 import com.strikeprotocols.mobile.data.models.approval.SolanaApprovalRequestType.*
 import com.strikeprotocols.mobile.data.models.approval.WalletApproval
@@ -164,9 +161,16 @@ fun ApprovalsListScreen(
                         navController.navigate("${Screen.ApprovalDetailRoute.route}/${WalletApproval.toJson(safeApproval, AndroidUriWrapper())}" )
                     }
                 },
-                walletApprovals = approvalsState.approvals
+                walletApprovals = approvalsState.approvals,
+                shouldRefreshTimers = approvalsState.shouldRefreshTimers,
+                getSecondsLeftUntilCountdownIsOver = { submitDate: String?, totalTimeInSeconds: Int ->
+                    calculateSecondsLeftUntilCountdownIsOver(
+                        submitDate = submitDate,
+                        totalTimeInSeconds = totalTimeInSeconds
+                    )
+                }
             )
-            
+
             Box(
                 modifier = Modifier
                     .padding(innerPadding)
@@ -240,7 +244,9 @@ fun ApprovalsList(
     onRefresh: () -> Unit,
     onApproveClicked: (WalletApproval?) -> Unit,
     onMoreInfoClicked: (WalletApproval?) -> Unit,
-    walletApprovals: List<WalletApproval?>
+    walletApprovals: List<WalletApproval?>,
+    shouldRefreshTimers: Boolean,
+    getSecondsLeftUntilCountdownIsOver: (String?, Int) -> Long
 ) {
     val context = LocalContext.current
 
@@ -281,10 +287,12 @@ fun ApprovalsList(
                         val type = safeApproval.getSolanaApprovalRequestType()
                         val rowMetaData = type.getApprovalRowMetaData(LocalContext.current)
 
+                        val calculatedTimerSecondsLeft = getSecondsLeftUntilCountdownIsOver(safeApproval.submitDate, safeApproval.approvalTimeoutInSeconds ?: 0)
+                        val timeRemainingInSeconds = if (shouldRefreshTimers) calculatedTimerSecondsLeft else calculatedTimerSecondsLeft
+
                         if (type == UnknownApprovalType) {
                             UnknownApprovalItem(
-                                timeRemainingInSeconds = safeApproval.approvalTimeoutInSeconds
-                                    ?: 0,
+                                timeRemainingInSeconds = timeRemainingInSeconds,
                                 accountRowMetaData = rowMetaData,
                                 onUpdateAppClicked = {
                                     val playStoreIntent = Intent(Intent.ACTION_VIEW).apply {
@@ -293,15 +301,16 @@ fun ApprovalsList(
                                         setPackage("com.android.vending")
                                     }
                                     startActivity(context, playStoreIntent, null)
-                                }
+                                },
+                                submitDate = safeApproval.submitDate
                             )
                         } else {
                             ApprovalRowItem(
-                                timeRemainingInSeconds = safeApproval.approvalTimeoutInSeconds
-                                    ?: 0,
+                                timeRemainingInSeconds = timeRemainingInSeconds,
                                 onApproveClicked = { onApproveClicked(walletApprovals[index]) },
                                 onMoreInfoClicked = { onMoreInfoClicked(walletApprovals[index]) },
                                 rowMetaData = rowMetaData,
+                                submitDate = safeApproval.submitDate
                             ) {
                                 ApprovalRowContent(type = type)
                             }
