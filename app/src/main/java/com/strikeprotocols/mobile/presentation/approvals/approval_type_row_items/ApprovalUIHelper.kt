@@ -3,13 +3,17 @@ package com.strikeprotocols.mobile.presentation.approvals.approval_type_row_item
 import android.content.Context
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.unit.sp
 import com.strikeprotocols.mobile.R
 import com.strikeprotocols.mobile.data.models.ApprovalDisposition
-import com.strikeprotocols.mobile.data.models.approval.AccountType
+import com.strikeprotocols.mobile.data.models.approval.*
 import com.strikeprotocols.mobile.data.models.approval.AccountType.*
-import com.strikeprotocols.mobile.data.models.approval.SlotUpdateType
-import com.strikeprotocols.mobile.data.models.approval.SolanaApprovalRequestType
-import com.strikeprotocols.mobile.data.models.approval.SymbolAndAmountInfo
+import com.strikeprotocols.mobile.ui.theme.GreyText
+import com.strikeprotocols.mobile.ui.theme.MoneyRed
 
 fun SolanaApprovalRequestType.getApprovalTypeDialogTitle(context: Context): String {
     return when (this) {
@@ -137,4 +141,22 @@ fun SymbolAndAmountInfo.getMainValueText(): String {
 
 fun SymbolAndAmountInfo.getUSDEquivalentText(context: Context, hideSymbol: Boolean = false) =
     "${formattedUSDEquivalent(hideSymbol = hideSymbol)} ${context.getString(R.string.usd_equivalent)}"
+
+
+fun getFullDestinationName(initialValue: String, subText: String): AnnotatedString {
+    return if (subText.isEmpty()) {
+        buildAnnotatedString { append(initialValue) }
+    } else {
+        val annotatedString = buildAnnotatedString {
+            append(initialValue)
+            withStyle(style = SpanStyle(color = GreyText, fontSize = 8.sp)) {
+                append("\n\n")
+            }
+            withStyle(style = SpanStyle(color = GreyText, fontSize = 14.sp)) {
+                append(subText)
+            }
+        }
+        annotatedString
+    }
+}
 

@@ -16,8 +16,10 @@ import com.strikeprotocols.mobile.R
 import com.strikeprotocols.mobile.common.convertSecondsIntoCountdownText
 import com.strikeprotocols.mobile.data.models.approval.SolanaApprovalRequestType
 import com.strikeprotocols.mobile.data.models.approval.WalletApproval
+import com.strikeprotocols.mobile.presentation.approval_detail.approval_type_detail_items.ConversionDetailContent
 import com.strikeprotocols.mobile.presentation.approval_detail.approval_type_detail_items.DAppDetailContent
 import com.strikeprotocols.mobile.presentation.approval_detail.approval_type_detail_items.SignersUpdateDetailContent
+import com.strikeprotocols.mobile.presentation.approval_detail.approval_type_detail_items.WithdrawalRequestDetailContent
 import com.strikeprotocols.mobile.presentation.approvals.approval_type_row_items.*
 import com.strikeprotocols.mobile.ui.theme.*
 import java.util.*
@@ -156,15 +158,25 @@ fun ApprovalDetailContent(
         is SolanaApprovalRequestType.BalanceAccountCreation ->
             Text(text = "Implement Balance Account Creation Detail UI", color = StrikeWhite)
         is SolanaApprovalRequestType.ConversionRequest ->
-            Text(text = "Implement Conversion Request Detail UI", color = StrikeWhite)
-        is SolanaApprovalRequestType.DAppTransactionRequest -> 
+            ConversionDetailContent(
+                conversionRequest = type,
+                submitterEmail = approval.submitterEmail ?: "",
+                submitterDate = approval.submitDate ?: "",
+                approvalsNeeded = approvalsNeeded
+            )
+        is SolanaApprovalRequestType.DAppTransactionRequest ->
             DAppDetailContent(dAppWalletApproval = type, approvalsNeeded = approvalsNeeded)
         is SolanaApprovalRequestType.LoginApprovalRequest ->
             Text(text = "Implement Login Approval Request Detail UI", color = StrikeWhite)
         is SolanaApprovalRequestType.SignersUpdate ->
             SignersUpdateDetailContent(approval = approval, signersUpdate = type, approvalsNeeded = approvalsNeeded)
         is SolanaApprovalRequestType.WithdrawalRequest ->
-            Text(text = "Implement Withdrawal Detail UI", color = StrikeWhite)
+            WithdrawalRequestDetailContent(
+                withdrawalRequest = type,
+                submitterEmail = approval.submitterEmail ?: "",
+                submitterDate = approval.submitDate ?: "",
+                approvalsNeeded = approvalsNeeded
+            )
         else -> Text(text = stringResource(R.string.unknown_approval_item))
     }
 }

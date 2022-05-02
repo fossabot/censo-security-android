@@ -18,6 +18,10 @@ fun convertSecondsIntoCountdownText(totalTimeInSeconds: Int): String {
 }
 
 fun String.formatISO8601IntoDisplayText(context: Context) : String {
+    if (this.isEmpty()) {
+        context.getString(R.string.requested_by_date_na)
+    }
+
     return try {
         val iso8601Formatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME
         val offsetDateTime = OffsetDateTime.parse(this, iso8601Formatter)
