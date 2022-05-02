@@ -90,6 +90,7 @@
     <string name="login_approval_dialog_message">Login Approval</string>
     <string name="you_are_about_to_approve">You are about to approve</string>
     <string name="you_are_about_to_deny">You are about to deny</string>
+    <string name="you_are_about_to_cancel">You are about to cancel</string>
     <string name="transfer_dialog_title">Transfer</string>
     <string name="unknown_dialog_title">Unknown</string>
     <string name="conversion_dialog_title">Conversion</string>
