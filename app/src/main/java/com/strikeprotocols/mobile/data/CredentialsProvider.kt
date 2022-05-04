@@ -1,15 +1,21 @@
 package com.strikeprotocols.mobile.data
 
 import android.content.Context
+import android.content.Intent
 import android.content.IntentSender
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.IntentSenderRequest
 import com.google.android.gms.auth.api.credentials.*
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInClient
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
+import com.google.android.gms.common.api.CommonStatusCodes.SIGN_IN_REQUIRED
 import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.tasks.RuntimeExecutionException
-import kotlin.Exception
+import com.strikeprotocols.mobile.common.strikeLog
+
 
 interface CredentialsProvider {
     fun saveCredential(
@@ -23,6 +29,7 @@ interface CredentialsProvider {
 
     fun retrieveCredential(
         launcher: ManagedActivityResultLauncher<IntentSenderRequest, ActivityResult>,
+        signInLauncher: ManagedActivityResultLauncher<Intent, ActivityResult>?,
         retrievalSuccess: (String?) -> Unit,
         retrievalFailed: (exception: Exception?) -> Unit
     )
@@ -32,7 +39,12 @@ class CredentialsProviderImpl(
     context: Context
 ) : CredentialsProvider {
 
+    var googleSignInOptions =
+        GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN).requestEmail().build()
+
     private val credentialsClient = Credentials.getClient(context)
+    private val signInClient: GoogleSignInClient =
+        GoogleSignIn.getClient(context, googleSignInOptions)
 
     override fun saveCredential(
         email: String,
@@ -66,6 +78,7 @@ class CredentialsProviderImpl(
 
     override fun retrieveCredential(
         launcher: ManagedActivityResultLauncher<IntentSenderRequest, ActivityResult>,
+        signInLauncher: ManagedActivityResultLauncher<Intent, ActivityResult>?,
         retrievalSuccess: (String?) -> Unit,
         retrievalFailed: (exception: Exception?) -> Unit
     ) {
@@ -87,14 +100,24 @@ class CredentialsProviderImpl(
                 } else {
                     val error = task.exception
                     if (error is ResolvableApiException) {
-                        try {
-                            launcher.launch(
-                                IntentSenderRequest.Builder(error.resolution)
-                                    .build()
-                            )
-                        } catch (exception: IntentSender.SendIntentException) {
-                            retrievalFailed(exception)
-                        }
+                        if (error.statusCode == SIGN_IN_REQUIRED) {
+                            if (signInLauncher != null) {
+                                signInLauncher.launch(
+                                    signInClient.signInIntent
+                                )
+                            } else {
+                                retrievalFailed(CREDENTIALS_NOT_PRESENT_ON_ACCOUNT)
+                            }
+                        } else {
+                            try {
+                                launcher.launch(
+                                    IntentSenderRequest.Builder(error.resolution)
+                                        .build()
+                                )
+                            } catch (exception: IntentSender.SendIntentException) {
+                                retrievalFailed(exception)
+                            }
+                    }
                     } else {
                         retrievalFailed(error)
                     }
@@ -133,5 +156,6 @@ class CredentialsProviderImpl(
         val INTENT_FAILED = Exception("INTENT_RESULT_NOT_OK")
         val NO_CREDENTIAL_EXTRA_DATA = Exception("NO_CREDENTIAL_EXTRA_DATA")
         val CREDENTIAL_DATA_EMPTY = Exception("CREDENTIAL_DATA_EMPTY")
+        val CREDENTIALS_NOT_PRESENT_ON_ACCOUNT = Exception("CREDENTIALS_NOT_PRESENT_ON_ACCOUNT")
     }
 }
