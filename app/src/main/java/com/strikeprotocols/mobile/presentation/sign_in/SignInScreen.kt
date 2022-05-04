@@ -26,9 +26,13 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.google.android.gms.auth.api.credentials.*
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount
+import com.google.android.gms.tasks.Task
 import com.strikeprotocols.mobile.R
 import com.strikeprotocols.mobile.common.BaseWrapper
 import com.strikeprotocols.mobile.common.Resource
+import com.strikeprotocols.mobile.common.strikeLog
 import com.strikeprotocols.mobile.data.CredentialsProvider
 import com.strikeprotocols.mobile.data.CredentialsProviderImpl
 import com.strikeprotocols.mobile.data.CredentialsProviderImpl.Companion.INTENT_FAILED
@@ -46,9 +50,6 @@ fun SignInScreen(
     viewModel: SignInViewModel = hiltViewModel(),
 ) {
     val state = viewModel.state
-    val context = LocalContext.current
-
-    val failedRetrieveMessage = stringResource(id = R.string.failed_retrieve_cred_default)
 
     val credentialsProvider: CredentialsProvider = CredentialsProviderImpl(LocalContext.current)
 
@@ -78,6 +79,25 @@ fun SignInScreen(
             viewModel.retrieveCredentialFailed(NO_CREDENTIAL_EXTRA_DATA)
         }
     }
+
+    val signInLauncher =
+        rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == RESULT_OK) {
+                if (result.data != null) {
+
+                    credentialsProvider.retrieveCredential(
+                        launcher = retrieveCredentialLauncher,
+                        retrievalSuccess = viewModel::retrieveCredentialSuccess,
+                        retrievalFailed = viewModel::retrieveCredentialFailed,
+                        signInLauncher = null
+                    )
+                } else {
+                    viewModel.retrieveCredentialFailed(CredentialsProviderImpl.CREDENTIALS_NOT_PRESENT_ON_ACCOUNT)
+                }
+            } else {
+                viewModel.retrieveCredentialFailed(CredentialsProviderImpl.CREDENTIALS_NOT_PRESENT_ON_ACCOUNT)
+            }
+    }
     //endregion
 
     //region LaunchedEffect
@@ -97,12 +117,6 @@ fun SignInScreen(
             viewModel.resetSaveCredential()
         }
 
-        if(state.retrieveCredential is Resource.Error) {
-            Toast.makeText(context, failedRetrieveMessage, Toast.LENGTH_SHORT).show()
-            viewModel.loadingFinished()
-            viewModel.resetRetrieveCredential()
-        }
-
         if (state.regenerateData is Resource.Success) {
             navController.navigate(Screen.ApprovalListRoute.route) {
                 popUpTo(Screen.SignInRoute.route) {
@@ -115,7 +129,6 @@ fun SignInScreen(
         }
 
         if(state.regenerateData is Resource.Error) {
-            Toast.makeText(context, "FAILED TO REGENERATE DATA", Toast.LENGTH_LONG).show()
             viewModel.loadingFinished()
             viewModel.resetRegenerateData()
         }
@@ -146,7 +159,8 @@ fun SignInScreen(
             credentialsProvider.retrieveCredential(
                 launcher = retrieveCredentialLauncher,
                 retrievalSuccess = viewModel::retrieveCredentialSuccess,
-                retrievalFailed = viewModel::retrieveCredentialFailed
+                retrievalFailed = viewModel::retrieveCredentialFailed,
+                signInLauncher = signInLauncher
             )
         }
 
@@ -265,9 +279,22 @@ fun SignInScreen(
     if(state.saveCredential is Resource.Error) {
         viewModel.loadingFinished()
         SmartLockAlertDialog(
+            dialogTitle = stringResource(R.string.smart_lock_dialog_fail_title),
             dialogText = stringResource(R.string.smart_lock_save_fail),
             onConfirm = {
                 viewModel.resetSaveCredential()
+            }
+        )
+    }
+
+    if(state.retrieveCredential is Resource.Error) {
+        viewModel.loadingFinished()
+        SmartLockAlertDialog(
+            dialogTitle = stringResource(R.string.smart_lock_dialog_fail_title),
+            dialogText = stringResource(R.string.smart_lock_retrieval_fail),
+            onConfirm = {
+                viewModel.loadingFinished()
+                viewModel.resetRetrieveCredential()
             }
         )
     }
@@ -276,6 +303,7 @@ fun SignInScreen(
 
 @Composable
 fun SmartLockAlertDialog(
+    dialogTitle: String = stringResource(id = R.string.smart_lock_dialog_title),
     dialogText: String,
     onConfirm: () -> Unit,
 ) {
@@ -291,16 +319,16 @@ fun SmartLockAlertDialog(
         },
         title = {
             Text(
-                text = stringResource(id = R.string.smart_lock_dialog_title),
+                text = dialogTitle,
                 color = StrikeWhite,
-                fontSize = 24.sp
+                fontSize = 22.sp
             )
         },
         text = {
             Text(
                 text = dialogText,
                 color = StrikeWhite,
-                fontSize = 18.sp
+                fontSize = 17.sp
             )
         }
     )
