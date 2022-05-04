@@ -76,6 +76,10 @@
     <string name="biometry_unavailable_message">This app requires biometry functionality to be used, unfortunately this device does not have biometry functionality.</string>
     <string name="biometry_deeplink_device_settings">Device Biometry Settings</string>
 
+    <string name="enabling_backup_settings">The credentials this app saves to the device are required for performing any approvals or denials from the app . It is highly recommended to enable backup settings for this device, so if the device is lost or stolen, we can recover your lost credentials.</string>
+    <string name="head_to_your_device_backup_settings">Head to your device backup settings and make sure they are enabled.</string>
+    <string name="backup_deeplink_device_settings">Device Backup Settings</string>
+
     <string name="update_strike_mobile">Update Strike Mobile…</string>
     <string name="unknown_approval_tip">You have an unknown approval request. Please update this app to see the request details</string>
     <string name="approval_type_unknown">Unknown Request</string>
