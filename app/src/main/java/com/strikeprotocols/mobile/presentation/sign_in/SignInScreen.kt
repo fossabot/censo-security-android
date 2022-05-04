@@ -37,6 +37,7 @@ import com.strikeprotocols.mobile.data.CredentialsProvider
 import com.strikeprotocols.mobile.data.CredentialsProviderImpl
 import com.strikeprotocols.mobile.data.CredentialsProviderImpl.Companion.INTENT_FAILED
 import com.strikeprotocols.mobile.data.CredentialsProviderImpl.Companion.NO_CREDENTIAL_EXTRA_DATA
+import com.strikeprotocols.mobile.data.SharedPrefsHelper
 import com.strikeprotocols.mobile.presentation.Screen
 import com.strikeprotocols.mobile.presentation.components.SignInTextField
 import com.strikeprotocols.mobile.ui.theme.*
@@ -107,7 +108,7 @@ fun SignInScreen(
         }
 
         if (state.saveCredential is Resource.Success) {
-            navController.navigate(Screen.ApprovalListRoute.route) {
+            navController.navigate(Screen.BackupCheckRoute.route) {
                 popUpTo(Screen.SignInRoute.route) {
                     inclusive = true
                 }
@@ -118,7 +119,7 @@ fun SignInScreen(
         }
 
         if (state.regenerateData is Resource.Success) {
-            navController.navigate(Screen.ApprovalListRoute.route) {
+            navController.navigate(Screen.BackupCheckRoute.route) {
                 popUpTo(Screen.SignInRoute.route) {
                     inclusive = true
                 }
@@ -134,7 +135,7 @@ fun SignInScreen(
         }
 
         if (state.keyValid is Resource.Success) {
-            navController.navigate(Screen.ApprovalListRoute.route) {
+            navController.navigate(Screen.BackupCheckRoute.route) {
                 popUpTo(Screen.SignInRoute.route) {
                     inclusive = true
                 }
@@ -209,6 +210,7 @@ fun SignInScreen(
             errorEnabled = state.passwordErrorEnabled,
             isPassword = true
         )
+
         Spacer(modifier = Modifier.weight(6f))
         Button(
             modifier = Modifier

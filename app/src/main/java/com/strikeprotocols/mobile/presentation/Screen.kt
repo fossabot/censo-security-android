@@ -13,6 +13,7 @@ sealed class Screen(val route: String) {
         const val MESSAGE_ARG = "message"
         const val BIOMETRY_AVAILABLE_ARG = "biometry available"
     }
+    object BackupCheckRoute : Screen("backup_check_screen")
 
     fun buildScreenDeepLinkUri() = "$STRIKE_PROTOCOLS_URI${this.route}"
 

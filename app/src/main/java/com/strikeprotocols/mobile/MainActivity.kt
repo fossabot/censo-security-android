@@ -7,6 +7,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.Bundle
+import android.provider.Settings
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.material.Surface
@@ -19,10 +20,9 @@ import androidx.navigation.*
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.strikeprotocols.mobile.common.BaseWrapper
 import com.strikeprotocols.mobile.common.BiometricUtil
+import com.strikeprotocols.mobile.common.strikeLog
 import com.strikeprotocols.mobile.data.AuthProvider
-import com.strikeprotocols.mobile.data.SharedPrefsHelper
 import com.strikeprotocols.mobile.data.UserState
 import com.strikeprotocols.mobile.data.UserStateListener
 import com.strikeprotocols.mobile.data.models.approval.WalletApproval
@@ -31,6 +31,7 @@ import com.strikeprotocols.mobile.presentation.approval_detail.ApprovalDetailsSc
 import com.strikeprotocols.mobile.presentation.approvals.ApprovalsListScreen
 import com.strikeprotocols.mobile.presentation.approvals.ApprovalsViewModel
 import com.strikeprotocols.mobile.presentation.auth.AuthScreen
+import com.strikeprotocols.mobile.presentation.backup_check.BackupCheckScreen
 import com.strikeprotocols.mobile.presentation.biometry_disabled.BiometryDisabledScreen
 import com.strikeprotocols.mobile.presentation.components.OnLifecycleEvent
 import com.strikeprotocols.mobile.presentation.contact_strike.ContactStrikeScreen
@@ -87,7 +88,7 @@ class MainActivity : FragmentActivity() {
                     //NavHost
                     StrikeNavHost(navController = navController)
 
-                    //Biometric Check
+                    //region Biometric Check
                     val biometryDisabledMessage = stringResource(R.string.biometry_disabled_message)
                     val biometryUnavailableMessage = stringResource(R.string.biometry_unavailable_message)
 
@@ -123,6 +124,7 @@ class MainActivity : FragmentActivity() {
                             else -> Unit
                         }
                     }
+                    //endregion
                 }
             }
         }
@@ -178,6 +180,11 @@ class MainActivity : FragmentActivity() {
                 BiometryDisabledScreen(
                     message = messageArg,
                     biometryAvailable = biometryAvailableArg)
+            }
+            composable(
+                route = Screen.BackupCheckRoute.route
+            ) {
+                BackupCheckScreen(navController = navController, packageManager = packageManager)
             }
         }
     }
