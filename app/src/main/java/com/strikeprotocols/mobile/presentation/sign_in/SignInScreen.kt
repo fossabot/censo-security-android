@@ -1,7 +1,6 @@
 package com.strikeprotocols.mobile.presentation.sign_in
 
 import android.app.Activity.RESULT_OK
-import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
@@ -26,13 +25,9 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.google.android.gms.auth.api.credentials.*
-import com.google.android.gms.auth.api.signin.GoogleSignIn
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount
-import com.google.android.gms.tasks.Task
 import com.strikeprotocols.mobile.R
 import com.strikeprotocols.mobile.common.BaseWrapper
 import com.strikeprotocols.mobile.common.Resource
-import com.strikeprotocols.mobile.common.strikeLog
 import com.strikeprotocols.mobile.data.CredentialsProvider
 import com.strikeprotocols.mobile.data.CredentialsProviderImpl
 import com.strikeprotocols.mobile.data.CredentialsProviderImpl.Companion.INTENT_FAILED
@@ -108,14 +103,24 @@ fun SignInScreen(
         }
 
         if (state.saveCredential is Resource.Success) {
-            navController.navigate(Screen.BackupCheckRoute.route) {
+            viewModel.attemptAddWalletSigner()
+            viewModel.resetSaveCredential()
+        }
+
+        if (state.addWalletSignerResult is Resource.Success)  {
+            navController.navigate(Screen.ApprovalListRoute.route) {
                 popUpTo(Screen.SignInRoute.route) {
                     inclusive = true
                 }
             }
             viewModel.setUserLoggedInSuccess()
             viewModel.loadingFinished()
-            viewModel.resetSaveCredential()
+            viewModel.resetAddWalletSignersCall()
+        }
+
+        if (state.addWalletSignerResult is Resource.Error) {
+            viewModel.resetAddWalletSignersCall()
+            viewModel.attemptAddWalletSigner()
         }
 
         if (state.regenerateData is Resource.Success) {

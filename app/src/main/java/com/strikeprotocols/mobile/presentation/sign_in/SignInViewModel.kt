@@ -101,6 +101,19 @@ class SignInViewModel @Inject constructor(
 
         }
     }
+
+    fun attemptAddWalletSigner() {
+        viewModelScope.launch {
+            state.initialAuthData?.let { safeInitialAuthData ->
+                state = try {
+                    val walletSigner = userRepository.addWalletSigner(safeInitialAuthData.walletSignerBody)
+                    state.copy(addWalletSignerResult = Resource.Success(walletSigner))
+                } catch (e: Exception) {
+                    state.copy(addWalletSignerResult = Resource.Error(e.message ?: "DEFAULT_ADD_WALLET_SIGNER_CALL_FAILED"))
+                }
+            }
+        }
+    }
     //endregion
 
     //region Reset Resource State
@@ -172,11 +185,6 @@ class SignInViewModel @Inject constructor(
 
     fun saveCredentialSuccess() {
         state = state.copy(saveCredential = Resource.Success(Unit))
-        viewModelScope.launch {
-            state.initialAuthData?.let { safeInitialAuthData ->
-                userRepository.addWalletSigner(safeInitialAuthData.walletSignerBody)
-            }
-        }
     }
 
     fun retrieveCredentialSuccess(credential: String?) {

@@ -24,7 +24,7 @@ data class SignInState(
     val saveCredential: Resource<Unit> = Resource.Uninitialized,
     val retrieveCredential: Resource<String> = Resource.Uninitialized,
     val keyValid: Resource<Unit> = Resource.Uninitialized,
-    val regenerateData: Resource<WalletSigner> = Resource.Uninitialized
+    val regenerateData: Resource<WalletSigner> = Resource.Uninitialized,
 ) {
     val signInButtonEnabled = email.isNotEmpty() && password.isNotEmpty()
 
