@@ -65,8 +65,6 @@ class UserRepositoryImpl(
         return securePreferences.retrieveGeneratedPassword(email = userEmail)
     }
 
-    //todo: add exception logic in here
-    // str-68: https://linear.app/strike-android/issue/STR-68/add-exception-logic-to-initial-auth-data-in-userrepository
     override suspend fun generateInitialAuthData(): InitialAuthData {
         val userEmail = retrieveUserEmail()
 

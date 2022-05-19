@@ -2,6 +2,7 @@ package com.strikeprotocols.mobile.common
 
 import android.content.Context
 import com.strikeprotocols.mobile.R
+import com.strikeprotocols.mobile.data.EncryptionManagerException
 import com.strikeprotocols.mobile.presentation.approval_disposition.ApprovalDispositionError
 
 fun Int.convertApprovalsNeededToDisplayMessage(context: Context): String {
@@ -38,4 +39,30 @@ fun retrieveApprovalDispositionDialogErrorText(
         else -> {
             context.getString(R.string.approval_disposition_error_general)
         }
+    }
+
+fun getAuthFlowErrorMessage(e: Exception, context: Context): String =
+    if (e is EncryptionManagerException) {
+        when (e) {
+            is EncryptionManagerException.KeyPairGenerationFailedException -> {
+                context.getString(R.string.key_pair_generation_failed)
+            }
+            is EncryptionManagerException.DecryptionFailedException -> {
+                context.getString(R.string.decryption_failed)
+            }
+            is EncryptionManagerException.EncryptionFailedException -> {
+                context.getString(R.string.encryption_failed)
+            }
+            is EncryptionManagerException.PublicKeyRegenerationFailedException -> {
+                context.getString(R.string.key_regeneration_failed)
+            }
+            is EncryptionManagerException.SignDataException -> {
+                context.getString(R.string.sign_data_failed)
+            }
+            is EncryptionManagerException.VerifyFailedException -> {
+                context.getString(R.string.verify_key_failed)
+            }
+        }
+    } else {
+        context.getString(R.string.auth_flow_exception)
     }

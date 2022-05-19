@@ -161,6 +161,10 @@ class SignInViewModel @Inject constructor(
     fun loadingFinished() {
         state = state.copy(loadingData = false)
     }
+
+    fun resetAuthFlowException() {
+        state = state.copy(authFlowException = Resource.Uninitialized)
+    }
     //endregion
 
     //region Smart Lock Save + Retrieval
@@ -194,10 +198,7 @@ class SignInViewModel @Inject constructor(
             viewModelScope.launch {
                 userRepository.saveGeneratedPassword(BaseWrapper.decode(credential))
 
-                //Restart AuthFlow
-                state.verifyUserResult.data?.let { safeVerifyUser ->
-                    handleAuthFlow(safeVerifyUser)
-                }
+                restartAuthFlow()
             }
         } else {
             retrieveCredentialFailed(CREDENTIAL_DATA_EMPTY)
@@ -227,11 +228,15 @@ class SignInViewModel @Inject constructor(
     private suspend fun handleAuthFlow(
         verifyUser: VerifyUser,
     ) {
-        val userAuthFlowState = getUserAuthFlowState(
-            verifyUser = verifyUser
-        )
+        try {
+            val userAuthFlowState = getUserAuthFlowState(
+                verifyUser = verifyUser
+            )
 
-        respondToUserAuthFlow(userAuthFlow = userAuthFlowState)
+            respondToUserAuthFlow(userAuthFlow = userAuthFlowState)
+        } catch (e: Exception) {
+            handleEncryptionManagerException(exception = e)
+        }
     }
 
     private suspend fun getUserAuthFlowState(verifyUser: VerifyUser) : UserAuthFlow {
@@ -295,13 +300,23 @@ class SignInViewModel @Inject constructor(
 
     private fun handleFirstTimeLoginAuthFlow() {
         viewModelScope.launch {
-            //todo: add loading, exception logic, and corresponding VM state:
-            // str-68: https://linear.app/strike-android/issue/STR-68/add-exception-logic-to-initial-auth-data-in-userrepository
             val initialAuthData = userRepository.generateInitialAuthData()
             state = state.copy(
                 initialAuthData = initialAuthData
             )
             launchSmartLockDialog()
+        }
+    }
+
+    private fun handleEncryptionManagerException(exception: Exception) {
+        state = state.copy(authFlowException = Resource.Success(exception))
+    }
+
+    private suspend fun restartAuthFlow() {
+        strikeLog(message = "restarting auth flow")
+        //Restart AuthFlow
+        state.verifyUserResult.data?.let { safeVerifyUser ->
+            handleAuthFlow(safeVerifyUser)
         }
     }
     //endregion
