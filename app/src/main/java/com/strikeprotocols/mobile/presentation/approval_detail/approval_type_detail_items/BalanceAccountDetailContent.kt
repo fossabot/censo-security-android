@@ -54,8 +54,8 @@ fun generateBalanceAccountDetailRows(balanceAccountCreation: SolanaApprovalReque
 
     //region Approvers Row
     val approversList = mutableListOf<Pair<String, String>>()
-    if (balanceAccountCreation.approvers.isNotEmpty()) {
-        for (approver in balanceAccountCreation.approvers) {
+    if (balanceAccountCreation.approvalPolicy.approvers.isNotEmpty()) {
+        for (approver in balanceAccountCreation.approvalPolicy.approvers) {
             approversList.add(Pair(approver.value.name, approver.value.email))
         }
     } else {
@@ -72,7 +72,7 @@ fun generateBalanceAccountDetailRows(balanceAccountCreation: SolanaApprovalReque
     //region Approvals Required Rows
     val approvalsRequiredRow = FactsData(
         title = context.getString(R.string.approval_outbound_title),
-        facts = listOf(Pair(balanceAccountCreation.approvalsRequired.toInt().toString(), ""))
+        facts = listOf(Pair(balanceAccountCreation.approvalPolicy.approvalsRequired.toInt().toString(), ""))
     )
     approverRowInfoData.add(approvalsRequiredRow)
     //endregion
@@ -81,7 +81,7 @@ fun generateBalanceAccountDetailRows(balanceAccountCreation: SolanaApprovalReque
     val approvalTimeoutRow = FactsData(
         title = context.getString(R.string.approval_timeout),
         facts = listOf(
-            Pair(convertSecondsIntoReadableText(balanceAccountCreation.approvalTimeout.toInt(), context), "")
+            Pair(convertSecondsIntoReadableText(balanceAccountCreation.approvalPolicy.approvalTimeout.toInt(), context), "")
         )
     )
     approverRowInfoData.add(approvalTimeoutRow)

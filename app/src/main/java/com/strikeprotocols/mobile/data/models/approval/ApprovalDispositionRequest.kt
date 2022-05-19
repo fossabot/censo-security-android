@@ -3,20 +3,24 @@ package com.strikeprotocols.mobile.data.models.approval
 import com.strikeprotocols.mobile.data.EncryptionManager
 import com.strikeprotocols.mobile.data.Signable
 import com.strikeprotocols.mobile.data.models.ApprovalDisposition
+import com.strikeprotocols.mobile.data.models.Nonce
+import com.strikeprotocols.mobile.data.models.approval.ApprovalConstants.MISSING_KEY
+import com.strikeprotocols.mobile.data.models.approval.ApprovalConstants.NOT_ENOUGH_NONCE_ACCOUNTS
 import com.strikeprotocols.mobile.data.models.approval.PublicKey.Companion.SYSVAR_CLOCK_PUBKEY
-import com.strikeprotocols.mobile.data.models.approval.SolanaApprovalRequestType.Companion.INVALID_REQUEST_APPROVAL
-import com.strikeprotocols.mobile.data.models.approval.SolanaApprovalRequestType.Companion.UNKNOWN_REQUEST_APPROVAL
+import com.strikeprotocols.mobile.data.models.approval.TransactionInstruction.Companion.createAdvanceNonceInstruction
 import com.strikeprotocols.mobile.presentation.approval_disposition.ApprovalDispositionError
 import org.web3j.crypto.Hash
 import java.io.ByteArrayOutputStream
-import java.util.*
 import kotlin.Exception
+import com.strikeprotocols.mobile.data.models.approval.SolanaApprovalRequestType.Companion.INVALID_REQUEST_APPROVAL
+import com.strikeprotocols.mobile.data.models.approval.SolanaApprovalRequestType.Companion.UNKNOWN_REQUEST_APPROVAL
+import com.strikeprotocols.mobile.data.models.approval.SolanaApprovalRequestType.*
 
 data class ApprovalDispositionRequest(
     val requestId: String,
     val approvalDisposition: ApprovalDisposition,
     val requestType: SolanaApprovalRequestType,
-    val blockhash: String,
+    val nonces: List<Nonce>,
     val email: String
 ) : Signable {
 
@@ -25,34 +29,39 @@ data class ApprovalDispositionRequest(
     val solanaProgramValue: Byte =
         if (approvalDisposition == ApprovalDisposition.APPROVE) 1 else 2
 
-    fun retrieveOpCode(): Byte {
+    private fun retrieveOpCode(): Byte {
         return when (requestType) {
-            is SolanaApprovalRequestType.BalanceAccountCreation -> 1
-            is SolanaApprovalRequestType.WithdrawalRequest, is SolanaApprovalRequestType.ConversionRequest -> 3
-            is SolanaApprovalRequestType.SignersUpdate -> 5
-            else -> 0
+            is BalanceAccountCreation -> 1
+            is WithdrawalRequest, is ConversionRequest -> 3
+            is SignersUpdate -> 5
+            is WrapConversionRequest -> 4
+            is WalletConfigPolicyUpdate -> 6
+            is BalanceAccountSettingsUpdate -> 8
+
+            is DAppBookUpdate -> 9
+            is AddressBookUpdate -> 10
+            is BalanceAccountNameUpdate -> 11
+            is BalanceAccountPolicyUpdate -> 12
+            is SPLTokenAccountCreation -> 13
+            is BalanceAccountAddressWhitelistUpdate -> 14
+
+            is DAppTransactionRequest,
+            is LoginApprovalRequest,
+            is UnknownApprovalType -> 0
         }
     }
 
     fun opHashData(): ByteArray = when(requestType) {
-        is SolanaApprovalRequestType.BalanceAccountCreation -> {
+        is BalanceAccountCreation -> {
             val buffer = ByteArrayOutputStream()
 
             buffer.write(byteArrayOf(retrieveOpCode()))
             buffer.write(requestType.signingData.walletAddress.base58Bytes())
-            buffer.write(byteArrayOf(requestType.accountSlot))
-            buffer.write(requestType.accountInfo.identifier.sha256HashBytes())
-            buffer.write(byteArrayOf(requestType.approvalsRequired))
-            buffer.writeLongLE(requestType.approvalTimeout.convertToSeconds())
-            buffer.write(byteArrayOf(requestType.approvers.size.toByte()))
-            buffer.write(requestType.approvers.flatMap { it.combinedBytes().toList() }.toByteArray())
-            buffer.write(byteArrayOf(requestType.whitelistEnabled.toSolanaProgramValue()))
-            buffer.write(byteArrayOf(requestType.dappsEnabled.toSolanaProgramValue()))
-            buffer.write(byteArrayOf(requestType.addressBookSlot))
+            buffer.write(requestType.combinedBytes())
 
             buffer.toByteArray()
         }
-        is SolanaApprovalRequestType.WithdrawalRequest -> {
+        is WithdrawalRequest -> {
             val buffer = ByteArrayOutputStream()
 
             buffer.write(byteArrayOf(retrieveOpCode()))
@@ -64,10 +73,11 @@ data class ApprovalDispositionRequest(
 
             buffer.toByteArray()
         }
-        is SolanaApprovalRequestType.ConversionRequest -> {
+        is ConversionRequest -> {
             val buffer = ByteArrayOutputStream()
 
             buffer.write(byteArrayOf(retrieveOpCode()))
+            buffer.write(requestType.signingData.walletAddress.base58Bytes())
             buffer.write(requestType.account.identifier.sha256HashBytes())
             buffer.write(requestType.destination.address.base58Bytes())
             buffer.writeLongLE(requestType.symbolAndAmountInfo.fundamentalAmount())
@@ -75,7 +85,7 @@ data class ApprovalDispositionRequest(
 
             buffer.toByteArray()
         }
-        is SolanaApprovalRequestType.SignersUpdate -> {
+        is SignersUpdate -> {
             val buffer = ByteArrayOutputStream()
 
             buffer.write(byteArrayOf(retrieveOpCode()))
@@ -85,31 +95,124 @@ data class ApprovalDispositionRequest(
 
             buffer.toByteArray()
         }
-        is SolanaApprovalRequestType.DAppTransactionRequest,
-        is SolanaApprovalRequestType.LoginApprovalRequest -> throw Exception(
+
+        is WrapConversionRequest -> {
+            val buffer = ByteArrayOutputStream()
+
+            buffer.write(byteArrayOf(retrieveOpCode()))
+            buffer.write(requestType.signingData.walletAddress.base58Bytes())
+            buffer.write(requestType.account.identifier.sha256HashBytes())
+            buffer.writeLongLE(requestType.symbolAndAmountInfo.fundamentalAmount())
+            buffer.write(byteArrayOf(requestType.symbolAndAmountInfo.symbolInfo.getSOLProgramValue()))
+
+            buffer.toByteArray()
+        }
+        is WalletConfigPolicyUpdate -> {
+            val buffer = ByteArrayOutputStream()
+
+            buffer.write(byteArrayOf(retrieveOpCode()))
+            buffer.write(requestType.signingData.walletAddress.base58Bytes())
+            buffer.write(requestType.approvalPolicy.combinedBytes())
+
+            buffer.toByteArray()
+        }
+        is BalanceAccountSettingsUpdate -> {
+            val buffer = ByteArrayOutputStream()
+
+            buffer.write(byteArrayOf(retrieveOpCode()))
+            buffer.write(requestType.signingData.walletAddress.base58Bytes())
+            buffer.write(requestType.combinedBytes())
+
+            buffer.toByteArray()
+        }
+        is DAppBookUpdate -> {
+            val buffer = ByteArrayOutputStream()
+
+            buffer.write(byteArrayOf(retrieveOpCode()))
+            buffer.write(requestType.signingData.walletAddress.base58Bytes())
+            buffer.write(requestType.combinedBytes())
+
+            buffer.toByteArray()
+        }
+        is AddressBookUpdate -> {
+            val buffer = ByteArrayOutputStream()
+
+            buffer.write(byteArrayOf(retrieveOpCode()))
+            buffer.write(requestType.signingData.walletAddress.base58Bytes())
+            buffer.write(requestType.combinedBytes())
+
+            buffer.toByteArray()
+        }
+        is BalanceAccountNameUpdate -> {
+            val buffer = ByteArrayOutputStream()
+
+            buffer.write(byteArrayOf(retrieveOpCode()))
+            buffer.write(requestType.signingData.walletAddress.base58Bytes())
+            buffer.write(requestType.combinedBytes())
+
+            buffer.toByteArray()
+        }
+        is BalanceAccountPolicyUpdate -> {
+            val buffer = ByteArrayOutputStream()
+
+            buffer.write(byteArrayOf(retrieveOpCode()))
+            buffer.write(requestType.signingData.walletAddress.base58Bytes())
+            buffer.write(requestType.combinedBytes())
+
+            buffer.toByteArray()
+        }
+        is BalanceAccountAddressWhitelistUpdate -> {
+            val buffer = ByteArrayOutputStream()
+            buffer.write(byteArrayOf(retrieveOpCode()))
+            buffer.write(requestType.signingData.walletAddress.base58Bytes())
+            buffer.write(requestType.combinedBytes())
+            buffer.toByteArray()
+        }
+        is SPLTokenAccountCreation -> {
+            val buffer = ByteArrayOutputStream()
+
+            buffer.write(byteArrayOf(retrieveOpCode()))
+            buffer.write(requestType.signingData.walletAddress.base58Bytes())
+            buffer.write(requestType.combinedBytes())
+
+            buffer.toByteArray()
+        }
+
+        is DAppTransactionRequest,
+        is LoginApprovalRequest -> throw Exception(
             INVALID_REQUEST_APPROVAL
         )
-        is SolanaApprovalRequestType.UnknownApprovalType -> throw Exception(
+        is UnknownApprovalType -> throw Exception(
             UNKNOWN_REQUEST_APPROVAL
         )
     }
 
-    fun signingData(): SolanaSigningData =
+    private fun signingData(): SolanaSigningData =
         when (requestType) {
-            is SolanaApprovalRequestType.BalanceAccountCreation -> requestType.signingData
-            is SolanaApprovalRequestType.WithdrawalRequest -> requestType.signingData
-            is SolanaApprovalRequestType.ConversionRequest -> requestType.signingData
-            is SolanaApprovalRequestType.SignersUpdate -> requestType.signingData
-            is SolanaApprovalRequestType.DAppTransactionRequest,
-            is SolanaApprovalRequestType.LoginApprovalRequest -> throw Exception(
+            is BalanceAccountCreation -> requestType.signingData
+            is WithdrawalRequest -> requestType.signingData
+            is ConversionRequest -> requestType.signingData
+            is SignersUpdate -> requestType.signingData
+            is WrapConversionRequest -> requestType.signingData
+            is WalletConfigPolicyUpdate -> requestType.signingData
+            is BalanceAccountSettingsUpdate -> requestType.signingData
+            is DAppBookUpdate -> requestType.signingData
+            is AddressBookUpdate -> requestType.signingData
+            is BalanceAccountNameUpdate -> requestType.signingData
+            is BalanceAccountPolicyUpdate -> requestType.signingData
+            is SPLTokenAccountCreation -> requestType.signingData
+            is BalanceAccountAddressWhitelistUpdate -> requestType.signingData
+
+            is DAppTransactionRequest,
+            is LoginApprovalRequest -> throw Exception(
                 INVALID_REQUEST_APPROVAL
             )
-            is SolanaApprovalRequestType.UnknownApprovalType -> throw Exception(
+            is UnknownApprovalType -> throw Exception(
                 UNKNOWN_REQUEST_APPROVAL
             )
         }
 
-    fun generateTransactionInstructionData(): ByteArray {
+    private fun generateTransactionInstructionData(): ByteArray {
         val buffer = ByteArrayOutputStream()
         buffer.write(byteArrayOf(opIndex))
         buffer.write(byteArrayOf(solanaProgramValue))
@@ -117,13 +220,21 @@ data class ApprovalDispositionRequest(
         return buffer.toByteArray()
     }
 
+    //todo: make this string non nullable
     override fun retrieveSignableData(approverPublicKey: String?): ByteArray {
-        if (requestType is SolanaApprovalRequestType.LoginApprovalRequest) {
+        if (requestType is LoginApprovalRequest) {
             return requestType.jwtToken.toByteArray(charset = Charsets.UTF_8)
         } else {
-            if (approverPublicKey == null) throw Exception("Missing Key")
+            if (approverPublicKey == null) throw Exception(MISSING_KEY)
 
             val signingData = signingData()
+
+            val nonce = nonces.firstOrNull()
+            val nonceAccountAddress = requestType.nonceAccountAddresses().firstOrNull()
+
+            if (nonce == null || nonceAccountAddress == null) {
+                throw Exception(NOT_ENOUGH_NONCE_ACCOUNTS)
+            }
 
             val keyList = listOf(
                 AccountMeta(
@@ -145,8 +256,12 @@ data class ApprovalDispositionRequest(
 
             val transactionMessage = Transaction.compileMessage(
                 feePayer = PublicKey(signingData.feePayer),
-                recentBlockhash = blockhash,
+                recentBlockhash = nonce.value,
                 instructions = listOf(
+                    createAdvanceNonceInstruction(
+                        nonceAccountAddress = nonceAccountAddress,
+                        feePayer = signingData.feePayer
+                    ),
                     TransactionInstruction(
                         keys = keyList,
                         programId = programId,
@@ -169,16 +284,21 @@ data class ApprovalDispositionRequest(
             throw Exception(ApprovalDispositionError.SIGNING_DATA_FAILURE.error)
         }
 
+        val nonce = if(nonces.isEmpty()) "" else nonces.first().value
+        val nonceAccountAddress = if(requestType.nonceAccountAddresses().isEmpty()) "" else requestType.nonceAccountAddresses().first()
+
         return RegisterApprovalDispositionBody(
             approvalDisposition = approvalDisposition,
-            recentBlockhash = blockhash,
-            signature = signature
+            signature = signature,
+            nonce = nonce,
+            nonceAccountAddress = nonceAccountAddress
         )
     }
 
     inner class RegisterApprovalDispositionBody(
         val approvalDisposition: ApprovalDisposition,
-        val recentBlockhash: String,
+        val nonce: String,
+        val nonceAccountAddress: String,
         val signature: String
     )
 }

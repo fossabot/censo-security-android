@@ -104,14 +104,27 @@ sealed class SolanaApprovalRequestType {
         val type: String,
         var accountSlot: Byte,
         var accountInfo: AccountInfo,
-        var approvalsRequired: Byte,
-        var approvalTimeout: Long,
-        var approvers: List<SlotSignerInfo>,
+        var approvalPolicy: ApprovalPolicy,
         var whitelistEnabled: BooleanSetting,
         var dappsEnabled: BooleanSetting,
         var addressBookSlot: Byte,
         var signingData: SolanaSigningData
-    ) : SolanaApprovalRequestType()
+    ) : SolanaApprovalRequestType() {
+
+        fun combinedBytes() : ByteArray {
+            val buffer = ByteArrayOutputStream()
+
+            buffer.write(accountInfo.identifier.sha256HashBytes())
+            buffer.write(byteArrayOf(accountSlot))
+            buffer.write(accountInfo.name.sha256HashBytes())
+            buffer.write(approvalPolicy.combinedBytes())
+            buffer.write(byteArrayOf(whitelistEnabled.toSolanaProgramValue()))
+            buffer.write(byteArrayOf(dappsEnabled.toSolanaProgramValue()))
+            buffer.write(byteArrayOf(addressBookSlot))
+
+            return buffer.toByteArray()
+        }
+    }
 
     data class DAppTransactionRequest(
         val type: String,
@@ -121,6 +134,221 @@ sealed class SolanaApprovalRequestType {
         var instructions: List<SolanaInstructionBatch>,
         var signingData: SolanaSigningData
     ) : SolanaApprovalRequestType()
+
+    data class WrapConversionRequest(
+        val type: String,
+        val account: AccountInfo,
+        val symbolAndAmountInfo: SymbolAndAmountInfo,
+        val destinationSymbolInfo: SymbolInfo,
+        var signingData: SolanaSigningData
+    ) : SolanaApprovalRequestType()
+
+    data class WalletConfigPolicyUpdate(
+        val type: String,
+        val approvalPolicy: ApprovalPolicy,
+        var signingData: SolanaSigningData
+    ) : SolanaApprovalRequestType()
+
+    data class BalanceAccountSettingsUpdate(
+        val type: String,
+        val account: AccountInfo,
+        val whitelistEnabled: BooleanSetting?,
+        val dappsEnabled: BooleanSetting?,
+        var signingData: SolanaSigningData
+    ) : SolanaApprovalRequestType() {
+
+        val change: SettingsChange
+
+        init {
+            if (whitelistEnabled != null && dappsEnabled == null) {
+                change = SettingsChange.WhitelistEnabled(whiteListEnabled = whitelistEnabled == BooleanSetting.On)
+            } else if (dappsEnabled != null && whitelistEnabled == null) {
+                change = SettingsChange.DAppsEnabled(dappsEnabled = dappsEnabled == BooleanSetting.On)
+            } else {
+                throw Exception("Only one setting should be changed")
+            }
+        }
+
+        fun combinedBytes() : ByteArray {
+            val buffer = ByteArrayOutputStream()
+            buffer.write(account.identifier.sha256HashBytes())
+
+            when (change) {
+                is SettingsChange.WhitelistEnabled -> {
+                    buffer.write(byteArrayOf(1.toByte()))
+                    val programValue =
+                        if (change.whiteListEnabled) BooleanSetting.On.toSolanaProgramValue() else BooleanSetting.Off.toSolanaProgramValue()
+                    buffer.write(byteArrayOf(programValue))
+                    buffer.write(byteArrayOf(0.toByte()))
+                    buffer.write(byteArrayOf(0.toByte()))
+                }
+                is SettingsChange.DAppsEnabled -> {
+                    buffer.write(byteArrayOf(0.toByte()))
+                    buffer.write(byteArrayOf(0.toByte()))
+                    buffer.write(byteArrayOf(1.toByte()))
+                    val programValue =
+                        if (change.dappsEnabled) BooleanSetting.On.toSolanaProgramValue() else BooleanSetting.Off.toSolanaProgramValue()
+                    buffer.write(byteArrayOf(programValue))
+                }
+            }
+
+            return buffer.toByteArray()
+        }
+    }
+
+    data class DAppBookUpdate(
+        val type: String,
+        val entriesToAdd: List<SlotDAppInfo>,
+        val entriesToRemove: List<SlotDAppInfo>,
+        var signingData: SolanaSigningData
+    ) : SolanaApprovalRequestType() {
+
+        fun combinedBytes() : ByteArray {
+            val buffer = ByteArrayOutputStream()
+
+            buffer.write(byteArrayOf(entriesToAdd.size.toByte()))
+            buffer.write(entriesToAdd.flatMap { it.combinedBytes().toList() }.toByteArray())
+            buffer.write(byteArrayOf(entriesToRemove.size.toByte()))
+            buffer.write(entriesToRemove.flatMap { it.combinedBytes().toList() }.toByteArray())
+
+            return buffer.toByteArray()
+        }
+    }
+
+    data class AddressBookUpdate(
+        val type: String,
+        val entriesToAdd: List<SlotDestinationInfo>,
+        val entriesToRemove: List<SlotDestinationInfo>,
+        var signingData: SolanaSigningData
+    ) : SolanaApprovalRequestType() {
+
+        val change : AddRemoveChange
+        val entry: SlotDestinationInfo
+
+        init {
+            if(entriesToAdd.size == 1 && entriesToRemove.isEmpty()) {
+                change = AddRemoveChange.ADD
+                entry = entriesToAdd[0]
+            } else if (entriesToAdd.isEmpty() && entriesToRemove.size == 1) {
+                change = AddRemoveChange.REMOVE
+                entry = entriesToRemove[0]
+            } else {
+                throw Exception("Only 1 entry is accepted for either added or removed")
+            }
+        }
+        fun combinedBytes() : ByteArray {
+            val buffer = ByteArrayOutputStream()
+
+            when (change) {
+                AddRemoveChange.ADD -> {
+                    buffer.write(byteArrayOf(1.toByte()))
+                    buffer.write(entry.combinedBytes())
+                    buffer.write(byteArrayOf(0.toByte()))
+                    buffer.write(byteArrayOf(0.toByte()))
+
+                }
+                AddRemoveChange.REMOVE -> {
+                    buffer.write(byteArrayOf(0.toByte()))
+                    buffer.write(byteArrayOf(1.toByte()))
+                    buffer.write(entry.combinedBytes())
+                    buffer.write(byteArrayOf(0.toByte()))
+                }
+            }
+
+            return buffer.toByteArray()
+        }
+    }
+
+    enum class AddRemoveChange {
+        ADD, REMOVE
+    }
+
+    sealed class SettingsChange(val value: Boolean) {
+        data class WhitelistEnabled(val whiteListEnabled: Boolean) : SettingsChange(value = whiteListEnabled)
+        data class DAppsEnabled(val dappsEnabled: Boolean) : SettingsChange(value = dappsEnabled)
+    }
+
+    data class BalanceAccountNameUpdate(
+        val type: String,
+        val accountInfo: AccountInfo,
+        val newAccountName: String,
+        var signingData: SolanaSigningData
+    ) : SolanaApprovalRequestType() {
+
+        fun combinedBytes() : ByteArray {
+            val buffer = ByteArrayOutputStream()
+
+            buffer.write(accountInfo.identifier.sha256HashBytes())
+            buffer.write(newAccountName.sha256HashBytes())
+
+            return buffer.toByteArray()
+        }
+    }
+
+    data class BalanceAccountPolicyUpdate(
+        val type: String,
+        val accountInfo: AccountInfo,
+        val approvalPolicy: ApprovalPolicy,
+        var signingData: SolanaSigningData
+    ) : SolanaApprovalRequestType() {
+
+        fun combinedBytes() : ByteArray {
+            val buffer = ByteArrayOutputStream()
+
+            buffer.write(accountInfo.identifier.sha256HashBytes())
+            buffer.write(approvalPolicy.combinedBytes())
+
+            return buffer.toByteArray()
+        }
+
+    }
+
+    data class SPLTokenAccountCreation(
+        val type: String,
+        val payerBalanceAccount: AccountInfo,
+        val balanceAccounts: List<AccountInfo>,
+        val tokenSymbolInfo: SymbolInfo,
+        var signingData: SolanaSigningData
+    ) : SolanaApprovalRequestType() {
+
+        fun combinedBytes() : ByteArray {
+            val buffer = ByteArrayOutputStream()
+
+            buffer.write(payerBalanceAccount.identifier.sha256HashBytes())
+            buffer.write(byteArrayOf(balanceAccounts.size.toByte()))
+            buffer.write(balanceAccounts.flatMap { it.identifier.sha256HashBytes().toList() }.toByteArray())
+            buffer.write(tokenSymbolInfo.tokenMintAddress.base58Bytes())
+
+            return buffer.toByteArray()
+        }
+    }
+
+    data class BalanceAccountAddressWhitelistUpdate(
+        val type: String,
+        val accountInfo: AccountInfo,
+        val destinations: List<SlotDestinationInfo>,
+        val signingData: SolanaSigningData
+    ) : SolanaApprovalRequestType() {
+
+        fun combinedBytes() : ByteArray {
+            val buffer = ByteArrayOutputStream()
+
+            buffer.write(accountInfo.identifier.sha256HashBytes())
+            buffer.write(byteArrayOf(destinations.size.toByte()))
+            buffer.write(destinations.map { it.slotId }.toByteArray())
+            buffer.write(destinationsData())
+
+            return buffer.toByteArray()
+        }
+
+        private fun destinationsData() : ByteArray {
+            val destinationsData = destinations.flatMap {
+                it.value.name.sha256HashBytes().toList()
+            }.toByteArray()
+
+            return destinationsData.sha256HashBytes()
+        }
+    }
 
     data class LoginApprovalRequest(
         val type: String,
@@ -134,6 +362,26 @@ sealed class SolanaApprovalRequestType {
         const val UNKNOWN_REQUEST_APPROVAL = "Unknown Approval"
         const val UNKNOWN_INITIATION = "Unknown Initiation"
     }
+
+    fun nonceAccountAddresses() : List<String> {
+        return when(this) {
+            is WithdrawalRequest -> signingData.nonceAccountAddresses
+            is ConversionRequest -> signingData.nonceAccountAddresses
+            is SignersUpdate -> signingData.nonceAccountAddresses
+            is BalanceAccountCreation -> signingData.nonceAccountAddresses
+            is DAppTransactionRequest -> signingData.nonceAccountAddresses
+            is WrapConversionRequest -> signingData.nonceAccountAddresses
+            is WalletConfigPolicyUpdate -> signingData.nonceAccountAddresses
+            is BalanceAccountSettingsUpdate -> signingData.nonceAccountAddresses
+            is DAppBookUpdate -> signingData.nonceAccountAddresses
+            is AddressBookUpdate -> signingData.nonceAccountAddresses
+            is BalanceAccountNameUpdate -> signingData.nonceAccountAddresses
+            is BalanceAccountPolicyUpdate -> signingData.nonceAccountAddresses
+            is SPLTokenAccountCreation -> signingData.nonceAccountAddresses
+            is BalanceAccountAddressWhitelistUpdate -> signingData.nonceAccountAddresses
+            is LoginApprovalRequest, UnknownApprovalType -> emptyList()
+        }
+    }
 }
 
 enum class ApprovalType(val value: String) {
@@ -143,6 +391,16 @@ enum class ApprovalType(val value: String) {
     BALANCE_ACCOUNT_CREATION_TYPE("BalanceAccountCreation"),
     DAPP_TRANSACTION_REQUEST_TYPE("DAppTransactionRequest"),
     LOGIN_TYPE("LoginApproval"),
+    WRAP_CONVERSION_REQUEST_TYPE("WrapConversionRequest"),
+    BALANCE_ACCOUNT_NAME_UPDATE_TYPE("BalanceAccountNameUpdate"),
+    BALANCE_ACCOUNT_POLICY_UPDATE_TYPE("BalanceAccountPolicyUpdate"),
+    BALANCE_ACCOUNT_SETTINGS_UPDATE_TYPE("BalanceAccountSettingsUpdate"),
+    ADDRESS_BOOK_TYPE("AddressBookUpdate"),
+    DAPP_BOOK_UPDATE_TYPE("DAppBookUpdate"),
+    WALLET_CONFIG_POLICY_UPDATE_TYPE("WalletConfigPolicyUpdate"),
+    SPL_TOKEN_ACCOUNT_CREATION_TYPE("SPLTokenAccountCreation"),
+    BALANCE_ACCOUNT_ADDRESS_WHITE_LIST_UPDATE("BalanceAccountAddressWhitelistUpdate"),
+
     UNKNOWN_TYPE("");
 
     companion object {
@@ -154,6 +412,14 @@ enum class ApprovalType(val value: String) {
                 BALANCE_ACCOUNT_CREATION_TYPE.value -> BALANCE_ACCOUNT_CREATION_TYPE
                 DAPP_TRANSACTION_REQUEST_TYPE.value -> DAPP_TRANSACTION_REQUEST_TYPE
                 LOGIN_TYPE.value -> LOGIN_TYPE
+                WRAP_CONVERSION_REQUEST_TYPE.value -> WRAP_CONVERSION_REQUEST_TYPE
+                BALANCE_ACCOUNT_NAME_UPDATE_TYPE.value -> BALANCE_ACCOUNT_NAME_UPDATE_TYPE
+                BALANCE_ACCOUNT_POLICY_UPDATE_TYPE.value -> BALANCE_ACCOUNT_POLICY_UPDATE_TYPE
+                BALANCE_ACCOUNT_SETTINGS_UPDATE_TYPE.value -> BALANCE_ACCOUNT_SETTINGS_UPDATE_TYPE
+                ADDRESS_BOOK_TYPE.value -> ADDRESS_BOOK_TYPE
+                DAPP_BOOK_UPDATE_TYPE.value -> DAPP_BOOK_UPDATE_TYPE
+                WALLET_CONFIG_POLICY_UPDATE_TYPE.value -> WALLET_CONFIG_POLICY_UPDATE_TYPE
+                SPL_TOKEN_ACCOUNT_CREATION_TYPE.value -> SPL_TOKEN_ACCOUNT_CREATION_TYPE
                 else -> UNKNOWN_TYPE
             }
     }
@@ -171,11 +437,93 @@ data class AccountInfo(
     val address: String?
 )
 
+data class ApprovalPolicy(
+    val approvalsRequired: Byte,
+    val approvalTimeout: Long,
+    val approvers: List<SlotSignerInfo>
+) {
+    fun combinedBytes(): ByteArray {
+        val buffer = ByteArrayOutputStream()
+        buffer.write(byteArrayOf(approvalsRequired))
+        buffer.writeLongLE(approvalTimeout.convertToSeconds())
+        buffer.write(byteArrayOf(approvers.size.toByte()))
+        buffer.write(approvers.map { it.slotId }.toByteArray())
+        buffer.write(
+            approvers.flatMap { it.value.publicKey.base58Bytes().toList() }.toByteArray().sha256HashBytes()
+        )
+
+        return buffer.toByteArray()
+    }
+}
+
+data class SlotDestinationInfo(
+    val slotId: Byte,
+    val value: DestinationAddress
+) {
+
+    fun combinedBytes() : ByteArray {
+        val buffer = ByteArrayOutputStream()
+
+        buffer.write(byteArrayOf(slotId))
+        buffer.write(value.address.base58Bytes())
+        buffer.write(value.name.sha256HashBytes())
+
+        return buffer.toByteArray()
+    }
+}
+
+data class SlotDAppInfo(
+    val slotId: Byte,
+    val value: SolanaDApp
+) {
+
+    fun combinedBytes() : ByteArray {
+        val buffer = ByteArrayOutputStream()
+
+        buffer.write(byteArrayOf(slotId))
+        buffer.write(value.address.base58Bytes())
+        buffer.write(value.name.sha256HashBytes())
+
+        return buffer.toByteArray()
+    }
+
+}
+
+data class WhitelistUpdate(
+    val account: AccountInfo,
+    val destinationsToAdd: List<SlotDestinationInfo>,
+    val destinationsToRemove: List<SlotDestinationInfo>,
+) {
+    fun combinedBytes() : ByteArray {
+        val buffer = ByteArrayOutputStream()
+
+        buffer.write(account.identifier.sha256HashBytes())
+        buffer.write(byteArrayOf(destinationsToAdd.size.toByte()))
+        buffer.write(destinationsToAdd.map { it.slotId }.toByteArray())
+        buffer.write(byteArrayOf(destinationsToRemove.size.toByte()))
+        buffer.write(destinationsToRemove.map { it.slotId }.toByteArray())
+        buffer.write(bothDestinationsData().sha256HashBytes())
+
+        return buffer.toByteArray()
+    }
+
+    fun bothDestinationsData() : ByteArray {
+        val buffer = ByteArrayOutputStream()
+
+        buffer.write(destinationsToAdd.flatMap { it.value.name.sha256HashBytes().toList() }.toByteArray())
+        buffer.write(byteArrayOf(1.toByte()))
+        buffer.write(destinationsToRemove.flatMap { it.value.name.sha256HashBytes().toList() }.toByteArray())
+
+        return buffer.toByteArray()
+    }
+}
+
 data class SolanaSigningData(
     val feePayer: String,
     val walletProgramId: String,
     val multisigOpAccountAddress: String,
     val walletAddress: String,
+    val nonceAccountAddresses: List<String>
 )
 
 enum class AccountType(val value: String) {
@@ -260,7 +608,9 @@ data class SymbolInfo(
     val symbol: String,
     val symbolDescription: String,
     val tokenMintAddress: String
-)
+) {
+    fun getSOLProgramValue() : Byte = if (symbol == "SOL") 0 else 1
+}
 
 data class DestinationAddress(
     val name: String,
@@ -286,8 +636,8 @@ enum class SlotUpdateType(val value: String) {
 
     fun toSolanaProgramValue() : Byte =
         when (this) {
-            SetIfEmpty -> 0
-            Clear -> 1
+            SetIfEmpty -> 0.toByte()
+            Clear -> 1.toByte()
         }
 }
 
@@ -339,22 +689,22 @@ data class SolanaInstruction(
         buffer.writeShortLE(b64DecodedData.size.toShort())
         buffer.write(b64DecodedData)
 
-        return byteArrayOf()
+        return buffer.toByteArray()
     }
 }
 
 data class SolanaAccountMeta(
     val address: String,
     val signer: Boolean,
-    val writeable: Boolean
+    val writable: Boolean
 ) {
     fun combinedBytes(): ByteArray {
         return byteArrayOf(flags()) + address.base58Bytes()
     }
 
     private fun flags(): Byte {
-        val writeValue = if (writeable) 1 else 0
-        val signValue = if (signer) 2 else 0
+        val writeValue : Byte = if (writable) 1 else 0
+        val signValue : Byte = if (signer) 2 else 0
         return (writeValue + signValue).toByte()
     }
 }

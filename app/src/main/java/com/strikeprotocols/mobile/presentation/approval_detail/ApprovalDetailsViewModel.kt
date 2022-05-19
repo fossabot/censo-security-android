@@ -17,9 +17,8 @@ import com.strikeprotocols.mobile.data.models.approval.WalletApproval
 import com.strikeprotocols.mobile.presentation.approval_detail.ApprovalDetailsViewModel.Companion.UPDATE_COUNTDOWN
 import com.strikeprotocols.mobile.presentation.approval_disposition.ApprovalDispositionError
 import com.strikeprotocols.mobile.presentation.approval_disposition.ApprovalDispositionState
-import com.strikeprotocols.mobile.presentation.blockhash.BlockHashViewModel.BlockHash
+import com.strikeprotocols.mobile.presentation.durable_nonce.DurableNonceViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.util.*
 import javax.inject.Inject
@@ -137,13 +136,13 @@ class ApprovalDetailsViewModel @Inject constructor(
         )
     }
 
-    fun setBlockHash(blockHash: BlockHash) {
-        state = state.copy(blockHash = blockHash)
+    fun setMultipleAccounts(multipleAccounts: DurableNonceViewModel.MultipleAccounts) {
+        state = state.copy(multipleAccounts = multipleAccounts)
         registerApprovalDisposition()
     }
 
-    fun resetBlockHash() {
-        state = state.copy(blockHash = null)
+    fun resetMultipleAccounts() {
+        state = state.copy(multipleAccounts = null)
     }
 
     //region API calls
@@ -155,12 +154,12 @@ class ApprovalDetailsViewModel @Inject constructor(
                 )
             )
             //Data retrieval and checks
-            val recentBlockHash = state.blockHash?.blockHashString
-            if (recentBlockHash == null) {
+            val nonces = state.multipleAccounts?.nonces
+            if (nonces == null) {
                 state = state.copy(
                     approvalDispositionState = state.approvalDispositionState?.copy(
-                        approvalDispositionError = ApprovalDispositionError.BLOCKHASH_FAILURE,
-                        registerApprovalDispositionResult = Resource.Error(ApprovalDispositionError.BLOCKHASH_FAILURE.error)
+                        approvalDispositionError = ApprovalDispositionError.DURABLE_NONCE_FAILURE,
+                        registerApprovalDispositionResult = Resource.Error(ApprovalDispositionError.DURABLE_NONCE_FAILURE.error)
                     )
                 )
                 return@launch
@@ -197,8 +196,8 @@ class ApprovalDetailsViewModel @Inject constructor(
                         state.approval?.details as SolanaApprovalRequestDetails.MultiSignOpInitiationDetails
                     val initiationDisposition = InitiationDisposition(
                         approvalDisposition = approvalDisposition,
-                        recentBlockhash = recentBlockHash,
-                        multiSigOpInitiationDetails = multiSignOpDetails
+                        nonces = nonces,
+                        multiSigOpInitiationDetails = multiSignOpDetails,
                     )
 
                     val initiationResponse = approvalsRepository.approveOrDenyInitiation(
@@ -224,7 +223,7 @@ class ApprovalDetailsViewModel @Inject constructor(
                     val registerApprovalDisposition = RegisterApprovalDisposition(
                         approvalDisposition = approvalDisposition,
                         solanaApprovalRequestType = solanaApprovalRequestType,
-                        recentBlockhash = recentBlockHash
+                        nonces = nonces,
                     )
 
                     val approvalDispositionResponse =

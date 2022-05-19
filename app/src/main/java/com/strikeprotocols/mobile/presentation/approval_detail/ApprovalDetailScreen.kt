@@ -34,7 +34,6 @@ import com.strikeprotocols.mobile.data.models.approval.WalletApproval
 import com.strikeprotocols.mobile.presentation.approvals.ApprovalsViewModel
 import com.strikeprotocols.mobile.presentation.approvals.approval_type_row_items.getApprovalTypeDialogTitle
 import com.strikeprotocols.mobile.presentation.approvals.approval_type_row_items.getDialogFullMessage
-import com.strikeprotocols.mobile.presentation.blockhash.BlockHashViewModel
 import com.strikeprotocols.mobile.presentation.components.OnLifecycleEvent
 import com.strikeprotocols.mobile.presentation.components.StrikeApprovalDispositionErrorAlertDialog
 import com.strikeprotocols.mobile.presentation.components.StrikeConfirmDispositionAlertDialog
@@ -43,16 +42,17 @@ import com.strikeprotocols.mobile.ui.theme.*
 import com.strikeprotocols.mobile.data.models.approval.SolanaApprovalRequestType.*
 import com.strikeprotocols.mobile.presentation.approvals.ApprovalDetailContent
 import com.strikeprotocols.mobile.presentation.approvals.approval_type_row_items.getApprovalRowMetaData
+import com.strikeprotocols.mobile.presentation.durable_nonce.DurableNonceViewModel
 
 @Composable
 fun ApprovalDetailsScreen(
     navController: NavController,
     approvalDetailsViewModel: ApprovalDetailsViewModel = hiltViewModel(),
-    blockHashViewModel: BlockHashViewModel = hiltViewModel(),
+    durableNonceViewModel: DurableNonceViewModel = hiltViewModel(),
     approval: WalletApproval?
 ) {
     val approvalDetailsState = approvalDetailsViewModel.state
-    val blockHashState = blockHashViewModel.state
+    val durableNonceState = durableNonceViewModel.state
 
     val context = LocalContext.current as FragmentActivity
 
@@ -61,10 +61,14 @@ fun ApprovalDetailsScreen(
     val bioPrompt = createBioPrompt(
         fragmentActivity = context,
         onSuccess = {
-            blockHashViewModel.setUserBiometricVerified(isVerified = true)
+            val nonceAddresses = approvalDetailsState.approval?.retrieveAccountAddresses()
+            nonceAddresses?.let {
+                durableNonceViewModel.setNonceAccountAddresses(nonceAddresses)
+            }
+            durableNonceViewModel.setUserBiometricVerified(isVerified = true)
         },
         onFail = {
-            blockHashViewModel.setUserBiometricVerified(isVerified = false)
+            durableNonceViewModel.setUserBiometricVerified(isVerified = false)
         }
     )
 
@@ -73,15 +77,15 @@ fun ApprovalDetailsScreen(
         onDispose { approvalDetailsViewModel.onStop() }
     }
 
-    LaunchedEffect(key1 = approvalDetailsState, key2 = blockHashState) {
-        if (blockHashState.triggerBioPrompt) {
-            blockHashViewModel.resetPromptTrigger()
+    LaunchedEffect(key1 = approvalDetailsState, key2 = durableNonceState) {
+        if (durableNonceState.triggerBioPrompt) {
+            durableNonceViewModel.resetPromptTrigger()
             bioPrompt.authenticate(promptInfo)
         }
-        if (blockHashState.recentBlockhashResult is Resource.Success) {
-            if (blockHashState.blockHash != null) {
-                approvalDetailsViewModel.setBlockHash(blockHashState.blockHash)
-                blockHashViewModel.resetState()
+        if (durableNonceState.multipleAccountsResult is Resource.Success) {
+            if (durableNonceState.multipleAccounts != null) {
+                approvalDetailsViewModel.setMultipleAccounts(durableNonceState.multipleAccounts)
+                durableNonceViewModel.resetState()
             }
         }
         if (approvalDetailsState.approvalDispositionState?.registerApprovalDispositionResult is Resource.Success
@@ -172,8 +176,8 @@ fun ApprovalDetailsScreen(
                             )
                     )
                 },
+                isLoading = approvalDetailsState.loadingData || durableNonceState.isLoading,
                 timeRemainingInSeconds = approvalDetailsState.remainingTimeInSeconds,
-                isLoading = approvalDetailsState.loadingData || blockHashState.isLoading,
                 approval = approvalDetailsState.approval,
                 initiationRequest = approvalDetailsState.approval?.isInitiationRequest() == true
             )
@@ -185,7 +189,7 @@ fun ApprovalDetailsScreen(
                         dialogText = safeDialogDetails.dialogText,
                         onConfirm = {
                             approvalDetailsViewModel.resetShouldDisplayConfirmDisposition()
-                            blockHashViewModel.setPromptTrigger()
+                            durableNonceViewModel.setPromptTrigger()
                         },
                         onDismiss = {
                             approvalDetailsViewModel.resetShouldDisplayConfirmDisposition()

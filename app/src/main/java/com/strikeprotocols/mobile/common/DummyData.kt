@@ -54,7 +54,7 @@ object ValidDummyData {
             name = "cryptology"
         ),
         publicKeys = listOf(
-            PublicKey(
+            WalletPublicKey(
                 key = publicKey,
                 walletType = WalletSigner.WALLET_TYPE_SOLANA
             )

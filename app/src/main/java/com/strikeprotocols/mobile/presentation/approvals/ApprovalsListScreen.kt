@@ -34,8 +34,8 @@ import com.strikeprotocols.mobile.data.models.approval.WalletApproval
 import com.strikeprotocols.mobile.presentation.Screen
 import com.strikeprotocols.mobile.presentation.approvals.approval_type_row_items.*
 import com.strikeprotocols.mobile.presentation.components.StrikeTopAppBar
-import com.strikeprotocols.mobile.presentation.blockhash.BlockHashViewModel
 import com.strikeprotocols.mobile.presentation.components.*
+import com.strikeprotocols.mobile.presentation.durable_nonce.DurableNonceViewModel
 import com.strikeprotocols.mobile.ui.theme.*
 import kotlinx.coroutines.launch
 import com.strikeprotocols.mobile.ui.theme.BackgroundBlack
@@ -45,10 +45,10 @@ import com.strikeprotocols.mobile.ui.theme.StrikeWhite
 fun ApprovalsListScreen(
     navController: NavController,
     approvalsViewModel: ApprovalsViewModel,
-    blockHashViewModel: BlockHashViewModel = hiltViewModel()
+    durableNonceViewModel: DurableNonceViewModel = hiltViewModel()
 ) {
     val approvalsState = approvalsViewModel.state
-    val blockHashState = blockHashViewModel.state
+    val blockHashState = durableNonceViewModel.state
 
     val context = LocalContext.current as FragmentActivity
 
@@ -60,10 +60,14 @@ fun ApprovalsListScreen(
     val bioPrompt = BiometricUtil.createBioPrompt(
         fragmentActivity = context,
         onSuccess = {
-            blockHashViewModel.setUserBiometricVerified(isVerified = true)
+            val nonceAddresses = approvalsState.selectedApproval?.retrieveAccountAddresses()
+            nonceAddresses?.let {
+                durableNonceViewModel.setNonceAccountAddresses(nonceAddresses)
+            }
+            durableNonceViewModel.setUserBiometricVerified(isVerified = true)
         },
         onFail = {
-            blockHashViewModel.setUserBiometricVerified(isVerified = false)
+            durableNonceViewModel.setUserBiometricVerified(isVerified = false)
         }
     )
 
@@ -99,13 +103,13 @@ fun ApprovalsListScreen(
             approvalsViewModel.resetLogoutResource()
         }
         if (blockHashState.triggerBioPrompt) {
-            blockHashViewModel.resetPromptTrigger()
+            durableNonceViewModel.resetPromptTrigger()
             bioPrompt.authenticate(promptInfo)
         }
-        if (blockHashState.recentBlockhashResult is Resource.Success) {
-            if (blockHashState.blockHash != null) {
-                approvalsViewModel.setBlockHash(blockHashState.blockHash)
-                blockHashViewModel.resetState()
+        if (blockHashState.multipleAccountsResult is Resource.Success) {
+            if (blockHashState.multipleAccounts != null) {
+                approvalsViewModel.setMultipleAccounts(blockHashState.multipleAccounts)
+                durableNonceViewModel.resetState()
             }
         }
         if (approvalsState.approvalDispositionState?.registerApprovalDispositionResult is Resource.Success ||
@@ -197,7 +201,7 @@ fun ApprovalsListScreen(
                         dialogText = safeDialogDetails.dialogText,
                         onConfirm = {
                             approvalsViewModel.resetShouldDisplayConfirmDisposition()
-                            blockHashViewModel.setPromptTrigger()
+                            durableNonceViewModel.setPromptTrigger()
                         },
                         onDismiss = {
                             approvalsViewModel.resetShouldDisplayConfirmDisposition()

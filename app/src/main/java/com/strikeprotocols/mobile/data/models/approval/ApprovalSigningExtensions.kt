@@ -10,6 +10,8 @@ fun String.base58Bytes() = BaseWrapper.decode(this)
 
 fun String.sha256HashBytes() : ByteArray = Hash.sha256(toByteArray())
 
+fun ByteArray.sha256HashBytes() : ByteArray = Hash.sha256(this)
+
 fun Long.convertToSeconds() : Long = this / 1000
 
 fun ByteArrayOutputStream.writeShortLE(value: Short) {
@@ -17,6 +19,15 @@ fun ByteArrayOutputStream.writeShortLE(value: Short) {
         ByteBuffer.allocate(2)
             .order(ByteOrder.LITTLE_ENDIAN)
             .putShort(value)
+            .array()
+    )
+}
+
+fun ByteArrayOutputStream.writeIntLE(value: Int) {
+    this.write(
+        ByteBuffer.allocate(4)
+            .order(ByteOrder.LITTLE_ENDIAN)
+            .putInt(value)
             .array()
     )
 }
@@ -31,9 +42,15 @@ fun ByteArrayOutputStream.writeLongLE(value: Long) {
 }
 
 fun SlotSignerInfo.combinedBytes(): ByteArray {
-    return byteArrayOf(this.slotId) + this.value.publicKey.base58Bytes()
+    return byteArrayOf(this.slotId).plus(this.value.publicKey.base58Bytes())
 }
 
-fun List<AccountMeta>.indexOfKey(publicKey: PublicKey) : Int {
-    return indexOfFirst { it.publicKey == publicKey }
+fun List<AccountMeta>.indexOfKey(publicKey: PublicKey): Int {
+    val index = indexOfFirst { it.publicKey.bytes.contentEquals(publicKey.bytes) }
+
+    if (index == -1) {
+        throw Exception("Could not find accountIndex")
+    }
+
+    return index
 }

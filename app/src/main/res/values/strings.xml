@@ -65,10 +65,10 @@
     <string name="biometry_check">Biometric Check</string>
     <string name="performing_biometry_check">Performing biometric check before submitting disposition</string>
 
-    <string name="approval_disposition_error_general">Something bad went wrong that should not have</string>
+    <string name="approval_disposition_error_general">Unable to register approval decision.</string>
     <string name="approval_disposition_error">Failure with recording approval disposition</string>
     <string name="approval_disposition_error_signing_data">Failure signing disposition data</string>
-    <string name="approval_disposition_error_blockhash">Failure retrieving blockHash from blockchain</string>
+    <string name="approval_disposition_error_nonces">Failure retrieving nonces from blockchain</string>
     <string name="approval_disposition_error_submit">Failure submitting data to the server</string>
     <string name="approval_disposition_error_title">Something went wrong</string>
 
@@ -89,8 +89,18 @@
     <string name="a_conversion_of_dialog_message">a conversion of</string>
     <string name="the_removal_of_dialog_message">the removal of</string>
     <string name="the_addition_of_dialog_message">the addition of</string>
-    <string name="an_account_creation_of_dialog_message">an account creation of</string>
+    <string name="an_account_creation_of_dialog_message">a wallet creation of</string>
     <string name="a_dapp_transaction_with_dialog_message">a dApp transaction with</string>
+
+    <string name="vault_config_policy_update_dialog_message">vault config policy update</string>
+    <string name="settings_update_for_dialog_message">settings update for</string>
+    <string name="dapp_book_update_dialog_message">dApp book update</string>
+    <string name="address_book_update_dialog_message">address book update</string>
+    <string name="wallet_name_change_to_dialog_message">wallet name change to</string>
+    <string name="policy_update_for_dialog_message">policy update for</string>
+    <string name="spl_token_account_dialog_message">SPL token account creation for</string>
+
+
     <string name="login_approval_dialog_message">Login Approval</string>
     <string name="you_are_about_to_approve">You are about to approve</string>
     <string name="you_are_about_to_deny">You are about to deny</string>
@@ -99,8 +109,8 @@
     <string name="unknown_dialog_title">Unknown</string>
     <string name="conversion_dialog_title">Conversion</string>
     <string name="signers_update_dialog_title">Signers Update</string>
-    <string name="balance_account_creation_dialog_title">Balance Account Creation</string>
-    <string name="stake_account_creation_dialog_title">Stake Account Creation</string>
+    <string name="balance_account_creation_dialog_title">Wallet Creation</string>
+    <string name="stake_account_creation_dialog_title">Stake Wallet Creation</string>
     <string name="dapp_transaction_dialog_title">dApp Transaction</string>
     <string name="login_approval_dialog_title">Login Approval</string>
     <string name="approval_type_dapp_transaction">DApp Transaction</string>
@@ -146,5 +156,15 @@
     <string name="hour_abbreviation">h</string>
     <string name="minutes_abbreviation">m</string>
     <string name="seconds_abbreviation">s</string>
+    <string name="wrap_conversion_dialog_title">Conversion</string>
+    <string name="wallet_config_dialog_title">Vault Config Policy Update</string>
+    <string name="balance_account_settings_dialog_title">Wallet Settings Update</string>
+    <string name="dapp_book_update_dialog_title">dApp Book Update</string>
+    <string name="address_book_dialog_title">Address Book Update</string>
+    <string name="balance_account_name_dialog_title">Wallet Name Update</string>
+    <string name="balance_account_policy_dialog_title">Wallet Policy Update</string>
+    <string name="spl_token_account_dialog_title">SPL Token Account Creation</string>
+    <string name="balance_acct_whitelist_update_dialog_title">Replace Transfer Whitelist</string>
+    <string name="balance_account_whitelist_dialog_message">transfer whitelist update for</string>
 
 </resources>

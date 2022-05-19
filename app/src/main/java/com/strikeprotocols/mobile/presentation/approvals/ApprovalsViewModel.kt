@@ -21,7 +21,7 @@ import com.strikeprotocols.mobile.presentation.approval_detail.ConfirmDispositio
 import com.strikeprotocols.mobile.presentation.approval_disposition.ApprovalDispositionError
 import com.strikeprotocols.mobile.presentation.approval_disposition.ApprovalDispositionState
 import com.strikeprotocols.mobile.presentation.approvals.ApprovalsViewModel.Companion.UPDATE_COUNTDOWN
-import com.strikeprotocols.mobile.presentation.blockhash.BlockHashViewModel.BlockHash
+import com.strikeprotocols.mobile.presentation.durable_nonce.DurableNonceViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -50,7 +50,7 @@ class ApprovalsViewModel @Inject constructor(
             approvals = emptyList(),
             walletApprovalsResult = Resource.Uninitialized,
             selectedApproval = null,
-            blockHash = null
+            multipleAccounts = null
         )
     }
 
@@ -140,13 +140,13 @@ class ApprovalsViewModel @Inject constructor(
         state = state.copy(logoutResult = Resource.Uninitialized)
     }
 
-    fun setBlockHash(blockHash: BlockHash) {
-        state = state.copy(blockHash = blockHash)
+    fun setMultipleAccounts(multipleAccounts: DurableNonceViewModel.MultipleAccounts) {
+        state = state.copy(multipleAccounts = multipleAccounts)
         registerApprovalDisposition()
     }
 
-    fun resetBlockHash() {
-        state = state.copy(blockHash = null)
+    fun resetMultipleAccounts() {
+        state = state.copy(multipleAccounts = null)
     }
 
     fun wipeDataAfterDispositionSuccess() {
@@ -197,12 +197,12 @@ class ApprovalsViewModel @Inject constructor(
                 )
             )
             //Data retrieval and checks
-            val recentBlockHash = state.blockHash?.blockHashString
-            if (recentBlockHash == null) {
+            val nonces = state.multipleAccounts?.nonces
+            if (nonces == null) {
                 state = state.copy(
                     approvalDispositionState = state.approvalDispositionState?.copy(
-                        approvalDispositionError = ApprovalDispositionError.BLOCKHASH_FAILURE,
-                        registerApprovalDispositionResult = Resource.Error(ApprovalDispositionError.BLOCKHASH_FAILURE.error)
+                        approvalDispositionError = ApprovalDispositionError.DURABLE_NONCE_FAILURE,
+                        registerApprovalDispositionResult = Resource.Error(ApprovalDispositionError.DURABLE_NONCE_FAILURE.error)
                     )
                 )
                 return@launch
@@ -240,7 +240,7 @@ class ApprovalsViewModel @Inject constructor(
                         state.selectedApproval?.details as SolanaApprovalRequestDetails.MultiSignOpInitiationDetails
                     val initiationDisposition = InitiationDisposition(
                         approvalDisposition = approvalDisposition,
-                        recentBlockhash = recentBlockHash,
+                        nonces = nonces,
                         multiSigOpInitiationDetails = multiSignOpDetails
                     )
 
@@ -267,7 +267,7 @@ class ApprovalsViewModel @Inject constructor(
                     val registerApprovalDisposition = RegisterApprovalDisposition(
                         approvalDisposition = approvalDisposition,
                         solanaApprovalRequestType = solanaApprovalRequestType,
-                        recentBlockhash = recentBlockHash
+                        nonces = nonces,
                     )
 
                     val approvalDispositionResponse =

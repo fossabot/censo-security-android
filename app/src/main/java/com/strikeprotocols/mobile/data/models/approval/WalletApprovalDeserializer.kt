@@ -159,6 +159,60 @@ class WalletApprovalDeserializer : JsonDeserializer<WalletApproval> {
                     SolanaApprovalRequestType.LoginApprovalRequest::class.java
                 )
             }
+            ApprovalType.WRAP_CONVERSION_REQUEST_TYPE -> {
+                Gson().fromJson(
+                    details,
+                    SolanaApprovalRequestType.WrapConversionRequest::class.java
+                )
+            }
+            ApprovalType.BALANCE_ACCOUNT_NAME_UPDATE_TYPE -> {
+                Gson().fromJson(
+                    details,
+                    SolanaApprovalRequestType.BalanceAccountNameUpdate::class.java
+                )
+            }
+            ApprovalType.BALANCE_ACCOUNT_SETTINGS_UPDATE_TYPE -> {
+                Gson().fromJson(
+                    details,
+                    SolanaApprovalRequestType.BalanceAccountSettingsUpdate::class.java
+                )
+            }
+            ApprovalType.ADDRESS_BOOK_TYPE -> {
+                Gson().fromJson(
+                    details,
+                    SolanaApprovalRequestType.AddressBookUpdate::class.java
+                )
+            }
+            ApprovalType.DAPP_BOOK_UPDATE_TYPE -> {
+                Gson().fromJson(
+                    details,
+                    SolanaApprovalRequestType.DAppBookUpdate::class.java
+                )
+            }
+            ApprovalType.SPL_TOKEN_ACCOUNT_CREATION_TYPE -> {
+                Gson().fromJson(
+                    details,
+                    SolanaApprovalRequestType.SPLTokenAccountCreation::class.java
+                )
+            }
+            ApprovalType.WALLET_CONFIG_POLICY_UPDATE_TYPE -> {
+                Gson().fromJson(
+                    details,
+                    SolanaApprovalRequestType.WalletConfigPolicyUpdate::class.java
+                )
+            }
+            ApprovalType.BALANCE_ACCOUNT_POLICY_UPDATE_TYPE -> {
+                Gson().fromJson(
+                    details,
+                    SolanaApprovalRequestType.BalanceAccountPolicyUpdate::class.java
+                )
+            }
+            ApprovalType.BALANCE_ACCOUNT_ADDRESS_WHITE_LIST_UPDATE -> {
+                Gson().fromJson(
+                    details,
+                    SolanaApprovalRequestType.BalanceAccountAddressWhitelistUpdate::class.java
+                )
+            }
             else -> SolanaApprovalRequestType.UnknownApprovalType
         }
     }

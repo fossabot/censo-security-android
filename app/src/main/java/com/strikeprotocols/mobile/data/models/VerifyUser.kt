@@ -6,7 +6,7 @@ data class VerifyUser(
     val id: String?,
     val loginName: String?,
     val organization: Organization?,
-    val publicKeys: List<PublicKey?>?,
+    val publicKeys: List<WalletPublicKey?>?,
     val useStaticKey: Boolean?
 )
 
@@ -15,7 +15,7 @@ data class Organization(
     val name: String?
 )
 
-data class PublicKey(
+data class WalletPublicKey(
     val key: String?,
     val walletType: String?
 )
