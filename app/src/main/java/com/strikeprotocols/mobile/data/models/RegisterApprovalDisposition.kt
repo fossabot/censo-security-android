@@ -7,17 +7,17 @@ import com.strikeprotocols.mobile.presentation.approval_disposition.ApprovalDisp
 
 data class RegisterApprovalDisposition(
     val approvalDisposition: ApprovalDisposition?,
-    val recentBlockhash: String?,
+    val nonces: List<Nonce>? = emptyList(),
     val solanaApprovalRequestType: SolanaApprovalRequestType?
 ) {
 
     fun anyItemNull() : Boolean =
-        approvalDisposition == null || recentBlockhash == null || solanaApprovalRequestType == null
+        approvalDisposition == null || nonces == null || solanaApprovalRequestType == null
 
     fun getError() =
         when {
             approvalDisposition == null -> ApprovalDispositionError.APPROVAL_DISPOSITION_FAILURE
-            recentBlockhash == null -> ApprovalDispositionError.BLOCKHASH_FAILURE
+            nonces == null -> ApprovalDispositionError.DURABLE_NONCE_FAILURE
             solanaApprovalRequestType == null -> ApprovalDispositionError.SIGNING_DATA_FAILURE
             else -> ApprovalDispositionError.GENERIC_FAILURE
         }

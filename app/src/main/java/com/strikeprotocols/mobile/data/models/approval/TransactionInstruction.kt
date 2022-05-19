@@ -1,5 +1,8 @@
 package com.strikeprotocols.mobile.data.models.approval
 
+import com.strikeprotocols.mobile.data.models.approval.PublicKey.Companion.RECENT_BLOCKHASHES_SYSVAR_ID
+import java.io.ByteArrayOutputStream
+
 data class TransactionInstruction(
     val programId: PublicKey,
     val keys: List<AccountMeta>,
@@ -23,5 +26,37 @@ data class TransactionInstruction(
         result = 31 * result + keys.hashCode()
         result = 31 * result + data.contentHashCode()
         return result
+    }
+
+    object Companion {
+        fun createAdvanceNonceInstruction(
+            nonceAccountAddress: String,
+            feePayer: String
+        ): TransactionInstruction {
+            val buffer = ByteArrayOutputStream()
+            buffer.writeIntLE(4)
+            val dataAsArray = buffer.toByteArray()
+            return TransactionInstruction(
+                keys = listOf(
+                    AccountMeta(
+                        publicKey = PublicKey(nonceAccountAddress),
+                        isSigner = false,
+                        isWritable = true
+                    ),
+                    AccountMeta(
+                        publicKey = RECENT_BLOCKHASHES_SYSVAR_ID,
+                        isSigner = false,
+                        isWritable = false
+                    ),
+                    AccountMeta(
+                        publicKey = PublicKey(feePayer),
+                        isSigner = true,
+                        isWritable = false
+                    )
+                ),
+                programId = PublicKey.SYS_PROGRAM_ID,
+                data = dataAsArray
+            )
+        }
     }
 }

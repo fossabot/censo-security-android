@@ -15,6 +15,8 @@ data class PublicKey(val bytes: ByteArray) {
         val SYS_PROGRAM_ID = PublicKey("11111111111111111111111111111111")
         val TOKEN_PROGRAM_ID = PublicKey("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA")
         val ASSOCIATED_TOKEN_PROGRAM_ID = PublicKey("ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL")
+        val RECENT_BLOCKHASHES_SYSVAR_ID = PublicKey("SysvarRecentB1ockHashes11111111111111111111")
+        val WRAPPED_SOL_MINT = PublicKey("So11111111111111111111111111111111111111112")
         val EMPTY_KEY = PublicKey("11111111111111111111111111111111")
 
         const val SIZE = 32

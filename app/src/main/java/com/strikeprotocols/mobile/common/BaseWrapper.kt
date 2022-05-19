@@ -10,3 +10,7 @@ object BaseWrapper {
     fun decodeFromBase64(string: String): ByteArray =
         Base64.getDecoder().decode(string)
 }
+
+
+fun ByteArray.toHexString(): String =
+    joinToString(separator = "") { eachByte -> "%02x".format(eachByte) }

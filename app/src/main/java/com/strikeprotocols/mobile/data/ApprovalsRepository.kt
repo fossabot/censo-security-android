@@ -1,8 +1,8 @@
 package com.strikeprotocols.mobile.data
 
-import com.strikeprotocols.mobile.common.MockedApprovals
 import com.strikeprotocols.mobile.data.models.InitiationDisposition
 import com.strikeprotocols.mobile.data.models.RegisterApprovalDisposition
+import com.strikeprotocols.mobile.data.models.approval.ApprovalConstants.MISSING_USER_EMAIL
 import com.strikeprotocols.mobile.data.models.approval.ApprovalDispositionRequest
 import com.strikeprotocols.mobile.data.models.approval.InitiationRequest
 import com.strikeprotocols.mobile.data.models.approval.WalletApproval
@@ -27,9 +27,7 @@ class ApprovalsRepositoryImpl @Inject constructor(
 ) : ApprovalsRepository {
 
     override suspend fun getWalletApprovals(): List<WalletApproval?> {
-        //todo: get rid of this when we merge approval_ui_tickets onto develop
-        return MockedApprovals.getFullListOfApprovalItems()
-        //return api.getWalletApprovals()
+        return api.getWalletApprovals()
     }
 
     override suspend fun approveOrDenyDisposition(
@@ -45,13 +43,13 @@ class ApprovalsRepositoryImpl @Inject constructor(
         val userEmail = userRepository.retrieveUserEmail()
 
         if (userEmail.isEmpty()) {
-            throw Exception("MISSING USER EMAIL")
+            throw Exception(MISSING_USER_EMAIL)
         }
 
         val approvalDispositionRequest = ApprovalDispositionRequest(
             requestId = requestId,
             approvalDisposition = registerApprovalDisposition.approvalDisposition!!,
-            blockhash = registerApprovalDisposition.recentBlockhash!!,
+            nonces = registerApprovalDisposition.nonces!!,
             email = userEmail,
             requestType = registerApprovalDisposition.solanaApprovalRequestType!!
         )
@@ -78,13 +76,13 @@ class ApprovalsRepositoryImpl @Inject constructor(
         val userEmail = userRepository.retrieveUserEmail()
 
         if (userEmail.isEmpty()) {
-            throw Exception("MISSING USER EMAIL")
+            throw Exception(MISSING_USER_EMAIL)
         }
 
         val initiationRequest = InitiationRequest(
             requestId = requestId,
             approvalDisposition = initialDisposition.approvalDisposition!!,
-            blockhash = initialDisposition.recentBlockhash!!,
+            nonces = initialDisposition.nonces!!,
             email = userEmail,
             initiation = initialDisposition.multiSigOpInitiationDetails!!.multisigOpInitiation,
             requestType = initialDisposition.multiSigOpInitiationDetails.requestType

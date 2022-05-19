@@ -1,6 +1,8 @@
 package com.strikeprotocols.mobile.data.models.approval
 
 import com.strikeprotocols.mobile.common.BaseWrapper
+import com.strikeprotocols.mobile.common.strikeLog
+import com.strikeprotocols.mobile.common.toHexString
 import java.io.ByteArrayOutputStream
 
 data class TransactionMessage(
@@ -107,7 +109,8 @@ data class TransactionMessage(
         val compiledInstructionBuffer = ByteArrayOutputStream()
 
         for (compiledInstruction in compiledInstructions) {
-            compiledInstructionBuffer.write(compiledInstruction.serializedData())
+            val compiledData = compiledInstruction.serializedData()
+            compiledInstructionBuffer.write(compiledData)
         }
 
         buffer.write(compiledInstructionBuffer.toByteArray())
@@ -141,9 +144,8 @@ data class CompiledInstruction(
     val data: ByteArray
 ) {
 
-    fun length() {
+    fun length() =
         1 + keyIndicesCount.size.toByte() + keyIndices.size.toByte() + dataLength.size.toByte() + data.size.toByte()
-    }
 
     fun serializedData() : ByteArray {
         val buffer = ByteArrayOutputStream()

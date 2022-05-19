@@ -32,7 +32,7 @@ fun retrieveApprovalDispositionDialogErrorText(
     context: Context
 ) = when (approvalDispositionError) {
         ApprovalDispositionError.SUBMIT_FAILURE -> context.getString(R.string.approval_disposition_error_submit)
-        ApprovalDispositionError.BLOCKHASH_FAILURE -> context.getString(R.string.approval_disposition_error_blockhash)
+        ApprovalDispositionError.DURABLE_NONCE_FAILURE -> context.getString(R.string.approval_disposition_error_nonces)
         ApprovalDispositionError.SIGNING_DATA_FAILURE -> context.getString(R.string.approval_disposition_error_signing_data)
         ApprovalDispositionError.APPROVAL_DISPOSITION_FAILURE -> context.getString(R.string.approval_disposition_error)
         else -> {

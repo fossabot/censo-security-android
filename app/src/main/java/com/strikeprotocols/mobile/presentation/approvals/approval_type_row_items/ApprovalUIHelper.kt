@@ -13,30 +13,35 @@ import com.strikeprotocols.mobile.data.models.ApprovalDisposition
 import com.strikeprotocols.mobile.data.models.approval.*
 import com.strikeprotocols.mobile.data.models.approval.AccountType.*
 import com.strikeprotocols.mobile.ui.theme.GreyText
-import com.strikeprotocols.mobile.ui.theme.MoneyRed
+
 
 fun SolanaApprovalRequestType.getApprovalTypeDialogTitle(context: Context): String {
-    return when (this) {
-        is SolanaApprovalRequestType.WithdrawalRequest ->
-            context.getString(R.string.transfer_dialog_title)
-        is SolanaApprovalRequestType.UnknownApprovalType ->
-            context.getString(R.string.unknown_dialog_title)
-        is SolanaApprovalRequestType.ConversionRequest ->
-            context.getString(R.string.conversion_dialog_title)
-        is SolanaApprovalRequestType.SignersUpdate ->
-            context.getString(R.string.signers_update_dialog_title)
+    val stringResId = when (this) {
+        is SolanaApprovalRequestType.WithdrawalRequest -> R.string.transfer_dialog_title
+        is SolanaApprovalRequestType.UnknownApprovalType -> R.string.unknown_dialog_title
+        is SolanaApprovalRequestType.ConversionRequest -> R.string.conversion_dialog_title
+        is SolanaApprovalRequestType.SignersUpdate -> R.string.signers_update_dialog_title
+        is SolanaApprovalRequestType.DAppTransactionRequest -> R.string.dapp_transaction_dialog_title
+        is SolanaApprovalRequestType.LoginApprovalRequest -> R.string.login_approval_dialog_title
+        is SolanaApprovalRequestType.WrapConversionRequest -> R.string.wrap_conversion_dialog_title
+        is SolanaApprovalRequestType.WalletConfigPolicyUpdate -> R.string.wallet_config_dialog_title
+        is SolanaApprovalRequestType.BalanceAccountSettingsUpdate -> R.string.balance_account_settings_dialog_title
+        is SolanaApprovalRequestType.DAppBookUpdate -> R.string.dapp_book_update_dialog_title
+        is SolanaApprovalRequestType.AddressBookUpdate -> R.string.address_book_dialog_title
+        is SolanaApprovalRequestType.BalanceAccountNameUpdate -> R.string.balance_account_name_dialog_title
+        is SolanaApprovalRequestType.BalanceAccountPolicyUpdate -> R.string.balance_account_policy_dialog_title
+        is SolanaApprovalRequestType.SPLTokenAccountCreation -> R.string.spl_token_account_dialog_title
+        is SolanaApprovalRequestType.BalanceAccountAddressWhitelistUpdate -> R.string.balance_acct_whitelist_update_dialog_title
         is SolanaApprovalRequestType.BalanceAccountCreation -> {
             if (accountInfo.accountType == BalanceAccount) {
-                context.getString(R.string.balance_account_creation_dialog_title)
+                R.string.balance_account_creation_dialog_title
             } else {
-                context.getString(R.string.stake_account_creation_dialog_title)
+                R.string.stake_account_creation_dialog_title
             }
         }
-        is SolanaApprovalRequestType.DAppTransactionRequest ->
-            context.getString(R.string.dapp_transaction_dialog_title)
-        is SolanaApprovalRequestType.LoginApprovalRequest ->
-            context.getString(R.string.login_approval_dialog_title)
     }
+
+    return context.getString(stringResId)
 }
 
 fun SolanaApprovalRequestType.getDialogFullMessage(
@@ -95,6 +100,12 @@ fun SolanaApprovalRequestType.getApprovalRowMetaData(context: Context): Approval
                 approvalTypeTitle = context.getString(R.string.login_approval_title),
             )
         }
+
+        else -> ApprovalRowMetaData(
+            approvalImageVector = Icons.Filled.Login,
+            approvalImageContentDescription = context.getString(R.string.login_icon_content_desc),
+            approvalTypeTitle = context.getString(R.string.login_approval_title)
+        )
     }
 }
 
@@ -131,6 +142,34 @@ private fun SolanaApprovalRequestType.getApprovalTypeDialogMessage(context: Cont
             "${context.getString(R.string.a_dapp_transaction_with_dialog_message)} ${dappInfo.name}"
         is SolanaApprovalRequestType.LoginApprovalRequest ->
             context.getString(R.string.login_approval_dialog_message)
+
+        is SolanaApprovalRequestType.WrapConversionRequest -> {
+            "${context.getString(R.string.a_conversion_of_dialog_message)} ${symbolAndAmountInfo.formattedAmount()} ${symbolAndAmountInfo.symbolInfo.symbol} to ${destinationSymbolInfo.symbol}"
+        }
+        is SolanaApprovalRequestType.WalletConfigPolicyUpdate -> {
+            context.getString(R.string.vault_config_policy_update_dialog_message)
+        }
+        is SolanaApprovalRequestType.BalanceAccountSettingsUpdate -> {
+            "${context.getString(R.string.settings_update_for_dialog_message)} ${account.name}"
+        }
+        is SolanaApprovalRequestType.DAppBookUpdate -> {
+            context.getString(R.string.dapp_book_update_dialog_message)
+        }
+        is SolanaApprovalRequestType.AddressBookUpdate -> {
+            context.getString(R.string.address_book_update_dialog_message)
+        }
+        is SolanaApprovalRequestType.BalanceAccountNameUpdate -> {
+            "${context.getString(R.string.wallet_name_change_to_dialog_message)} $newAccountName"
+        }
+        is SolanaApprovalRequestType.BalanceAccountPolicyUpdate -> {
+            "${context.getString(R.string.policy_update_for_dialog_message)} ${accountInfo.name}"
+        }
+        is SolanaApprovalRequestType.SPLTokenAccountCreation -> {
+            "${context.getString(R.string.spl_token_account_dialog_message)} ${tokenSymbolInfo.symbolDescription}"
+        }
+        is SolanaApprovalRequestType.BalanceAccountAddressWhitelistUpdate -> {
+            "${context.getString(R.string.balance_account_whitelist_dialog_message)} ${accountInfo.name}"
+        }
     }
 }
 

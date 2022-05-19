@@ -4,13 +4,13 @@ import com.strikeprotocols.mobile.common.Resource
 import com.strikeprotocols.mobile.data.models.approval.WalletApproval
 import com.strikeprotocols.mobile.presentation.approval_detail.ConfirmDispositionDialogDetails
 import com.strikeprotocols.mobile.presentation.approval_disposition.ApprovalDispositionState
-import com.strikeprotocols.mobile.presentation.blockhash.BlockHashViewModel.BlockHash
+import com.strikeprotocols.mobile.presentation.durable_nonce.DurableNonceViewModel
 
 data class ApprovalsState(
     val shouldShowErrorSnackbar: Boolean = false,
     val shouldDisplayConfirmDisposition: ConfirmDispositionDialogDetails? = null,
     val shouldDisplayApprovalDispositionError: Boolean = false,
-    val blockHash: BlockHash? = null,
+    val multipleAccounts: DurableNonceViewModel.MultipleAccounts? = null,
 
     //Async Data
     val approvalDispositionState: ApprovalDispositionState? = ApprovalDispositionState(),
