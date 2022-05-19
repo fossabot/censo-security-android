@@ -28,6 +28,7 @@ import com.google.android.gms.auth.api.credentials.*
 import com.strikeprotocols.mobile.R
 import com.strikeprotocols.mobile.common.BaseWrapper
 import com.strikeprotocols.mobile.common.Resource
+import com.strikeprotocols.mobile.common.getAuthFlowErrorMessage
 import com.strikeprotocols.mobile.data.CredentialsProvider
 import com.strikeprotocols.mobile.data.CredentialsProviderImpl
 import com.strikeprotocols.mobile.data.CredentialsProviderImpl.Companion.INTENT_FAILED
@@ -304,6 +305,45 @@ fun SignInScreen(
                 viewModel.resetRetrieveCredential()
             }
         )
+    }
+
+    if (state.authFlowException is Resource.Success) {
+        AlertDialog(
+            backgroundColor = UnfocusedGrey,
+            onDismissRequest = {
+                viewModel.resetAuthFlowException()
+                viewModel.resetLoginCall()
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        viewModel.resetAuthFlowException()
+                        viewModel.resetLoginCall()
+                    }
+                )
+                {
+                    Text(text = stringResource(R.string.ok))
+                }
+            },
+            title = {
+                Text(
+                    text = stringResource(R.string.login_failed_title),
+                    color = StrikeWhite,
+                    fontSize = 20.sp
+                )
+            },
+            text = {
+                Text(
+                    text = getAuthFlowErrorMessage(
+                        e = state.authFlowException.data ?: Exception(),
+                        context = LocalContext.current
+                    ),
+                    color = StrikeWhite,
+                    fontSize = 16.sp
+                )
+            }
+        )
+        viewModel.loadingFinished()
     }
     //endregion
 }

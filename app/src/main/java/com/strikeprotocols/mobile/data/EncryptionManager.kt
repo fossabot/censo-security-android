@@ -12,13 +12,14 @@ import org.bouncycastle.crypto.params.Ed25519KeyGenerationParameters
 import org.bouncycastle.crypto.params.Ed25519PrivateKeyParameters
 import org.bouncycastle.crypto.params.Ed25519PublicKeyParameters
 import org.bouncycastle.crypto.signers.Ed25519Signer
+import com.strikeprotocols.mobile.data.EncryptionManagerException.*
 import java.security.SecureRandom
 import javax.crypto.Cipher
 import javax.crypto.spec.GCMParameterSpec
 import javax.crypto.spec.SecretKeySpec
 import javax.inject.Inject
 
-fun generateEphemeralPrivateKey() : Ed25519PrivateKeyParameters {
+fun generateEphemeralPrivateKey(): Ed25519PrivateKeyParameters {
     val keyPairGenerator: AsymmetricCipherKeyPairGenerator = Ed25519KeyPairGenerator()
     keyPairGenerator.init(Ed25519KeyGenerationParameters(SecureRandom()))
     val keyPair = keyPairGenerator.generateKeyPair()
@@ -31,61 +32,82 @@ interface EncryptionManager {
         signable: Signable,
         userEmail: String
     ): String
+
     fun signApprovalInitiationMessage(
         ephemeralPrivateKey: ByteArray,
         signable: Signable,
         userEmail: String
     ): String
+
     fun signatures(
         userEmail: String,
         signableSupplyInstructions: SignableSupplyInstructions
     ): List<String>
+
     fun signData(data: ByteArray, privateKey: ByteArray): ByteArray
     fun verifyData(data: ByteArray, signature: ByteArray, publicKey: ByteArray): Boolean
     fun encrypt(message: ByteArray, generatedPassword: ByteArray): ByteArray
     fun decrypt(encryptedMessage: ByteArray, generatedPassword: ByteArray): ByteArray
     fun generatePassword(): ByteArray
-    fun verifyKeyPair(encryptedPrivateKey: String?, publicKey: String?, symmetricKey: String?): Boolean
+    fun verifyKeyPair(
+        encryptedPrivateKey: String?,
+        publicKey: String?,
+        symmetricKey: String?
+    ): Boolean
+
     fun regeneratePublicKey(mainKey: String): String
 }
 
-class EncryptionManagerImpl @Inject constructor(private val securePreferences: SecurePreferences) : EncryptionManager {
+class EncryptionManagerImpl @Inject constructor(private val securePreferences: SecurePreferences) :
+    EncryptionManager {
 
     //region interface methods
     override fun signData(data: ByteArray, privateKey: ByteArray): ByteArray {
-        val privateKeyParam = Ed25519PrivateKeyParameters(privateKey.inputStream())
+        try {
+            val privateKeyParam = Ed25519PrivateKeyParameters(privateKey.inputStream())
 
-        val signer = Ed25519Signer()
-        signer.init(true, privateKeyParam)
-        signer.update(data, NO_OFFSET_INDEX, data.size)
+            val signer = Ed25519Signer()
+            signer.init(true, privateKeyParam)
+            signer.update(data, NO_OFFSET_INDEX, data.size)
 
-        return signer.generateSignature()
+            return signer.generateSignature()
+        } catch (e: Exception) {
+            throw SignDataException()
+        }
     }
 
     override fun verifyData(data: ByteArray, signature: ByteArray, publicKey: ByteArray): Boolean {
-        val publicKeyParameter = Ed25519PublicKeyParameters(publicKey.inputStream())
+        try {
+            val publicKeyParameter = Ed25519PublicKeyParameters(publicKey.inputStream())
 
-        val verifier = Ed25519Signer()
-        verifier.init(false, publicKeyParameter)
-        verifier.update(data, NO_OFFSET_INDEX, data.size)
+            val verifier = Ed25519Signer()
+            verifier.init(false, publicKeyParameter)
+            verifier.update(data, NO_OFFSET_INDEX, data.size)
 
-        return verifier.verifySignature(signature)
+            return verifier.verifySignature(signature)
+        } catch (e: Exception) {
+            throw VerifyFailedException()
+        }
     }
 
     override fun createKeyPair(): StrikeKeyPair {
-        val keyPairGenerator: AsymmetricCipherKeyPairGenerator = Ed25519KeyPairGenerator()
-        keyPairGenerator.init(Ed25519KeyGenerationParameters(SecureRandom()))
-        val keyPair = keyPairGenerator.generateKeyPair()
-        val privateKey = (keyPair.private as Ed25519PrivateKeyParameters).encoded
-        val publicKey = (keyPair.public as Ed25519PublicKeyParameters).encoded
+        try {
+            val keyPairGenerator: AsymmetricCipherKeyPairGenerator = Ed25519KeyPairGenerator()
+            keyPairGenerator.init(Ed25519KeyGenerationParameters(SecureRandom()))
+            val keyPair = keyPairGenerator.generateKeyPair()
+            val privateKey = (keyPair.private as Ed25519PrivateKeyParameters).encoded
+            val publicKey = (keyPair.public as Ed25519PublicKeyParameters).encoded
 
-        return StrikeKeyPair(privateKey = privateKey, publicKey = publicKey)
+            return StrikeKeyPair(privateKey = privateKey, publicKey = publicKey)
+        } catch (e: Exception) {
+            throw KeyPairGenerationFailedException()
+        }
     }
 
     override fun signApprovalDispositionMessage(signable: Signable, userEmail: String): String {
         val mainKey = securePreferences.retrievePrivateKey(userEmail)
 
-        if(mainKey.isEmpty()) {
+        if (mainKey.isEmpty()) {
             throw NoKeyDataException
         }
 
@@ -143,11 +165,19 @@ class EncryptionManagerImpl @Inject constructor(private val securePreferences: S
     }
 
     override fun encrypt(message: ByteArray, generatedPassword: ByteArray): ByteArray {
-        return getCipher(Cipher.ENCRYPT_MODE, generatedPassword).doFinal(message)
+        try {
+            return getCipher(Cipher.ENCRYPT_MODE, generatedPassword).doFinal(message)
+        } catch (e: Exception) {
+            throw EncryptionFailedException()
+        }
     }
 
     override fun decrypt(encryptedMessage: ByteArray, generatedPassword: ByteArray): ByteArray {
-        return getCipher(Cipher.DECRYPT_MODE, generatedPassword).doFinal(encryptedMessage)
+        try {
+            return getCipher(Cipher.DECRYPT_MODE, generatedPassword).doFinal(encryptedMessage)
+        } catch (e: Exception) {
+            throw DecryptionFailedException()
+        }
     }
 
     override fun generatePassword(): ByteArray =
@@ -159,32 +189,41 @@ class EncryptionManagerImpl @Inject constructor(private val securePreferences: S
         symmetricKey: String?
     ): Boolean {
         if (encryptedPrivateKey.isNullOrEmpty()
-            || publicKey.isNullOrEmpty() || symmetricKey.isNullOrEmpty()) {
+            || publicKey.isNullOrEmpty() || symmetricKey.isNullOrEmpty()
+        ) {
             return false
         }
 
-        val decryptionKey = BaseWrapper.decode(symmetricKey)
-        val base58EncryptedPrivateKey = BaseWrapper.decode(encryptedPrivateKey)
-        val base58PublicKey = BaseWrapper.decode(publicKey)
-        val decryptedPrivateKey = decrypt(base58EncryptedPrivateKey, decryptionKey)
-        val signData = signData(DATA_CHECK, decryptedPrivateKey)
-        return verifyData(DATA_CHECK, signData, base58PublicKey)
+        try {
+            val decryptionKey = BaseWrapper.decode(symmetricKey)
+            val base58EncryptedPrivateKey = BaseWrapper.decode(encryptedPrivateKey)
+            val base58PublicKey = BaseWrapper.decode(publicKey)
+            val decryptedPrivateKey = decrypt(base58EncryptedPrivateKey, decryptionKey)
+            val signedData = signData(DATA_CHECK, decryptedPrivateKey)
+            return verifyData(DATA_CHECK, signedData, base58PublicKey)
+        } catch (e: Exception) {
+            throw VerifyFailedException()
+        }
     }
 
     override fun regeneratePublicKey(mainKey: String): String {
-        val base58PrivateKey = BaseWrapper.decode(mainKey)
-        val privateKeyParam = Ed25519PrivateKeyParameters(base58PrivateKey.inputStream())
+        try {
+            val base58PrivateKey = BaseWrapper.decode(mainKey)
+            val privateKeyParam = Ed25519PrivateKeyParameters(base58PrivateKey.inputStream())
 
-        val publicKey = privateKeyParam.generatePublicKey()
+            val publicKey = privateKeyParam.generatePublicKey()
 
-        return BaseWrapper.encode(publicKey.encoded)
+            return BaseWrapper.encode(publicKey.encoded)
+        } catch (e: Exception) {
+            throw PublicKeyRegenerationFailedException()
+        }
     }
     //endregion
 
     //region helper methods
     private fun getCipher(opMode: Int, password: ByteArray): Cipher {
 
-        if(password.size != IV_AND_KEY_COMBINED_LENGTH) {
+        if (password.size != IV_AND_KEY_COMBINED_LENGTH) {
             throw IllegalStateException("iv and key are not the correct size")
         }
 

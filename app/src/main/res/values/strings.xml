@@ -51,6 +51,7 @@
     <string name="pull_to_refresh">Pull down to refresh approvals</string>
     <string name="content_des_pull_to_refresh_icon">Pull down to refresh icon</string>
     <string name="snackbar_refresh_error">Something went wrong, please try again</string>
+    <string name="auth_flow_exception">Something went wrong, please try again</string>
 
     <string name="logout">Sign Out</string>
 
@@ -166,5 +167,11 @@
     <string name="spl_token_account_dialog_title">SPL Token Account Creation</string>
     <string name="balance_acct_whitelist_update_dialog_title">Replace Transfer Whitelist</string>
     <string name="balance_account_whitelist_dialog_message">transfer whitelist update for</string>
+    <string name="key_pair_generation_failed">Unable to generate key pair for device. Please retry.</string>
+    <string name="decryption_failed">Unable to decrypt data. Please retry.</string>
+    <string name="encryption_failed">Unable to encrypt data. Please retry.</string>
+    <string name="key_regeneration_failed">Unable to regenerate key pair. Please retry.</string>
+    <string name="sign_data_failed">Unable to sign data. Please retry.</string>
+    <string name="verify_key_failed">Unable to verify data. Please retry.</string>
 
 </resources>
