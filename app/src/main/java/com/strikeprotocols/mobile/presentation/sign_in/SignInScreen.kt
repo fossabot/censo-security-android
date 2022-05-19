@@ -29,6 +29,7 @@ import com.strikeprotocols.mobile.R
 import com.strikeprotocols.mobile.common.BaseWrapper
 import com.strikeprotocols.mobile.common.Resource
 import com.strikeprotocols.mobile.common.getAuthFlowErrorMessage
+import com.strikeprotocols.mobile.common.strikeLog
 import com.strikeprotocols.mobile.data.CredentialsProvider
 import com.strikeprotocols.mobile.data.CredentialsProviderImpl
 import com.strikeprotocols.mobile.data.CredentialsProviderImpl.Companion.INTENT_FAILED
@@ -105,6 +106,7 @@ fun SignInScreen(
         if (state.saveCredential is Resource.Success) {
             viewModel.attemptAddWalletSigner()
             viewModel.resetSaveCredential()
+            viewModel.resetShouldDisplaySmartLockDialog()
         }
 
         if (state.addWalletSignerResult is Resource.Success)  {
@@ -274,6 +276,7 @@ fun SignInScreen(
     }
 
     if(state.saveCredential is Resource.Error) {
+        viewModel.resetShouldDisplaySmartLockDialog()
         viewModel.loadingFinished()
         SmartLockAlertDialog(
             dialogTitle = stringResource(R.string.smart_lock_dialog_fail_title),

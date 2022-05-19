@@ -53,12 +53,13 @@ object ValidDummyData {
             id = "cryptoco",
             name = "cryptology"
         ),
-        publicKeys = listOf(
-            WalletPublicKey(
-                key = publicKey,
-                walletType = WalletSigner.WALLET_TYPE_SOLANA
-            )
-        ),
+        publicKeys = emptyList(),
+//        publicKeys = listOf(
+//            WalletPublicKey(
+//                key = publicKey,
+//                walletType = WalletSigner.WALLET_TYPE_SOLANA
+//            )
+//        ),
         useStaticKey = false
     )
 
