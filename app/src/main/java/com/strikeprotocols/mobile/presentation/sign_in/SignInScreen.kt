@@ -33,7 +33,6 @@ import com.strikeprotocols.mobile.data.CredentialsProvider
 import com.strikeprotocols.mobile.data.CredentialsProviderImpl
 import com.strikeprotocols.mobile.data.CredentialsProviderImpl.Companion.INTENT_FAILED
 import com.strikeprotocols.mobile.data.CredentialsProviderImpl.Companion.NO_CREDENTIAL_EXTRA_DATA
-import com.strikeprotocols.mobile.data.SharedPrefsHelper
 import com.strikeprotocols.mobile.presentation.Screen
 import com.strikeprotocols.mobile.presentation.components.SignInTextField
 import com.strikeprotocols.mobile.ui.theme.*
@@ -119,11 +118,6 @@ fun SignInScreen(
             viewModel.resetAddWalletSignersCall()
         }
 
-        if (state.addWalletSignerResult is Resource.Error) {
-            viewModel.resetAddWalletSignersCall()
-            viewModel.attemptAddWalletSigner()
-        }
-
         if (state.regenerateData is Resource.Success) {
             navController.navigate(Screen.BackupCheckRoute.route) {
                 popUpTo(Screen.SignInRoute.route) {
@@ -131,11 +125,6 @@ fun SignInScreen(
                 }
             }
             viewModel.setUserLoggedInSuccess()
-            viewModel.loadingFinished()
-            viewModel.resetRegenerateData()
-        }
-
-        if(state.regenerateData is Resource.Error) {
             viewModel.loadingFinished()
             viewModel.resetRegenerateData()
         }
@@ -303,6 +292,19 @@ fun SignInScreen(
             onConfirm = {
                 viewModel.loadingFinished()
                 viewModel.resetRetrieveCredential()
+            }
+        )
+    }
+
+    if(state.addWalletSignerResult is Resource.Error || state.regenerateData is Resource.Error) {
+        viewModel.loadingFinished()
+        SmartLockAlertDialog(
+            dialogTitle = stringResource(R.string.unable_to_add_wallet_signer_title),
+            dialogText = stringResource(R.string.unable_to_add_wallet_signer_message),
+            onConfirm = {
+                viewModel.loadingFinished()
+                viewModel.resetAddWalletSignersCall()
+                viewModel.resetRegenerateData()
             }
         )
     }

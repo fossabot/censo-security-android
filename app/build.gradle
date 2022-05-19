@@ -110,7 +110,7 @@ android {
         preRelease {
             resValue "string", "app_name", "$appName (Develop)"
             applicationIdSuffix ".prerelease"
-            minifyEnabled true
+            minifyEnabled false
             buildConfigField "String", "BASE_URL", "\"https://brooklyn-prerelease.strikeprotocols.com/\""
             buildConfigField "String", "SOLANA_URL", "\"https://solana-validator-prerelease.strikeprotocols.com\""
             buildConfigField "String", "SOLANA_COMMITMENT", "\"confirmed\""
@@ -200,7 +200,7 @@ dependencies {
     implementation "com.squareup.okhttp3:logging-interceptor:$okhttp_version"
 
     //Firebase BOM
-    implementation platform('com.google.firebase:firebase-bom:30.0.1')
+    implementation platform('com.google.firebase:firebase-bom:30.0.2')
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.6.0'
 
     //Push Notifications

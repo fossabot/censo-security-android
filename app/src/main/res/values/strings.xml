@@ -173,5 +173,7 @@
     <string name="key_regeneration_failed">Unable to regenerate key pair. Please retry.</string>
     <string name="sign_data_failed">Unable to sign data. Please retry.</string>
     <string name="verify_key_failed">Unable to verify data. Please retry.</string>
+    <string name="unable_to_add_wallet_signer_title">Unable To Add Wallet Signer</string>
+    <string name="unable_to_add_wallet_signer_message">We were unable to add the wallet signer to the app. Please retry login, or close the app and login again.</string>
 
 </resources>
