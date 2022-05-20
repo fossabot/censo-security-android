@@ -299,6 +299,30 @@ fun SignInScreen(
         )
     }
 
+    if (state.verifyUserResult is Resource.Error) {
+        viewModel.loadingFinished()
+        SmartLockAlertDialog(
+            dialogTitle = stringResource(R.string.verify_user_fail_title),
+            dialogText = stringResource(R.string.verify_user_fail_message),
+            onConfirm = {
+                viewModel.loadingFinished()
+                viewModel.resetVerifyUserResult()
+            }
+        )
+    }
+
+    if (state.walletSignersResult is Resource.Error) {
+        viewModel.loadingFinished()
+        SmartLockAlertDialog(
+            dialogTitle = stringResource(R.string.wallet_signers_fail_title),
+            dialogText = stringResource(R.string.wallet_signers_fail_message),
+            onConfirm = {
+                viewModel.loadingFinished()
+                viewModel.resetWalletSignersCall()
+            }
+        )
+    }
+
     if(state.addWalletSignerResult is Resource.Error || state.regenerateData is Resource.Error) {
         viewModel.loadingFinished()
         SmartLockAlertDialog(

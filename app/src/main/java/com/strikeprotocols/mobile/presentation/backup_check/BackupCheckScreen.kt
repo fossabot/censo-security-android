@@ -7,7 +7,6 @@ import android.provider.Settings
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Button
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -16,11 +15,14 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
 import com.strikeprotocols.mobile.R
-import com.strikeprotocols.mobile.common.strikeLog
 import com.strikeprotocols.mobile.presentation.Screen
+import com.strikeprotocols.mobile.presentation.backup_check.BackupSettingsActivity.Companion.BACKUP_CLASS
+import com.strikeprotocols.mobile.presentation.backup_check.BackupSettingsActivity.Companion.PACKAGE
+import com.strikeprotocols.mobile.presentation.backup_check.BackupSettingsActivity.Companion.USER_BACKUP_CLASS
 import com.strikeprotocols.mobile.ui.theme.StrikeWhite
 
 @Composable
@@ -33,7 +35,7 @@ fun BackupCheckScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp)
+            .padding(vertical = 16.dp, horizontal = 24.dp)
             .clickable {
                 navController.navigate(Screen.ApprovalListRoute.route) {
                     popUpTo(Screen.BackupCheckRoute.route) {
@@ -46,41 +48,52 @@ fun BackupCheckScreen(
     ) {
         Text(
             text = stringResource(id = R.string.enabling_backup_settings),
+            fontSize = 20.sp,
             textAlign = TextAlign.Center,
-            style = MaterialTheme.typography.h6,
             color = StrikeWhite
         )
         Spacer(modifier = Modifier.height(24.dp))
         Text(
             text = stringResource(id = R.string.head_to_your_device_backup_settings),
+            fontSize = 20.sp,
             textAlign = TextAlign.Center,
-            style = MaterialTheme.typography.h6,
             color = StrikeWhite
         )
         Spacer(modifier = Modifier.height(24.dp))
 
         var intent = Intent()
-        if (isBackupSettingsActivityInstalled(packageManager)) {
+        if (isBackupSettingsActivityInstalled(packageManager, BACKUP_CLASS)) {
             intent.component = ComponentName(
-                BackupSettingsActivity.PACKAGE.value,
-                BackupSettingsActivity.CLASS.value
+                PACKAGE,
+                BACKUP_CLASS
+            )
+        } else if (isBackupSettingsActivityInstalled(packageManager, USER_BACKUP_CLASS)) {
+            intent.component = ComponentName(
+                PACKAGE,
+                USER_BACKUP_CLASS
             )
         } else {
             intent = Intent(Settings.ACTION_SETTINGS)
         }
 
-        Button(onClick = {
+        Button(
+            modifier = Modifier.padding(16.dp),
+            onClick = {
             ContextCompat.startActivity(context, intent, null)
         }) {
-            Text(text = stringResource(R.string.backup_deeplink_device_settings))
+            Text(
+                text = stringResource(R.string.backup_deeplink_device_settings),
+                color = StrikeWhite,
+                fontSize = 20.sp
+            )
         }
     }
 }
 
-fun isBackupSettingsActivityInstalled(packageManager: PackageManager) : Boolean {
+fun isBackupSettingsActivityInstalled(packageManager: PackageManager, className: String): Boolean {
     val activityComponentName = ComponentName(
-        BackupSettingsActivity.PACKAGE.value,
-        BackupSettingsActivity.CLASS.value
+        PACKAGE,
+        className
     )
 
     return try {
@@ -91,7 +104,10 @@ fun isBackupSettingsActivityInstalled(packageManager: PackageManager) : Boolean 
     }
 }
 
-enum class BackupSettingsActivity(val value: String) {
-    PACKAGE("com.android.settings"),
-    CLASS("com.android.settings.backup.BackupSettingsActivity")
+class BackupSettingsActivity(val value: String) {
+    companion object {
+        const val PACKAGE = "com.android.settings"
+        const val BACKUP_CLASS = "com.android.settings.backup.BackupSettingsActivity"
+        const val USER_BACKUP_CLASS = "com.android.settings.backup.UserBackupSettingsActivity"
+    }
 }
