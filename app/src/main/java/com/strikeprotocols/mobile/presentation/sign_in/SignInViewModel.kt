@@ -14,6 +14,8 @@ import com.strikeprotocols.mobile.data.CredentialsProviderImpl.Companion.CREDENT
 import com.strikeprotocols.mobile.data.NoInternetException.Companion.NO_INTERNET_ERROR
 import com.strikeprotocols.mobile.data.models.PushBody
 import com.strikeprotocols.mobile.data.models.VerifyUser
+import com.strikeprotocols.mobile.data.models.WalletSigner
+import com.strikeprotocols.mobile.presentation.sign_in.SignInState.Companion.DEFAULT_SIGN_IN_ERROR_MESSAGE
 import kotlinx.coroutines.*
 import kotlinx.coroutines.tasks.await
 
@@ -69,10 +71,17 @@ class SignInViewModel @Inject constructor(
         }
 
         viewModelScope.launch(Dispatchers.IO + coroutineExceptionHandler) {
-            val verifyUserData = userRepository.verifyUser()
-            state = state.copy(verifyUserResult = Resource.Success(verifyUserData))
-
-            handleAuthFlow(verifyUserData)
+            try {
+                val verifyUserData = userRepository.verifyUser()
+                state = state.copy(verifyUserResult = Resource.Success(verifyUserData))
+                handleAuthFlow(verifyUserData)
+            } catch (e: Exception) {
+                state = state.copy(
+                    verifyUserResult = Resource.Error(
+                        e.message ?: DEFAULT_SIGN_IN_ERROR_MESSAGE
+                    )
+                )
+            }
         }
     }
 
@@ -109,7 +118,9 @@ class SignInViewModel @Inject constructor(
                     val walletSigner = userRepository.addWalletSigner(safeInitialAuthData.walletSignerBody)
                     state.copy(addWalletSignerResult = Resource.Success(walletSigner))
                 } catch (e: Exception) {
-                    state.copy(addWalletSignerResult = Resource.Error(e.message ?: "DEFAULT_ADD_WALLET_SIGNER_CALL_FAILED"))
+                    state.copy(addWalletSignerResult =
+                        Resource.Error(e.message ?: DEFAULT_SIGN_IN_ERROR_MESSAGE)
+                    )
                 }
             }
         }
@@ -138,10 +149,6 @@ class SignInViewModel @Inject constructor(
         state = state.copy(regenerateData = Resource.Uninitialized)
     }
 
-    fun resetVerifyCall() {
-        state = state.copy(verifyUserResult = Resource.Uninitialized)
-    }
-
     fun resetWalletSignersCall() {
         state = state.copy(walletSignersResult = Resource.Uninitialized)
     }
@@ -164,6 +171,10 @@ class SignInViewModel @Inject constructor(
 
     fun resetAuthFlowException() {
         state = state.copy(authFlowException = Resource.Uninitialized)
+    }
+
+    fun resetVerifyUserResult() {
+        state = state.copy(verifyUserResult = Resource.Uninitialized)
     }
     //endregion
 
@@ -250,7 +261,12 @@ class SignInViewModel @Inject constructor(
             return UserAuthFlow.LOCAL_KEY_PRESENT_NO_BACKEND_KEYS
         }
 
-        val walletSigners = userRepository.getWalletSigners()
+        val walletSigners: List<WalletSigner?> =
+            try {
+                userRepository.getWalletSigners()
+            } catch (e: Exception) {
+                throw WalletSignersException()
+            }
 
         if(savedEncryption.isEmpty()) {
             return UserAuthFlow.EXISTING_BACKEND_KEY_LOCAL_KEY_MISSING
@@ -309,7 +325,14 @@ class SignInViewModel @Inject constructor(
     }
 
     private fun handleEncryptionManagerException(exception: Exception) {
-        state = state.copy(authFlowException = Resource.Success(exception))
+        state = if(exception is WalletSignersException) {
+            state.copy(
+                walletSignersResult =
+                Resource.Error(exception.message ?: DEFAULT_SIGN_IN_ERROR_MESSAGE)
+            )
+        } else {
+            state.copy(authFlowException = Resource.Success(exception))
+        }
     }
 
     private suspend fun restartAuthFlow() {

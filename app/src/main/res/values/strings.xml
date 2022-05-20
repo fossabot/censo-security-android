@@ -77,7 +77,7 @@
     <string name="biometry_unavailable_message">This app requires biometry functionality to be used, unfortunately this device does not have biometry functionality.</string>
     <string name="biometry_deeplink_device_settings">Device Biometry Settings</string>
 
-    <string name="enabling_backup_settings">The credentials this app saves to the device are required for performing any approvals or denials from the app . It is highly recommended to enable backup settings for this device, so if the device is lost or stolen, we can recover your lost credentials.</string>
+    <string name="enabling_backup_settings">The credentials this app saves to the device are required for performing any approvals or denials from the app .\n\nIt is highly recommended to enable backup settings for this device, so if the device is lost or stolen, we can recover your lost credentials.</string>
     <string name="head_to_your_device_backup_settings">Head to your device backup settings and make sure they are enabled.</string>
     <string name="backup_deeplink_device_settings">Device Backup Settings</string>
 
@@ -175,5 +175,12 @@
     <string name="verify_key_failed">Unable to verify data. Please retry.</string>
     <string name="unable_to_add_wallet_signer_title">Unable To Add Wallet Signer</string>
     <string name="unable_to_add_wallet_signer_message">We were unable to add the wallet signer to the app. Please retry login, or close the app and login again.</string>
+
+    <string name="verify_user_fail_title">Unable To Retrieve User Details</string>
+    <string name="verify_user_fail_message">We were unable to retrieve user details to complete login.\n\nPlease try again.</string>
+
+    <string name="wallet_signers_fail_title">Unable To Retrieve User Wallet</string>
+    <string name="wallet_signers_fail_message">We were unable to retrieve user wallet details to complete login.\n\nPlease try again.</string>
+
 
 </resources>
