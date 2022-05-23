@@ -17,11 +17,7 @@ import com.strikeprotocols.mobile.R
 import com.strikeprotocols.mobile.common.convertSecondsIntoCountdownText
 import com.strikeprotocols.mobile.data.models.approval.SolanaApprovalRequestType
 import com.strikeprotocols.mobile.data.models.approval.WalletApproval
-import com.strikeprotocols.mobile.presentation.approval_detail.approval_type_detail_items.ConversionDetailContent
-import com.strikeprotocols.mobile.presentation.approval_detail.approval_type_detail_items.BalanceAccountDetailContent
-import com.strikeprotocols.mobile.presentation.approval_detail.approval_type_detail_items.DAppDetailContent
-import com.strikeprotocols.mobile.presentation.approval_detail.approval_type_detail_items.SignersUpdateDetailContent
-import com.strikeprotocols.mobile.presentation.approval_detail.approval_type_detail_items.WithdrawalRequestDetailContent
+import com.strikeprotocols.mobile.presentation.approval_detail.approval_type_detail_items.*
 import com.strikeprotocols.mobile.presentation.approvals.approval_type_row_items.*
 import com.strikeprotocols.mobile.ui.theme.*
 import java.util.*
@@ -146,6 +142,24 @@ fun ApprovalRowContent(
             DAppRowContent(dAppWalletApproval = type)
         is SolanaApprovalRequestType.LoginApprovalRequest ->
             LoginApprovalRowContent(loginApproval = type)
+        is SolanaApprovalRequestType.AddressBookUpdate -> 
+            AddressBookUpdateRowContent(addressBookUpdate = null)
+        is SolanaApprovalRequestType.BalanceAccountAddressWhitelistUpdate -> 
+            BalanceAccountAddressWhitelistUpdateRowContent(accountAddressWhitelistUpdate = null)
+        is SolanaApprovalRequestType.BalanceAccountNameUpdate -> 
+            BalanceAccountNameUpdateRowContent(accountNameUpdate = null)
+        is SolanaApprovalRequestType.BalanceAccountPolicyUpdate -> 
+            BalanceAccountPolicyUpdateRowContent(accountPolicyUpdate = null)
+        is SolanaApprovalRequestType.BalanceAccountSettingsUpdate -> 
+            BalanceAccountSettingsUpdateRowContent(accountSettingsUpdate = null)
+        is SolanaApprovalRequestType.DAppBookUpdate -> 
+            DAppBookUpdateRowContent(dAppBookUpdate = null)
+        is SolanaApprovalRequestType.SPLTokenAccountCreation -> 
+            SPLTokenAccountCreationRowContent(splTokenAccountCreation = null)
+        is SolanaApprovalRequestType.WalletConfigPolicyUpdate -> 
+            WalletConfigPolicyUpdateRowContent(walletConfigPolicyUpdate = null)
+        is SolanaApprovalRequestType.WrapConversionRequest -> 
+            WrapConversionRequestRowContent(wrapConversionRequest = null)
         else -> Text(text = stringResource(R.string.unknown_approval_item))
     }
 }
@@ -179,6 +193,24 @@ fun ApprovalDetailContent(
                 submitterDate = approval.submitDate ?: "",
                 approvalsNeeded = approvalsNeeded
             )
+        is SolanaApprovalRequestType.AddressBookUpdate ->
+            AddressBookUpdateDetailContent(addressBookUpdate = null)
+        is SolanaApprovalRequestType.BalanceAccountAddressWhitelistUpdate ->
+            BalanceAccountAddressWhitelistUpdateDetailContent(addressWhitelistUpdate = null)
+        is SolanaApprovalRequestType.BalanceAccountNameUpdate ->
+            BalanceAccountNameUpdateDetailContent(accountNameUpdate = null)
+        is SolanaApprovalRequestType.BalanceAccountPolicyUpdate ->
+            BalanceAccountPolicyUpdateDetailContent(accountPolicyUpdate = null)
+        is SolanaApprovalRequestType.BalanceAccountSettingsUpdate ->
+            BalanceAccountSettingsUpdateDetailContent(accountSettingsUpdate = null)
+        is SolanaApprovalRequestType.DAppBookUpdate ->
+            DAppBookUpdateDetailContent(dAppBookUpdate = null)
+        is SolanaApprovalRequestType.SPLTokenAccountCreation ->
+            SPLTokenAccountCreationDetailContent(splTokenAccountCreation = null)
+        is SolanaApprovalRequestType.WalletConfigPolicyUpdate ->
+            WalletConfigPolicyUpdateDetailContent(walletConfigPolicyUpdate = null)
+        is SolanaApprovalRequestType.WrapConversionRequest ->
+            WrapConversionRequestDetailContent(wrapConversionRequest = null)
         else -> Text(text = stringResource(R.string.unknown_approval_item))
     }
 }
