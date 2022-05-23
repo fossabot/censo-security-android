@@ -29,6 +29,7 @@ import com.strikeprotocols.mobile.R
 import com.strikeprotocols.mobile.common.*
 import com.strikeprotocols.mobile.common.BiometricUtil.createBioPrompt
 import com.strikeprotocols.mobile.common.BiometricUtil.getBasicBiometricPromptBuilder
+import com.strikeprotocols.mobile.common.GeneralDummyData.generateWalletApprovalsDummyData
 import com.strikeprotocols.mobile.data.models.ApprovalDisposition
 import com.strikeprotocols.mobile.data.models.approval.WalletApproval
 import com.strikeprotocols.mobile.presentation.approvals.ApprovalsViewModel
