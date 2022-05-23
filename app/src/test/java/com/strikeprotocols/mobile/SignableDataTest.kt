@@ -1,26 +1,5 @@
 package com.strikeprotocols.mobile
 
-import com.strikeprotocols.mobile.common.MockedApprovals.getAddAddressBookEntry
-import com.strikeprotocols.mobile.common.MockedApprovals.getAddDAppBookEntry
-import com.strikeprotocols.mobile.common.MockedApprovals.getBalanceAccountAddressWhitelistUpdate
-import com.strikeprotocols.mobile.common.MockedApprovals.getBalanceAccountCreationRequest
-import com.strikeprotocols.mobile.common.MockedApprovals.getBalanceAccountNameUpdate
-import com.strikeprotocols.mobile.common.MockedApprovals.getBalanceAccountPolicyUpdate
-import com.strikeprotocols.mobile.common.MockedApprovals.getBalanceAccountSettingsUpdate
-import com.strikeprotocols.mobile.common.MockedApprovals.getConversionRequest
-import com.strikeprotocols.mobile.common.MockedApprovals.getDAppTransactionRequest
-import com.strikeprotocols.mobile.common.MockedApprovals.getOpAccountCreationInfo
-import com.strikeprotocols.mobile.common.MockedApprovals.getRemoveDAppBookEntry
-import com.strikeprotocols.mobile.common.MockedApprovals.getSPLTokenAccountCreation
-import com.strikeprotocols.mobile.common.MockedApprovals.getSignersUpdateRequest
-import com.strikeprotocols.mobile.common.MockedApprovals.getSignersUpdateWalletRequest
-import com.strikeprotocols.mobile.common.MockedApprovals.getSolWithdrawalRequest
-import com.strikeprotocols.mobile.common.MockedApprovals.getSplWithdrawalRequest
-import com.strikeprotocols.mobile.common.MockedApprovals.getUnwrapConversionRequest
-import com.strikeprotocols.mobile.common.MockedApprovals.getWalletApprovalRequest
-import com.strikeprotocols.mobile.common.MockedApprovals.getWalletConfigPolicyUpdate
-import com.strikeprotocols.mobile.common.MockedApprovals.getWalletInitiationRequest
-import com.strikeprotocols.mobile.common.MockedApprovals.getWrapConversionRequest
 import com.strikeprotocols.mobile.common.toHexString
 import com.strikeprotocols.mobile.data.models.ApprovalDisposition
 import com.strikeprotocols.mobile.data.models.Nonce
@@ -118,11 +97,11 @@ class SignableDataTest {
         )
 
         val approvalRequest = ApprovalDispositionRequest(
-                approvalDisposition = ApprovalDisposition.APPROVE,
-                requestId = request.id!!,
-                requestType = request.getSolanaApprovalRequestType(),
-                nonces =  listOf(Nonce("QRKqHqP5SNEngXrcK2QeAR2nqx9AmwbHrmYF49ZbkEK")),
-                email = "dont care"
+            approvalDisposition = ApprovalDisposition.APPROVE,
+            requestId = request.id!!,
+            requestType = request.getSolanaApprovalRequestType(),
+            nonces =  listOf(Nonce("QRKqHqP5SNEngXrcK2QeAR2nqx9AmwbHrmYF49ZbkEK")),
+            email = "dont care"
         )
 
         Assert.assertEquals(
@@ -159,7 +138,7 @@ class SignableDataTest {
 
         Assert.assertEquals(
             "0301050969ab8cb05413af9614f898a1f1fdfbc07e7ad5eb2eb1d0f1c49f448bd179c71511fa69aa5bb02ddd4a80e4673e541767116f2034406d2f917725045d215bdd3f2ba22d14fd3198775d3b9d1b22d6b48743f502ac2129cdf0094af144febf0666a8574221c4298fd6dd12f8d67ac57a7e3586087ff177defef319a8f2b7ae8a9906a7d517192c568ee08a845f73d29788cf035c3145b21ab344d8062ea9400000ff90e321f14ded704cbb267d1cbd7c0e9ae8c5e3ccbb6f47c95bbf75d5a924a606a7d51718c774c928566398691d5eb68b5eb8a39b4b6d5c73555b21000000000000000000000000000000000000000000000000000000000000000000000000095f6d73715ba2affc6e25f8845e8f18908d92a129f233413b34d675d6fbd03d05ffdcd59d8f12aab0f8644eb0a57db2187baf6cc1e0115a977082f2ecd54120030703030400040400000007020001340000000080b2720000000000b803000000000000095f6d73715ba2affc6e25f8845e8f18908d92a129f233413b34d675d6fbd03d080501050206009901030000000000000000000000000000000000000000000000000000000000000000000000000000000000b59460e652df36f1ffb509cdf44bb3469f9054f93f8f707fe56685cdc6fc9c3300b94e0c79c1fb7db6ff3380f8bd8f09376fb8f87c488f98ec920164e1e3a7417101100e0000000000000100b33db8d45a74ca5c0593ea113efc73528320af0a70713d08f1ec3fa085c9c74c000001",
-                    initiationRequest.retrieveSignableData(approverPublicKey = "3wKxhgiogoCaA2uxPYeH7cy3cG4hxRPogrPmDPLS54iZ")
+            initiationRequest.retrieveSignableData(approverPublicKey = "3wKxhgiogoCaA2uxPYeH7cy3cG4hxRPogrPmDPLS54iZ")
                 .toHexString()
         )
     }
@@ -177,7 +156,7 @@ class SignableDataTest {
         )
         Assert.assertEquals(
             "0201040869ab8cb05413af9614f898a1f1fdfbc07e7ad5eb2eb1d0f1c49f448bd179c71501d86d390e73db0061cc718bad82036d774f115923c2e5e6c675ca99dd41c4fd8e3dffb3877aaf1f737715f58920c52f4fcec66fab4ac69bb95f0ad69e33bcd77c4c8d158b8f7d6a29a29e8f938db7344b356d823531737b5405d71c995eab1a06a7d517192c568ee08a845f73d29788cf035c3145b21ab344d8062ea940000006a7d51718c774c928566398691d5eb68b5eb8a39b4b6d5c73555b21000000000000000000000000000000000000000000000000000000000000000000000000095f6d73715ba2affc6e25f8845e8f18908d92a129f233413b34d675d6fbd03d7c91fdec5cfa84288fc1e5d1732f0cc5ebba8ba90e1720fc85cf8f328bd1529a0206030204000404000000070303010522090132577d9ee7c270f02040c9da6af65a135da4b69c5d57bebdb52e245ecc0f16d8",
-                    approvalRequest.retrieveSignableData(approverPublicKey = "8CpMnz9RNojAZWMyzWirH3Y7vBebkf2965SGmcwgYSY")
+            approvalRequest.retrieveSignableData(approverPublicKey = "8CpMnz9RNojAZWMyzWirH3Y7vBebkf2965SGmcwgYSY")
                 .toHexString(),
         )
     }
@@ -208,7 +187,7 @@ class SignableDataTest {
 
         Assert.assertEquals(
             "0301080e69ab8cb05413af9614f898a1f1fdfbc07e7ad5eb2eb1d0f1c49f448bd179c715f6e8d816af808b1e4407ef06675d067e201881fc785606e3a12eec7c8bccb0712ba22d14fd3198775d3b9d1b22d6b48743f502ac2129cdf0094af144febf0666a8574221c4298fd6dd12f8d67ac57a7e3586087ff177defef319a8f2b7ae8a990be476bc2de9162c6f52a1170d16d263bd60cca5c76b924b8b94690e4c22a10f000000000000000000000000000000000000000000000000000000000000000006a7d517192c568ee08a845f73d29788cf035c3145b21ab344d8062ea9400000ff90e321f14ded704cbb267d1cbd7c0e9ae8c5e3ccbb6f47c95bbf75d5a924a61209c6930f6cb4d8e110eb62f6f9133ec338123ab6822970d5c055e0e0adc33b06a7d51718c774c928566398691d5eb68b5eb8a39b4b6d5c73555b210000000006ddf6e1d765a193d9cbe146ceeb79ac1cb485ed5f5b37913a8cf5857eff00a906a7d517192c5c51218cc94c3d4af17f58daee089ba1fd44e3dbd98a000000008c97258f4e2489f1bb3d1029148e0d830b5a1399daff1084048e7bd8dbe9f859095f6d73715ba2affc6e25f8845e8f18908d92a129f233413b34d675d6fbd03d318efd8bd8dbc9ddab3329f58c5b16054ef3506a1c7c284eb6a13411a94f913f030503030600040400000005020001340000000080b2720000000000b803000000000000095f6d73715ba2affc6e25f8845e8f18908d92a129f233413b34d675d6fbd03d0d0d010704080209000505050a0b0c72070000000000000000000000000000000000000000000000000000000000000000000000000000000000b59460e652df36f1ffb509cdf44bb3469f9054f93f8f707fe56685cdc6fc9c330065cd1d00000000cd62deaa07b0058a44cc8ec7b3a5fc67156a8b6d82bb4223b58d554a624256be",
-                    initiationRequest.retrieveSignableData(approverPublicKey = "3wKxhgiogoCaA2uxPYeH7cy3cG4hxRPogrPmDPLS54iZ")
+            initiationRequest.retrieveSignableData(approverPublicKey = "3wKxhgiogoCaA2uxPYeH7cy3cG4hxRPogrPmDPLS54iZ")
                 .toHexString()
         )
     }
@@ -226,7 +205,7 @@ class SignableDataTest {
         )
         Assert.assertEquals(
             "02010408d5259a75898e5c16f1b0675c496a9f8ee74dd7687f234ba93c0ff09dfee8af3401d86d390e73db0061cc718bad82036d774f115923c2e5e6c675ca99dd41c4fd8e3dffb3877aaf1f737715f58920c52f4fcec66fab4ac69bb95f0ad69e33bcd7515cf7a3ae636d0b1f0ac3f76dc5bafdf519e49df160e0d2f5eb77747a40f23006a7d517192c568ee08a845f73d29788cf035c3145b21ab344d8062ea940000006a7d51718c774c928566398691d5eb68b5eb8a39b4b6d5c73555b210000000000000000000000000000000000000000000000000000000000000000000000000ec4916daf26706bf27b89ecfff6ba56155f1d4ab734f92f008b81d4176076267c91fdec5cfa84288fc1e5d1732f0cc5ebba8ba90e1720fc85cf8f328bd1529a02060302040004040000000703030105220901f5b64c094158e4d4b31dfc38b6c2b28b458a5d9fe0c33f1cb3736318f77f5a52",
-                    approvalRequest.retrieveSignableData(approverPublicKey = "8CpMnz9RNojAZWMyzWirH3Y7vBebkf2965SGmcwgYSY")
+            approvalRequest.retrieveSignableData(approverPublicKey = "8CpMnz9RNojAZWMyzWirH3Y7vBebkf2965SGmcwgYSY")
                 .toHexString()
         )
     }
@@ -257,7 +236,7 @@ class SignableDataTest {
 
         Assert.assertEquals(
             "03010a10d5259a75898e5c16f1b0675c496a9f8ee74dd7687f234ba93c0ff09dfee8af34e34e9cdb62a817da76d5163666c93570c210e7287f7f268c77236b3002156ca08ea1bcb15aa292a9b51b7f05f19d0e27669957b9990a4aa8f9cddc1cf4c56c55515cf7a3ae636d0b1f0ac3f76dc5bafdf519e49df160e0d2f5eb77747a40f230f46cdc8655b9add6c8905bd1247a2ef15870d4076fb39915885d08628a9f22a493c4b438027247811fa84db55c2e6ede640264dad0876d56a8bf819f2cb17bfa06a7d517192c568ee08a845f73d29788cf035c3145b21ab344d8062ea9400000631f065d4a6b93340e8b8a8c3061fd6eb0b7d402fe560fc40a84e9c8ce1ac3035c66b35c237860fd27d95409d452edbd91300bbfe80850fd4841759722b5073106a7d51718c774c928566398691d5eb68b5eb8a39b4b6d5c73555b21000000008df1a38eac809d9806f4e9502bc085aadb4975b84dc3ba062b1ce416efd4b1c5000000000000000000000000000000000000000000000000000000000000000006ddf6e1d765a193d9cbe146ceeb79ac1cb485ed5f5b37913a8cf5857eff00a906a7d517192c5c51218cc94c3d4af17f58daee089ba1fd44e3dbd98a000000008c97258f4e2489f1bb3d1029148e0d830b5a1399daff1084048e7bd8dbe9f8590ec4916daf26706bf27b89ecfff6ba56155f1d4ab734f92f008b81d4176076268201354297cec572707724dac5f6c92613c5a8f04e34fe284c882de8d09a0826030b0303060004040000000b020001340000000080b2720000000000b8030000000000000ec4916daf26706bf27b89ecfff6ba56155f1d4ab734f92f008b81d4176076260f0d010704080209000a050b0c0d0e72070000000000000000000000000000000000000000000000000000000000000000000000000000000000c381ac8c68089013328ad37eda42b285abedc13fef404fc34e56528011ded600f401000000000000f7d1a2ef642101c041a4523de1dd26652402149065ae308c55e1924cb217cb48",
-                    initiationRequest.retrieveSignableData(approverPublicKey = "AbmwBa52qPj5zpWQxeJJ3ZSDRDxnyZMWitrE8nd4mrmi")
+            initiationRequest.retrieveSignableData(approverPublicKey = "AbmwBa52qPj5zpWQxeJJ3ZSDRDxnyZMWitrE8nd4mrmi")
                 .toHexString()
         )
     }
@@ -275,7 +254,7 @@ class SignableDataTest {
         )
         Assert.assertEquals(
             "02010307d2c2e3ac53223ce6b5a6e04fe0f98071cf10a62646b6c1c100f9829afcced04e5335831f99da167bf80d87be098dbaafc9309035be4aedd53460c3571c05b6a0515cf7a3ae636d0b1f0ac3f76dc5bafdf519e49df160e0d2f5eb77747a40f230000000000000000000000000000000000000000000000000000000000000000006a7d517192c568ee08a845f73d29788cf035c3145b21ab344d8062ea940000006a7d51718c774c928566398691d5eb68b5eb8a39b4b6d5c73555b2100000000a78bdd1907176367f56f7fab4bee90dabaa7372794fb0403f75f2a96580998478201354297cec572707724dac5f6c92613c5a8f04e34fe284c882de8d09a082602030302040004040000000603030105220901db20e8ec87e412a88078e810a7dda408df916bd03f429a92a6d3b00fd819e304",
-                    approvalRequest.retrieveSignableData(approverPublicKey = "6bpAbKqWrtXBtdnWqA8YSybGTeyD91u9MNzQuP7641MH")
+            approvalRequest.retrieveSignableData(approverPublicKey = "6bpAbKqWrtXBtdnWqA8YSybGTeyD91u9MNzQuP7641MH")
                 .toHexString()
         )
     }
@@ -306,7 +285,7 @@ class SignableDataTest {
 
         Assert.assertEquals(
             "03010a10d2c2e3ac53223ce6b5a6e04fe0f98071cf10a62646b6c1c100f9829afcced04e17ce130f4d1b123ff7f5f840aee4e9fa5665106de0cf2d1245c2b60f6ade6e245335831f99da167bf80d87be098dbaafc9309035be4aedd53460c3571c05b6a0515cf7a3ae636d0b1f0ac3f76dc5bafdf519e49df160e0d2f5eb77747a40f230d1e5bffc491a1b7890805d162a2cf8f0a2facae1df8579eddfed575e44f958108e829493f87ba7dc9497154a2cf8e656ee9979277f9ac88b5570775e7cb447d106a7d517192c568ee08a845f73d29788cf035c3145b21ab344d8062ea94000001bbc7e99fc43d0c442a698780fa1c7e4bcfbe5f100df263390ef0ab695e1b85aa1a993efade361c637af59e4d387db1aec381df43083f38e789f4bd57280889906a7d51718c774c928566398691d5eb68b5eb8a39b4b6d5c73555b21000000008ac94d970e27bc29711d382b1d5fac3fe82f590485b065e57fcc6e83424110cd000000000000000000000000000000000000000000000000000000000000000006ddf6e1d765a193d9cbe146ceeb79ac1cb485ed5f5b37913a8cf5857eff00a906a7d517192c5c51218cc94c3d4af17f58daee089ba1fd44e3dbd98a000000008c97258f4e2489f1bb3d1029148e0d830b5a1399daff1084048e7bd8dbe9f859a78bdd1907176367f56f7fab4bee90dabaa7372794fb0403f75f2a96580998478201354297cec572707724dac5f6c92613c5a8f04e34fe284c882de8d09a0826030b0303060004040000000b020001340000000080b2720000000000b803000000000000a78bdd1907176367f56f7fab4bee90dabaa7372794fb0403f75f2a96580998470f0d010704080209000a050b0c0d0e72070000000000000000000000000000000000000000000000000000000000000000000000000000000000138543b25e89429dae0ec18a0fa198dc5006898f91b3b99d80a58d65bcdff9d00065cd1d00000000455c311d68d6d25a36bb09d58c4f62e6e637031c29b7fd3bd205b658500739cf",
-                    initiationRequest.retrieveSignableData(approverPublicKey = "6bpAbKqWrtXBtdnWqA8YSybGTeyD91u9MNzQuP7641MH")
+            initiationRequest.retrieveSignableData(approverPublicKey = "6bpAbKqWrtXBtdnWqA8YSybGTeyD91u9MNzQuP7641MH")
                 .toHexString()
         )
     }
@@ -337,7 +316,7 @@ class SignableDataTest {
 
         Assert.assertEquals(
             "0301090fd5259a75898e5c16f1b0675c496a9f8ee74dd7687f234ba93c0ff09dfee8af342a6b6e29ec48d15d528b864b1d58f441b263ed5f24db504928f6090efc8cb41d0b5e9dd920eed912053e5333449d7a92d82d80ebea0f12829aa36e93559b000e515cf7a3ae636d0b1f0ac3f76dc5bafdf519e49df160e0d2f5eb77747a40f2309b0ed81b27ca1d63c6a994c30755027b44c213a3a5948040c8d4e1703ed539fb5abb3bbf8838f5129b8032b1f4ffac9f4043ef034e9d9dab4d32f25055c7496f06a7d517192c568ee08a845f73d29788cf035c3145b21ab344d8062ea9400000ca16efb68a8429558cd821a7c0942d5960f0b2c5b7f3a54caf6920e4555ac75c069b8857feab8184fb687f634618c035dac439dc1aeb3b5598a0f0000000000106a7d51718c774c928566398691d5eb68b5eb8a39b4b6d5c73555b2100000000000000000000000000000000000000000000000000000000000000000000000006ddf6e1d765a193d9cbe146ceeb79ac1cb485ed5f5b37913a8cf5857eff00a906a7d517192c5c51218cc94c3d4af17f58daee089ba1fd44e3dbd98a000000008c97258f4e2489f1bb3d1029148e0d830b5a1399daff1084048e7bd8dbe9f859bad1dda43bb63a1a1841895eae8fc1398f8e943ccf637d87c6f25aa82b25067d8201354297cec572707724dac5f6c92613c5a8f04e34fe284c882de8d09a0826030a0303060004040000000a020001340000000080b2720000000000b803000000000000bad1dda43bb63a1a1841895eae8fc1398f8e943ccf637d87c6f25aa82b25067d0e0c01070405080209000a0b0c0d530a0000000000000000000000000000000000000000000000000000000000000000000000000000000000c344bc80949c53bf0f257f570c1beea68dbc9563a595d46d5c9a7367bd12a5cc0065cd1d0000000000",
-                    initiationRequest.retrieveSignableData(approverPublicKey = "mPAWwEkDygfLX7A8Tzox6wyZRBrEudpRN2frKRXtLoX")
+            initiationRequest.retrieveSignableData(approverPublicKey = "mPAWwEkDygfLX7A8Tzox6wyZRBrEudpRN2frKRXtLoX")
                 .toHexString()
         )
     }

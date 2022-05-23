@@ -15,7 +15,7 @@ class ParseApprovalRequestTypes {
     fun parseAllApprovalRequestTypes() {
         val allApprovalRequests = getFullListOfApprovalItems()
 
-        assertEquals(allApprovalRequests.size, 21)
+        assertEquals(allApprovalRequests.size, 11)
 
         allApprovalRequests.forEach { approvalRequest ->
             assertNotNull(approvalRequest)
@@ -63,6 +63,10 @@ class ParseApprovalRequestTypes {
                 val parsedDetails =
                     parsedWalletApproval.details as SolanaApprovalRequestDetails.ApprovalRequestDetails
                 assert(parsedDetails.requestType !is SolanaApprovalRequestType.UnknownApprovalType)
+
+                if(details.requestType is SolanaApprovalRequestType.DAppTransactionRequest) {
+                    println(details.requestType)
+                }
             }
         }
     }
@@ -179,59 +183,9 @@ class ParseApprovalRequestTypes {
         allApprovalRequests.add(multiSignWithDAppRequestWalletApproval)
 
         val dAppJson: JsonElement =
-            JsonParser.parseString(dAppJson.trim())
+            JsonParser.parseString(MockedApprovals.dAppJson.trim())
         val dAppWalletApproval = deserializer.parseData(dAppJson)
         allApprovalRequests.add(dAppWalletApproval)
-
-        val balanceAccountPolicyChangeJson: JsonElement =
-            JsonParser.parseString(balanceAccountPolicyChangeJson.trim())
-        val balanceAccountPolicyChangeWalletApproval = deserializer.parseData(balanceAccountPolicyChangeJson)
-        allApprovalRequests.add(balanceAccountPolicyChangeWalletApproval)
-
-        val balanceAccountSettingsChangeOneJsonElement: JsonElement =
-            JsonParser.parseString(balanceAccountSettingsChangeOneJson.trim())
-        val balanceAccountSettingsChangeOneWalletApproval = deserializer.parseData(balanceAccountSettingsChangeOneJsonElement)
-        allApprovalRequests.add(balanceAccountSettingsChangeOneWalletApproval)
-
-        val balanceAccountSettingsChangeTwoJson: JsonElement =
-            JsonParser.parseString(balanceAccountSettingsChangeTwoJson.trim())
-        val balanceAccountSettingsChangeTwoWalletApproval = deserializer.parseData(balanceAccountSettingsChangeTwoJson)
-        allApprovalRequests.add(balanceAccountSettingsChangeTwoWalletApproval)
-
-        val balanceAccountNameChangeJson: JsonElement =
-            JsonParser.parseString(balanceAccountNameChangeJson.trim())
-        val balanceAccountNameChangeWalletApproval = deserializer.parseData(balanceAccountNameChangeJson)
-        allApprovalRequests.add(balanceAccountNameChangeWalletApproval)
-
-        val walletConfigPolicyChangeJson: JsonElement =
-            JsonParser.parseString(walletConfigPolicyChangeJson.trim())
-        val walletConfigPolicyChangeWalletApproval = deserializer.parseData(walletConfigPolicyChangeJson)
-        allApprovalRequests.add(walletConfigPolicyChangeWalletApproval)
-
-        val splTokenAccountCreationJson: JsonElement =
-            JsonParser.parseString(splTokenAccountCreationJson.trim())
-        val splTokenAccountCreationWalletApproval = deserializer.parseData(splTokenAccountCreationJson)
-        allApprovalRequests.add(splTokenAccountCreationWalletApproval)
-
-        val wrapConversionJson: JsonElement =
-            JsonParser.parseString(wrapConversionJson.trim())
-        val wrapConversionWalletApproval = deserializer.parseData(wrapConversionJson)
-        allApprovalRequests.add(wrapConversionWalletApproval)
-
-        val addressBookAddJson: JsonElement =
-            JsonParser.parseString(addressBookAddJson.trim())
-        val addressBookAddWalletApproval = deserializer.parseData(addressBookAddJson)
-        allApprovalRequests.add(addressBookAddWalletApproval)
-
-        val balanceAccountWhitelistingUpdateJson: JsonElement =
-            JsonParser.parseString(balanceAccountWhitelistingUpdateJson.trim())
-        val balanceAccountWhitelistingUpdateWalletApproval = deserializer.parseData(balanceAccountWhitelistingUpdateJson)
-        allApprovalRequests.add(balanceAccountWhitelistingUpdateWalletApproval)
-
-        val dappBookUpdateJson: JsonElement =
-            JsonParser.parseString(dappBookUpdateJson.trim())
-        val dappBookUpdateWalletApproval = deserializer.parseData(dappBookUpdateJson)
-        allApprovalRequests.add(dappBookUpdateWalletApproval)
 
         return allApprovalRequests
     }
