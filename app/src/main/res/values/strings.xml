@@ -164,6 +164,7 @@
 
     <string name="wallet_signers_fail_title">Unable To Retrieve User Wallet</string>
     <string name="wallet_signers_fail_message">We were unable to retrieve user wallet details to complete login.\n\nPlease try again.</string>
+
     <string name="wallet_change">Wallet Change</string>
     <string name="vault_change">Vault Change</string>
     <string name="authentication">Authentication</string>
@@ -209,5 +210,6 @@
     <string name="approvals_received">Approvals Received</string>
     <string name="denials_received">Denials Received</string>
     <string name="of">of</string>
+    <string name="initiate">Initiate</string>
 
 </resources>

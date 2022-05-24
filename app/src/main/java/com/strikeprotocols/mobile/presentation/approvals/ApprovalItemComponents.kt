@@ -83,7 +83,8 @@ fun ApprovalRowContentHeader(
 @Composable
 fun ApprovalButtonRow(
     onApproveClicked: () -> Unit,
-    onMoreInfoClicked: () -> Unit
+    onMoreInfoClicked: () -> Unit,
+    positiveButtonText: String
 ) {
     Column(modifier = Modifier.background(DetailInfoLightBackground)) {
         Divider(color = DividerGrey, modifier = Modifier.height(0.5.dp))
@@ -97,7 +98,7 @@ fun ApprovalButtonRow(
                     .padding(top = 4.dp, bottom = 4.dp),
                 onClick = onApproveClicked) {
                 Text(
-                    stringResource(R.string.approve),
+                    positiveButtonText,
                     color = ApprovalGreen,
                     fontSize = 17.sp,
                     fontWeight = FontWeight.SemiBold,

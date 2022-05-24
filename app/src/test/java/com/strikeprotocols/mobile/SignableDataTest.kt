@@ -79,7 +79,8 @@ class SignableDataTest {
     fun testSignersUpdateInitiationRequest() {
         val initiation = MultiSigOpInitiation(
             opAccountCreationInfo = getOpAccountCreationInfo(),
-            dataAccountCreationInfo = null
+            dataAccountCreationInfo = null,
+            initiatorIsApprover = true
         )
 
         val requestType: SolanaApprovalRequestType =
@@ -134,7 +135,8 @@ class SignableDataTest {
     fun testBalanceAccountCreationInitiationRequest() {
         val initiation = MultiSigOpInitiation(
             opAccountCreationInfo = getOpAccountCreationInfo(),
-            dataAccountCreationInfo = null
+            dataAccountCreationInfo = null,
+            initiatorIsApprover = true
         )
 
         val privateKey = generateEphemeralPrivateKeyFromText(
@@ -184,7 +186,8 @@ class SignableDataTest {
     fun testSolWithdrawalRequestInitiationRequest() {
         val initiation = MultiSigOpInitiation(
             opAccountCreationInfo = getOpAccountCreationInfo(),
-            dataAccountCreationInfo = null
+            dataAccountCreationInfo = null,
+            initiatorIsApprover = true
         )
         val requestType =
             getSolWithdrawalRequest(nonceAccountAddresses = listOf("CL8fZq5BzjCBXmixSMKqBsFoCLSFxqN6GvheDQ68HP44"))
@@ -232,7 +235,8 @@ class SignableDataTest {
     fun testSplWithdrawalRequestInitiationRequest() {
         val initiation = MultiSigOpInitiation(
             opAccountCreationInfo = getOpAccountCreationInfo(),
-            dataAccountCreationInfo = null
+            dataAccountCreationInfo = null,
+            initiatorIsApprover = true
         )
         val requestType =
             getSplWithdrawalRequest(nonceAccountAddresses = listOf("6UcFAr9rqGfFEtLxnYdW6QjeRor3aej5akLpYpXUkPWX"))
@@ -280,7 +284,8 @@ class SignableDataTest {
     fun testUSDCConversionRequestInitiationRequest() {
         val initiation = MultiSigOpInitiation(
             opAccountCreationInfo = getOpAccountCreationInfo(),
-            dataAccountCreationInfo = null
+            dataAccountCreationInfo = null,
+            initiatorIsApprover = true
         )
         val requestType =
             getConversionRequest(nonceAccountAddresses = listOf("6UcFAr9rqGfFEtLxnYdW6QjeRor3aej5akLpYpXUkPWX"))
@@ -310,7 +315,8 @@ class SignableDataTest {
     fun testWrapConversionRequestInitiationRequest() {
         val initiation = MultiSigOpInitiation(
             opAccountCreationInfo = getOpAccountCreationInfo(),
-            dataAccountCreationInfo = null
+            dataAccountCreationInfo = null,
+            initiatorIsApprover = true
         )
         val requestType =
             getWrapConversionRequest(nonceAccountAddresses = listOf("6UcFAr9rqGfFEtLxnYdW6QjeRor3aej5akLpYpXUkPWX"))
@@ -340,7 +346,8 @@ class SignableDataTest {
     fun testUnwrapConversionRequestInitiationRequest() {
         val initiation = MultiSigOpInitiation(
             opAccountCreationInfo = getOpAccountCreationInfo(),
-            dataAccountCreationInfo = null
+            dataAccountCreationInfo = null,
+            initiatorIsApprover = true
         )
         val requestType =
             getUnwrapConversionRequest(nonceAccountAddresses = listOf("6UcFAr9rqGfFEtLxnYdW6QjeRor3aej5akLpYpXUkPWX"))
@@ -379,7 +386,8 @@ class SignableDataTest {
             dataAccountCreationInfo = MultiSigAccountCreationInfo(
                 accountSize = 2696,
                 minBalanceForRentExemption = 19655040
-            )
+            ),
+            initiatorIsApprover = true
         )
 
         val nonceAccountAddresses = listOf(
@@ -442,7 +450,8 @@ class SignableDataTest {
     fun testAddDAppBookEntryInitiationRequest() {
         val initiation = MultiSigOpInitiation(
             opAccountCreationInfo = getOpAccountCreationInfo(),
-            dataAccountCreationInfo = null
+            dataAccountCreationInfo = null,
+            initiatorIsApprover = true
         )
         val requestType =
             getAddDAppBookEntry(nonceAccountAddresses = listOf("AaFj4THN8CJmDPyJjPuDpsfC5FZys2Wmczust5UfmqeN"))
@@ -490,7 +499,8 @@ class SignableDataTest {
     fun testRemoveDAppBookEntryInitiationRequest() {
         val initiation = MultiSigOpInitiation(
             opAccountCreationInfo = getOpAccountCreationInfo(),
-            dataAccountCreationInfo = null
+            dataAccountCreationInfo = null,
+            initiatorIsApprover = true
         )
         val requestType =
             getRemoveDAppBookEntry(nonceAccountAddresses = listOf("AaFj4THN8CJmDPyJjPuDpsfC5FZys2Wmczust5UfmqeN"))
@@ -520,7 +530,8 @@ class SignableDataTest {
     fun testAddAddressBookEntryInitiationRequest() {
         val initiation = MultiSigOpInitiation(
             opAccountCreationInfo = getOpAccountCreationInfo(),
-            dataAccountCreationInfo = null
+            dataAccountCreationInfo = null,
+            initiatorIsApprover = true
         )
         val requestType =
             getAddAddressBookEntry(nonceAccountAddresses = listOf("8R4EuFv5f31D8HijRXA4eyebKMZ287ho2UyPpbtQ8Gos"))
@@ -586,7 +597,8 @@ class SignableDataTest {
     fun testWalletConfigPolicyUpdateInitiationRequest() {
         val initiation = MultiSigOpInitiation(
             opAccountCreationInfo = getOpAccountCreationInfo(),
-            dataAccountCreationInfo = null
+            dataAccountCreationInfo = null,
+            initiatorIsApprover = true
         )
         val requestType =
             getWalletConfigPolicyUpdate(nonceAccountAddresses = listOf("5osJEyGL1Ryiv9jedyhjnMqXHQaAM6A5PK253DTCTVdf"))
@@ -634,7 +646,8 @@ class SignableDataTest {
     fun testBalanceAccountSettingsUpdateUpdateInitiationRequest() {
         val initiation = MultiSigOpInitiation(
             opAccountCreationInfo = getOpAccountCreationInfo(),
-            dataAccountCreationInfo = null
+            dataAccountCreationInfo = null,
+            initiatorIsApprover = true
         )
         val requestType =
             getBalanceAccountSettingsUpdate(nonceAccountAddresses = listOf("CL8fZq5BzjCBXmixSMKqBsFoCLSFxqN6GvheDQ68HP44"))
@@ -682,7 +695,8 @@ class SignableDataTest {
     fun testBalanceAccountPolicyUpdateInitiationRequest() {
         val initiation = MultiSigOpInitiation(
             opAccountCreationInfo = getOpAccountCreationInfo(),
-            dataAccountCreationInfo = null
+            dataAccountCreationInfo = null,
+            initiatorIsApprover = true
         )
         val requestType =
             getBalanceAccountPolicyUpdate(nonceAccountAddresses = listOf("5Fx8Nk98DbUcNUe4izqJkcYwfaMGmKRbXi1A7fVPfzj7"))
@@ -733,7 +747,8 @@ class SignableDataTest {
     fun testBalanceAccountAddressWhitelistUpdateInitiationRequest() {
         val initiation = MultiSigOpInitiation(
             opAccountCreationInfo = getOpAccountCreationInfo(),
-            dataAccountCreationInfo = null
+            dataAccountCreationInfo = null,
+            initiatorIsApprover = true
         )
         val requestType =
             getBalanceAccountAddressWhitelistUpdate(nonceAccountAddresses = listOf("9LGMMPep1WKdiNNwicDvx8JiwgtBKPWhidaSv3rVUNz"))
@@ -781,7 +796,8 @@ class SignableDataTest {
     fun testBalanceAccountNameUpdateInitiationRequest() {
         val initiation = MultiSigOpInitiation(
             opAccountCreationInfo = getOpAccountCreationInfo(),
-            dataAccountCreationInfo = null
+            dataAccountCreationInfo = null,
+            initiatorIsApprover = true
         )
         val requestType =
             getBalanceAccountNameUpdate(nonceAccountAddresses = listOf("AaFj4THN8CJmDPyJjPuDpsfC5FZys2Wmczust5UfmqeN"))
@@ -811,7 +827,8 @@ class SignableDataTest {
     fun testSPLTokenAccountCreationInitiationRequest() {
         val initiation = MultiSigOpInitiation(
             opAccountCreationInfo = getOpAccountCreationInfo(),
-            dataAccountCreationInfo = null
+            dataAccountCreationInfo = null,
+            initiatorIsApprover = true
         )
         val requestType =
             getSPLTokenAccountCreation(nonceAccountAddresses = listOf("AaFj4THN8CJmDPyJjPuDpsfC5FZys2Wmczust5UfmqeN"))

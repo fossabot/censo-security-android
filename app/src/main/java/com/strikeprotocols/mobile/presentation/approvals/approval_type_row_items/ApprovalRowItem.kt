@@ -19,6 +19,7 @@ fun ApprovalRowItem(
     onApproveClicked: () -> Unit,
     onMoreInfoClicked: () -> Unit,
     rowMetaData: ApprovalRowMetaData,
+    positiveButtonText: String,
     content: @Composable() () -> Unit
 ) {
     Column(
@@ -37,7 +38,8 @@ fun ApprovalRowItem(
         content()
         ApprovalButtonRow(
             onApproveClicked = onApproveClicked,
-            onMoreInfoClicked = onMoreInfoClicked
+            onMoreInfoClicked = onMoreInfoClicked,
+            positiveButtonText = positiveButtonText
         )
     }
 }

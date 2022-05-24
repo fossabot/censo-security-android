@@ -1,6 +1,8 @@
 package com.strikeprotocols.mobile.data.models.approval
 
+import android.content.Context
 import com.google.gson.*
+import com.strikeprotocols.mobile.R
 import com.strikeprotocols.mobile.common.UriWrapper
 import com.strikeprotocols.mobile.data.models.approval.SolanaApprovalRequestType.Companion.UNKNOWN_REQUEST_APPROVAL
 import java.lang.reflect.Modifier
@@ -23,6 +25,13 @@ data class WalletApproval(
             is SolanaApprovalRequestDetails.ApprovalRequestDetails -> details.requestType
             is SolanaApprovalRequestDetails.MultiSignOpInitiationDetails -> details.requestType
             else -> throw Exception(UNKNOWN_REQUEST_APPROVAL)
+        }
+
+    fun approveButtonCaption(context: Context) =
+        if (details is SolanaApprovalRequestDetails.MultiSignOpInitiationDetails && !details.multisigOpInitiation.initiatorIsApprover) {
+            context.getString(R.string.initiate)
+        } else {
+            context.getString(R.string.approve)
         }
 
     fun retrieveAccountAddresses(): List<String> =

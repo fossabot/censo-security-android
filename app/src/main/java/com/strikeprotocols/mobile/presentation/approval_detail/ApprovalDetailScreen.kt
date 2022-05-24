@@ -308,7 +308,8 @@ fun ApprovalDetails(
                 onApproveClicked = { onApproveClicked() },
                 onDenyClicked = { onDenyClicked() },
                 isLoading = isLoading,
-                initiationRequest = initiationRequest
+                initiationRequest = initiationRequest,
+                positiveText = approval?.approveButtonCaption(context = LocalContext.current) ?: stringResource(R.string.approve)
             )
         }
     }
@@ -403,6 +404,7 @@ fun ApprovalDetailsButtons(
     onApproveClicked: () -> Unit,
     onDenyClicked: () -> Unit,
     isLoading: Boolean,
+    positiveText: String,
     initiationRequest: Boolean = false
 ) {
     Spacer(modifier = Modifier.height(24.dp))
@@ -436,7 +438,7 @@ fun ApprovalDetailsButtons(
     ) {
         Text(
             modifier = Modifier.padding(all = 6.dp),
-            text = stringResource(id = R.string.approve),
+            text = positiveText,
             color = ApprovalGreen,
             fontSize = 24.sp
         )
