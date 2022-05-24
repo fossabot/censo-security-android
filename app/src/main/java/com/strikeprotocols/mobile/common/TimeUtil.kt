@@ -19,7 +19,7 @@ fun convertSecondsIntoCountdownText(context: Context, totalTimeInSeconds: Long):
 
 fun String.formatISO8601IntoDisplayText(context: Context): String {
     if (this.isEmpty()) {
-        return context.getString(R.string.requested_by_date_na)
+        return context.getString(R.string.not_applicable)
     }
 
     return try {
@@ -31,7 +31,7 @@ fun String.formatISO8601IntoDisplayText(context: Context): String {
 
         offsetDateTime.format(dateTimeFormatter)
     } catch (e: Exception) {
-        context.getString(R.string.requested_by_date_na)
+        context.getString(R.string.not_applicable)
     }
 }
 

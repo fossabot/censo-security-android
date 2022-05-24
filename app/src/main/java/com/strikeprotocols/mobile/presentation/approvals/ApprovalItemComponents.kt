@@ -207,7 +207,7 @@ fun ApprovalDetailContent(
             ApprovalContentHeader(header = type.getHeader(LocalContext.current), topSpacing = 12, bottomSpacing = 32)
         }
         is SolanaApprovalRequestType.SignersUpdate ->
-            SignersUpdateDetailContent(approval = approval, signersUpdate = type, approvalsNeeded = approvalsNeeded)
+            SignersUpdateDetailContent(signersUpdate = type)
         is SolanaApprovalRequestType.WithdrawalRequest ->
             WithdrawalRequestDetailContent(
                 withdrawalRequest = type,

@@ -125,8 +125,7 @@
     <string name="login_icon_content_desc">Login Icon</string>
     <string name="transfer_icon_content_desc">Transfer Icon</string>
     <string name="generic_approval_title">Approval</string>
-    <string name="requested_by_email_na">N/A</string>
-    <string name="requested_by_date_na">N/A</string>
+    <string name="not_applicable">N/A</string>
 
     <string name="usd_equivalent">USD equivalent</string>
     <string name="unknown_approval_item">Unknown Approval</string>
@@ -198,6 +197,8 @@
     <string name="wrap_conversion_request_approval_header">Convert %1$s</string>
     <string name="destinations_title">Destinations</string>
     <string name="no_whitelisted_addresses">No whitelisted addresses</string>
+    <string name="signer_email">Signer Email</string>
+    <string name="signer_name">Signer Name</string>
 
 
 </resources>

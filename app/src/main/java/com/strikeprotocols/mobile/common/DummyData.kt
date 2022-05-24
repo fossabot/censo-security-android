@@ -249,23 +249,24 @@ object MockedApprovals {
                 SolanaApprovalRequestType.UnknownApprovalType
             )
 
+
         return listOf(
-//            withdrawalRequest,
-//            conversionRequest,
-//            wrapConversionRequest,
-//            balanceAccountNameUpdateRequest,
-//            balanceAccountPolicyUpdateRequest,
-//            balanceAccountSettingsUpdateRequest,
-            balanceAccountAddressWhitelistUpdateRequest
-//            dAppTransactionRequest,
-//            splTokenAccountCreationRequest,
-//            signersUpdateRequest,
-//            balanceAccountCreationRequest,
-//            addressBookUpdateRequest,
-//            walletConfigPolicyUpdateRequest,
-//            dappBookUpdateRequest,
-//            loginApproval,
-//            unknownRequest
+            withdrawalRequest,
+            conversionRequest,
+            wrapConversionRequest,
+            balanceAccountNameUpdateRequest,
+            balanceAccountPolicyUpdateRequest,
+            balanceAccountSettingsUpdateRequest,
+            balanceAccountAddressWhitelistUpdateRequest,
+            dAppTransactionRequest,
+            splTokenAccountCreationRequest,
+            signersUpdateRequest,
+            balanceAccountCreationRequest,
+            addressBookUpdateRequest,
+            walletConfigPolicyUpdateRequest,
+            dappBookUpdateRequest,
+            loginApproval,
+            unknownRequest
         )
     }
 
