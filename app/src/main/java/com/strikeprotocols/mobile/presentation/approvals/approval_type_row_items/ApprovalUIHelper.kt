@@ -3,6 +3,7 @@ package com.strikeprotocols.mobile.presentation.approvals.approval_type_row_item
 import android.content.Context
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -113,61 +114,124 @@ fun SolanaApprovalRequestType.getDialogFullMessage(
 }
 
 fun SolanaApprovalRequestType.getApprovalRowMetaData(context: Context): ApprovalRowMetaData {
-    return when (this) {
+    val vectorAndContentDescription: Pair<ImageVector, String> = when (this) {
         is WithdrawalRequest -> {
-            ApprovalRowMetaData(
-                approvalImageVector = Icons.Filled.SyncAlt,
-                approvalImageContentDescription = context.getString(R.string.transfer_icon_content_desc),
-                approvalTypeTitle = context.getString(R.string.withdrawal_type_title),
+            Pair(
+                Icons.Filled.SyncAlt,
+                context.getString(R.string.transfer_icon_content_desc),
             )
         }
         is UnknownApprovalType -> {
-            ApprovalRowMetaData(
-                approvalImageVector = Icons.Filled.HelpOutline,
-                approvalImageContentDescription = context.getString(R.string.approval_type_unknown_content_des),
-                approvalTypeTitle = context.getString(R.string.approval_type_unknown)
+            Pair(
+                Icons.Filled.HelpOutline,
+                context.getString(R.string.approval_type_unknown_content_des),
             )
         }
         is ConversionRequest -> {
-            ApprovalRowMetaData(
-                approvalImageVector = Icons.Filled.Refresh,
-                approvalImageContentDescription = context.getString(R.string.conversion_icon_desc),
-                approvalTypeTitle = context.getString(R.string.conversion_row_title),
+            Pair(
+                Icons.Filled.Refresh,
+                context.getString(R.string.conversion_icon_desc),
             )
         }
         is SignersUpdate ->
-            ApprovalRowMetaData(
-                approvalImageVector = Icons.Filled.PhoneAndroid,
-                approvalImageContentDescription = context.getString(R.string.signers_update_icon_content_desc),
-                approvalTypeTitle = context.getString(R.string.approval_type_signers_update_title),
+            Pair(
+                Icons.Filled.PhoneAndroid,
+                context.getString(R.string.signers_update_icon_content_desc),
             )
         is BalanceAccountCreation ->
-            ApprovalRowMetaData(
-                approvalImageVector = Icons.Filled.Lock,
-                approvalImageContentDescription = context.getString(R.string.balance_account_creation_icon_content_desc),
-                approvalTypeTitle = context.getString(R.string.balance_account_creation_title),
+            Pair(
+                Icons.Filled.Lock,
+                context.getString(R.string.balance_account_creation_icon_content_desc),
             )
         is DAppTransactionRequest ->
-            ApprovalRowMetaData(
-                approvalImageVector = Icons.Filled.Refresh,
-                approvalImageContentDescription = context.getString(R.string.approval_type_dapp_content_des),
-                approvalTypeTitle = context.getString(R.string.approval_type_dapp_transaction)
+            Pair(
+                Icons.Filled.Refresh,
+                context.getString(R.string.approval_type_dapp_content_des),
             )
         is LoginApprovalRequest -> {
-            ApprovalRowMetaData(
-                approvalImageVector = Icons.Filled.Login,
-                approvalImageContentDescription = context.getString(R.string.login_icon_content_desc),
-                approvalTypeTitle = context.getString(R.string.login_approval_title),
+            Pair(
+                Icons.Filled.Login,
+                context.getString(R.string.login_icon_content_desc),
             )
         }
 
-        else -> ApprovalRowMetaData(
-            approvalImageVector = Icons.Filled.Login,
-            approvalImageContentDescription = context.getString(R.string.login_icon_content_desc),
-            approvalTypeTitle = context.getString(R.string.login_approval_title)
-        )
+        //todo: replace these with correct values. Need to get values from Ata.
+        is AddressBookUpdate ->
+            Pair(
+                Icons.Filled.Login,
+                context.getString(R.string.login_icon_content_desc),
+            )
+        is BalanceAccountAddressWhitelistUpdate ->
+            Pair(
+                Icons.Filled.Login,
+                context.getString(R.string.login_icon_content_desc),
+            )
+        is BalanceAccountNameUpdate ->
+            Pair(
+                Icons.Filled.Login,
+                context.getString(R.string.login_icon_content_desc),
+            )
+        is BalanceAccountPolicyUpdate ->
+            Pair(
+                Icons.Filled.Login,
+                context.getString(R.string.login_icon_content_desc),
+            )
+        is BalanceAccountSettingsUpdate ->
+            Pair(
+                Icons.Filled.Login,
+                context.getString(R.string.login_icon_content_desc),
+            )
+        is DAppBookUpdate ->
+            Pair(
+                Icons.Filled.Login,
+                context.getString(R.string.login_icon_content_desc),
+            )
+        is SPLTokenAccountCreation ->
+            Pair(
+                Icons.Filled.Login,
+                context.getString(R.string.login_icon_content_desc),
+            )
+        is WalletConfigPolicyUpdate ->
+            Pair(
+                Icons.Filled.Login,
+                context.getString(R.string.login_icon_content_desc),
+            )
+        is WrapConversionRequest ->
+            Pair(
+                Icons.Filled.Login,
+                context.getString(R.string.login_icon_content_desc),
+            )
     }
+
+    return ApprovalRowMetaData(
+        approvalImageVector = vectorAndContentDescription.first,
+        approvalImageContentDescription = vectorAndContentDescription.second,
+        approvalTypeTitle = getRowTitle(context)
+    )
 }
+
+fun SolanaApprovalRequestType.getRowTitle(context: Context): String =
+    when (this) {
+        is WithdrawalRequest,
+        is ConversionRequest,
+        is WrapConversionRequest,
+        is BalanceAccountNameUpdate,
+        is BalanceAccountPolicyUpdate,
+        is BalanceAccountSettingsUpdate,
+        is BalanceAccountAddressWhitelistUpdate,
+        is DAppTransactionRequest,
+        is SPLTokenAccountCreation -> context.getString(R.string.wallet_change)
+
+        is SignersUpdate,
+        is AddressBookUpdate,
+        is BalanceAccountCreation,
+        is WalletConfigPolicyUpdate,
+        is DAppBookUpdate -> context.getString(R.string.vault_change)
+
+        is LoginApprovalRequest -> context.getString(R.string.authentication)
+
+        is UnknownApprovalType -> context.getString(R.string.unknown)
+    }
 
 fun ApprovalDisposition.getDialogMessage(context: Context, initiationRequest: Boolean): String {
     return if (this == ApprovalDisposition.APPROVE) {
