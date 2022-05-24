@@ -61,7 +61,7 @@
     <string name="smart_lock_save_fail">Unable to save account credential to Google Smart Lock.\nWe must save this credential to continue to the app.\n\nPlease try again.</string>
     <string name="smart_lock_retrieval_fail">Unable to retrieve account credential from Google Smart Lock.\n\nMake sure you select the correct account when retrieving credential.\n\nIf unable to retrieve credential, please contact Strike directly.</string>
 
-    <string name="approval_expired">Approval Expired</string>
+    <string name="approval_expired">EXPIRED</string>
     <string name="confirm">Confirm</string>
     <string name="biometry_check">Biometric Check</string>
     <string name="performing_biometry_check">Performing biometric check before submitting disposition</string>
@@ -121,9 +121,6 @@
     <string name="usd_equivalent_na">~N/A</string>
     <string name="signers_update_icon_content_desc">Signers Update Icon</string>
     <string name="approval_type_signers_update_title">SIGNERS UPDATE</string>
-    <string name="removing_signer">Removed Signer</string>
-    <string name="new_signer">New Signer</string>
-    <string name="new_balance_account">New Balance Account</string>
     <string name="balance_account_title">Balance Account</string>
     <string name="stake_account_title">Stake Account</string>
     <string name="balance_account_creation_title">Balance Account Creation</string>
@@ -143,7 +140,6 @@
     <string name="address">Address</string>
     <string name="from">From</string>
     <string name="to">To</string>
-    <string name="new_balance_account_details_title">New Account</string>
     <string name="yes">Yes</string>
     <string name="no">No</string>
     <string name="outbound_transfers_title">Who can approve outbound transfers</string>
@@ -181,6 +177,28 @@
 
     <string name="wallet_signers_fail_title">Unable To Retrieve User Wallet</string>
     <string name="wallet_signers_fail_message">We were unable to retrieve user wallet details to complete login.\n\nPlease try again.</string>
+
+    <string name="add_address_book_update_approval_header">Add Address Book Entry</string>
+    <string name="remove_address_book_update_approval_header">Remove Address Book Entry</string>
+    <string name="balance_account_address_whitelist_update_approval_header">Replace Transfer Whitelist</string>
+    <string name="balance_account_creation_approval_header">Add Wallet</string>
+    <string name="balance_account_name_update_approval_header">Rename Wallet</string>
+    <string name="balance_account_policy_update_approval_header">Replace Wallet Approval Policy</string>
+    <string name="disable_dapp_balance_account_settings_update_approval_header">Disable dApp Access</string>
+    <string name="enable_dapp_balance_account_settings_update_approval_header">Enable dApp Access</string>
+    <string name="disable_transfer_balance_account_settings_update_approval_header">Disable Transfer Whitelist</string>
+    <string name="enable_transfer_balance_account_settings_update_approval_header">Enable Transfer Whitelist</string>
+    <string name="dapp_book_update_approval_header">Replace dApp Book</string>
+    <string name="dapp_transaction_request_approval_header">Execute dApp Transaction</string>
+    <string name="login_approval_header">Log In</string>
+    <string name="spl_token_account_creation_approval_header">Enable SPL Token</string>
+    <string name="remove_signers_update_approval_header">Remove Signer</string>
+    <string name="add_signers_update_approval_header">Add Signer</string>
+    <string name="wallet_config_policy_update_approval_header">Replace Vault Approval Policy</string>
+    <string name="unknown_approval_header">Unknown</string>
+    <string name="conversion_request_approval_header">Convert %1$s</string>
+    <string name="withdrawal_request_approval_header">Send %1$s</string>
+    <string name="wrap_conversion_request_approval_header">Convert %1$s</string>
 
 
 </resources>

@@ -15,10 +15,7 @@ import androidx.compose.ui.unit.dp
 import com.strikeprotocols.mobile.R
 import com.strikeprotocols.mobile.common.formatISO8601IntoDisplayText
 import com.strikeprotocols.mobile.data.models.approval.SolanaApprovalRequestType
-import com.strikeprotocols.mobile.presentation.approvals.approval_type_row_items.TransferConversionContent
-import com.strikeprotocols.mobile.presentation.approvals.approval_type_row_items.TransferConversionLabelData
-import com.strikeprotocols.mobile.presentation.approvals.approval_type_row_items.getMainValueText
-import com.strikeprotocols.mobile.presentation.approvals.approval_type_row_items.getUSDEquivalentText
+import com.strikeprotocols.mobile.presentation.approvals.approval_type_row_items.*
 import com.strikeprotocols.mobile.ui.theme.DetailInfoDarkBackground
 import com.strikeprotocols.mobile.ui.theme.DetailInfoLightBackground
 import com.strikeprotocols.mobile.ui.theme.DividerGrey
@@ -30,7 +27,7 @@ fun ConversionDetailContent(
     submitterDate: String,
     approvalsNeeded: Int
 ) {
-    val mainValue = conversionRequest.symbolAndAmountInfo.getMainValueText()
+    val header = conversionRequest.getHeader(LocalContext.current)
     val usdEquivalent = conversionRequest.symbolAndAmountInfo.getUSDEquivalentText(
         context = LocalContext.current,
         hideSymbol = true
@@ -53,7 +50,7 @@ fun ConversionDetailContent(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         TransferConversionContent(
-            mainValue = mainValue,
+            header = header,
             usdEquivalent = usdEquivalent,
             fromText = fromAccount,
             toText = toAccount,

@@ -28,7 +28,7 @@ fun WithdrawalRequestDetailContent(
     submitterDate: String,
     approvalsNeeded: Int
 ) {
-    val mainValue = withdrawalRequest.symbolAndAmountInfo.getMainValueText()
+    val header = withdrawalRequest.getHeader(LocalContext.current)
     val usdEquivalent = withdrawalRequest.symbolAndAmountInfo.getUSDEquivalentText(
         context = LocalContext.current,
         hideSymbol = true
@@ -50,7 +50,7 @@ fun WithdrawalRequestDetailContent(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         TransferConversionContent(
-            mainValue = mainValue,
+            header = header,
             usdEquivalent = usdEquivalent,
             fromText = fromAccount,
             toText = toAccount,

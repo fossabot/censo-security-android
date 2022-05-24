@@ -3,6 +3,9 @@ package com.strikeprotocols.mobile.common
 import android.content.Context
 import com.strikeprotocols.mobile.R
 import com.strikeprotocols.mobile.data.EncryptionManagerException
+import com.strikeprotocols.mobile.data.models.approval.AccountType
+import com.strikeprotocols.mobile.data.models.approval.SlotUpdateType
+import com.strikeprotocols.mobile.data.models.approval.SolanaApprovalRequestType
 import com.strikeprotocols.mobile.presentation.approval_disposition.ApprovalDispositionError
 
 fun Int.convertApprovalsNeededToDisplayMessage(context: Context): String {
@@ -32,14 +35,14 @@ fun retrieveApprovalDispositionDialogErrorText(
     approvalDispositionError: ApprovalDispositionError,
     context: Context
 ) = when (approvalDispositionError) {
-        ApprovalDispositionError.SUBMIT_FAILURE -> context.getString(R.string.approval_disposition_error_submit)
-        ApprovalDispositionError.DURABLE_NONCE_FAILURE -> context.getString(R.string.approval_disposition_error_nonces)
-        ApprovalDispositionError.SIGNING_DATA_FAILURE -> context.getString(R.string.approval_disposition_error_signing_data)
-        ApprovalDispositionError.APPROVAL_DISPOSITION_FAILURE -> context.getString(R.string.approval_disposition_error)
-        else -> {
-            context.getString(R.string.approval_disposition_error_general)
-        }
+    ApprovalDispositionError.SUBMIT_FAILURE -> context.getString(R.string.approval_disposition_error_submit)
+    ApprovalDispositionError.DURABLE_NONCE_FAILURE -> context.getString(R.string.approval_disposition_error_nonces)
+    ApprovalDispositionError.SIGNING_DATA_FAILURE -> context.getString(R.string.approval_disposition_error_signing_data)
+    ApprovalDispositionError.APPROVAL_DISPOSITION_FAILURE -> context.getString(R.string.approval_disposition_error)
+    else -> {
+        context.getString(R.string.approval_disposition_error_general)
     }
+}
 
 fun getAuthFlowErrorMessage(e: Exception, context: Context): String =
     if (e is EncryptionManagerException) {

@@ -13,19 +13,18 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.strikeprotocols.mobile.presentation.approvals.ApprovalContentHeader
 import com.strikeprotocols.mobile.ui.theme.DetailInfoDarkBackground
 import com.strikeprotocols.mobile.ui.theme.GreyText
 import com.strikeprotocols.mobile.ui.theme.StrikeWhite
 
 @Composable
-fun AccountChangeItem(mainTitle: String, title: String, subtitle: String) {
+fun AccountChangeItem(header: String, title: String, subtitle: String) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
         ) {
-        Spacer(modifier = Modifier.height(12.dp))
-        ApprovalRowTitleText(title = mainTitle)
-        Spacer(modifier = Modifier.height(32.dp))
+        ApprovalContentHeader(header = header, topSpacing = 12, bottomSpacing = 32)
         AccountTitleSubtitle(title = title, subtitle = subtitle)
         Spacer(modifier = Modifier.height(6.dp))
     }
@@ -58,7 +57,7 @@ fun Preview() {
         color = Color.Black
     ) {
         AccountChangeItem(
-            mainTitle = "Adding Signer",
+            header = "Adding Signer",
             title = "John Malkovich",
             subtitle = "john@hollywood.com"
         )

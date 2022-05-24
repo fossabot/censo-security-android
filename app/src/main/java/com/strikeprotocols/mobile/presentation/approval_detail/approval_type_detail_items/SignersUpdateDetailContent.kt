@@ -15,10 +15,10 @@ import androidx.compose.ui.unit.dp
 import com.strikeprotocols.mobile.R
 import com.strikeprotocols.mobile.common.convertPublicKeyToDisplayText
 import com.strikeprotocols.mobile.common.formatISO8601IntoDisplayText
-import com.strikeprotocols.mobile.common.strikeLog
 import com.strikeprotocols.mobile.data.models.approval.SlotUpdateType
 import com.strikeprotocols.mobile.data.models.approval.SolanaApprovalRequestType
 import com.strikeprotocols.mobile.data.models.approval.WalletApproval
+import com.strikeprotocols.mobile.presentation.approvals.approval_type_row_items.getHeader
 import com.strikeprotocols.mobile.presentation.components.AccountChangeItem
 import com.strikeprotocols.mobile.ui.theme.BackgroundBlack
 import com.strikeprotocols.mobile.ui.theme.DetailInfoDarkBackground
@@ -31,12 +31,7 @@ fun SignersUpdateDetailContent(
     signersUpdate: SolanaApprovalRequestType.SignersUpdate,
     approvalsNeeded: Int
 ) {
-    val mainTitle =
-        if (signersUpdate.slotUpdateType == SlotUpdateType.Clear) {
-            stringResource(R.string.removing_signer)
-        } else {
-            stringResource(R.string.new_signer)
-        }
+    val header = signersUpdate.getHeader(LocalContext.current)
     val value = signersUpdate.signer.value
     val name = value.name
     val email = value.email
@@ -50,7 +45,7 @@ fun SignersUpdateDetailContent(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        AccountChangeItem(mainTitle = mainTitle, title = name, subtitle = email)
+        AccountChangeItem(header = header, title = name, subtitle = email)
         Spacer(modifier = Modifier.height(18.dp))//+6.dp from the bottom of the AccountChangeItem
         ApprovalDispositionsRequired(approvalsNeeded = approvalsNeeded)
         Spacer(modifier = Modifier.height(18.dp))

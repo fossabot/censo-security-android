@@ -19,6 +19,7 @@ import com.strikeprotocols.mobile.data.models.approval.SolanaApprovalRequestType
 import com.strikeprotocols.mobile.data.models.approval.WalletApproval
 import com.strikeprotocols.mobile.presentation.approval_detail.approval_type_detail_items.*
 import com.strikeprotocols.mobile.presentation.approvals.approval_type_row_items.*
+import com.strikeprotocols.mobile.presentation.components.ApprovalRowTitleText
 import com.strikeprotocols.mobile.ui.theme.*
 import java.util.*
 
@@ -50,6 +51,23 @@ fun ApprovalItemHeader(
             textAlign = TextAlign.End,
             color = GreyText
         )
+    }
+}
+
+@Composable
+fun ApprovalContentHeader(
+    header: String,
+    topSpacing: Int = 0,
+    bottomSpacing: Int = 0
+) {
+    if (topSpacing > 0) {
+        Spacer(Modifier.height(topSpacing.dp))
+    }
+
+    ApprovalRowTitleText(title = header)
+
+    if (bottomSpacing > 0) {
+        Spacer(Modifier.height(bottomSpacing.dp))
     }
 }
 
@@ -139,28 +157,31 @@ fun ApprovalRowContent(
         is SolanaApprovalRequestType.BalanceAccountCreation ->
             BalanceAccountCreationRowContent(balanceAccountCreation = type)
         is SolanaApprovalRequestType.DAppTransactionRequest ->
-            DAppRowContent(dAppWalletApproval = type)
+            DAppRowContent(dAppTransactionRequest = type)
         is SolanaApprovalRequestType.LoginApprovalRequest ->
             LoginApprovalRowContent(loginApproval = type)
         is SolanaApprovalRequestType.AddressBookUpdate -> 
-            AddressBookUpdateRowContent(addressBookUpdate = null)
+            AddressBookUpdateRowContent(addressBookUpdate = type)
         is SolanaApprovalRequestType.BalanceAccountAddressWhitelistUpdate -> 
-            BalanceAccountAddressWhitelistUpdateRowContent(accountAddressWhitelistUpdate = null)
+            BalanceAccountAddressWhitelistUpdateRowContent(accountAddressWhitelistUpdate = type)
         is SolanaApprovalRequestType.BalanceAccountNameUpdate -> 
-            BalanceAccountNameUpdateRowContent(accountNameUpdate = null)
+            BalanceAccountNameUpdateRowContent(accountNameUpdate = type)
         is SolanaApprovalRequestType.BalanceAccountPolicyUpdate -> 
-            BalanceAccountPolicyUpdateRowContent(accountPolicyUpdate = null)
+            BalanceAccountPolicyUpdateRowContent(accountPolicyUpdate = type)
         is SolanaApprovalRequestType.BalanceAccountSettingsUpdate -> 
-            BalanceAccountSettingsUpdateRowContent(accountSettingsUpdate = null)
+            BalanceAccountSettingsUpdateRowContent(accountSettingsUpdate = type)
         is SolanaApprovalRequestType.DAppBookUpdate -> 
-            DAppBookUpdateRowContent(dAppBookUpdate = null)
+            DAppBookUpdateRowContent(dAppBookUpdate = type)
         is SolanaApprovalRequestType.SPLTokenAccountCreation -> 
-            SPLTokenAccountCreationRowContent(splTokenAccountCreation = null)
+            SPLTokenAccountCreationRowContent(splTokenAccountCreation = type)
         is SolanaApprovalRequestType.WalletConfigPolicyUpdate -> 
-            WalletConfigPolicyUpdateRowContent(walletConfigPolicyUpdate = null)
+            WalletConfigPolicyUpdateRowContent(walletConfigPolicyUpdate = type)
         is SolanaApprovalRequestType.WrapConversionRequest -> 
-            WrapConversionRequestRowContent(wrapConversionRequest = null)
-        else -> Text(text = stringResource(R.string.unknown_approval_item))
+            WrapConversionRequestRowContent(wrapConversionRequest = type)
+        else -> {
+            val header = type.getHeader(LocalContext.current)
+            Text(text = header)
+        }
     }
 }
 
@@ -182,8 +203,9 @@ fun ApprovalDetailContent(
             )
         is SolanaApprovalRequestType.DAppTransactionRequest ->
             DAppDetailContent(dAppWalletApproval = type, approvalsNeeded = approvalsNeeded)
-        is SolanaApprovalRequestType.LoginApprovalRequest ->
-            Text(text = "Implement Login Approval Request Detail UI", color = StrikeWhite)
+        is SolanaApprovalRequestType.LoginApprovalRequest -> {
+            ApprovalContentHeader(header = type.getHeader(LocalContext.current), topSpacing = 12, bottomSpacing = 32)
+        }
         is SolanaApprovalRequestType.SignersUpdate ->
             SignersUpdateDetailContent(approval = approval, signersUpdate = type, approvalsNeeded = approvalsNeeded)
         is SolanaApprovalRequestType.WithdrawalRequest ->
@@ -194,23 +216,23 @@ fun ApprovalDetailContent(
                 approvalsNeeded = approvalsNeeded
             )
         is SolanaApprovalRequestType.AddressBookUpdate ->
-            AddressBookUpdateDetailContent(addressBookUpdate = null)
+            AddressBookUpdateDetailContent(addressBookUpdate = type)
         is SolanaApprovalRequestType.BalanceAccountAddressWhitelistUpdate ->
-            BalanceAccountAddressWhitelistUpdateDetailContent(addressWhitelistUpdate = null)
+            BalanceAccountAddressWhitelistUpdateDetailContent(addressWhitelistUpdate = type)
         is SolanaApprovalRequestType.BalanceAccountNameUpdate ->
-            BalanceAccountNameUpdateDetailContent(accountNameUpdate = null)
+            BalanceAccountNameUpdateDetailContent(accountNameUpdate = type)
         is SolanaApprovalRequestType.BalanceAccountPolicyUpdate ->
-            BalanceAccountPolicyUpdateDetailContent(accountPolicyUpdate = null)
+            BalanceAccountPolicyUpdateDetailContent(accountPolicyUpdate = type)
         is SolanaApprovalRequestType.BalanceAccountSettingsUpdate ->
-            BalanceAccountSettingsUpdateDetailContent(accountSettingsUpdate = null)
+            BalanceAccountSettingsUpdateDetailContent(accountSettingsUpdate = type)
         is SolanaApprovalRequestType.DAppBookUpdate ->
-            DAppBookUpdateDetailContent(dAppBookUpdate = null)
+            DAppBookUpdateDetailContent(dAppBookUpdate = type)
         is SolanaApprovalRequestType.SPLTokenAccountCreation ->
-            SPLTokenAccountCreationDetailContent(splTokenAccountCreation = null)
+            SPLTokenAccountCreationDetailContent(splTokenAccountCreation = type)
         is SolanaApprovalRequestType.WalletConfigPolicyUpdate ->
-            WalletConfigPolicyUpdateDetailContent(walletConfigPolicyUpdate = null)
+            WalletConfigPolicyUpdateDetailContent(walletConfigPolicyUpdate = type)
         is SolanaApprovalRequestType.WrapConversionRequest ->
-            WrapConversionRequestDetailContent(wrapConversionRequest = null)
+            WrapConversionRequestDetailContent(wrapConversionRequest = type)
         else -> Text(text = stringResource(R.string.unknown_approval_item))
     }
 }

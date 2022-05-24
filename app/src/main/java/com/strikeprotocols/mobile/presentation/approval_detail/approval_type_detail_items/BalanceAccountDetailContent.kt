@@ -12,6 +12,7 @@ import com.strikeprotocols.mobile.R
 import com.strikeprotocols.mobile.common.convertSecondsIntoReadableText
 import com.strikeprotocols.mobile.data.models.approval.BooleanSetting
 import com.strikeprotocols.mobile.data.models.approval.SolanaApprovalRequestType
+import com.strikeprotocols.mobile.presentation.approvals.approval_type_row_items.getHeader
 import com.strikeprotocols.mobile.presentation.approvals.approval_type_row_items.getUITitle
 import com.strikeprotocols.mobile.presentation.components.AccountChangeItem
 import com.strikeprotocols.mobile.presentation.components.FactRow
@@ -22,7 +23,7 @@ fun BalanceAccountDetailContent(
     balanceAccountCreation: SolanaApprovalRequestType.BalanceAccountCreation,
     approvalsNeeded: Int
 ) {
-    val mainTitle = stringResource(R.string.new_balance_account_details_title)
+    val header = balanceAccountCreation.getHeader(LocalContext.current)
     val accountName = balanceAccountCreation.accountInfo.name
     val accountType =
         balanceAccountCreation.accountInfo.accountType.getUITitle(LocalContext.current)
@@ -34,7 +35,7 @@ fun BalanceAccountDetailContent(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        AccountChangeItem(mainTitle = mainTitle, title = accountName, subtitle = accountType)
+        AccountChangeItem(header = header, title = accountName, subtitle = accountType)
         Spacer(modifier = Modifier.height(16.dp))
         ApprovalDispositionsRequired(approvalsNeeded = approvalsNeeded)
         Spacer(modifier = Modifier.height(28.dp))

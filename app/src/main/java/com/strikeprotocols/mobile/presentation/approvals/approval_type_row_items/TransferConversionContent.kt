@@ -7,6 +7,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.strikeprotocols.mobile.presentation.approvals.ApprovalContentHeader
 import com.strikeprotocols.mobile.presentation.components.ApprovalRowTitleText
 import com.strikeprotocols.mobile.presentation.components.StrikeTagLabeledRow
 import com.strikeprotocols.mobile.presentation.components.StrikeTagRow
@@ -14,15 +15,13 @@ import com.strikeprotocols.mobile.ui.theme.GreyText
 
 @Composable
 fun TransferConversionContent(
-    mainValue: String,
+    header: String,
     usdEquivalent: String,
     fromText: String,
     toText: String,
     transferConversionLabelData: TransferConversionLabelData = TransferConversionLabelData()
 ) {
-    Spacer(modifier = Modifier.height(8.dp))
-    ApprovalRowTitleText(title = mainValue)
-    Spacer(modifier = Modifier.height(16.dp))
+    ApprovalContentHeader(header = header, topSpacing = 8, bottomSpacing = 16)
     Text(
         text = usdEquivalent,
         color = GreyText,

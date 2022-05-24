@@ -6,13 +6,13 @@ import com.strikeprotocols.mobile.data.models.approval.SolanaApprovalRequestType
 
 @Composable
 fun ConversionRequestRowContent(conversionRequest: SolanaApprovalRequestType.ConversionRequest) {
-    val mainValue = conversionRequest.symbolAndAmountInfo.getMainValueText()
+    val header = conversionRequest.getHeader(LocalContext.current)
     val usdEquivalent = conversionRequest.symbolAndAmountInfo.getUSDEquivalentText(context = LocalContext.current, hideSymbol = true)
     val fromAccount = conversionRequest.account.name
     val toAccount = conversionRequest.destination.name
 
     TransferConversionContent(
-        mainValue = mainValue,
+        header = header,
         usdEquivalent = usdEquivalent,
         fromText = fromAccount,
         toText = toAccount

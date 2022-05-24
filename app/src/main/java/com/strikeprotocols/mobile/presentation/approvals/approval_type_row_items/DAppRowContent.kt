@@ -9,6 +9,7 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -16,6 +17,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.strikeprotocols.mobile.R
 import com.strikeprotocols.mobile.data.models.approval.SolanaApprovalRequestType
+import com.strikeprotocols.mobile.presentation.approvals.ApprovalContentHeader
 import com.strikeprotocols.mobile.presentation.components.ApprovalRowTitleText
 import com.strikeprotocols.mobile.presentation.components.StrikeTagRow
 import com.strikeprotocols.mobile.ui.theme.*
@@ -23,28 +25,29 @@ import java.util.*
 
 
 @Composable
-fun DAppRowContent(dAppWalletApproval: SolanaApprovalRequestType.DAppTransactionRequest) {
+fun DAppRowContent(dAppTransactionRequest: SolanaApprovalRequestType.DAppTransactionRequest) {
     Column(
         modifier = Modifier.background(DetailInfoLightBackground),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        ApprovalRowTitleText(title = dAppWalletApproval.dappInfo.name)
+        val header = dAppTransactionRequest.getHeader(LocalContext.current)
+        ApprovalContentHeader(header = header)
 
-        if (!dAppWalletApproval.balanceChanges.isNullOrEmpty()) {
-            dAppWalletApproval.balanceChanges.forEachIndexed { index, symbolAndAmountInfo ->
+        if (!dAppTransactionRequest.balanceChanges.isNullOrEmpty()) {
+            dAppTransactionRequest.balanceChanges.forEachIndexed { index, symbolAndAmountInfo ->
                 Spacer(modifier = Modifier.height(16.dp))
                 BalanceChange(
                     symbol = symbolAndAmountInfo.symbolInfo.symbol,
                     amount = symbolAndAmountInfo.formattedAmount(),
                     usdEquivalent = symbolAndAmountInfo.formattedUSDEquivalent(false),
-                    fromDestination = dAppWalletApproval.dappInfo.name,
-                    toDestination = dAppWalletApproval.account.name,
+                    fromDestination = dAppTransactionRequest.dappInfo.name,
+                    toDestination = dAppTransactionRequest.account.name,
                     positiveChange = symbolAndAmountInfo.isAmountPositive()
                 )
 
                 //If we are not at the last index position
                 // then we want to add extra space to the bottom of the BalanceChange composable
-                if (index != dAppWalletApproval.balanceChanges.size - 1 ) {
+                if (index != dAppTransactionRequest.balanceChanges.size - 1 ) {
                     Spacer(modifier = Modifier.height(20.dp))
                 }
             }

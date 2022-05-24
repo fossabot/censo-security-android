@@ -17,7 +17,7 @@ import com.strikeprotocols.mobile.ui.theme.DetailInfoLightBackground
 fun BalanceAccountCreationRowContent(
     balanceAccountCreation: SolanaApprovalRequestType.BalanceAccountCreation
 ) {
-    val mainTitle = stringResource(R.string.new_balance_account)
+    val header = balanceAccountCreation.getHeader(LocalContext.current)
     val accountName = balanceAccountCreation.accountInfo.name
     val accountType =
         balanceAccountCreation.accountInfo.accountType.getUITitle(LocalContext.current)
@@ -27,6 +27,6 @@ fun BalanceAccountCreationRowContent(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        AccountChangeItem(mainTitle = mainTitle, title = accountName, subtitle = accountType)
+        AccountChangeItem(header = header, title = accountName, subtitle = accountType)
     }
 }

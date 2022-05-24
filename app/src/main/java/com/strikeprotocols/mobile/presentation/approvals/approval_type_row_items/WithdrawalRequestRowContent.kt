@@ -6,13 +6,13 @@ import com.strikeprotocols.mobile.data.models.approval.SolanaApprovalRequestType
 
 @Composable
 fun WithdrawalRequestRowContent(withdrawalRequest: SolanaApprovalRequestType.WithdrawalRequest) {
-    val mainValue = withdrawalRequest.symbolAndAmountInfo.getMainValueText()
+    val header = withdrawalRequest.getHeader(LocalContext.current)
     val usdEquivalent = withdrawalRequest.symbolAndAmountInfo.getUSDEquivalentText(context = LocalContext.current, hideSymbol = true)
     val fromAccount = withdrawalRequest.account.name
     val toAccount = withdrawalRequest.destination.name
 
     TransferConversionContent(
-        mainValue = mainValue,
+        header = header,
         usdEquivalent = usdEquivalent,
         fromText = fromAccount,
         toText = toAccount
