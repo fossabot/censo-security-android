@@ -421,6 +421,8 @@ enum class ApprovalType(val value: String) {
                 DAPP_BOOK_UPDATE_TYPE.value -> DAPP_BOOK_UPDATE_TYPE
                 WALLET_CONFIG_POLICY_UPDATE_TYPE.value -> WALLET_CONFIG_POLICY_UPDATE_TYPE
                 SPL_TOKEN_ACCOUNT_CREATION_TYPE.value -> SPL_TOKEN_ACCOUNT_CREATION_TYPE
+                BALANCE_ACCOUNT_ADDRESS_WHITE_LIST_UPDATE.value -> BALANCE_ACCOUNT_ADDRESS_WHITE_LIST_UPDATE
+
                 else -> UNKNOWN_TYPE
             }
     }

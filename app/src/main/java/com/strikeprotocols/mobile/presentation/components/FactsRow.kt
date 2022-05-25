@@ -2,6 +2,7 @@ package com.strikeprotocols.mobile.presentation.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.Divider
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -31,7 +32,7 @@ fun FactRow(factsData: FactsData, modifier: Modifier = Modifier) {
                 color = AccountTextGrey
             )
         }
-        for (fact in factsData.facts) {
+        for ((index, fact) in factsData.facts.withIndex()) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -43,6 +44,9 @@ fun FactRow(factsData: FactsData, modifier: Modifier = Modifier) {
                 if (fact.second.isNotEmpty()) {
                     Text(text = fact.second, color = AccountTextGrey)
                 }
+            }
+            if (index != factsData.facts.size - 1) {
+                Divider(modifier = Modifier.height(0.5.dp), color = DividerGrey)
             }
         }
     }

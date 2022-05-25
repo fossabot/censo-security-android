@@ -177,7 +177,7 @@
 
     <string name="add_address_book_update_approval_header">Add Address Book Entry</string>
     <string name="remove_address_book_update_approval_header">Remove Address Book Entry</string>
-    <string name="balance_account_address_whitelist_update_approval_header">Replace Transfer Whitelist</string>
+    <string name="balance_account_address_whitelist_update_approval_header">Replace Wallet Whitelist</string>
     <string name="balance_account_creation_approval_header">Add Wallet</string>
     <string name="balance_account_name_update_approval_header">Rename Wallet</string>
     <string name="balance_account_policy_update_approval_header">Replace Wallet Approval Policy</string>
@@ -196,6 +196,8 @@
     <string name="conversion_request_approval_header">Convert %1$s</string>
     <string name="withdrawal_request_approval_header">Send %1$s</string>
     <string name="wrap_conversion_request_approval_header">Convert %1$s</string>
+    <string name="destinations_title">Destinations</string>
+    <string name="no_whitelisted_addresses">No whitelisted addresses</string>
 
 
 </resources>

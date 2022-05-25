@@ -23,11 +23,26 @@ fun Int.convertApprovalsNeededToDisplayMessage(context: Context): String {
 }
 
 fun String.convertPublicKeyToDisplayText(): String {
+    if (this.length <= 9) {
+        return ""
+    }
     //Only want to keep the last 8 characters
     val startIndex = this.length - 9
     val subStringedPublicKey = this.substring(startIndex = startIndex)
 
     return StringBuilder().append("••••••••••••").append(subStringedPublicKey).toString()
+}
+
+fun String.maskAddress(): String {
+    if (this.length <= 8) {
+        return ""
+    }
+
+    //Grab first 4 and last 4 characters
+    val start = this.substring(startIndex = 0, endIndex = 4)
+    val end = this.substring(startIndex = this.length - 4)
+
+    return StringBuilder().append(start).append("•••").append(end).toString()
 }
 
 

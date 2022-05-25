@@ -19,12 +19,12 @@ import com.strikeprotocols.mobile.ui.theme.GreyText
 import com.strikeprotocols.mobile.ui.theme.StrikeWhite
 
 @Composable
-fun AccountChangeItem(header: String, title: String, subtitle: String) {
+fun AccountChangeItem(header: String, title: String, subtitle: String, headerTopSpacing: Int = 12, headerBottomSpacing: Int = 32) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
         ) {
-        ApprovalContentHeader(header = header, topSpacing = 12, bottomSpacing = 32)
+        ApprovalContentHeader(header = header, topSpacing = headerTopSpacing, bottomSpacing = headerBottomSpacing)
         AccountTitleSubtitle(title = title, subtitle = subtitle)
         Spacer(modifier = Modifier.height(6.dp))
     }
