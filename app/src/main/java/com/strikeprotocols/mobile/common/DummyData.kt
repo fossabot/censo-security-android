@@ -882,7 +882,7 @@ object MockedApprovals {
 
     fun getBalanceAccountAddressWhitelistUpdate(nonceAccountAddresses: List<String>): SolanaApprovalRequestType {
         return SolanaApprovalRequestType.BalanceAccountAddressWhitelistUpdate(
-            type = ApprovalType.BALANCE_ACCOUNT_ADDRESS_WHITE_LIST_UPDATE.value,
+            type = ApprovalType.BALANCE_ACCOUNT_ADDRESS_WHITE_LIST_UPDATE_TYPE.value,
             accountInfo = AccountInfo(
                 name = "Account 1",
                 identifier = "4d2eecc1-cbe1-4c36-a4ae-1f777a739eb3",

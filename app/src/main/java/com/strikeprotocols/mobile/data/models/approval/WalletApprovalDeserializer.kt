@@ -207,7 +207,7 @@ class WalletApprovalDeserializer : JsonDeserializer<WalletApproval> {
                     SolanaApprovalRequestType.BalanceAccountPolicyUpdate::class.java
                 )
             }
-            ApprovalType.BALANCE_ACCOUNT_ADDRESS_WHITE_LIST_UPDATE -> {
+            ApprovalType.BALANCE_ACCOUNT_ADDRESS_WHITE_LIST_UPDATE_TYPE -> {
                 Gson().fromJson(
                     details,
                     SolanaApprovalRequestType.BalanceAccountAddressWhitelistUpdate::class.java

@@ -400,7 +400,7 @@ enum class ApprovalType(val value: String) {
     DAPP_BOOK_UPDATE_TYPE("DAppBookUpdate"),
     WALLET_CONFIG_POLICY_UPDATE_TYPE("WalletConfigPolicyUpdate"),
     SPL_TOKEN_ACCOUNT_CREATION_TYPE("SPLTokenAccountCreation"),
-    BALANCE_ACCOUNT_ADDRESS_WHITE_LIST_UPDATE("BalanceAccountAddressWhitelistUpdate"),
+    BALANCE_ACCOUNT_ADDRESS_WHITE_LIST_UPDATE_TYPE("BalanceAccountAddressWhitelistUpdate"),
 
     UNKNOWN_TYPE("");
 
@@ -421,8 +421,7 @@ enum class ApprovalType(val value: String) {
                 DAPP_BOOK_UPDATE_TYPE.value -> DAPP_BOOK_UPDATE_TYPE
                 WALLET_CONFIG_POLICY_UPDATE_TYPE.value -> WALLET_CONFIG_POLICY_UPDATE_TYPE
                 SPL_TOKEN_ACCOUNT_CREATION_TYPE.value -> SPL_TOKEN_ACCOUNT_CREATION_TYPE
-                BALANCE_ACCOUNT_ADDRESS_WHITE_LIST_UPDATE.value -> BALANCE_ACCOUNT_ADDRESS_WHITE_LIST_UPDATE
-
+                BALANCE_ACCOUNT_ADDRESS_WHITE_LIST_UPDATE_TYPE.value -> BALANCE_ACCOUNT_ADDRESS_WHITE_LIST_UPDATE_TYPE
                 else -> UNKNOWN_TYPE
             }
     }
