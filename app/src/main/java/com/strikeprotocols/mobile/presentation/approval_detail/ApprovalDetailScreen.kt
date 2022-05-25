@@ -243,17 +243,17 @@ fun ApprovalDetails(
     initiationRequest: Boolean
     ) {
     Column(
-        modifier = Modifier.fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.SpaceBetween,
+        modifier = Modifier.fillMaxHeight()
     ) {
-
         ApprovalDetailsTimer(
             timeRemainingInSeconds = timeRemainingInSeconds
         )
         Column(
             modifier = Modifier
-                .fillMaxSize()
                 .background(BackgroundBlack)
+                .weight(1f)
                 .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -266,10 +266,18 @@ fun ApprovalDetails(
                 //Defensive coding,
                 // we should never have an unknown approval in the details screen
                 if (type != UnknownApprovalType) {
-                    ApprovalDetailContent(approval = safeApproval, type = type, approvalsNeeded = approvalsNeeded)
+                    ApprovalDetailContent(
+                        approval = safeApproval,
+                        type = type,
+                        approvalsNeeded = approvalsNeeded
+                    )
                 }
             }
+        }
 
+        Column(
+            modifier = Modifier.fillMaxWidth()
+        ) {
             ApprovalDetailsButtons(
                 onApproveClicked = { onApproveClicked() },
                 onDenyClicked = { onDenyClicked() },
@@ -320,40 +328,42 @@ fun ApprovalDetailsButtons(
     isLoading: Boolean,
     initiationRequest: Boolean = false
 ) {
-    Spacer(modifier = Modifier.height(24.dp))
-    Button(
-        modifier = Modifier
-            .padding(horizontal = 16.dp)
-            .fillMaxWidth(),
-        onClick = { onDenyClicked() },
-        shape = MaterialTheme.shapes.medium,
-        colors = ButtonDefaults.buttonColors(backgroundColor = DenyRedBackground),
-        enabled = !isLoading
-    ) {
-        Text(
-            modifier = Modifier.padding(all = 4.dp),
-            text = if (initiationRequest) stringResource(id = R.string.cancel) else stringResource(id = R.string.deny),
-            color = DenyRed,
-            fontSize = 16.sp
-        )
-    }
-    Spacer(modifier = Modifier.height(12.dp))
-    Button(
-        modifier = Modifier
-            .padding(horizontal = 16.dp)
-            .fillMaxWidth(),
-        onClick = { onApproveClicked() },
-        shape = MaterialTheme.shapes.medium,
-        colors = ButtonDefaults.buttonColors(backgroundColor = ApprovalGreenBackground),
-        enabled = !isLoading
-    ) {
-        Text(
-            modifier = Modifier.padding(all = 6.dp),
-            text = stringResource(id = R.string.approve),
-            color = ApprovalGreen,
-            fontSize = 24.sp
-        )
-    }
+        Spacer(modifier = Modifier.height(24.dp))
+        Button(
+            modifier = Modifier
+                .padding(horizontal = 16.dp)
+                .fillMaxWidth(),
+            onClick = { onDenyClicked() },
+            shape = MaterialTheme.shapes.medium,
+            colors = ButtonDefaults.buttonColors(backgroundColor = DenyRedBackground),
+            enabled = !isLoading
+        ) {
+            Text(
+                modifier = Modifier.padding(all = 4.dp),
+                text = if (initiationRequest) stringResource(id = R.string.cancel) else stringResource(
+                    id = R.string.deny
+                ),
+                color = DenyRed,
+                fontSize = 16.sp
+            )
+        }
+        Spacer(modifier = Modifier.height(12.dp))
+        Button(
+            modifier = Modifier
+                .padding(start = 16.dp, end = 16.dp, bottom = 24.dp)
+                .fillMaxWidth(),
+            onClick = { onApproveClicked() },
+            shape = MaterialTheme.shapes.medium,
+            colors = ButtonDefaults.buttonColors(backgroundColor = ApprovalGreenBackground),
+            enabled = !isLoading
+        ) {
+            Text(
+                modifier = Modifier.padding(all = 6.dp),
+                text = stringResource(id = R.string.approve),
+                color = ApprovalGreen,
+                fontSize = 24.sp
+            )
+        }
 }
 //endregion
 
