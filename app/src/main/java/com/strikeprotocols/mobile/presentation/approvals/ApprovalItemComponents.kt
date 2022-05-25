@@ -145,7 +145,8 @@ fun ApprovalType(
 
 @Composable
 fun ApprovalRowContent(
-    type: SolanaApprovalRequestType
+    type: SolanaApprovalRequestType,
+    approvalsNeeded: Int
 ) {
     when (type) {
         is SolanaApprovalRequestType.WithdrawalRequest ->
@@ -175,7 +176,10 @@ fun ApprovalRowContent(
         is SolanaApprovalRequestType.SPLTokenAccountCreation -> 
             SPLTokenAccountCreationRowContent(splTokenAccountCreation = type)
         is SolanaApprovalRequestType.WalletConfigPolicyUpdate -> 
-            WalletConfigPolicyUpdateRowContent(walletConfigPolicyUpdate = type)
+            WalletConfigPolicyUpdateRowContent(
+                walletConfigPolicyUpdate = type,
+                approvalsNeeded = approvalsNeeded
+            )
         is SolanaApprovalRequestType.WrapConversionRequest -> 
             WrapConversionRequestRowContent(wrapConversionRequest = type)
         else -> {

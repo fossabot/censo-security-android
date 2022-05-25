@@ -199,6 +199,9 @@
     <string name="no_whitelisted_addresses">No whitelisted addresses</string>
     <string name="signer_email">Signer Email</string>
     <string name="signer_name">Signer Name</string>
+    <string name="vault_approvers">Vault Approvers</string>
+    <string name="approvals_required">Approvals Required</string>
+    <string name="approval_expiration">Approval Expiration</string>
 
 
 </resources>

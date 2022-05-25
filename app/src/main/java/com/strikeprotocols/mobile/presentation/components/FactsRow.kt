@@ -29,7 +29,7 @@ fun FactRow(factsData: FactsData, modifier: Modifier = Modifier) {
             Text(
                 text = factsData.title,
                 textAlign = TextAlign.Center,
-                color = AccountTextGrey
+                color = StrikeWhite
             )
         }
         for ((index, fact) in factsData.facts.withIndex()) {

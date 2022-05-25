@@ -324,8 +324,12 @@ fun ApprovalsList(
                                 rowMetaData = rowMetaData,
                                 submitDate = safeApproval.submitDate
                             ) {
-                                ApprovalRowContent(type = type)
+                                ApprovalRowContent(
+                                    type = type,
+                                    approvalsNeeded = safeApproval.numberOfApprovalsReceived ?: 0
+                                )
                             }
+
                         }
                     }
                 }

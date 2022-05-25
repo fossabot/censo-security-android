@@ -249,7 +249,6 @@ object MockedApprovals {
                 SolanaApprovalRequestType.UnknownApprovalType
             )
 
-
         return listOf(
             withdrawalRequest,
             conversionRequest,
