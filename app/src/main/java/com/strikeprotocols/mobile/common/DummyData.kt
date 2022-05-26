@@ -250,22 +250,22 @@ object MockedApprovals {
             )
 
         return listOf(
-//            withdrawalRequest,
-//            conversionRequest,
-//            wrapConversionRequest,
+            withdrawalRequest,
+            conversionRequest,
+            wrapConversionRequest,
             balanceAccountNameUpdateRequest,
-//            balanceAccountPolicyUpdateRequest,
-//            balanceAccountSettingsUpdateRequest,
-//            balanceAccountAddressWhitelistUpdateRequest,
-//            dAppTransactionRequest,
-//            splTokenAccountCreationRequest,
-//            signersUpdateRequest,
-//            balanceAccountCreationRequest,
-//            addressBookUpdateRequest,
-//            walletConfigPolicyUpdateRequest,
-//            dappBookUpdateRequest,
-//            loginApproval,
-//            unknownRequest
+            balanceAccountPolicyUpdateRequest,
+            balanceAccountSettingsUpdateRequest,
+            balanceAccountAddressWhitelistUpdateRequest,
+            dAppTransactionRequest,
+            splTokenAccountCreationRequest,
+            signersUpdateRequest,
+            balanceAccountCreationRequest,
+            addressBookUpdateRequest,
+            walletConfigPolicyUpdateRequest,
+            dappBookUpdateRequest,
+            loginApproval,
+            unknownRequest
         )
     }
 
