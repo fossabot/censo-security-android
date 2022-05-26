@@ -134,9 +134,9 @@
     <string name="to">To</string>
     <string name="yes">Yes</string>
     <string name="no">No</string>
-    <string name="outbound_transfers_title">Who can approve outbound transfers</string>
-    <string name="approval_outbound_title">Approvals required for outbound transfers</string>
-    <string name="approval_timeout">Approval timeout</string>
+    <string name="wallet_approvers_title">Wallet Approvers</string>
+    <string name="approvals_required_title">Approvals Required</string>
+    <string name="approval_expiration">Approval Expiration</string>
     <string name="whitelisting_enabled">Whitelisting Enabled</string>
     <string name="supports_dapps">Supports DApps</string>
     <string name="no_approvers_text">No users may approve requests</string>
@@ -197,13 +197,15 @@
     <string name="wrap_conversion_request_approval_header">Convert %1$s</string>
     <string name="destinations_title">Destinations</string>
     <string name="no_whitelisted_addresses">No whitelisted addresses</string>
+
     <string name="signer_email">Signer Email</string>
     <string name="signer_name">Signer Name</string>
     <string name="vault_approvers">Vault Approvers</string>
     <string name="approvals_required">Approvals Required</string>
-    <string name="approval_expiration">Approval Expiration</string>
     <string name="symbol_title">Symbol</string>
     <string name="name">Name</string>
+    <string name="wallet_name_title">Wallet Name</string>
+
 
 
 </resources>

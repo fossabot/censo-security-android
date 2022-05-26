@@ -197,7 +197,7 @@ fun ApprovalDetailContent(
 ) {
     when (type) {
         is SolanaApprovalRequestType.BalanceAccountCreation ->
-            BalanceAccountDetailContent(balanceAccountCreation = type, approvalsNeeded = approvalsNeeded)
+            BalanceAccountDetailContent(balanceAccountCreation = type)
         is SolanaApprovalRequestType.ConversionRequest ->
             ConversionDetailContent(
                 conversionRequest = type,
