@@ -202,6 +202,7 @@
     <string name="vault_approvers">Vault Approvers</string>
     <string name="approvals_required">Approvals Required</string>
     <string name="approval_expiration">Approval Expiration</string>
+    <string name="symbol_title">Symbol</string>
 
 
 </resources>
