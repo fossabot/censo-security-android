@@ -168,7 +168,10 @@ fun ApprovalRowContent(
         is SolanaApprovalRequestType.BalanceAccountNameUpdate -> 
             BalanceAccountNameUpdateRowContent(accountNameUpdate = type)
         is SolanaApprovalRequestType.BalanceAccountPolicyUpdate -> 
-            BalanceAccountPolicyUpdateRowContent(accountPolicyUpdate = type)
+            BalanceAccountPolicyUpdateRowContent(
+                accountPolicyUpdate = type,
+                approvalsNeeded = approvalsNeeded
+            )
         is SolanaApprovalRequestType.BalanceAccountSettingsUpdate -> 
             BalanceAccountSettingsUpdateRowContent(accountSettingsUpdate = type)
         is SolanaApprovalRequestType.DAppBookUpdate -> 

@@ -140,6 +140,7 @@
     <string name="whitelisting_enabled">Whitelisting Enabled</string>
     <string name="supports_dapps">Supports DApps</string>
     <string name="no_approvers_text">No users may approve requests</string>
+    <string name="no_wallet_approvers_text">No wallet approvers</string>
     <string name="zero_minutes">0m</string>
     <string name="zero_seconds">0s</string>
     <string name="hour_abbreviation">h</string>
@@ -202,9 +203,11 @@
     <string name="signer_name">Signer Name</string>
     <string name="vault_approvers">Vault Approvers</string>
     <string name="approvals_required">Approvals Required</string>
+
     <string name="symbol_title">Symbol</string>
     <string name="name">Name</string>
     <string name="wallet_name_title">Wallet Name</string>
+    <string name="wallet_approvers">Wallet Approvers</string>
 
 
 

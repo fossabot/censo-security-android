@@ -257,8 +257,6 @@ fun ApprovalDetails(
                 .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Spacer(modifier = Modifier.height(24.dp))
-
             approval?.let { safeApproval ->
                 val type = safeApproval.getSolanaApprovalRequestType()
                 val approvalsNeeded = safeApproval.numberOfDispositionsRequired ?: 0
