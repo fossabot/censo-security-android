@@ -158,21 +158,21 @@ sealed class SolanaApprovalRequestType {
         var signingData: SolanaSigningData
     ) : SolanaApprovalRequestType() {
 
-        val change: SettingsChange
-
-        init {
-            if (whitelistEnabled != null && dappsEnabled == null) {
-                change = SettingsChange.WhitelistEnabled(whiteListEnabled = whitelistEnabled == BooleanSetting.On)
+        fun changeValue() : SettingsChange? {
+            return if (whitelistEnabled != null && dappsEnabled == null) {
+                SettingsChange.WhitelistEnabled(whiteListEnabled = whitelistEnabled == BooleanSetting.On)
             } else if (dappsEnabled != null && whitelistEnabled == null) {
-                change = SettingsChange.DAppsEnabled(dappsEnabled = dappsEnabled == BooleanSetting.On)
+                SettingsChange.DAppsEnabled(dappsEnabled = dappsEnabled == BooleanSetting.On)
             } else {
-                throw Exception("Only one setting should be changed")
+                null
             }
         }
 
         fun combinedBytes() : ByteArray {
             val buffer = ByteArrayOutputStream()
             buffer.write(account.identifier.sha256HashBytes())
+
+            val change : SettingsChange = changeValue() ?: throw Exception("Only one setting should be changed")
 
             when (change) {
                 is SettingsChange.WhitelistEnabled -> {
@@ -223,27 +223,25 @@ sealed class SolanaApprovalRequestType {
         var signingData: SolanaSigningData
     ) : SolanaApprovalRequestType() {
 
-        val change : AddRemoveChange
-        val entry: SlotDestinationInfo
 
-        init {
-            if(entriesToAdd.size == 1 && entriesToRemove.isEmpty()) {
-                change = AddRemoveChange.ADD
-                entry = entriesToAdd[0]
+        fun getEntryMetaData(): Pair<AddRemoveChange, SlotDestinationInfo>? =
+            if (entriesToAdd.size == 1 && entriesToRemove.isEmpty()) {
+                Pair(AddRemoveChange.ADD, entriesToAdd[0])
             } else if (entriesToAdd.isEmpty() && entriesToRemove.size == 1) {
-                change = AddRemoveChange.REMOVE
-                entry = entriesToRemove[0]
+                Pair(AddRemoveChange.REMOVE, entriesToRemove[0])
             } else {
-                throw Exception("Only 1 entry is accepted for either added or removed")
+                null
             }
-        }
+
         fun combinedBytes() : ByteArray {
             val buffer = ByteArrayOutputStream()
+            val entryMetaData : Pair<AddRemoveChange, SlotDestinationInfo> = getEntryMetaData()
+                ?: throw Exception("Only 1 entry is accepted for either added or removed")
 
-            when (change) {
+            when (entryMetaData.first) {
                 AddRemoveChange.ADD -> {
                     buffer.write(byteArrayOf(1.toByte()))
-                    buffer.write(entry.combinedBytes())
+                    buffer.write(entryMetaData.second.combinedBytes())
                     buffer.write(byteArrayOf(0.toByte()))
                     buffer.write(byteArrayOf(0.toByte()))
 
@@ -251,7 +249,7 @@ sealed class SolanaApprovalRequestType {
                 AddRemoveChange.REMOVE -> {
                     buffer.write(byteArrayOf(0.toByte()))
                     buffer.write(byteArrayOf(1.toByte()))
-                    buffer.write(entry.combinedBytes())
+                    buffer.write(entryMetaData.second.combinedBytes())
                     buffer.write(byteArrayOf(0.toByte()))
                 }
             }
@@ -264,9 +262,9 @@ sealed class SolanaApprovalRequestType {
         ADD, REMOVE
     }
 
-    sealed class SettingsChange(val value: Boolean) {
-        data class WhitelistEnabled(val whiteListEnabled: Boolean) : SettingsChange(value = whiteListEnabled)
-        data class DAppsEnabled(val dappsEnabled: Boolean) : SettingsChange(value = dappsEnabled)
+    open class SettingsChange() {
+        data class WhitelistEnabled(val whiteListEnabled: Boolean) : SettingsChange()
+        data class DAppsEnabled(val dappsEnabled: Boolean) : SettingsChange()
     }
 
     data class BalanceAccountNameUpdate(

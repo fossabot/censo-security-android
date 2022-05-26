@@ -11,6 +11,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.strikeprotocols.mobile.R
 import com.strikeprotocols.mobile.common.maskAddress
+import com.strikeprotocols.mobile.data.models.approval.SlotDestinationInfo
 import com.strikeprotocols.mobile.data.models.approval.SolanaApprovalRequestType
 import com.strikeprotocols.mobile.presentation.approvals.ApprovalContentHeader
 import com.strikeprotocols.mobile.presentation.approvals.approval_type_row_items.getHeader
@@ -23,8 +24,10 @@ fun AddressBookUpdateDetailContent(
     addressBookUpdate: SolanaApprovalRequestType.AddressBookUpdate
 ) {
     val header = addressBookUpdate.getHeader(LocalContext.current)
-    val name = addressBookUpdate.entry.value.name
-    val address = addressBookUpdate.entry.value.address.maskAddress()
+    val entryMetaData : Pair<SolanaApprovalRequestType.AddRemoveChange, SlotDestinationInfo>? = addressBookUpdate.getEntryMetaData()
+
+    val name = entryMetaData?.second?.value?.name ?: stringResource(id = R.string.not_applicable)
+    val address = entryMetaData?.second?.value?.address?.maskAddress() ?: stringResource(id = R.string.not_applicable)
 
     ApprovalContentHeader(header = header, topSpacing = 12, bottomSpacing = 36)
     Column(modifier = Modifier.padding(horizontal = 16.dp)) {

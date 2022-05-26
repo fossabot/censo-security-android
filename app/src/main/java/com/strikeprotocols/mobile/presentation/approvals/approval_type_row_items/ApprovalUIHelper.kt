@@ -19,7 +19,11 @@ import com.strikeprotocols.mobile.data.models.approval.SolanaApprovalRequestType
 fun SolanaApprovalRequestType.getHeader(context: Context): String {
     return when (this) {
         is AddressBookUpdate -> {
-            if (change == AddRemoveChange.ADD) {
+            val entryMetaData: Pair<AddRemoveChange, SlotDestinationInfo>? = this.getEntryMetaData()
+
+            if (entryMetaData == null) {
+                context.getString(R.string.not_applicable)
+            } else if (entryMetaData.first == AddRemoveChange.ADD) {
                 context.getString(R.string.add_address_book_update_approval_header)
             } else {
                 context.getString(R.string.remove_address_book_update_approval_header)
@@ -38,11 +42,12 @@ fun SolanaApprovalRequestType.getHeader(context: Context): String {
         is BalanceAccountPolicyUpdate ->
             context.getString(R.string.balance_account_policy_update_approval_header)
         is BalanceAccountSettingsUpdate -> {
-            if (change is SettingsChange.DAppsEnabled && !change.value) {
+            val change = this.changeValue()
+            if (change is SettingsChange.DAppsEnabled && !change.dappsEnabled) {
                 context.getString(R.string.disable_dapp_balance_account_settings_update_approval_header)
-            } else if (change is SettingsChange.DAppsEnabled && change.value) {
+            } else if (change is SettingsChange.DAppsEnabled && change.dappsEnabled) {
                 context.getString(R.string.enable_dapp_balance_account_settings_update_approval_header)
-            } else if (change is SettingsChange.WhitelistEnabled && !change.value) {
+            } else if (change is SettingsChange.WhitelistEnabled && !change.whiteListEnabled) {
                 context.getString(R.string.disable_transfer_balance_account_settings_update_approval_header)
             } else {
                 context.getString(R.string.enable_transfer_balance_account_settings_update_approval_header)

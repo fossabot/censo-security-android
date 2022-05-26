@@ -12,6 +12,7 @@ import androidx.compose.ui.unit.dp
 import com.strikeprotocols.mobile.R
 import com.strikeprotocols.mobile.data.models.approval.SolanaApprovalRequestType
 import com.strikeprotocols.mobile.presentation.approvals.approval_type_row_items.getHeader
+import com.strikeprotocols.mobile.presentation.approvals.approval_type_row_items.getUITitle
 import com.strikeprotocols.mobile.presentation.components.AccountChangeItem
 import com.strikeprotocols.mobile.ui.theme.AccountTextGrey
 import com.strikeprotocols.mobile.ui.theme.DetailInfoLightBackground
@@ -23,7 +24,7 @@ fun SPLTokenAccountCreationDetailContent(
 ) {
     val header = splTokenAccountCreation.getHeader(LocalContext.current)
     val accountName = splTokenAccountCreation.payerBalanceAccount.name
-    val accountType = splTokenAccountCreation.payerBalanceAccount.accountType.name
+    val accountType = splTokenAccountCreation.payerBalanceAccount.accountType.getUITitle(LocalContext.current)
     val symbol = splTokenAccountCreation.tokenSymbolInfo.symbol
 
     AccountChangeItem(header = header, title = accountName, subtitle = accountType, headerTopSpacing = 24)

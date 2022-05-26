@@ -23,10 +23,10 @@ fun BalanceAccountAddressWhitelistUpdateDetailContent(
     addressWhitelistUpdate: SolanaApprovalRequestType.BalanceAccountAddressWhitelistUpdate
 ) {
     val header = addressWhitelistUpdate.getHeader(LocalContext.current)
-    val accoutName = addressWhitelistUpdate.accountInfo.name
+    val accountName = addressWhitelistUpdate.accountInfo.name
     val accountType = addressWhitelistUpdate.accountInfo.accountType.getUITitle(LocalContext.current)
 
-    AccountChangeItem(header = header, title = accoutName, subtitle = accountType, headerTopSpacing = 24, headerBottomSpacing = 24)
+    AccountChangeItem(header = header, title = accountName, subtitle = accountType, headerTopSpacing = 24, headerBottomSpacing = 24)
     Spacer(modifier = Modifier.height(16.dp))
 
     val destinationsRowInfoData =

@@ -137,8 +137,6 @@
     <string name="wallet_approvers_title">Wallet Approvers</string>
     <string name="approvals_required_title">Approvals Required</string>
     <string name="approval_expiration">Approval Expiration</string>
-    <string name="whitelisting_enabled">Whitelisting Enabled</string>
-    <string name="supports_dapps">Supports DApps</string>
     <string name="no_approvers_text">No users may approve requests</string>
     <string name="no_wallet_approvers_text">No wallet approvers</string>
     <string name="zero_minutes">0m</string>
@@ -208,7 +206,8 @@
     <string name="name">Name</string>
     <string name="wallet_name_title">Wallet Name</string>
     <string name="wallet_approvers">Wallet Approvers</string>
-
+    <string name="dapps_enabled_title">DApps Enabled</string>
+    <string name="whitelisting_enabled_title">Whitelisting Enabled</string>
 
 
 </resources>
