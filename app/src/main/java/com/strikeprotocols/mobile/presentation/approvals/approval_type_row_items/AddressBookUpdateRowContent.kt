@@ -27,7 +27,7 @@ fun AddressBookUpdateRowContent(
     val name = entryMetaData?.second?.value?.name ?: stringResource(id = R.string.not_applicable)
     val header = addressBookUpdate.getHeader(LocalContext.current)
 
-    ApprovalContentHeader(header = header, topSpacing = 12, bottomSpacing = 6)
+    ApprovalContentHeader(header = header, topSpacing = 24, bottomSpacing = 6)
     Text(
         name,
         color = GreyText,

@@ -29,7 +29,7 @@ fun DAppDetailContent(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         val header = dAppWalletApproval.getHeader(LocalContext.current)
-        ApprovalContentHeader(header = header)
+        ApprovalContentHeader(header = header, topSpacing = 24)
         Spacer(modifier = Modifier.height(36.dp))
         ApprovalDispositionsRequired(approvalsNeeded = approvalsNeeded)
         Spacer(modifier = Modifier.height(36.dp))

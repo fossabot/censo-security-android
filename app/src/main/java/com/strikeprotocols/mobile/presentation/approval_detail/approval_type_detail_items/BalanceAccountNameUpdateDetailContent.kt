@@ -17,7 +17,7 @@ fun BalanceAccountNameUpdateDetailContent(
     val fromAccount = accountNameUpdate.accountInfo.name
     val toAccount = accountNameUpdate.newAccountName
 
-    ApprovalContentHeader(header = header, topSpacing = 0, bottomSpacing = 36)
+    ApprovalContentHeader(header = header, topSpacing = 24, bottomSpacing = 36)
     StrikeTagLabeledRow(
         text1 = fromAccount,
         text2 = toAccount,

@@ -211,7 +211,7 @@ fun ApprovalDetailContent(
         is SolanaApprovalRequestType.DAppTransactionRequest ->
             DAppDetailContent(dAppWalletApproval = type, approvalsNeeded = approvalsNeeded)
         is SolanaApprovalRequestType.LoginApprovalRequest -> {
-            ApprovalContentHeader(header = type.getHeader(LocalContext.current), topSpacing = 12, bottomSpacing = 32)
+            ApprovalContentHeader(header = type.getHeader(LocalContext.current), topSpacing = 24, bottomSpacing = 32)
         }
         is SolanaApprovalRequestType.SignersUpdate ->
             SignersUpdateDetailContent(signersUpdate = type)

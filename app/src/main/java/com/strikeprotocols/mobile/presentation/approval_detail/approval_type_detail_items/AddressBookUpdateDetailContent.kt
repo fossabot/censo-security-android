@@ -29,7 +29,7 @@ fun AddressBookUpdateDetailContent(
     val name = entryMetaData?.second?.value?.name ?: stringResource(id = R.string.not_applicable)
     val address = entryMetaData?.second?.value?.address?.maskAddress() ?: stringResource(id = R.string.not_applicable)
 
-    ApprovalContentHeader(header = header, topSpacing = 12, bottomSpacing = 36)
+    ApprovalContentHeader(header = header, topSpacing = 24, bottomSpacing = 36)
     Column(modifier = Modifier.padding(horizontal = 16.dp)) {
         ApprovalInfoRow(
             backgroundColor = DetailInfoLightBackground,

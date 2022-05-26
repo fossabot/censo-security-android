@@ -28,7 +28,7 @@ fun BalanceAccountPolicyUpdateDetailContent(
         header = header,
         title = accountName,
         subtitle = accountType,
-        headerTopSpacing = 20,
+        headerTopSpacing = 24,
         headerBottomSpacing = 36
     )
     Spacer(modifier = Modifier.height(24.dp))

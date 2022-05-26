@@ -34,7 +34,7 @@ fun SignersUpdateDetailContent(signersUpdate: SolanaApprovalRequestType.SignersU
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        ApprovalContentHeader(header = header, topSpacing = 12, bottomSpacing = 32)
+        ApprovalContentHeader(header = header, topSpacing = 24, bottomSpacing = 32)
 
         ApprovalInfoRow(
             backgroundColor = DetailInfoDarkBackground,

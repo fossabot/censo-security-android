@@ -31,7 +31,7 @@ fun DAppRowContent(dAppTransactionRequest: SolanaApprovalRequestType.DAppTransac
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         val header = dAppTransactionRequest.getHeader(LocalContext.current)
-        ApprovalContentHeader(header = header)
+        ApprovalContentHeader(header = header, topSpacing = 24, bottomSpacing = 24)
 
         if (!dAppTransactionRequest.balanceChanges.isNullOrEmpty()) {
             dAppTransactionRequest.balanceChanges.forEachIndexed { index, symbolAndAmountInfo ->
