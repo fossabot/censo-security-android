@@ -72,12 +72,20 @@ fun ApprovalContentHeader(
 }
 
 @Composable
+fun ApprovalRowContentHeader(
+    header: String,
+    topSpacing: Int = 16,
+    bottomSpacing: Int = 20
+) {
+    ApprovalContentHeader(header = header, topSpacing = topSpacing, bottomSpacing = bottomSpacing)
+}
+
+@Composable
 fun ApprovalButtonRow(
     onApproveClicked: () -> Unit,
     onMoreInfoClicked: () -> Unit
 ) {
     Column(modifier = Modifier.background(DetailInfoLightBackground)) {
-        Spacer(modifier = Modifier.height(24.dp))
         Divider(color = DividerGrey, modifier = Modifier.height(0.5.dp))
         Row(
             modifier = Modifier.height(IntrinsicSize.Min),
@@ -158,7 +166,7 @@ fun ApprovalRowContent(
         is SolanaApprovalRequestType.BalanceAccountCreation ->
             BalanceAccountCreationRowContent(balanceAccountCreation = type)
         is SolanaApprovalRequestType.DAppTransactionRequest ->
-            DAppRowContent(dAppTransactionRequest = type)
+            DAppTransactionRowContent(dAppTransactionRequest = type)
         is SolanaApprovalRequestType.LoginApprovalRequest ->
             LoginApprovalRowContent(loginApproval = type)
         is SolanaApprovalRequestType.AddressBookUpdate -> 
@@ -209,7 +217,7 @@ fun ApprovalDetailContent(
                 approvalsNeeded = approvalsNeeded
             )
         is SolanaApprovalRequestType.DAppTransactionRequest ->
-            DAppDetailContent(dAppWalletApproval = type, approvalsNeeded = approvalsNeeded)
+            DAppTransactionDetailContent(dAppWalletApproval = type, approvalsNeeded = approvalsNeeded)
         is SolanaApprovalRequestType.LoginApprovalRequest -> {
             ApprovalContentHeader(header = type.getHeader(LocalContext.current), topSpacing = 24, bottomSpacing = 32)
         }

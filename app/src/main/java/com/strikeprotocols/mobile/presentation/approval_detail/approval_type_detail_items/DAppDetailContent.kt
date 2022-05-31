@@ -8,19 +8,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.strikeprotocols.mobile.R
 import com.strikeprotocols.mobile.data.models.approval.SolanaApprovalRequestType
 import com.strikeprotocols.mobile.presentation.approvals.ApprovalContentHeader
 import com.strikeprotocols.mobile.presentation.approvals.approval_type_row_items.BalanceChange
 import com.strikeprotocols.mobile.presentation.approvals.approval_type_row_items.getHeader
-import com.strikeprotocols.mobile.presentation.components.ApprovalRowTitleText
 import com.strikeprotocols.mobile.ui.theme.BackgroundBlack
-import com.strikeprotocols.mobile.ui.theme.DetailInfoLightBackground
 
 @Composable
-fun DAppDetailContent(
+fun DAppTransactionDetailContent(
     dAppWalletApproval: SolanaApprovalRequestType.DAppTransactionRequest,
     approvalsNeeded: Int
 ) {

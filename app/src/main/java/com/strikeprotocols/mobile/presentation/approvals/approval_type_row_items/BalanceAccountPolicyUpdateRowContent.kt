@@ -24,7 +24,7 @@ fun BalanceAccountPolicyUpdateRowContent(
     val header = accountPolicyUpdate.getHeader(LocalContext.current)
     val tagText = accountPolicyUpdate.accountInfo.name
 
-    ApprovalContentHeader(header = header, topSpacing = 24, bottomSpacing = 8)
+    ApprovalContentHeader(header = header, topSpacing = 16, bottomSpacing = 8)
     ApprovalDispositionsRequired(approvalsNeeded = approvalsNeeded)
     Spacer(modifier = Modifier.height(24.dp))
     val tagPaddingValues = PaddingValues(top = 12.dp, bottom = 12.dp, start = 16.dp, end = 16.dp)
@@ -35,4 +35,5 @@ fun BalanceAccountPolicyUpdateRowContent(
         text = tagText,
         paddingValues = tagPaddingValues
     )
+    Spacer(modifier = Modifier.height(20.dp))
 }

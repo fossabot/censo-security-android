@@ -13,6 +13,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.strikeprotocols.mobile.data.models.approval.SolanaApprovalRequestType
+import com.strikeprotocols.mobile.presentation.approval_detail.approval_type_detail_items.ApprovalDispositionsRequired
 import com.strikeprotocols.mobile.presentation.approvals.ApprovalContentHeader
 import com.strikeprotocols.mobile.presentation.components.StrikeTag
 import com.strikeprotocols.mobile.ui.theme.GreyText
@@ -26,11 +27,9 @@ fun SPLTokenAccountCreationRowContent(
     val accountName = splTokenAccountCreation.payerBalanceAccount.name
     val symbol = splTokenAccountCreation.tokenSymbolInfo.symbol
 
-    ApprovalContentHeader(header = header, topSpacing = 24)
-    Spacer(modifier = Modifier.height(8.dp))
+    ApprovalContentHeader(header = header, topSpacing = 16, bottomSpacing = 8)
     Text(symbol, color = GreyText, fontSize = 13.sp)
     Spacer(modifier = Modifier.height(24.dp))
-
     val tagPaddingValues = PaddingValues(top = 12.dp, bottom = 12.dp, start = 16.dp, end = 16.dp)
     StrikeTag(
         modifier = Modifier
@@ -39,4 +38,5 @@ fun SPLTokenAccountCreationRowContent(
         text = accountName,
         paddingValues = tagPaddingValues
     )
+    Spacer(modifier = Modifier.height(20.dp))
 }

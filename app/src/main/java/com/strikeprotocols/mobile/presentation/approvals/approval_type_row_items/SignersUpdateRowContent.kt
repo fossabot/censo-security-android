@@ -3,10 +3,13 @@ package com.strikeprotocols.mobile.presentation.approvals.approval_type_row_item
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
 import com.strikeprotocols.mobile.data.models.approval.SolanaApprovalRequestType
 import com.strikeprotocols.mobile.presentation.components.AccountChangeItem
 import com.strikeprotocols.mobile.ui.theme.DetailInfoLightBackground
@@ -23,6 +26,7 @@ fun SignersUpdateRowContent(signersUpdate: SolanaApprovalRequestType.SignersUpda
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        AccountChangeItem(header = header, title = name, subtitle = email)
+        AccountChangeItem(header = header, title = name, subtitle = email, headerTopSpacing = 16, headerBottomSpacing = 24)
+        Spacer(modifier = Modifier.height(20.dp))
     }
 }

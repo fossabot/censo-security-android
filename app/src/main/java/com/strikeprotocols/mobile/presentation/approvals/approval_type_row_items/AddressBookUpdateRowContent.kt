@@ -14,6 +14,7 @@ import com.strikeprotocols.mobile.R
 import com.strikeprotocols.mobile.data.models.approval.SlotDestinationInfo
 import com.strikeprotocols.mobile.data.models.approval.SolanaApprovalRequestType
 import com.strikeprotocols.mobile.presentation.approvals.ApprovalContentHeader
+import com.strikeprotocols.mobile.presentation.approvals.ApprovalRowContentHeader
 import com.strikeprotocols.mobile.ui.theme.GreyText
 
 @Composable
@@ -27,12 +28,12 @@ fun AddressBookUpdateRowContent(
     val name = entryMetaData?.second?.value?.name ?: stringResource(id = R.string.not_applicable)
     val header = addressBookUpdate.getHeader(LocalContext.current)
 
-    ApprovalContentHeader(header = header, topSpacing = 24, bottomSpacing = 6)
+    ApprovalRowContentHeader(header = header, topSpacing = 16, bottomSpacing = 6)
     Text(
         name,
         color = GreyText,
         textAlign = TextAlign.Center,
         fontSize = 12.sp
     )
-    Spacer(modifier = Modifier.height(8.dp))
+    Spacer(modifier = Modifier.height(24.dp))
 }

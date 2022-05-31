@@ -16,7 +16,6 @@ import com.strikeprotocols.mobile.ui.theme.*
 @Composable
 fun ApprovalRowItem(
     timeRemainingInSeconds: Long,
-    submitDate: String?,
     onApproveClicked: () -> Unit,
     onMoreInfoClicked: () -> Unit,
     rowMetaData: ApprovalRowMetaData,
@@ -35,7 +34,6 @@ fun ApprovalRowItem(
             approvalImageContentDescription = rowMetaData.approvalImageContentDescription,
             approvalType = rowMetaData.approvalTypeTitle
         )
-        Spacer(modifier = Modifier.height(8.dp))
         content()
         ApprovalButtonRow(
             onApproveClicked = onApproveClicked,

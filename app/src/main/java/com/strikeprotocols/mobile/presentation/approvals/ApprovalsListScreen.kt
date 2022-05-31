@@ -321,8 +321,7 @@ fun ApprovalsList(
                                 timeRemainingInSeconds = timeRemainingInSeconds,
                                 onApproveClicked = { onApproveClicked(walletApprovals[index]) },
                                 onMoreInfoClicked = { onMoreInfoClicked(walletApprovals[index]) },
-                                rowMetaData = rowMetaData,
-                                submitDate = safeApproval.submitDate
+                                rowMetaData = rowMetaData
                             ) {
                                 ApprovalRowContent(
                                     type = type,

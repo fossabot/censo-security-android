@@ -20,9 +20,11 @@ import androidx.navigation.*
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.strikeprotocols.mobile.common.BaseWrapper
 import com.strikeprotocols.mobile.common.BiometricUtil
 import com.strikeprotocols.mobile.common.strikeLog
 import com.strikeprotocols.mobile.data.AuthProvider
+import com.strikeprotocols.mobile.data.SharedPrefsHelper
 import com.strikeprotocols.mobile.data.UserState
 import com.strikeprotocols.mobile.data.UserStateListener
 import com.strikeprotocols.mobile.data.models.approval.WalletApproval

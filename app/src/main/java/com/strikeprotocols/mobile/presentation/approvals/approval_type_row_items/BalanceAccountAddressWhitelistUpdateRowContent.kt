@@ -2,6 +2,8 @@ package com.strikeprotocols.mobile.presentation.approvals.approval_type_row_item
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -11,6 +13,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.strikeprotocols.mobile.data.models.approval.SolanaApprovalRequestType
 import com.strikeprotocols.mobile.presentation.approvals.ApprovalContentHeader
+import com.strikeprotocols.mobile.presentation.approvals.ApprovalRowContentHeader
 import com.strikeprotocols.mobile.presentation.components.StrikeTag
 import com.strikeprotocols.mobile.ui.theme.SectionBlack
 import com.strikeprotocols.mobile.ui.theme.StrikeWhite
@@ -22,7 +25,7 @@ fun BalanceAccountAddressWhitelistUpdateRowContent(
     val header = accountAddressWhitelistUpdate.getHeader(LocalContext.current)
     val tagText = accountAddressWhitelistUpdate.accountInfo.name
 
-    ApprovalContentHeader(header = header, topSpacing = 24, bottomSpacing = 24)
+    ApprovalRowContentHeader(header = header, topSpacing = 16, bottomSpacing = 16)
 
     val tagPaddingValues = PaddingValues(top = 12.dp, bottom = 12.dp, start = 16.dp, end = 16.dp)
     StrikeTag(
@@ -32,4 +35,5 @@ fun BalanceAccountAddressWhitelistUpdateRowContent(
         text = tagText,
         paddingValues = tagPaddingValues
     )
+    Spacer(modifier = Modifier.height(20.dp))
 }

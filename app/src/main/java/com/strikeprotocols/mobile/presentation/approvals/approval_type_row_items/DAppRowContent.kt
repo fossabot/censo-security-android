@@ -18,22 +18,22 @@ import androidx.compose.ui.unit.sp
 import com.strikeprotocols.mobile.R
 import com.strikeprotocols.mobile.data.models.approval.SolanaApprovalRequestType
 import com.strikeprotocols.mobile.presentation.approvals.ApprovalContentHeader
-import com.strikeprotocols.mobile.presentation.components.ApprovalRowTitleText
+import com.strikeprotocols.mobile.presentation.approvals.ApprovalRowContentHeader
 import com.strikeprotocols.mobile.presentation.components.StrikeTagRow
 import com.strikeprotocols.mobile.ui.theme.*
 import java.util.*
 
 
 @Composable
-fun DAppRowContent(dAppTransactionRequest: SolanaApprovalRequestType.DAppTransactionRequest) {
+fun DAppTransactionRowContent(dAppTransactionRequest: SolanaApprovalRequestType.DAppTransactionRequest) {
     Column(
         modifier = Modifier.background(DetailInfoLightBackground),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         val header = dAppTransactionRequest.getHeader(LocalContext.current)
-        ApprovalContentHeader(header = header, topSpacing = 24, bottomSpacing = 24)
+        ApprovalRowContentHeader(header = header, topSpacing = 16, bottomSpacing = 16)
 
-        if (!dAppTransactionRequest.balanceChanges.isNullOrEmpty()) {
+        if (dAppTransactionRequest.balanceChanges.isNotEmpty()) {
             dAppTransactionRequest.balanceChanges.forEachIndexed { index, symbolAndAmountInfo ->
                 Spacer(modifier = Modifier.height(16.dp))
                 BalanceChange(
@@ -51,6 +51,8 @@ fun DAppRowContent(dAppTransactionRequest: SolanaApprovalRequestType.DAppTransac
                     Spacer(modifier = Modifier.height(20.dp))
                 }
             }
+        } else {
+            Spacer(modifier = Modifier.height(12.dp))
         }
     }
 }

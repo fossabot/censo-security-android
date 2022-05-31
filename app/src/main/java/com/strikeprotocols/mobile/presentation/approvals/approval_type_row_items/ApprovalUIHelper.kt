@@ -15,6 +15,7 @@ import com.strikeprotocols.mobile.data.models.approval.*
 import com.strikeprotocols.mobile.data.models.approval.AccountType.*
 import com.strikeprotocols.mobile.ui.theme.GreyText
 import com.strikeprotocols.mobile.data.models.approval.SolanaApprovalRequestType.*
+import com.strikeprotocols.mobile.presentation.approvals.ApprovalContentHeader
 
 fun SolanaApprovalRequestType.getHeader(context: Context): String {
     return when (this) {

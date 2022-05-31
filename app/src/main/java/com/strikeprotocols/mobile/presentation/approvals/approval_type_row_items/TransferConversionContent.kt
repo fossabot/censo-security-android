@@ -21,7 +21,7 @@ fun TransferConversionContent(
     toText: String,
     transferConversionLabelData: TransferConversionLabelData = TransferConversionLabelData()
 ) {
-    ApprovalContentHeader(header = header, topSpacing = 24, bottomSpacing = 16)
+    ApprovalContentHeader(header = header, topSpacing = 16, bottomSpacing = 16)
     Text(
         text = usdEquivalent,
         color = GreyText,
