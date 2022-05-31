@@ -20,11 +20,11 @@ fun FactRow(factsData: FactsData, modifier: Modifier = Modifier) {
         verticalArrangement = Arrangement.Top
     ) {
         Box(
-            contentAlignment = Alignment.Center,
+            contentAlignment = Alignment.CenterStart,
             modifier = Modifier
                 .fillMaxWidth()
                 .background(color = DetailInfoDarkBackground)
-                .padding(top = 2.dp, bottom = 2.dp)
+                .padding(top = 2.dp, bottom = 2.dp, start = 12.dp)
         ) {
             Text(
                 text = factsData.title,
