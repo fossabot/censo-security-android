@@ -77,7 +77,7 @@ android {
         release {
             resValue "string", "app_name", appName
             minifyEnabled true
-            buildConfigField "String", "BASE_URL", "\"\""
+            buildConfigField "String", "BASE_URL", "\"https://brooklyn.strikeprotocols.com/\""
             buildConfigField "String", "SOLANA_URL", "\"https://solana-validator.strikeprotocols.com\""
             buildConfigField "String", "SOLANA_COMMITMENT", "\"finalized\""
             buildConfigField "String", "OKTA_CLIENT_ID", "\"0oa7ajzug1y8O0CPe357\""
@@ -88,8 +88,8 @@ android {
         demoOne {
             resValue "string", "app_name", "$appName (Demo)"
             applicationIdSuffix ".demo"
-            minifyEnabled true
-            buildConfigField "String", "BASE_URL", "\"\""
+            minifyEnabled false
+            buildConfigField "String", "BASE_URL", "\"https://brooklyn-demo1.strikeprotocols.com/\""
             buildConfigField "String", "SOLANA_URL", "\"https://solana-validator-demo1.strikeprotocols.com\""
             buildConfigField "String", "SOLANA_COMMITMENT", "\"confirmed\""
             buildConfigField "String", "OKTA_CLIENT_ID", "\"0oa7ajsmclS0GyzMw357\""
@@ -101,7 +101,7 @@ android {
             initWith demoOne
             resValue "string", "app_name", "$appName (Demo2)"
             applicationIdSuffix ".demo2"
-            buildConfigField "String", "BASE_URL", "\"\""
+            buildConfigField "String", "BASE_URL", "\"https://brooklyn-demo2.strikeprotocols.com/\""
             buildConfigField "String", "SOLANA_URL", "\"https://solana-validator-demo2.strikeprotocols.com\""
             buildConfigField "String", "SOLANA_COMMITMENT", "\"confirmed\""
             buildConfigField "String", "OKTA_CLIENT_ID", "\"0oa7ajsmclS0GyzMw357\""
