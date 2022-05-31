@@ -39,7 +39,6 @@
     <string name="equivalent">equivalent</string>
 
     <string name="expires_in">Expires in</string>
-    <string name="transfer_details">Transfer Details</string>
     <string name="content_des_back_icon">Back Icon</string>
     <string name="requested_by">Requested By</string>
     <string name="requested_date">Requested Date</string>
@@ -124,7 +123,6 @@
     <string name="conversion_icon_desc">Conversion Icon</string>
     <string name="login_icon_content_desc">Login Icon</string>
     <string name="transfer_icon_content_desc">Transfer Icon</string>
-    <string name="generic_approval_title">Approval</string>
     <string name="not_applicable">N/A</string>
 
     <string name="usd_equivalent">USD equivalent</string>
@@ -208,6 +206,7 @@
     <string name="wallet_approvers">Wallet Approvers</string>
     <string name="dapps_enabled_title">DApps Enabled</string>
     <string name="whitelisting_enabled_title">Whitelisting Enabled</string>
+    <string name="details_title">Details</string>
 
 
 </resources>

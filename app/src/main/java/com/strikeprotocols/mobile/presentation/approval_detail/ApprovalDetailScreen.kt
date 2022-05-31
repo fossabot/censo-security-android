@@ -123,18 +123,11 @@ fun ApprovalDetailsScreen(
         }
     }
 
-
-    val approvalRowMetadata = approvalDetailsState.approval?.getSolanaApprovalRequestType()
-        ?.getApprovalRowMetaData(context = context)
-    val title = approvalRowMetadata?.approvalTypeTitle
-        ?: stringResource(id = R.string.generic_approval_title)
-
     //region Screen Content
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
             ApprovalDetailsTopAppBar(
-                title = title,
                 onAppBarIconClick = { navController.navigateUp() },
                 navigationIcon = Icons.Rounded.ArrowBack,
                 navigationIconContentDes = stringResource(id = R.string.content_des_back_icon)
@@ -220,13 +213,12 @@ fun ApprovalDetailsScreen(
 //region Screen Composables
 @Composable
 fun ApprovalDetailsTopAppBar(
-    title: String,
     onAppBarIconClick: () -> Unit,
     navigationIcon: ImageVector,
     navigationIconContentDes: String
 ) {
     StrikeTopAppBar(
-        title = title,
+        title = stringResource(R.string.details_title),
         onAppBarIconClick = { onAppBarIconClick() },
         navigationIcon = navigationIcon,
         navigationIconContentDes = navigationIconContentDes
@@ -375,7 +367,6 @@ fun StatelessApprovalDetailsScreen() {
         modifier = Modifier.fillMaxSize(),
         topBar = {
             ApprovalDetailsTopAppBar(
-                title = stringResource(id = R.string.transfer_details),
                 onAppBarIconClick = {},
                 navigationIcon = Icons.Rounded.ArrowBackIos,
                 navigationIconContentDes = stringResource(id = R.string.content_des_back_icon)
