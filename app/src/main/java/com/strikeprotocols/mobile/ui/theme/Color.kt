@@ -26,3 +26,13 @@ val DividerGrey = Color(0xFF3c3c3c)
 val DividerDarkGrey = Color(0xFF262626)
 val AccountTextGrey = Color(0xFFb2b2b2)
 
+
+val StatusGreyText = Color(0xFF6a6a6a)
+
+val BackgroundLight = Color(
+    red = 1f, green = 1f, blue = 1f, alpha = 0.1f)
+val BackgroundDark = Color(
+    red = 1f, green = 1f, blue = 1f, alpha = 0.06f)
+
+val ApprovalInfoBorder = Color(0xff535355)
+

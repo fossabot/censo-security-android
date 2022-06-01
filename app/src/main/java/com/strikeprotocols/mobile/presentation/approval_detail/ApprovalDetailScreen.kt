@@ -1,5 +1,6 @@
 package com.strikeprotocols.mobile.presentation.approval_detail
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -41,9 +42,12 @@ import com.strikeprotocols.mobile.presentation.components.StrikeConfirmDispositi
 import com.strikeprotocols.mobile.presentation.components.StrikeTopAppBar
 import com.strikeprotocols.mobile.ui.theme.*
 import com.strikeprotocols.mobile.data.models.approval.SolanaApprovalRequestType.*
+import com.strikeprotocols.mobile.presentation.approval_detail.approval_type_detail_items.ApprovalInfoRow
 import com.strikeprotocols.mobile.presentation.approvals.ApprovalDetailContent
 import com.strikeprotocols.mobile.presentation.approvals.approval_type_row_items.getApprovalRowMetaData
+import com.strikeprotocols.mobile.presentation.approvals.approval_type_row_items.getApprovalTimerText
 import com.strikeprotocols.mobile.presentation.durable_nonce.DurableNonceViewModel
+import kotlin.math.exp
 
 @Composable
 fun ApprovalDetailsScreen(
@@ -90,11 +94,13 @@ fun ApprovalDetailsScreen(
             }
         }
         if (approvalDetailsState.approvalDispositionState?.registerApprovalDispositionResult is Resource.Success
-            || approvalDetailsState.approvalDispositionState?.initiationDispositionResult is Resource.Success) {
+            || approvalDetailsState.approvalDispositionState?.initiationDispositionResult is Resource.Success
+        ) {
             approvalDetailsViewModel.wipeDataAndKickUserOutToApprovalsScreen()
         }
         if (approvalDetailsState.approvalDispositionState?.registerApprovalDispositionResult is Resource.Error
-            || approvalDetailsState.approvalDispositionState?.initiationDispositionResult is Resource.Error) {
+            || approvalDetailsState.approvalDispositionState?.initiationDispositionResult is Resource.Error
+        ) {
             approvalDetailsViewModel.setShouldDisplayApprovalDispositionError()
         }
         if (approvalDetailsState.shouldKickOutUserToApprovalsScreen) {
@@ -139,7 +145,8 @@ fun ApprovalDetailsScreen(
                 onApproveClicked = {
                     approvalDetailsViewModel.setShouldDisplayConfirmDispositionDialog(
                         isApproving = true,
-                        dialogTitle = approval?.getSolanaApprovalRequestType()?.getApprovalTypeDialogTitle(context)
+                        dialogTitle = approval?.getSolanaApprovalRequestType()
+                            ?.getApprovalTypeDialogTitle(context)
                             ?: UnknownApprovalType.getApprovalTypeDialogTitle(context),
                         dialogText = approval?.getSolanaApprovalRequestType()?.getDialogFullMessage(
                             context = context,
@@ -156,7 +163,8 @@ fun ApprovalDetailsScreen(
                 onDenyClicked = {
                     approvalDetailsViewModel.setShouldDisplayConfirmDispositionDialog(
                         isApproving = false,
-                        dialogTitle = approval?.getSolanaApprovalRequestType()?.getApprovalTypeDialogTitle(context)
+                        dialogTitle = approval?.getSolanaApprovalRequestType()
+                            ?.getApprovalTypeDialogTitle(context)
                             ?: UnknownApprovalType.getApprovalTypeDialogTitle(context),
                         dialogText = approval?.getSolanaApprovalRequestType()?.getDialogFullMessage(
                             context = context,
@@ -176,6 +184,18 @@ fun ApprovalDetailsScreen(
                 initiationRequest = approvalDetailsState.approval?.isInitiationRequest() == true
             )
 
+//            val expiresInText = getApprovalTimerText(
+//                context = LocalContext.current,
+//                timeRemainingInSeconds = approvalDetailsState.remainingTimeInSeconds)
+//
+//            ApprovalStatus(
+//                requestedBy = approval?.submitterEmail ?: "",
+//                approvalsReceived = approval?.numberOfApprovalsReceived ?: 0,
+//                totalApprovals = approval?.numberOfDispositionsRequired ?: 0,
+//                denialsReceived = approval?.numberOfDeniesReceived ?: 0,
+//                expiresIn = expiresInText
+//            )
+
             if (approvalDetailsState.shouldDisplayConfirmDisposition != null) {
                 approvalDetailsState.shouldDisplayConfirmDisposition.let { safeDialogDetails ->
                     StrikeConfirmDispositionAlertDialog(
@@ -193,9 +213,13 @@ fun ApprovalDetailsScreen(
             }
 
             if (approvalDetailsState.shouldDisplayApprovalDispositionError) {
-                val approvalDispositionError = approvalDetailsState.approvalDispositionState?.approvalDispositionError
+                val approvalDispositionError =
+                    approvalDetailsState.approvalDispositionState?.approvalDispositionError
                 approvalDispositionError?.let { safeApprovalDispositionError ->
-                    val dialogErrorText = retrieveApprovalDispositionDialogErrorText(safeApprovalDispositionError, context)
+                    val dialogErrorText = retrieveApprovalDispositionDialogErrorText(
+                        safeApprovalDispositionError,
+                        context
+                    )
                     StrikeApprovalDispositionErrorAlertDialog(
                         dialogTitle = stringResource(R.string.approval_disposition_error_title),
                         dialogText = dialogErrorText,
@@ -233,15 +257,12 @@ fun ApprovalDetails(
     isLoading: Boolean,
     approval: WalletApproval?,
     initiationRequest: Boolean
-    ) {
+) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.SpaceBetween,
         modifier = Modifier.fillMaxHeight()
     ) {
-        ApprovalDetailsTimer(
-            timeRemainingInSeconds = timeRemainingInSeconds
-        )
         Column(
             modifier = Modifier
                 .background(BackgroundBlack)
@@ -263,6 +284,21 @@ fun ApprovalDetails(
                     )
                 }
             }
+
+            val expiresInText = getApprovalTimerText(
+                context = LocalContext.current,
+                timeRemainingInSeconds = timeRemainingInSeconds
+            )
+
+            Spacer(modifier = Modifier.height(28.dp))
+            ApprovalStatus(
+                requestedBy = approval?.submitterEmail ?: "",
+                approvalsReceived = approval?.numberOfApprovalsReceived ?: 0,
+                totalApprovals = approval?.numberOfDispositionsRequired ?: 0,
+                denialsReceived = approval?.numberOfDeniesReceived ?: 0,
+                expiresIn = expiresInText
+            )
+
         }
 
         Column(
@@ -277,15 +313,61 @@ fun ApprovalDetails(
         }
     }
 
-    if(isLoading) {
-        Box(modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = 12.dp)) {
+    if (isLoading) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 12.dp)
+        ) {
             CircularProgressIndicator(
                 modifier = Modifier.align(Alignment.Center),
                 color = StrikeWhite
             )
         }
+    }
+}
+
+@Composable
+fun ApprovalStatus(
+    requestedBy: String,
+    approvalsReceived: Int,
+    totalApprovals: Int,
+    denialsReceived: Int,
+    expiresIn: String
+) {
+    Column {
+        Text(
+            text = stringResource(R.string.status).uppercase(),
+            color = StatusGreyText,
+            modifier = Modifier.padding(start = 16.dp, top = 6.dp, bottom = 6.dp),
+            letterSpacing = 0.25.sp
+        )
+        ApprovalInfoRow(
+            backgroundColor = BackgroundLight,
+            title = stringResource(R.string.requested_by),
+            value = requestedBy
+        )
+        ApprovalInfoRow(
+            backgroundColor = BackgroundDark,
+            title = stringResource(R.string.approvals_received),
+            value = "$approvalsReceived ${stringResource(id = R.string.of)} $totalApprovals"
+        )
+        ApprovalInfoRow(
+            backgroundColor = BackgroundLight,
+            title = stringResource(R.string.denials_received),
+            value = "$denialsReceived ${stringResource(id = R.string.of)} $totalApprovals"
+        )
+        ApprovalInfoRow(
+            backgroundColor = BackgroundDark,
+            title = stringResource(R.string.expires_in),
+            value = expiresIn
+        )
+        Spacer(
+            modifier = Modifier
+                .background(color = BackgroundLight)
+                .height(1.dp)
+                .fillMaxWidth()
+        )
     }
 }
 
@@ -297,7 +379,12 @@ fun ApprovalDetailsTimer(
 
     val background = if (timerFinished) DenyRed else SectionBlack
     val text = if (timerFinished) stringResource(R.string.approval_expired) else
-        "${stringResource(id = R.string.expires_in)} ${convertSecondsIntoCountdownText(LocalContext.current, timeRemainingInSeconds)}"
+        "${stringResource(id = R.string.expires_in)} ${
+            convertSecondsIntoCountdownText(
+                LocalContext.current,
+                timeRemainingInSeconds
+            )
+        }"
 
     Text(
         modifier = Modifier
@@ -318,42 +405,42 @@ fun ApprovalDetailsButtons(
     isLoading: Boolean,
     initiationRequest: Boolean = false
 ) {
-        Spacer(modifier = Modifier.height(24.dp))
-        Button(
-            modifier = Modifier
-                .padding(horizontal = 16.dp)
-                .fillMaxWidth(),
-            onClick = { onDenyClicked() },
-            shape = MaterialTheme.shapes.medium,
-            colors = ButtonDefaults.buttonColors(backgroundColor = DenyRedBackground),
-            enabled = !isLoading
-        ) {
-            Text(
-                modifier = Modifier.padding(all = 4.dp),
-                text = if (initiationRequest) stringResource(id = R.string.cancel) else stringResource(
-                    id = R.string.deny
-                ),
-                color = DenyRed,
-                fontSize = 16.sp
-            )
-        }
-        Spacer(modifier = Modifier.height(12.dp))
-        Button(
-            modifier = Modifier
-                .padding(start = 16.dp, end = 16.dp, bottom = 24.dp)
-                .fillMaxWidth(),
-            onClick = { onApproveClicked() },
-            shape = MaterialTheme.shapes.medium,
-            colors = ButtonDefaults.buttonColors(backgroundColor = ApprovalGreenBackground),
-            enabled = !isLoading
-        ) {
-            Text(
-                modifier = Modifier.padding(all = 6.dp),
-                text = stringResource(id = R.string.approve),
-                color = ApprovalGreen,
-                fontSize = 24.sp
-            )
-        }
+    Spacer(modifier = Modifier.height(24.dp))
+    Button(
+        modifier = Modifier
+            .padding(horizontal = 16.dp)
+            .fillMaxWidth(),
+        onClick = { onDenyClicked() },
+        shape = MaterialTheme.shapes.medium,
+        colors = ButtonDefaults.buttonColors(backgroundColor = DenyRedBackground),
+        enabled = !isLoading
+    ) {
+        Text(
+            modifier = Modifier.padding(all = 4.dp),
+            text = if (initiationRequest) stringResource(id = R.string.cancel) else stringResource(
+                id = R.string.deny
+            ),
+            color = DenyRed,
+            fontSize = 16.sp
+        )
+    }
+    Spacer(modifier = Modifier.height(12.dp))
+    Button(
+        modifier = Modifier
+            .padding(start = 16.dp, end = 16.dp, bottom = 24.dp)
+            .fillMaxWidth(),
+        onClick = { onApproveClicked() },
+        shape = MaterialTheme.shapes.medium,
+        colors = ButtonDefaults.buttonColors(backgroundColor = ApprovalGreenBackground),
+        enabled = !isLoading
+    ) {
+        Text(
+            modifier = Modifier.padding(all = 6.dp),
+            text = stringResource(id = R.string.approve),
+            color = ApprovalGreen,
+            fontSize = 24.sp
+        )
+    }
 }
 //endregion
 
