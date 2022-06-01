@@ -44,7 +44,7 @@ android {
         applicationId coreAppId
         minSdk 26
         targetSdk 32
-        versionCode 2
+        versionCode 3
 
         buildConfigField "int", "versionNameMajor", versionNameMajor
         buildConfigField "int", "versionNameMinor", versionNameMinor
@@ -90,8 +90,8 @@ android {
             applicationIdSuffix ".demo"
             minifyEnabled false
             buildConfigField "String", "BASE_URL", "\"https://brooklyn-demo1.strikeprotocols.com/\""
-            buildConfigField "String", "SOLANA_URL", "\"https://solana-validator-demo1.strikeprotocols.com\""
-            buildConfigField "String", "SOLANA_COMMITMENT", "\"confirmed\""
+            buildConfigField "String", "SOLANA_URL", "\"https://api.mainnet-beta.solana.com\""
+            buildConfigField "String", "SOLANA_COMMITMENT", "\"finalized\""
             buildConfigField "String", "OKTA_CLIENT_ID", "\"0oa7ajsmclS0GyzMw357\""
             buildConfigField "String", "OKTA_ISSUER_ID", "\"aus7834x2w3eqeZSr357\""
             buildConfigField "String", "REDIRECT_SUFFIX", "\"-demo\""
