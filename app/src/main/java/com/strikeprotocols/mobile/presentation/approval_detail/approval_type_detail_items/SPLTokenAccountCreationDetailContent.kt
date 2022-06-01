@@ -15,7 +15,7 @@ import com.strikeprotocols.mobile.presentation.approvals.approval_type_row_items
 import com.strikeprotocols.mobile.presentation.approvals.approval_type_row_items.getUITitle
 import com.strikeprotocols.mobile.presentation.components.AccountChangeItem
 import com.strikeprotocols.mobile.ui.theme.AccountTextGrey
-import com.strikeprotocols.mobile.ui.theme.DetailInfoLightBackground
+import com.strikeprotocols.mobile.ui.theme.BackgroundLight
 import com.strikeprotocols.mobile.ui.theme.GreyText
 
 @Composable
@@ -33,7 +33,7 @@ fun SPLTokenAccountCreationDetailContent(
         modifier = Modifier
             .fillMaxWidth()
             .padding(start = 16.dp, end = 16.dp)
-            .background(color = DetailInfoLightBackground),
+            .background(color = BackgroundLight),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {

@@ -17,9 +17,9 @@ import com.strikeprotocols.mobile.common.convertPublicKeyToDisplayText
 import com.strikeprotocols.mobile.common.formatISO8601IntoDisplayText
 import com.strikeprotocols.mobile.data.models.approval.SolanaApprovalRequestType
 import com.strikeprotocols.mobile.presentation.approvals.approval_type_row_items.*
-import com.strikeprotocols.mobile.ui.theme.DetailInfoDarkBackground
-import com.strikeprotocols.mobile.ui.theme.DetailInfoLightBackground
-import com.strikeprotocols.mobile.ui.theme.DividerGrey
+import com.strikeprotocols.mobile.presentation.components.FactRow
+import com.strikeprotocols.mobile.presentation.components.FactsData
+import com.strikeprotocols.mobile.ui.theme.BackgroundLight
 
 @Composable
 fun WithdrawalRequestDetailContent(
@@ -44,9 +44,7 @@ fun WithdrawalRequestDetailContent(
     )
 
     Column(
-        modifier = Modifier
-            .padding(start = 8.dp, end = 8.dp)
-            .background(color = DetailInfoLightBackground),
+        modifier = Modifier.padding(start = 8.dp, end = 8.dp).background(color = BackgroundLight),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         TransferConversionContent(
@@ -60,23 +58,25 @@ fun WithdrawalRequestDetailContent(
         ApprovalDispositionsRequired(approvalsNeeded = approvalsNeeded)
         Spacer(modifier = Modifier.height(20.dp))
 
-        ApprovalInfoRow(
-            backgroundColor = DetailInfoLightBackground,
-            title = stringResource(R.string.requested_by),
-            value = submitterEmail
-        )
-        Divider(modifier = Modifier.height(0.5.dp), color = DividerGrey)
-        ApprovalInfoRow(
-            backgroundColor = DetailInfoDarkBackground,
-            title = stringResource(R.string.requested_date),
-            value = submitterDate.formatISO8601IntoDisplayText(LocalContext.current)
-        )
-        Divider(modifier = Modifier.height(0.5.dp), color = DividerGrey)
         val address = withdrawalRequest.destination.address
-        ApprovalInfoRow(
-            backgroundColor = DetailInfoLightBackground,
-            title = stringResource(R.string.address),
-            value = address.convertPublicKeyToDisplayText()
+
+        val factsData = FactsData(
+            facts = listOf(
+                Pair(
+                    stringResource(R.string.requested_by),
+                    submitterEmail
+                ),
+                Pair(
+                    stringResource(R.string.requested_date),
+                    submitterDate.formatISO8601IntoDisplayText(LocalContext.current)
+                ),
+                Pair(
+                    stringResource(R.string.address),
+                    address.convertPublicKeyToDisplayText()
+                )
+            )
         )
+
+        FactRow(factsData = factsData)
     }
 }

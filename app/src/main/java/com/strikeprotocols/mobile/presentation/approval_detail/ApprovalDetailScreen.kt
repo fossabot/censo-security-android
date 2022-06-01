@@ -36,16 +36,13 @@ import com.strikeprotocols.mobile.data.models.approval.WalletApproval
 import com.strikeprotocols.mobile.presentation.approvals.ApprovalsViewModel
 import com.strikeprotocols.mobile.presentation.approvals.approval_type_row_items.getApprovalTypeDialogTitle
 import com.strikeprotocols.mobile.presentation.approvals.approval_type_row_items.getDialogFullMessage
-import com.strikeprotocols.mobile.presentation.components.OnLifecycleEvent
-import com.strikeprotocols.mobile.presentation.components.StrikeApprovalDispositionErrorAlertDialog
-import com.strikeprotocols.mobile.presentation.components.StrikeConfirmDispositionAlertDialog
-import com.strikeprotocols.mobile.presentation.components.StrikeTopAppBar
 import com.strikeprotocols.mobile.ui.theme.*
 import com.strikeprotocols.mobile.data.models.approval.SolanaApprovalRequestType.*
 import com.strikeprotocols.mobile.presentation.approval_detail.approval_type_detail_items.ApprovalInfoRow
 import com.strikeprotocols.mobile.presentation.approvals.ApprovalDetailContent
 import com.strikeprotocols.mobile.presentation.approvals.approval_type_row_items.getApprovalRowMetaData
 import com.strikeprotocols.mobile.presentation.approvals.approval_type_row_items.getApprovalTimerText
+import com.strikeprotocols.mobile.presentation.components.*
 import com.strikeprotocols.mobile.presentation.durable_nonce.DurableNonceViewModel
 import kotlin.math.exp
 
@@ -184,18 +181,6 @@ fun ApprovalDetailsScreen(
                 initiationRequest = approvalDetailsState.approval?.isInitiationRequest() == true
             )
 
-//            val expiresInText = getApprovalTimerText(
-//                context = LocalContext.current,
-//                timeRemainingInSeconds = approvalDetailsState.remainingTimeInSeconds)
-//
-//            ApprovalStatus(
-//                requestedBy = approval?.submitterEmail ?: "",
-//                approvalsReceived = approval?.numberOfApprovalsReceived ?: 0,
-//                totalApprovals = approval?.numberOfDispositionsRequired ?: 0,
-//                denialsReceived = approval?.numberOfDeniesReceived ?: 0,
-//                expiresIn = expiresInText
-//            )
-
             if (approvalDetailsState.shouldDisplayConfirmDisposition != null) {
                 approvalDetailsState.shouldDisplayConfirmDisposition.let { safeDialogDetails ->
                     StrikeConfirmDispositionAlertDialog(
@@ -298,6 +283,7 @@ fun ApprovalDetails(
                 denialsReceived = approval?.numberOfDeniesReceived ?: 0,
                 expiresIn = expiresInText
             )
+            Spacer(modifier = Modifier.height(28.dp))
 
         }
 
@@ -336,67 +322,18 @@ fun ApprovalStatus(
     denialsReceived: Int,
     expiresIn: String
 ) {
-    Column {
-        Text(
-            text = stringResource(R.string.status).uppercase(),
-            color = StatusGreyText,
-            modifier = Modifier.padding(start = 16.dp, top = 6.dp, bottom = 6.dp),
-            letterSpacing = 0.25.sp
+    
+    val factsData = FactsData(
+        title = stringResource(R.string.status),
+        facts = listOf(
+            Pair(stringResource(R.string.requested_by), requestedBy),
+            Pair(stringResource(R.string.approvals_received), "$approvalsReceived ${stringResource(id = R.string.of)} $totalApprovals"),
+            Pair(stringResource(R.string.denials_received), "$denialsReceived ${stringResource(id = R.string.of)} $totalApprovals"),
+            Pair(stringResource(R.string.expires_in), expiresIn)
         )
-        ApprovalInfoRow(
-            backgroundColor = BackgroundLight,
-            title = stringResource(R.string.requested_by),
-            value = requestedBy
-        )
-        ApprovalInfoRow(
-            backgroundColor = BackgroundDark,
-            title = stringResource(R.string.approvals_received),
-            value = "$approvalsReceived ${stringResource(id = R.string.of)} $totalApprovals"
-        )
-        ApprovalInfoRow(
-            backgroundColor = BackgroundLight,
-            title = stringResource(R.string.denials_received),
-            value = "$denialsReceived ${stringResource(id = R.string.of)} $totalApprovals"
-        )
-        ApprovalInfoRow(
-            backgroundColor = BackgroundDark,
-            title = stringResource(R.string.expires_in),
-            value = expiresIn
-        )
-        Spacer(
-            modifier = Modifier
-                .background(color = BackgroundLight)
-                .height(1.dp)
-                .fillMaxWidth()
-        )
-    }
-}
-
-@Composable
-fun ApprovalDetailsTimer(
-    timeRemainingInSeconds: Long
-) {
-    val timerFinished = timeRemainingInSeconds <= 0
-
-    val background = if (timerFinished) DenyRed else SectionBlack
-    val text = if (timerFinished) stringResource(R.string.approval_expired) else
-        "${stringResource(id = R.string.expires_in)} ${
-            convertSecondsIntoCountdownText(
-                LocalContext.current,
-                timeRemainingInSeconds
-            )
-        }"
-
-    Text(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(background)
-            .padding(vertical = 6.dp),
-        text = text,
-        textAlign = TextAlign.Center,
-        color = StrikeWhite,
-        fontSize = 18.sp
     )
+    
+    FactRow(factsData = factsData)
 }
 
 @Composable

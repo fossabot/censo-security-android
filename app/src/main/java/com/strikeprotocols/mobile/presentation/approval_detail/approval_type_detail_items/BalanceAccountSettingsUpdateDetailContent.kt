@@ -32,7 +32,6 @@ fun BalanceAccountSettingsUpdateDetailContent(
         generateBalanceAccountSettingsUpdateDetailRows(accountSettingsUpdate, LocalContext.current)
 
     FactRow(
-        modifier = Modifier.padding(start = 16.dp, end = 16.dp),
         factsData = settingsRowInfoData[0]
     )
 }

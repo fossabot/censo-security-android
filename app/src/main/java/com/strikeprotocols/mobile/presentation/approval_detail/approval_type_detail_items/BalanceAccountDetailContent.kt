@@ -15,11 +15,10 @@ import com.strikeprotocols.mobile.common.convertSecondsIntoReadableText
 import com.strikeprotocols.mobile.data.models.approval.SolanaApprovalRequestType
 import com.strikeprotocols.mobile.presentation.approvals.ApprovalContentHeader
 import com.strikeprotocols.mobile.presentation.approvals.approval_type_row_items.getHeader
-import com.strikeprotocols.mobile.presentation.approvals.approval_type_row_items.getUITitle
 import com.strikeprotocols.mobile.presentation.components.FactRow
 import com.strikeprotocols.mobile.presentation.components.FactsData
 import com.strikeprotocols.mobile.ui.theme.AccountTextGrey
-import com.strikeprotocols.mobile.ui.theme.DetailInfoLightBackground
+import com.strikeprotocols.mobile.ui.theme.BackgroundLight
 import com.strikeprotocols.mobile.ui.theme.GreyText
 
 @Composable
@@ -42,7 +41,7 @@ fun BalanceAccountDetailContent(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(start = 16.dp, end = 16.dp)
-                .background(color = DetailInfoLightBackground),
+                .background(color = BackgroundLight),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -56,7 +55,6 @@ fun BalanceAccountDetailContent(
 
         for (approvalRow in approverRowInfoData) {
             FactRow(
-                modifier = Modifier.padding(start = 16.dp, end = 16.dp),
                 factsData = approvalRow
             )
             Spacer(modifier = Modifier.height(20.dp))

@@ -32,7 +32,6 @@ fun WalletConfigPolicyUpdateDetailContent(
     ) {
         for (approvalRow in approverRowInfoData) {
             FactRow(
-                modifier = Modifier.padding(start = 16.dp, end = 16.dp),
                 factsData = approvalRow
             )
             Spacer(modifier = Modifier.height(20.dp))

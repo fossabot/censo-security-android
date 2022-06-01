@@ -4,8 +4,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material.Divider
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -16,9 +14,9 @@ import com.strikeprotocols.mobile.R
 import com.strikeprotocols.mobile.common.formatISO8601IntoDisplayText
 import com.strikeprotocols.mobile.data.models.approval.SolanaApprovalRequestType
 import com.strikeprotocols.mobile.presentation.approvals.approval_type_row_items.*
-import com.strikeprotocols.mobile.ui.theme.DetailInfoDarkBackground
-import com.strikeprotocols.mobile.ui.theme.DetailInfoLightBackground
-import com.strikeprotocols.mobile.ui.theme.DividerGrey
+import com.strikeprotocols.mobile.presentation.components.FactRow
+import com.strikeprotocols.mobile.presentation.components.FactsData
+import com.strikeprotocols.mobile.ui.theme.BackgroundLight
 
 @Composable
 fun ConversionDetailContent(
@@ -44,9 +42,7 @@ fun ConversionDetailContent(
 
 
     Column(
-        modifier = Modifier
-            .padding(start = 8.dp, end = 8.dp)
-            .background(color = DetailInfoLightBackground),
+        modifier = Modifier.background(color = BackgroundLight),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         TransferConversionContent(
@@ -59,18 +55,14 @@ fun ConversionDetailContent(
         Spacer(modifier = Modifier.height(36.dp))
         ApprovalDispositionsRequired(approvalsNeeded = approvalsNeeded)
         Spacer(modifier = Modifier.height(20.dp))
-
-        ApprovalInfoRow(
-            backgroundColor = DetailInfoLightBackground,
-            title = stringResource(R.string.requested_by),
-            value = submitterEmail
+        
+        val factsData = FactsData(
+            facts = listOf(
+                Pair(stringResource(R.string.requested_by), submitterEmail),
+                Pair(stringResource(R.string.requested_date), submitterDate.formatISO8601IntoDisplayText(LocalContext.current)),
+            )
         )
-        Divider(modifier = Modifier.height(0.5.dp), color = DividerGrey)
-        ApprovalInfoRow(
-            backgroundColor = DetailInfoDarkBackground,
-            title = stringResource(R.string.requested_date),
-            value = submitterDate.formatISO8601IntoDisplayText(LocalContext.current)
-        )
-        Divider(modifier = Modifier.height(0.5.dp), color = DividerGrey)
+        
+        FactRow(factsData = factsData)
     }
 }

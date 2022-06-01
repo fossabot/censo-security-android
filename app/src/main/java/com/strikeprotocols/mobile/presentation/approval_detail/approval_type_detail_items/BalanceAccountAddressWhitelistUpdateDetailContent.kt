@@ -36,7 +36,6 @@ fun BalanceAccountAddressWhitelistUpdateDetailContent(
         )
 
     FactRow(
-        modifier = Modifier.padding(start = 16.dp, end = 16.dp),
         factsData = destinationsRowInfoData[0]
     )
 }
