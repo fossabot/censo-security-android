@@ -26,6 +26,17 @@ fun ApprovalDispositionsRequired(approvalsNeeded: Int) {
 }
 
 @Composable
+fun ApprovalSubtitle(text: String) {
+    Text(
+        text = text,
+        color = SubtitleGrey,
+        textAlign = TextAlign.Center,
+        fontSize = 16.sp,
+        letterSpacing = 0.23.sp
+    )
+}
+
+@Composable
 fun ApprovalInfoRow(
     backgroundColor: Color,
     title: String,
@@ -48,8 +59,9 @@ fun ApprovalInfoRow(
         )
 
         Text(
-            modifier = Modifier.padding(end = 16.dp),
+            modifier = Modifier.padding(end = 16.dp).wrapContentHeight(),
             text = value,
+            textAlign = TextAlign.Center,
             color = StrikeWhite,
             fontSize = 16.sp,
             fontWeight = FontWeight.Bold,

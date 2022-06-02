@@ -177,10 +177,7 @@ fun ApprovalRowContent(
         is SolanaApprovalRequestType.BalanceAccountNameUpdate -> 
             BalanceAccountNameUpdateRowContent(accountNameUpdate = type)
         is SolanaApprovalRequestType.BalanceAccountPolicyUpdate -> 
-            BalanceAccountPolicyUpdateRowContent(
-                accountPolicyUpdate = type,
-                approvalsNeeded = approvalsNeeded
-            )
+            BalanceAccountPolicyUpdateRowContent(accountPolicyUpdate = type)
         is SolanaApprovalRequestType.BalanceAccountSettingsUpdate -> 
             BalanceAccountSettingsUpdateRowContent(accountSettingsUpdate = type)
         is SolanaApprovalRequestType.DAppBookUpdate -> 
@@ -188,10 +185,7 @@ fun ApprovalRowContent(
         is SolanaApprovalRequestType.SPLTokenAccountCreation -> 
             SPLTokenAccountCreationRowContent(splTokenAccountCreation = type)
         is SolanaApprovalRequestType.WalletConfigPolicyUpdate -> 
-            WalletConfigPolicyUpdateRowContent(
-                walletConfigPolicyUpdate = type,
-                approvalsNeeded = approvalsNeeded
-            )
+            WalletConfigPolicyUpdateRowContent(walletConfigPolicyUpdate = type)
         is SolanaApprovalRequestType.WrapConversionRequest -> 
             WrapConversionRequestRowContent(wrapConversionRequest = type)
         else -> {
@@ -209,7 +203,7 @@ fun ApprovalDetailContent(
 ) {
     when (type) {
         is SolanaApprovalRequestType.BalanceAccountCreation ->
-            BalanceAccountDetailContent(balanceAccountCreation = type)
+            BalanceAccountDetailContent(balanceAccountCreation = type, approvalsReceived = approval.numberOfApprovalsReceived.toString())
         is SolanaApprovalRequestType.ConversionRequest ->
             ConversionDetailContent(
                 conversionRequest = type,
@@ -218,9 +212,9 @@ fun ApprovalDetailContent(
                 approvalsNeeded = approvalsNeeded
             )
         is SolanaApprovalRequestType.DAppTransactionRequest ->
-            DAppTransactionDetailContent(dAppWalletApproval = type, approvalsNeeded = approvalsNeeded)
+            DAppTransactionDetailContent(dAppWalletApproval = type)
         is SolanaApprovalRequestType.LoginApprovalRequest -> {
-            ApprovalContentHeader(header = type.getHeader(LocalContext.current), topSpacing = 24, bottomSpacing = 32)
+            LoginApprovalDetailContent(loginApproval = type)
         }
         is SolanaApprovalRequestType.SignersUpdate ->
             SignersUpdateDetailContent(signersUpdate = type)
@@ -238,7 +232,10 @@ fun ApprovalDetailContent(
         is SolanaApprovalRequestType.BalanceAccountNameUpdate ->
             BalanceAccountNameUpdateDetailContent(accountNameUpdate = type)
         is SolanaApprovalRequestType.BalanceAccountPolicyUpdate ->
-            BalanceAccountPolicyUpdateDetailContent(accountPolicyUpdate = type)
+            BalanceAccountPolicyUpdateDetailContent(
+                accountPolicyUpdate = type,
+                approvalsReceived = approval.numberOfApprovalsReceived ?: 0
+            )
         is SolanaApprovalRequestType.BalanceAccountSettingsUpdate ->
             BalanceAccountSettingsUpdateDetailContent(accountSettingsUpdate = type)
         is SolanaApprovalRequestType.DAppBookUpdate ->
@@ -246,7 +243,7 @@ fun ApprovalDetailContent(
         is SolanaApprovalRequestType.SPLTokenAccountCreation ->
             SPLTokenAccountCreationDetailContent(splTokenAccountCreation = type)
         is SolanaApprovalRequestType.WalletConfigPolicyUpdate ->
-            WalletConfigPolicyUpdateDetailContent(walletConfigPolicyUpdate = type)
+            WalletConfigPolicyUpdateDetailContent(walletConfigPolicyUpdate = type, approvalsReceived = approval.numberOfApprovalsReceived.toString())
         is SolanaApprovalRequestType.WrapConversionRequest ->
             WrapConversionRequestDetailContent(wrapConversionRequest = type)
         else -> Text(text = stringResource(R.string.unknown_approval_item))

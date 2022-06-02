@@ -34,5 +34,7 @@ val BackgroundLight = Color(
 val BackgroundDark = Color(
     red = 1f, green = 1f, blue = 1f, alpha = 0.06f)
 
+val SubtitleGrey = Color(0xFF9c9ea4)
+
 val ApprovalInfoBorder = Color(0xff535355)
 

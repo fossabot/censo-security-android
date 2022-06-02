@@ -10,6 +10,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Logout
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
+import com.strikeprotocols.mobile.ui.theme.BackgroundBlack
 import com.strikeprotocols.mobile.ui.theme.HeaderBlack
 import com.strikeprotocols.mobile.ui.theme.StrikeWhite
 
@@ -24,7 +25,7 @@ fun StrikeTopAppBar(
     ) {
     TopAppBar(
         title = { Text(text = title) },
-        backgroundColor = HeaderBlack,
+        backgroundColor = BackgroundBlack,
         contentColor = StrikeWhite,
         navigationIcon = {
             IconButton(onClick = { onAppBarIconClick() }) {

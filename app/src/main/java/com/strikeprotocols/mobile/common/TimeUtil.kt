@@ -36,26 +36,42 @@ fun String.formatISO8601IntoDisplayText(context: Context): String {
 }
 
 fun convertSecondsIntoReadableText(totalTimeInSeconds: Int, context: Context): String {
-    if (totalTimeInSeconds <= 0) return ""
+    val expirationTimeStringBuilder = StringBuilder().append("")
+    if (totalTimeInSeconds <= 0) return expirationTimeStringBuilder.toString()
 
-    val days = totalTimeInSeconds / DAYS_IN_SECONDS
-    val hours = totalTimeInSeconds / HOURS_IN_SECONDS % HOURS_IN_DAY
-    val minutes = totalTimeInSeconds / MINUTES_IN_SECONDS % 60
-    val seconds = totalTimeInSeconds % 60
+    val days: Int  = totalTimeInSeconds / DAYS_IN_SECONDS
+    val hours: Int = totalTimeInSeconds / HOURS_IN_SECONDS % HOURS_IN_DAY
+    val minutes: Int  = totalTimeInSeconds / MINUTES_IN_SECONDS % 60
+    val seconds: Int  = totalTimeInSeconds % 60
 
-    val hourLabel =
-        if (hours > 0) "${hours}${context.getString(R.string.hour_abbreviation)} " else ""
-    val minutesLabel =
-        if (minutes > 0) "${minutes}${context.getString(R.string.minutes_abbreviation)}" else context.getString(
-            R.string.zero_minutes
-        )
-    val secondsLabel =
-        if (seconds > 0) "${seconds}${context.getString(R.string.seconds_abbreviation)}" else context.getString(
-            R.string.zero_seconds
-        )
+    expirationTimeStringBuilder.append(
+        if (hours > 0) "$hours ${context.getString(R.string.hours)}" else ""
+    )
+    expirationTimeStringBuilder.append(
+        if (minutes > 0) " $minutes ${context.getString(R.string.minutes)}" else ""
+    )
 
+    val secondsText: String = if (seconds > 0) {
+        val secondsTextStringBuilder = StringBuilder()
 
-    return "$hourLabel$minutesLabel $secondsLabel"
+        val expirationTimeContainsHourOrMinutesText =
+            expirationTimeStringBuilder.contains(context.getString(R.string.hours)) ||
+                    expirationTimeStringBuilder.contains(context.getString(R.string.minutes))
+
+        if (expirationTimeContainsHourOrMinutesText) {
+            secondsTextStringBuilder.append(System.getProperty("line.separator"))
+        }
+        secondsTextStringBuilder.append("$seconds ${context.getString(R.string.seconds)}")
+            .toString()
+    } else {
+        ""
+    }
+
+    expirationTimeStringBuilder.append(
+        secondsText
+    )
+
+    return expirationTimeStringBuilder.toString()
 }
 
 fun calculateSecondsLeftUntilCountdownIsOver(submitDate: String?, totalTimeInSeconds: Int) : Long {

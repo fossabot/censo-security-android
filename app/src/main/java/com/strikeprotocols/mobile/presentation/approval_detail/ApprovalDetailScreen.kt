@@ -270,7 +270,6 @@ fun ApprovalDetails(
                 timeRemainingInSeconds = timeRemainingInSeconds
             )
 
-            Spacer(modifier = Modifier.height(28.dp))
             ApprovalStatus(
                 requestedBy = approval?.submitterEmail ?: "",
                 approvalsReceived = approval?.numberOfApprovalsReceived ?: 0,

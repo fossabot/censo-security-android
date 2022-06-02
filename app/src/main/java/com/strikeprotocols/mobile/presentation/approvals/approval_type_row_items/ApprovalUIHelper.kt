@@ -344,3 +344,7 @@ fun getApprovalTimerText(context: Context, timeRemainingInSeconds: Long) : Strin
     }
 }
 
+fun buildFromToDisplayText(from: String, to: String, context: Context): String {
+    return "$from ${context.getString(R.string.to).lowercase()} $to"
+}
+

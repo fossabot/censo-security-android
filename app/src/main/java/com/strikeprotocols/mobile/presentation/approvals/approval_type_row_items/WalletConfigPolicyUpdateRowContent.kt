@@ -13,12 +13,9 @@ import com.strikeprotocols.mobile.presentation.approvals.ApprovalRowContentHeade
 
 @Composable
 fun WalletConfigPolicyUpdateRowContent(
-    walletConfigPolicyUpdate: SolanaApprovalRequestType.WalletConfigPolicyUpdate,
-    approvalsNeeded: Int
+    walletConfigPolicyUpdate: SolanaApprovalRequestType.WalletConfigPolicyUpdate
 ) {
     val header = walletConfigPolicyUpdate.getHeader(LocalContext.current)
-    ApprovalRowContentHeader(header = header, topSpacing = 16, bottomSpacing = 6)
-    ApprovalDispositionsRequired(approvalsNeeded = approvalsNeeded)
-    Spacer(modifier = Modifier.height(24.dp))
+    ApprovalRowContentHeader(header = header, topSpacing = 16)
 }
 

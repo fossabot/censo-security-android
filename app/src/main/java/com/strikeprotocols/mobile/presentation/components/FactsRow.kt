@@ -12,7 +12,7 @@ import com.strikeprotocols.mobile.presentation.approval_detail.approval_type_det
 import com.strikeprotocols.mobile.ui.theme.*
 
 @Composable
-fun FactRow(factsData: FactsData, modifier: Modifier = Modifier) {
+fun FactRow(factsData: FactsData, modifier: Modifier = Modifier, hideFinalDivider: Boolean = false) {
     Column(
         modifier = modifier.fillMaxWidth(),
     ) {
@@ -31,7 +31,7 @@ fun FactRow(factsData: FactsData, modifier: Modifier = Modifier) {
                 title = fact.first,
                 value = fact.second
             )
-            if (index != factsData.facts.size - 1) {
+            if (!hideFinalDivider) {
                 Divider(modifier = Modifier.height(0.5.dp), color = DividerGrey)
             }
         }

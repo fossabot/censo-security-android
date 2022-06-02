@@ -2,6 +2,7 @@ package com.strikeprotocols.mobile.presentation.approval_detail.approval_type_de
 
 import android.content.Context
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.Divider
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -10,31 +11,30 @@ import androidx.compose.ui.unit.dp
 import com.strikeprotocols.mobile.R
 import com.strikeprotocols.mobile.common.convertSecondsIntoReadableText
 import com.strikeprotocols.mobile.data.models.approval.SolanaApprovalRequestType
+import com.strikeprotocols.mobile.presentation.approvals.ApprovalContentHeader
 import com.strikeprotocols.mobile.presentation.approvals.approval_type_row_items.getHeader
 import com.strikeprotocols.mobile.presentation.approvals.approval_type_row_items.getUITitle
 import com.strikeprotocols.mobile.presentation.components.AccountChangeItem
 import com.strikeprotocols.mobile.presentation.components.FactRow
 import com.strikeprotocols.mobile.presentation.components.FactsData
+import com.strikeprotocols.mobile.ui.theme.DividerGrey
 
 @Composable
 fun BalanceAccountPolicyUpdateDetailContent(
-    accountPolicyUpdate: SolanaApprovalRequestType.BalanceAccountPolicyUpdate
+    accountPolicyUpdate: SolanaApprovalRequestType.BalanceAccountPolicyUpdate,
+    approvalsReceived: Int
 ) {
     val header = accountPolicyUpdate.getHeader(LocalContext.current)
-    val accountName = accountPolicyUpdate.accountInfo.name
-    val accountType = accountPolicyUpdate.accountInfo.accountType.getUITitle(LocalContext.current)
 
-    AccountChangeItem(
-        header = header,
-        title = accountName,
-        subtitle = accountType,
-        headerTopSpacing = 24,
-        headerBottomSpacing = 36
-    )
+    ApprovalContentHeader(header = header, topSpacing = 16, bottomSpacing = 8)
+    ApprovalSubtitle(text = accountPolicyUpdate.accountInfo.name)
+
     Spacer(modifier = Modifier.height(24.dp))
 
     val approverRowInfoData = generateAccountPolicyUpdateRows(
-        accountPolicyUpdate = accountPolicyUpdate, context = LocalContext.current)
+        approvalsReceived = approvalsReceived,
+        accountPolicyUpdate = accountPolicyUpdate,
+        context = LocalContext.current)
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -47,11 +47,24 @@ fun BalanceAccountPolicyUpdateDetailContent(
             Spacer(modifier = Modifier.height(20.dp))
         }
     }
-
 }
 
-fun generateAccountPolicyUpdateRows(accountPolicyUpdate: SolanaApprovalRequestType.BalanceAccountPolicyUpdate, context: Context) : List<FactsData>{
+fun generateAccountPolicyUpdateRows(
+    context: Context,
+    accountPolicyUpdate: SolanaApprovalRequestType.BalanceAccountPolicyUpdate,
+    approvalsReceived: Int
+) : List<FactsData>{
     val approverRowInfoData = mutableListOf<FactsData>()
+    //region Approvals Row
+    val approvalsInfoRow = FactsData(
+        title = context.getString(R.string.approvals).uppercase(),
+        facts = listOf(
+            Pair(context.getString(R.string.approvals_required), "$approvalsReceived ${context.getString(R.string.of)} ${accountPolicyUpdate.approvalPolicy.approvalsRequired.toInt()}"),
+            Pair(context. getString(R.string.approval_expiration), convertSecondsIntoReadableText(accountPolicyUpdate.approvalPolicy.approvalTimeout.toInt(), context))
+        )
+    )
+    approverRowInfoData.add(approvalsInfoRow)
+    //endregion
 
     //region Approvers Row
     val approversList = mutableListOf<Pair<String, String>>()
@@ -64,28 +77,10 @@ fun generateAccountPolicyUpdateRows(accountPolicyUpdate: SolanaApprovalRequestTy
     }
 
     val approverRow = FactsData(
-        title = context.getString(R.string.wallet_approvers),
+        title = context.getString(R.string.approvers).uppercase(),
         facts = approversList
     )
     approverRowInfoData.add(approverRow)
-    //endregion
-
-    //region Approvals Required Rows
-    val approvalsRequiredRow = FactsData(
-        title = context.getString(R.string.approvals_required),
-        facts = listOf(Pair(accountPolicyUpdate.approvalPolicy.approvalsRequired.toInt().toString(), ""))
-    )
-    approverRowInfoData.add(approvalsRequiredRow)
-    //endregion
-
-    //region Approval Timeout Row
-    val approvalTimeoutRow = FactsData(
-        title = context.getString(R.string.approval_expiration),
-        facts = listOf(
-            Pair(convertSecondsIntoReadableText(accountPolicyUpdate.approvalPolicy.approvalTimeout.toInt(), context), "")
-        )
-    )
-    approverRowInfoData.add(approvalTimeoutRow)
     //endregion
 
     return approverRowInfoData

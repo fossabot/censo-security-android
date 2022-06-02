@@ -65,4 +65,5 @@ fun ConversionDetailContent(
         
         FactRow(factsData = factsData)
     }
+    Spacer(modifier = Modifier.height(28.dp))
 }

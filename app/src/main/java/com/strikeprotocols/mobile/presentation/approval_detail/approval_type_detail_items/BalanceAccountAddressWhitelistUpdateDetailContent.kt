@@ -38,6 +38,7 @@ fun BalanceAccountAddressWhitelistUpdateDetailContent(
     FactRow(
         factsData = destinationsRowInfoData[0]
     )
+    Spacer(modifier = Modifier.height(28.dp))
 }
 
 fun generateBalanceAccountAddressWhitelistUpdateDetailRows(addressWhitelistUpdate: SolanaApprovalRequestType.BalanceAccountAddressWhitelistUpdate, context: Context) : List<FactsData> {

@@ -7,6 +7,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.strikeprotocols.mobile.R
 import com.strikeprotocols.mobile.common.convertSecondsIntoReadableText
@@ -18,13 +19,14 @@ import com.strikeprotocols.mobile.presentation.components.FactsData
 
 @Composable
 fun WalletConfigPolicyUpdateDetailContent(
-    walletConfigPolicyUpdate: SolanaApprovalRequestType.WalletConfigPolicyUpdate
+    walletConfigPolicyUpdate: SolanaApprovalRequestType.WalletConfigPolicyUpdate,
+    approvalsReceived: String
 ) {
     val header = walletConfigPolicyUpdate.getHeader(LocalContext.current)
     ApprovalContentHeader(header = header, topSpacing = 24, bottomSpacing = 36)
 
     val approverRowInfoData = generateWalletConfigPolicyRows(
-        walletConfigPolicyUpdate = walletConfigPolicyUpdate, context = LocalContext.current)
+        walletConfigPolicyUpdate = walletConfigPolicyUpdate, approvalsReceived = approvalsReceived, context = LocalContext.current)
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -37,11 +39,28 @@ fun WalletConfigPolicyUpdateDetailContent(
             Spacer(modifier = Modifier.height(20.dp))
         }
     }
-
+    Spacer(modifier = Modifier.height(8.dp))
 }
 
-fun generateWalletConfigPolicyRows(walletConfigPolicyUpdate: SolanaApprovalRequestType.WalletConfigPolicyUpdate, context: Context) : List<FactsData>{
+fun generateWalletConfigPolicyRows(
+    walletConfigPolicyUpdate: SolanaApprovalRequestType.WalletConfigPolicyUpdate,
+    approvalsReceived: String,
+    context: Context
+): List<FactsData> {
+    val approvalsRequired = walletConfigPolicyUpdate.approvalPolicy.approvalsRequired.toInt().toString()
+
     val approverRowInfoData = mutableListOf<FactsData>()
+
+    //region Approvals Row
+    val approvalsRequiredRow = FactsData(
+        title = context.getString(R.string.approvals),
+        facts = listOf(
+            Pair(context.getString(R.string.approvals_required), "$approvalsReceived ${context.getString(R.string.of)} ${approvalsRequired.toInt()}"),
+            Pair(context.getString(R.string.approval_expiration), convertSecondsIntoReadableText(walletConfigPolicyUpdate.approvalPolicy.approvalTimeout.toInt(), context))
+        )
+    )
+    approverRowInfoData.add(approvalsRequiredRow)
+    //endregion
 
     //region Approvers Row
     val approversList = mutableListOf<Pair<String, String>>()
@@ -58,24 +77,6 @@ fun generateWalletConfigPolicyRows(walletConfigPolicyUpdate: SolanaApprovalReque
         facts = approversList
     )
     approverRowInfoData.add(approverRow)
-    //endregion
-
-    //region Approvals Required Rows
-    val approvalsRequiredRow = FactsData(
-        title = context.getString(R.string.approvals_required),
-        facts = listOf(Pair(walletConfigPolicyUpdate.approvalPolicy.approvalsRequired.toInt().toString(), ""))
-    )
-    approverRowInfoData.add(approvalsRequiredRow)
-    //endregion
-
-    //region Approval Timeout Row
-    val approvalTimeoutRow = FactsData(
-        title = context.getString(R.string.approval_expiration),
-        facts = listOf(
-            Pair(convertSecondsIntoReadableText(walletConfigPolicyUpdate.approvalPolicy.approvalTimeout.toInt(), context), "")
-        )
-    )
-    approverRowInfoData.add(approvalTimeoutRow)
     //endregion
 
     return approverRowInfoData
