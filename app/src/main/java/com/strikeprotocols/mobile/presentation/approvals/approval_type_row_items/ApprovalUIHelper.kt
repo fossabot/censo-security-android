@@ -4,8 +4,6 @@ import android.content.Context
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -18,9 +16,6 @@ import com.strikeprotocols.mobile.data.models.approval.*
 import com.strikeprotocols.mobile.data.models.approval.AccountType.*
 import com.strikeprotocols.mobile.ui.theme.GreyText
 import com.strikeprotocols.mobile.data.models.approval.SolanaApprovalRequestType.*
-import com.strikeprotocols.mobile.presentation.approvals.ApprovalContentHeader
-import com.strikeprotocols.mobile.ui.theme.DenyRed
-import com.strikeprotocols.mobile.ui.theme.SectionBlack
 
 fun SolanaApprovalRequestType.getHeader(context: Context): String {
     return when (this) {

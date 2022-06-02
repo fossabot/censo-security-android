@@ -1,6 +1,5 @@
 package com.strikeprotocols.mobile.presentation.approval_detail
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -19,7 +18,6 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.fragment.app.FragmentActivity
@@ -38,13 +36,10 @@ import com.strikeprotocols.mobile.presentation.approvals.approval_type_row_items
 import com.strikeprotocols.mobile.presentation.approvals.approval_type_row_items.getDialogFullMessage
 import com.strikeprotocols.mobile.ui.theme.*
 import com.strikeprotocols.mobile.data.models.approval.SolanaApprovalRequestType.*
-import com.strikeprotocols.mobile.presentation.approval_detail.approval_type_detail_items.ApprovalInfoRow
 import com.strikeprotocols.mobile.presentation.approvals.ApprovalDetailContent
-import com.strikeprotocols.mobile.presentation.approvals.approval_type_row_items.getApprovalRowMetaData
 import com.strikeprotocols.mobile.presentation.approvals.approval_type_row_items.getApprovalTimerText
 import com.strikeprotocols.mobile.presentation.components.*
 import com.strikeprotocols.mobile.presentation.durable_nonce.DurableNonceViewModel
-import kotlin.math.exp
 
 @Composable
 fun ApprovalDetailsScreen(
@@ -351,7 +346,7 @@ fun ApprovalDetailsButtons(
             .fillMaxWidth(),
         onClick = { onDenyClicked() },
         shape = MaterialTheme.shapes.medium,
-        colors = ButtonDefaults.buttonColors(backgroundColor = DenyRedBackground),
+        colors = ButtonDefaults.buttonColors(backgroundColor = DetailDenyRedBackground),
         enabled = !isLoading
     ) {
         Text(
@@ -359,7 +354,7 @@ fun ApprovalDetailsButtons(
             text = if (initiationRequest) stringResource(id = R.string.cancel) else stringResource(
                 id = R.string.deny
             ),
-            color = DenyRed,
+            color = DetailDenyRed,
             fontSize = 16.sp
         )
     }
@@ -370,13 +365,13 @@ fun ApprovalDetailsButtons(
             .fillMaxWidth(),
         onClick = { onApproveClicked() },
         shape = MaterialTheme.shapes.medium,
-        colors = ButtonDefaults.buttonColors(backgroundColor = ApprovalGreenBackground),
+        colors = ButtonDefaults.buttonColors(backgroundColor = DetailApprovalGreenBackground),
         enabled = !isLoading
     ) {
         Text(
             modifier = Modifier.padding(all = 6.dp),
             text = positiveText,
-            color = ApprovalGreen,
+            color = DetailApprovalGreen,
             fontSize = 24.sp
         )
     }
