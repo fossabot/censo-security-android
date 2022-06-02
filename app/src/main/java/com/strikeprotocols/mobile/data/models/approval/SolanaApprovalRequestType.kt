@@ -7,6 +7,7 @@ import com.google.gson.annotations.SerializedName
 import com.strikeprotocols.mobile.common.BaseWrapper
 import com.strikeprotocols.mobile.common.strikeLog
 import org.web3j.abi.datatypes.Bool
+import java.io.BufferedOutputStream
 import java.io.ByteArrayOutputStream
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
@@ -523,8 +524,30 @@ data class SolanaSigningData(
     val walletProgramId: String,
     val multisigOpAccountAddress: String,
     val walletAddress: String,
-    val nonceAccountAddresses: List<String>
-)
+    val nonceAccountAddresses: List<String>,
+    val initiator: String
+) {
+    fun commonOpHashBytes() : ByteArray {
+        val buffer = ByteArrayOutputStream()
+
+        buffer.write(initiator.base58Bytes())
+        buffer.write(feePayer.base58Bytes())
+        buffer.writeLongLE(0)
+        buffer.write(ByteArray(size = 32))
+
+        return buffer.toByteArray()
+    }
+
+    fun commonInitiationBytes() : ByteArray {
+        val buffer = ByteArrayOutputStream()
+
+        buffer.writeLongLE(0)
+        buffer.write(byteArrayOf(0))
+        buffer.write(ByteArray(size = 32))
+
+        return buffer.toByteArray()
+    }
+}
 
 enum class AccountType(val value: String) {
     @SerializedName("BalanceAccount") BalanceAccount("BalanceAccount"),

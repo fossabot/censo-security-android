@@ -51,140 +51,182 @@ data class ApprovalDispositionRequest(
         }
     }
 
-    fun opHashData(): ByteArray = when(requestType) {
-        is BalanceAccountCreation -> {
-            val buffer = ByteArrayOutputStream()
+    fun opHashData(): ByteArray {
+        val commonBytes = signingData().commonOpHashBytes()
 
-            buffer.write(byteArrayOf(retrieveOpCode()))
-            buffer.write(requestType.signingData.walletAddress.base58Bytes())
-            buffer.write(requestType.combinedBytes())
+        return when (requestType) {
+            is BalanceAccountCreation -> {
+                val buffer = ByteArrayOutputStream()
 
-            buffer.toByteArray()
+                buffer.write(byteArrayOf(retrieveOpCode()))
+                buffer.write(commonBytes)
+                buffer.write(requestType.signingData.walletAddress.base58Bytes())
+                buffer.write(requestType.combinedBytes())
+
+                buffer.toByteArray()
+            }
+            is WithdrawalRequest -> {
+                val buffer = ByteArrayOutputStream()
+
+                val opAndCommonBuffer = ByteArrayOutputStream()
+                opAndCommonBuffer.write(byteArrayOf(retrieveOpCode()))
+                opAndCommonBuffer.write(commonBytes)
+                buffer.write(opAndCommonBuffer.toByteArray())
+
+                buffer.write(requestType.signingData.walletAddress.base58Bytes())
+                buffer.write(requestType.account.identifier.sha256HashBytes())
+                buffer.write(requestType.destination.address.base58Bytes())
+                buffer.writeLongLE(requestType.symbolAndAmountInfo.fundamentalAmount())
+                buffer.write(requestType.symbolAndAmountInfo.symbolInfo.tokenMintAddress.base58Bytes())
+
+                buffer.toByteArray()
+            }
+            is ConversionRequest -> {
+                val buffer = ByteArrayOutputStream()
+
+                val opAndCommonBuffer = ByteArrayOutputStream()
+                opAndCommonBuffer.write(byteArrayOf(retrieveOpCode()))
+                opAndCommonBuffer.write(commonBytes)
+                buffer.write(opAndCommonBuffer.toByteArray())
+
+                buffer.write(requestType.signingData.walletAddress.base58Bytes())
+                buffer.write(requestType.account.identifier.sha256HashBytes())
+                buffer.write(requestType.destination.address.base58Bytes())
+                buffer.writeLongLE(requestType.symbolAndAmountInfo.fundamentalAmount())
+                buffer.write(requestType.symbolAndAmountInfo.symbolInfo.tokenMintAddress.base58Bytes())
+
+                buffer.toByteArray()
+            }
+            is SignersUpdate -> {
+                val buffer = ByteArrayOutputStream()
+
+                buffer.write(byteArrayOf(retrieveOpCode()))
+                buffer.write(commonBytes)
+                buffer.write(requestType.signingData.walletAddress.base58Bytes())
+                buffer.write(byteArrayOf(requestType.slotUpdateType.toSolanaProgramValue()))
+                buffer.write(requestType.signer.combinedBytes())
+
+                buffer.toByteArray()
+            }
+
+            is WrapConversionRequest -> {
+                val buffer = ByteArrayOutputStream()
+
+                buffer.write(byteArrayOf(retrieveOpCode()))
+                buffer.write(commonBytes)
+                buffer.write(requestType.signingData.walletAddress.base58Bytes())
+                buffer.write(requestType.account.identifier.sha256HashBytes())
+                buffer.writeLongLE(requestType.symbolAndAmountInfo.fundamentalAmount())
+                buffer.write(byteArrayOf(requestType.symbolAndAmountInfo.symbolInfo.getSOLProgramValue()))
+
+                buffer.toByteArray()
+            }
+            is WalletConfigPolicyUpdate -> {
+                val buffer = ByteArrayOutputStream()
+
+                buffer.write(byteArrayOf(retrieveOpCode()))
+                buffer.write(commonBytes)
+                buffer.write(requestType.signingData.walletAddress.base58Bytes())
+                buffer.write(requestType.approvalPolicy.combinedBytes())
+
+                buffer.toByteArray()
+            }
+            is BalanceAccountSettingsUpdate -> {
+                val buffer = ByteArrayOutputStream()
+
+                buffer.write(byteArrayOf(retrieveOpCode()))
+                buffer.write(commonBytes)
+                buffer.write(requestType.signingData.walletAddress.base58Bytes())
+                buffer.write(requestType.combinedBytes())
+
+                buffer.toByteArray()
+            }
+            is DAppBookUpdate -> {
+                val buffer = ByteArrayOutputStream()
+
+                buffer.write(byteArrayOf(retrieveOpCode()))
+                buffer.write(commonBytes)
+                buffer.write(requestType.signingData.walletAddress.base58Bytes())
+                buffer.write(requestType.combinedBytes())
+
+                buffer.toByteArray()
+            }
+            is AddressBookUpdate -> {
+                val buffer = ByteArrayOutputStream()
+
+                buffer.write(byteArrayOf(retrieveOpCode()))
+                buffer.write(commonBytes)
+                buffer.write(requestType.signingData.walletAddress.base58Bytes())
+                buffer.write(requestType.combinedBytes())
+
+                buffer.toByteArray()
+            }
+            is BalanceAccountNameUpdate -> {
+                val buffer = ByteArrayOutputStream()
+
+                buffer.write(byteArrayOf(retrieveOpCode()))
+                buffer.write(commonBytes)
+                buffer.write(requestType.signingData.walletAddress.base58Bytes())
+                buffer.write(requestType.combinedBytes())
+
+                buffer.toByteArray()
+            }
+            is BalanceAccountPolicyUpdate -> {
+                val buffer = ByteArrayOutputStream()
+
+                buffer.write(byteArrayOf(retrieveOpCode()))
+                buffer.write(commonBytes)
+                buffer.write(requestType.signingData.walletAddress.base58Bytes())
+                buffer.write(requestType.combinedBytes())
+
+                buffer.toByteArray()
+            }
+            is BalanceAccountAddressWhitelistUpdate -> {
+                val buffer = ByteArrayOutputStream()
+                buffer.write(byteArrayOf(retrieveOpCode()))
+                buffer.write(commonBytes)
+                buffer.write(requestType.signingData.walletAddress.base58Bytes())
+                buffer.write(requestType.combinedBytes())
+                buffer.toByteArray()
+            }
+            is SPLTokenAccountCreation -> {
+                val buffer = ByteArrayOutputStream()
+
+                buffer.write(byteArrayOf(retrieveOpCode()))
+                buffer.write(commonBytes)
+                buffer.write(requestType.signingData.walletAddress.base58Bytes())
+                buffer.write(requestType.combinedBytes())
+
+                buffer.toByteArray()
+            }
+
+            is DAppTransactionRequest -> {
+                val buffer = ByteArrayOutputStream()
+                val hashBytesBuffer = ByteArrayOutputStream()
+                hashBytesBuffer.write(byteArrayOf(retrieveOpCode()))
+                hashBytesBuffer.write(commonBytes)
+                hashBytesBuffer.write(requestType.signingData.walletAddress.base58Bytes())
+
+                var hashBytes = hashBytesBuffer.toByteArray().sha256HashBytes()
+
+                for (instruction in requestType.instructions) {
+                    val instructionBuffer = ByteArrayOutputStream()
+                    instructionBuffer.write(hashBytes)
+                    instructionBuffer.write(instruction.combinedBytes())
+                    val instructionBytes = instructionBuffer.toByteArray()
+                    hashBytes = instructionBytes.sha256HashBytes()
+                }
+
+                buffer.write(hashBytes)
+                buffer.toByteArray()
+            }
+            is LoginApprovalRequest -> throw Exception(
+                INVALID_REQUEST_APPROVAL
+            )
+            is UnknownApprovalType -> throw Exception(
+                UNKNOWN_REQUEST_APPROVAL
+            )
         }
-        is WithdrawalRequest -> {
-            val buffer = ByteArrayOutputStream()
-
-            buffer.write(byteArrayOf(retrieveOpCode()))
-            buffer.write(requestType.signingData.walletAddress.base58Bytes())
-            buffer.write(requestType.account.identifier.sha256HashBytes())
-            buffer.write(requestType.destination.address.base58Bytes())
-            buffer.writeLongLE(requestType.symbolAndAmountInfo.fundamentalAmount())
-            buffer.write(requestType.symbolAndAmountInfo.symbolInfo.tokenMintAddress.base58Bytes())
-
-            buffer.toByteArray()
-        }
-        is ConversionRequest -> {
-            val buffer = ByteArrayOutputStream()
-
-            buffer.write(byteArrayOf(retrieveOpCode()))
-            buffer.write(requestType.signingData.walletAddress.base58Bytes())
-            buffer.write(requestType.account.identifier.sha256HashBytes())
-            buffer.write(requestType.destination.address.base58Bytes())
-            buffer.writeLongLE(requestType.symbolAndAmountInfo.fundamentalAmount())
-            buffer.write(requestType.symbolAndAmountInfo.symbolInfo.tokenMintAddress.base58Bytes())
-
-            buffer.toByteArray()
-        }
-        is SignersUpdate -> {
-            val buffer = ByteArrayOutputStream()
-
-            buffer.write(byteArrayOf(retrieveOpCode()))
-            buffer.write(requestType.signingData.walletAddress.base58Bytes())
-            buffer.write(byteArrayOf(requestType.slotUpdateType.toSolanaProgramValue()))
-            buffer.write(requestType.signer.combinedBytes())
-
-            buffer.toByteArray()
-        }
-
-        is WrapConversionRequest -> {
-            val buffer = ByteArrayOutputStream()
-
-            buffer.write(byteArrayOf(retrieveOpCode()))
-            buffer.write(requestType.signingData.walletAddress.base58Bytes())
-            buffer.write(requestType.account.identifier.sha256HashBytes())
-            buffer.writeLongLE(requestType.symbolAndAmountInfo.fundamentalAmount())
-            buffer.write(byteArrayOf(requestType.symbolAndAmountInfo.symbolInfo.getSOLProgramValue()))
-
-            buffer.toByteArray()
-        }
-        is WalletConfigPolicyUpdate -> {
-            val buffer = ByteArrayOutputStream()
-
-            buffer.write(byteArrayOf(retrieveOpCode()))
-            buffer.write(requestType.signingData.walletAddress.base58Bytes())
-            buffer.write(requestType.approvalPolicy.combinedBytes())
-
-            buffer.toByteArray()
-        }
-        is BalanceAccountSettingsUpdate -> {
-            val buffer = ByteArrayOutputStream()
-
-            buffer.write(byteArrayOf(retrieveOpCode()))
-            buffer.write(requestType.signingData.walletAddress.base58Bytes())
-            buffer.write(requestType.combinedBytes())
-
-            buffer.toByteArray()
-        }
-        is DAppBookUpdate -> {
-            val buffer = ByteArrayOutputStream()
-
-            buffer.write(byteArrayOf(retrieveOpCode()))
-            buffer.write(requestType.signingData.walletAddress.base58Bytes())
-            buffer.write(requestType.combinedBytes())
-
-            buffer.toByteArray()
-        }
-        is AddressBookUpdate -> {
-            val buffer = ByteArrayOutputStream()
-
-            buffer.write(byteArrayOf(retrieveOpCode()))
-            buffer.write(requestType.signingData.walletAddress.base58Bytes())
-            buffer.write(requestType.combinedBytes())
-
-            buffer.toByteArray()
-        }
-        is BalanceAccountNameUpdate -> {
-            val buffer = ByteArrayOutputStream()
-
-            buffer.write(byteArrayOf(retrieveOpCode()))
-            buffer.write(requestType.signingData.walletAddress.base58Bytes())
-            buffer.write(requestType.combinedBytes())
-
-            buffer.toByteArray()
-        }
-        is BalanceAccountPolicyUpdate -> {
-            val buffer = ByteArrayOutputStream()
-
-            buffer.write(byteArrayOf(retrieveOpCode()))
-            buffer.write(requestType.signingData.walletAddress.base58Bytes())
-            buffer.write(requestType.combinedBytes())
-
-            buffer.toByteArray()
-        }
-        is BalanceAccountAddressWhitelistUpdate -> {
-            val buffer = ByteArrayOutputStream()
-            buffer.write(byteArrayOf(retrieveOpCode()))
-            buffer.write(requestType.signingData.walletAddress.base58Bytes())
-            buffer.write(requestType.combinedBytes())
-            buffer.toByteArray()
-        }
-        is SPLTokenAccountCreation -> {
-            val buffer = ByteArrayOutputStream()
-
-            buffer.write(byteArrayOf(retrieveOpCode()))
-            buffer.write(requestType.signingData.walletAddress.base58Bytes())
-            buffer.write(requestType.combinedBytes())
-
-            buffer.toByteArray()
-        }
-
-        is DAppTransactionRequest,
-        is LoginApprovalRequest -> throw Exception(
-            INVALID_REQUEST_APPROVAL
-        )
-        is UnknownApprovalType -> throw Exception(
-            UNKNOWN_REQUEST_APPROVAL
-        )
     }
 
     private fun signingData(): SolanaSigningData =

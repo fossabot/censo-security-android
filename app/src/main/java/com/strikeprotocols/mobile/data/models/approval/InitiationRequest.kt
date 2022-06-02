@@ -162,16 +162,21 @@ data class InitiationRequest(
         )
 
     private fun instructionData() : ByteArray {
+
+        val commonBytes = signingData.commonInitiationBytes()
+
         when(requestType) {
             is BalanceAccountCreation -> {
                 val buffer = ByteArrayOutputStream()
                 buffer.write(byteArrayOf(opCode))
+                buffer.write(commonBytes)
                 buffer.write(requestType.combinedBytes())
                 return buffer.toByteArray()
             }
             is WithdrawalRequest -> {
                 val buffer = ByteArrayOutputStream()
                 buffer.write(byteArrayOf(opCode))
+                buffer.write(commonBytes)
                 buffer.write(requestType.account.identifier.sha256HashBytes())
                 buffer.writeLongLE(requestType.symbolAndAmountInfo.fundamentalAmount())
                 buffer.write(requestType.destination.name.sha256HashBytes())
@@ -180,6 +185,7 @@ data class InitiationRequest(
             is ConversionRequest -> {
                 val buffer = ByteArrayOutputStream()
                 buffer.write(byteArrayOf(opCode))
+                buffer.write(commonBytes)
                 buffer.write(requestType.account.identifier.sha256HashBytes())
                 buffer.writeLongLE(requestType.symbolAndAmountInfo.fundamentalAmount())
                 buffer.write(requestType.destination.name.sha256HashBytes())
@@ -188,6 +194,7 @@ data class InitiationRequest(
             is SignersUpdate -> {
                 val buffer = ByteArrayOutputStream()
                 buffer.write(byteArrayOf(opCode))
+                buffer.write(commonBytes)
                 buffer.write(byteArrayOf(requestType.slotUpdateType.toSolanaProgramValue()))
                 buffer.write(requestType.signer.combinedBytes())
                 return buffer.toByteArray()
@@ -195,6 +202,7 @@ data class InitiationRequest(
             is DAppTransactionRequest -> {
                 val buffer = ByteArrayOutputStream()
                 buffer.write(byteArrayOf(opCode))
+                buffer.write(commonBytes)
                 buffer.write(requestType.account.identifier.sha256HashBytes())
                 buffer.write(requestType.dappInfo.address.base58Bytes())
                 buffer.write(requestType.dappInfo.name.sha256HashBytes())
@@ -204,6 +212,7 @@ data class InitiationRequest(
             is WrapConversionRequest -> {
                 val buffer = ByteArrayOutputStream()
                 buffer.write(byteArrayOf(opCode))
+                buffer.write(commonBytes)
                 buffer.write(requestType.account.identifier.sha256HashBytes())
                 buffer.writeLongLE(requestType.symbolAndAmountInfo.fundamentalAmount())
                 buffer.write(byteArrayOf(requestType.symbolAndAmountInfo.symbolInfo.getSOLProgramValue()))
@@ -212,48 +221,56 @@ data class InitiationRequest(
             is BalanceAccountPolicyUpdate -> {
                 val buffer = ByteArrayOutputStream()
                 buffer.write(byteArrayOf(opCode))
+                buffer.write(commonBytes)
                 buffer.write(requestType.combinedBytes())
                 return buffer.toByteArray()
             }
             is BalanceAccountNameUpdate -> {
                 val buffer = ByteArrayOutputStream()
                 buffer.write(byteArrayOf(opCode))
+                buffer.write(commonBytes)
                 buffer.write(requestType.combinedBytes())
                 return buffer.toByteArray()
             }
             is BalanceAccountSettingsUpdate -> {
                 val buffer = ByteArrayOutputStream()
                 buffer.write(byteArrayOf(opCode))
+                buffer.write(commonBytes)
                 buffer.write(requestType.combinedBytes())
                 return buffer.toByteArray()
             }
             is BalanceAccountAddressWhitelistUpdate -> {
                 val buffer = ByteArrayOutputStream()
                 buffer.write(byteArrayOf(opCode))
+                buffer.write(commonBytes)
                 buffer.write(requestType.combinedBytes())
                 return buffer.toByteArray()
             }
             is SPLTokenAccountCreation -> {
                 val buffer = ByteArrayOutputStream()
                 buffer.write(byteArrayOf(opCode))
+                buffer.write(commonBytes)
                 buffer.write(requestType.combinedBytes())
                 return buffer.toByteArray()
             }
             is WalletConfigPolicyUpdate -> {
                 val buffer = ByteArrayOutputStream()
                 buffer.write(byteArrayOf(opCode))
+                buffer.write(commonBytes)
                 buffer.write(requestType.approvalPolicy.combinedBytes())
                 return buffer.toByteArray()
             }
             is AddressBookUpdate -> {
                 val buffer = ByteArrayOutputStream()
                 buffer.write(byteArrayOf(opCode))
+                buffer.write(commonBytes)
                 buffer.write(requestType.combinedBytes())
                 return buffer.toByteArray()
             }
             is DAppBookUpdate -> {
                 val buffer = ByteArrayOutputStream()
                 buffer.write(byteArrayOf(opCode))
+                buffer.write(commonBytes)
                 buffer.write(requestType.combinedBytes())
                 return buffer.toByteArray()
             }
@@ -324,6 +341,7 @@ data class InitiationRequest(
                     AccountMeta(WRAPPED_SOL_MINT, isSigner = false, isWritable = false),
                     AccountMeta(approverPublicKey, isSigner = true, isWritable = false),
                     AccountMeta(SYSVAR_CLOCK_PUBKEY, isSigner = false, isWritable = false),
+                    AccountMeta(publicKey = PublicKey(signingData.feePayer), isSigner = true, isWritable = false),
                     AccountMeta(SYS_PROGRAM_ID, isSigner = false, isWritable = false),
                     AccountMeta(TOKEN_PROGRAM_ID, isSigner = false, isWritable = false),
                     AccountMeta(SYSVAR_RENT_PUBKEY, isSigner = false, isWritable = false),
@@ -337,6 +355,7 @@ data class InitiationRequest(
                     AccountMeta(publicKey = PublicKey(signingData.walletAddress), isSigner = false, isWritable = false),
                     AccountMeta(publicKey = approverPublicKey, isSigner = true, isWritable = false),
                     AccountMeta(publicKey = SYSVAR_CLOCK_PUBKEY, isSigner = false, isWritable = false),
+                    AccountMeta(publicKey = PublicKey(signingData.feePayer), isSigner = true, isWritable = false)
                 )
             }
             is SPLTokenAccountCreation -> {
@@ -352,6 +371,7 @@ data class InitiationRequest(
                     AccountMeta(approverPublicKey, isSigner = true, isWritable = false),
                     AccountMeta(tokenMintPublicKey, isSigner = false, isWritable = false),
                     AccountMeta(SYSVAR_CLOCK_PUBKEY, isSigner = false, isWritable = false),
+                    AccountMeta(publicKey = PublicKey(signingData.feePayer), isSigner = true, isWritable = false)
                 )
 
                 for (balanceAccount in requestType.balanceAccounts) {
@@ -374,17 +394,12 @@ data class InitiationRequest(
                 accounts
             }
             else -> {
-                val walletAccountWritable =
-                    when(requestType) {
-                        is WalletConfigPolicyUpdate, is BalanceAccountPolicyUpdate -> true
-                        else -> false
-                    }
-
                 listOf(
                     AccountMeta(publicKey = opAccountPublicKey(), isSigner = false, isWritable = true),
-                    AccountMeta(publicKey = PublicKey(signingData.walletAddress), isSigner = false, isWritable = walletAccountWritable),
+                    AccountMeta(publicKey = PublicKey(signingData.walletAddress), isSigner = false, isWritable = false),
                     AccountMeta(publicKey = approverPublicKey, isSigner = true, isWritable = false),
                     AccountMeta(publicKey = SYSVAR_CLOCK_PUBKEY, isSigner = false, isWritable = false),
+                    AccountMeta(publicKey = PublicKey(signingData.feePayer), isSigner = true, isWritable = false)
                 )
             }
         }
@@ -414,9 +429,9 @@ data class InitiationRequest(
             AccountMeta(publicKey = destinationPublicKey, isSigner = false, isWritable = false),
             AccountMeta(publicKey = approverPublicKey, isSigner = true, isWritable = false),
             AccountMeta(publicKey = SYSVAR_CLOCK_PUBKEY, isSigner = false, isWritable = false),
+            AccountMeta(publicKey = PublicKey(signingData.feePayer), isSigner = true, isWritable = true),
             AccountMeta(publicKey = tokenMintPublicKey, isSigner = false, isWritable = false),
             AccountMeta(publicKey = destinationTokenAddress, isSigner = false, isWritable = true),
-            AccountMeta(publicKey = PublicKey(signingData.feePayer), isSigner = true, isWritable = true),
             AccountMeta(publicKey = SYS_PROGRAM_ID, isSigner= false, isWritable = false),
             AccountMeta(publicKey = TOKEN_PROGRAM_ID, isSigner = false, isWritable = false),
             AccountMeta(publicKey = SYSVAR_RENT_PUBKEY, isSigner = false, isWritable = false),

@@ -68,90 +68,61 @@ class InitiationRequestSigningTest {
     }
 
     //region Test creating api body from initiation request
-//    @Test
-//    fun fullBalanceAccountIntitiationApiBody() {
-//        val initiationRequest = generateBalanceAccountInitiationSignableData()
-//
-//        val apiBody = initiationRequest.convertToApiBody(encryptionManager)
-//
-//        //todo: when we receive valid dataAccountCreationInfo, then we can validate supplyDappInstructions data also
-//        assert(apiBody.approvalDisposition == initiationRequest.approvalDisposition)
-//        assert(apiBody.nonce == exampleNonces.first().value)
-//        assert(apiBody.initiatorSignature.isNotEmpty())
-//        assert(apiBody.nonceAccountAddress == initiationRequest.requestType.nonceAccountAddresses().first())
-//        assert(apiBody.opAccountAddress == initiationRequest.opAccountPublicKey().toBase58())
-//        assert(apiBody.opAccountSignature.isNotEmpty())
-//        assert(apiBody.supplyDappInstructions?.dataAccountAddress == initiationRequest.dataAccountPublicKey().toBase58())
-//        assert(apiBody.supplyDappInstructions?.dataAccountSignature?.isNotEmpty() == true)
-//    }
+    @Test
+    fun fullBalanceAccountIntitiationApiBody() {
+        val initiationRequest = generateBalanceAccountInitiationSignableData()
 
-//    @Test
-//    fun signersUpdateIntitiationApiBody() {
-//        val initiationRequest = generateSignersUpdateInitiationSignableData()
-//
-//        val apiBody = initiationRequest.convertToApiBody(encryptionManager)
-//
-//        //todo: when we receive valid dataAccountCreationInfo, then we can validate supplyDappInstructions data also
-//        assert(apiBody.approvalDisposition == initiationRequest.approvalDisposition)
-//        assert(apiBody.nonce == exampleNonces.first().value)
-//        assert(apiBody.initiatorSignature.isNotEmpty())
-//        assert(apiBody.nonceAccountAddress == initiationRequest.requestType.nonceAccountAddresses().first())
-//        assert(apiBody.opAccountAddress == initiationRequest.opAccountPublicKey().toBase58())
-//        assert(apiBody.opAccountSignature.isNotEmpty())
-//    }
+        val apiBody = initiationRequest.convertToApiBody(encryptionManager)
 
-//    @Test
-//    fun withdrawalRequestIntitiationApiBody() {
-//        val initiationRequest = generateWithdrawalRequestInitiationSignableData()
-//
-//        val apiBody = initiationRequest.convertToApiBody(encryptionManager)
-//
-//        //todo: when we receive valid dataAccountCreationInfo, then we can validate supplyDappInstructions data also
-//        assert(apiBody.approvalDisposition == initiationRequest.approvalDisposition)
-//        assert(apiBody.nonce == exampleNonces.first().value)
-//        assert(apiBody.initiatorSignature.isNotEmpty())
-//        assert(apiBody.nonceAccountAddress == initiationRequest.requestType.nonceAccountAddresses().first())
-//        assert(apiBody.opAccountAddress == initiationRequest.opAccountPublicKey().toBase58())
-//        assert(apiBody.opAccountSignature.isNotEmpty())
-//        assert(apiBody.supplyDappInstructions?.dataAccountAddress == initiationRequest.dataAccountPublicKey().toBase58())
-//        assert(apiBody.supplyDappInstructions?.dataAccountSignature?.isNotEmpty() == true)
-//    }
+        assert(apiBody.approvalDisposition == initiationRequest.approvalDisposition)
+        assert(apiBody.nonce == exampleNonces.first().value)
+        assert(apiBody.initiatorSignature.isNotEmpty())
+        assert(apiBody.nonceAccountAddress == initiationRequest.requestType.nonceAccountAddresses().first())
+        assert(apiBody.opAccountAddress == initiationRequest.opAccountPublicKey().toBase58())
+        assert(apiBody.opAccountSignature.isNotEmpty())
+    }
 
-//    @Test
-//    fun dAppTransactionIntitiationApiBody() {
-//        val initiationRequest = generateDAppTransactionInitiationSignableData()
-//
-//        val apiBody = initiationRequest.convertToApiBody(encryptionManager)
-//
-//        //todo: when we receive valid dataAccountCreationInfo, then we can validate supplyDappInstructions data also
-//        assert(apiBody.approvalDisposition == initiationRequest.approvalDisposition)
-//        assert(apiBody.nonce == exampleNonces.first().value)
-//        assert(apiBody.initiatorSignature.isNotEmpty())
-//        assert(apiBody.nonceAccountAddress == initiationRequest.requestType.nonceAccountAddresses().first())
-//        assert(apiBody.opAccountAddress == initiationRequest.opAccountPublicKey().toBase58())
-//        assert(apiBody.opAccountSignature.isNotEmpty())
-//        assert(apiBody.supplyDappInstructions.dataAccountAddress == initiationRequest.dataAccountPublicKey().toBase58())
-//        assert(apiBody.supplyDappInstructions.dataAccountSignature.isNotEmpty())
-          //todo: this will only have data if it is a dapp transaction request
-        //assert(apiBody.supplyDappInstructions.supplyInstructionInitiatorSignatures.isNotEmpty())
-//    }
-//
-//    @Test
-//    fun conversionRequestIntitiationApiBody() {
-//        val initiationRequest = generateConversionRequestInitiationSignableData()
-//
-//        val apiBody = initiationRequest.convertToApiBody(encryptionManager)
-//
-//        //todo: when we receive valid dataAccountCreationInfo, then we can validate supplyDappInstructions data also
-//        assert(apiBody.approvalDisposition == initiationRequest.approvalDisposition)
-//        assert(apiBody.nonce == exampleNonces.first().value)
-//        assert(apiBody.initiatorSignature.isNotEmpty())
-//        assert(apiBody.nonceAccountAddress == initiationRequest.requestType.nonceAccountAddresses().first())
-//        assert(apiBody.opAccountAddress == initiationRequest.opAccountPublicKey().toBase58())
-//        assert(apiBody.opAccountSignature.isNotEmpty())
-//        assert(apiBody.supplyDappInstructions.dataAccountAddress == initiationRequest.dataAccountPublicKey().toBase58())
-//        assert(apiBody.supplyDappInstructions.dataAccountSignature.isNotEmpty())
-//    }
+    @Test
+    fun signersUpdateIntitiationApiBody() {
+        val initiationRequest = generateSignersUpdateInitiationSignableData()
+
+        val apiBody = initiationRequest.convertToApiBody(encryptionManager)
+
+        assert(apiBody.approvalDisposition == initiationRequest.approvalDisposition)
+        assert(apiBody.nonce == exampleNonces.first().value)
+        assert(apiBody.initiatorSignature.isNotEmpty())
+        assert(apiBody.nonceAccountAddress == initiationRequest.requestType.nonceAccountAddresses().first())
+        assert(apiBody.opAccountAddress == initiationRequest.opAccountPublicKey().toBase58())
+        assert(apiBody.opAccountSignature.isNotEmpty())
+    }
+
+    @Test
+    fun withdrawalRequestIntitiationApiBody() {
+        val initiationRequest = generateWithdrawalRequestInitiationSignableData()
+
+        val apiBody = initiationRequest.convertToApiBody(encryptionManager)
+
+        assert(apiBody.approvalDisposition == initiationRequest.approvalDisposition)
+        assert(apiBody.nonce == exampleNonces.first().value)
+        assert(apiBody.initiatorSignature.isNotEmpty())
+        assert(apiBody.nonceAccountAddress == initiationRequest.requestType.nonceAccountAddresses().first())
+        assert(apiBody.opAccountAddress == initiationRequest.opAccountPublicKey().toBase58())
+        assert(apiBody.opAccountSignature.isNotEmpty())
+    }
+
+    @Test
+    fun conversionRequestIntitiationApiBody() {
+        val initiationRequest = generateConversionRequestInitiationSignableData()
+
+        val apiBody = initiationRequest.convertToApiBody(encryptionManager)
+
+        assert(apiBody.approvalDisposition == initiationRequest.approvalDisposition)
+        assert(apiBody.nonce == exampleNonces.first().value)
+        assert(apiBody.initiatorSignature.isNotEmpty())
+        assert(apiBody.nonceAccountAddress == initiationRequest.requestType.nonceAccountAddresses().first())
+        assert(apiBody.opAccountAddress == initiationRequest.opAccountPublicKey().toBase58())
+        assert(apiBody.opAccountSignature.isNotEmpty())
+    }
     //endregion
 
     //region Testing Signable data
@@ -165,15 +136,15 @@ class InitiationRequestSigningTest {
         assertNotNull(simpleSignableData)
     }
 
-//    @Test
-//    fun testGenerateSignersUpdateInitiationSignableData() {
-//        val initiationRequest = generateSignersUpdateInitiationSignableData()
-//
-//        val simpleSignableData =
-//            initiationRequest.retrieveSignableData(approverPublicKey)
-//
-//        assertNotNull(simpleSignableData)
-//    }
+    @Test
+    fun testGenerateSignersUpdateInitiationSignableData() {
+        val initiationRequest = generateSignersUpdateInitiationSignableData()
+
+        val simpleSignableData =
+            initiationRequest.retrieveSignableData(approverPublicKey)
+
+        assertNotNull(simpleSignableData)
+    }
 
     @Test
     fun testGenerateWithdrawalRequestInitiationSignableData() {
@@ -185,25 +156,15 @@ class InitiationRequestSigningTest {
         assertNotNull(simpleSignableData)
     }
 
-//    @Test
-//    fun testGenerateDAppTransactionInitiationSignableData() {
-//        val initiationRequest = generateDAppTransactionInitiationSignableData()
-//
-//        val simpleSignableData =
-//            initiationRequest.retrieveSignableData(approverPublicKey)
-//
-//        assertNotNull(simpleSignableData)
-//    }
-//
-//    @Test
-//    fun testGenerateConversionRequestInitiationSignableData() {
-//        val initiationRequest = generateConversionRequestInitiationSignableData()
-//
-//        val simpleSignableData =
-//            initiationRequest.retrieveSignableData(approverPublicKey)
-//
-//        assertNotNull(simpleSignableData)
-//    }
+    @Test
+    fun testGenerateConversionRequestInitiationSignableData() {
+        val initiationRequest = generateConversionRequestInitiationSignableData()
+
+        val simpleSignableData =
+            initiationRequest.retrieveSignableData(approverPublicKey)
+
+        assertNotNull(simpleSignableData)
+    }
     //endregion
 
     //region create initiation requests

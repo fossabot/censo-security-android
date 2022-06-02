@@ -38,7 +38,8 @@ fun getSignersUpdateRequest(nonceAccountAddresses: List<String>): SolanaApproval
             walletProgramId = "8pPAcjFSByreFRnRm5YyAdBP2LfiNnWBtBzHtRDcJpUA",
             multisigOpAccountAddress = "SLnWXM1QTraLWFhCm7JxDZk11PBE5Gu524ASzAC6YjW",
             walletAddress = "ECzeaMTMBXYXXfVM53n5iPepf8749QUqEzjW8jxefGhh",
-            nonceAccountAddresses = nonceAccountAddresses
+            nonceAccountAddresses = nonceAccountAddresses,
+            initiator = "3wKxhgiogoCaA2uxPYeH7cy3cG4hxRPogrPmDPLS54iZ"
         )
     )
 }
@@ -61,7 +62,8 @@ fun getSignersUpdateWalletRequest(nonceAccountAddresses: List<String>) : WalletA
                 walletProgramId = "JAbzU4jwUMn92xhZcAX4M6JANEigzVMKKJqy6pA1cNBT",
                 multisigOpAccountAddress = "Hx9JnkPHioA9eu92y7jho1TxNaBCHYbw8zaSxvkGXSdD",
                 walletAddress = "FWhBukWcdXaMqZhJMvAAEH6PH81nV6JSpBEmwdvWgUjW",
-                nonceAccountAddresses = nonceAccountAddresses
+                nonceAccountAddresses = nonceAccountAddresses,
+                initiator = "3wKxhgiogoCaA2uxPYeH7cy3cG4hxRPogrPmDPLS54iZ"
             )
         )
     )
@@ -73,7 +75,7 @@ fun getBalanceAccountCreationRequest(nonceAccountAddresses: List<String>) : Bala
         accountSlot = 0,
         accountInfo = AccountInfo(
             name = "Account 1",
-            identifier = "1ac4a7fc-d2f8-4c32-8707-7496ee958933",
+            identifier = "c6055be1-a895-45a6-b0f3-fce261760b89",
             accountType = AccountType.BalanceAccount,
             address = null
         ),
@@ -86,20 +88,21 @@ fun getBalanceAccountCreationRequest(nonceAccountAddresses: List<String>) : Bala
                     value = SignerInfo(
                         name = "User 1",
                         email = "authorized1@org1",
-                        publicKey = "4q8ApWsB3rSW2HPFwc1aWmGgcBMfj7tSKBbb5sBGAB6h"
+                        publicKey = "3wKxhgiogoCaA2uxPYeH7cy3cG4hxRPogrPmDPLS54iZ"
                     )
                 )
             )
         ),
         whitelistEnabled = BooleanSetting.Off,
         dappsEnabled = BooleanSetting.Off,
-        addressBookSlot = 0,
+        addressBookSlot = 1,
         signingData = SolanaSigningData(
-            feePayer = "FM36ah2bH8nQWJNPCRzu7R69gE5o6UhujqJFtDpWN5as",
-            walletProgramId = "8pPAcjFSByreFRnRm5YyAdBP2LfiNnWBtBzHtRDcJpUA",
-            multisigOpAccountAddress = "HypFjU4nfRYwdnNQTyJw8TFxYekptWTQNrTcW7ofMZxu",
-            walletAddress = "ECzeaMTMBXYXXfVM53n5iPepf8749QUqEzjW8jxefGhh",
-            nonceAccountAddresses = nonceAccountAddresses
+            feePayer = "87VXbkJsqdDvXYfDBtS4kW4TcFor7ogofZXbXjT7t7AU",
+            walletProgramId = "db4pdTHvA3XLBgKfwKzdx8DcNpHuWWn63t6u8kbYiuS",
+            multisigOpAccountAddress = "2DBQ368KgyPkmqd6fKsQpmpMhBTDTuW6wWESbxDs5otz",
+            walletAddress = "JCd6uutAtgsbxDfM54ss4TyeG6kakvSfdxJwjBTjkPLh",
+            nonceAccountAddresses = nonceAccountAddresses,
+            initiator = "3wKxhgiogoCaA2uxPYeH7cy3cG4hxRPogrPmDPLS54iZ"
         )
     )
 }
@@ -109,9 +112,9 @@ fun getSolWithdrawalRequest(nonceAccountAddresses: List<String>) : WithdrawalReq
         type = ApprovalType.WITHDRAWAL_TYPE.value,
         account = AccountInfo(
             name = "Account 1",
-            identifier = "9f3093c7-5b77-4ce4-b718-d47030bfdf3f",
+            identifier = "c6055be1-a895-45a6-b0f3-fce261760b89",
             accountType = AccountType.BalanceAccount,
-            address = "2AhhYePazh7dekyu9Ug8Vfp7weVCs3UgefLKq2pwpMzo"
+            address = "oRYGxVHXEqpLaH9QWxX8yRMzLsmPRXyfNmop2QrPQKY"
         ),
         symbolAndAmountInfo = SymbolAndAmountInfo(
             symbolInfo = SymbolInfo(
@@ -119,21 +122,22 @@ fun getSolWithdrawalRequest(nonceAccountAddresses: List<String>) : WithdrawalReq
                 symbolDescription = "Solana",
                 tokenMintAddress = "11111111111111111111111111111111"
             ),
-            amount = "0.200000000",
+            amount = "0.500000000",
             usdEquivalent = "17.75"
         ),
         destination = DestinationAddress(
             name = "My External Sol address",
             subName = null,
-            address = "AzntcKp4TjdgRakBBorz6Tp2kC4PQg4gkDgrr9khCETU",
+            address = "2DQz5vWgs1PKxPDd9YaYKoemgFriRJqoFRniAQ7Wtuva",
             tag = null
         ),
         signingData = SolanaSigningData(
-            feePayer = "FM36ah2bH8nQWJNPCRzu7R69gE5o6UhujqJFtDpWN5as",
-            walletProgramId = "AG23jVQ5EftDonUwCMhgXtr4jQAPdhAtPFw4y84CMeuj",
+            feePayer = "87VXbkJsqdDvXYfDBtS4kW4TcFor7ogofZXbXjT7t7AU",
+            walletProgramId = "db4pdTHvA3XLBgKfwKzdx8DcNpHuWWn63t6u8kbYiuS",
             multisigOpAccountAddress = "9NDFtaczqouZ9SGTfd489EfN3KvMQgrAjpuu4QEr9Kys",
-            walletAddress = "CV3Xhgcs48U5o6CnabtjngKbR7H5dxpzJxpfZqBeEMfV",
-            nonceAccountAddresses = nonceAccountAddresses
+            walletAddress = "JCd6uutAtgsbxDfM54ss4TyeG6kakvSfdxJwjBTjkPLh",
+            nonceAccountAddresses = nonceAccountAddresses,
+            initiator = "3wKxhgiogoCaA2uxPYeH7cy3cG4hxRPogrPmDPLS54iZ"
         )
     )
 }
@@ -167,7 +171,8 @@ fun getSplWithdrawalRequest(nonceAccountAddresses: List<String>) : WithdrawalReq
             walletProgramId = "zeZ7E8F6UaNYy3ry3Mt6MGUSr679oTKV8tzXVe5B4bP",
             multisigOpAccountAddress = "6UcFAr9rqGfFEtLxnYdW6QjeRor3aej5akLpYpXUkPWX",
             walletAddress = "7fvoSJ6iNAyTFvBDuAWuciXWYiyUBtJfCUswZF3YGbUN",
-            nonceAccountAddresses = nonceAccountAddresses
+            nonceAccountAddresses = nonceAccountAddresses,
+            initiator = "3wKxhgiogoCaA2uxPYeH7cy3cG4hxRPogrPmDPLS54iZ"
         )
     )
 }
@@ -206,7 +211,8 @@ fun getConversionRequest(nonceAccountAddresses: List<String>): ConversionRequest
             walletProgramId = "CH2nLW24j2Wd1geFGSKkJmbAz1KLhACR9RRD1wHgCH74",
             multisigOpAccountAddress = "11111111111111111111111111111111",
             walletAddress = "2sGiNkpwYod6c1Wcd6H1ycd85KwykMfb8ZCt7t3XEp4h",
-            nonceAccountAddresses = nonceAccountAddresses
+            nonceAccountAddresses = nonceAccountAddresses,
+            initiator = "3wKxhgiogoCaA2uxPYeH7cy3cG4hxRPogrPmDPLS54iZ"
         )
     )
 }
@@ -239,7 +245,8 @@ fun getWrapConversionRequest(nonceAccountAddresses: List<String>): WrapConversio
             walletProgramId = "DaGSQwGd1GZnscN2Mu5d1CPYqYXAQMV29Q4Zk9yDhZLp",
             multisigOpAccountAddress = "11111111111111111111111111111111",
             walletAddress = "Ebse7xEiKuhe3bWY6dXiWB8QS4QDhr8fRBgH4tUKR2Ys",
-            nonceAccountAddresses = nonceAccountAddresses
+            nonceAccountAddresses = nonceAccountAddresses,
+            initiator = "3wKxhgiogoCaA2uxPYeH7cy3cG4hxRPogrPmDPLS54iZ"
         )
     )
 }
@@ -272,10 +279,38 @@ fun getUnwrapConversionRequest(nonceAccountAddresses: List<String>) : SolanaAppr
             walletProgramId= "DaGSQwGd1GZnscN2Mu5d1CPYqYXAQMV29Q4Zk9yDhZLp",
             multisigOpAccountAddress= "11111111111111111111111111111111",
             walletAddress= "Ebse7xEiKuhe3bWY6dXiWB8QS4QDhr8fRBgH4tUKR2Ys",
-            nonceAccountAddresses= nonceAccountAddresses
+            nonceAccountAddresses= nonceAccountAddresses,
+            initiator = "3wKxhgiogoCaA2uxPYeH7cy3cG4hxRPogrPmDPLS54iZ"
         )
     )
 }
+
+fun getAddAddressBookEntry(nonceAccountAddresses: List<String>): SolanaApprovalRequestType {
+    return AddressBookUpdate(
+        type = ApprovalType.ADDRESS_BOOK_TYPE.value,
+        entriesToRemove = emptyList(),
+        entriesToAdd = listOf(
+            SlotDestinationInfo(
+                slotId = 0,
+                value = DestinationAddress(
+                    name = "My External Sol address",
+                    subName = null,
+                    address = "2DQz5vWgs1PKxPDd9YaYKoemgFriRJqoFRniAQ7Wtuva",
+                    tag = null
+                )
+            )
+        ),
+        signingData = SolanaSigningData(
+            feePayer = "87VXbkJsqdDvXYfDBtS4kW4TcFor7ogofZXbXjT7t7AU",
+            walletProgramId = "db4pdTHvA3XLBgKfwKzdx8DcNpHuWWn63t6u8kbYiuS",
+            multisigOpAccountAddress = "Dpt714om7J3B3f1ygptgoEnFvHo3aiXjeLPP7TqjHJhq",
+            walletAddress = "JCd6uutAtgsbxDfM54ss4TyeG6kakvSfdxJwjBTjkPLh",
+            nonceAccountAddresses = nonceAccountAddresses,
+            initiator = "3wKxhgiogoCaA2uxPYeH7cy3cG4hxRPogrPmDPLS54iZ"
+        )
+    )
+}
+
 
 fun getAddDAppBookEntry(nonceAccountAddresses: List<String>) : SolanaApprovalRequestType {
     return  DAppBookUpdate(
@@ -292,7 +327,8 @@ fun getAddDAppBookEntry(nonceAccountAddresses: List<String>) : SolanaApprovalReq
             walletProgramId= "3Nh3QsaXKbTbLM1BLsD4dhT4zeHTPaVbZX3eN3Yg1G2w",
             multisigOpAccountAddress= "Hn2CJuYyyB2H3wwmdHPy1Aun2Jkye3MCSVajzUvw55A9",
             walletAddress= "Re4dLGch8a1G98PeRtpHa5ApS6Gnik444CqB5BQ8rY1",
-            nonceAccountAddresses= nonceAccountAddresses
+            nonceAccountAddresses= nonceAccountAddresses,
+            initiator = "3wKxhgiogoCaA2uxPYeH7cy3cG4hxRPogrPmDPLS54iZ"
         )
     )
 }
@@ -301,13 +337,13 @@ fun getWalletConfigPolicyUpdate(nonceAccountAddresses: List<String>): SolanaAppr
     return WalletConfigPolicyUpdate(
         type = ApprovalType.WALLET_CONFIG_POLICY_UPDATE_TYPE.value,
         approvalPolicy = ApprovalPolicy(
-            approvalsRequired = 3,
+            approvalsRequired = 2,
             approvalTimeout = 18000000,
             approvers = listOf(
                 SlotSignerInfo(
                     slotId = 0,
                     value = SignerInfo(
-                        publicKey = "5zpDzYujD8xnZ5B9m93qHCGMSeLDb7eAKCo4kWha7knV",
+                        publicKey = "3wKxhgiogoCaA2uxPYeH7cy3cG4hxRPogrPmDPLS54iZ",
                         name = "User 1",
                         email = "authorized1@org1"
                     )
@@ -315,27 +351,20 @@ fun getWalletConfigPolicyUpdate(nonceAccountAddresses: List<String>): SolanaAppr
                 SlotSignerInfo(
                     slotId = 1,
                     value = SignerInfo(
-                        publicKey = "3tSshpPL1WyNR7qDfxPffinndQmgfvTGoZc3PgL65Z9o",
+                        publicKey = "7AH35qStXtrUgRkmqDmhjufNHjF74R1A9cCKT3C3HaAR",
                         name = "User 2",
                         email = "user2@org1"
                     )
                 ),
-                SlotSignerInfo(
-                    slotId = 2,
-                    value = SignerInfo(
-                        publicKey = "5rt9dFozMbpPf2mMgiMuu2f4CxQa3pWS1Exo9wHPbwJK",
-                        name = "User 3",
-                        email = "user3@org1"
-                    )
-                )
             )
         ),
         signingData = SolanaSigningData(
-            feePayer = "FM36ah2bH8nQWJNPCRzu7R69gE5o6UhujqJFtDpWN5as",
-            walletProgramId = "5kx1BNgMpBbEfrrzfqZrmW8xfqpdbC8b34TkwGbXg42r",
+            feePayer = "87VXbkJsqdDvXYfDBtS4kW4TcFor7ogofZXbXjT7t7AU",
+            walletProgramId = "db4pdTHvA3XLBgKfwKzdx8DcNpHuWWn63t6u8kbYiuS",
             multisigOpAccountAddress = "F6iUTdJDE4vnTgBanCtBgtoNHag57Uaut82xATGVVps3",
-            walletAddress = "hBVqSAZ3Z7dSrWXoQdKJGttgHVrWa3qzdeHpiX6WKk3",
-            nonceAccountAddresses = nonceAccountAddresses
+            walletAddress = "JCd6uutAtgsbxDfM54ss4TyeG6kakvSfdxJwjBTjkPLh",
+            nonceAccountAddresses = nonceAccountAddresses,
+            initiator = "3wKxhgiogoCaA2uxPYeH7cy3cG4hxRPogrPmDPLS54iZ"
         )
     )
 }
@@ -368,7 +397,8 @@ fun getBalanceAccountPolicyUpdate(nonceAccountAddresses: List<String>) : SolanaA
             walletProgramId= "8pPAcjFSByreFRnRm5YyAdBP2LfiNnWBtBzHtRDcJpUA",
             multisigOpAccountAddress= "DbdTEwihgEYJYAgXBKEqQGknGyHsRnxE5coeZaVS4T9y",
             walletAddress= "ECzeaMTMBXYXXfVM53n5iPepf8749QUqEzjW8jxefGhh",
-            nonceAccountAddresses= nonceAccountAddresses
+            nonceAccountAddresses= nonceAccountAddresses,
+            initiator = "3wKxhgiogoCaA2uxPYeH7cy3cG4hxRPogrPmDPLS54iZ"
         )
     )
 }
@@ -388,7 +418,8 @@ fun getBalanceAccountNameUpdate(nonceAccountAddresses: List<String>): SolanaAppr
             walletProgramId = "7kNPVcK2cpyaZsLsqmhZbjcbt433vYUckH1PM5gZeJ1L",
             multisigOpAccountAddress = "7DY87mHHiSSyxFBbhCYbTpQE5M4Jk9Z9hymJ7UzL3sPm",
             walletAddress = "4XaqL4MtTUDrncTGBqvTC9ketf8WVqrUocDkYhKAnDju",
-            nonceAccountAddresses = nonceAccountAddresses
+            nonceAccountAddresses = nonceAccountAddresses,
+            initiator = "3wKxhgiogoCaA2uxPYeH7cy3cG4hxRPogrPmDPLS54iZ"
         )
     )
 }
@@ -420,7 +451,8 @@ fun getSPLTokenAccountCreation(nonceAccountAddresses: List<String>): SolanaAppro
             walletProgramId = "8pPAcjFSByreFRnRm5YyAdBP2LfiNnWBtBzHtRDcJpUA",
             multisigOpAccountAddress = "SLnWXM1QTraLWFhCm7JxDZk11PBE5Gu524ASzAC6YjW",
             walletAddress = "ECzeaMTMBXYXXfVM53n5iPepf8749QUqEzjW8jxefGhh",
-            nonceAccountAddresses = nonceAccountAddresses
+            nonceAccountAddresses = nonceAccountAddresses,
+            initiator = "3wKxhgiogoCaA2uxPYeH7cy3cG4hxRPogrPmDPLS54iZ"
         )
     )
 }
@@ -493,7 +525,8 @@ fun getDAppTransactionRequest(nonceAccountAddresses: List<String>): SolanaApprov
             walletProgramId = "DafeuJ6v1Mv1cvEVU6EnH2uomCP8nvj9EbKHgXGxGChy",
             multisigOpAccountAddress = "11111111111111111111111111111111",
             walletAddress = "6Vie7d1hd84JnQVAyZW5V5EkTfVTF1Gap2a5mtwMqobF",
-            nonceAccountAddresses = nonceAccountAddresses
+            nonceAccountAddresses = nonceAccountAddresses,
+            initiator = "3wKxhgiogoCaA2uxPYeH7cy3cG4hxRPogrPmDPLS54iZ"
         )
     )
 }
@@ -519,12 +552,10 @@ fun getWalletInitiationRequest( requestType: SolanaApprovalRequestType, initiati
 
 fun getOpAccountCreationInfo() : MultiSigAccountCreationInfo {
     return MultiSigAccountCreationInfo(
-        accountSize= 848,
-        minBalanceForRentExemption= 6792960
+        accountSize= 952,
+        minBalanceForRentExemption= 7516800
     )
 }
-
-//BROKEN BOYS
 
 fun getBalanceAccountAddressWhitelistUpdate(nonceAccountAddresses: List<String>): SolanaApprovalRequestType {
     return BalanceAccountAddressWhitelistUpdate(
@@ -560,7 +591,8 @@ fun getBalanceAccountAddressWhitelistUpdate(nonceAccountAddresses: List<String>)
             walletProgramId = "9LM4sYmMHk1VDcFpA8ezPeL8GtEVR5T51Qxcksrf4VX2",
             multisigOpAccountAddress = "71S5qEAD3DMn7QY9fdb2uR1TV7kiAfcAqNHfQfyFUSME",
             walletAddress = "AoEAvW2TvZYmy2WbmqN4nXdJT8o21RbJP6xNK2yR4of",
-            nonceAccountAddresses = nonceAccountAddresses
+            nonceAccountAddresses = nonceAccountAddresses,
+            initiator = "3wKxhgiogoCaA2uxPYeH7cy3cG4hxRPogrPmDPLS54iZ"
         )
     )
 }
@@ -570,44 +602,19 @@ fun getBalanceAccountSettingsUpdate(nonceAccountAddresses: List<String>): Solana
         type = ApprovalType.BALANCE_ACCOUNT_SETTINGS_UPDATE_TYPE.value,
         account = AccountInfo(
             name = "Account 1",
-            identifier = "b645a5d9-227f-4a9f-9331-52af64bf1989",
+            identifier = "c6055be1-a895-45a6-b0f3-fce261760b89",
             accountType = AccountType.BalanceAccount,
-            address = "DcvZ2k6ygvvu2Z5ihrSxRZL7bHJ38gPRgpCie8GzztTP"
+            address = "oRYGxVHXEqpLaH9QWxX8yRMzLsmPRXyfNmop2QrPQKY"
         ),
         whitelistEnabled = BooleanSetting.On,
         dappsEnabled = null,
         signingData = SolanaSigningData(
-            feePayer = "FM36ah2bH8nQWJNPCRzu7R69gE5o6UhujqJFtDpWN5as",
-            walletProgramId = "7kNPVcK2cpyaZsLsqmhZbjcbt433vYUckH1PM5gZeJ1L",
-            multisigOpAccountAddress = "GM2yp6wzBijkziNSDAXoDsuJ2e76VTLgqTfikh5r9BfD",
-            walletAddress = "4XaqL4MtTUDrncTGBqvTC9ketf8WVqrUocDkYhKAnDju",
-            nonceAccountAddresses = nonceAccountAddresses
-        )
-    )
-}
-
-
-fun getAddAddressBookEntry(nonceAccountAddresses: List<String>): SolanaApprovalRequestType {
-    return AddressBookUpdate(
-        type = ApprovalType.ADDRESS_BOOK_TYPE.value,
-        entriesToRemove = emptyList(),
-        entriesToAdd = listOf(
-            SlotDestinationInfo(
-                slotId = 1,
-                value = DestinationAddress(
-                    name = "My External Sol address 1",
-                    subName = null,
-                    address = "6RsFJRJb2RxZG7kKFbnnKdei4bUmC51wBbEpZtm9AuzV",
-                    tag = null
-                )
-            )
-        ),
-        signingData = SolanaSigningData(
-            feePayer = "FM36ah2bH8nQWJNPCRzu7R69gE5o6UhujqJFtDpWN5as",
-            walletProgramId = "A2iHua5UQd6RWb6C3ZctQcfVZDoeG5pUvBtRQfWSxSqb",
-            multisigOpAccountAddress = "2Qr2bq8KpyAho1rSnE7TUwXgHW3UpM7KwYEijF11JF2d",
-            walletAddress = "FpyUo7gVxzB3mPVSkcHNdzdo1T6tNHvkzUvFajw2PwkG",
-            nonceAccountAddresses = nonceAccountAddresses
+            feePayer = "87VXbkJsqdDvXYfDBtS4kW4TcFor7ogofZXbXjT7t7AU",
+            walletProgramId = "db4pdTHvA3XLBgKfwKzdx8DcNpHuWWn63t6u8kbYiuS",
+            multisigOpAccountAddress = "Dp4oaRWRtBxQdf5Lg2zti3TCjsUsxv4rUBgtf2HSQnVb",
+            walletAddress = "JCd6uutAtgsbxDfM54ss4TyeG6kakvSfdxJwjBTjkPLh",
+            nonceAccountAddresses = nonceAccountAddresses,
+            initiator = "3wKxhgiogoCaA2uxPYeH7cy3cG4hxRPogrPmDPLS54iZ"
         )
     )
 }
@@ -631,7 +638,8 @@ fun getRemoveDAppBookEntry(nonceAccountAddresses: List<String>): SolanaApprovalR
             walletProgramId = "3Nh3QsaXKbTbLM1BLsD4dhT4zeHTPaVbZX3eN3Yg1G2w",
             multisigOpAccountAddress = "9CfoFci2agjCJ7bWqfgKEFSAc5zB6UR63MrK61nRaJzm",
             walletAddress = "Re4dLGch8a1G98PeRtpHa5ApS6Gnik444CqB5BQ8rY1",
-            nonceAccountAddresses = nonceAccountAddresses
+            nonceAccountAddresses = nonceAccountAddresses,
+            initiator = "3wKxhgiogoCaA2uxPYeH7cy3cG4hxRPogrPmDPLS54iZ"
         )
     )
 }

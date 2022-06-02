@@ -181,23 +181,23 @@ class ApprovalRequestSigningTest {
         return signableData
     }
 
-//    @Test
-//    fun testSignersUpdateRemovalSignableDataIsNotNull() {
-//        val signersUpdateRemovalSignableData = generateSignersUpdateRemovalSignableData()
-//        assertNotNull(signersUpdateRemovalSignableData)
-//    }
-//
-//    @Test
-//    fun testSignersUpdateSignableDataIsNotNull() {
-//        val signersUpdateSignableData = generateSignSignersUpdateSignableData()
-//        assertNotNull(signersUpdateSignableData)
-//    }
-//
-//    @Test
-//    fun testConversionRequestSignableDataIsNotNull() {
-//        val conversionRequestSignableData = generateSignConversionRequestSignableData()
-//        assertNotNull(conversionRequestSignableData)
-//    }
+    @Test
+    fun testSignersUpdateRemovalSignableDataIsNotNull() {
+        val signersUpdateRemovalSignableData = generateSignersUpdateRemovalSignableData()
+        assertNotNull(signersUpdateRemovalSignableData)
+    }
+
+    @Test
+    fun testSignersUpdateSignableDataIsNotNull() {
+        val signersUpdateSignableData = generateSignSignersUpdateSignableData()
+        assertNotNull(signersUpdateSignableData)
+    }
+
+    @Test
+    fun testConversionRequestSignableDataIsNotNull() {
+        val conversionRequestSignableData = generateSignConversionRequestSignableData()
+        assertNotNull(conversionRequestSignableData)
+    }
 
     @Test
     fun testWithdrawalRequestSignableDataIsNotNull() {
@@ -262,73 +262,73 @@ class ApprovalRequestSigningTest {
         assertNotNull(signature)
     }
 
-//    @Test
-//    fun generateSignatureForConversionRequest() {
-//        val conversionRequestWalletApproval =
-//            deserializer.parseData(JsonParser.parseString(conversionRequestJson.trim()))
-//
-//
-//        val approvalDispositionRequest = ApprovalDispositionRequest(
-//            requestId = conversionRequestWalletApproval.id!!,
-//            approvalDisposition = if (Random().nextBoolean()) ApprovalDisposition.APPROVE else ApprovalDisposition.DENY,
-//            requestType = conversionRequestWalletApproval.getSolanaApprovalRequestType(),
-//            nonces = exampleNonces,
-//            email = userEmail
-//        )
-//
-//        val signature = encryptionManager.signApprovalDispositionMessage(
-//            signable = approvalDispositionRequest, userEmail = userEmail
-//        )
-//
-//        println("Signature from conversion request: $signature")
-//
-//        assertNotNull(signature)
-//    }
+    @Test
+    fun generateSignatureForConversionRequest() {
+        val conversionRequestWalletApproval =
+            deserializer.parseData(JsonParser.parseString(conversionRequestJson.trim()))
 
-//    @Test
-//    fun generateSignatureForSignersUpdate() {
-//        val signersUpdateWalletApproval =
-//            deserializer.parseData(JsonParser.parseString(signersUpdateJson.trim()))
-//
-//
-//        val approvalDispositionRequest = ApprovalDispositionRequest(
-//            requestId = signersUpdateWalletApproval.id!!,
-//            approvalDisposition = ApprovalDisposition.APPROVE,
-//            requestType = signersUpdateWalletApproval.getSolanaApprovalRequestType(),
-//            nonces = exampleNonces,
-//            email = userEmail
-//        )
-//
-//        val signature = encryptionManager.signApprovalDispositionMessage(
-//            signable = approvalDispositionRequest, userEmail = userEmail
-//        )
-//
-//        println("Signature from signers update: $signature")
-//
-//        assertNotNull(signature)
-//    }
 
-//    @Test
-//    fun generateSignatureForSignersUpdateRemoval() {
-//        val signersUpdateRemovalWalletApproval =
-//            deserializer.parseData(JsonParser.parseString(signersUpdateRemovalJson.trim()))
-//
-//        val approvalDispositionRequest = ApprovalDispositionRequest(
-//            requestId = signersUpdateRemovalWalletApproval.id!!,
-//            approvalDisposition = ApprovalDisposition.APPROVE,
-//            requestType = signersUpdateRemovalWalletApproval.getSolanaApprovalRequestType(),
-//            nonces = exampleNonces,
-//            email = userEmail
-//        )
-//
-//        val signature = encryptionManager.signApprovalDispositionMessage(
-//            signable = approvalDispositionRequest, userEmail = userEmail
-//        )
-//
-//        println("Signature from signers update removal: $signature")
-//
-//        assertNotNull(signature)
-//    }
+        val approvalDispositionRequest = ApprovalDispositionRequest(
+            requestId = conversionRequestWalletApproval.id!!,
+            approvalDisposition = if (Random().nextBoolean()) ApprovalDisposition.APPROVE else ApprovalDisposition.DENY,
+            requestType = conversionRequestWalletApproval.getSolanaApprovalRequestType(),
+            nonces = exampleNonces,
+            email = userEmail
+        )
+
+        val signature = encryptionManager.signApprovalDispositionMessage(
+            signable = approvalDispositionRequest, userEmail = userEmail
+        )
+
+        println("Signature from conversion request: $signature")
+
+        assertNotNull(signature)
+    }
+
+    @Test
+    fun generateSignatureForSignersUpdate() {
+        val signersUpdateWalletApproval =
+            deserializer.parseData(JsonParser.parseString(signersUpdateJson.trim()))
+
+
+        val approvalDispositionRequest = ApprovalDispositionRequest(
+            requestId = signersUpdateWalletApproval.id!!,
+            approvalDisposition = ApprovalDisposition.APPROVE,
+            requestType = signersUpdateWalletApproval.getSolanaApprovalRequestType(),
+            nonces = exampleNonces,
+            email = userEmail
+        )
+
+        val signature = encryptionManager.signApprovalDispositionMessage(
+            signable = approvalDispositionRequest, userEmail = userEmail
+        )
+
+        println("Signature from signers update: $signature")
+
+        assertNotNull(signature)
+    }
+
+    @Test
+    fun generateSignatureForSignersUpdateRemoval() {
+        val signersUpdateRemovalWalletApproval =
+            deserializer.parseData(JsonParser.parseString(signersUpdateRemovalJson.trim()))
+
+        val approvalDispositionRequest = ApprovalDispositionRequest(
+            requestId = signersUpdateRemovalWalletApproval.id!!,
+            approvalDisposition = ApprovalDisposition.APPROVE,
+            requestType = signersUpdateRemovalWalletApproval.getSolanaApprovalRequestType(),
+            nonces = exampleNonces,
+            email = userEmail
+        )
+
+        val signature = encryptionManager.signApprovalDispositionMessage(
+            signable = approvalDispositionRequest, userEmail = userEmail
+        )
+
+        println("Signature from signers update removal: $signature")
+
+        assertNotNull(signature)
+    }
 
     @Test
     fun generateSignatureForLoginApproval() {
