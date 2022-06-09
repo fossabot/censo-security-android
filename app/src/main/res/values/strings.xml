@@ -40,7 +40,6 @@
     <string name="expires_in">Expires in</string>
     <string name="content_des_back_icon">Back Icon</string>
     <string name="requested_by">Requested By</string>
-    <string name="requested_date">Requested Date</string>
     <string name="no_more_approvals_needed">No more approvals needed</string>
     <string name="more_approval_needed">more approval needed</string>
     <string name="more_approvals_needed">more approvals needed</string>
@@ -126,7 +125,6 @@
     <string name="usd_equivalent">USD equivalent</string>
     <string name="unknown_approval_item">Unknown Approval</string>
     <string name="address">Address</string>
-    <string name="from">From</string>
     <string name="to">To</string>
     <string name="approvals_required_title">Approvals Required</string>
     <string name="approval_expiration">Approval Expiration</string>
@@ -180,8 +178,8 @@
     <string name="add_signers_update_approval_header">Add Signer</string>
     <string name="wallet_config_policy_update_approval_header">Replace Vault Approval Policy</string>
     <string name="unknown_approval_header">Unknown</string>
-    <string name="conversion_request_approval_header">Convert %1$s</string>
-    <string name="withdrawal_request_approval_header">Send %1$s</string>
+    <string name="conversion_request_approval_header">Convert %1$s %2$s</string>
+    <string name="withdrawal_request_approval_header">Send %1$s %2$s</string>
     <string name="wrap_conversion_request_approval_header">Convert %1$s</string>
     <string name="destinations_title">Destinations</string>
     <string name="no_whitelisted_addresses">No whitelisted addresses</string>
@@ -209,6 +207,9 @@
     <string name="login_name">Login Name</string>
     <string name="login_email">Login Email</string>
 
+    <string name="from_wallet">From Wallet</string>
+    <string name="destination">Destination</string>
+    <string name="destination_address">Destination Address</string>
 
     <string name="hours">Hours</string>
     <string name="minutes">Minutes</string>

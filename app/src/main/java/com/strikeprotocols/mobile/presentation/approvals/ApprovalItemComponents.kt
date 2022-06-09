@@ -154,8 +154,7 @@ fun ApprovalType(
 
 @Composable
 fun ApprovalRowContent(
-    type: SolanaApprovalRequestType,
-    approvalsNeeded: Int
+    type: SolanaApprovalRequestType
 ) {
     when (type) {
         is SolanaApprovalRequestType.WithdrawalRequest ->
@@ -205,12 +204,7 @@ fun ApprovalDetailContent(
         is SolanaApprovalRequestType.BalanceAccountCreation ->
             BalanceAccountDetailContent(balanceAccountCreation = type, approvalsReceived = approval.numberOfApprovalsReceived.toString())
         is SolanaApprovalRequestType.ConversionRequest ->
-            ConversionDetailContent(
-                conversionRequest = type,
-                submitterEmail = approval.submitterEmail ?: "",
-                submitterDate = approval.submitDate ?: "",
-                approvalsNeeded = approvalsNeeded
-            )
+            ConversionDetailContent(conversionRequest = type)
         is SolanaApprovalRequestType.DAppTransactionRequest ->
             DAppTransactionDetailContent(dAppWalletApproval = type)
         is SolanaApprovalRequestType.LoginApprovalRequest -> {
@@ -219,12 +213,7 @@ fun ApprovalDetailContent(
         is SolanaApprovalRequestType.SignersUpdate ->
             SignersUpdateDetailContent(signersUpdate = type)
         is SolanaApprovalRequestType.WithdrawalRequest ->
-            WithdrawalRequestDetailContent(
-                withdrawalRequest = type,
-                submitterEmail = approval.submitterEmail ?: "",
-                submitterDate = approval.submitDate ?: "",
-                approvalsNeeded = approvalsNeeded
-            )
+            WithdrawalRequestDetailContent(withdrawalRequest = type)
         is SolanaApprovalRequestType.AddressBookUpdate ->
             AddressBookUpdateDetailContent(addressBookUpdate = type)
         is SolanaApprovalRequestType.BalanceAccountAddressWhitelistUpdate ->

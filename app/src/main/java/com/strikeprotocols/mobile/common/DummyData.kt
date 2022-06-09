@@ -263,8 +263,8 @@ object MockedApprovals {
             balanceAccountPolicyUpdateRequest,
             splTokenAccountCreationRequest,
             walletConfigPolicyUpdateRequest,
-            wrapConversionRequest,
-            dappBookUpdateRequest,
+//            wrapConversionRequest,
+//            dappBookUpdateRequest,
             unknownRequest
         )
     }

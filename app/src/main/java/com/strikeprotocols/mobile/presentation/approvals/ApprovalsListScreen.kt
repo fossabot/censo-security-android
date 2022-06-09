@@ -325,8 +325,7 @@ fun ApprovalsList(
                                 positiveButtonText = safeApproval.approveButtonCaption(context)
                             ) {
                                 ApprovalRowContent(
-                                    type = type,
-                                    approvalsNeeded = safeApproval.numberOfApprovalsReceived ?: 0
+                                    type = type
                                 )
                             }
 

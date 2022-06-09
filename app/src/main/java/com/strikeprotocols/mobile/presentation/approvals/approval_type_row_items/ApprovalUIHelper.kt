@@ -55,7 +55,7 @@ fun SolanaApprovalRequestType.getHeader(context: Context): String {
             }
         }
         is ConversionRequest ->
-            context.getString(R.string.conversion_request_approval_header, symbolAndAmountInfo.symbolInfo.symbol)
+            context.getString(R.string.conversion_request_approval_header, symbolAndAmountInfo.amount, symbolAndAmountInfo.symbolInfo.symbol)
         is DAppBookUpdate ->
             context.getString(R.string.dapp_book_update_approval_header)
         is DAppTransactionRequest ->
@@ -74,7 +74,7 @@ fun SolanaApprovalRequestType.getHeader(context: Context): String {
         is WalletConfigPolicyUpdate ->
             context.getString(R.string.wallet_config_policy_update_approval_header)
         is WithdrawalRequest ->
-            context.getString(R.string.withdrawal_request_approval_header, symbolAndAmountInfo.symbolInfo.symbol)
+            context.getString(R.string.withdrawal_request_approval_header, symbolAndAmountInfo.amount, symbolAndAmountInfo.symbolInfo.symbol)
         is WrapConversionRequest ->
             context.getString(R.string.wrap_conversion_request_approval_header, symbolAndAmountInfo.symbolInfo.symbol)
         else ->
