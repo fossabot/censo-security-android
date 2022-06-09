@@ -7,23 +7,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.strikeprotocols.mobile.common.convertApprovalsNeededToDisplayMessage
 import com.strikeprotocols.mobile.ui.theme.*
-
-@Composable
-fun ApprovalDispositionsRequired(approvalsNeeded: Int) {
-    Text(
-        text = approvalsNeeded.convertApprovalsNeededToDisplayMessage(context = LocalContext.current),
-        color = GreyText,
-        textAlign = TextAlign.Center,
-        fontSize = 12.sp
-    )
-}
 
 @Composable
 fun ApprovalSubtitle(text: String) {

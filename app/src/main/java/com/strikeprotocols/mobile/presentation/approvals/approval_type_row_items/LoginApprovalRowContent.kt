@@ -12,18 +12,26 @@ import androidx.compose.ui.unit.sp
 import com.strikeprotocols.mobile.data.models.approval.SolanaApprovalRequestType
 import com.strikeprotocols.mobile.presentation.approvals.ApprovalRowContentHeader
 import com.strikeprotocols.mobile.ui.theme.GreyText
+import java.util.*
 
 @Composable
 fun LoginApprovalRowContent(loginApproval: SolanaApprovalRequestType.LoginApprovalRequest) {
     val header = loginApproval.getHeader(LocalContext.current)
     ApprovalRowContentHeader(header = header, bottomSpacing = 8)
+
     //TODO: Use the user data here once the AuthFlow PR is merged.
-    Text(
-        "",
-        color = GreyText,
-        textAlign = TextAlign.Center,
-        fontSize = 12.sp,
-        letterSpacing = 0.23.sp
-    )
-    Spacer(modifier = Modifier.height(20.dp))
+    val userEmail : String? = if(Random().nextBoolean()) "" else null
+
+    if (!userEmail.isNullOrEmpty()) {
+        Text(
+            "",
+            color = GreyText,
+            textAlign = TextAlign.Center,
+            fontSize = 12.sp,
+            letterSpacing = 0.23.sp
+        )
+        Spacer(modifier = Modifier.height(20.dp))
+    } else {
+        Spacer(modifier = Modifier.height(16.dp))
+    }
 }

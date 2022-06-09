@@ -25,8 +25,7 @@ import com.strikeprotocols.mobile.ui.theme.StrikeWhite
 fun UnknownApprovalItem(
     timeRemainingInSeconds: Long,
     accountRowMetaData: ApprovalRowMetaData,
-    onUpdateAppClicked: () -> Unit,
-    submitDate: String?
+    onUpdateAppClicked: () -> Unit
 ) {
     Column(
         modifier = Modifier

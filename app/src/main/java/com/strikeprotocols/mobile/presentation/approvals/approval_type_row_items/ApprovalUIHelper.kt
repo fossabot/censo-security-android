@@ -120,6 +120,14 @@ fun SolanaApprovalRequestType.getDialogFullMessage(
 }
 
 fun SolanaApprovalRequestType.getApprovalRowMetaData(context: Context): ApprovalRowMetaData {
+    if (this.isUnknownTypeOrUIUnimplemented()) {
+        return ApprovalRowMetaData(
+            approvalImageVector = Icons.Filled.HelpOutline,
+            approvalImageContentDescription = context.getString(R.string.approval_type_unknown_content_des),
+            approvalTypeTitle = UnknownApprovalType.getRowTitle(context)
+        )
+    }
+
     val vectorAndContentDescription: Pair<ImageVector, String> = when (this) {
         is WithdrawalRequest -> {
             Pair(
@@ -215,6 +223,9 @@ fun SolanaApprovalRequestType.getApprovalRowMetaData(context: Context): Approval
         approvalTypeTitle = getRowTitle(context)
     )
 }
+
+fun SolanaApprovalRequestType.isUnknownTypeOrUIUnimplemented() =
+    this is UnknownApprovalType || this is DAppBookUpdate || this is WrapConversionRequest
 
 fun SolanaApprovalRequestType.getRowTitle(context: Context): String =
     when (this) {

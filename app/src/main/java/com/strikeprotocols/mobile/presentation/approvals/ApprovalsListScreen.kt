@@ -302,7 +302,7 @@ fun ApprovalsList(
                         val calculatedTimerSecondsLeft = getSecondsLeftUntilCountdownIsOver(safeApproval.submitDate, safeApproval.approvalTimeoutInSeconds ?: 0)
                         val timeRemainingInSeconds = if (shouldRefreshTimers) calculatedTimerSecondsLeft else calculatedTimerSecondsLeft
 
-                        if (type == UnknownApprovalType) {
+                        if (type.isUnknownTypeOrUIUnimplemented()) {
                             UnknownApprovalItem(
                                 timeRemainingInSeconds = timeRemainingInSeconds,
                                 accountRowMetaData = rowMetaData,
@@ -313,8 +313,7 @@ fun ApprovalsList(
                                         setPackage("com.android.vending")
                                     }
                                     startActivity(context, playStoreIntent, null)
-                                },
-                                submitDate = safeApproval.submitDate
+                                }
                             )
                         } else {
                             ApprovalRowItem(
