@@ -76,7 +76,7 @@ fun SolanaApprovalRequestType.getHeader(context: Context): String {
         is WithdrawalRequest ->
             context.getString(R.string.withdrawal_request_approval_header, symbolAndAmountInfo.amount, symbolAndAmountInfo.symbolInfo.symbol)
         is WrapConversionRequest ->
-            context.getString(R.string.wrap_conversion_request_approval_header, symbolAndAmountInfo.symbolInfo.symbol)
+            context.getString(R.string.wrap_conversion_request_approval_header, symbolAndAmountInfo.amount, symbolAndAmountInfo.symbolInfo.symbol)
         else ->
             context.getString(R.string.unknown_approval_header)
     }
@@ -225,7 +225,7 @@ fun SolanaApprovalRequestType.getApprovalRowMetaData(context: Context): Approval
 }
 
 fun SolanaApprovalRequestType.isUnknownTypeOrUIUnimplemented() =
-    this is UnknownApprovalType || this is DAppBookUpdate || this is WrapConversionRequest
+    this is UnknownApprovalType || this is DAppBookUpdate
 
 fun SolanaApprovalRequestType.getRowTitle(context: Context): String =
     when (this) {

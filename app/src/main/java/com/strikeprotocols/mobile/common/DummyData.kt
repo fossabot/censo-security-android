@@ -265,7 +265,7 @@ object MockedApprovals {
             walletConfigPolicyUpdateRequest,
             unknownRequest,
             wrapConversionRequest,
-            dappBookUpdateRequest,
+            dappBookUpdateRequest
         )
     }
 

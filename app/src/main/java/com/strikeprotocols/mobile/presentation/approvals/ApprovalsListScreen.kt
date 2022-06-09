@@ -1,7 +1,9 @@
 package com.strikeprotocols.mobile.presentation.approvals
 
+import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.net.Uri
+import android.widget.Toast
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -312,7 +314,11 @@ fun ApprovalsList(
                                             Uri.parse("http://play.google.com/store/apps/details?id=com.strikeprotocols.mobile")
                                         setPackage("com.android.vending")
                                     }
-                                    startActivity(context, playStoreIntent, null)
+                                    try {
+                                        startActivity(context, playStoreIntent, null)
+                                    } catch (e: ActivityNotFoundException) {
+                                        Toast.makeText(context, "Play Store not found on this device.", Toast.LENGTH_LONG).show()
+                                    }
                                 }
                             )
                         } else {
