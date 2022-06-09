@@ -10,6 +10,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.strikeprotocols.mobile.data.models.approval.SolanaApprovalRequestType
+import com.strikeprotocols.mobile.presentation.approval_detail.approval_type_detail_items.ApprovalSubtitle
 import com.strikeprotocols.mobile.presentation.approvals.ApprovalRowContentHeader
 import com.strikeprotocols.mobile.ui.theme.GreyText
 
@@ -21,12 +22,6 @@ fun BalanceAccountSettingsUpdateRowContent(
     val accountName = accountSettingsUpdate.account.name
     
     ApprovalRowContentHeader(header = header, topSpacing = 16, bottomSpacing = 8)
-    Text(
-        accountName,
-        color = GreyText,
-        textAlign = TextAlign.Center,
-        fontSize = 12.sp,
-        letterSpacing = 0.23.sp
-    )
+    ApprovalSubtitle(text = accountName)
     Spacer(modifier = Modifier.height(20.dp))
 }

@@ -19,7 +19,6 @@ import com.strikeprotocols.mobile.data.models.approval.SolanaApprovalRequestType
 import com.strikeprotocols.mobile.data.models.approval.WalletApproval
 import com.strikeprotocols.mobile.presentation.approval_detail.approval_type_detail_items.*
 import com.strikeprotocols.mobile.presentation.approvals.approval_type_row_items.*
-import com.strikeprotocols.mobile.presentation.components.ApprovalRowTitleText
 import com.strikeprotocols.mobile.ui.theme.*
 import java.util.*
 

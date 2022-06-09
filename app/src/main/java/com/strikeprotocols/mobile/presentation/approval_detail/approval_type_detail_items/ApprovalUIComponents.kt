@@ -14,6 +14,16 @@ import androidx.compose.ui.unit.sp
 import com.strikeprotocols.mobile.ui.theme.*
 
 @Composable
+fun ApprovalRowTitleText(title: String) {
+    Text(
+        text = title,
+        color = StrikeWhite,
+        fontSize = 22.sp,
+        fontWeight = FontWeight.Bold
+    )
+}
+
+@Composable
 fun ApprovalSubtitle(text: String) {
     Text(
         text = text,

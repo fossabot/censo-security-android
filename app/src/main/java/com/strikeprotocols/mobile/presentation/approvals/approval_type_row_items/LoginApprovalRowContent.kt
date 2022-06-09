@@ -10,6 +10,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.strikeprotocols.mobile.data.models.approval.SolanaApprovalRequestType
+import com.strikeprotocols.mobile.presentation.approval_detail.approval_type_detail_items.ApprovalSubtitle
 import com.strikeprotocols.mobile.presentation.approvals.ApprovalRowContentHeader
 import com.strikeprotocols.mobile.ui.theme.GreyText
 import java.util.*
@@ -23,13 +24,7 @@ fun LoginApprovalRowContent(loginApproval: SolanaApprovalRequestType.LoginApprov
     val userEmail : String? = if(Random().nextBoolean()) "" else null
 
     if (!userEmail.isNullOrEmpty()) {
-        Text(
-            "",
-            color = GreyText,
-            textAlign = TextAlign.Center,
-            fontSize = 12.sp,
-            letterSpacing = 0.23.sp
-        )
+        ApprovalSubtitle(text = userEmail)
         Spacer(modifier = Modifier.height(20.dp))
     } else {
         Spacer(modifier = Modifier.height(16.dp))

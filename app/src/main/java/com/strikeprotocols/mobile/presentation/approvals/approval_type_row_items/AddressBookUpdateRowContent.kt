@@ -13,6 +13,7 @@ import androidx.compose.ui.unit.sp
 import com.strikeprotocols.mobile.R
 import com.strikeprotocols.mobile.data.models.approval.SlotDestinationInfo
 import com.strikeprotocols.mobile.data.models.approval.SolanaApprovalRequestType
+import com.strikeprotocols.mobile.presentation.approval_detail.approval_type_detail_items.ApprovalSubtitle
 import com.strikeprotocols.mobile.presentation.approvals.ApprovalContentHeader
 import com.strikeprotocols.mobile.presentation.approvals.ApprovalRowContentHeader
 import com.strikeprotocols.mobile.ui.theme.GreyText
@@ -29,11 +30,6 @@ fun AddressBookUpdateRowContent(
     val header = addressBookUpdate.getHeader(LocalContext.current)
 
     ApprovalRowContentHeader(header = header, topSpacing = 16, bottomSpacing = 6)
-    Text(
-        name,
-        color = GreyText,
-        textAlign = TextAlign.Center,
-        fontSize = 12.sp
-    )
+    ApprovalSubtitle(text = name)
     Spacer(modifier = Modifier.height(24.dp))
 }

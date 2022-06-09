@@ -18,6 +18,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.strikeprotocols.mobile.R
 import com.strikeprotocols.mobile.data.models.approval.SolanaApprovalRequestType
+import com.strikeprotocols.mobile.presentation.approval_detail.approval_type_detail_items.ApprovalSubtitle
 import com.strikeprotocols.mobile.presentation.approvals.ApprovalContentHeader
 import com.strikeprotocols.mobile.presentation.approvals.ApprovalRowContentHeader
 import com.strikeprotocols.mobile.presentation.components.StrikeTagRow
@@ -34,13 +35,7 @@ fun DAppTransactionRowContent(dAppTransactionRequest: SolanaApprovalRequestType.
         val header = dAppTransactionRequest.getHeader(LocalContext.current)
         val dappName = dAppTransactionRequest.dappInfo.name
         ApprovalRowContentHeader(header = header, topSpacing = 16, bottomSpacing = 8)
-        Text(
-            dappName,
-            color = GreyText,
-            textAlign = TextAlign.Center,
-            fontSize = 12.sp,
-            letterSpacing = 0.23.sp
-        )
+        ApprovalSubtitle(text = dappName)
         Spacer(modifier = Modifier.height(20.dp))
     }
 }

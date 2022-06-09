@@ -8,9 +8,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.strikeprotocols.mobile.presentation.approval_detail.approval_type_detail_items.ApprovalSubtitle
 import com.strikeprotocols.mobile.presentation.approvals.ApprovalContentHeader
-import com.strikeprotocols.mobile.presentation.components.ApprovalRowTitleText
-import com.strikeprotocols.mobile.presentation.components.StrikeTagLabeledRow
 import com.strikeprotocols.mobile.presentation.components.StrikeTagRow
 import com.strikeprotocols.mobile.ui.theme.GreyText
 
@@ -22,13 +21,7 @@ fun TransferConversionContent(
     toText: String
 ) {
     ApprovalContentHeader(header = header, topSpacing = 16, bottomSpacing = 8)
-    Text(
-        usdEquivalent,
-        color = GreyText,
-        textAlign = TextAlign.Center,
-        fontSize = 12.sp,
-        letterSpacing = 0.23.sp
-    )
+    ApprovalSubtitle(text = usdEquivalent)
     Spacer(modifier = Modifier.height(32.dp))
     StrikeTagRow(
         text1 = fromText,
@@ -36,10 +29,3 @@ fun TransferConversionContent(
         arrowForward = true
     )
 }
-
-data class TransferConversionLabelData(
-    val showLabels: Boolean = false,
-    val label1: String = "",
-    val label2: String = "",
-    val subText: String? = ""
-)
