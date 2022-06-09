@@ -34,13 +34,7 @@ fun DAppTransactionDetailContent(
         val dappName = dAppWalletApproval.dappInfo.name
         val walletName = dAppWalletApproval.account.name
         ApprovalContentHeader(header = header, topSpacing = 24, bottomSpacing = 8)
-        Text(
-            dappName,
-            color = GreyText,
-            textAlign = TextAlign.Center,
-            fontSize = 12.sp,
-            letterSpacing = 0.23.sp
-        )
+        ApprovalSubtitle(text = dappName)
         Spacer(modifier = Modifier.height(24.dp))
         val factsData = FactsData(
             facts =

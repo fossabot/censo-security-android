@@ -33,13 +33,7 @@ fun WithdrawalRequestDetailContent(
     val address = withdrawalRequest.destination.address
 
     ApprovalContentHeader(header = header, topSpacing = 24, bottomSpacing = 8)
-    Text(
-        usdEquivalent,
-        color = GreyText,
-        textAlign = TextAlign.Center,
-        fontSize = 12.sp,
-        letterSpacing = 0.23.sp
-    )
+    ApprovalSubtitle(text = usdEquivalent)
     Spacer(modifier = Modifier.height(24.dp))
 
     val factsData = FactsData(

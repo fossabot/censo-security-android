@@ -36,13 +36,7 @@ fun SignersUpdateDetailContent(signersUpdate: SolanaApprovalRequestType.SignersU
         verticalArrangement = Arrangement.Center
     ) {
         ApprovalContentHeader(header = header, topSpacing = 24)
-        Text(
-            email,
-            color = GreyText,
-            textAlign = TextAlign.Center,
-            fontSize = 12.sp,
-            letterSpacing = 0.23.sp
-        )
+        ApprovalSubtitle(text = email)
         Spacer(modifier = Modifier.height(24.dp))
         val factsData = FactsData(
             facts =

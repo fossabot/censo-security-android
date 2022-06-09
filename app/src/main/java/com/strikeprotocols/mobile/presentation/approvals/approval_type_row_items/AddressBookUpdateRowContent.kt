@@ -31,5 +31,5 @@ fun AddressBookUpdateRowContent(
 
     ApprovalRowContentHeader(header = header, topSpacing = 16, bottomSpacing = 6)
     ApprovalSubtitle(text = name)
-    Spacer(modifier = Modifier.height(24.dp))
+    Spacer(modifier = Modifier.height(20.dp))
 }

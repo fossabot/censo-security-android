@@ -32,13 +32,7 @@ fun BalanceAccountDetailContent(
     )
 
     ApprovalContentHeader(header = header, topSpacing = 24, bottomSpacing = 8)
-    Text(
-        accountName,
-        color = GreyText,
-        textAlign = TextAlign.Center,
-        fontSize = 12.sp,
-        letterSpacing = 0.23.sp
-    )
+    ApprovalSubtitle(text = accountName)
     Spacer(modifier = Modifier.height(24.dp))
     val factsData = FactsData(
         facts = listOf(
