@@ -1,6 +1,5 @@
 package com.strikeprotocols.mobile.data
 
-import com.strikeprotocols.mobile.common.MockedApprovals
 import com.strikeprotocols.mobile.data.models.InitiationDisposition
 import com.strikeprotocols.mobile.data.models.RegisterApprovalDisposition
 import com.strikeprotocols.mobile.data.models.approval.ApprovalConstants.MISSING_USER_EMAIL
@@ -28,7 +27,7 @@ class ApprovalsRepositoryImpl @Inject constructor(
 ) : ApprovalsRepository {
 
     override suspend fun getWalletApprovals(): List<WalletApproval?> {
-        return MockedApprovals.get16StandardApprovals()
+        return api.getWalletApprovals()
     }
 
     override suspend fun approveOrDenyDisposition(
