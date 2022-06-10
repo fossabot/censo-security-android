@@ -3,6 +3,7 @@ package com.strikeprotocols.mobile.presentation.approval_detail
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -344,7 +345,7 @@ fun ApprovalDetailsButtons(
             .padding(horizontal = 16.dp)
             .fillMaxWidth(),
         onClick = { onDenyClicked() },
-        shape = MaterialTheme.shapes.medium,
+        shape = RoundedCornerShape(8.dp),
         colors = ButtonDefaults.buttonColors(backgroundColor = DetailDenyRedBackground),
         enabled = !isLoading
     ) {
@@ -363,15 +364,15 @@ fun ApprovalDetailsButtons(
             .padding(start = 16.dp, end = 16.dp, bottom = 24.dp)
             .fillMaxWidth(),
         onClick = { onApproveClicked() },
-        shape = MaterialTheme.shapes.medium,
+        shape = RoundedCornerShape(8.dp),
         colors = ButtonDefaults.buttonColors(backgroundColor = DetailApprovalGreenBackground),
         enabled = !isLoading
     ) {
         Text(
-            modifier = Modifier.padding(all = 6.dp),
+            modifier = Modifier.padding(start = 6.dp, end = 6.dp, top = 4.dp, bottom = 10.dp),
             text = positiveText,
             color = DetailApprovalGreen,
-            fontSize = 24.sp
+            fontSize = 26.sp
         )
     }
 }
