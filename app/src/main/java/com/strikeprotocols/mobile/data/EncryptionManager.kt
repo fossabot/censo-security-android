@@ -1,9 +1,9 @@
 package com.strikeprotocols.mobile.data
 
+import cash.z.ecc.android.bip39.Mnemonics
 import com.strikeprotocols.mobile.common.BaseWrapper
+import com.strikeprotocols.mobile.common.Ed25519HierarchicalPrivateKey
 import com.strikeprotocols.mobile.data.EncryptionManagerImpl.Companion.DATA_CHECK
-import com.strikeprotocols.mobile.data.EncryptionManagerImpl.Companion.IV_AND_KEY_COMBINED_LENGTH
-import com.strikeprotocols.mobile.data.EncryptionManagerImpl.Companion.IV_LENGTH
 import com.strikeprotocols.mobile.data.EncryptionManagerImpl.Companion.NO_OFFSET_INDEX
 import com.strikeprotocols.mobile.data.EncryptionManagerImpl.Companion.NoKeyDataException
 import org.bouncycastle.crypto.AsymmetricCipherKeyPairGenerator
@@ -14,9 +14,6 @@ import org.bouncycastle.crypto.params.Ed25519PublicKeyParameters
 import org.bouncycastle.crypto.signers.Ed25519Signer
 import com.strikeprotocols.mobile.data.EncryptionManagerException.*
 import java.security.SecureRandom
-import javax.crypto.Cipher
-import javax.crypto.spec.GCMParameterSpec
-import javax.crypto.spec.SecretKeySpec
 import javax.inject.Inject
 
 fun generateEphemeralPrivateKey(): Ed25519PrivateKeyParameters {
@@ -27,7 +24,7 @@ fun generateEphemeralPrivateKey(): Ed25519PrivateKeyParameters {
 }
 
 interface EncryptionManager {
-    fun createKeyPair(): StrikeKeyPair
+    fun createKeyPair(phrase: String): StrikeKeyPair
     fun signApprovalDispositionMessage(
         signable: Signable,
         userEmail: String
@@ -46,14 +43,11 @@ interface EncryptionManager {
 
     fun signData(data: ByteArray, privateKey: ByteArray): ByteArray
     fun verifyData(data: ByteArray, signature: ByteArray, publicKey: ByteArray): Boolean
-    fun encrypt(message: ByteArray, generatedPassword: ByteArray): ByteArray
-    fun decrypt(encryptedMessage: ByteArray, generatedPassword: ByteArray): ByteArray
-    fun generatePassword(): ByteArray
     fun verifyKeyPair(
-        encryptedPrivateKey: String?,
+        privateKey: String?,
         publicKey: String?,
-        symmetricKey: String?
     ): Boolean
+    fun generatePhrase(): String
 
     fun regeneratePublicKey(mainKey: String): String
 }
@@ -90,15 +84,13 @@ class EncryptionManagerImpl @Inject constructor(private val securePreferences: S
         }
     }
 
-    override fun createKeyPair(): StrikeKeyPair {
+    override fun createKeyPair(phrase: String): StrikeKeyPair {
         try {
-            val keyPairGenerator: AsymmetricCipherKeyPairGenerator = Ed25519KeyPairGenerator()
-            keyPairGenerator.init(Ed25519KeyGenerationParameters(SecureRandom()))
-            val keyPair = keyPairGenerator.generateKeyPair()
-            val privateKey = (keyPair.private as Ed25519PrivateKeyParameters).encoded
-            val publicKey = (keyPair.public as Ed25519PublicKeyParameters).encoded
-
-            return StrikeKeyPair(privateKey = privateKey, publicKey = publicKey)
+            val bip39PrivateKey = Ed25519HierarchicalPrivateKey.fromSeedPhrase(phrase)
+            return StrikeKeyPair(
+                privateKey = bip39PrivateKey.privateKeyBytes,
+                publicKey = bip39PrivateKey.publicKeyBytes
+            )
         } catch (e: Exception) {
             throw KeyPairGenerationFailedException()
         }
@@ -164,47 +156,23 @@ class EncryptionManagerImpl @Inject constructor(private val securePreferences: S
             .toList()
     }
 
-    override fun encrypt(message: ByteArray, generatedPassword: ByteArray): ByteArray {
-        try {
-            return getCipher(Cipher.ENCRYPT_MODE, generatedPassword).doFinal(message)
-        } catch (e: Exception) {
-            throw EncryptionFailedException()
-        }
-    }
-
-    override fun decrypt(encryptedMessage: ByteArray, generatedPassword: ByteArray): ByteArray {
-        try {
-            return getCipher(Cipher.DECRYPT_MODE, generatedPassword).doFinal(encryptedMessage)
-        } catch (e: Exception) {
-            throw DecryptionFailedException()
-        }
-    }
-
-    override fun generatePassword(): ByteArray =
-        SecureRandom().generateSeed(IV_AND_KEY_COMBINED_LENGTH)
-
-    override fun verifyKeyPair(
-        encryptedPrivateKey: String?,
-        publicKey: String?,
-        symmetricKey: String?
-    ): Boolean {
-        if (encryptedPrivateKey.isNullOrEmpty()
-            || publicKey.isNullOrEmpty() || symmetricKey.isNullOrEmpty()
-        ) {
+    override fun verifyKeyPair(privateKey: String?, publicKey: String?, ): Boolean {
+        if (privateKey.isNullOrEmpty() || publicKey.isNullOrEmpty()) {
             return false
         }
 
         try {
-            val decryptionKey = BaseWrapper.decode(symmetricKey)
-            val base58EncryptedPrivateKey = BaseWrapper.decode(encryptedPrivateKey)
             val base58PublicKey = BaseWrapper.decode(publicKey)
-            val decryptedPrivateKey = decrypt(base58EncryptedPrivateKey, decryptionKey)
-            val signedData = signData(DATA_CHECK, decryptedPrivateKey)
+            val privateKeyBytes = BaseWrapper.decode(privateKey)
+            val signedData = signData(DATA_CHECK, privateKeyBytes)
             return verifyData(DATA_CHECK, signedData, base58PublicKey)
         } catch (e: Exception) {
             throw VerifyFailedException()
         }
     }
+
+    override fun generatePhrase(): String =
+        String(Mnemonics.MnemonicCode(Mnemonics.WordCount.COUNT_24).chars)
 
     override fun regeneratePublicKey(mainKey: String): String {
         try {
@@ -220,29 +188,8 @@ class EncryptionManagerImpl @Inject constructor(private val securePreferences: S
     }
     //endregion
 
-    //region helper methods
-    private fun getCipher(opMode: Int, password: ByteArray): Cipher {
-
-        if (password.size != IV_AND_KEY_COMBINED_LENGTH) {
-            throw IllegalStateException("iv and key are not the correct size")
-        }
-
-        val ivParameter = password.slice(0.until(IV_LENGTH)).toByteArray()
-        val key = password.slice(IV_LENGTH.until(password.size)).toByteArray()
-
-        val cipher = Cipher.getInstance("AES/GCM/NoPadding")
-        val secretKeySpec = SecretKeySpec(key, "AES")
-
-        cipher.init(opMode, secretKeySpec, GCMParameterSpec(128, ivParameter))
-        return cipher
-    }
-    //endregion
-
     //region companion
     object Companion {
-        private const val PASSWORD_BYTE_LENGTH = 32
-        const val IV_LENGTH = 12
-        const val IV_AND_KEY_COMBINED_LENGTH = PASSWORD_BYTE_LENGTH + IV_LENGTH
         const val NO_OFFSET_INDEX = 0
         val DATA_CHECK = BaseWrapper.decode("VerificationCheck")
 

@@ -9,20 +9,22 @@ import com.strikeprotocols.mobile.data.models.WalletSigner
 data class SignInState(
     val email: String = "",
     val password: String = "",
+    val phrase: String? = null,
     val emailErrorEnabled: Boolean = false,
     val passwordErrorEnabled: Boolean = false,
     val initialAuthData: InitialAuthData? = null,
     val loadingData : Boolean = false,
     val shouldAbortUserFromAuthFlow: Boolean = false,
-    val shouldDisplaySmartLockDialog: Boolean = false,
+    val showPhraseVerificationDialog: Boolean = false,
+    val showPhraseVerificationUI: Boolean = false,
 
     //Async Data
     val loginResult: Resource<String> = Resource.Uninitialized,
     val verifyUserResult: Resource<VerifyUser> = Resource.Uninitialized,
     val walletSignersResult: Resource<List<WalletSigner?>> = Resource.Uninitialized,
     val addWalletSignerResult: Resource<WalletSigner> = Resource.Uninitialized,
-    val saveCredential: Resource<Unit> = Resource.Uninitialized,
-    val retrieveCredential: Resource<String> = Resource.Uninitialized,
+    val regeneratedPhrase: Resource<Unit> = Resource.Uninitialized,
+    val verifiedPhrase: Resource<Unit> = Resource.Uninitialized,
     val keyValid: Resource<Unit> = Resource.Uninitialized,
     val regenerateData: Resource<WalletSigner> = Resource.Uninitialized,
 

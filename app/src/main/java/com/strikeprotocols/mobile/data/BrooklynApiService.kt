@@ -85,7 +85,7 @@ interface BrooklynApiService {
     suspend fun removePushNotificationToken(
         @Path("deviceId") deviceId: String,
         @Path("deviceType") deviceType: String
-    )
+    ) : retrofit2.Response<Unit>
 
     @POST("v1/wallet-approvals/{request_id}/dispositions")
     @Headers(AUTH_REQUIRED, X_STRIKE_REQUIRED)

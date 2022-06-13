@@ -9,7 +9,6 @@ import com.strikeprotocols.mobile.data.SecurePreferences
 import com.strikeprotocols.mobile.data.StrikeKeyPair
 import com.strikeprotocols.mobile.data.models.ApprovalDisposition
 import com.strikeprotocols.mobile.data.models.Nonce
-import com.strikeprotocols.mobile.data.models.WalletSigner.Companion.WALLET_TYPE_SOLANA
 import com.strikeprotocols.mobile.data.models.approval.*
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
@@ -40,28 +39,20 @@ class ApprovalRequestSigningTest {
 
     private lateinit var approverPublicKey: String
 
-    private lateinit var encryptedPrivateKey: ByteArray
-    private lateinit var decyptionKey: ByteArray
+    private lateinit var phrase: String
 
     @Before
     fun setUp() {
         MockitoAnnotations.openMocks(this)
 
         encryptionManager = EncryptionManagerImpl(securePreferences)
-        keyPair = encryptionManager.createKeyPair()
 
-        decyptionKey = encryptionManager.generatePassword()
-        encryptedPrivateKey = encryptionManager.encrypt(
-            message = keyPair.privateKey,
-            generatedPassword = decyptionKey
-        )
+        phrase = encryptionManager.generatePhrase()
+
+        keyPair = encryptionManager.createKeyPair(phrase)
 
         whenever(securePreferences.retrievePrivateKey(userEmail)).then {
-            BaseWrapper.encode(encryptedPrivateKey)
-        }
-
-        whenever(securePreferences.retrieveGeneratedPassword(userEmail)).then {
-            BaseWrapper.encode(decyptionKey)
+            BaseWrapper.encode(keyPair.privateKey)
         }
 
         approverPublicKey = BaseWrapper.encode(keyPair.publicKey)
@@ -375,3 +366,4 @@ class ApprovalRequestSigningTest {
         assertNotNull(signature)
     }
 }
+

@@ -67,7 +67,6 @@ object GeneralDummyData {
             listOf<WalletSigner>(
                 WalletSigner(
                     publicKey = publicKey,
-                    encryptedKey = encryptedPrivateKey,
                     walletType = WalletSigner.WALLET_TYPE_SOLANA
                 )
             )

@@ -25,7 +25,7 @@ class PushRepositoryImpl @Inject constructor(
         return try {
             api.addPushNotificationToken(pushBody)
         } catch (e: Exception) {
-            strikeLog(message = "registration failed")
+            strikeLog(message = "push registration exception: ${e::class.java} ${e.message}")
             null
         }
     }
@@ -36,7 +36,7 @@ class PushRepositoryImpl @Inject constructor(
             try {
                 api.removePushNotificationToken(deviceId, DEVICE_TYPE)
             } catch (e: Exception) {
-                strikeLog(message = "un-registration failed")
+                strikeLog(message = "push un-registration exception: ${e::class.java} ${e.message}")
             }
         }
     }

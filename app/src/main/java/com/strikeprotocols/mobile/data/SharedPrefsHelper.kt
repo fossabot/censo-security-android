@@ -10,7 +10,6 @@ object SharedPrefsHelper {
 
     private const val USER_LOGGED_IN = "skipped_login"
     private const val USER_EMAIL = "user_email"
-    private const val GENERATED_PASSWORD = "_generated_password"
     private const val MAIN_KEY = "_main_key"
 
     private lateinit var appContext: Context
@@ -28,21 +27,6 @@ object SharedPrefsHelper {
         editor.putBoolean(USER_LOGGED_IN, loggedIn)
         editor.apply()
     }
-
-    fun saveGeneratedPassword(email: String, generatedPassword: ByteArray) {
-        val editor = sharedPrefs.edit()
-        editor.putString("$email$GENERATED_PASSWORD", BaseWrapper.encode(generatedPassword))
-        editor.apply()
-    }
-
-    fun clearGeneratedPassword(email: String) {
-        val editor = sharedPrefs.edit()
-        editor.putString("$email$GENERATED_PASSWORD", "")
-        editor.apply()
-    }
-
-    fun retrieveGeneratedPassword(email: String) =
-        sharedPrefs.getString("$email$GENERATED_PASSWORD", "") ?: ""
 
     fun saveMainKey(email: String, mainKey: ByteArray) {
         val data = if(mainKey.isEmpty()) "" else BaseWrapper.encode(mainKey)

@@ -1,9 +1,9 @@
 package com.strikeprotocols.mobile.presentation.sign_in
 
-import android.app.Activity.RESULT_OK
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
+import android.widget.Toast
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
@@ -15,6 +15,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -24,19 +25,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import com.google.android.gms.auth.api.credentials.*
 import com.strikeprotocols.mobile.R
-import com.strikeprotocols.mobile.common.BaseWrapper
 import com.strikeprotocols.mobile.common.Resource
 import com.strikeprotocols.mobile.common.getAuthFlowErrorMessage
 import com.strikeprotocols.mobile.common.strikeLog
-import com.strikeprotocols.mobile.data.CredentialsProvider
-import com.strikeprotocols.mobile.data.CredentialsProviderImpl
-import com.strikeprotocols.mobile.data.CredentialsProviderImpl.Companion.INTENT_FAILED
-import com.strikeprotocols.mobile.data.CredentialsProviderImpl.Companion.NO_CREDENTIAL_EXTRA_DATA
 import com.strikeprotocols.mobile.presentation.Screen
 import com.strikeprotocols.mobile.presentation.components.SignInTextField
 import com.strikeprotocols.mobile.ui.theme.*
+import kotlinx.coroutines.delay
+import java.util.*
 
 @OptIn(ExperimentalComposeUiApi::class,
     androidx.compose.foundation.ExperimentalFoundationApi::class
@@ -47,55 +44,16 @@ fun SignInScreen(
     viewModel: SignInViewModel = hiltViewModel(),
 ) {
     val state = viewModel.state
+    val context = LocalContext.current
 
-    val credentialsProvider: CredentialsProvider = CredentialsProviderImpl(LocalContext.current)
-
-    //region Credentials Launchers
-    val saveCredentialLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.StartIntentSenderForResult()
-    ) {
-        if (it.resultCode != RESULT_OK) {
-            viewModel.saveCredentialFailed(INTENT_FAILED)
-            return@rememberLauncherForActivityResult
-        }
-        viewModel.saveCredentialSuccess()
-    }
-
-    val retrieveCredentialLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.StartIntentSenderForResult()
-    ) {
-        if (it.resultCode != RESULT_OK) {
-            viewModel.retrieveCredentialFailed(INTENT_FAILED)
-            return@rememberLauncherForActivityResult
-        }
-
-        val credentialExtra = it.data?.extras?.get(Credential.EXTRA_KEY)
-        if (credentialExtra is Credential?) {
-            viewModel.retrieveCredentialSuccess(credentialExtra?.password)
+    suspend fun regeneratePhrase() {
+        delay(3000)
+        if (Random().nextBoolean() || Random().nextBoolean() || Random().nextBoolean()) {
+            viewModel.regeneratePhraseSuccess("phrase here")
         } else {
-            viewModel.retrieveCredentialFailed(NO_CREDENTIAL_EXTRA_DATA)
+            viewModel.regeneratePhraseFailure(Exception("Failed to regenerate phrase"))
         }
     }
-
-    val signInLauncher =
-        rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            if (result.resultCode == RESULT_OK) {
-                if (result.data != null) {
-
-                    credentialsProvider.retrieveCredential(
-                        launcher = retrieveCredentialLauncher,
-                        retrievalSuccess = viewModel::retrieveCredentialSuccess,
-                        retrievalFailed = viewModel::retrieveCredentialFailed,
-                        signInLauncher = null
-                    )
-                } else {
-                    viewModel.retrieveCredentialFailed(CredentialsProviderImpl.CREDENTIALS_NOT_PRESENT_ON_ACCOUNT)
-                }
-            } else {
-                viewModel.retrieveCredentialFailed(CredentialsProviderImpl.CREDENTIALS_NOT_PRESENT_ON_ACCOUNT)
-            }
-    }
-    //endregion
 
     //region LaunchedEffect
     LaunchedEffect(key1 = state) {
@@ -103,10 +61,8 @@ fun SignInScreen(
             viewModel.resetLoginCallAndRetrieveUserInformation()
         }
 
-        if (state.saveCredential is Resource.Success) {
-            viewModel.attemptAddWalletSigner()
-            viewModel.resetSaveCredential()
-            viewModel.resetShouldDisplaySmartLockDialog()
+        if (state.verifiedPhrase is Resource.Success) {
+            Toast.makeText(context, "Phrase verified, by app. Saving private key to storage. Adding wallet signer...", Toast.LENGTH_LONG).show()
         }
 
         if (state.addWalletSignerResult is Resource.Success)  {
@@ -121,7 +77,7 @@ fun SignInScreen(
         }
 
         if (state.regenerateData is Resource.Success) {
-            navController.navigate(Screen.BackupCheckRoute.route) {
+            navController.navigate(Screen.ApprovalListRoute.route) {
                 popUpTo(Screen.SignInRoute.route) {
                     inclusive = true
                 }
@@ -132,7 +88,7 @@ fun SignInScreen(
         }
 
         if (state.keyValid is Resource.Success) {
-            navController.navigate(Screen.BackupCheckRoute.route) {
+            navController.navigate(Screen.ApprovalListRoute.route) {
                 popUpTo(Screen.SignInRoute.route) {
                     inclusive = true
                 }
@@ -141,25 +97,12 @@ fun SignInScreen(
             viewModel.resetValidKey()
         }
 
-        if (state.saveCredential is Resource.Loading) {
-            state.initialAuthData?.generatedPassword?.let { generatedPassword ->
-                credentialsProvider.saveCredential(
-                    email = state.email,
-                    password = BaseWrapper.encode(generatedPassword),
-                    launcher = saveCredentialLauncher,
-                    saveSuccess = viewModel::saveCredentialSuccess,
-                    saveFailed = viewModel::saveCredentialFailed
-                )
-            }
+        if (state.verifiedPhrase is Resource.Loading) {
+            viewModel.launchPhraseVerificationUI()
         }
 
-        if(state.retrieveCredential is Resource.Loading) {
-            credentialsProvider.retrieveCredential(
-                launcher = retrieveCredentialLauncher,
-                retrievalSuccess = viewModel::retrieveCredentialSuccess,
-                retrievalFailed = viewModel::retrieveCredentialFailed,
-                signInLauncher = signInLauncher
-            )
+        if(state.regeneratedPhrase is Resource.Loading) {
+            regeneratePhrase()
         }
 
         if (state.shouldAbortUserFromAuthFlow) {
@@ -238,6 +181,76 @@ fun SignInScreen(
         Spacer(modifier = Modifier.height(24.dp))
     }
 
+
+    if (state.showPhraseVerificationUI) {
+        val words = state.phrase?.split(" ") ?: emptyList()
+        val leftWords = words.filterIndexed { index, s -> index % 2 == 0 }
+        val rightWords = words.filterIndexed { index, s -> index % 2 != 0 }
+
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(color = Color.Black)
+                .clickable { },
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Row() {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Top
+                ) {
+                    for (leftWord in leftWords) {
+                        val touched = remember { mutableStateOf(false) }
+
+                        Text(
+                            text = leftWord,
+                            color = StrikeWhite,
+                            fontSize = 18.sp,
+                            modifier = Modifier.background(
+                                color = if (touched.value) Color.White else Color.Transparent
+                            ).clickable {
+                                touched.value = !touched.value
+                            }
+                        )
+                        Spacer(modifier = Modifier.height(10.dp))
+                    }
+                }
+                Spacer(modifier = Modifier.width(24.dp))
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Top
+                ) {
+                    for (rightWord in rightWords) {
+                        val touched = remember { mutableStateOf(false) }
+
+                        Text(
+                            text = rightWord,
+                            color = StrikeWhite,
+                            fontSize = 18.sp,
+                            modifier = Modifier.background(
+                                color = if (touched.value) Color.White else Color.Transparent
+                            ).clickable {
+                                touched.value = !touched.value
+                            }
+                        )
+                        Spacer(modifier = Modifier.height(10.dp))
+                    }
+                }
+            }
+            Spacer(modifier = Modifier.height(36.dp))
+            Button(onClick = {
+                viewModel.verifyPhrase(state.phrase ?: "")
+            }) {
+                Text(
+                    text = "I Have Saved The Full Phrase",
+                    color = StrikeWhite, fontSize = 16.sp,
+                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 8.dp)
+                )
+            }
+        }
+    }
+
     if (state.loginResult is Resource.Error) {
         AlertDialog(
             backgroundColor = UnfocusedGrey,
@@ -268,40 +281,41 @@ fun SignInScreen(
         viewModel.loadingFinished()
     }
 
-    if (state.shouldDisplaySmartLockDialog) {
-        SmartLockAlertDialog(
-            dialogText = stringResource(R.string.smart_lock_dialog_save),
-            onConfirm = viewModel::launchSmartLockSaveFlow
+    if (state.showPhraseVerificationDialog) {
+        PhraseAlertDialog(
+            dialogText = stringResource(R.string.phrase_dialog_verification),
+            onConfirm = viewModel::launchVerifyPhraseFlow
         )
     }
 
-    if(state.saveCredential is Resource.Error) {
-        viewModel.resetShouldDisplaySmartLockDialog()
+    if(state.verifiedPhrase is Resource.Error) {
+        val errorMessage = state.verifiedPhrase.message ?: stringResource(R.string.phrase_verification_fail)
+        viewModel.resetShouldDisplayPhraseVerificationDialog()
         viewModel.loadingFinished()
-        SmartLockAlertDialog(
-            dialogTitle = stringResource(R.string.smart_lock_dialog_fail_title),
-            dialogText = stringResource(R.string.smart_lock_save_fail),
+        PhraseAlertDialog(
+            dialogTitle = stringResource(R.string.phrase_verification_dialog_fail_title),
+            dialogText = errorMessage,
             onConfirm = {
-                viewModel.resetSaveCredential()
+                viewModel.resetVerifiedPhrase()
             }
         )
     }
 
-    if(state.retrieveCredential is Resource.Error) {
+    if(state.regeneratedPhrase is Resource.Error) {
         viewModel.loadingFinished()
-        SmartLockAlertDialog(
-            dialogTitle = stringResource(R.string.smart_lock_dialog_fail_title),
-            dialogText = stringResource(R.string.smart_lock_retrieval_fail),
+        PhraseAlertDialog(
+            dialogTitle = stringResource(R.string.phrase_verification_dialog_fail_title),
+            dialogText = stringResource(R.string.phrase_regeneration_fail),
             onConfirm = {
                 viewModel.loadingFinished()
-                viewModel.resetRetrieveCredential()
+                viewModel.resetRegeneratedPhrase()
             }
         )
     }
 
     if (state.verifyUserResult is Resource.Error) {
         viewModel.loadingFinished()
-        SmartLockAlertDialog(
+        PhraseAlertDialog(
             dialogTitle = stringResource(R.string.verify_user_fail_title),
             dialogText = stringResource(R.string.verify_user_fail_message),
             onConfirm = {
@@ -313,7 +327,7 @@ fun SignInScreen(
 
     if (state.walletSignersResult is Resource.Error) {
         viewModel.loadingFinished()
-        SmartLockAlertDialog(
+        PhraseAlertDialog(
             dialogTitle = stringResource(R.string.wallet_signers_fail_title),
             dialogText = stringResource(R.string.wallet_signers_fail_message),
             onConfirm = {
@@ -324,8 +338,9 @@ fun SignInScreen(
     }
 
     if(state.addWalletSignerResult is Resource.Error || state.regenerateData is Resource.Error) {
+        strikeLog(message = "Received failed to add wallet signer in the screen...")
         viewModel.loadingFinished()
-        SmartLockAlertDialog(
+        PhraseAlertDialog(
             dialogTitle = stringResource(R.string.unable_to_add_wallet_signer_title),
             dialogText = stringResource(R.string.unable_to_add_wallet_signer_message),
             onConfirm = {
@@ -378,8 +393,8 @@ fun SignInScreen(
 }
 
 @Composable
-fun SmartLockAlertDialog(
-    dialogTitle: String = stringResource(id = R.string.smart_lock_dialog_title),
+fun PhraseAlertDialog(
+    dialogTitle: String = stringResource(id = R.string.phrase_dialog_title),
     dialogText: String,
     onConfirm: () -> Unit,
 ) {

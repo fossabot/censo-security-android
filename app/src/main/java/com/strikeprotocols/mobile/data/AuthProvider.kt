@@ -177,6 +177,8 @@ class OktaAuth(
     override suspend fun getSessionToken(username: String, password: String): String =
         suspendCoroutine { cont ->
             try {
+                setupAuthenticationClient()
+
                 authenticationClient.authenticate(username, password.toCharArray(), null, null)
                     ?.run {
                         if (statusString == Companion.SUCCESS_STATUS) {
@@ -186,6 +188,8 @@ class OktaAuth(
                         }
                     }
             } catch (e: AuthenticationFailureException) {
+                cont.resumeWith(Result.failure(SessionTokenException()))
+            } catch(e: Exception) {
                 cont.resumeWith(Result.failure(SessionTokenException()))
             }
         }

@@ -49,11 +49,13 @@
     <string name="snackbar_refresh_error">Something went wrong, please try again</string>
     <string name="auth_flow_exception">Something went wrong, please try again</string>
 
-    <string name="smart_lock_dialog_title">Google SmartLock</string>
-    <string name="smart_lock_dialog_fail_title">Google SmartLock Error</string>
-    <string name="smart_lock_dialog_save">We need to save an important account credential to the cloud in case you lose access to this device in the future.\n\nYou will be prompted to save this credential to a Google account.\n\nYou will not be able to continue into the app until you save this credential to your preferred Google account.</string>
-    <string name="smart_lock_save_fail">Unable to save account credential to Google Smart Lock.\nWe must save this credential to continue to the app.\n\nPlease try again.</string>
-    <string name="smart_lock_retrieval_fail">Unable to retrieve account credential from Google Smart Lock.\n\nMake sure you select the correct account when retrieving credential.\n\nIf unable to retrieve credential, please contact Strike directly.</string>
+    <string name="logout">Sign Out</string>
+
+    <string name="phrase_dialog_title">Secret Phrase</string>
+    <string name="phrase_verification_dialog_fail_title">Phrase Verification Error</string>
+    <string name="phrase_dialog_verification">Please enter the key phrase words one by one into the app to verify you have saved the phrase!</string>
+    <string name="phrase_verification_fail">Key phrase you entered does not match phrase.\n\nPlease try again.</string>
+    <string name="phrase_regeneration_fail">Recreated key does not match. Please try again.\n\nIf unable to recreate key, please contact Strike directly.</string>
 
     <string name="approval_expired">Expired</string>
     <string name="confirm">Confirm</string>
@@ -145,7 +147,7 @@
     <string name="sign_data_failed">Unable to sign data. Please retry.</string>
     <string name="verify_key_failed">Unable to verify data. Please retry.</string>
     <string name="unable_to_add_wallet_signer_title">Unable To Add Wallet Signer</string>
-    <string name="unable_to_add_wallet_signer_message">We were unable to add the wallet signer to the app. Please retry login, or close the app and login again.</string>
+    <string name="unable_to_add_wallet_signer_message">We were unable to add the wallet signer to the app. Please retry login.</string>
 
     <string name="verify_user_fail_title">Unable To Retrieve User Details</string>
     <string name="verify_user_fail_message">We were unable to retrieve user details to complete login.\n\nPlease try again.</string>

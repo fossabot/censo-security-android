@@ -42,9 +42,16 @@ object AppModule {
         authProvider: AuthProvider,
         api: BrooklynApiService,
         encryptionManager: EncryptionManager,
-        securePreferences: SecurePreferences
+        securePreferences: SecurePreferences,
+        phraseValidator: PhraseValidator
     ): UserRepository {
-        return UserRepositoryImpl(authProvider, api, encryptionManager, securePreferences)
+        return UserRepositoryImpl(
+            authProvider = authProvider,
+            api = api,
+            encryptionManager = encryptionManager,
+            securePreferences = securePreferences,
+            phraseValidator = phraseValidator
+        )
     }
 
     @Provides
@@ -69,6 +76,12 @@ object AppModule {
     @Singleton
     fun provideSecurePrefs(): SecurePreferences {
         return SecurePreferencesImpl()
+    }
+
+    @Provides
+    @Singleton
+    fun providePhraseValidator() : PhraseValidator {
+        return PhraseValidatorImpl()
     }
 
 }

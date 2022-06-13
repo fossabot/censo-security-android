@@ -36,32 +36,21 @@ class InitiationRequestSigningTest {
 
     private val userEmail = "floater@test887123.com"
 
+    private lateinit var phrase: String
     private lateinit var keyPair: StrikeKeyPair
 
     private lateinit var approverPublicKey: String
-
-    private lateinit var encryptedPrivateKey: ByteArray
-    private lateinit var decyptionKey: ByteArray
 
     @Before
     fun setUp() {
         MockitoAnnotations.openMocks(this)
 
         encryptionManager = EncryptionManagerImpl(securePreferences)
-        keyPair = encryptionManager.createKeyPair()
-
-        decyptionKey = encryptionManager.generatePassword()
-        encryptedPrivateKey = encryptionManager.encrypt(
-            message = keyPair.privateKey,
-            generatedPassword = decyptionKey
-        )
+        phrase = encryptionManager.generatePhrase()
+        keyPair = encryptionManager.createKeyPair(phrase)
 
         whenever(securePreferences.retrievePrivateKey(userEmail)).then {
-            BaseWrapper.encode(encryptedPrivateKey)
-        }
-
-        whenever(securePreferences.retrieveGeneratedPassword(userEmail)).then {
-            BaseWrapper.encode(decyptionKey)
+            BaseWrapper.encode(keyPair.privateKey)
         }
 
         approverPublicKey = BaseWrapper.encode(keyPair.publicKey)
@@ -77,7 +66,10 @@ class InitiationRequestSigningTest {
         assert(apiBody.approvalDisposition == initiationRequest.approvalDisposition)
         assert(apiBody.nonce == exampleNonces.first().value)
         assert(apiBody.initiatorSignature.isNotEmpty())
-        assert(apiBody.nonceAccountAddress == initiationRequest.requestType.nonceAccountAddresses().first())
+        assert(
+            apiBody.nonceAccountAddress == initiationRequest.requestType.nonceAccountAddresses()
+                .first()
+        )
         assert(apiBody.opAccountAddress == initiationRequest.opAccountPublicKey().toBase58())
         assert(apiBody.opAccountSignature.isNotEmpty())
     }
@@ -91,7 +83,10 @@ class InitiationRequestSigningTest {
         assert(apiBody.approvalDisposition == initiationRequest.approvalDisposition)
         assert(apiBody.nonce == exampleNonces.first().value)
         assert(apiBody.initiatorSignature.isNotEmpty())
-        assert(apiBody.nonceAccountAddress == initiationRequest.requestType.nonceAccountAddresses().first())
+        assert(
+            apiBody.nonceAccountAddress == initiationRequest.requestType.nonceAccountAddresses()
+                .first()
+        )
         assert(apiBody.opAccountAddress == initiationRequest.opAccountPublicKey().toBase58())
         assert(apiBody.opAccountSignature.isNotEmpty())
     }
@@ -105,7 +100,10 @@ class InitiationRequestSigningTest {
         assert(apiBody.approvalDisposition == initiationRequest.approvalDisposition)
         assert(apiBody.nonce == exampleNonces.first().value)
         assert(apiBody.initiatorSignature.isNotEmpty())
-        assert(apiBody.nonceAccountAddress == initiationRequest.requestType.nonceAccountAddresses().first())
+        assert(
+            apiBody.nonceAccountAddress == initiationRequest.requestType.nonceAccountAddresses()
+                .first()
+        )
         assert(apiBody.opAccountAddress == initiationRequest.opAccountPublicKey().toBase58())
         assert(apiBody.opAccountSignature.isNotEmpty())
     }
@@ -119,7 +117,10 @@ class InitiationRequestSigningTest {
         assert(apiBody.approvalDisposition == initiationRequest.approvalDisposition)
         assert(apiBody.nonce == exampleNonces.first().value)
         assert(apiBody.initiatorSignature.isNotEmpty())
-        assert(apiBody.nonceAccountAddress == initiationRequest.requestType.nonceAccountAddresses().first())
+        assert(
+            apiBody.nonceAccountAddress == initiationRequest.requestType.nonceAccountAddresses()
+                .first()
+        )
         assert(apiBody.opAccountAddress == initiationRequest.opAccountPublicKey().toBase58())
         assert(apiBody.opAccountSignature.isNotEmpty())
     }
@@ -168,7 +169,7 @@ class InitiationRequestSigningTest {
     //endregion
 
     //region create initiation requests
-    private fun generateBalanceAccountInitiationSignableData() : InitiationRequest {
+    private fun generateBalanceAccountInitiationSignableData(): InitiationRequest {
         val multiSigBalanceAccountCreationWalletApproval =
             deserializer.parseData(JsonParser.parseString(multiSigWithBalanceAccountCreationJson.trim()))
 
@@ -185,7 +186,7 @@ class InitiationRequestSigningTest {
         )
     }
 
-    private fun generateSignersUpdateInitiationSignableData() : InitiationRequest {
+    private fun generateSignersUpdateInitiationSignableData(): InitiationRequest {
         val multiSigSignersUpdateWalletApproval =
             deserializer.parseData(JsonParser.parseString(multiSigWithSignersUpdateJson.trim()))
 
@@ -202,7 +203,7 @@ class InitiationRequestSigningTest {
         )
     }
 
-    private fun generateWithdrawalRequestInitiationSignableData() : InitiationRequest {
+    private fun generateWithdrawalRequestInitiationSignableData(): InitiationRequest {
         val multiSigWithdrawalRequestWalletApproval =
             deserializer.parseData(JsonParser.parseString(multiSigWithWithdrawalRequestJson.trim()))
 
@@ -219,7 +220,7 @@ class InitiationRequestSigningTest {
         )
     }
 
-    private fun generateDAppTransactionInitiationSignableData() : InitiationRequest {
+    private fun generateDAppTransactionInitiationSignableData(): InitiationRequest {
         val multiSigDAppTransactionWalletApproval =
             deserializer.parseData(JsonParser.parseString(multiSignWithDAppRequestJson.trim()))
 
@@ -236,7 +237,7 @@ class InitiationRequestSigningTest {
         )
     }
 
-    private fun generateConversionRequestInitiationSignableData() : InitiationRequest {
+    private fun generateConversionRequestInitiationSignableData(): InitiationRequest {
         val multiSigConversionRequestWalletApproval =
             deserializer.parseData(JsonParser.parseString(multiSigWithConversionRequestJson.trim()))
 
