@@ -44,7 +44,7 @@ android {
         applicationId coreAppId
         minSdk 26
         targetSdk 32
-        versionCode 5
+        versionCode 6
 
         buildConfigField "int", "versionNameMajor", versionNameMajor
         buildConfigField "int", "versionNameMinor", versionNameMinor
