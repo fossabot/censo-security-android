@@ -35,8 +35,10 @@ fun String.formatISO8601IntoDisplayText(context: Context): String {
     }
 }
 
-fun convertSecondsIntoReadableText(totalTimeInSeconds: Int, context: Context): String {
+fun convertSecondsIntoReadableText(totalTimeInMilliSeconds: Int, context: Context): String {
     val expirationTimeStringBuilder = StringBuilder().append("")
+
+    val totalTimeInSeconds = totalTimeInMilliSeconds / 1000
     if (totalTimeInSeconds <= 0) return expirationTimeStringBuilder.toString()
 
     val days: Int  = totalTimeInSeconds / DAYS_IN_SECONDS

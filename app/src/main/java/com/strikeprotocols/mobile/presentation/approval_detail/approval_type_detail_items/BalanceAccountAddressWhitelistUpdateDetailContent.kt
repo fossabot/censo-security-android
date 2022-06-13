@@ -45,7 +45,7 @@ fun generateBalanceAccountAddressWhitelistUpdateDetailRows(addressWhitelistUpdat
     val destinationsRowInfoData = mutableListOf<FactsData>()
 
     val destinationsList = mutableListOf<Pair<String, String>>()
-    if (!addressWhitelistUpdate.destinations.isNotEmpty()) {
+    if (addressWhitelistUpdate.destinations.isNotEmpty()) {
         for (destination in addressWhitelistUpdate.destinations) {
             destinationsList.add(Pair(destination.value.name, destination.value.address.maskAddress()))
         }
