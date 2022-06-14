@@ -20,8 +20,7 @@ fun LoginApprovalRowContent(loginApproval: SolanaApprovalRequestType.LoginApprov
     val header = loginApproval.getHeader(LocalContext.current)
     ApprovalRowContentHeader(header = header, bottomSpacing = 8)
 
-    //TODO: Use the user data here once the AuthFlow PR is merged.
-    val userEmail : String? = if(Random().nextBoolean()) "" else null
+    val userEmail : String? = if(loginApproval.email.isNullOrEmpty()) null else loginApproval.email
 
     if (!userEmail.isNullOrEmpty()) {
         ApprovalSubtitle(text = userEmail)

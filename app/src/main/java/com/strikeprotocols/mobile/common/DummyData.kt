@@ -867,7 +867,9 @@ object MockedApprovals {
     fun getLoginApproval( jwtToken : String) : SolanaApprovalRequestType {
         return SolanaApprovalRequestType.LoginApprovalRequest(
             type = ApprovalType.LOGIN_TYPE.value,
-            jwtToken = jwtToken
+            jwtToken = jwtToken,
+            email = "sharris@blue.rock",
+            name = "Sammy Miami Harris"
         )
     }
 

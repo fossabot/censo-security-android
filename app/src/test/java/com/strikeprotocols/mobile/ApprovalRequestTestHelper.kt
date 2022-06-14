@@ -532,7 +532,12 @@ fun getDAppTransactionRequest(nonceAccountAddresses: List<String>): SolanaApprov
 }
 
 fun getLoginApproval( jwtToken : String) : SolanaApprovalRequestType {
-    return LoginApprovalRequest(type = ApprovalType.LOGIN_TYPE.value, jwtToken= jwtToken)
+    return LoginApprovalRequest(
+        type = ApprovalType.LOGIN_TYPE.value,
+        jwtToken= jwtToken,
+        email = "sharris@blue.rock",
+        name = "Sam Ortiz"
+    )
 }
 
 fun getWalletInitiationRequest( requestType: SolanaApprovalRequestType, initiation: MultiSigOpInitiation) : WalletApproval {

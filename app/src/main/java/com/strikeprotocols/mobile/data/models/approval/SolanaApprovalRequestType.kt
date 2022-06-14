@@ -352,7 +352,9 @@ sealed class SolanaApprovalRequestType {
 
     data class LoginApprovalRequest(
         val type: String,
-        var jwtToken: String
+        val jwtToken: String,
+        val email: String?,
+        val name: String?
     ) : SolanaApprovalRequestType()
 
     object UnknownApprovalType : SolanaApprovalRequestType()

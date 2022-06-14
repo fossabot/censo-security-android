@@ -21,8 +21,6 @@ import com.strikeprotocols.mobile.ui.theme.GreyText
 @Composable
 fun LoginApprovalDetailContent(loginApproval: SolanaApprovalRequestType.LoginApprovalRequest) {
     ApprovalContentHeader(header = loginApproval.getHeader(LocalContext.current), topSpacing = 24, bottomSpacing = 8)
-    //TODO: Use the user data here once the AuthFlow PR is merged.
-    // It is needed for user email and name
     Text(
         "",
         color = GreyText,
@@ -32,8 +30,8 @@ fun LoginApprovalDetailContent(loginApproval: SolanaApprovalRequestType.LoginApp
     Spacer(modifier = Modifier.height(20.dp))
     val factsData = FactsData(
         facts = listOf(
-            Pair(stringResource(R.string.login_name), "Jon Doe"),
-            Pair(stringResource(R.string.login_email), "jdoe@blue.rock")
+            Pair(stringResource(R.string.login_name), loginApproval.name ?: ""),
+            Pair(stringResource(R.string.login_email), loginApproval.email ?: "")
         )
     )
 
