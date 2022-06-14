@@ -178,18 +178,23 @@ fun ApprovalDetailsScreen(
             )
 
             if (approvalDetailsState.shouldDisplayConfirmDisposition != null) {
-                approvalDetailsState.shouldDisplayConfirmDisposition.let { safeDialogDetails ->
-                    StrikeConfirmDispositionAlertDialog(
-                        dialogTitle = safeDialogDetails.dialogTitle,
-                        dialogText = safeDialogDetails.dialogText,
-                        onConfirm = {
-                            approvalDetailsViewModel.resetShouldDisplayConfirmDisposition()
-                            durableNonceViewModel.setPromptTrigger()
-                        },
-                        onDismiss = {
-                            approvalDetailsViewModel.resetShouldDisplayConfirmDisposition()
-                        }
-                    )
+                if (approvalDetailsState.approval?.getSolanaApprovalRequestType() is LoginApprovalRequest) {
+                    approvalDetailsViewModel.resetShouldDisplayConfirmDisposition()
+                    durableNonceViewModel.setPromptTrigger()
+                } else {
+                    approvalDetailsState.shouldDisplayConfirmDisposition.let { safeDialogDetails ->
+                        StrikeConfirmDispositionAlertDialog(
+                            dialogTitle = safeDialogDetails.dialogTitle,
+                            dialogText = safeDialogDetails.dialogText,
+                            onConfirm = {
+                                approvalDetailsViewModel.resetShouldDisplayConfirmDisposition()
+                                durableNonceViewModel.setPromptTrigger()
+                            },
+                            onDismiss = {
+                                approvalDetailsViewModel.resetShouldDisplayConfirmDisposition()
+                            }
+                        )
+                    }
                 }
             }
 
