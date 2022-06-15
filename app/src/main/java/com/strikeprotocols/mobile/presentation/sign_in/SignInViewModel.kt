@@ -22,7 +22,8 @@ import java.util.*
 @HiltViewModel
 class SignInViewModel @Inject constructor(
     private val userRepository: UserRepository,
-    private val pushRepository: PushRepository
+    private val pushRepository: PushRepository,
+    private val strikeUserData: StrikeUserData
 ) : ViewModel() {
 
     var state by mutableStateOf(SignInState())
@@ -38,10 +39,29 @@ class SignInViewModel @Inject constructor(
     }
     //endregion
 
+    //region lifecycle methods
+    fun onStart() {
+        state = state.copy(loggedInStatusResult = Resource.Loading())
+        viewModelScope.launch {
+            delay(500)
+            val userLoggedIn = try {
+                userRepository.userLoggedIn()
+            } catch (e: Exception) {
+                false
+            }
+
+            if (userLoggedIn) {
+                triggerAutoAuthFlow()
+            }
+            state = state.copy(loggedInStatusResult = Resource.Uninitialized)
+        }
+    }
+    //endregion
+
     //region Login + API Calls
     fun attemptLogin() {
         if (state.signInButtonEnabled) {
-            state = state.copy(loginResult = Resource.Loading(), loadingData = true)
+            state = state.copy(loginResult = Resource.Loading(), manualAuthFlowLoading = true)
             viewModelScope.launch(Dispatchers.IO) {
                 state = try {
                     val sessionToken =
@@ -73,9 +93,11 @@ class SignInViewModel @Inject constructor(
         viewModelScope.launch(Dispatchers.IO + coroutineExceptionHandler) {
             try {
                 val verifyUserData = userRepository.verifyUser()
+                strikeUserData.setStrikeUser(verifyUserData)
                 state = state.copy(verifyUserResult = Resource.Success(verifyUserData))
                 handleAuthFlow(verifyUserData)
             } catch (e: Exception) {
+                strikeUserData.setStrikeUser(null)
                 state = state.copy(
                     verifyUserResult = Resource.Error(
                         e.message ?: DEFAULT_SIGN_IN_ERROR_MESSAGE
@@ -126,6 +148,11 @@ class SignInViewModel @Inject constructor(
             } ?: strikeLog(message = "No valid initial auth data because that step is still missing in new flow")
         }
     }
+
+    fun triggerAutoAuthFlow() {
+        state = state.copy(autoAuthFlowLoading = true)
+        retrieveUserVerifyDetails()
+    }
     //endregion
 
     //region Reset Resource State
@@ -167,7 +194,15 @@ class SignInViewModel @Inject constructor(
     }
 
     fun loadingFinished() {
-        state = state.copy(loadingData = false)
+        //manual auth flow happens when the user signs in manually
+        //auto auth flow happens when we detect that the user is currently logged in
+
+        //If the auto auth flow is triggered,
+        //we want to show a splash screen with loading indicator
+
+        //When any loading is finished, reset both loading properties
+        state = state.copy(manualAuthFlowLoading = false)
+        state = state.copy(autoAuthFlowLoading = false)
     }
 
     fun resetAuthFlowException() {
@@ -176,6 +211,10 @@ class SignInViewModel @Inject constructor(
 
     fun resetVerifyUserResult() {
         state = state.copy(verifyUserResult = Resource.Uninitialized)
+    }
+
+    fun resetLoggedInResource() {
+        state = state.copy(loggedInStatusResult = Resource.Uninitialized)
     }
     //endregion
 

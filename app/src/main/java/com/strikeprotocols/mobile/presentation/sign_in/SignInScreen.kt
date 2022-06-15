@@ -7,10 +7,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -54,6 +51,13 @@ fun SignInScreen(
             viewModel.regeneratePhraseFailure(Exception("Failed to regenerate phrase"))
         }
     }
+
+    //region DisposableEffect
+    DisposableEffect(key1 = viewModel) {
+        viewModel.onStart()
+        onDispose { }
+    }
+    //endregion
 
     //region LaunchedEffect
     LaunchedEffect(key1 = state) {
@@ -164,7 +168,7 @@ fun SignInScreen(
             enabled = state.signInButtonEnabled,
             onClick = viewModel::attemptLogin
         ) {
-            if (state.loadingData) {
+            if (state.manualAuthFlowLoading) {
                 CircularProgressIndicator(
                     modifier = Modifier.height(40.dp),
                     color = StrikeWhite,
@@ -184,8 +188,8 @@ fun SignInScreen(
 
     if (state.showPhraseVerificationUI) {
         val words = state.phrase?.split(" ") ?: emptyList()
-        val leftWords = words.filterIndexed { index, s -> index % 2 == 0 }
-        val rightWords = words.filterIndexed { index, s -> index % 2 != 0 }
+        val leftWords = words.filterIndexed { index, _ -> index % 2 == 0 }
+        val rightWords = words.filterIndexed { index, _ -> index % 2 != 0 }
 
         Column(
             modifier = Modifier
@@ -248,6 +252,29 @@ fun SignInScreen(
                     modifier = Modifier.padding(horizontal = 10.dp, vertical = 8.dp)
                 )
             }
+        }
+    }
+
+    if (state.loggedInStatusResult is Resource.Loading || state.autoAuthFlowLoading) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(color = BackgroundBlack)
+        ) {
+            Image(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 172.dp, start = 44.dp, end = 44.dp),
+                painter = painterResource(R.drawable.strike_main_logo),
+                contentDescription = "",
+                contentScale = ContentScale.FillWidth,
+            )
+            CircularProgressIndicator(
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .size(60.dp),
+                color = StrikeWhite
+            )
         }
     }
 

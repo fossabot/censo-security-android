@@ -13,12 +13,16 @@ data class SignInState(
     val emailErrorEnabled: Boolean = false,
     val passwordErrorEnabled: Boolean = false,
     val initialAuthData: InitialAuthData? = null,
-    val loadingData : Boolean = false,
+    val manualAuthFlowLoading : Boolean = false,
+    val autoAuthFlowLoading: Boolean = false,
     val shouldAbortUserFromAuthFlow: Boolean = false,
     val showPhraseVerificationDialog: Boolean = false,
     val showPhraseVerificationUI: Boolean = false,
 
     //Async Data
+    //checking if user is logged in
+    val loggedInStatusResult: Resource<Boolean> = Resource.Loading(),
+    //logging the user in
     val loginResult: Resource<String> = Resource.Uninitialized,
     val verifyUserResult: Resource<VerifyUser> = Resource.Uninitialized,
     val walletSignersResult: Resource<List<WalletSigner?>> = Resource.Uninitialized,

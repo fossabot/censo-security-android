@@ -7,7 +7,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.Bundle
-import android.provider.Settings
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.material.Surface
@@ -20,11 +19,8 @@ import androidx.navigation.*
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.strikeprotocols.mobile.common.BaseWrapper
 import com.strikeprotocols.mobile.common.BiometricUtil
-import com.strikeprotocols.mobile.common.strikeLog
 import com.strikeprotocols.mobile.data.AuthProvider
-import com.strikeprotocols.mobile.data.SharedPrefsHelper
 import com.strikeprotocols.mobile.data.UserState
 import com.strikeprotocols.mobile.data.UserStateListener
 import com.strikeprotocols.mobile.data.models.approval.WalletApproval
@@ -33,13 +29,10 @@ import com.strikeprotocols.mobile.presentation.account.AccountScreen
 import com.strikeprotocols.mobile.presentation.approval_detail.ApprovalDetailsScreen
 import com.strikeprotocols.mobile.presentation.approvals.ApprovalsListScreen
 import com.strikeprotocols.mobile.presentation.approvals.ApprovalsViewModel
-import com.strikeprotocols.mobile.presentation.auth.AuthScreen
-import com.strikeprotocols.mobile.presentation.backup_check.BackupCheckScreen
 import com.strikeprotocols.mobile.presentation.biometry_disabled.BiometryDisabledScreen
 import com.strikeprotocols.mobile.presentation.components.OnLifecycleEvent
 import com.strikeprotocols.mobile.presentation.contact_strike.ContactStrikeScreen
 import com.strikeprotocols.mobile.presentation.sign_in.SignInScreen
-import com.strikeprotocols.mobile.presentation.splash.SplashScreen
 import com.strikeprotocols.mobile.service.MessagingService.Companion.NOTIFICATION_DISPLAYED_KEY
 import com.strikeprotocols.mobile.ui.theme.BackgroundBlack
 import com.strikeprotocols.mobile.ui.theme.StrikeMobileTheme
@@ -138,13 +131,8 @@ class MainActivity : FragmentActivity() {
 
         NavHost(
             navController = navController,
-            startDestination = Screen.SplashRoute.route
+            startDestination = Screen.SignInRoute.route
         ) {
-            composable(
-                route = Screen.SplashRoute.route
-            ) {
-                SplashScreen(navController = navController)
-            }
             composable(
                 route = Screen.SignInRoute.route
             ) {
@@ -164,11 +152,6 @@ class MainActivity : FragmentActivity() {
                 ApprovalDetailsScreen(navController = navController, approval = WalletApproval.fromJson(approvalArg))
             }
             composable(
-                route = Screen.AuthRoute.route
-            ) {
-                AuthScreen(navController = navController)
-            }
-            composable(
                 route = Screen.ContactStrikeRoute.route
             ) {
                 ContactStrikeScreen()
@@ -184,6 +167,7 @@ class MainActivity : FragmentActivity() {
                     message = messageArg,
                     biometryAvailable = biometryAvailableArg)
             }
+<<<<<<< HEAD
             composable(
                 route = Screen.BackupCheckRoute.route
             ) {
@@ -194,6 +178,8 @@ class MainActivity : FragmentActivity() {
             ) {
                 AccountScreen(navController = navController, approvalsViewModel = approvalsViewModel)
             }
+=======
+>>>>>>> 7ffbc82 (User should go through auth flow every time they enter a cold start)
         }
     }
 

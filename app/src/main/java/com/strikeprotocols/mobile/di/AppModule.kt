@@ -84,4 +84,10 @@ object AppModule {
         return PhraseValidatorImpl()
     }
 
+    @Provides
+    @Singleton
+    fun provideStrikeUserData(): StrikeUserData {
+        return StrikeUserDataImpl
+    }
+
 }
