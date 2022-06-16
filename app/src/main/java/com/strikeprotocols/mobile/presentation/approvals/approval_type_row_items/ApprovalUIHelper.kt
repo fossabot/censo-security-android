@@ -11,6 +11,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.sp
 import com.strikeprotocols.mobile.R
 import com.strikeprotocols.mobile.common.convertSecondsIntoCountdownText
+import com.strikeprotocols.mobile.common.maskAddress
 import com.strikeprotocols.mobile.data.models.ApprovalDisposition
 import com.strikeprotocols.mobile.data.models.approval.*
 import com.strikeprotocols.mobile.data.models.approval.AccountType.*
@@ -357,5 +358,30 @@ fun getApprovalTimerText(context: Context, timeRemainingInSeconds: Long) : Strin
 
 fun buildFromToDisplayText(from: String, to: String, context: Context): String {
     return "$from ${context.getString(R.string.to).lowercase()} $to"
+}
+
+private fun List<SlotSignerInfo>.sortApprovers() = this.sortedBy { it.value.name }
+private fun List<SlotDestinationInfo>.sortDestinations() = this.sortedBy { it.value.name }
+
+fun List<SlotDestinationInfo>.retrieveDestinationsRowData() : MutableList<Pair<String, String>> {
+    val destinationsList = mutableListOf<Pair<String, String>>()
+    if (isNotEmpty()) {
+        for (destination in sortDestinations()) {
+            destinationsList.add(
+                Pair(destination.value.name, destination.value.address.maskAddress())
+            )
+        }
+    }
+    return destinationsList
+}
+
+fun List<SlotSignerInfo>.retrieveSlotRowData(): MutableList<Pair<String, String>> {
+    val approversList = mutableListOf<Pair<String, String>>()
+    if (isNotEmpty()) {
+        for (approver in sortApprovers()) {
+            approversList.add(Pair(approver.value.name, approver.value.email))
+        }
+    }
+    return approversList
 }
 

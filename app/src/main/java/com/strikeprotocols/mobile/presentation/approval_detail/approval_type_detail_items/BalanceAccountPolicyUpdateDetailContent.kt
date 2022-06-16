@@ -2,7 +2,6 @@ package com.strikeprotocols.mobile.presentation.approval_detail.approval_type_de
 
 import android.content.Context
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.Divider
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -13,11 +12,9 @@ import com.strikeprotocols.mobile.common.convertSecondsIntoReadableText
 import com.strikeprotocols.mobile.data.models.approval.SolanaApprovalRequestType
 import com.strikeprotocols.mobile.presentation.approvals.ApprovalContentHeader
 import com.strikeprotocols.mobile.presentation.approvals.approval_type_row_items.getHeader
-import com.strikeprotocols.mobile.presentation.approvals.approval_type_row_items.getUITitle
-import com.strikeprotocols.mobile.presentation.components.AccountChangeItem
+import com.strikeprotocols.mobile.presentation.approvals.approval_type_row_items.retrieveSlotRowData
 import com.strikeprotocols.mobile.presentation.components.FactRow
 import com.strikeprotocols.mobile.presentation.components.FactsData
-import com.strikeprotocols.mobile.ui.theme.DividerGrey
 
 @Composable
 fun BalanceAccountPolicyUpdateDetailContent(
@@ -67,12 +64,8 @@ fun generateAccountPolicyUpdateRows(
     //endregion
 
     //region Approvers Row
-    val approversList = mutableListOf<Pair<String, String>>()
-    if (accountPolicyUpdate.approvalPolicy.approvers.isNotEmpty()) {
-        for (approver in accountPolicyUpdate.approvalPolicy.approvers) {
-            approversList.add(Pair(approver.value.name, approver.value.email))
-        }
-    } else {
+    val approversList = accountPolicyUpdate.approvalPolicy.approvers.retrieveSlotRowData()
+    if (approversList.isEmpty()) {
         approversList.add(Pair(context.getString(R.string.no_wallet_approvers_text), ""))
     }
 

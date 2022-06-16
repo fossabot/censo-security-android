@@ -2,22 +2,19 @@ package com.strikeprotocols.mobile.presentation.approval_detail.approval_type_de
 
 import android.content.Context
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.strikeprotocols.mobile.R
 import com.strikeprotocols.mobile.common.convertSecondsIntoReadableText
 import com.strikeprotocols.mobile.data.models.approval.SolanaApprovalRequestType
 import com.strikeprotocols.mobile.presentation.approvals.ApprovalContentHeader
 import com.strikeprotocols.mobile.presentation.approvals.approval_type_row_items.getHeader
+import com.strikeprotocols.mobile.presentation.approvals.approval_type_row_items.retrieveSlotRowData
 import com.strikeprotocols.mobile.presentation.components.FactRow
 import com.strikeprotocols.mobile.presentation.components.FactsData
-import com.strikeprotocols.mobile.ui.theme.GreyText
 
 @Composable
 fun BalanceAccountDetailContent(
@@ -83,12 +80,8 @@ fun generateBalanceAccountDetailRows(
 
 
     //region Approvers Row
-    val approversList = mutableListOf<Pair<String, String>>()
-    if (balanceAccountCreation.approvalPolicy.approvers.isNotEmpty()) {
-        for (approver in balanceAccountCreation.approvalPolicy.approvers) {
-            approversList.add(Pair(approver.value.name, approver.value.email))
-        }
-    } else {
+    val approversList = balanceAccountCreation.approvalPolicy.approvers.retrieveSlotRowData()
+    if (approversList.isEmpty()) {
         approversList.add(Pair(context.getString(R.string.no_approvers_text), ""))
     }
 

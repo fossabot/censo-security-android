@@ -12,8 +12,7 @@ import com.strikeprotocols.mobile.R
 import com.strikeprotocols.mobile.common.maskAddress
 import com.strikeprotocols.mobile.data.models.approval.SolanaApprovalRequestType
 import com.strikeprotocols.mobile.presentation.approvals.ApprovalContentHeader
-import com.strikeprotocols.mobile.presentation.approvals.approval_type_row_items.getHeader
-import com.strikeprotocols.mobile.presentation.approvals.approval_type_row_items.getUITitle
+import com.strikeprotocols.mobile.presentation.approvals.approval_type_row_items.*
 import com.strikeprotocols.mobile.presentation.components.AccountChangeItem
 import com.strikeprotocols.mobile.presentation.components.FactRow
 import com.strikeprotocols.mobile.presentation.components.FactsData
@@ -44,12 +43,9 @@ fun BalanceAccountAddressWhitelistUpdateDetailContent(
 fun generateBalanceAccountAddressWhitelistUpdateDetailRows(addressWhitelistUpdate: SolanaApprovalRequestType.BalanceAccountAddressWhitelistUpdate, context: Context) : List<FactsData> {
     val destinationsRowInfoData = mutableListOf<FactsData>()
 
-    val destinationsList = mutableListOf<Pair<String, String>>()
-    if (addressWhitelistUpdate.destinations.isNotEmpty()) {
-        for (destination in addressWhitelistUpdate.destinations) {
-            destinationsList.add(Pair(destination.value.name, destination.value.address.maskAddress()))
-        }
-    } else {
+    val destinationsList = addressWhitelistUpdate.destinations.retrieveDestinationsRowData()
+
+    if (destinationsList.isEmpty()) {
         destinationsList.add(Pair(context.getString(R.string.no_whitelisted_addresses), ""))
     }
 
