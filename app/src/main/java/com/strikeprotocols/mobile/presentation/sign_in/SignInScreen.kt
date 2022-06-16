@@ -23,14 +23,12 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.strikeprotocols.mobile.R
+import com.strikeprotocols.mobile.common.GeneralDummyData
 import com.strikeprotocols.mobile.common.Resource
 import com.strikeprotocols.mobile.common.getAuthFlowErrorMessage
-import com.strikeprotocols.mobile.common.strikeLog
 import com.strikeprotocols.mobile.presentation.Screen
 import com.strikeprotocols.mobile.presentation.components.SignInTextField
 import com.strikeprotocols.mobile.ui.theme.*
-import kotlinx.coroutines.delay
-import java.util.*
 
 @OptIn(ExperimentalComposeUiApi::class,
     androidx.compose.foundation.ExperimentalFoundationApi::class
@@ -42,15 +40,6 @@ fun SignInScreen(
 ) {
     val state = viewModel.state
     val context = LocalContext.current
-
-    suspend fun regeneratePhrase() {
-        delay(3000)
-        if (Random().nextBoolean() || Random().nextBoolean() || Random().nextBoolean()) {
-            viewModel.regeneratePhraseSuccess("phrase here")
-        } else {
-            viewModel.regeneratePhraseFailure(Exception("Failed to regenerate phrase"))
-        }
-    }
 
     //region DisposableEffect
     DisposableEffect(key1 = viewModel) {
@@ -103,10 +92,6 @@ fun SignInScreen(
 
         if (state.verifiedPhrase is Resource.Loading) {
             viewModel.launchPhraseVerificationUI()
-        }
-
-        if(state.regeneratedPhrase is Resource.Loading) {
-            regeneratePhrase()
         }
 
         if (state.shouldAbortUserFromAuthFlow) {
@@ -185,7 +170,6 @@ fun SignInScreen(
         Spacer(modifier = Modifier.height(24.dp))
     }
 
-
     if (state.showPhraseVerificationUI) {
         val words = state.phrase?.split(" ") ?: emptyList()
         val leftWords = words.filterIndexed { index, _ -> index % 2 == 0 }
@@ -199,7 +183,7 @@ fun SignInScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            Row() {
+            Row {
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Top
@@ -244,7 +228,7 @@ fun SignInScreen(
             }
             Spacer(modifier = Modifier.height(36.dp))
             Button(onClick = {
-                viewModel.verifyPhrase(state.phrase ?: "")
+                viewModel.verifyPhraseToGenerateKeyPair(state.phrase ?: "")
             }) {
                 Text(
                     text = "I Have Saved The Full Phrase",
@@ -252,6 +236,36 @@ fun SignInScreen(
                     modifier = Modifier.padding(horizontal = 10.dp, vertical = 8.dp)
                 )
             }
+        }
+    }
+
+    if (state.showPhraseKeyRegenerationUI) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(color = Color.White)
+                .clickable { },
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Bottom
+        ) {
+            Button(onClick = {
+                viewModel.verifyPhraseToRegenerateKeyPair()
+            }) {
+                if (state.keyRegenerationLoading) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.height(40.dp),
+                        color = StrikeWhite,
+                        strokeWidth = 4.dp,
+                    )
+                } else {
+                    Text(
+                        text = "I have entered my secret phrase",
+                        color = StrikeWhite, fontSize = 16.sp,
+                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 8.dp)
+                    )
+                }
+            }
+            Spacer(modifier = Modifier.height(36.dp))
         }
     }
 
@@ -328,14 +342,12 @@ fun SignInScreen(
         )
     }
 
-    if(state.regeneratedPhrase is Resource.Error) {
-        viewModel.loadingFinished()
+    if(state.regenerateKeyFromPhrase is Resource.Error) {
         PhraseAlertDialog(
             dialogTitle = stringResource(R.string.phrase_verification_dialog_fail_title),
             dialogText = stringResource(R.string.phrase_regeneration_fail),
             onConfirm = {
-                viewModel.loadingFinished()
-                viewModel.resetRegeneratedPhrase()
+                viewModel.restartRegenerateKeyFromPhraseFlow()
             }
         )
     }
@@ -365,7 +377,6 @@ fun SignInScreen(
     }
 
     if(state.addWalletSignerResult is Resource.Error || state.regenerateData is Resource.Error) {
-        strikeLog(message = "Received failed to add wallet signer in the screen...")
         viewModel.loadingFinished()
         PhraseAlertDialog(
             dialogTitle = stringResource(R.string.unable_to_add_wallet_signer_title),

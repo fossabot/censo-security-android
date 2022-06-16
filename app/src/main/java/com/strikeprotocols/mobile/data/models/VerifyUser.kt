@@ -8,7 +8,9 @@ data class VerifyUser(
     val organization: Organization?,
     val publicKeys: List<WalletPublicKey?>?,
     val useStaticKey: Boolean?
-)
+) {
+    val firstPublicKey: String? = publicKeys?.firstOrNull { !it?.key.isNullOrEmpty() }?.key
+}
 
 data class Organization(
     val id: String?,

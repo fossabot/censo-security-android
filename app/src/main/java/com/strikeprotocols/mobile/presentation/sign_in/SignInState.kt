@@ -15,9 +15,11 @@ data class SignInState(
     val initialAuthData: InitialAuthData? = null,
     val manualAuthFlowLoading : Boolean = false,
     val autoAuthFlowLoading: Boolean = false,
+    val keyRegenerationLoading: Boolean = false,
     val shouldAbortUserFromAuthFlow: Boolean = false,
     val showPhraseVerificationDialog: Boolean = false,
     val showPhraseVerificationUI: Boolean = false,
+    val showPhraseKeyRegenerationUI: Boolean = false,
 
     //Async Data
     //checking if user is logged in
@@ -27,7 +29,7 @@ data class SignInState(
     val verifyUserResult: Resource<VerifyUser> = Resource.Uninitialized,
     val walletSignersResult: Resource<List<WalletSigner?>> = Resource.Uninitialized,
     val addWalletSignerResult: Resource<WalletSigner> = Resource.Uninitialized,
-    val regeneratedPhrase: Resource<Unit> = Resource.Uninitialized,
+    val regenerateKeyFromPhrase: Resource<Unit> = Resource.Uninitialized,
     val verifiedPhrase: Resource<Unit> = Resource.Uninitialized,
     val keyValid: Resource<Unit> = Resource.Uninitialized,
     val regenerateData: Resource<WalletSigner> = Resource.Uninitialized,

@@ -257,10 +257,6 @@ class OktaAuth(
     }
 
     override suspend fun signOut() {
-        val userEmail = retrieveUserEmail()
-        if (userEmail.isNotEmpty()) {
-            securePreferences.clearPrivateKey(userEmail)
-        }
         SharedPrefsHelper.setUserLoggedIn(false)
         SharedPrefsHelper.clearEmail()
         authClient?.sessionClient?.clear()

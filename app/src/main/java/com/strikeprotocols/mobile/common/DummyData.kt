@@ -71,6 +71,40 @@ object GeneralDummyData {
                 )
             )
     }
+
+    object PhraseDummyData {
+        //Please note this is to be used for mocked data purposes ONLY
+        const val phrase = "wedding avoid come master casual have trend maid clump fly gain alter wagon bid rely lava foot buddy orchard already force tent just ladder"
+
+        const val privateKey = "8U8sunPpaWPefPTy4wTwuRkgE9aCFa7iCjvbXRpuw1JY"
+        const val publicKey = "GHNH45yPvJJKvzsJNjxqQWpmeWDF4yU5eWoS21Kqsaia"
+
+        fun generateVerifyWalletSignersDummyDataWithValidPublicKey() =
+            listOf(
+                WalletSigner(
+                    publicKey = publicKey,
+                    walletType = WalletSigner.WALLET_TYPE_SOLANA
+                )
+            )
+
+        fun generateVerifyUserDummyDataWithValidKeyPair() : VerifyUser {
+            return VerifyUser(
+                fullName = null,
+                hasApprovalPermission = null,
+                id = null,
+                loginName = null,
+                organization = null,
+                publicKeys = listOf(
+                    WalletPublicKey(
+                        key = publicKey,
+                        walletType = null
+                    )
+                ),
+                useStaticKey = null
+            )
+        }
+
+    }
 }
 
 object MockedApprovals {

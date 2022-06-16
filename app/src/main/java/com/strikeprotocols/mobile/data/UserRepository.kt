@@ -12,6 +12,7 @@ interface UserRepository {
     suspend fun getWalletSigners(): List<WalletSigner?>
     suspend fun addWalletSigner(walletSignerBody: WalletSigner): WalletSigner
     suspend fun generateInitialAuthDataAndSaveKeyToUser(phrase: String): InitialAuthData
+    suspend fun regenerateAuthDataAndSaveKeyToUser(phrase: String, backendPublicKey: String)
     suspend fun userLoggedIn(): Boolean
     suspend fun setUserLoggedIn()
     suspend fun logOut() : Boolean
@@ -64,6 +65,40 @@ class UserRepositoryImpl(
                 publicKey = BaseWrapper.encode(keyPair.publicKey),
                 walletType = WalletSigner.WALLET_TYPE_SOLANA
             )
+        )
+    }
+
+    override suspend fun regenerateAuthDataAndSaveKeyToUser(phrase: String, backendPublicKey: String) {
+        val userEmail = retrieveUserEmail()
+        //Validate the phrase firsts
+        if (!phraseValidator.isPhraseValid(phrase)) {
+            throw Exception("Invalid Phrase")
+        }
+
+        //Regenerate the key pair
+        val keyPair = encryptionManager.createKeyPair(phrase)
+
+        //Verify the keyPair
+        val validPair = encryptionManager.verifyKeyPair(
+            privateKey = BaseWrapper.encode(keyPair.privateKey),
+            publicKey = BaseWrapper.encode(keyPair.publicKey),
+        )
+        if (!validPair) {
+            throw Exception("Invalid Regenerated KeyPair")
+        }
+
+        //Verify the backend public key and recreated private key work together
+        val phraseKeyMatchesBackendKey = encryptionManager.verifyKeyPair(
+            privateKey = BaseWrapper.encode(keyPair.privateKey),
+            publicKey = backendPublicKey
+        )
+        if (!phraseKeyMatchesBackendKey) {
+            throw Exception("Phrase Key Does Not Match Backend Key")
+        }
+
+        //Save the recreated private key if the pair is valid together
+        securePreferences.savePrivateKey(
+            email = userEmail, privateKey = keyPair.privateKey
         )
     }
 
@@ -129,7 +164,7 @@ class UserRepositoryImpl(
             return false
         }
 
-        val publicKey = verifyUser.publicKeys?.firstOrNull { !it?.key.isNullOrEmpty() }?.key
+        val publicKey = verifyUser.firstPublicKey
 
         if (publicKey.isNullOrEmpty()) {
             return false

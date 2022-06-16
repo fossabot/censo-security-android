@@ -7,6 +7,7 @@ import javax.inject.Inject
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.viewModelScope
+import cash.z.ecc.android.bip39.Mnemonics
 import com.google.firebase.messaging.FirebaseMessaging
 import com.strikeprotocols.mobile.common.*
 import com.strikeprotocols.mobile.data.*
@@ -169,8 +170,8 @@ class SignInViewModel @Inject constructor(
         state = state.copy(verifiedPhrase = Resource.Uninitialized)
     }
 
-    fun resetRegeneratedPhrase() {
-        state = state.copy(regeneratedPhrase = Resource.Uninitialized)
+    fun resetRegenerateKeyFromPhrase() {
+        state = state.copy(regenerateKeyFromPhrase = Resource.Uninitialized)
     }
 
     fun resetRegenerateData() {
@@ -218,9 +219,11 @@ class SignInViewModel @Inject constructor(
     }
     //endregion
 
-    private fun launchRegeneratePhraseFlow() {
-        if (state.regeneratedPhrase !is Resource.Loading) {
-            state = state.copy(regeneratedPhrase = Resource.Loading())
+    private fun launchRegenerateKeyFromPhraseFlow() {
+        if (state.regenerateKeyFromPhrase !is Resource.Loading) {
+            state = state.copy(
+                regenerateKeyFromPhrase = Resource.Loading(),
+                showPhraseKeyRegenerationUI = true)
         }
     }
 
@@ -245,14 +248,13 @@ class SignInViewModel @Inject constructor(
         }
     }
 
-    fun verifyPhrase(phrase: String) {
+    fun verifyPhraseToGenerateKeyPair(phrase: String) {
         if (Random().nextBoolean() || Random().nextBoolean() || Random().nextBoolean()) {
             verifiedPhraseSuccess()
         } else {
             verifiedPhraseFailure(Exception("Failed to verify phrase"))
         }
     }
-
 
     private fun verifiedPhraseSuccess() {
         state = state.copy(
@@ -276,21 +278,6 @@ class SignInViewModel @Inject constructor(
         }
     }
 
-    fun regeneratePhraseSuccess(phrase: String?) {
-        state = state.copy(regeneratedPhrase = Resource.Success(Unit))
-
-        //verify this is a valid phrase
-
-        if (phrase != null) {
-            viewModelScope.launch {
-                //todo: save the encryption key instead of generated password
-                restartAuthFlow()
-            }
-        } else {
-            regeneratePhraseFailure(Exception("No phrase found"))
-        }
-    }
-
     private fun verifiedPhraseFailure(exception: Exception?) {
         viewModelScope.launch {
             userRepository.clearGeneratedAuthData()
@@ -303,11 +290,47 @@ class SignInViewModel @Inject constructor(
         }
     }
 
-    fun regeneratePhraseFailure(exception: Exception?) {
-        state = state.copy(
-            regeneratedPhrase = Resource.Error(
-            exception?.message ?: "DEFAULT_RETRIEVE_CREDENTIAL_ERROR"))
+    fun verifyPhraseToRegenerateKeyPair() {
+        state = state.copy(keyRegenerationLoading = true)
+        val phrase =
+            if (Random().nextBoolean() || Random().nextBoolean() || Random().nextBoolean()) {
+                GeneralDummyData.PhraseDummyData.phrase
+            } else {
+                String(Mnemonics.MnemonicCode(Mnemonics.WordCount.COUNT_24).chars)
+            }
 
+        val verifyUser = state.verifyUserResult.data
+        val publicKey = verifyUser?.firstPublicKey
+
+        if (verifyUser != null && publicKey != null) {
+            viewModelScope.launch {
+                try {
+                    userRepository.regenerateAuthDataAndSaveKeyToUser(phrase, publicKey)
+                    state = state.copy(
+                        regenerateKeyFromPhrase = Resource.Uninitialized,
+                        keyRegenerationLoading = false,
+                        showPhraseKeyRegenerationUI = false)
+                    restartAuthFlow()
+                } catch (e: Exception) {
+                    regeneratePhraseFailure(e)
+                }
+            }
+        } else {
+            regeneratePhraseFailure(Exception("Verify User data is invalid"))
+        }
+    }
+
+    private fun regeneratePhraseFailure(exception: Exception?) {
+        state = state.copy(
+            regenerateKeyFromPhrase = Resource.Error(
+            exception?.message ?: "DEFAULT_RETRIEVE_CREDENTIAL_ERROR"),
+            keyRegenerationLoading = false
+        )
+    }
+
+    fun restartRegenerateKeyFromPhraseFlow() {
+        resetRegenerateKeyFromPhrase()
+        launchRegenerateKeyFromPhraseFlow()
     }
     //endregion
 
@@ -367,7 +390,7 @@ class SignInViewModel @Inject constructor(
                 state = state.copy(keyValid = Resource.Success(Unit))
             }
             UserAuthFlow.EXISTING_BACKEND_KEY_LOCAL_KEY_MISSING -> {
-                launchRegeneratePhraseFlow()
+                launchRegenerateKeyFromPhraseFlow()
             }
             UserAuthFlow.NO_VALID_KEY, UserAuthFlow.NO_LOCAL_KEY_AVAILABLE -> {
                 state = state.copy(shouldAbortUserFromAuthFlow = true)
