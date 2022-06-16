@@ -293,6 +293,7 @@ class SignInViewModel @Inject constructor(
     }
 
     private fun verifiedPhraseFailure(exception: Exception?) {
+        //todo: need to wipe more state here on ticket str-256. That state does not currently exist, but will after we finalize UI.
         viewModelScope.launch {
             userRepository.clearGeneratedAuthData()
             state = state.copy(
@@ -330,11 +331,12 @@ class SignInViewModel @Inject constructor(
                 }
             }
         } else {
-            regeneratePhraseFailure(Exception("Verify User data is invalid"))
+            regeneratePhraseFailure(AuthDataException.InvalidVerifyUserException())
         }
     }
 
     private fun regeneratePhraseFailure(exception: Exception?) {
+        //todo: need to wipe more state here on ticket str-255. That state does not currently exist, but will after we finalize UI.
         state = state.copy(
             regenerateKeyFromPhrase = Resource.Error(
             exception?.message ?: "DEFAULT_RETRIEVE_CREDENTIAL_ERROR"),

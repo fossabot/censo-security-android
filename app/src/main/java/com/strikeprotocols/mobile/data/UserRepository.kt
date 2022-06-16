@@ -1,6 +1,7 @@
 package com.strikeprotocols.mobile.data
 
 import com.strikeprotocols.mobile.common.*
+import com.strikeprotocols.mobile.data.AuthDataException.*
 import com.strikeprotocols.mobile.data.models.VerifyUser
 import com.strikeprotocols.mobile.data.models.WalletSigner
 import com.strikeprotocols.mobile.data.models.WalletSigner.Companion.WALLET_TYPE_SOLANA
@@ -57,6 +58,15 @@ class UserRepositoryImpl(
         val userEmail = retrieveUserEmail()
         val keyPair = encryptionManager.createKeyPair(phrase)
 
+        //Verify the keyPair
+        val validPair = encryptionManager.verifyKeyPair(
+            privateKey = BaseWrapper.encode(keyPair.privateKey),
+            publicKey = BaseWrapper.encode(keyPair.publicKey),
+        )
+        if (!validPair) {
+            throw InvalidKeyPairException()
+        }
+
         securePreferences.savePrivateKey(
             email = userEmail, privateKey = keyPair.privateKey)
 
@@ -72,7 +82,7 @@ class UserRepositoryImpl(
         val userEmail = retrieveUserEmail()
         //Validate the phrase firsts
         if (!phraseValidator.isPhraseValid(phrase)) {
-            throw Exception("Invalid Phrase")
+            throw InvalidPhraseException()
         }
 
         //Regenerate the key pair
@@ -84,7 +94,7 @@ class UserRepositoryImpl(
             publicKey = BaseWrapper.encode(keyPair.publicKey),
         )
         if (!validPair) {
-            throw Exception("Invalid Regenerated KeyPair")
+            throw InvalidKeyPairException()
         }
 
         //Verify the backend public key and recreated private key work together
@@ -93,7 +103,7 @@ class UserRepositoryImpl(
             publicKey = backendPublicKey
         )
         if (!phraseKeyMatchesBackendKey) {
-            throw Exception("Phrase Key Does Not Match Backend Key")
+            throw PhraseKeyDoesNotMatchBackendKeyException()
         }
 
         //Save the recreated private key if the pair is valid together
