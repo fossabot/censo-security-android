@@ -5,34 +5,17 @@ import com.strikeprotocols.mobile.R
 import java.time.OffsetDateTime
 import java.time.format.DateTimeFormatter
 import java.util.*
+import kotlin.math.min
+import kotlin.time.Duration.Companion.days
 
 fun convertSecondsIntoCountdownText(context: Context, totalTimeInSeconds: Long): String {
     if(totalTimeInSeconds <= 0) return context.getString(R.string.approval_expired)
 
-    val days = totalTimeInSeconds / DAYS_IN_SECONDS
-    val hours = totalTimeInSeconds / HOURS_IN_SECONDS % HOURS_IN_DAY
+    val hours = totalTimeInSeconds / HOURS_IN_SECONDS
     val minutes = totalTimeInSeconds / MINUTES_IN_SECONDS % 60
     val seconds = totalTimeInSeconds % 60
 
     return "${String.format("%02d", hours)}:${String.format("%02d", minutes)}:${String.format("%02d", seconds)}"
-}
-
-fun String.formatISO8601IntoDisplayText(context: Context): String {
-    if (this.isEmpty()) {
-        return context.getString(R.string.not_applicable)
-    }
-
-    return try {
-        val iso8601Formatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME
-        val offsetDateTime = OffsetDateTime.parse(this, iso8601Formatter)
-
-        val dateTimeFormatter =
-            DateTimeFormatter.ofPattern("MMM dd, yyyy 'at' HH:mm:ss a", Locale.getDefault())
-
-        offsetDateTime.format(dateTimeFormatter)
-    } catch (e: Exception) {
-        context.getString(R.string.not_applicable)
-    }
 }
 
 fun convertSecondsIntoReadableText(totalTimeInMilliSeconds: Int, context: Context): String {
@@ -41,8 +24,7 @@ fun convertSecondsIntoReadableText(totalTimeInMilliSeconds: Int, context: Contex
     val totalTimeInSeconds = totalTimeInMilliSeconds / 1000
     if (totalTimeInSeconds <= 0) return expirationTimeStringBuilder.toString()
 
-    val days: Int  = totalTimeInSeconds / DAYS_IN_SECONDS
-    val hours: Int = totalTimeInSeconds / HOURS_IN_SECONDS % HOURS_IN_DAY
+    val hours: Int = totalTimeInSeconds / HOURS_IN_SECONDS
     val minutes: Int  = totalTimeInSeconds / MINUTES_IN_SECONDS % 60
     val seconds: Int  = totalTimeInSeconds % 60
 
