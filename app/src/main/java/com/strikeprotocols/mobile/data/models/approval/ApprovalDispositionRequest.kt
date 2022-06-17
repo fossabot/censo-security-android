@@ -36,6 +36,7 @@ data class ApprovalDispositionRequest(
             is SignersUpdate -> 5
             is WrapConversionRequest -> 4
             is WalletConfigPolicyUpdate -> 6
+            is DAppTransactionRequest -> 7
             is BalanceAccountSettingsUpdate -> 8
 
             is DAppBookUpdate -> 9
@@ -45,7 +46,6 @@ data class ApprovalDispositionRequest(
             is SPLTokenAccountCreation -> 13
             is BalanceAccountAddressWhitelistUpdate -> 14
 
-            is DAppTransactionRequest,
             is LoginApprovalRequest,
             is UnknownApprovalType -> 0
         }
@@ -206,17 +206,22 @@ data class ApprovalDispositionRequest(
                 hashBytesBuffer.write(byteArrayOf(retrieveOpCode()))
                 hashBytesBuffer.write(commonBytes)
                 hashBytesBuffer.write(requestType.signingData.walletAddress.base58Bytes())
+                hashBytesBuffer.write(requestType.account.identifier.sha256HashBytes())
+                hashBytesBuffer.write(requestType.dappInfo.address.base58Bytes())
+                hashBytesBuffer.write(requestType.dappInfo.name.sha256HashBytes())
+                hashBytesBuffer.writeShortLE(requestType.instructions.sumOf { it.instructions.size }.toShort())
 
                 var hashBytes = hashBytesBuffer.toByteArray().sha256HashBytes()
 
-                for (instruction in requestType.instructions) {
-                    val instructionBuffer = ByteArrayOutputStream()
-                    instructionBuffer.write(hashBytes)
-                    instructionBuffer.write(instruction.combinedBytes())
-                    val instructionBytes = instructionBuffer.toByteArray()
-                    hashBytes = instructionBytes.sha256HashBytes()
+                for (instructionBatch in requestType.instructions) {
+                    for (instruction in instructionBatch.instructions) {
+                        val instructionBuffer = ByteArrayOutputStream()
+                        instructionBuffer.write(hashBytes)
+                        instructionBuffer.write(instruction.combinedBytes())
+                        val instructionBytes = instructionBuffer.toByteArray()
+                        hashBytes = instructionBytes.sha256HashBytes()
+                    }
                 }
-
                 buffer.write(hashBytes)
                 buffer.toByteArray()
             }
@@ -244,8 +249,8 @@ data class ApprovalDispositionRequest(
             is BalanceAccountPolicyUpdate -> requestType.signingData
             is SPLTokenAccountCreation -> requestType.signingData
             is BalanceAccountAddressWhitelistUpdate -> requestType.signingData
+            is DAppTransactionRequest -> requestType.signingData
 
-            is DAppTransactionRequest,
             is LoginApprovalRequest -> throw Exception(
                 INVALID_REQUEST_APPROVAL
             )
@@ -258,7 +263,12 @@ data class ApprovalDispositionRequest(
         val buffer = ByteArrayOutputStream()
         buffer.write(byteArrayOf(opIndex))
         buffer.write(byteArrayOf(solanaProgramValue))
-        buffer.write(Hash.sha256(opHashData()))
+        buffer.write(
+            when (requestType) {
+                is DAppTransactionRequest -> opHashData()
+                else -> Hash.sha256(opHashData())
+            }
+        )
         return buffer.toByteArray()
     }
 

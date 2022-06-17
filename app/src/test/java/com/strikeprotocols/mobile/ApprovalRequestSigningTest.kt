@@ -352,4 +352,26 @@ class ApprovalRequestSigningTest {
 
         assertNotNull(signature)
     }
+
+    @Test
+    fun generateSignatureForDappTransaction() {
+        val dappTransactionWalletApproval =
+            deserializer.parseData(JsonParser.parseString(dappTransactionJson.trim()))
+
+        val approvalDispositionRequest = ApprovalDispositionRequest(
+            requestId = dappTransactionWalletApproval.id!!,
+            approvalDisposition = ApprovalDisposition.APPROVE,
+            requestType = dappTransactionWalletApproval.getSolanaApprovalRequestType(),
+            nonces = listOf(Nonce("Bf1znCzN6V7tczCXfBXZvfBGFimSV79kZD513E2ZiCap")),
+            email = userEmail
+        )
+
+        val signature = encryptionManager.signApprovalDispositionMessage(
+            signable = approvalDispositionRequest, userEmail = userEmail
+        )
+
+        println("Signature from dapp transaction: $signature")
+
+        assertNotNull(signature)
+    }
 }
