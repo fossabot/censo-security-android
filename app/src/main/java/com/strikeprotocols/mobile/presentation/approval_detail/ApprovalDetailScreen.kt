@@ -258,16 +258,11 @@ fun ApprovalDetails(
         ) {
             approval?.let { safeApproval ->
                 val type = safeApproval.getSolanaApprovalRequestType()
-                val approvalsNeeded = safeApproval.numberOfDispositionsRequired ?: 0
 
                 //Defensive coding,
                 // we should never have an unknown approval in the details screen
                 if (type != UnknownApprovalType) {
-                    ApprovalDetailContent(
-                        approval = safeApproval,
-                        type = type,
-                        approvalsNeeded = approvalsNeeded
-                    )
+                    ApprovalDetailContent(approval = safeApproval, type = type)
                 }
             }
 

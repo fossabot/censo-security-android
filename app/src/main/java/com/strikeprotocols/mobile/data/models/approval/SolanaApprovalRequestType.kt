@@ -621,7 +621,7 @@ data class SymbolAndAmountInfo(
             amountAsDecimal >= 0.toBigDecimal()
         } catch (e: Exception) {
             try {
-                !amount.contains("-")
+                !amount.startsWith("-")
             } catch (innerException: Exception) {
                 true
             }

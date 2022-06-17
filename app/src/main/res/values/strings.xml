@@ -197,7 +197,6 @@
     <string name="old_wallet_name_title">Old Wallet Name</string>
     <string name="new_wallet_name_title">New Wallet Name</string>
     <string name="wallet_title">Wallet</string>
-    <string name="dapp_name_title">dApp Name</string>
     <string name="approvers">Approvers</string>
     <string name="details_title">Details</string>
     <string name="status">status</string>

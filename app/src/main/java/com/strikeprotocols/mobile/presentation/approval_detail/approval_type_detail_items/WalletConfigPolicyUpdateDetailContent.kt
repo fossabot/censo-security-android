@@ -2,7 +2,6 @@ package com.strikeprotocols.mobile.presentation.approval_detail.approval_type_de
 
 import android.content.Context
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -19,14 +18,13 @@ import com.strikeprotocols.mobile.presentation.components.FactsData
 
 @Composable
 fun WalletConfigPolicyUpdateDetailContent(
-    walletConfigPolicyUpdate: SolanaApprovalRequestType.WalletConfigPolicyUpdate,
-    approvalsReceived: String
+    walletConfigPolicyUpdate: SolanaApprovalRequestType.WalletConfigPolicyUpdate
 ) {
     val header = walletConfigPolicyUpdate.getHeader(LocalContext.current)
     ApprovalContentHeader(header = header, topSpacing = 24, bottomSpacing = 36)
 
     val approverRowInfoData = generateWalletConfigPolicyRows(
-        walletConfigPolicyUpdate = walletConfigPolicyUpdate, approvalsReceived = approvalsReceived, context = LocalContext.current)
+        walletConfigPolicyUpdate = walletConfigPolicyUpdate, context = LocalContext.current)
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -44,7 +42,6 @@ fun WalletConfigPolicyUpdateDetailContent(
 
 fun generateWalletConfigPolicyRows(
     walletConfigPolicyUpdate: SolanaApprovalRequestType.WalletConfigPolicyUpdate,
-    approvalsReceived: String,
     context: Context
 ): List<FactsData> {
     val approvalsRequired = walletConfigPolicyUpdate.approvalPolicy.approvalsRequired.toInt().toString()
@@ -55,7 +52,7 @@ fun generateWalletConfigPolicyRows(
     val approvalsRequiredRow = FactsData(
         title = context.getString(R.string.approvals),
         facts = listOf(
-            Pair(context.getString(R.string.approvals_required), "$approvalsReceived ${context.getString(R.string.of)} ${approvalsRequired.toInt()}"),
+            Pair(context.getString(R.string.approvals_required), approvalsRequired),
             Pair(context.getString(R.string.approval_expiration), convertSecondsIntoReadableText(walletConfigPolicyUpdate.approvalPolicy.approvalTimeout.toInt(), context))
         )
     )

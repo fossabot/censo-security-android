@@ -18,8 +18,7 @@ import com.strikeprotocols.mobile.presentation.components.FactsData
 
 @Composable
 fun BalanceAccountPolicyUpdateDetailContent(
-    accountPolicyUpdate: SolanaApprovalRequestType.BalanceAccountPolicyUpdate,
-    approvalsReceived: Int
+    accountPolicyUpdate: SolanaApprovalRequestType.BalanceAccountPolicyUpdate
 ) {
     val header = accountPolicyUpdate.getHeader(LocalContext.current)
 
@@ -29,7 +28,6 @@ fun BalanceAccountPolicyUpdateDetailContent(
     Spacer(modifier = Modifier.height(24.dp))
 
     val approverRowInfoData = generateAccountPolicyUpdateRows(
-        approvalsReceived = approvalsReceived,
         accountPolicyUpdate = accountPolicyUpdate,
         context = LocalContext.current)
 
@@ -49,14 +47,13 @@ fun BalanceAccountPolicyUpdateDetailContent(
 fun generateAccountPolicyUpdateRows(
     context: Context,
     accountPolicyUpdate: SolanaApprovalRequestType.BalanceAccountPolicyUpdate,
-    approvalsReceived: Int
 ) : List<FactsData>{
     val approverRowInfoData = mutableListOf<FactsData>()
     //region Approvals Row
     val approvalsInfoRow = FactsData(
         title = context.getString(R.string.approvals).uppercase(),
         facts = listOf(
-            Pair(context.getString(R.string.approvals_required), "$approvalsReceived ${context.getString(R.string.of)} ${accountPolicyUpdate.approvalPolicy.approvalsRequired.toInt()}"),
+            Pair(context.getString(R.string.approvals_required), "${accountPolicyUpdate.approvalPolicy.approvalsRequired}"),
             Pair(context. getString(R.string.approval_expiration), convertSecondsIntoReadableText(accountPolicyUpdate.approvalPolicy.approvalTimeout.toInt(), context))
         )
     )
