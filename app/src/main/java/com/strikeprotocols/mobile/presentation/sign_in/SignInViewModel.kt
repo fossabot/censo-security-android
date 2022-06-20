@@ -141,16 +141,15 @@ class SignInViewModel @Inject constructor(
                     val walletSigner = userRepository.addWalletSigner(safeInitialAuthData.walletSignerBody)
                     state.copy(addWalletSignerResult = Resource.Success(walletSigner))
                 } catch (e: Exception) {
-                    strikeLog(message = "Failed to add wallet signer...")
                     state.copy(addWalletSignerResult =
                         Resource.Error(e.message ?: DEFAULT_SIGN_IN_ERROR_MESSAGE)
                     )
                 }
-            } ?: strikeLog(message = "No valid initial auth data because that step is still missing in new flow")
+            } ?: restartAuthFlow()
         }
     }
 
-    fun triggerAutoAuthFlow() {
+    private fun triggerAutoAuthFlow() {
         state = state.copy(autoAuthFlowLoading = true)
         retrieveUserVerifyDetails()
     }
@@ -217,8 +216,19 @@ class SignInViewModel @Inject constructor(
     fun resetLoggedInResource() {
         state = state.copy(loggedInStatusResult = Resource.Uninitialized)
     }
+
+    private fun resetStateToSendUserBackToLogin() {
+        state = state.copy(
+            email = "",
+            password = "",
+            manualAuthFlowLoading = false,
+            autoAuthFlowLoading = false,
+            verifyUserResult = Resource.Uninitialized
+        )
+    }
     //endregion
 
+    //region Phrase + Key Generation Flows
     private fun launchRegenerateKeyFromPhraseFlow() {
         if (state.regenerateKeyFromPhrase !is Resource.Loading) {
             state = state.copy(
@@ -274,8 +284,12 @@ class SignInViewModel @Inject constructor(
                 } catch (e: Exception) {
                     //Todo: STR-241 handle error case if generating key fails. Less likely now that we have phrase but still could happen...
                 }
-            }
+            } ?: setVerifiedPhraseErrorState(PhraseException.NULL_PHRASE_IN_STATE)
         }
+    }
+
+    private fun setVerifiedPhraseErrorState(message: String) {
+        state = state.copy(verifiedPhrase = Resource.Error(message = message))
     }
 
     private fun verifiedPhraseFailure(exception: Exception?) {
@@ -438,7 +452,7 @@ class SignInViewModel @Inject constructor(
         //Restart AuthFlow
         state.verifyUserResult.data?.let { safeVerifyUser ->
             handleAuthFlow(safeVerifyUser)
-        }
+        } ?: resetStateToSendUserBackToLogin()
     }
     //endregion
 

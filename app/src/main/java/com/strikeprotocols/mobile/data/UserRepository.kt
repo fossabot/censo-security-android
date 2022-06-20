@@ -113,7 +113,6 @@ class UserRepositoryImpl(
         val mainKey = securePreferences.retrievePrivateKey(userEmail)
         val publicKey = encryptionManager.regeneratePublicKey(mainKey = mainKey)
 
-        //todo: remove encrypted key from here going forward
         val walletSigner = WalletSigner(
             publicKey = publicKey,
             walletType = WALLET_TYPE_SOLANA

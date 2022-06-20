@@ -35,7 +35,7 @@ class ApprovalDetailsViewModel @Inject constructor(
 
     fun onStart(approval: WalletApproval?) {
         if (state.approval == null) {
-            approval?.let { setArgsToState(it) }
+            approval?.let { setArgsToState(it) } ?: setShouldKickOutUser()
         }
 
         startCountDown()
@@ -109,6 +109,12 @@ class ApprovalDetailsViewModel @Inject constructor(
                 submitDate = state.submitDate,
                 totalTimeInSeconds = state.approvalTimeoutInSeconds
             )
+        )
+    }
+
+    fun setShouldKickOutUser() {
+        state = state.copy(
+            shouldKickOutUserToApprovalsScreen = true
         )
     }
 
