@@ -203,6 +203,7 @@
     <string name="hours">Hours</string>
     <string name="minutes">Minutes</string>
     <string name="seconds">Seconds</string>
+<<<<<<< HEAD
     <string name="sign_out">Sign Out</string>
     <string name="app_version">App Version</string>
     <string name="done">Done</string>
@@ -216,5 +217,9 @@
     <string name="accept_vault_invitation_dialog_title">Accept Vault Invitation</string>
     <string name="accept_vault_invitation_dialog_message">accept vault invitation</string>
     <string name="vault_name">Vault Name</string>
+=======
+    <string name="clear">Clear</string>
+    <string name="key_phrase_hint">Enter Key Phrase Here</string>
+>>>>>>> f041435 (Setup autocomplete functionality text view. Add basic logic to VM to update query and show predictions.)
 
 </resources>

@@ -40,6 +40,39 @@ class SignInViewModel @Inject constructor(
     }
     //endregion
 
+    //region Autocomplete state handling
+    fun updatePredictions(query: String) {
+        val updatedPredictions = if (query.isEmpty()) emptyList() else
+            PhraseValidatorImpl.words.filter { it.startsWith(query.trim().lowercase()) }
+
+        state = state.copy(
+            wordQuery = query,
+            wordPredictions = updatedPredictions
+        )
+    }
+
+    fun clearQuery() {
+        updatePredictions("")
+    }
+
+    fun wordSelected(word: String) {
+        strikeLog(message = "Word selected: ${word.lowercase()}")
+        state = state.copy(
+            wordQuery = "",
+            wordPredictions = emptyList()
+        )
+    }
+
+
+    fun wordEntered() {
+        strikeLog(message = "Word entered: ${state.wordQuery.lowercase()}")
+        state = state.copy(
+            wordQuery = "",
+            wordPredictions = emptyList()
+        )
+    }
+    //endregion
+
     //region lifecycle methods
     fun onStart() {
         state = state.copy(loggedInStatusResult = Resource.Loading())

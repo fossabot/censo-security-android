@@ -1,10 +1,12 @@
 package com.strikeprotocols.mobile.presentation.sign_in
 
 import android.util.Patterns
+import cash.z.ecc.android.bip39.Mnemonics
 import com.strikeprotocols.mobile.common.Resource
 import com.strikeprotocols.mobile.data.InitialAuthData
 import com.strikeprotocols.mobile.data.models.VerifyUser
 import com.strikeprotocols.mobile.data.models.WalletSigner
+import java.util.*
 
 data class SignInState(
     val email: String = "",
@@ -35,7 +37,11 @@ data class SignInState(
     val regenerateData: Resource<WalletSigner> = Resource.Uninitialized,
 
     //Exception Data
-    val authFlowException: Resource<Exception> = Resource.Uninitialized
+    val authFlowException: Resource<Exception> = Resource.Uninitialized,
+
+    //Autocomplete State
+    val wordQuery: String = "",
+    val wordPredictions: List<String> = emptyList()
 ) {
     val signInButtonEnabled = email.isNotEmpty() && password.isNotEmpty()
 

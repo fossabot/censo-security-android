@@ -23,21 +23,26 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.strikeprotocols.mobile.R
-import com.strikeprotocols.mobile.common.GeneralDummyData
 import com.strikeprotocols.mobile.common.Resource
 import com.strikeprotocols.mobile.common.getAuthFlowErrorMessage
 import com.strikeprotocols.mobile.presentation.Screen
+import com.strikeprotocols.mobile.presentation.components.AutoCompleteUI
 import com.strikeprotocols.mobile.presentation.components.SignInTextField
 import com.strikeprotocols.mobile.ui.theme.*
 
-@OptIn(ExperimentalComposeUiApi::class,
+
+@OptIn(
+    ExperimentalComposeUiApi::class,
     androidx.compose.foundation.ExperimentalFoundationApi::class
 )
+
+
 @Composable
 fun SignInScreen(
     navController: NavController,
     viewModel: SignInViewModel = hiltViewModel(),
 ) {
+
     val state = viewModel.state
     val context = LocalContext.current
 
@@ -183,6 +188,23 @@ fun SignInScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
+
+            AutoCompleteUI(
+                modifier = Modifier.fillMaxWidth(),
+                query = viewModel.state.wordQuery,
+                queryHint = stringResource(R.string.key_phrase_hint),
+                predictions = viewModel.state.wordPredictions,
+                onQueryChanged = viewModel::updatePredictions,
+                onClearClick = viewModel::clearQuery,
+                onItemClick = viewModel::wordSelected,
+                onDoneActionClick = viewModel::wordEntered,
+                itemContent = {
+                    Box(modifier = Modifier.background(color = StrikeWhite)) {
+                        Text(text = it, color = Color.Black)
+                    }
+                }
+            )
+
             Row {
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
@@ -195,11 +217,13 @@ fun SignInScreen(
                             text = leftWord,
                             color = StrikeWhite,
                             fontSize = 18.sp,
-                            modifier = Modifier.background(
-                                color = if (touched.value) Color.White else Color.Transparent
-                            ).clickable {
-                                touched.value = !touched.value
-                            }
+                            modifier = Modifier
+                                .background(
+                                    color = if (touched.value) Color.White else Color.Transparent
+                                )
+                                .clickable {
+                                    touched.value = !touched.value
+                                }
                         )
                         Spacer(modifier = Modifier.height(10.dp))
                     }
@@ -216,11 +240,13 @@ fun SignInScreen(
                             text = rightWord,
                             color = StrikeWhite,
                             fontSize = 18.sp,
-                            modifier = Modifier.background(
-                                color = if (touched.value) Color.White else Color.Transparent
-                            ).clickable {
-                                touched.value = !touched.value
-                            }
+                            modifier = Modifier
+                                .background(
+                                    color = if (touched.value) Color.White else Color.Transparent
+                                )
+                                .clickable {
+                                    touched.value = !touched.value
+                                }
                         )
                         Spacer(modifier = Modifier.height(10.dp))
                     }

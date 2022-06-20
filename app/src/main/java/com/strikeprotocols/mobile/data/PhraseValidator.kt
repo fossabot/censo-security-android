@@ -28,8 +28,6 @@ class PhraseValidatorImpl() : PhraseValidator {
             else -> "th"
         }
 
-    private val words = Mnemonics.getCachedWords(Locale.ENGLISH.language)
-
     override fun isPhraseValid(phrase: String): Boolean {
         val phraseWords = phrase.split(" ")
         val wordCount = phraseWords.size
@@ -79,6 +77,10 @@ class PhraseValidatorImpl() : PhraseValidator {
         }
 
         return false
+    }
+
+    companion object {
+        val words = Mnemonics.getCachedWords(Locale.ENGLISH.language)
     }
 
 }
