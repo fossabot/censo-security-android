@@ -49,8 +49,6 @@
     <string name="snackbar_refresh_error">Something went wrong, please try again</string>
     <string name="auth_flow_exception">Something went wrong, please try again</string>
 
-    <string name="logout">Sign Out</string>
-
     <string name="smart_lock_dialog_title">Google SmartLock</string>
     <string name="smart_lock_dialog_fail_title">Google SmartLock Error</string>
     <string name="smart_lock_dialog_save">We need to save an important account credential to the cloud in case you lose access to this device in the future.\n\nYou will be prompted to save this credential to a Google account.\n\nYou will not be able to continue into the app until you save this credential to your preferred Google account.</string>
@@ -216,5 +214,13 @@
     <string name="hours">Hours</string>
     <string name="minutes">Minutes</string>
     <string name="seconds">Seconds</string>
+    <string name="sign_out">Sign Out</string>
+    <string name="app_version">App Version</string>
+    <string name="done">Done</string>
+    <string name="user">User</string>
+    <string name="get_help">Get Help</string>
+    <string name="security_notice">SECURITY NOTICE:</string>
+    <string name="security_message">To help protect your account\'s security a Strike Protocols Support representative will never call you to request any confidential information in regards to your account (such as password etc.). If you receive a call from anyone claiming to represent Strike Protocols that seems suspicious, please hang up and contact us immediately.</string>
+    <string name="email">Email</string>
 
 </resources>

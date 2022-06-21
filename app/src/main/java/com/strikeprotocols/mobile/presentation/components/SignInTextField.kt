@@ -10,7 +10,6 @@ import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
@@ -19,7 +18,6 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import com.strikeprotocols.mobile.R
-import com.strikeprotocols.mobile.ui.theme.FocusedGrey
 import com.strikeprotocols.mobile.ui.theme.StrikePurple
 import com.strikeprotocols.mobile.ui.theme.StrikeWhite
 import com.strikeprotocols.mobile.ui.theme.UnfocusedGrey

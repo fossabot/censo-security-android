@@ -5,10 +5,8 @@ import androidx.compose.ui.graphics.Color
 val BackgroundBlack = Color.Black
 val StrikePurple = Color(0xFF996CFD)
 val GradientPurple = Color(0xFF221038)
-val TopBlack = Color(0x40000000)
 val StrikeWhite = Color.White
 val UnfocusedGrey = Color(0xFF373737)
-val FocusedGrey = Color(0xFFFFFFFF)
 val HeaderBlack = Color(0xFF191919)
 val DisabledButtonTextColor = Color(0xFFbfa1ff)
 val SectionBlack = Color(0xFF141414)
@@ -24,17 +22,12 @@ val DetailDenyRedBackground = Color(0xFF170a0a)
 val GreyText = Color(0xFF8c8c8c)
 val SnackbarBackground = Color(0xFF363636)
 val DividerGrey = Color(0xFF3c3c3c)
-val DividerDarkGrey = Color(0xFF262626)
-val AccountTextGrey = Color(0xFFb2b2b2)
-
 val StatusGreyText = Color(0xFF6a6a6a)
-
-val BackgroundLight = Color(
-    red = 1f, green = 1f, blue = 1f, alpha = 0.1f)
-val BackgroundDark = Color(
-    red = 1f, green = 1f, blue = 1f, alpha = 0.06f)
-
 val SubtitleGrey = Color(0xFF9c9ea4)
-
-val ApprovalInfoBorder = Color(0xff535355)
+val AccountRowBackground = Color(0xFF2d2c2e)
+val AccountTextGrey = Color(0xFF979797)
+val AccountButtonRed = Color(0xFF200e0e)
+val SignOutRed = Color(0xFFa34944)
+val BackgroundLight = Color(red = 1f, green = 1f, blue = 1f, alpha = 0.1f)
+val BackgroundDark = Color(red = 1f, green = 1f, blue = 1f, alpha = 0.06f)
 

@@ -96,14 +96,6 @@ fun ApprovalsListScreen(
             }
             approvalsViewModel.resetShouldShowErrorSnackbar()
         }
-        if (approvalsState.logoutResult is Resource.Success) {
-            navController.navigate(Screen.SplashRoute.route) {
-                popUpTo(Screen.ApprovalListRoute.route) {
-                    inclusive = true
-                }
-            }
-            approvalsViewModel.resetLogoutResource()
-        }
         if (blockHashState.triggerBioPrompt) {
             durableNonceViewModel.resetPromptTrigger()
             bioPrompt.authenticate(promptInfo)
@@ -142,10 +134,9 @@ fun ApprovalsListScreen(
         topBar = {
             ApprovalsListTopAppBar(
                 title = stringResource(id = R.string.approvals),
-                onAppBarIconClick = {},
+                onAppBarIconClick = { navController.navigate(Screen.AccountRoute.route) },
                 navigationIcon = Icons.Outlined.AccountCircle,
-                navigationIconContentDes = stringResource(id = R.string.content_des_account_icon),
-                onLogout = approvalsViewModel::logout
+                navigationIconContentDes = stringResource(id = R.string.content_des_account_icon)
             )
         },
         content = { innerPadding ->
@@ -240,7 +231,6 @@ fun ApprovalsListScreen(
 fun ApprovalsListTopAppBar(
     title: String,
     onAppBarIconClick: () -> Unit,
-    onLogout: () -> Unit,
     navigationIcon: ImageVector,
     navigationIconContentDes: String
 ) {
@@ -249,11 +239,6 @@ fun ApprovalsListTopAppBar(
         onAppBarIconClick = { onAppBarIconClick() },
         navigationIcon = navigationIcon,
         navigationIconContentDes = navigationIconContentDes,
-        actions = {
-            TextButton(onClick = onLogout) {
-                Text(stringResource(R.string.logout), color = StrikeWhite)
-            }
-        }
     )
 }
 

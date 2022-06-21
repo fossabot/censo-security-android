@@ -22,7 +22,7 @@ fun StrikeTopAppBar(
     navigationIcon: ImageVector,
     navigationIconContentDes: String,
     actions: @Composable RowScope.() -> Unit = {},
-    ) {
+) {
     TopAppBar(
         title = { Text(text = title) },
         backgroundColor = BackgroundBlack,

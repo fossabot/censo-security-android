@@ -57,12 +57,49 @@ fun ApprovalInfoRow(
         )
 
         Text(
-            modifier = Modifier.padding(end = 16.dp).wrapContentHeight(),
+            modifier = Modifier
+                .padding(end = 16.dp)
+                .wrapContentHeight(),
             text = value,
             textAlign = TextAlign.Center,
             color = StrikeWhite,
             fontSize = 16.sp,
             fontWeight = FontWeight.Bold,
+            letterSpacing = 0.25.sp
+        )
+    }
+}
+
+@Composable
+fun AccountRow(
+    title: String,
+    value: String,
+    titleColor: Color = StrikeWhite,
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(AccountRowBackground)
+            .padding(vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Text(
+            modifier = Modifier.padding(start = 16.dp),
+            text = title,
+            color = titleColor,
+            fontSize = 18.sp,
+            letterSpacing = 0.25.sp,
+            fontWeight = FontWeight.W400
+        )
+        Text(
+            modifier = Modifier
+                .padding(end = 16.dp)
+                .wrapContentHeight(),
+            text = value,
+            textAlign = TextAlign.Center,
+            color = AccountTextGrey,
+            fontSize = 16.sp,
             letterSpacing = 0.25.sp
         )
     }

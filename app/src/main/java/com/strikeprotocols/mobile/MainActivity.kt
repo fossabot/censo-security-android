@@ -29,6 +29,7 @@ import com.strikeprotocols.mobile.data.UserState
 import com.strikeprotocols.mobile.data.UserStateListener
 import com.strikeprotocols.mobile.data.models.approval.WalletApproval
 import com.strikeprotocols.mobile.presentation.Screen
+import com.strikeprotocols.mobile.presentation.account.AccountScreen
 import com.strikeprotocols.mobile.presentation.approval_detail.ApprovalDetailsScreen
 import com.strikeprotocols.mobile.presentation.approvals.ApprovalsListScreen
 import com.strikeprotocols.mobile.presentation.approvals.ApprovalsViewModel
@@ -187,6 +188,11 @@ class MainActivity : FragmentActivity() {
                 route = Screen.BackupCheckRoute.route
             ) {
                 BackupCheckScreen(navController = navController, packageManager = packageManager)
+            }
+            composable(
+                route = Screen.AccountRoute.route
+            ) {
+                AccountScreen(navController = navController, approvalsViewModel = approvalsViewModel)
             }
         }
     }
