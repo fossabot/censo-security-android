@@ -23,7 +23,7 @@ import com.strikeprotocols.mobile.ui.theme.StrikeWhite
 
 @Composable
 fun UnknownApprovalItem(
-    timeRemainingInSeconds: Long,
+    timeRemainingInSeconds: Long?,
     accountRowMetaData: ApprovalRowMetaData,
     onUpdateAppClicked: () -> Unit
 ) {

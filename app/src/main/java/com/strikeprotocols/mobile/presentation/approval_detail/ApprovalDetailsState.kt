@@ -11,7 +11,7 @@ data class ApprovalDetailsState(
     val screenWasBackgrounded: Boolean = false,
     val approval: WalletApproval? = null,
     val multipleAccounts: DurableNonceViewModel.MultipleAccounts? = null,
-    val remainingTimeInSeconds: Long = 0L,
+    val remainingTimeInSeconds: Long? = null,
     val approvalDispositionState: ApprovalDispositionState? = ApprovalDispositionState()
 ) {
     val loadingData = approvalDispositionState?.loadingData == true

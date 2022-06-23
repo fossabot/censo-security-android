@@ -346,7 +346,9 @@ fun getFullDestinationName(initialValue: String, subText: String): AnnotatedStri
     }
 }
 
-fun getApprovalTimerText(context: Context, timeRemainingInSeconds: Long) : String {
+fun getApprovalTimerText(context: Context, timeRemainingInSeconds: Long?) : String? {
+    if(timeRemainingInSeconds == null) return null
+
     val timerFinished = timeRemainingInSeconds <= 0
 
     return if (timerFinished) {

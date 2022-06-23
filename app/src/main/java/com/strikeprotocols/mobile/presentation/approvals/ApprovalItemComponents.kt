@@ -25,7 +25,7 @@ import java.util.*
 
 @Composable
 fun ApprovalItemHeader(
-    timeRemainingInSeconds: Long,
+    timeRemainingInSeconds: Long?,
     approvalImageVector: ImageVector,
     approvalImageContentDescription: String,
     approvalType: String
@@ -44,12 +44,15 @@ fun ApprovalItemHeader(
             approvalImageContentDescription = approvalImageContentDescription,
             approvalType = approvalType
         )
-        Text(
-            modifier = Modifier.weight(2.5f),
-            text = convertSecondsIntoCountdownText(LocalContext.current, timeRemainingInSeconds),
-            textAlign = TextAlign.End,
-            color = GreyText
-        )
+
+        convertSecondsIntoCountdownText(LocalContext.current, timeRemainingInSeconds)?.let { timerText ->
+            Text(
+                modifier = Modifier.weight(2.5f),
+                text = timerText,
+                textAlign = TextAlign.End,
+                color = GreyText
+            )
+        }
     }
 }
 

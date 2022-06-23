@@ -168,7 +168,7 @@ fun ApprovalsListScreen(
                 },
                 walletApprovals = approvalsState.approvals,
                 shouldRefreshTimers = approvalsState.shouldRefreshTimers,
-                getSecondsLeftUntilCountdownIsOver = { submitDate: String?, totalTimeInSeconds: Int ->
+                getSecondsLeftUntilCountdownIsOver = { submitDate: String?, totalTimeInSeconds: Int? ->
                     calculateSecondsLeftUntilCountdownIsOver(
                         submitDate = submitDate,
                         totalTimeInSeconds = totalTimeInSeconds
@@ -250,7 +250,7 @@ fun ApprovalsList(
     onMoreInfoClicked: (WalletApproval?) -> Unit,
     walletApprovals: List<WalletApproval?>,
     shouldRefreshTimers: Boolean,
-    getSecondsLeftUntilCountdownIsOver: (String?, Int) -> Long
+    getSecondsLeftUntilCountdownIsOver: (String?, Int?) -> Long?
 ) {
     val context = LocalContext.current
 
@@ -291,7 +291,7 @@ fun ApprovalsList(
                         val type = safeApproval.getSolanaApprovalRequestType()
                         val rowMetaData = type.getApprovalRowMetaData(LocalContext.current)
 
-                        val calculatedTimerSecondsLeft = getSecondsLeftUntilCountdownIsOver(safeApproval.submitDate, safeApproval.approvalTimeoutInSeconds ?: 0)
+                        val calculatedTimerSecondsLeft = getSecondsLeftUntilCountdownIsOver(safeApproval.submitDate, safeApproval.approvalTimeoutInSeconds)
                         val timeRemainingInSeconds = if (shouldRefreshTimers) calculatedTimerSecondsLeft else calculatedTimerSecondsLeft
 
                         if (type.isUnknownTypeOrUIUnimplemented()) {

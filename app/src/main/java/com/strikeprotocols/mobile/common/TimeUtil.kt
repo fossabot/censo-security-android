@@ -8,7 +8,9 @@ import java.util.*
 import kotlin.math.min
 import kotlin.time.Duration.Companion.days
 
-fun convertSecondsIntoCountdownText(context: Context, totalTimeInSeconds: Long): String {
+fun convertSecondsIntoCountdownText(context: Context, totalTimeInSeconds: Long?): String? {
+    if(totalTimeInSeconds == null) return null
+
     if(totalTimeInSeconds <= 0) return context.getString(R.string.approval_expired)
 
     val hours = totalTimeInSeconds / HOURS_IN_SECONDS
@@ -58,7 +60,9 @@ fun convertSecondsIntoReadableText(totalTimeInMilliSeconds: Int, context: Contex
     return expirationTimeStringBuilder.toString()
 }
 
-fun calculateSecondsLeftUntilCountdownIsOver(submitDate: String?, totalTimeInSeconds: Int) : Long {
+fun calculateSecondsLeftUntilCountdownIsOver(submitDate: String?, totalTimeInSeconds: Int?) : Long? {
+    if(totalTimeInSeconds == null) return null
+
     if(totalTimeInSeconds <= 0 || submitDate == null) return 0
 
     //Convert the submit date into epoch seconds

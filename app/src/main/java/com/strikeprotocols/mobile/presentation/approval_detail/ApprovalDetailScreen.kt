@@ -239,7 +239,7 @@ fun ApprovalDetailsTopAppBar(
 fun ApprovalDetails(
     onApproveClicked: () -> Unit,
     onDenyClicked: () -> Unit,
-    timeRemainingInSeconds: Long,
+    timeRemainingInSeconds: Long?,
     isLoading: Boolean,
     approval: WalletApproval?,
     initiationRequest: Boolean
@@ -315,18 +315,20 @@ fun ApprovalStatus(
     approvalsReceived: Int,
     totalApprovals: Int,
     denialsReceived: Int,
-    expiresIn: String
+    expiresIn: String?
 ) {
-    
-    val factsData = FactsData(
-        title = stringResource(R.string.status),
-        facts = listOf(
-            Pair(stringResource(R.string.requested_by), requestedBy),
-            Pair(stringResource(R.string.approvals_received), "$approvalsReceived ${stringResource(id = R.string.of)} $totalApprovals"),
-            Pair(stringResource(R.string.denials_received), "$denialsReceived ${stringResource(id = R.string.of)} $totalApprovals"),
-            Pair(stringResource(R.string.expires_in), expiresIn)
-        )
+
+    val facts = mutableListOf(
+        Pair(stringResource(R.string.requested_by), requestedBy),
+        Pair(stringResource(R.string.approvals_received), "$approvalsReceived ${stringResource(id = R.string.of)} $totalApprovals"),
+        Pair(stringResource(R.string.denials_received), "$denialsReceived ${stringResource(id = R.string.of)} $totalApprovals"),
     )
+
+    if (expiresIn != null) {
+        facts.add(Pair(stringResource(R.string.expires_in), expiresIn))
+    }
+    
+    val factsData = FactsData(title = stringResource(R.string.status), facts = facts)
     
     FactRow(factsData = factsData)
 }

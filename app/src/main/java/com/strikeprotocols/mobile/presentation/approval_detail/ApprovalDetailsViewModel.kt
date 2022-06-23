@@ -107,7 +107,7 @@ class ApprovalDetailsViewModel @Inject constructor(
         state = state.copy(
             remainingTimeInSeconds = calculateSecondsLeftUntilCountdownIsOver(
                 submitDate = state.submitDate,
-                totalTimeInSeconds = state.approvalTimeoutInSeconds ?: 0
+                totalTimeInSeconds = state.approvalTimeoutInSeconds
             )
         )
     }
