@@ -357,6 +357,12 @@ sealed class SolanaApprovalRequestType {
         val name: String?
     ) : SolanaApprovalRequestType()
 
+    data class AcceptVaultInvitation(
+        val type: String,
+        val vaultGuid: String,
+        val vaultName: String
+    ) : SolanaApprovalRequestType()
+
     object UnknownApprovalType : SolanaApprovalRequestType()
 
     companion object {
@@ -381,7 +387,7 @@ sealed class SolanaApprovalRequestType {
             is BalanceAccountPolicyUpdate -> signingData.nonceAccountAddresses
             is SPLTokenAccountCreation -> signingData.nonceAccountAddresses
             is BalanceAccountAddressWhitelistUpdate -> signingData.nonceAccountAddresses
-            is LoginApprovalRequest, UnknownApprovalType -> emptyList()
+            is LoginApprovalRequest, is UnknownApprovalType, is AcceptVaultInvitation -> emptyList()
         }
     }
 }
@@ -402,6 +408,7 @@ enum class ApprovalType(val value: String) {
     WALLET_CONFIG_POLICY_UPDATE_TYPE("WalletConfigPolicyUpdate"),
     SPL_TOKEN_ACCOUNT_CREATION_TYPE("SPLTokenAccountCreation"),
     BALANCE_ACCOUNT_ADDRESS_WHITE_LIST_UPDATE_TYPE("BalanceAccountAddressWhitelistUpdate"),
+    ACCEPT_VAULT_INVITATION_TYPE("AcceptVaultInvitation"),
 
     UNKNOWN_TYPE("");
 
@@ -423,6 +430,7 @@ enum class ApprovalType(val value: String) {
                 WALLET_CONFIG_POLICY_UPDATE_TYPE.value -> WALLET_CONFIG_POLICY_UPDATE_TYPE
                 SPL_TOKEN_ACCOUNT_CREATION_TYPE.value -> SPL_TOKEN_ACCOUNT_CREATION_TYPE
                 BALANCE_ACCOUNT_ADDRESS_WHITE_LIST_UPDATE_TYPE.value -> BALANCE_ACCOUNT_ADDRESS_WHITE_LIST_UPDATE_TYPE
+                ACCEPT_VAULT_INVITATION_TYPE.value -> ACCEPT_VAULT_INVITATION_TYPE
                 else -> UNKNOWN_TYPE
             }
     }

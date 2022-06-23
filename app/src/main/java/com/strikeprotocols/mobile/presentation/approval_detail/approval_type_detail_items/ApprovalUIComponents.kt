@@ -9,6 +9,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.strikeprotocols.mobile.ui.theme.*
@@ -24,12 +25,12 @@ fun ApprovalRowTitleText(title: String) {
 }
 
 @Composable
-fun ApprovalSubtitle(text: String) {
+fun ApprovalSubtitle(text: String, fontSize: TextUnit = 16.sp) {
     Text(
         text = text,
         color = SubtitleGrey,
         textAlign = TextAlign.Center,
-        fontSize = 16.sp,
+        fontSize = fontSize,
         letterSpacing = 0.23.sp
     )
 }

@@ -15,7 +15,7 @@ class ParseApprovalRequestTypes {
     fun parseAllApprovalRequestTypes() {
         val allApprovalRequests = getFullListOfApprovalItems()
 
-        assertEquals(allApprovalRequests.size, 11)
+        assertEquals(12, allApprovalRequests.size)
 
         allApprovalRequests.forEach { approvalRequest ->
             assertNotNull(approvalRequest)
@@ -186,6 +186,11 @@ class ParseApprovalRequestTypes {
             JsonParser.parseString(MockedApprovals.dAppJson.trim())
         val dAppWalletApproval = deserializer.parseData(dAppJson)
         allApprovalRequests.add(dAppWalletApproval)
+
+        val acceptVaultInvitationJson: JsonElement =
+            JsonParser.parseString(MockedApprovals.acceptVaultInvitationJson.trim())
+        val acceptVaultInvitationApproval = deserializer.parseData(acceptVaultInvitationJson)
+        allApprovalRequests.add(acceptVaultInvitationApproval)
 
         return allApprovalRequests
     }

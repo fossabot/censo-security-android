@@ -53,6 +53,7 @@ data class InitiationRequest(
             is SPLTokenAccountCreation -> requestType.signingData
             is BalanceAccountAddressWhitelistUpdate -> requestType.signingData
             is LoginApprovalRequest,
+            is AcceptVaultInvitation,
             is UnknownApprovalType ->
                 throw Exception(UNKNOWN_INITIATION)
         }
@@ -74,6 +75,7 @@ data class InitiationRequest(
         is BalanceAccountAddressWhitelistUpdate -> 33
 
         is UnknownApprovalType,
+        is AcceptVaultInvitation,
         is LoginApprovalRequest -> 0
     }
 
@@ -275,7 +277,7 @@ data class InitiationRequest(
                 return buffer.toByteArray()
             }
 
-            is LoginApprovalRequest, is UnknownApprovalType -> {
+            is LoginApprovalRequest, is AcceptVaultInvitation, is UnknownApprovalType -> {
                 throw Exception("Unknown Approval")
             }
         }

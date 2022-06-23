@@ -189,6 +189,8 @@ fun ApprovalRowContent(
             WalletConfigPolicyUpdateRowContent(walletConfigPolicyUpdate = type)
         is SolanaApprovalRequestType.WrapConversionRequest -> 
             WrapConversionRequestRowContent(wrapConversionRequest = type)
+        is SolanaApprovalRequestType.AcceptVaultInvitation ->
+            AcceptVaultInvitationRowContent(acceptVaultInvitation = type)
         else -> {
             val header = type.getHeader(LocalContext.current)
             Text(text = header)
@@ -230,6 +232,8 @@ fun ApprovalDetailContent(approval: WalletApproval, type: SolanaApprovalRequestT
             WalletConfigPolicyUpdateDetailContent(walletConfigPolicyUpdate = type)
         is SolanaApprovalRequestType.WrapConversionRequest ->
             WrapConversionRequestDetailContent(wrapConversionRequest = type)
+        is SolanaApprovalRequestType.AcceptVaultInvitation ->
+            AcceptVaultInvitationDetailContent(acceptVaultInvitation = type)
         else -> Text(text = stringResource(R.string.unknown_approval_item))
     }
 }

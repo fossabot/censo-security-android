@@ -1,9 +1,13 @@
 package com.strikeprotocols.mobile
 
+import com.google.gson.JsonElement
+import com.google.gson.JsonParser
+import com.strikeprotocols.mobile.common.MockedApprovals
 import com.strikeprotocols.mobile.common.toHexString
 import com.strikeprotocols.mobile.data.models.ApprovalDisposition
 import com.strikeprotocols.mobile.data.models.Nonce
 import com.strikeprotocols.mobile.data.models.approval.*
+import junit.framework.Assert.*
 import org.junit.Assert
 import org.junit.Test
 
@@ -867,6 +871,36 @@ class SignableDataTest {
             approvalRequest.retrieveSignableData(approverPublicKey = "GYFxPGjuBXYKg1S91zgpVZCLP4guLGRho27bTAkAzjVL")
                 .toHexString()
         )
+    }
+
+    @Test
+    fun testAcceptVaultInvitation() {
+        val deserializer = WalletApprovalDeserializer()
+        val acceptVaultInvitationJson: JsonElement =
+            JsonParser.parseString(MockedApprovals.acceptVaultInvitationJson.trim())
+        val acceptVaultInvitationApproval = deserializer.parseData(acceptVaultInvitationJson)
+
+
+        val approvalDispositionRequest = ApprovalDispositionRequest(
+            approvalDisposition = ApprovalDisposition.APPROVE,
+            requestId = acceptVaultInvitationApproval.id!!,
+            requestType = acceptVaultInvitationApproval.getSolanaApprovalRequestType(),
+            nonces = listOf(),
+            email = "dont care"
+        )
+
+        when (approvalDispositionRequest.requestType) {
+            is SolanaApprovalRequestType.AcceptVaultInvitation -> {
+                val signableData =
+                    approvalDispositionRequest.retrieveSignableData(approverPublicKey = "GYFxPGjuBXYKg1S91zgpVZCLP4guLGRho27bTAkAzjVL")
+                assertEquals(
+                    String(signableData, charset = Charsets.UTF_8),
+                    "Test Organization 1"
+                )
+            }
+            else ->
+                assertTrue("should not get here", false)
+        }
     }
 
 }

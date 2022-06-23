@@ -213,6 +213,12 @@ class WalletApprovalDeserializer : JsonDeserializer<WalletApproval> {
                     SolanaApprovalRequestType.BalanceAccountAddressWhitelistUpdate::class.java
                 )
             }
+            ApprovalType.ACCEPT_VAULT_INVITATION_TYPE -> {
+                Gson().fromJson(
+                    details,
+                    SolanaApprovalRequestType.AcceptVaultInvitation::class.java
+                )
+            }
             else -> SolanaApprovalRequestType.UnknownApprovalType
         }
     }

@@ -47,7 +47,8 @@ data class ApprovalDispositionRequest(
             is BalanceAccountAddressWhitelistUpdate -> 14
 
             is LoginApprovalRequest,
-            is UnknownApprovalType -> 0
+            is UnknownApprovalType,
+            is AcceptVaultInvitation -> 0
         }
     }
 
@@ -225,7 +226,7 @@ data class ApprovalDispositionRequest(
                 buffer.write(hashBytes)
                 buffer.toByteArray()
             }
-            is LoginApprovalRequest -> throw Exception(
+            is LoginApprovalRequest, is AcceptVaultInvitation -> throw Exception(
                 INVALID_REQUEST_APPROVAL
             )
             is UnknownApprovalType -> throw Exception(
@@ -251,7 +252,7 @@ data class ApprovalDispositionRequest(
             is BalanceAccountAddressWhitelistUpdate -> requestType.signingData
             is DAppTransactionRequest -> requestType.signingData
 
-            is LoginApprovalRequest -> throw Exception(
+            is LoginApprovalRequest, is AcceptVaultInvitation -> throw Exception(
                 INVALID_REQUEST_APPROVAL
             )
             is UnknownApprovalType -> throw Exception(
@@ -272,57 +273,62 @@ data class ApprovalDispositionRequest(
         return buffer.toByteArray()
     }
 
-    //todo: make this string non nullable
     override fun retrieveSignableData(approverPublicKey: String?): ByteArray {
-        if (requestType is LoginApprovalRequest) {
-            return requestType.jwtToken.toByteArray(charset = Charsets.UTF_8)
-        } else {
-            if (approverPublicKey == null) throw Exception(MISSING_KEY)
+        return when (requestType) {
+            is LoginApprovalRequest ->
+                requestType.jwtToken.toByteArray(charset = Charsets.UTF_8)
+            is AcceptVaultInvitation ->
+                requestType.vaultName.toByteArray(charset = Charsets.UTF_8)
+            else -> {
+                if (approverPublicKey == null) throw Exception(MISSING_KEY)
 
-            val signingData = signingData()
+                val signingData = signingData()
 
-            val nonce = nonces.firstOrNull()
-            val nonceAccountAddress = requestType.nonceAccountAddresses().firstOrNull()
+                val nonce = nonces.firstOrNull()
+                val nonceAccountAddress = requestType.nonceAccountAddresses().firstOrNull()
 
-            if (nonce == null || nonceAccountAddress == null) {
-                throw Exception(NOT_ENOUGH_NONCE_ACCOUNTS)
-            }
+                if (nonce == null || nonceAccountAddress == null) {
+                    throw Exception(NOT_ENOUGH_NONCE_ACCOUNTS)
+                }
 
-            val keyList = listOf(
-                AccountMeta(
-                    publicKey = PublicKey(signingData.multisigOpAccountAddress),
-                    isSigner = false,
-                    isWritable = true
-                ),
-                AccountMeta(
-                    publicKey = PublicKey(approverPublicKey), isSigner = true, isWritable = false
-                ),
-                AccountMeta(
-                    publicKey = SYSVAR_CLOCK_PUBKEY,
-                    isSigner = false,
-                    isWritable = false
-                )
-            )
-
-            val programId = PublicKey(signingData.walletProgramId)
-
-            val transactionMessage = Transaction.compileMessage(
-                feePayer = PublicKey(signingData.feePayer),
-                recentBlockhash = nonce.value,
-                instructions = listOf(
-                    createAdvanceNonceInstruction(
-                        nonceAccountAddress = nonceAccountAddress,
-                        feePayer = signingData.feePayer
+                val keyList = listOf(
+                    AccountMeta(
+                        publicKey = PublicKey(signingData.multisigOpAccountAddress),
+                        isSigner = false,
+                        isWritable = true
                     ),
-                    TransactionInstruction(
-                        keys = keyList,
-                        programId = programId,
-                        data = generateTransactionInstructionData()
+                    AccountMeta(
+                        publicKey = PublicKey(approverPublicKey),
+                        isSigner = true,
+                        isWritable = false
+                    ),
+                    AccountMeta(
+                        publicKey = SYSVAR_CLOCK_PUBKEY,
+                        isSigner = false,
+                        isWritable = false
                     )
                 )
-            )
 
-            return transactionMessage.serialize()
+                val programId = PublicKey(signingData.walletProgramId)
+
+                val transactionMessage = Transaction.compileMessage(
+                    feePayer = PublicKey(signingData.feePayer),
+                    recentBlockhash = nonce.value,
+                    instructions = listOf(
+                        createAdvanceNonceInstruction(
+                            nonceAccountAddress = nonceAccountAddress,
+                            feePayer = signingData.feePayer
+                        ),
+                        TransactionInstruction(
+                            keys = keyList,
+                            programId = programId,
+                            data = generateTransactionInstructionData()
+                        )
+                    )
+                )
+
+                transactionMessage.serialize()
+            }
         }
     }
 

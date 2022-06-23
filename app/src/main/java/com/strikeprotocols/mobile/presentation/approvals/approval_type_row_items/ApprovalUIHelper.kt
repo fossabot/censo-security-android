@@ -72,6 +72,8 @@ fun SolanaApprovalRequestType.getHeader(context: Context): String {
                 context.getString(R.string.add_signers_update_approval_header)
             }
         }
+        is AcceptVaultInvitation ->
+            context.getString(R.string.accept_vault_invitation_approval_header)
         is WalletConfigPolicyUpdate ->
             context.getString(R.string.wallet_config_policy_update_approval_header)
         is WithdrawalRequest ->
@@ -107,6 +109,7 @@ fun SolanaApprovalRequestType.getApprovalTypeDialogTitle(context: Context): Stri
                 R.string.stake_account_creation_dialog_title
             }
         }
+        is AcceptVaultInvitation -> R.string.accept_vault_invitation_dialog_title
     }
 
     return context.getString(stringResId)
@@ -216,6 +219,11 @@ fun SolanaApprovalRequestType.getApprovalRowMetaData(context: Context): Approval
                 Icons.Filled.Login,
                 context.getString(R.string.login_icon_content_desc),
             )
+        is AcceptVaultInvitation ->
+            Pair(
+                Icons.Filled.Login,
+                context.getString(R.string.login_icon_content_desc),
+            )
     }
 
     return ApprovalRowMetaData(
@@ -244,6 +252,7 @@ fun SolanaApprovalRequestType.getRowTitle(context: Context): String =
         is AddressBookUpdate,
         is BalanceAccountCreation,
         is WalletConfigPolicyUpdate,
+        is AcceptVaultInvitation,
         is DAppBookUpdate -> context.getString(R.string.vault_change)
 
         is LoginApprovalRequest -> context.getString(R.string.authentication)
@@ -299,6 +308,9 @@ private fun SolanaApprovalRequestType.getApprovalTypeDialogMessage(context: Cont
         }
         is AddressBookUpdate -> {
             context.getString(R.string.address_book_update_dialog_message)
+        }
+        is AcceptVaultInvitation -> {
+            context.getString(R.string.accept_vault_invitation_dialog_message)
         }
         is BalanceAccountNameUpdate -> {
             "${context.getString(R.string.wallet_name_change_to_dialog_message)} $newAccountName"
