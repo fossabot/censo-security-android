@@ -11,7 +11,6 @@ import android.provider.Settings
 import androidx.core.app.NotificationCompat
 import androidx.core.app.TaskStackBuilder
 import androidx.core.net.toUri
-import com.google.firebase.installations.FirebaseInstallations
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import com.strikeprotocols.mobile.BuildConfig
@@ -24,11 +23,7 @@ import com.strikeprotocols.mobile.data.models.PushBody
 import com.strikeprotocols.mobile.presentation.Screen
 import com.strikeprotocols.mobile.service.MessagingService.Companion.BODY_KEY
 import com.strikeprotocols.mobile.service.MessagingService.Companion.DEFAULT_BODY
-import com.strikeprotocols.mobile.service.MessagingService.Companion.DEFAULT_KEY_ONE
-import com.strikeprotocols.mobile.service.MessagingService.Companion.DEFAULT_KEY_TWO
 import com.strikeprotocols.mobile.service.MessagingService.Companion.DEFAULT_TITLE
-import com.strikeprotocols.mobile.service.MessagingService.Companion.KEY_ONE_KEY
-import com.strikeprotocols.mobile.service.MessagingService.Companion.KEY_TWO_KEY
 import com.strikeprotocols.mobile.service.MessagingService.Companion.NOTIFICATION_DISPLAYED_KEY
 import com.strikeprotocols.mobile.service.MessagingService.Companion.TITLE_KEY
 import dagger.hilt.android.AndroidEntryPoint
@@ -115,11 +110,11 @@ class MessagingService : FirebaseMessagingService() {
     }
 
     private fun parsePushData(data: Map<String, String>): PushData {
+        //TODO: str-258 https://linear.app/strike-android/issue/STR-258/consume-the-push-data-image-in-the-notification-icon
+        // Consume image data for notification icon
         return PushData(
             title = data.getOrDefault(TITLE_KEY, DEFAULT_TITLE),
-            body = data.getOrDefault(BODY_KEY, DEFAULT_BODY),
-            keyOne = data.getOrDefault(KEY_ONE_KEY, DEFAULT_KEY_ONE),
-            keyTwo = data.getOrDefault(KEY_TWO_KEY, DEFAULT_KEY_TWO)
+            body = data.getOrDefault(BODY_KEY, DEFAULT_BODY)
         )
     }
 
@@ -181,15 +176,11 @@ class MessagingService : FirebaseMessagingService() {
 
         const val TITLE_KEY = "title"
         const val BODY_KEY = "body"
-        const val KEY_ONE_KEY = "key_1"
-        const val KEY_TWO_KEY = "key_2"
 
 
         const val DEFAULT_TITLE = "Strike Mobile"
         const val DEFAULT_BODY = "Verification Needed"
-        const val DEFAULT_KEY_ONE = ""
-        const val DEFAULT_KEY_TWO = ""
     }
 }
 
-data class PushData(val body: String, val title: String, val keyOne: String, val keyTwo: String)
+data class PushData(val body: String, val title: String)
