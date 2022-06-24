@@ -74,8 +74,8 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideSecurePrefs(): SecurePreferences {
-        return SecurePreferencesImpl()
+    fun provideSecurePrefs(@ApplicationContext applicationContext: Context): SecurePreferences {
+        return SecurePreferencesImpl(applicationContext)
     }
 
     @Provides

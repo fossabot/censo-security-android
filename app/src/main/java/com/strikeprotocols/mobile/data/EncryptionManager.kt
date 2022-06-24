@@ -3,6 +3,7 @@ package com.strikeprotocols.mobile.data
 import cash.z.ecc.android.bip39.Mnemonics
 import com.strikeprotocols.mobile.common.BaseWrapper
 import com.strikeprotocols.mobile.common.Ed25519HierarchicalPrivateKey
+import com.strikeprotocols.mobile.common.strikeLog
 import com.strikeprotocols.mobile.data.EncryptionManagerImpl.Companion.DATA_CHECK
 import com.strikeprotocols.mobile.data.EncryptionManagerImpl.Companion.NO_OFFSET_INDEX
 import com.strikeprotocols.mobile.data.EncryptionManagerImpl.Companion.NoKeyDataException

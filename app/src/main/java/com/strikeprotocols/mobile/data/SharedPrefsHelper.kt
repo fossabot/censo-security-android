@@ -3,6 +3,7 @@ package com.strikeprotocols.mobile.data
 import android.content.Context
 import android.content.SharedPreferences
 import com.strikeprotocols.mobile.common.BaseWrapper
+import com.strikeprotocols.mobile.common.strikeLog
 
 object SharedPrefsHelper {
 
@@ -28,21 +29,22 @@ object SharedPrefsHelper {
         editor.apply()
     }
 
-    fun saveMainKey(email: String, mainKey: ByteArray) {
-        val data = if(mainKey.isEmpty()) "" else BaseWrapper.encode(mainKey)
-        val editor = sharedPrefs.edit()
+    fun saveMainKey(encryptedPrefs: SharedPreferences, email: String, mainKey: ByteArray) {
+        val data = if (mainKey.isEmpty()) "" else BaseWrapper.encode(mainKey)
+        val editor = encryptedPrefs.edit()
         editor.putString("$email$MAIN_KEY", data)
         editor.apply()
     }
 
-    fun retrieveMainKey(email: String) : String {
-        return sharedPrefs.getString("$email$MAIN_KEY", "") ?: ""
+    fun retrieveMainKey(encryptedPrefs: SharedPreferences, email: String): String {
+        return encryptedPrefs.getString("$email$MAIN_KEY", "") ?: ""
     }
 
-    fun clearMainKey(email: String) {
-        val editor = sharedPrefs.edit()
+    fun clearMainKey(encryptedPrefs: SharedPreferences, email: String) {
+        val editor = encryptedPrefs.edit()
         editor.putString("$email$MAIN_KEY", "")
-        editor.apply()    }
+        editor.apply()
+    }
 
     fun saveUserEmail(email: String) {
         val editor = sharedPrefs.edit()

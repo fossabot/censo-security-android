@@ -9,6 +9,7 @@ data class VerifyUser(
     val publicKeys: List<WalletPublicKey?>?,
     val useStaticKey: Boolean?
 ) {
+    //TODO: STR-262 Look into why this is returning null and not the first public key
     val firstPublicKey: String? = publicKeys?.firstOrNull { !it?.key.isNullOrEmpty() }?.key
 }
 

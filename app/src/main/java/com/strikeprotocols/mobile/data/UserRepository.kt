@@ -173,7 +173,7 @@ class UserRepositoryImpl(
             return false
         }
 
-        val publicKey = verifyUser.firstPublicKey
+        val publicKey = verifyUser.publicKeys?.get(0)?.key //verifyUser.firstPublicKey
 
         if (publicKey.isNullOrEmpty()) {
             return false
@@ -195,6 +195,7 @@ class UserRepositoryImpl(
 
         return false
     }
+
 }
 
 data class InitialAuthData(val walletSignerBody: WalletSigner)
