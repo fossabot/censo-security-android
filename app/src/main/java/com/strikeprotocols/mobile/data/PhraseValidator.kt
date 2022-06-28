@@ -9,6 +9,7 @@ import java.util.*
 interface PhraseValidator {
     fun isPhraseValid(phrase: String): Boolean
     fun userInputValidPhrase(originalPhrase: String, inputtedPhrase: String): Boolean
+    fun format(text: String): String
 
     companion object {
         const val EXPECTED_LENGTH = 24
@@ -78,6 +79,10 @@ class PhraseValidatorImpl() : PhraseValidator {
 
         return false
     }
+
+    override fun format(text: String) =
+        text.trim().replace("[^A-Za-z0-9 ]".toRegex(), " ").replace("\\s+".toRegex(), " ")
+
 
     companion object {
         val words = Mnemonics.getCachedWords(Locale.ENGLISH.language)

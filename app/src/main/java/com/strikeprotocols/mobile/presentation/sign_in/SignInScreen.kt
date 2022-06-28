@@ -1,5 +1,9 @@
 package com.strikeprotocols.mobile.presentation.sign_in
 
+import android.content.ClipDescription
+import android.content.ClipboardManager
+import android.content.ContentResolver
+import android.content.Context
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -25,6 +29,9 @@ import androidx.navigation.NavController
 import com.strikeprotocols.mobile.R
 import com.strikeprotocols.mobile.common.Resource
 import com.strikeprotocols.mobile.common.getAuthFlowErrorMessage
+import com.strikeprotocols.mobile.common.strikeLog
+import com.strikeprotocols.mobile.data.InvalidKeyPhraseException
+import com.strikeprotocols.mobile.data.RegenerateKeyPhraseException
 import com.strikeprotocols.mobile.presentation.Screen
 import com.strikeprotocols.mobile.presentation.components.AutoCompleteUI
 import com.strikeprotocols.mobile.presentation.components.SignInTextField
@@ -175,6 +182,7 @@ fun SignInScreen(
         Spacer(modifier = Modifier.height(24.dp))
     }
 
+    //region PhraseVerificationUI
     if (state.showPhraseVerificationUI) {
         val words = state.phrase?.split(" ") ?: emptyList()
         val leftWords = words.filterIndexed { index, _ -> index % 2 == 0 }
@@ -264,17 +272,74 @@ fun SignInScreen(
             }
         }
     }
+    //endregion
 
+    //region PhraseKeyRegenerationUI
     if (state.showPhraseKeyRegenerationUI) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(color = Color.White)
+                .background(color = Color.Black)
                 .clickable { },
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Bottom
         ) {
-            Button(onClick = {
+
+            //region Clipboard
+            val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+            //endregion
+
+            TextField(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 16.dp, end = 16.dp),
+                value = state.phrase ?: "",
+                onValueChange = viewModel::updatePhrase,
+                placeholder = {
+                    Text(text = "Enter phrase here", color = StrikeWhite)
+                },
+                textStyle = MaterialTheme.typography.subtitle1.copy(color = StrikeWhite),
+                colors = TextFieldDefaults.textFieldColors(
+                    textColor = StrikeWhite,
+                    backgroundColor = UnfocusedGrey
+                ),
+                singleLine = true
+            )
+            Spacer(modifier = Modifier.height(36.dp))
+            Button(
+                onClick = {
+                    val primaryClipDescription = clipboard.primaryClipDescription
+                    if (primaryClipDescription?.hasMimeType(ClipDescription.MIMETYPE_TEXT_PLAIN) != true) {
+                        Toast.makeText(
+                            context,
+                            context.getString(R.string.invalid_clipboard_data),
+                            Toast.LENGTH_LONG
+                        ).show()
+                        return@Button
+                    }
+
+                    val item = clipboard.primaryClip?.getItemAt(0)
+                    if (item == null || item.text == null) {
+                        Toast.makeText(
+                            context,
+                            context.getString(R.string.unable_to_retrieve_clipboard_data),
+                            Toast.LENGTH_LONG
+                        ).show()
+                        return@Button
+                    }
+
+                    viewModel.updatePhrase(phrase = item.text.toString())
+                }) {
+                Text(
+                    text = "Paste phrase",
+                    color = StrikeWhite, fontSize = 16.sp,
+                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 8.dp)
+                )
+            }
+            Spacer(modifier = Modifier.height(48.dp))
+            Button(
+                enabled = !state.phrase.isNullOrEmpty(),
+                onClick = {
                 viewModel.verifyPhraseToRegenerateKeyPair()
             }) {
                 if (state.keyRegenerationLoading) {
@@ -284,16 +349,25 @@ fun SignInScreen(
                         strokeWidth = 4.dp,
                     )
                 } else {
-                    Text(
-                        text = "I have entered my secret phrase",
-                        color = StrikeWhite, fontSize = 16.sp,
-                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 8.dp)
-                    )
+                    if (state.phrase.isNullOrEmpty()) {
+                        Text(
+                            text = "Please enter key phrase for regeneration",
+                            color = StrikeWhite, fontSize = 16.sp,
+                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 8.dp)
+                        )
+                    } else {
+                        Text(
+                            text = "Submit key phrase for regeneration",
+                            color = StrikeWhite, fontSize = 16.sp,
+                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 8.dp)
+                        )
+                    }
                 }
             }
-            Spacer(modifier = Modifier.height(36.dp))
+            Spacer(modifier = Modifier.height(250.dp))
         }
     }
+    //endregion
 
     if (state.loggedInStatusResult is Resource.Loading || state.autoAuthFlowLoading) {
         Box(
@@ -369,9 +443,21 @@ fun SignInScreen(
     }
 
     if(state.regenerateKeyFromPhrase is Resource.Error) {
+        val message: String = when (state.regenerateKeyFromPhrase.message) {
+            RegenerateKeyPhraseException.DEFAULT_KEY_REGENERATION_ERROR -> {
+                stringResource(R.string.key_regeneration_error)
+            }
+            InvalidKeyPhraseException.INVALID_KEY_PHRASE_ERROR -> {
+                stringResource(R.string.invalid_key_phrase_error)
+            }
+            else -> {
+                stringResource(R.string.phrase_regeneration_fail)
+            }
+        }
+
         PhraseAlertDialog(
             dialogTitle = stringResource(R.string.phrase_verification_dialog_fail_title),
-            dialogText = stringResource(R.string.phrase_regeneration_fail),
+            dialogText = message,
             onConfirm = {
                 viewModel.restartRegenerateKeyFromPhraseFlow()
             }

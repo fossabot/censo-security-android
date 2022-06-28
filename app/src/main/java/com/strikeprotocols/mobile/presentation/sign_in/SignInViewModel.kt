@@ -7,7 +7,6 @@ import javax.inject.Inject
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.viewModelScope
-import cash.z.ecc.android.bip39.Mnemonics
 import com.google.firebase.messaging.FirebaseMessaging
 import com.strikeprotocols.mobile.common.*
 import com.strikeprotocols.mobile.data.*
@@ -24,7 +23,8 @@ import java.util.*
 class SignInViewModel @Inject constructor(
     private val userRepository: UserRepository,
     private val pushRepository: PushRepository,
-    private val strikeUserData: StrikeUserData
+    private val strikeUserData: StrikeUserData,
+    private val phraseValidator: PhraseValidator
 ) : ViewModel() {
 
     var state by mutableStateOf(SignInState())
@@ -37,6 +37,11 @@ class SignInViewModel @Inject constructor(
 
     fun updatePassword(updatedPassword: String) {
         state = state.copy(password = updatedPassword, passwordErrorEnabled = false)
+    }
+
+    fun updatePhrase(phrase: String) {
+        val formattedPhrase = phraseValidator.format(text = phrase)
+        state = state.copy(phrase = formattedPhrase)
     }
     //endregion
 
@@ -292,6 +297,7 @@ class SignInViewModel @Inject constructor(
     }
 
     fun verifyPhraseToGenerateKeyPair(phrase: String) {
+        val trimmedPhrase = phrase.trim()
         if (Random().nextBoolean() || Random().nextBoolean() || Random().nextBoolean()) {
             verifiedPhraseSuccess()
         } else {
@@ -339,32 +345,45 @@ class SignInViewModel @Inject constructor(
     }
 
     fun verifyPhraseToRegenerateKeyPair() {
-        state = state.copy(keyRegenerationLoading = true)
-        val phrase =
-            if (Random().nextBoolean() || Random().nextBoolean() || Random().nextBoolean()) {
-                GeneralDummyData.PhraseDummyData.phrase
-            } else {
-                String(Mnemonics.MnemonicCode(Mnemonics.WordCount.COUNT_24).chars)
-            }
+        viewModelScope.launch {
+            state.phrase?.let { safePhrase ->
+                state = state.copy(keyRegenerationLoading = true)
 
-        val verifyUser = state.verifyUserResult.data
-        val publicKey = verifyUser?.firstPublicKey
-
-        if (verifyUser != null && publicKey != null) {
-            viewModelScope.launch {
                 try {
-                    userRepository.regenerateAuthDataAndSaveKeyToUser(phrase, publicKey)
-                    state = state.copy(
-                        regenerateKeyFromPhrase = Resource.Uninitialized,
-                        keyRegenerationLoading = false,
-                        showPhraseKeyRegenerationUI = false)
-                    restartAuthFlow()
+                    if (!phraseValidator.isPhraseValid(phrase = safePhrase)) {
+                        state = state.copy(
+                            keyRegenerationLoading = false,
+                            regenerateKeyFromPhrase = Resource.Error(InvalidKeyPhraseException.INVALID_KEY_PHRASE_ERROR)
+                        )
+                        return@launch
+                    }
                 } catch (e: Exception) {
-                    regeneratePhraseFailure(e)
+                    state = state.copy(
+                        keyRegenerationLoading = false,
+                        regenerateKeyFromPhrase = Resource.Error(
+                            e.message ?: RegenerateKeyPhraseException.DEFAULT_KEY_REGENERATION_ERROR
+                        )
+                    )
                 }
-            }
-        } else {
-            regeneratePhraseFailure(AuthDataException.InvalidVerifyUserException())
+
+                val verifyUser = state.verifyUserResult.data
+                val publicKey = verifyUser?.firstPublicKey
+
+                if (verifyUser != null && publicKey != null) {
+                    try {
+                        userRepository.regenerateAuthDataAndSaveKeyToUser(safePhrase, publicKey)
+                        state = state.copy(
+                            regenerateKeyFromPhrase = Resource.Uninitialized,
+                            keyRegenerationLoading = false,
+                            showPhraseKeyRegenerationUI = false)
+                        restartAuthFlow()
+                    } catch (e: Exception) {
+                        regeneratePhraseFailure(e)
+                    }
+                } else {
+                    regeneratePhraseFailure(AuthDataException.InvalidVerifyUserException())
+                }
+            } ?: restartAuthFlow()
         }
     }
 
