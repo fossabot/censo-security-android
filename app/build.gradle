@@ -86,7 +86,7 @@ android {
             debuggable false
         }
         demoOne {
-            resValue "string", "app_name", "$appName (Demo)"
+            resValue "string", "app_name", "Demo1 Strike"
             applicationIdSuffix ".demo"
             minifyEnabled false
             buildConfigField "String", "BASE_URL", "\"https://brooklyn-demo1.strikeprotocols.com/\""
@@ -99,7 +99,7 @@ android {
         }
         demoTwo {
             initWith demoOne
-            resValue "string", "app_name", "$appName (Demo2)"
+            resValue "string", "app_name", "Demo2 Strike"
             applicationIdSuffix ".demo2"
             buildConfigField "String", "BASE_URL", "\"https://brooklyn-demo2.strikeprotocols.com/\""
             buildConfigField "String", "SOLANA_URL", "\"https://solana-validator-demo2.strikeprotocols.com\""
@@ -108,7 +108,7 @@ android {
             buildConfigField "String", "REDIRECT_SUFFIX", "\"-demo-2\""
         }
         preRelease {
-            resValue "string", "app_name", "$appName (Develop)"
+            resValue "string", "app_name", "PreRelease Strike"
             applicationIdSuffix ".prerelease"
             minifyEnabled false
             buildConfigField "String", "BASE_URL", "\"https://brooklyn-prerelease.strikeprotocols.com/\""
@@ -119,8 +119,16 @@ android {
             buildConfigField "String", "REDIRECT_SUFFIX", "\"-dev\""
             debuggable false
         }
+        auth {
+            initWith preRelease
+            resValue "string", "app_name", "Auth Strike"
+            applicationIdSuffix ".auth"
+            minifyEnabled false
+            debuggable false
+        }
         debug {
             initWith preRelease
+            resValue "string", "app_name", "Debug Strike"
             applicationIdSuffix ".debug"
             minifyEnabled false
             debuggable true
