@@ -2,7 +2,7 @@ package com.strikeprotocols.mobile.presentation.sign_in
 
 import android.content.ClipDescription
 import android.content.ClipboardManager
-import android.content.ContentResolver
+import android.content.ClipData
 import android.content.Context
 import android.widget.Toast
 import androidx.compose.foundation.Image
@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.strikeprotocols.mobile.BuildConfig
 import com.strikeprotocols.mobile.R
 import com.strikeprotocols.mobile.common.Resource
 import com.strikeprotocols.mobile.common.getAuthFlowErrorMessage
@@ -184,7 +185,8 @@ fun SignInScreen(
 
     //region PhraseVerificationUI
     if (state.showPhraseVerificationUI) {
-        val words = state.phrase?.split(" ") ?: emptyList()
+        val phrase = state.phrase
+        val words = phrase?.split(" ") ?: emptyList()
         val leftWords = words.filterIndexed { index, _ -> index % 2 == 0 }
         val rightWords = words.filterIndexed { index, _ -> index % 2 != 0 }
 
@@ -196,22 +198,6 @@ fun SignInScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-
-            AutoCompleteUI(
-                modifier = Modifier.fillMaxWidth(),
-                query = viewModel.state.wordQuery,
-                queryHint = stringResource(R.string.key_phrase_hint),
-                predictions = viewModel.state.wordPredictions,
-                onQueryChanged = viewModel::updatePredictions,
-                onClearClick = viewModel::clearQuery,
-                onItemClick = viewModel::wordSelected,
-                onDoneActionClick = viewModel::wordEntered,
-                itemContent = {
-                    Box(modifier = Modifier.background(color = StrikeWhite)) {
-                        Text(text = it, color = Color.Black)
-                    }
-                }
-            )
 
             Row {
                 Column(
@@ -262,8 +248,32 @@ fun SignInScreen(
             }
             Spacer(modifier = Modifier.height(36.dp))
             Button(onClick = {
-                viewModel.verifyPhraseToGenerateKeyPair(state.phrase ?: "")
+                if (phrase != null) {
+                    val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                    val clip: ClipData = ClipData.newPlainText(SignInViewModel.CLIPBOARD_LABEL_PHRASE, phrase)
+                    clipboard.setPrimaryClip(clip)
+                    Toast.makeText(context, context.getString(R.string.copy_key_phrase_success), Toast.LENGTH_LONG).show()
+                } else {
+                    Toast.makeText(context, context.getString(R.string.copied_key_phrase_failure), Toast.LENGTH_LONG).show()
+                }
             }) {
+                Text(
+                    text = "Copy full phrase",
+                    color = StrikeWhite, fontSize = 16.sp,
+                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 8.dp)
+                )
+            }
+            Spacer(modifier = Modifier.height(36.dp))
+            Button(onClick = {
+                viewModel.verifyPhraseToGenerateKeyPair()
+            }) {
+                val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P) {
+                    clipboard.clearPrimaryClip()
+                } else {
+                    val clip: ClipData = ClipData.newPlainText(SignInViewModel.CLIPBOARD_LABEL_PHRASE, "")
+                    clipboard.setPrimaryClip(clip)
+                }
                 Text(
                     text = "I Have Saved The Full Phrase",
                     color = StrikeWhite, fontSize = 16.sp,
@@ -284,10 +294,7 @@ fun SignInScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Bottom
         ) {
-
-            //region Clipboard
             val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-            //endregion
 
             TextField(
                 modifier = Modifier

@@ -27,6 +27,10 @@ class SignInViewModel @Inject constructor(
     private val phraseValidator: PhraseValidator
 ) : ViewModel() {
 
+    companion object {
+        const val CLIPBOARD_LABEL_PHRASE = "Phrase"
+    }
+
     var state by mutableStateOf(SignInState())
         private set
 
@@ -296,9 +300,8 @@ class SignInViewModel @Inject constructor(
         }
     }
 
-    fun verifyPhraseToGenerateKeyPair(phrase: String) {
-        val trimmedPhrase = phrase.trim()
-        if (Random().nextBoolean() || Random().nextBoolean() || Random().nextBoolean()) {
+    fun verifyPhraseToGenerateKeyPair() {
+        if (phraseValidator.isPhraseValid(state.phrase ?: "")) {
             verifiedPhraseSuccess()
         } else {
             verifiedPhraseFailure(Exception("Failed to verify phrase"))
@@ -367,7 +370,7 @@ class SignInViewModel @Inject constructor(
                 }
 
                 val verifyUser = state.verifyUserResult.data
-                val publicKey = verifyUser?.firstPublicKey
+                val publicKey = verifyUser?.firstPublicKey()
 
                 if (verifyUser != null && publicKey != null) {
                     try {

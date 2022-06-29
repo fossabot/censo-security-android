@@ -81,7 +81,7 @@ class PhraseValidatorImpl() : PhraseValidator {
     }
 
     override fun format(text: String) =
-        text.trim().replace("[^A-Za-z0-9 ]".toRegex(), " ").replace("\\s+".toRegex(), " ")
+        text.replace("[^A-Za-z ]".toRegex(), " ").replace("\\s+".toRegex(), " ").trim()
 
 
     companion object {

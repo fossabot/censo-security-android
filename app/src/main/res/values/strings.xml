@@ -219,15 +219,21 @@
     <string name="vault_name">Vault Name</string>
 =======
     <string name="clear">Clear</string>
+<<<<<<< HEAD
     <string name="key_phrase_hint">Enter Key Phrase Here</string>
 <<<<<<< HEAD
 >>>>>>> f041435 (Setup autocomplete functionality text view. Add basic logic to VM to update query and show predictions.)
 =======
+=======
+>>>>>>> 25be11c (Added copy functionality during the initial login so user can copy key phrase)
     <string name="invalid_clipboard_data">Pasted key phrase is not in a valid format, please try copying plain text</string>
     <string name="unable_to_retrieve_clipboard_data">Unable to retrieve pasted data, please try again</string>
 
     <string name="invalid_key_phrase_error">Invalid Key Phrase, please try again with the correct key phrase.</string>
     <string name="key_regeneration_error">Failed to regenerate key from key phrase, please try again.</string>
 >>>>>>> b2d44a5 (Added functionality to paste key phrase during the key regen flow)
+
+    <string name="copy_key_phrase_success">Copied phrase to clipboard</string>
+    <string name="copied_key_phrase_failure">Failed to copy phrase to clipboard, please try again</string>
 
 </resources>
