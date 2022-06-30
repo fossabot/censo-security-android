@@ -173,7 +173,7 @@ class UserRepositoryImpl(
             return false
         }
 
-        val publicKey = verifyUser.publicKeys?.get(0)?.key //verifyUser.firstPublicKey
+        val publicKey = verifyUser.firstPublicKey()
 
         if (publicKey.isNullOrEmpty()) {
             return false
