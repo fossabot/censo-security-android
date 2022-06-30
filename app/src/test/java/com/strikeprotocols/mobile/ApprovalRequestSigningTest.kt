@@ -52,7 +52,7 @@ class ApprovalRequestSigningTest {
 
         keyPair = encryptionManager.createKeyPair(Mnemonics.MnemonicCode(phrase = phrase))
 
-        whenever(securePreferences.retrievePrivateKey(userEmail)).then {
+        whenever(securePreferences.retrieveSolanaKey(userEmail)).then {
             BaseWrapper.encode(keyPair.privateKey)
         }
 

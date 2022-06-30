@@ -9,9 +9,9 @@ import com.strikeprotocols.mobile.data.SecurePreferencesImpl.Companion.SHARED_PR
 import javax.inject.Inject
 
 interface SecurePreferences {
-    fun savePrivateKey(email: String, privateKey: ByteArray)
-    fun retrievePrivateKey(email: String): String
-    fun clearPrivateKey(email: String)
+    fun saveSolanaKey(email: String, privateKey: ByteArray)
+    fun retrieveSolanaKey(email: String): String
+    fun clearSolanaKey(email: String)
     fun saveRootSeed(email: String, rootSeed: ByteArray)
     fun retrieveRootSeed(email: String) : String
     fun clearRootSeed(email: String)
@@ -33,19 +33,19 @@ class SecurePreferencesImpl @Inject constructor(applicationContext: Context) :
         EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
     )
 
-    override fun savePrivateKey(email: String, privateKey: ByteArray) {
-        SharedPrefsHelper.saveMainKey(
+    override fun saveSolanaKey(email: String, privateKey: ByteArray) {
+        SharedPrefsHelper.saveSolanaKey(
             encryptedPrefs = secureSharedPreferences,
             email = email,
-            mainKey = privateKey
+            solanaKey = privateKey
         )
     }
 
-    override fun retrievePrivateKey(email: String) =
-        SharedPrefsHelper.retrieveMainKey(encryptedPrefs = secureSharedPreferences, email)
+    override fun retrieveSolanaKey(email: String) =
+        SharedPrefsHelper.retrieveSolanaKey(encryptedPrefs = secureSharedPreferences, email)
 
-    override fun clearPrivateKey(email: String) {
-        SharedPrefsHelper.clearMainKey(encryptedPrefs = secureSharedPreferences, email = email)
+    override fun clearSolanaKey(email: String) {
+        SharedPrefsHelper.clearSolanaKey(encryptedPrefs = secureSharedPreferences, email = email)
     }
 
     override fun saveRootSeed(email: String, rootSeed: ByteArray) {

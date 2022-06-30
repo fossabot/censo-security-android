@@ -4,7 +4,6 @@ import cash.z.ecc.android.bip39.Mnemonics
 import cash.z.ecc.android.bip39.toSeed
 import com.strikeprotocols.mobile.common.BaseWrapper
 import com.strikeprotocols.mobile.common.Ed25519HierarchicalPrivateKey
-import com.strikeprotocols.mobile.common.strikeLog
 import com.strikeprotocols.mobile.data.EncryptionManagerImpl.Companion.DATA_CHECK
 import com.strikeprotocols.mobile.data.EncryptionManagerImpl.Companion.NO_OFFSET_INDEX
 import com.strikeprotocols.mobile.data.EncryptionManagerImpl.Companion.NoKeyDataException
@@ -51,7 +50,7 @@ interface EncryptionManager {
     ): Boolean
     fun generatePhrase(): String
 
-    fun regeneratePublicKey(mainKey: String): String
+    fun regeneratePublicKey(privateKey: String): String
 }
 
 class EncryptionManagerImpl @Inject constructor(private val securePreferences: SecurePreferences) :
@@ -102,18 +101,18 @@ class EncryptionManagerImpl @Inject constructor(private val securePreferences: S
     }
 
     override fun signApprovalDispositionMessage(signable: Signable, userEmail: String): String {
-        val mainKey = securePreferences.retrievePrivateKey(userEmail)
+        val solanaKey = securePreferences.retrieveSolanaKey(userEmail)
 
-        if (mainKey.isEmpty()) {
+        if (solanaKey.isEmpty()) {
             throw NoKeyDataException
         }
 
-        val publicKey = regeneratePublicKey(mainKey = mainKey)
+        val publicKey = regeneratePublicKey(privateKey = solanaKey)
 
         val messageToSign = signable.retrieveSignableData(approverPublicKey = publicKey)
 
         val signedData = signData(
-            data = messageToSign, privateKey = BaseWrapper.decode(mainKey)
+            data = messageToSign, privateKey = BaseWrapper.decode(solanaKey)
         )
 
         return BaseWrapper.encodeToBase64(signedData)
@@ -124,12 +123,12 @@ class EncryptionManagerImpl @Inject constructor(private val securePreferences: S
         signable: Signable,
         userEmail: String
     ): String {
-        val privateKey = securePreferences.retrievePrivateKey(userEmail)
+        val privateKey = securePreferences.retrieveSolanaKey(userEmail)
         if (privateKey.isEmpty()) {
             throw NoKeyDataException
         }
 
-        val publicKey = regeneratePublicKey(mainKey = privateKey)
+        val publicKey = regeneratePublicKey(privateKey = privateKey)
 
         val messageToSign = signable.retrieveSignableData(approverPublicKey = publicKey)
 
@@ -145,17 +144,17 @@ class EncryptionManagerImpl @Inject constructor(private val securePreferences: S
         userEmail: String,
         signableSupplyInstructions: SignableSupplyInstructions
     ): List<String> {
-        val mainKey = securePreferences.retrievePrivateKey(userEmail)
+        val solanaKey = securePreferences.retrieveSolanaKey(userEmail)
 
-        if (mainKey.isEmpty()) {
+        if (solanaKey.isEmpty()) {
             throw NoKeyDataException
         }
 
-        val publicKey = regeneratePublicKey(mainKey = mainKey)
+        val publicKey = regeneratePublicKey(privateKey = solanaKey)
 
         return signableSupplyInstructions.signableSupplyInstructions(approverPublicKey = publicKey)
             .map {
-                val signature = signData(it, BaseWrapper.decode(mainKey))
+                val signature = signData(it, BaseWrapper.decode(solanaKey))
                 BaseWrapper.encodeToBase64(signature)
             }
             .toList()
@@ -179,9 +178,9 @@ class EncryptionManagerImpl @Inject constructor(private val securePreferences: S
     override fun generatePhrase(): String =
         String(Mnemonics.MnemonicCode(Mnemonics.WordCount.COUNT_24).chars)
 
-    override fun regeneratePublicKey(mainKey: String): String {
+    override fun regeneratePublicKey(privateKey: String): String {
         try {
-            val base58PrivateKey = BaseWrapper.decode(mainKey)
+            val base58PrivateKey = BaseWrapper.decode(privateKey)
             val privateKeyParam = Ed25519PrivateKeyParameters(base58PrivateKey.inputStream())
 
             val publicKey = privateKeyParam.generatePublicKey()

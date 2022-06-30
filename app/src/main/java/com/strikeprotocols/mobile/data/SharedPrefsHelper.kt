@@ -11,7 +11,7 @@ object SharedPrefsHelper {
 
     private const val USER_LOGGED_IN = "skipped_login"
     private const val USER_EMAIL = "user_email"
-    private const val MAIN_KEY = "_main_key"
+    private const val SOLANA_KEY = "_solana_key"
     private const val ROOT_SEED = "_root_seed"
 
     private lateinit var appContext: Context
@@ -30,43 +30,43 @@ object SharedPrefsHelper {
         editor.apply()
     }
 
-    fun saveMainKey(encryptedPrefs: SharedPreferences, email: String, mainKey: ByteArray) {
-        val data = if (mainKey.isEmpty()) "" else BaseWrapper.encode(mainKey)
+    fun saveSolanaKey(encryptedPrefs: SharedPreferences, email: String, solanaKey: ByteArray) {
+        val data = if (solanaKey.isEmpty()) "" else BaseWrapper.encode(solanaKey)
         val editor = encryptedPrefs.edit()
-        editor.putString("$email$MAIN_KEY", data)
+        editor.putString("${email.lowercase()}$SOLANA_KEY", data)
         editor.apply()
     }
 
-    fun retrieveMainKey(encryptedPrefs: SharedPreferences, email: String): String {
-        return encryptedPrefs.getString("$email$MAIN_KEY", "") ?: ""
+    fun retrieveSolanaKey(encryptedPrefs: SharedPreferences, email: String): String {
+        return encryptedPrefs.getString("${email.lowercase()}$SOLANA_KEY", "") ?: ""
     }
 
-    fun clearMainKey(encryptedPrefs: SharedPreferences, email: String) {
+    fun clearSolanaKey(encryptedPrefs: SharedPreferences, email: String) {
         val editor = encryptedPrefs.edit()
-        editor.putString("$email$MAIN_KEY", "")
+        editor.putString("${email.lowercase()}$SOLANA_KEY", "")
         editor.apply()
     }
 
     fun saveRootSeed(encryptedPrefs: SharedPreferences, email: String, rootSeed: ByteArray) {
         val data = if (rootSeed.isEmpty()) "" else BaseWrapper.encode(rootSeed)
         val editor = encryptedPrefs.edit()
-        editor.putString("$email$ROOT_SEED", data)
+        editor.putString("${email.lowercase()}$ROOT_SEED", data)
         editor.apply()
     }
 
     fun retrieveRootSeed(encryptedPrefs: SharedPreferences, email: String): String {
-        return encryptedPrefs.getString("$email$ROOT_SEED", "") ?: ""
+        return encryptedPrefs.getString("${email.lowercase()}$ROOT_SEED", "") ?: ""
     }
 
     fun clearRootSeed(encryptedPrefs: SharedPreferences, email: String) {
         val editor = encryptedPrefs.edit()
-        editor.putString("$email$ROOT_SEED", "")
+        editor.putString("${email.lowercase()}$ROOT_SEED", "")
         editor.apply()
     }
 
     fun saveUserEmail(email: String) {
         val editor = sharedPrefs.edit()
-        editor.putString(USER_EMAIL, email)
+        editor.putString(USER_EMAIL, email.lowercase())
         editor.apply()
     }
 
@@ -77,7 +77,7 @@ object SharedPrefsHelper {
     }
 
     fun retrieveUserEmail(): String =
-        sharedPrefs.getString(USER_EMAIL, "") ?: ""
+        sharedPrefs.getString(USER_EMAIL, "")?.lowercase() ?: ""
 
 
 }

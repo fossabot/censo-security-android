@@ -20,7 +20,6 @@ import com.strikeprotocols.mobile.data.OktaAuth.Companion.LOGOUT_REDIRECT_URI
 import com.strikeprotocols.mobile.data.OktaAuth.Companion.NO_EMAIL_EXCEPTION
 import com.strikeprotocols.mobile.data.OktaAuth.Companion.OIDC_SCOPES
 import com.strikeprotocols.mobile.data.OktaAuth.Companion.OKTA_EMAIL_KEY
-import java.util.*
 import kotlin.coroutines.suspendCoroutine
 import com.okta.oidc.results.Result as OktaResult
 
@@ -134,11 +133,11 @@ class OktaAuth(
             val tokenByteArray = token.toByteArray(charset = Charsets.UTF_8)
 
             val userEmail = retrieveJwtEmail(jwt = token)
-            val mainKey = securePreferences.retrievePrivateKey(email = userEmail)
+            val solanaKey = securePreferences.retrieveSolanaKey(email = userEmail)
 
             val authHeader = encryptionManager.signData(
                 data = tokenByteArray,
-                privateKey = BaseWrapper.decode(mainKey)
+                privateKey = BaseWrapper.decode(solanaKey)
             )
 
             return BaseWrapper.encodeToBase64(authHeader)

@@ -72,7 +72,7 @@ class UserRepositoryImpl(
         securePreferences.saveRootSeed(
             email = userEmail, rootSeed = mnemonic.toSeed()
         )
-        securePreferences.savePrivateKey(
+        securePreferences.saveSolanaKey(
             email = userEmail, privateKey = keyPair.privateKey)
 
         return InitialAuthData(
@@ -116,7 +116,7 @@ class UserRepositoryImpl(
             email = userEmail,
             Mnemonics.MnemonicCode(phrase = phrase).toSeed()
         )
-        securePreferences.savePrivateKey(
+        securePreferences.saveSolanaKey(
             email = userEmail, privateKey = keyPair.privateKey
         )
     }
@@ -124,13 +124,13 @@ class UserRepositoryImpl(
     override suspend fun clearGeneratedAuthData() {
         val userEmail = retrieveUserEmail()
         saveUserEmail("")
-        securePreferences.clearPrivateKey(email = userEmail)
+        securePreferences.clearSolanaKey(email = userEmail)
     }
 
     override suspend fun regenerateDataAndUploadToBackend() : WalletSigner {
         val userEmail = retrieveUserEmail()
-        val mainKey = securePreferences.retrievePrivateKey(userEmail)
-        val publicKey = encryptionManager.regeneratePublicKey(mainKey = mainKey)
+        val solanaKey = securePreferences.retrieveSolanaKey(userEmail)
+        val publicKey = encryptionManager.regeneratePublicKey(privateKey = solanaKey)
 
         val walletSigner = WalletSigner(
             publicKey = publicKey,
@@ -168,7 +168,7 @@ class UserRepositoryImpl(
 
     override suspend fun getSavedPrivateKey(): String {
         val userEmail = retrieveUserEmail()
-        return securePreferences.retrievePrivateKey(email = userEmail)
+        return securePreferences.retrieveSolanaKey(email = userEmail)
     }
 
     override suspend fun doesUserHaveValidLocalKey(
@@ -176,7 +176,7 @@ class UserRepositoryImpl(
         walletSigners: List<WalletSigner?>
     ): Boolean {
         val userEmail = retrieveUserEmail()
-        val privateKey = securePreferences.retrievePrivateKey(email = userEmail)
+        val privateKey = securePreferences.retrieveSolanaKey(email = userEmail)
 
         if (privateKey.isEmpty()) {
             return false

@@ -53,7 +53,7 @@ class EncryptionTest {
         val keyPair = encryptionManager.createKeyPair(Mnemonics.MnemonicCode(phrase = phrase))
 
         val regeneratedPublicKey = encryptionManager.regeneratePublicKey(
-            mainKey = BaseWrapper.encode(keyPair.privateKey)
+            privateKey = BaseWrapper.encode(keyPair.privateKey)
         )
 
         val signData = encryptionManager.signData(data = data, privateKey = keyPair.privateKey)
