@@ -19,7 +19,7 @@
 
     <string name="cancel">Cancel</string>
     <string name="dismiss">Dismiss</string>
-    <string name="contact_strike">Please contact Strike to resolve this issue</string>
+    <string name="contact_strike">We are unable to verify your key. Please contact Strike directly to resolve this issue.</string>
 
     <string name="approvals">Approvals</string>
     <string name="content_des_account_icon">Account Icon</string>
@@ -235,5 +235,6 @@
 
     <string name="copy_key_phrase_success">Copied phrase to clipboard</string>
     <string name="copied_key_phrase_failure">Failed to copy phrase to clipboard, please try again</string>
+    <string name="get_help">Get Help</string>
 
 </resources>

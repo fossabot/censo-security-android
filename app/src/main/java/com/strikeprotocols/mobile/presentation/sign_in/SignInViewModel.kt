@@ -87,7 +87,6 @@ class SignInViewModel @Inject constructor(
     fun onStart() {
         state = state.copy(loggedInStatusResult = Resource.Loading())
         viewModelScope.launch {
-            delay(500)
             val userLoggedIn = try {
                 userRepository.userLoggedIn()
             } catch (e: Exception) {
