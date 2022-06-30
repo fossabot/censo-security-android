@@ -1,5 +1,6 @@
 package com.strikeprotocols.mobile
 
+import cash.z.ecc.android.bip39.Mnemonics
 import com.google.gson.JsonParser
 import com.nhaarman.mockitokotlin2.whenever
 import com.strikeprotocols.mobile.common.BaseWrapper
@@ -49,7 +50,7 @@ class ApprovalRequestSigningTest {
 
         phrase = encryptionManager.generatePhrase()
 
-        keyPair = encryptionManager.createKeyPair(phrase)
+        keyPair = encryptionManager.createKeyPair(Mnemonics.MnemonicCode(phrase = phrase))
 
         whenever(securePreferences.retrievePrivateKey(userEmail)).then {
             BaseWrapper.encode(keyPair.privateKey)

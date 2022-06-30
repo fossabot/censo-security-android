@@ -1,6 +1,7 @@
 package com.strikeprotocols.mobile.data
 
 import cash.z.ecc.android.bip39.Mnemonics
+import cash.z.ecc.android.bip39.toSeed
 import com.strikeprotocols.mobile.common.BaseWrapper
 import com.strikeprotocols.mobile.common.Ed25519HierarchicalPrivateKey
 import com.strikeprotocols.mobile.common.strikeLog
@@ -25,7 +26,7 @@ fun generateEphemeralPrivateKey(): Ed25519PrivateKeyParameters {
 }
 
 interface EncryptionManager {
-    fun createKeyPair(phrase: String): StrikeKeyPair
+    fun createKeyPair(mnenomic: Mnemonics.MnemonicCode): StrikeKeyPair
     fun signApprovalDispositionMessage(
         signable: Signable,
         userEmail: String
@@ -85,12 +86,15 @@ class EncryptionManagerImpl @Inject constructor(private val securePreferences: S
         }
     }
 
-    override fun createKeyPair(phrase: String): StrikeKeyPair {
+    override fun createKeyPair(mnenomic: Mnemonics.MnemonicCode): StrikeKeyPair {
         try {
-            val bip39PrivateKey = Ed25519HierarchicalPrivateKey.fromSeedPhrase(phrase)
+            val rootSeed = mnenomic.toSeed()
+            val solanaHierarchicalKey = Ed25519HierarchicalPrivateKey.fromRootSeed(rootSeed)
+
             return StrikeKeyPair(
-                privateKey = bip39PrivateKey.privateKeyBytes,
-                publicKey = bip39PrivateKey.publicKeyBytes
+                privateKey = solanaHierarchicalKey.privateKeyBytes,
+                publicKey = solanaHierarchicalKey.publicKeyBytes,
+                rootSeed = rootSeed
             )
         } catch (e: Exception) {
             throw KeyPairGenerationFailedException()
@@ -199,7 +203,11 @@ class EncryptionManagerImpl @Inject constructor(private val securePreferences: S
     //endregion
 }
 
-data class StrikeKeyPair(val privateKey: ByteArray, val publicKey: ByteArray) {
+data class StrikeKeyPair(
+    val privateKey: ByteArray,
+    val publicKey: ByteArray,
+    val rootSeed: ByteArray
+) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
@@ -208,6 +216,7 @@ data class StrikeKeyPair(val privateKey: ByteArray, val publicKey: ByteArray) {
 
         if (!privateKey.contentEquals(other.privateKey)) return false
         if (!publicKey.contentEquals(other.publicKey)) return false
+        if (!rootSeed.contentEquals(other.rootSeed)) return false
 
         return true
     }
@@ -215,6 +224,7 @@ data class StrikeKeyPair(val privateKey: ByteArray, val publicKey: ByteArray) {
     override fun hashCode(): Int {
         var result = privateKey.contentHashCode()
         result = 31 * result + publicKey.contentHashCode()
+        result = 31 * result + rootSeed.contentHashCode()
         return result
     }
 }

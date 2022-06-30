@@ -7,6 +7,7 @@ import javax.inject.Inject
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.viewModelScope
+import cash.z.ecc.android.bip39.Mnemonics
 import com.google.firebase.messaging.FirebaseMessaging
 import com.strikeprotocols.mobile.common.*
 import com.strikeprotocols.mobile.data.*
@@ -319,7 +320,8 @@ class SignInViewModel @Inject constructor(
 
             state.phrase?.let {
                 try {
-                    val initialAuthData = userRepository.generateInitialAuthDataAndSaveKeyToUser(it)
+                    val initialAuthData = userRepository.generateInitialAuthDataAndSaveKeyToUser(
+                        Mnemonics.MnemonicCode(phrase = it))
                     //wiping key in the VM because we have saved private key, and will not reference phrase again.
                     state = state.copy(initialAuthData = initialAuthData, phrase = null)
                     attemptAddWalletSigner()

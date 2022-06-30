@@ -12,6 +12,9 @@ interface SecurePreferences {
     fun savePrivateKey(email: String, privateKey: ByteArray)
     fun retrievePrivateKey(email: String): String
     fun clearPrivateKey(email: String)
+    fun saveRootSeed(email: String, rootSeed: ByteArray)
+    fun retrieveRootSeed(email: String) : String
+    fun clearRootSeed(email: String)
 }
 
 class SecurePreferencesImpl @Inject constructor(applicationContext: Context) :
@@ -43,6 +46,21 @@ class SecurePreferencesImpl @Inject constructor(applicationContext: Context) :
 
     override fun clearPrivateKey(email: String) {
         SharedPrefsHelper.clearMainKey(encryptedPrefs = secureSharedPreferences, email = email)
+    }
+
+    override fun saveRootSeed(email: String, rootSeed: ByteArray) {
+        SharedPrefsHelper.saveRootSeed(
+            encryptedPrefs = secureSharedPreferences,
+            email = email,
+            rootSeed = rootSeed
+        )
+    }
+
+    override fun retrieveRootSeed(email: String) =
+        SharedPrefsHelper.retrieveRootSeed(encryptedPrefs = secureSharedPreferences, email)
+
+    override fun clearRootSeed(email: String) {
+        SharedPrefsHelper.clearRootSeed(encryptedPrefs = secureSharedPreferences, email = email)
     }
 
     object Companion {

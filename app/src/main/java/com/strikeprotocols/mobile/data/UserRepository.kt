@@ -1,5 +1,7 @@
 package com.strikeprotocols.mobile.data
 
+import cash.z.ecc.android.bip39.Mnemonics
+import cash.z.ecc.android.bip39.toSeed
 import com.strikeprotocols.mobile.common.*
 import com.strikeprotocols.mobile.data.AuthDataException.*
 import com.strikeprotocols.mobile.data.models.VerifyUser
@@ -12,7 +14,7 @@ interface UserRepository {
     suspend fun verifyUser(): VerifyUser
     suspend fun getWalletSigners(): List<WalletSigner?>
     suspend fun addWalletSigner(walletSignerBody: WalletSigner): WalletSigner
-    suspend fun generateInitialAuthDataAndSaveKeyToUser(phrase: String): InitialAuthData
+    suspend fun generateInitialAuthDataAndSaveKeyToUser(mnemonic: Mnemonics.MnemonicCode): InitialAuthData
     suspend fun regenerateAuthDataAndSaveKeyToUser(phrase: String, backendPublicKey: String)
     suspend fun userLoggedIn(): Boolean
     suspend fun setUserLoggedIn()
@@ -54,9 +56,9 @@ class UserRepositoryImpl(
         return api.addWalletSigner(walletSignerBody = walletSignerBody)
     }
 
-    override suspend fun generateInitialAuthDataAndSaveKeyToUser(phrase: String): InitialAuthData {
+    override suspend fun generateInitialAuthDataAndSaveKeyToUser(mnemonic: Mnemonics.MnemonicCode): InitialAuthData {
         val userEmail = retrieveUserEmail()
-        val keyPair = encryptionManager.createKeyPair(phrase)
+        val keyPair = encryptionManager.createKeyPair(mnemonic)
 
         //Verify the keyPair
         val validPair = encryptionManager.verifyKeyPair(
@@ -67,6 +69,9 @@ class UserRepositoryImpl(
             throw InvalidKeyPairException()
         }
 
+        securePreferences.saveRootSeed(
+            email = userEmail, rootSeed = mnemonic.toSeed()
+        )
         securePreferences.savePrivateKey(
             email = userEmail, privateKey = keyPair.privateKey)
 
@@ -86,7 +91,7 @@ class UserRepositoryImpl(
         }
 
         //Regenerate the key pair
-        val keyPair = encryptionManager.createKeyPair(phrase)
+        val keyPair = encryptionManager.createKeyPair(Mnemonics.MnemonicCode(phrase))
 
         //Verify the keyPair
         val validPair = encryptionManager.verifyKeyPair(
@@ -107,6 +112,10 @@ class UserRepositoryImpl(
         }
 
         //Save the recreated private key if the pair is valid together
+        securePreferences.saveRootSeed(
+            email = userEmail,
+            Mnemonics.MnemonicCode(phrase = phrase).toSeed()
+        )
         securePreferences.savePrivateKey(
             email = userEmail, privateKey = keyPair.privateKey
         )

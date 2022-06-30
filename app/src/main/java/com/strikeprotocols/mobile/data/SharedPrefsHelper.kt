@@ -12,6 +12,7 @@ object SharedPrefsHelper {
     private const val USER_LOGGED_IN = "skipped_login"
     private const val USER_EMAIL = "user_email"
     private const val MAIN_KEY = "_main_key"
+    private const val ROOT_SEED = "_root_seed"
 
     private lateinit var appContext: Context
     private lateinit var sharedPrefs: SharedPreferences
@@ -43,6 +44,23 @@ object SharedPrefsHelper {
     fun clearMainKey(encryptedPrefs: SharedPreferences, email: String) {
         val editor = encryptedPrefs.edit()
         editor.putString("$email$MAIN_KEY", "")
+        editor.apply()
+    }
+
+    fun saveRootSeed(encryptedPrefs: SharedPreferences, email: String, rootSeed: ByteArray) {
+        val data = if (rootSeed.isEmpty()) "" else BaseWrapper.encode(rootSeed)
+        val editor = encryptedPrefs.edit()
+        editor.putString("$email$ROOT_SEED", data)
+        editor.apply()
+    }
+
+    fun retrieveRootSeed(encryptedPrefs: SharedPreferences, email: String): String {
+        return encryptedPrefs.getString("$email$ROOT_SEED", "") ?: ""
+    }
+
+    fun clearRootSeed(encryptedPrefs: SharedPreferences, email: String) {
+        val editor = encryptedPrefs.edit()
+        editor.putString("$email$ROOT_SEED", "")
         editor.apply()
     }
 

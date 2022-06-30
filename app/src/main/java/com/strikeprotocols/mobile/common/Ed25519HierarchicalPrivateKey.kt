@@ -20,12 +20,11 @@ class Ed25519HierarchicalPrivateKey(
     private val chainCode: KeyParameter = KeyParameter(data, 32, 32)
 
     companion object {
-        fun fromSeedPhrase(seedPhrase: String): Ed25519HierarchicalPrivateKey {
-            val seed = Mnemonics.MnemonicCode(seedPhrase).toSeed()
+        fun fromRootSeed(rootSeed: ByteArray): Ed25519HierarchicalPrivateKey {
             var derivedKey = Ed25519HierarchicalPrivateKey(
                 HMac(SHA512Digest()).let { hmacSha512 ->
                     hmacSha512.init(KeyParameter("ed25519 seed".toByteArray(StandardCharsets.UTF_8)))
-                    hmacSha512.update(seed, 0, seed.size)
+                    hmacSha512.update(rootSeed, 0, rootSeed.size)
                     ByteArray(hmacSha512.macSize).also { hmacSha512.doFinal(it, 0) }
                 }
             )

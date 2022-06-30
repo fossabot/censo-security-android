@@ -1,5 +1,6 @@
 package com.strikeprotocols.mobile
 
+import cash.z.ecc.android.bip39.Mnemonics
 import com.strikeprotocols.mobile.common.BaseWrapper
 import com.strikeprotocols.mobile.data.EncryptionManagerImpl
 import com.strikeprotocols.mobile.data.SecurePreferences
@@ -22,7 +23,7 @@ class EncryptionTest {
         val encryptionManager = EncryptionManagerImpl(securePreferences)
 
         val phrase = encryptionManager.generatePhrase()
-        val keyPair = encryptionManager.createKeyPair(phrase)
+        val keyPair = encryptionManager.createKeyPair(Mnemonics.MnemonicCode(phrase = phrase))
 
         val signData = encryptionManager.signData(data = data, privateKey = keyPair.privateKey)
 
@@ -49,7 +50,7 @@ class EncryptionTest {
         val encryptionManager = EncryptionManagerImpl(securePreferences)
 
         val phrase = encryptionManager.generatePhrase()
-        val keyPair = encryptionManager.createKeyPair(phrase)
+        val keyPair = encryptionManager.createKeyPair(Mnemonics.MnemonicCode(phrase = phrase))
 
         val regeneratedPublicKey = encryptionManager.regeneratePublicKey(
             mainKey = BaseWrapper.encode(keyPair.privateKey)
