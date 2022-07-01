@@ -2,24 +2,37 @@ package com.strikeprotocols.mobile.common
 
 import com.google.gson.JsonElement
 import com.google.gson.JsonParser
+import com.strikeprotocols.mobile.BuildConfig
 import com.strikeprotocols.mobile.data.models.*
 import com.strikeprotocols.mobile.data.models.approval.*
 import java.util.*
 
-object GeneralDummyData {
+class GeneralDummyData {
 
-    fun generateInitialUserDummyData() = VerifyUser(
-        fullName = "John Doe",
-        hasApprovalPermission = false,
-        id = "jondoe",
-        loginName = "Johnny Doey",
-        organization = Organization(
-            id = "cryptoco",
-            name = "cryptology"
-        ),
-        publicKeys = null,
-        useStaticKey = false
+    init {
+        if(!BuildConfig.DEBUG) {
+            throw Exception("Do not use dummy data outside of debug")
+        }
+    }
+
+    fun emptyWalletSigner() = WalletSigner(
+        publicKey = "",
+        walletType = ""
     )
+
+    fun generateInitialUserDummyData() =
+        VerifyUser(
+            fullName = "John Doe",
+            hasApprovalPermission = false,
+            id = "jondoe",
+            loginName = "Johnny Doey",
+            organization = Organization(
+                id = "cryptoco",
+                name = "cryptology"
+            ),
+            publicKeys = null,
+            useStaticKey = false
+        )
 
     fun generateWalletApprovalsDummyData() = WalletApproval(
         approvalTimeoutInSeconds = 18000,
@@ -37,52 +50,21 @@ object GeneralDummyData {
     fun generateRecentBlockhashDummyData() =
         "JtcoutZwsH8Xd6mtQEi3MXEDhDVMckeSfWYoPn7VnzNnDnBYACwRmZU2caCY1BGYQoZ"
 
-    object ValidDummyData {
+    class PhraseDummyData {
 
-        const val publicKey = "9uBGYQoZr6otJGU1FkBiRuabZPJsH8XdMckeSz9Bk8kn"
-        const val encryptedPrivateKey =
-            "4JtcoutZwfkKiu1vD5vNwNhCi6DgNZECSwCfESmY9VWYmoPn7VnzNnDnBYye2bEVk1TK8Pe2zaxDcFRdtF"
-        const val decryptionKey = "R6mtQEi3MXEDhDVjduAhfdfCDWVhfWYACwRmZU2caCY1f6fHdszEsoMqvPx5"
+        companion object {
+            //Please note this is to be used for mocked data purposes ONLY
+            const val PHRASE =
+                "wedding avoid come master casual have trend maid clump fly gain alter wagon bid rely lava foot buddy orchard already force tent just ladder"
 
-        //Secret Key for this flow: Md27x1XnpF166Te2PNrR9rGr2V3uTH9my4eRpzcUzvEfYZSE75ijbFq4TcdM
-        fun generateVerifyUserDummyDataWithValidPublicKey() = VerifyUser(
-            fullName = "John Doe",
-            hasApprovalPermission = false,
-            id = "jondoe",
-            loginName = "Johnny Doey",
-            organization = Organization(
-                id = "cryptoco",
-                name = "cryptology"
-            ),
-            publicKeys = listOf(
-                WalletPublicKey(
-                    key = publicKey,
-                    walletType = WalletSigner.WALLET_TYPE_SOLANA
-                )
-            ),
-            useStaticKey = false
-        )
-
-        fun generateVerifyWalletSignersDummyDataWithValidPublicKey() =
-            listOf<WalletSigner>(
-                WalletSigner(
-                    publicKey = publicKey,
-                    walletType = WalletSigner.WALLET_TYPE_SOLANA
-                )
-            )
-    }
-
-    object PhraseDummyData {
-        //Please note this is to be used for mocked data purposes ONLY
-        const val phrase = "wedding avoid come master casual have trend maid clump fly gain alter wagon bid rely lava foot buddy orchard already force tent just ladder"
-
-        const val privateKey = "8U8sunPpaWPefPTy4wTwuRkgE9aCFa7iCjvbXRpuw1JY"
-        const val publicKey = "GHNH45yPvJJKvzsJNjxqQWpmeWDF4yU5eWoS21Kqsaia"
+            const val PHRASE_PRIVATE_KEY = "8U8sunPpaWPefPTy4wTwuRkgE9aCFa7iCjvbXRpuw1JY"
+            const val PHRASE_PUBLIC_KEY = "GHNH45yPvJJKvzsJNjxqQWpmeWDF4yU5eWoS21Kqsaia"
+        }
 
         fun generateVerifyWalletSignersDummyDataWithValidPublicKey() =
             listOf(
                 WalletSigner(
-                    publicKey = publicKey,
+                    publicKey = PHRASE_PUBLIC_KEY,
                     walletType = WalletSigner.WALLET_TYPE_SOLANA
                 )
             )
@@ -96,7 +78,7 @@ object GeneralDummyData {
                 organization = null,
                 publicKeys = listOf(
                     WalletPublicKey(
-                        key = publicKey,
+                        key = PHRASE_PUBLIC_KEY,
                         walletType = null
                     )
                 ),
@@ -107,7 +89,13 @@ object GeneralDummyData {
     }
 }
 
-object MockedApprovals {
+class MockedApprovals {
+
+    init {
+        if(!BuildConfig.DEBUG) {
+            throw Exception("Do not use mocked data outside of debug")
+        }
+    }
 
     val signersUpdateJson = """
     {"id": "13cd643e-393e-4b38-91cb-5f1ab2655223", "walletType": "Solana", "submitDate": "2022-05-05T14:42:53.015+00:00", "submitterName": "User 2", "submitterEmail": "user2@org1", "approvalTimeoutInSeconds": 180000, "numberOfDispositionsRequired": 1, "numberOfApprovalsReceived": 0, "numberOfDeniesReceived": 0, "details": {"type": "SignersUpdate", "slotUpdateType": "SetIfEmpty", "signer": {"slotId": 1, "value": {"publicKey": "HhNwcVMrJX8newbDVderrnsmvG6uGYuxUUvzm6BqdjzH", "name": "User 2", "email": "user2@org1"}}, "signingData": {"feePayer": "FM36ah2bH8nQWJNPCRzu7R69gE5o6UhujqJFtDpWN5as", "walletProgramId": "GN694sm2Ex1GcnamYwqfjSs6XJ7xadTXiZqBwvGvQyT8", "multisigOpAccountAddress": "DHgNPbMHz66DQacFdo4rN8pks9Lw1zpfqqqAymHUgQkg", "walletAddress": "6JmmkmowSLQ3jFQacREDNwbrD3Hj7Eyj9MvK8eBTzV5q"}}}
@@ -134,7 +122,7 @@ object MockedApprovals {
 """.trim()
 
     // Login Approval
-    const val EXAMPLE_JWT_TOKEN =
+    val EXAMPLE_JWT_TOKEN =
         "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsImF1ZCI6IlNvbHIifQ.SWCJDd6B_m7xr_puQH-wgbxvXyJYXH9lTpldOU0eQKc"
     val loginApprovalJson = """
     {"id": "13cd643e-393e-4b38-91cb-5f1ab2655223", "walletType": "Solana", "submitDate": "2022-04-05T14:42:53.015+00:00", "submitterName": "User 2", "submitterEmail": "user2@org1", "approvalTimeoutInSeconds": 18000, "numberOfDispositionsRequired": 1, "numberOfApprovalsReceived": 0, "numberOfDeniesReceived": 0, "details": { "type": "LoginApproval", "jwtToken": "$EXAMPLE_JWT_TOKEN"}}

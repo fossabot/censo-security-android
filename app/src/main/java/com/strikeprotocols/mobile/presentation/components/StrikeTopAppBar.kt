@@ -9,6 +9,7 @@ import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Logout
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.strikeprotocols.mobile.ui.theme.BackgroundBlack
 import com.strikeprotocols.mobile.ui.theme.HeaderBlack
@@ -21,6 +22,7 @@ fun StrikeTopAppBar(
     onAppBarIconClick: () -> Unit,
     navigationIcon: ImageVector,
     navigationIconContentDes: String,
+    showNavIcon: Boolean = true,
     actions: @Composable RowScope.() -> Unit = {},
 ) {
     TopAppBar(
@@ -28,12 +30,14 @@ fun StrikeTopAppBar(
         backgroundColor = BackgroundBlack,
         contentColor = StrikeWhite,
         navigationIcon = {
-            IconButton(onClick = { onAppBarIconClick() }) {
-                Icon(
-                    navigationIcon,
-                    navigationIconContentDes,
-                    tint = StrikeWhite
-                )
+            if(showNavIcon) {
+                IconButton(onClick = { onAppBarIconClick() }) {
+                    Icon(
+                        navigationIcon,
+                        navigationIconContentDes,
+                        tint = StrikeWhite
+                    )
+                }
             }
         },
         actions = actions

@@ -43,10 +43,6 @@
     <string name="logout">Sign Out</string>
 
     <string name="phrase_dialog_title">Secret Phrase</string>
-    <string name="phrase_verification_dialog_fail_title">Phrase Verification Error</string>
-    <string name="phrase_dialog_verification">Please enter the key phrase words one by one into the app to verify you have saved the phrase!</string>
-    <string name="phrase_verification_fail">Key phrase you entered does not match phrase.\n\nPlease try again.</string>
-    <string name="phrase_regeneration_fail">Recreated key does not match. Please try again.\n\nIf unable to recreate key, please contact Strike directly.</string>
 
     <string name="approval_expired">Expired</string>
     <string name="confirm">Confirm</string>
@@ -220,6 +216,7 @@
 =======
     <string name="clear">Clear</string>
 <<<<<<< HEAD
+<<<<<<< HEAD
     <string name="key_phrase_hint">Enter Key Phrase Here</string>
 <<<<<<< HEAD
 >>>>>>> f041435 (Setup autocomplete functionality text view. Add basic logic to VM to update query and show predictions.)
@@ -235,6 +232,49 @@
 
     <string name="copy_key_phrase_success">Copied phrase to clipboard</string>
     <string name="copied_key_phrase_failure">Failed to copy phrase to clipboard, please try again</string>
+=======
+
+>>>>>>> 9b2e916 (Add initial UI for copying phrase during initial auth)
     <string name="get_help">Get Help</string>
+    <string name="start_over">Start over</string>
+    <string name="copy_key">Copy Key</string>
+    <string name="time_to_back_up">It\'s time to back up\nyour private key</string>
+    <string name="how_would_you_save_it">How would you like to save it?</string>
+    <string name="password_manager">Password Manager</string>
+    <string name="pen_and_paper">Pen and Paper</string>
+    <string name="copy_private_key">Copy Private Key</string>
+    <string name="copy_key_message">Copy your private key\nto your clipboard</string>
+    <string name="copied_to_clipboard">Copied to your clipboard!</string>
+    <string name="paste_your_key">Paste your key in your Password Manager and come back here when it\'s saved</string>
+    <string name="enter_key_title">We\'ve cleared your clipboard.</string>
+    <string name="enter_key_message">Open your password manager, copy your private key, and paste it here.</string>
+    <string name="key_not_valid_title">Uh oh. That key is not correct.</string>
+    <string name="key_not_valid_message">You can try again or go back to copy your key.</string>
+
+    <string name="phrase_enter_key_title">We\'ve cleared your clipboard.</string>
+    <string name="phrase_enter_key_message">Open your password manager or wherever you keep your phrase, and paste it here.</string>
+    <string name="phrase_key_not_valid_title">Uh oh. That key is not correct.</string>
+    <string name="phrase_key_not_valid_message">You can try again, or contact Strike if you can not recreate it.</string>
+
+    <string name="confirm_private_key">Confirm private key</string>
+    <string name="all_set">You\'re all set.</string>
+    <string name="continue_to_strike">Continue to Strike</string>
+    <string name="recreate_key_phrase">Recreate Key From Phrase</string>
+    <string name="paste_phrase">Paste Phrase</string>
+    <string name="how_would_you_enter">How would you like to enter it?</string>
+    <string name="lets_recreate_key">Let\'s recreate your private key</string>
+    <string name="by_keyboard">Enter With Keyboard</string>
+
+    <string name="write_each_word_down">Write each word down\nin order</string>
+    <string name="showing_of_words">Showing %1$s - %2$s of 24</string>
+    <string name="exit_flow">exit flow</string>
+    <string name="phrase_words_empty">Phrase words were not generated, please start over and try again</string>
+
+    <string name="previous">Previous</string>
+    <string name="previous_icon_content_desc">previous icon</string>
+    <string name="next">Next</string>
+    <string name="next_icon_content_desc">next icon</string>
+
+    <string name="saved_the_key"><![CDATA[I saved the key ->]]></string>
 
 </resources>

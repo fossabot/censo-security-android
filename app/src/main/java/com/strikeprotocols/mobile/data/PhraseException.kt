@@ -6,9 +6,9 @@ class PhraseException : Exception(NULL_PHRASE_IN_STATE) {
     }
 }
 
-class RegenerateKeyPhraseException : Exception(DEFAULT_KEY_REGENERATION_ERROR) {
+class RecoverKeyException : Exception(DEFAULT_KEY_RECOVERY_ERROR) {
     companion object {
-        const val DEFAULT_KEY_REGENERATION_ERROR = "DEFAULT_KEY_REGENERATION_ERROR"
+        const val DEFAULT_KEY_RECOVERY_ERROR = "DEFAULT_KEY_RECOVERY_ERROR"
     }
 }
 

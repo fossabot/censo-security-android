@@ -1,5 +1,6 @@
 package com.strikeprotocols.mobile.presentation.sign_in
 
+import android.content.Context
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -18,7 +19,6 @@ import com.strikeprotocols.mobile.data.models.WalletSigner
 import com.strikeprotocols.mobile.presentation.sign_in.SignInState.Companion.DEFAULT_SIGN_IN_ERROR_MESSAGE
 import kotlinx.coroutines.*
 import kotlinx.coroutines.tasks.await
-import java.util.*
 
 @HiltViewModel
 class SignInViewModel @Inject constructor(
@@ -30,6 +30,12 @@ class SignInViewModel @Inject constructor(
 
     companion object {
         const val CLIPBOARD_LABEL_PHRASE = "Phrase"
+
+        const val FIRST_WORD_INDEX = 0
+        const val LAST_WORD_INDEX = 23
+
+        const val LAST_WORD_RANGE_SET_INDEX = 20
+        const val CHANGE_AMOUNT = 4
     }
 
     var state by mutableStateOf(SignInState())
@@ -84,6 +90,13 @@ class SignInViewModel @Inject constructor(
     //endregion
 
     //region lifecycle methods
+    fun onResume() {
+        if (state.keyCreationFlowStep == KeyCreationFlowStep.PHRASE_COPIED_STEP) {
+            state =
+                state.copy(keyCreationFlowStep = KeyCreationFlowStep.PHRASE_SAVED_STEP)
+        }
+    }
+
     fun onStart() {
         state = state.copy(loggedInStatusResult = Resource.Loading())
         viewModelScope.launch {
@@ -107,8 +120,7 @@ class SignInViewModel @Inject constructor(
             state = state.copy(loginResult = Resource.Loading(), manualAuthFlowLoading = true)
             viewModelScope.launch(Dispatchers.IO) {
                 state = try {
-                    val sessionToken =
-                        userRepository.retrieveSessionToken(state.email, state.password)
+                    val sessionToken = userRepository.retrieveSessionToken(state.email, state.password)
                     val token = userRepository.authenticate(sessionToken)
                     userRepository.saveUserEmail(state.email)
                     state.copy(loginResult = Resource.Success(token))
@@ -183,7 +195,8 @@ class SignInViewModel @Inject constructor(
                     val walletSigner = userRepository.addWalletSigner(safeInitialAuthData.walletSignerBody)
                     state.copy(addWalletSignerResult = Resource.Success(walletSigner))
                 } catch (e: Exception) {
-                    state.copy(addWalletSignerResult =
+                    state.copy(
+                        addWalletSignerResult =
                         Resource.Error(e.message ?: DEFAULT_SIGN_IN_ERROR_MESSAGE)
                     )
                 }
@@ -207,14 +220,6 @@ class SignInViewModel @Inject constructor(
         state = state.copy(loginResult = Resource.Uninitialized)
     }
 
-    fun resetVerifiedPhrase() {
-        state = state.copy(verifiedPhrase = Resource.Uninitialized)
-    }
-
-    fun resetRegenerateKeyFromPhrase() {
-        state = state.copy(regenerateKeyFromPhrase = Resource.Uninitialized)
-    }
-
     fun resetRegenerateData() {
         state = state.copy(regenerateData = Resource.Uninitialized)
     }
@@ -229,10 +234,6 @@ class SignInViewModel @Inject constructor(
 
     fun resetValidKey() {
         state = state.copy(keyValid = Resource.Uninitialized)
-    }
-
-    fun resetShouldDisplayPhraseVerificationDialog() {
-        state = state.copy(showPhraseVerificationDialog = false)
     }
 
     fun loadingFinished() {
@@ -271,68 +272,166 @@ class SignInViewModel @Inject constructor(
     //endregion
 
     //region Phrase + Key Generation Flows
-    private fun launchRegenerateKeyFromPhraseFlow() {
-        if (state.regenerateKeyFromPhrase !is Resource.Loading) {
-            state = state.copy(
-                regenerateKeyFromPhrase = Resource.Loading(),
-                showPhraseKeyRegenerationUI = true)
-        }
+    private fun launchRecoverKeyFromPhraseFlow() {
+        state = state.copy(
+            showKeyRecoveryUI = true,
+            keyRecoveryFlowStep = KeyRecoveryFlowStep.ENTRY_STEP
+        )
     }
 
-    fun launchVerifyPhraseFlow() {
-        if (state.verifiedPhrase !is Resource.Loading) {
-            state = state.copy(verifiedPhrase = Resource.Loading(),
-                showPhraseVerificationDialog = false
+    private fun launchPhraseVerificationUI() {
+        if (!state.showKeyCreationUI) {
+            state = state.copy(
+                showKeyCreationUI = true,
+                keyCreationFlowStep = KeyCreationFlowStep.ENTRY_STEP,
             )
         }
     }
 
-
-    private fun launchPhraseVerificationDialog() {
-        if(!state.showPhraseVerificationDialog) {
-            state = state.copy(showPhraseVerificationDialog = true)
+    fun phraseFlowAction(phraseFlowAction: PhraseFlowAction) {
+        when (phraseFlowAction) {
+            is PhraseFlowAction.WordIndexChanged -> {
+                handleWordIndexChanged(increasing = phraseFlowAction.increasing)
+            }
+            PhraseFlowAction.LaunchManualKeyCreation -> {
+                state = state.copy(
+                    keyCreationFlowStep = KeyCreationFlowStep.WRITE_WORD_STEP,
+                    wordIndex = 0
+                )
+            }
+            is PhraseFlowAction.ChangeCreationFlowStep -> {
+                state =
+                    state.copy(keyCreationFlowStep = phraseFlowAction.phraseVerificationFlowStep)
+            }
+            is PhraseFlowAction.ChangeRecoveryFlowStep -> {
+                state =
+                    state.copy(keyRecoveryFlowStep = phraseFlowAction.phraseGenerationFlowStep)
+            }
         }
     }
 
-    fun launchPhraseVerificationUI() {
-        if(!state.showPhraseVerificationUI) {
-            state = state.copy(showPhraseVerificationUI = true)
+    fun phraseVerificationAction() {
+        state = when (state.keyCreationFlowStep) {
+            KeyCreationFlowStep.ENTRY_STEP ->
+                state.copy(keyCreationFlowStep = KeyCreationFlowStep.COPY_PHRASE_STEP)
+            KeyCreationFlowStep.PHRASE_COPIED_STEP, KeyCreationFlowStep.COPY_PHRASE_STEP ->
+                state.copy(keyCreationFlowStep = KeyCreationFlowStep.PHRASE_COPIED_STEP)
+            KeyCreationFlowStep.PHRASE_SAVED_STEP ->
+                state.copy(keyCreationFlowStep = KeyCreationFlowStep.CONFIRM_KEY_ENTRY_STEP)
+            KeyCreationFlowStep.CONFIRM_KEY_ENTRY_STEP, KeyCreationFlowStep.CONFIRM_KEY_ERROR_STEP ->
+                state.copy(keyCreationFlowStep = KeyCreationFlowStep.ALL_SET_STEP)
+            KeyCreationFlowStep.WRITE_WORD_STEP -> {
+                state.copy(keyCreationFlowStep = KeyCreationFlowStep.WRITE_WORD_STEP)
+            }
+            KeyCreationFlowStep.ALL_SET_STEP ->
+                state.copy(
+                    keyCreationFlowStep = KeyCreationFlowStep.FINISHED,
+                    showKeyCreationUI = false
+                )
+            KeyCreationFlowStep.FINISHED ->
+                state.copy(keyCreationFlowStep = KeyCreationFlowStep.ENTRY_STEP)
+            KeyCreationFlowStep.UNINITIALIZED ->
+                state.copy(keyCreationFlowStep = KeyCreationFlowStep.ENTRY_STEP)
         }
     }
 
-    fun verifyPhraseToGenerateKeyPair() {
-        if (phraseValidator.isPhraseValid(state.phrase ?: "")) {
-            verifiedPhraseSuccess()
-        } else {
-            verifiedPhraseFailure(Exception("Failed to verify phrase"))
+    fun phraseVerificationBackNavigation() {
+        state = when (state.keyCreationFlowStep) {
+            KeyCreationFlowStep.ENTRY_STEP ->
+                state.copy(keyCreationFlowStep = KeyCreationFlowStep.UNINITIALIZED)
+            KeyCreationFlowStep.COPY_PHRASE_STEP,
+            KeyCreationFlowStep.PHRASE_SAVED_STEP,
+            KeyCreationFlowStep.PHRASE_COPIED_STEP ->
+                state.copy(keyCreationFlowStep = KeyCreationFlowStep.ENTRY_STEP)
+            KeyCreationFlowStep.CONFIRM_KEY_ENTRY_STEP, KeyCreationFlowStep.CONFIRM_KEY_ERROR_STEP ->
+                state.copy(keyCreationFlowStep = KeyCreationFlowStep.COPY_PHRASE_STEP)
+            KeyCreationFlowStep.ALL_SET_STEP ->
+                state.copy(
+                    keyCreationFlowStep = KeyCreationFlowStep.UNINITIALIZED,
+                    showKeyCreationUI = false
+                )
+            KeyCreationFlowStep.WRITE_WORD_STEP -> {
+                state.copy(keyCreationFlowStep = KeyCreationFlowStep.ENTRY_STEP)
+            }
+            KeyCreationFlowStep.FINISHED ->
+                state.copy(keyCreationFlowStep = KeyCreationFlowStep.UNINITIALIZED)
+            KeyCreationFlowStep.UNINITIALIZED ->
+                state.copy(keyCreationFlowStep = KeyCreationFlowStep.UNINITIALIZED)
         }
     }
 
-    private fun verifiedPhraseSuccess() {
-        state = state.copy(
-            verifiedPhrase = Resource.Success(Unit),
-            showPhraseVerificationUI = false
-        )
-        resetVerifiedPhrase()
+    fun phraseRegenerationAction() {
+        state = when (state.keyRecoveryFlowStep) {
+            KeyRecoveryFlowStep.ENTRY_STEP ->
+                state.copy(keyRecoveryFlowStep = KeyRecoveryFlowStep.CONFIRM_KEY_ENTRY_STEP)
+            KeyRecoveryFlowStep.CONFIRM_KEY_ENTRY_STEP ->
+                state.copy(keyRecoveryFlowStep = KeyRecoveryFlowStep.ALL_SET_STEP)
+            KeyRecoveryFlowStep.CONFIRM_KEY_ERROR_STEP ->
+                state.copy(keyRecoveryFlowStep = KeyRecoveryFlowStep.ALL_SET_STEP)
+            KeyRecoveryFlowStep.ALL_SET_STEP -> state.copy(
+                keyRecoveryFlowStep = KeyRecoveryFlowStep.FINISHED
+            )
+            KeyRecoveryFlowStep.FINISHED,
+            KeyRecoveryFlowStep.UNINITIALIZED ->
+                state.copy(keyRecoveryFlowStep = KeyRecoveryFlowStep.ENTRY_STEP)
+        }
+    }
+
+    fun phraseRegenerationBackNavigation() {
+        state = when (state.keyRecoveryFlowStep) {
+            KeyRecoveryFlowStep.ENTRY_STEP ->
+                state.copy(keyRecoveryFlowStep = KeyRecoveryFlowStep.UNINITIALIZED)
+            KeyRecoveryFlowStep.CONFIRM_KEY_ENTRY_STEP ->
+                state.copy(keyRecoveryFlowStep = KeyRecoveryFlowStep.ENTRY_STEP)
+            KeyRecoveryFlowStep.CONFIRM_KEY_ERROR_STEP ->
+                state.copy(keyRecoveryFlowStep = KeyRecoveryFlowStep.ENTRY_STEP)
+            KeyRecoveryFlowStep.ALL_SET_STEP ->
+                state.copy(keyRecoveryFlowStep = KeyRecoveryFlowStep.CONFIRM_KEY_ENTRY_STEP)
+            KeyRecoveryFlowStep.FINISHED ->
+                state.copy(keyRecoveryFlowStep = KeyRecoveryFlowStep.UNINITIALIZED)
+            KeyRecoveryFlowStep.UNINITIALIZED ->
+                state.copy(keyRecoveryFlowStep = KeyRecoveryFlowStep.UNINITIALIZED)
+        }
+    }
+
+    fun verifyPastedPhrase(pastedPhrase: String) {
+        if (pastedPhrase == state.pastedPhrase) {
+            return
+        }
 
         viewModelScope.launch {
-
-            state.phrase?.let {
-                try {
-                    val initialAuthData = userRepository.generateInitialAuthDataAndSaveKeyToUser(
-                        Mnemonics.MnemonicCode(phrase = it))
-                    //wiping key in the VM because we have saved private key, and will not reference phrase again.
-                    state = state.copy(initialAuthData = initialAuthData, phrase = null)
-                    attemptAddWalletSigner()
-                } catch (e: Exception) {
-                    //Todo: STR-241 handle error case if generating key fails. Less likely now that we have phrase but still could happen...
+            state = state.copy(pastedPhrase = pastedPhrase)
+            try {
+                if (phraseValidator.isPhraseValid(pastedPhrase) && pastedPhrase == state.phrase) {
+                    verifiedPhraseSuccess()
+                } else {
+                    verifiedPhraseFailure(Exception("Failed to verify phrase"))
                 }
-            } ?: setVerifiedPhraseErrorState(PhraseException.NULL_PHRASE_IN_STATE)
+            } catch (e: Exception) {
+                verifiedPhraseFailure(Exception(e.message ?: "Failed to verify phrase"))
+            }
         }
     }
 
-    private fun setVerifiedPhraseErrorState(message: String) {
-        state = state.copy(verifiedPhrase = Resource.Error(message = message))
+    private suspend fun verifiedPhraseSuccess() {
+        state.phrase?.let {
+            try {
+                val initialAuthData = userRepository.generateInitialAuthDataAndSaveKeyToUser(
+                    Mnemonics.MnemonicCode(phrase = it)
+                )
+                //wiping key in the VM because we have saved private key, and will not reference phrase again.
+                state = state.copy(initialAuthData = initialAuthData, phrase = null)
+                attemptAddWalletSigner()
+                state =
+                    state.copy(keyCreationFlowStep = KeyCreationFlowStep.ALL_SET_STEP)
+            } catch (e: Exception) {
+                //Todo: STR-241 handle error case if generating key fails. Less likely now that we have phrase but still could happen...
+            }
+        } ?: setCreateKeyError(PhraseException.NULL_PHRASE_IN_STATE)
+    }
+
+    private fun setCreateKeyError(message: String) {
+        state = state.copy(createKeyError = message)
     }
 
     private fun verifiedPhraseFailure(exception: Exception?) {
@@ -340,69 +439,85 @@ class SignInViewModel @Inject constructor(
         viewModelScope.launch {
             userRepository.clearGeneratedAuthData()
             state = state.copy(
-                verifiedPhrase = Resource.Error(
-                    exception?.message ?: "DEFAULT_SAVE_CREDENTIAL_ERROR",
-                ),
-                showPhraseVerificationUI = false
+                keyCreationFlowStep = KeyCreationFlowStep.CONFIRM_KEY_ERROR_STEP,
             )
         }
     }
 
-    fun verifyPhraseToRegenerateKeyPair() {
-        viewModelScope.launch {
-            state.phrase?.let { safePhrase ->
-                state = state.copy(keyRegenerationLoading = true)
-
-                try {
-                    if (!phraseValidator.isPhraseValid(phrase = safePhrase)) {
-                        state = state.copy(
-                            keyRegenerationLoading = false,
-                            regenerateKeyFromPhrase = Resource.Error(InvalidKeyPhraseException.INVALID_KEY_PHRASE_ERROR)
-                        )
-                        return@launch
-                    }
-                } catch (e: Exception) {
-                    state = state.copy(
-                        keyRegenerationLoading = false,
-                        regenerateKeyFromPhrase = Resource.Error(
-                            e.message ?: RegenerateKeyPhraseException.DEFAULT_KEY_REGENERATION_ERROR
-                        )
-                    )
-                }
-
-                val verifyUser = state.verifyUserResult.data
-                val publicKey = verifyUser?.firstPublicKey()
-
-                if (verifyUser != null && publicKey != null) {
-                    try {
-                        userRepository.regenerateAuthDataAndSaveKeyToUser(safePhrase, publicKey)
-                        state = state.copy(
-                            regenerateKeyFromPhrase = Resource.Uninitialized,
-                            keyRegenerationLoading = false,
-                            showPhraseKeyRegenerationUI = false)
-                        restartAuthFlow()
-                    } catch (e: Exception) {
-                        regeneratePhraseFailure(e)
-                    }
-                } else {
-                    regeneratePhraseFailure(AuthDataException.InvalidVerifyUserException())
-                }
-            } ?: restartAuthFlow()
-        }
-    }
-
-    private fun regeneratePhraseFailure(exception: Exception?) {
-        //todo: need to wipe more state here on ticket str-255. That state does not currently exist, but will after we finalize UI.
+    fun exitPhraseFlow() {
         state = state.copy(
-            regenerateKeyFromPhrase = Resource.Error(
-            exception?.message ?: "DEFAULT_RETRIEVE_CREDENTIAL_ERROR"),
-            keyRegenerationLoading = false
+            keyRecoveryFlowStep = KeyRecoveryFlowStep.UNINITIALIZED,
+            keyCreationFlowStep = KeyCreationFlowStep.UNINITIALIZED,
+            showKeyCreationUI = false,
+            showKeyRecoveryUI = false,
+            manualAuthFlowLoading = false,
+            autoAuthFlowLoading = false,
+            recoverKeyError = null,
+            createKeyError = null
         )
     }
 
-    fun restartRegenerateKeyFromPhraseFlow() {
-        resetRegenerateKeyFromPhrase()
-        launchRegenerateKeyFromPhraseFlow()
+    fun verifyPhraseToRecoverKeyPair(pastedPhrase: String) {
+        viewModelScope.launch {
+            state = state.copy(keyRegenerationLoading = true)
+
+            try {
+                if (!phraseValidator.isPhraseValid(phrase = pastedPhrase)) {
+                    state = state.copy(
+                        keyRegenerationLoading = false,
+                        recoverKeyError = InvalidKeyPhraseException.INVALID_KEY_PHRASE_ERROR
+                    )
+                    return@launch
+                }
+            } catch (e: Exception) {
+                state = state.copy(
+                    keyRegenerationLoading = false,
+                    recoverKeyError = RecoverKeyException.DEFAULT_KEY_RECOVERY_ERROR
+                )
+            }
+
+            val verifyUser = state.verifyUserResult.data
+            val publicKey = verifyUser?.firstPublicKey()
+
+            if (verifyUser != null && publicKey != null) {
+                try {
+                    userRepository.regenerateAuthDataAndSaveKeyToUser(pastedPhrase, publicKey)
+                    state = state.copy(
+                        recoverKeyError = null,
+                        keyRecoveryFlowStep = KeyRecoveryFlowStep.ALL_SET_STEP
+                    )
+                } catch (e: Exception) {
+                    recoverKeyFailure(e)
+                }
+            } else {
+                recoverKeyFailure(AuthDataException.InvalidVerifyUserException())
+            }
+        }
+    }
+
+    private fun recoverKeyFailure(exception: Exception?) {
+        //todo: need to wipe more state here on ticket str-255. That state does not currently exist, but will after we finalize UI.
+        state = state.copy(
+            recoverKeyError = exception?.message ?: RecoverKeyException.DEFAULT_KEY_RECOVERY_ERROR,
+            keyRecoveryFlowStep = KeyRecoveryFlowStep.CONFIRM_KEY_ERROR_STEP
+        )
+    }
+
+    private fun handleWordIndexChanged(increasing: Boolean) {
+        var wordIndex =
+            if (increasing) {
+                state.wordIndex + CHANGE_AMOUNT
+            } else {
+                state.wordIndex - CHANGE_AMOUNT
+            }
+
+        if (wordIndex > LAST_WORD_INDEX) {
+            wordIndex = FIRST_WORD_INDEX
+        } else if (wordIndex < FIRST_WORD_INDEX) {
+            wordIndex = LAST_WORD_RANGE_SET_INDEX
+        }
+
+        state = state.copy(wordIndex = wordIndex)
     }
     //endregion
 
@@ -414,21 +529,20 @@ class SignInViewModel @Inject constructor(
             val userAuthFlowState = getUserAuthFlowState(
                 verifyUser = verifyUser
             )
-
             respondToUserAuthFlow(userAuthFlow = userAuthFlowState)
         } catch (e: Exception) {
             handleEncryptionManagerException(exception = e)
         }
     }
 
-    private suspend fun getUserAuthFlowState(verifyUser: VerifyUser) : UserAuthFlow {
+    private suspend fun getUserAuthFlowState(verifyUser: VerifyUser): UserAuthFlow {
         val savedPrivateKey = userRepository.getSavedPrivateKey()
         val publicKeysPresent = !verifyUser.publicKeys.isNullOrEmpty()
 
         //no public keys on backend then we need to generate data
-        if(!publicKeysPresent && savedPrivateKey.isEmpty()) {
+        if (!publicKeysPresent && savedPrivateKey.isEmpty()) {
             return UserAuthFlow.FIRST_LOGIN
-        }  else if (!publicKeysPresent) {
+        } else if (!publicKeysPresent) {
             return UserAuthFlow.LOCAL_KEY_PRESENT_NO_BACKEND_KEYS
         }
 
@@ -439,14 +553,14 @@ class SignInViewModel @Inject constructor(
                 throw WalletSignersException()
             }
 
-        if(savedPrivateKey.isEmpty()) {
+        if (savedPrivateKey.isEmpty()) {
             return UserAuthFlow.EXISTING_BACKEND_KEY_LOCAL_KEY_MISSING
         }
 
         val doesUserHaveValidLocalKey =
             userRepository.doesUserHaveValidLocalKey(verifyUser, walletSigners)
 
-        if(doesUserHaveValidLocalKey) {
+        if (doesUserHaveValidLocalKey) {
             return UserAuthFlow.KEY_VALIDATED
         }
 
@@ -462,7 +576,7 @@ class SignInViewModel @Inject constructor(
                 state = state.copy(keyValid = Resource.Success(Unit))
             }
             UserAuthFlow.EXISTING_BACKEND_KEY_LOCAL_KEY_MISSING -> {
-                launchRegenerateKeyFromPhraseFlow()
+                launchRecoverKeyFromPhraseFlow()
             }
             UserAuthFlow.NO_VALID_KEY, UserAuthFlow.NO_LOCAL_KEY_AVAILABLE -> {
                 state = state.copy(shouldAbortUserFromAuthFlow = true)
@@ -491,12 +605,12 @@ class SignInViewModel @Inject constructor(
             state = state.copy(
                 phrase = phrase
             )
-            launchPhraseVerificationDialog()
+            launchPhraseVerificationUI()
         }
     }
 
     private fun handleEncryptionManagerException(exception: Exception) {
-        state = if(exception is WalletSignersException) {
+        state = if (exception is WalletSignersException) {
             state.copy(
                 walletSignersResult =
                 Resource.Error(exception.message ?: DEFAULT_SIGN_IN_ERROR_MESSAGE)

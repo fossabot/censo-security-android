@@ -1,5 +1,6 @@
 package com.strikeprotocols.mobile.presentation.approval_detail
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -29,7 +30,6 @@ import com.strikeprotocols.mobile.R
 import com.strikeprotocols.mobile.common.*
 import com.strikeprotocols.mobile.common.BiometricUtil.createBioPrompt
 import com.strikeprotocols.mobile.common.BiometricUtil.getBasicBiometricPromptBuilder
-import com.strikeprotocols.mobile.common.GeneralDummyData.generateWalletApprovalsDummyData
 import com.strikeprotocols.mobile.data.models.ApprovalDisposition
 import com.strikeprotocols.mobile.data.models.approval.WalletApproval
 import com.strikeprotocols.mobile.presentation.approvals.ApprovalsViewModel
@@ -42,6 +42,7 @@ import com.strikeprotocols.mobile.presentation.approvals.approval_type_row_items
 import com.strikeprotocols.mobile.presentation.components.*
 import com.strikeprotocols.mobile.presentation.durable_nonce.DurableNonceViewModel
 
+@SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
 fun ApprovalDetailsScreen(
     navController: NavController,
@@ -384,6 +385,7 @@ fun ApprovalDetailsButtons(
 
 //This stateless composable can be useful for quick iteration on UI
 // and using the preview to test
+@SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
 fun StatelessApprovalDetailsScreen() {
     Scaffold(
@@ -401,8 +403,8 @@ fun StatelessApprovalDetailsScreen() {
                 onDenyClicked = { strikeLog(message = "Deny clicked") },
                 timeRemainingInSeconds = 1000,
                 isLoading = false,
-                approval = generateWalletApprovalsDummyData(),
-                initiationRequest = generateWalletApprovalsDummyData().isInitiationRequest()
+                approval = GeneralDummyData().generateWalletApprovalsDummyData(),
+                initiationRequest = GeneralDummyData().generateWalletApprovalsDummyData().isInitiationRequest()
             )
         }
     )

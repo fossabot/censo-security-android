@@ -1,6 +1,7 @@
 buildscript {
     ext {
-        compose_version = '1.1.1'
+        //on RC early because of TextField bug causing issues when pasting text in
+        compose_version = '1.2.0-rc03'
         retrofit_version = '2.9.0'
         okhttp_version = '5.0.0-alpha.2'
         lifecycle_version = '2.4.1'
@@ -19,7 +20,7 @@ buildscript {
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:7.2.0'
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.6.10"
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.7.0"
         classpath "com.google.dagger:hilt-android-gradle-plugin:$hilt_version"
         classpath "com.google.gms:google-services:4.3.10"
         //Need to stay on 2.2.0 until this issue is fixed by their team: https://github.com/firebase/firebase-android-sdk/issues/3403

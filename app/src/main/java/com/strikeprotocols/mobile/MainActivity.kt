@@ -19,10 +19,9 @@ import androidx.navigation.*
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import cash.z.ecc.android.bip39.Mnemonics
 import com.strikeprotocols.mobile.common.BiometricUtil
-import com.strikeprotocols.mobile.data.AuthProvider
-import com.strikeprotocols.mobile.data.UserState
-import com.strikeprotocols.mobile.data.UserStateListener
+import com.strikeprotocols.mobile.data.*
 import com.strikeprotocols.mobile.data.models.approval.WalletApproval
 import com.strikeprotocols.mobile.presentation.Screen
 import com.strikeprotocols.mobile.presentation.account.AccountScreen
