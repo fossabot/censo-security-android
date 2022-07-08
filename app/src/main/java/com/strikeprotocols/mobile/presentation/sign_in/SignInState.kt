@@ -36,15 +36,18 @@ data class SignInState(
     val createKeyError: String? = null,
     val keyValid: Resource<Unit> = Resource.Uninitialized,
     val regenerateData: Resource<WalletSigner> = Resource.Uninitialized,
+    val showToast: Resource<String> = Resource.Uninitialized,
+
+    val finalizingKeyCreation: Resource<Boolean> = Resource.Uninitialized,
+    val finalizingKeyRecovery: Resource<Boolean> = Resource.Uninitialized,
 
     //Exception Data
     val authFlowException: Resource<Exception> = Resource.Uninitialized,
+    val recoverKeyFlowException: Resource<Exception> = Resource.Uninitialized,
 
-    //Autocomplete State
-    val wordQuery: String = "",
-    val wordPredictions: List<String> = emptyList(),
+    val wordIndex: Int = 0,
 
-    val wordIndex: Int = 0
+    val confirmPhraseWordsState: ConfirmPhraseWordsState = ConfirmPhraseWordsState()
 ) {
     val signInButtonEnabled = email.isNotEmpty() && password.isNotEmpty()
 

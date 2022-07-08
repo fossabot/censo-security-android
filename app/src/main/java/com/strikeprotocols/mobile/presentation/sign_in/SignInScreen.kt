@@ -1,5 +1,6 @@
 package com.strikeprotocols.mobile.presentation.sign_in
 
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -42,8 +43,8 @@ fun SignInScreen(
     navController: NavController,
     viewModel: SignInViewModel = hiltViewModel(),
 ) {
-
     val state = viewModel.state
+    val context = LocalContext.current
 
     val lifecycleOwner: LifecycleOwner = LocalLifecycleOwner.current
 
@@ -54,10 +55,8 @@ fun SignInScreen(
             }
         }
 
-        // Add the observer to the lifecycle
         lifecycleOwner.lifecycle.addObserver(observer)
 
-        // When the effect leaves the Composition, remove the observer
         onDispose {
             lifecycleOwner.lifecycle.removeObserver(observer)
         }
@@ -77,26 +76,14 @@ fun SignInScreen(
             viewModel.resetLoginCallAndRetrieveUserInformation()
         }
 
-        if (state.keyCreationFlowStep == KeyCreationFlowStep.FINISHED) {
+        if (state.keyCreationFlowStep == KeyCreationFlowStep.FINISHED
+            || state.keyRecoveryFlowStep == KeyRecoveryFlowStep.FINISHED) {
             navController.navigate(Screen.ApprovalListRoute.route) {
                 popUpTo(Screen.SignInRoute.route) {
                     inclusive = true
                 }
             }
             viewModel.setUserLoggedInSuccess()
-            viewModel.exitPhraseFlow()
-            viewModel.loadingFinished()
-            viewModel.resetAddWalletSignersCall()
-        }
-
-        if (state.keyRecoveryFlowStep == KeyRecoveryFlowStep.FINISHED) {
-            navController.navigate(Screen.ApprovalListRoute.route) {
-                popUpTo(Screen.SignInRoute.route) {
-                    inclusive = true
-                }
-            }
-            viewModel.setUserLoggedInSuccess()
-            viewModel.exitPhraseFlow()
             viewModel.loadingFinished()
             viewModel.resetAddWalletSignersCall()
         }
@@ -201,7 +188,7 @@ fun SignInScreen(
     //region PhraseVerificationUI
     if (state.showKeyCreationUI) {
         Box {
-            PhraseVerificationFlowUI(
+            KeyCreationFlowUI(
                 phrase = state.phrase ?: "",
                 pastedPhrase = state.pastedPhrase,
                 phraseVerificationFlowStep = state.keyCreationFlowStep,
@@ -210,7 +197,14 @@ fun SignInScreen(
                 onNavigate = viewModel::phraseVerificationAction,
                 onBackNavigate = viewModel::phraseVerificationBackNavigation,
                 verifyPastedPhrase = viewModel::verifyPastedPhrase,
-                onExit = viewModel::exitPhraseFlow
+                onExit = viewModel::exitPhraseFlow,
+                wordToVerifyIndex = state.confirmPhraseWordsState.wordIndex,
+                wordInput = state.confirmPhraseWordsState.wordInput,
+                wordInputChange = viewModel::updateWordInput,
+                wordVerificationErrorEnabled = state.confirmPhraseWordsState.errorEnabled,
+                onSubmitWord = viewModel::submitWordInput,
+                keyCreationState = state.finalizingKeyCreation,
+                retryKeyCreation = viewModel::retryKeyCreationFromPhrase
             )
         }
     }
@@ -219,14 +213,21 @@ fun SignInScreen(
     //region PhraseKeyRegenerationUI
     if (state.showKeyRecoveryUI) {
         Box {
-            PhraseRecoveryFlowUI(
+            KeyRecoveryFlowUI(
                 pastedPhrase = state.pastedPhrase,
                 keyRecoveryFlowStep = state.keyRecoveryFlowStep,
                 onNavigate = viewModel::phraseRegenerationAction,
                 onBackNavigate = viewModel::phraseRegenerationBackNavigation,
                 verifyPastedPhrase = viewModel::verifyPhraseToRecoverKeyPair,
                 onExit = viewModel::exitPhraseFlow,
-                onPhraseFlowAction = viewModel::phraseFlowAction
+                onPhraseFlowAction = viewModel::phraseFlowAction,
+                wordToVerifyIndex = state.confirmPhraseWordsState.wordIndex,
+                wordInput = state.confirmPhraseWordsState.wordInput,
+                wordInputChange = viewModel::updateWordInput,
+                wordVerificationErrorEnabled = state.confirmPhraseWordsState.errorEnabled,
+                onSubmitWord = viewModel::submitWordInput,
+                keyRecoveryState = state.finalizingKeyRecovery,
+                retryKeyRecovery = viewModel::retryKeyRecoveryFromPhrase
             )
         }
     }
@@ -359,6 +360,47 @@ fun SignInScreen(
             }
         )
         viewModel.loadingFinished()
+    }
+
+    if (state.recoverKeyFlowException is Resource.Success) {
+        AlertDialog(
+            backgroundColor = UnfocusedGrey,
+            title = {
+                Text(
+                    text = stringResource(R.string.key_recovery_failed),
+                    color = StrikeWhite,
+                    fontSize = 20.sp
+                )
+            },
+            text = {
+                Text(
+                    text = getAuthFlowErrorMessage(
+                        e = state.recoverKeyFlowException.data ?: Exception(),
+                        context = LocalContext.current
+                    ),
+                    color = StrikeWhite,
+                    fontSize = 16.sp
+                )
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        viewModel.resetRecoverKeyFlowException()
+                    }
+                )
+                {
+                    Text(text = stringResource(R.string.ok))
+                }
+            },
+            onDismissRequest = {
+                viewModel.resetRecoverKeyFlowException()
+            }
+        )
+    }
+
+    if (state.showToast is Resource.Success) {
+        Toast.makeText(context, state.showToast.data, Toast.LENGTH_LONG).show()
+        viewModel.resetShowToast()
     }
     //endregion
 }

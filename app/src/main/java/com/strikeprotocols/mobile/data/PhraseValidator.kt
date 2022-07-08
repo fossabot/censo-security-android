@@ -83,7 +83,6 @@ class PhraseValidatorImpl() : PhraseValidator {
     override fun format(text: String) =
         text.replace("[^A-Za-z ]".toRegex(), " ").replace("\\s+".toRegex(), " ").trim()
 
-
     companion object {
         val words = Mnemonics.getCachedWords(Locale.ENGLISH.language)
     }

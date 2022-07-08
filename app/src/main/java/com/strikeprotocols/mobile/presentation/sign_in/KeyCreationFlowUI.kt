@@ -1,25 +1,21 @@
 package com.strikeprotocols.mobile.presentation.sign_in
 
 import android.annotation.SuppressLint
-import androidx.compose.foundation.background
+import android.content.Context
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ArrowBack
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.blur
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import com.strikeprotocols.mobile.R
+import com.strikeprotocols.mobile.common.Resource
 import com.strikeprotocols.mobile.presentation.components.StrikeTopAppBar
 
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
-fun PhraseVerificationFlowUI(
+fun KeyCreationFlowUI(
     phrase: String,
     phraseVerificationFlowStep: KeyCreationFlowStep,
     pastedPhrase: String,
@@ -28,7 +24,14 @@ fun PhraseVerificationFlowUI(
     onPhraseFlowAction: (phraseFlowAction: PhraseFlowAction) -> Unit,
     onBackNavigate: () -> Unit,
     onExit: () -> Unit,
-    verifyPastedPhrase: (String) -> Unit
+    verifyPastedPhrase: (String) -> Unit,
+    wordToVerifyIndex: Int,
+    wordInput: String,
+    wordInputChange: (String) -> Unit,
+    wordVerificationErrorEnabled: Boolean,
+    retryKeyCreation: () -> Unit,
+    onSubmitWord: (Context) -> Unit,
+    keyCreationState: Resource<Boolean>
 ) {
 
     val screenTitle = when (phraseVerificationFlowStep) {
@@ -37,6 +40,7 @@ fun PhraseVerificationFlowUI(
         KeyCreationFlowStep.WRITE_WORD_STEP,
         KeyCreationFlowStep.PHRASE_COPIED_STEP,
         KeyCreationFlowStep.PHRASE_SAVED_STEP -> stringResource(R.string.start_over)
+        KeyCreationFlowStep.VERIFY_WORDS_STEP -> stringResource(R.string.write_down_key)
         KeyCreationFlowStep.CONFIRM_KEY_ENTRY_STEP,
         KeyCreationFlowStep.CONFIRM_KEY_ERROR_STEP -> stringResource(R.string.copy_key)
         KeyCreationFlowStep.ALL_SET_STEP -> ""
@@ -93,7 +97,17 @@ fun PhraseVerificationFlowUI(
                         WriteWordUI(
                             phrase = phrase,
                             index = wordIndex,
-                            onPhraseFlowAction = onPhraseFlowAction
+                            onPhraseFlowAction = onPhraseFlowAction,
+                            onNavigate = onNavigate
+                        )
+                    }
+                    KeyCreationFlowStep.VERIFY_WORDS_STEP -> {
+                        VerifyPhraseWordUI(
+                            wordIndex = wordToVerifyIndex,
+                            value = wordInput,
+                            onValueChanged = wordInputChange,
+                            errorEnabled = wordVerificationErrorEnabled,
+                            onSubmitWord = onSubmitWord
                         )
                     }
                     KeyCreationFlowStep.CONFIRM_KEY_ENTRY_STEP -> ConfirmKeyUI(
@@ -114,7 +128,12 @@ fun PhraseVerificationFlowUI(
                         title = stringResource(R.string.key_not_valid_title),
                         message = stringResource(R.string.key_not_valid_message)
                     )
-                    KeyCreationFlowStep.ALL_SET_STEP -> AllSetUI(onNavigate = onNavigate)
+                    KeyCreationFlowStep.ALL_SET_STEP ->
+                        AllSetUI(
+                            onNavigate = onNavigate,
+                            allSetState = keyCreationState,
+                            retry = retryKeyCreation
+                        )
                     else -> EntryScreenPhraseUI(
                         title = stringResource(R.string.time_to_back_up),
                         subtitle = stringResource(R.string.how_would_you_save_it),
@@ -122,7 +141,8 @@ fun PhraseVerificationFlowUI(
                         buttonTwoText = stringResource(R.string.pen_and_paper),
                         onExit = onExit,
                         onPhraseFlowAction = onPhraseFlowAction,
-                        creationFlow = true
+                        creationFlow = true,
+                        onNavigate = {}
                     )
                 }
             }

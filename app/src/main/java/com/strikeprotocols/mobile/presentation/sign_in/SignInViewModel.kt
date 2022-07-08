@@ -10,9 +10,11 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.viewModelScope
 import cash.z.ecc.android.bip39.Mnemonics
 import com.google.firebase.messaging.FirebaseMessaging
+import com.strikeprotocols.mobile.R
 import com.strikeprotocols.mobile.common.*
 import com.strikeprotocols.mobile.data.*
 import com.strikeprotocols.mobile.data.NoInternetException.Companion.NO_INTERNET_ERROR
+import com.strikeprotocols.mobile.data.models.IndexedPhraseWord
 import com.strikeprotocols.mobile.data.models.PushBody
 import com.strikeprotocols.mobile.data.models.VerifyUser
 import com.strikeprotocols.mobile.data.models.WalletSigner
@@ -54,38 +56,18 @@ class SignInViewModel @Inject constructor(
         val formattedPhrase = phraseValidator.format(text = phrase)
         state = state.copy(phrase = formattedPhrase)
     }
-    //endregion
 
-    //region Autocomplete state handling
-    fun updatePredictions(query: String) {
-        val updatedPredictions = if (query.isEmpty()) emptyList() else
-            PhraseValidatorImpl.words.filter { it.startsWith(query.trim().lowercase()) }
+    fun updateWordInput(input: String) {
+        state = state.copy(confirmPhraseWordsState = state.confirmPhraseWordsState.copy(wordInput = input.lowercase().trim()))
 
-        state = state.copy(
-            wordQuery = query,
-            wordPredictions = updatedPredictions
-        )
+        //TODO: Slot in the autocomplete logic here
+        if (state.confirmPhraseWordsState.isCreationKeyFlow) {
+            verifyWordInputAgainstPhraseWord()
+        }
     }
 
-    fun clearQuery() {
-        updatePredictions("")
-    }
-
-    fun wordSelected(word: String) {
-        strikeLog(message = "Word selected: ${word.lowercase()}")
-        state = state.copy(
-            wordQuery = "",
-            wordPredictions = emptyList()
-        )
-    }
-
-
-    fun wordEntered() {
-        strikeLog(message = "Word entered: ${state.wordQuery.lowercase()}")
-        state = state.copy(
-            wordQuery = "",
-            wordPredictions = emptyList()
-        )
+    fun submitWordInput(context: Context) {
+        handleWordSubmitted(context = context)
     }
     //endregion
 
@@ -166,7 +148,7 @@ class SignInViewModel @Inject constructor(
         viewModelScope.launch {
             userRepository.saveUserEmail(state.email)
             userRepository.setUserLoggedIn()
-            submitNotificationTokenForRegistration()
+            //submitNotificationTokenForRegistration()
         }
     }
 
@@ -188,19 +170,23 @@ class SignInViewModel @Inject constructor(
         }
     }
 
-    private fun attemptAddWalletSigner() {
+    private suspend fun attemptAddWalletSigner() {
+        state.initialAuthData?.let { safeInitialAuthData ->
+            val walletSigner =
+                userRepository.addWalletSigner(safeInitialAuthData.walletSignerBody)
+            state = state.copy(addWalletSignerResult = Resource.Success(walletSigner))
+        } ?: restartAuthFlow()
+    }
+
+    fun retryKeyCreationFromPhrase() {
         viewModelScope.launch {
-            state.initialAuthData?.let { safeInitialAuthData ->
-                state = try {
-                    val walletSigner = userRepository.addWalletSigner(safeInitialAuthData.walletSignerBody)
-                    state.copy(addWalletSignerResult = Resource.Success(walletSigner))
-                } catch (e: Exception) {
-                    state.copy(
-                        addWalletSignerResult =
-                        Resource.Error(e.message ?: DEFAULT_SIGN_IN_ERROR_MESSAGE)
-                    )
-                }
-            } ?: restartAuthFlow()
+            verifiedPhraseSuccess()
+        }
+    }
+
+    fun retryKeyRecoveryFromPhrase() {
+        viewModelScope.launch {
+
         }
     }
 
@@ -269,6 +255,18 @@ class SignInViewModel @Inject constructor(
             verifyUserResult = Resource.Uninitialized
         )
     }
+
+    private fun resetConfirmPhraseWordsState() {
+        state = state.copy(confirmPhraseWordsState = ConfirmPhraseWordsState())
+    }
+
+    fun resetShowToast() {
+        state = state.copy(showToast = Resource.Uninitialized)
+    }
+
+    fun resetRecoverKeyFlowException() {
+        state = state.copy(recoverKeyFlowException = Resource.Uninitialized)
+    }
     //endregion
 
     //region Phrase + Key Generation Flows
@@ -323,6 +321,22 @@ class SignInViewModel @Inject constructor(
             KeyCreationFlowStep.WRITE_WORD_STEP -> {
                 state.copy(keyCreationFlowStep = KeyCreationFlowStep.WRITE_WORD_STEP)
             }
+            KeyCreationFlowStep.VERIFY_WORDS_STEP -> {
+                try {
+                    val confirmPhraseWordsState = generateConfirmPhraseWordsStateForCreationFlow()
+                    state.copy(
+                        keyCreationFlowStep = KeyCreationFlowStep.VERIFY_WORDS_STEP,
+                        confirmPhraseWordsState = confirmPhraseWordsState
+                    )
+                } catch (e: Exception) {
+                    setCreateKeyError(e.message ?: PhraseException.DEFAULT_ERROR)
+                    //TODO: Zak 278 We want to handle this better,
+                    // at this point we may need to generate a new phrase for the user and restart the flow
+                    state.copy(
+                        keyCreationFlowStep = KeyCreationFlowStep.ENTRY_STEP
+                    )
+                }
+            }
             KeyCreationFlowStep.ALL_SET_STEP ->
                 state.copy(
                     keyCreationFlowStep = KeyCreationFlowStep.FINISHED,
@@ -346,12 +360,24 @@ class SignInViewModel @Inject constructor(
             KeyCreationFlowStep.CONFIRM_KEY_ENTRY_STEP, KeyCreationFlowStep.CONFIRM_KEY_ERROR_STEP ->
                 state.copy(keyCreationFlowStep = KeyCreationFlowStep.COPY_PHRASE_STEP)
             KeyCreationFlowStep.ALL_SET_STEP ->
-                state.copy(
-                    keyCreationFlowStep = KeyCreationFlowStep.UNINITIALIZED,
-                    showKeyCreationUI = false
-                )
+                if(state.finalizingKeyCreation is Resource.Success) {
+                    state.copy(
+                        keyCreationFlowStep = KeyCreationFlowStep.FINISHED,
+                        showKeyCreationUI = false
+                    )
+                } else {
+                    state.copy(
+                        keyCreationFlowStep = KeyCreationFlowStep.ENTRY_STEP
+                    )
+                }
             KeyCreationFlowStep.WRITE_WORD_STEP -> {
                 state.copy(keyCreationFlowStep = KeyCreationFlowStep.ENTRY_STEP)
+            }
+            KeyCreationFlowStep.VERIFY_WORDS_STEP -> {
+                state.copy(
+                    keyCreationFlowStep = KeyCreationFlowStep.WRITE_WORD_STEP,
+                    confirmPhraseWordsState = ConfirmPhraseWordsState()
+                )
             }
             KeyCreationFlowStep.FINISHED ->
                 state.copy(keyCreationFlowStep = KeyCreationFlowStep.UNINITIALIZED)
@@ -364,16 +390,25 @@ class SignInViewModel @Inject constructor(
         state = when (state.keyRecoveryFlowStep) {
             KeyRecoveryFlowStep.ENTRY_STEP ->
                 state.copy(keyRecoveryFlowStep = KeyRecoveryFlowStep.CONFIRM_KEY_ENTRY_STEP)
+            KeyRecoveryFlowStep.VERIFY_WORDS_STEP -> {
+                val confirmPhraseWordsState = generateConfirmPhraseWordsStateForRecoveryFlow()
+                state.copy(
+                    keyRecoveryFlowStep = KeyRecoveryFlowStep.VERIFY_WORDS_STEP,
+                    confirmPhraseWordsState = confirmPhraseWordsState
+                )
+            }
             KeyRecoveryFlowStep.CONFIRM_KEY_ENTRY_STEP ->
                 state.copy(keyRecoveryFlowStep = KeyRecoveryFlowStep.ALL_SET_STEP)
             KeyRecoveryFlowStep.CONFIRM_KEY_ERROR_STEP ->
                 state.copy(keyRecoveryFlowStep = KeyRecoveryFlowStep.ALL_SET_STEP)
-            KeyRecoveryFlowStep.ALL_SET_STEP -> state.copy(
-                keyRecoveryFlowStep = KeyRecoveryFlowStep.FINISHED
-            )
+            KeyRecoveryFlowStep.ALL_SET_STEP ->
+                    state.copy(
+                        keyRecoveryFlowStep = KeyRecoveryFlowStep.FINISHED,
+                        showKeyCreationUI = false
+                    )
             KeyRecoveryFlowStep.FINISHED,
             KeyRecoveryFlowStep.UNINITIALIZED ->
-                state.copy(keyRecoveryFlowStep = KeyRecoveryFlowStep.ENTRY_STEP)
+                state.copy(keyRecoveryFlowStep = KeyRecoveryFlowStep.UNINITIALIZED)
         }
     }
 
@@ -381,6 +416,8 @@ class SignInViewModel @Inject constructor(
         state = when (state.keyRecoveryFlowStep) {
             KeyRecoveryFlowStep.ENTRY_STEP ->
                 state.copy(keyRecoveryFlowStep = KeyRecoveryFlowStep.UNINITIALIZED)
+            KeyRecoveryFlowStep.VERIFY_WORDS_STEP ->
+                state.copy(keyRecoveryFlowStep = KeyRecoveryFlowStep.ENTRY_STEP)
             KeyRecoveryFlowStep.CONFIRM_KEY_ENTRY_STEP ->
                 state.copy(keyRecoveryFlowStep = KeyRecoveryFlowStep.ENTRY_STEP)
             KeyRecoveryFlowStep.CONFIRM_KEY_ERROR_STEP ->
@@ -405,27 +442,36 @@ class SignInViewModel @Inject constructor(
                 if (phraseValidator.isPhraseValid(pastedPhrase) && pastedPhrase == state.phrase) {
                     verifiedPhraseSuccess()
                 } else {
-                    verifiedPhraseFailure(Exception("Failed to verify phrase"))
+                    verifiedPhraseFailure(Exception(PhraseException.FAILED_TO_VERIFY_PHRASE))
                 }
             } catch (e: Exception) {
-                verifiedPhraseFailure(Exception(e.message ?: "Failed to verify phrase"))
+                verifiedPhraseFailure(Exception(e.message ?: PhraseException.FAILED_TO_VERIFY_PHRASE))
             }
         }
     }
 
     private suspend fun verifiedPhraseSuccess() {
         state.phrase?.let {
+            state = state.copy(
+                keyCreationFlowStep = KeyCreationFlowStep.ALL_SET_STEP,
+                finalizingKeyCreation = Resource.Loading()
+            )
             try {
                 val initialAuthData = userRepository.generateInitialAuthDataAndSaveKeyToUser(
                     Mnemonics.MnemonicCode(phrase = it)
                 )
-                //wiping key in the VM because we have saved private key, and will not reference phrase again.
-                state = state.copy(initialAuthData = initialAuthData, phrase = null)
+                state = state.copy(initialAuthData = initialAuthData)
                 attemptAddWalletSigner()
                 state =
-                    state.copy(keyCreationFlowStep = KeyCreationFlowStep.ALL_SET_STEP)
+                    state.copy(
+                        keyCreationFlowStep = KeyCreationFlowStep.ALL_SET_STEP,
+                        finalizingKeyCreation = Resource.Success(true),
+                        phrase = null
+                    )
             } catch (e: Exception) {
-                //Todo: STR-241 handle error case if generating key fails. Less likely now that we have phrase but still could happen...
+                state = state.copy(
+                    finalizingKeyCreation = Resource.Error(e.message ?: "")
+                )
             }
         } ?: setCreateKeyError(PhraseException.NULL_PHRASE_IN_STATE)
     }
@@ -453,7 +499,8 @@ class SignInViewModel @Inject constructor(
             manualAuthFlowLoading = false,
             autoAuthFlowLoading = false,
             recoverKeyError = null,
-            createKeyError = null
+            createKeyError = null,
+            confirmPhraseWordsState = ConfirmPhraseWordsState()
         )
     }
 
@@ -487,20 +534,26 @@ class SignInViewModel @Inject constructor(
                         keyRecoveryFlowStep = KeyRecoveryFlowStep.ALL_SET_STEP
                     )
                 } catch (e: Exception) {
-                    recoverKeyFailure(e)
+                    recoverKeyFailure(e, pastedPhrase = true)
                 }
             } else {
-                recoverKeyFailure(AuthDataException.InvalidVerifyUserException())
+                recoverKeyFailure(AuthDataException.InvalidVerifyUserException(), pastedPhrase = true)
             }
         }
     }
 
-    private fun recoverKeyFailure(exception: Exception?) {
-        //todo: need to wipe more state here on ticket str-255. That state does not currently exist, but will after we finalize UI.
-        state = state.copy(
-            recoverKeyError = exception?.message ?: RecoverKeyException.DEFAULT_KEY_RECOVERY_ERROR,
-            keyRecoveryFlowStep = KeyRecoveryFlowStep.CONFIRM_KEY_ERROR_STEP
-        )
+    private fun recoverKeyFailure(exception: Exception?, pastedPhrase: Boolean) {
+        state = if (pastedPhrase) {
+            state.copy(
+                keyRecoveryFlowStep = KeyRecoveryFlowStep.CONFIRM_KEY_ERROR_STEP
+            )
+        } else {
+            resetConfirmPhraseWordsState()
+            state.copy(
+                keyRecoveryFlowStep = KeyRecoveryFlowStep.ENTRY_STEP,
+                recoverKeyFlowException = Resource.Success(exception)
+            )
+        }
     }
 
     private fun handleWordIndexChanged(increasing: Boolean) {
@@ -519,7 +572,188 @@ class SignInViewModel @Inject constructor(
 
         state = state.copy(wordIndex = wordIndex)
     }
-    //endregion
+
+    private fun generateConfirmPhraseWordsStateForCreationFlow(): ConfirmPhraseWordsState {
+        val phrase = state.phrase ?: throw Exception(PhraseException.NULL_PHRASE_IN_STATE)
+
+        val indexedPhraseWord = getPhraseWordAtIndex(phrase = phrase, index = 0)//This does almost the same thing as getWordIndexFromWordSet method
+
+        return ConfirmPhraseWordsState(
+            phrase = phrase,
+            phraseWordToVerify = indexedPhraseWord.wordValue,
+            wordIndex = indexedPhraseWord.wordIndex,
+            wordInput = "",
+            errorEnabled = false,
+            wordsVerified = 0,
+            isCreationKeyFlow = true
+        )
+    }
+
+    private fun generateConfirmPhraseWordsStateForRecoveryFlow(): ConfirmPhraseWordsState {
+        //The user will just have to enter 24 words and we just need to keep them and build them into a phrase
+        return ConfirmPhraseWordsState(
+            phrase = "",
+            phraseWordToVerify = "",
+            wordIndex = 0,
+            wordInput = "",
+            errorEnabled = false,
+            wordsVerified = 0,
+            isCreationKeyFlow = false
+        )
+    }
+
+    private fun getPhraseWordAtIndex(phrase: String, index: Int): IndexedPhraseWord {
+        if (!phrase.contains(" ") || phrase.split(" ").size < ConfirmPhraseWordsState.PHRASE_WORD_COUNT) {
+            //Does not contain space
+            //Does not equal 24 word phrase
+            throw Exception(PhraseException.INVALID_PHRASE_IN_STATE)
+        }
+
+        val phraseWords = phrase.split(" ")
+        val phraseWord = phraseWords[index]
+
+        return IndexedPhraseWord(wordIndex = index, wordValue = phraseWord)
+    }
+
+    private fun handleWordSubmitted(context: Context) {
+        val word = state.confirmPhraseWordsState.wordInput.trim()
+        val index = state.confirmPhraseWordsState.wordIndex
+
+        if (word.isEmpty()) {
+            state = state.copy(showToast = Resource.Success(context.getString(R.string.do_not_leave_text_field_empty)))
+            return
+        } else {
+
+            if (state.confirmPhraseWordsState.isCreationKeyFlow) {
+                verifyWordSubmittedAgainstPhraseWord()
+            } else {
+                addWordInputToRecoveryPhraseWords(word = word, index = index)
+            }
+        }
+    }
+
+    private fun verifyWordInputAgainstPhraseWord() {
+        val phraseWord = state.confirmPhraseWordsState.phraseWordToVerify
+        val wordInput = state.confirmPhraseWordsState.wordInput
+
+        if (phraseWord == wordInput) {
+            handleWordVerified()
+        }
+    }
+
+    private fun verifyWordSubmittedAgainstPhraseWord() {
+        val phraseWord = state.confirmPhraseWordsState.phraseWordToVerify
+        val wordInput = state.confirmPhraseWordsState.wordInput
+
+        if (phraseWord == wordInput) {
+            handleWordVerified()
+        } else {
+            state = state.copy(
+                confirmPhraseWordsState = state.confirmPhraseWordsState.copy(
+                    errorEnabled = true
+                )
+            )
+        }
+    }
+
+    private fun addWordInputToRecoveryPhraseWords(word: String, index: Int) {
+        val words = state.confirmPhraseWordsState.words.toMutableList()
+        words.add(index = index, element = word)
+
+        state = state.copy(
+            confirmPhraseWordsState = state.confirmPhraseWordsState.copy(
+                wordIndex = index + 1,//Increment by one
+                wordInput = "",
+                errorEnabled = false,
+                words = words
+            )
+        )
+
+        if (state.confirmPhraseWordsState.allWordsEntered) {
+            assemblePhraseFromWords()
+        }
+    }
+
+    private fun handleWordVerified() {
+        //If 23 words are verified and this method gets call, we have verified the last word
+        if (state.confirmPhraseWordsState.wordsVerified == ConfirmPhraseWordsState.PHRASE_WORD_SECOND_TO_LAST_INDEX) {
+            handleUserVerifiedAllPhraseWords()
+            return
+        }
+
+        val phrase = state.confirmPhraseWordsState.phrase
+        val nextIndex = state.confirmPhraseWordsState.wordIndex + 1
+
+        val nextWordToVerify = getPhraseWordAtIndex(phrase = phrase, index = nextIndex)
+
+        state = state.copy(
+            confirmPhraseWordsState = state.confirmPhraseWordsState.copy(
+                phraseWordToVerify = nextWordToVerify.wordValue,
+                wordIndex = nextWordToVerify.wordIndex,
+                wordInput = "",
+                wordsVerified = state.confirmPhraseWordsState.wordsVerified + 1,
+                errorEnabled = false
+            )
+        )
+    }
+
+    private fun assemblePhraseFromWords() {
+
+        viewModelScope.launch {
+            //We still need to connect logic for regenerating the key
+            val words = state.confirmPhraseWordsState.words
+
+            val phraseBuilder = StringBuilder()
+            for (word in words) {
+                phraseBuilder.append("$word ")
+            }
+
+            val phrase = phraseBuilder.toString().trim()
+
+            try {
+                val isPhraseValid = phraseValidator.isPhraseValid(phrase = phrase)
+
+                if (isPhraseValid) {
+                    val verifyUser = state.verifyUserResult.data
+                    val publicKey = verifyUser?.firstPublicKey()
+
+                    if (verifyUser != null && publicKey != null) {
+                        try {
+                            userRepository.regenerateAuthDataAndSaveKeyToUser(phrase, publicKey)
+                            state = state.copy(
+                                recoverKeyError = null,
+                                finalizingKeyRecovery = Resource.Success(true),
+                                keyRecoveryFlowStep = KeyRecoveryFlowStep.ALL_SET_STEP
+                            )
+                        } catch (e: Exception) {
+                            recoverKeyFailure(e, pastedPhrase = false)
+                        }
+                    } else {
+                        recoverKeyFailure(AuthDataException.InvalidVerifyUserException(), pastedPhrase = false)
+                    }
+                } else {
+                    recoverKeyFailure(
+                        RecoverKeyException(RecoverKeyException.MANUALLY_TYPED_PHRASE_IS_INVALID),
+                        pastedPhrase = false
+                    )
+                }
+            } catch (e: Exception) {
+                recoverKeyFailure(
+                    RecoverKeyException(
+                        e.message ?: RecoverKeyException.DEFAULT_KEY_RECOVERY_ERROR
+                    ),
+                    pastedPhrase = false
+                )
+            }
+        }
+    }
+
+    private fun handleUserVerifiedAllPhraseWords() {
+        viewModelScope.launch {
+            verifiedPhraseSuccess()
+        }
+        resetConfirmPhraseWordsState()
+    }
 
     //region Get Auth Flow State + Respond to Auth Flow State
     private suspend fun handleAuthFlow(
@@ -529,6 +763,7 @@ class SignInViewModel @Inject constructor(
             val userAuthFlowState = getUserAuthFlowState(
                 verifyUser = verifyUser
             )
+
             respondToUserAuthFlow(userAuthFlow = userAuthFlowState)
         } catch (e: Exception) {
             handleEncryptionManagerException(exception = e)

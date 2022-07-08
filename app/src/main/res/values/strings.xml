@@ -225,15 +225,14 @@
     <string name="key_not_valid_title">Uh oh. That phrase is not correct.</string>
     <string name="key_not_valid_message">You can try again or go back to copy your phrase.</string>
 
-    <string name="phrase_enter_key_title">We\'ve cleared your clipboard.</string>
-    <string name="phrase_enter_key_message">Open your password manager or wherever you keep your phrase, and paste it here.</string>
-    <string name="phrase_key_not_valid_title">Uh oh. That phrase is not correct.</string>
+    <string name="phrase_enter_key_message">Open your password manager, copy your private key, and paste it here.</string>
+    <string name="phrase_key_not_valid_title">Uh oh. That key is not correct.</string>
     <string name="phrase_key_not_valid_message">You can try again, or contact Strike if you can not recreate it.</string>
 
     <string name="confirm_private_key">Confirm private key</string>
     <string name="all_set">You\'re all set.</string>
     <string name="continue_to_strike">Continue to Strike</string>
-    <string name="recreate_key_phrase">Recreate Key From Phrase</string>
+    <string name="recreate_key_phrase">Paste Private Key</string>
     <string name="paste_phrase">Paste Phrase</string>
     <string name="how_would_you_enter">How would you like to enter it?</string>
     <string name="lets_recreate_key">Let\'s recreate your private key</string>
@@ -250,5 +249,15 @@
     <string name="next_icon_content_desc">next icon</string>
 
     <string name="saved_the_phrase"><![CDATA[I saved the phrase ->]]></string>
+    <string name="enter_word_number">Enter word #</string>
+    <string name="enter_each_word_to_verify">Enter each word to verify you have\nthe key written down correctly</string>
+    <string name="that_word_is_not_correct">That word is not correct.</string>
+    <string name="write_down_key">Write down key</string>
+    <string name="do_not_leave_text_field_empty">Please do not leave the text field empty when submitting a word</string>
+    <string name="key_recovery_failed">Key recovery failed</string>
+    <string name="failed_load_data">Unable to complete auth.\nPlease retry.</string>
+    <string name="retry">Retry</string>
+    <string name="finishing_auth">Finishing up auth…</string>
+    <string name="i_saved_key"><![CDATA[I saved the key ->]]></string>
 
 </resources>
