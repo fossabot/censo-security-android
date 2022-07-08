@@ -877,7 +877,7 @@ class SignableDataTest {
     fun testAcceptVaultInvitation() {
         val deserializer = WalletApprovalDeserializer()
         val acceptVaultInvitationJson: JsonElement =
-            JsonParser.parseString(MockedApprovals.acceptVaultInvitationJson.trim())
+            JsonParser.parseString(acceptVaultInvitationJson.trim())
         val acceptVaultInvitationApproval = deserializer.parseData(acceptVaultInvitationJson)
 
 

@@ -48,7 +48,7 @@ fun AccountScreen(
 
     LaunchedEffect(key1 = approvalsState) {
         if (approvalsState.logoutResult is Resource.Success) {
-            navController.navigate(Screen.SplashRoute.route) {
+            navController.navigate(Screen.SignInRoute.route) {
                 popUpTo(Screen.ApprovalListRoute.route) {
                     inclusive = true
                 }

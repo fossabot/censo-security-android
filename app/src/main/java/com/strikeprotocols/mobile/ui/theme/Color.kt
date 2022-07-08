@@ -22,16 +22,12 @@ val DetailDenyRedBackground = Color(0xFF170a0a)
 val GreyText = Color(0xFF8c8c8c)
 val SnackbarBackground = Color(0xFF363636)
 val DividerGrey = Color(0xFF3c3c3c)
-<<<<<<< HEAD
-=======
 val DividerDarkGrey = Color(0xFF262626)
-val AccountTextGrey = Color(0xFFb2b2b2)
 
 val AllSetGreen = Color(0xFF92c83e)
 
 val GreyOutline = Color(0XFF979797)
 
->>>>>>> 9b2e916 (Add initial UI for copying phrase during initial auth)
 val StatusGreyText = Color(0xFF6a6a6a)
 val SubtitleGrey = Color(0xFF9c9ea4)
 val AccountRowBackground = Color(0xFF2d2c2e)

@@ -166,19 +166,11 @@ class MainActivity : FragmentActivity() {
                     message = messageArg,
                     biometryAvailable = biometryAvailableArg)
             }
-<<<<<<< HEAD
-            composable(
-                route = Screen.BackupCheckRoute.route
-            ) {
-                BackupCheckScreen(navController = navController, packageManager = packageManager)
-            }
             composable(
                 route = Screen.AccountRoute.route
             ) {
                 AccountScreen(navController = navController, approvalsViewModel = approvalsViewModel)
             }
-=======
->>>>>>> 7ffbc82 (User should go through auth flow every time they enter a cold start)
         }
     }
 

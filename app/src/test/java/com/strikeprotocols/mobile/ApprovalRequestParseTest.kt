@@ -183,12 +183,12 @@ class ParseApprovalRequestTypes {
         allApprovalRequests.add(multiSignWithDAppRequestWalletApproval)
 
         val dAppJson: JsonElement =
-            JsonParser.parseString(dAppJson.trim())
+            JsonParser.parseString(dappTransactionJson.trim())
         val dAppWalletApproval = deserializer.parseData(dAppJson)
         allApprovalRequests.add(dAppWalletApproval)
 
         val acceptVaultInvitationJson: JsonElement =
-            JsonParser.parseString(MockedApprovals.acceptVaultInvitationJson.trim())
+            JsonParser.parseString(acceptVaultInvitationJson.trim())
         val acceptVaultInvitationApproval = deserializer.parseData(acceptVaultInvitationJson)
         allApprovalRequests.add(acceptVaultInvitationApproval)
 

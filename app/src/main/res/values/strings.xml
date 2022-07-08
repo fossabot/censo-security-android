@@ -40,8 +40,6 @@
     <string name="snackbar_refresh_error">Something went wrong, please try again</string>
     <string name="auth_flow_exception">Something went wrong, please try again</string>
 
-    <string name="logout">Sign Out</string>
-
     <string name="phrase_dialog_title">Secret Phrase</string>
 
     <string name="approval_expired">Expired</string>
@@ -199,7 +197,6 @@
     <string name="hours">Hours</string>
     <string name="minutes">Minutes</string>
     <string name="seconds">Seconds</string>
-<<<<<<< HEAD
     <string name="sign_out">Sign Out</string>
     <string name="app_version">App Version</string>
     <string name="done">Done</string>
@@ -213,29 +210,8 @@
     <string name="accept_vault_invitation_dialog_title">Accept Vault Invitation</string>
     <string name="accept_vault_invitation_dialog_message">accept vault invitation</string>
     <string name="vault_name">Vault Name</string>
-=======
     <string name="clear">Clear</string>
-<<<<<<< HEAD
-<<<<<<< HEAD
-    <string name="key_phrase_hint">Enter Key Phrase Here</string>
-<<<<<<< HEAD
->>>>>>> f041435 (Setup autocomplete functionality text view. Add basic logic to VM to update query and show predictions.)
-=======
-=======
->>>>>>> 25be11c (Added copy functionality during the initial login so user can copy key phrase)
-    <string name="invalid_clipboard_data">Pasted key phrase is not in a valid format, please try copying plain text</string>
-    <string name="unable_to_retrieve_clipboard_data">Unable to retrieve pasted data, please try again</string>
 
-    <string name="invalid_key_phrase_error">Invalid Key Phrase, please try again with the correct key phrase.</string>
-    <string name="key_regeneration_error">Failed to regenerate key from key phrase, please try again.</string>
->>>>>>> b2d44a5 (Added functionality to paste key phrase during the key regen flow)
-
-    <string name="copy_key_phrase_success">Copied phrase to clipboard</string>
-    <string name="copied_key_phrase_failure">Failed to copy phrase to clipboard, please try again</string>
-=======
-
->>>>>>> 9b2e916 (Add initial UI for copying phrase during initial auth)
-    <string name="get_help">Get Help</string>
     <string name="start_over">Start over</string>
     <string name="copy_key">Copy Key</string>
     <string name="time_to_back_up">It\'s time to back up\nyour private key</string>

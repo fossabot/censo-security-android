@@ -96,17 +96,7 @@ fun ApprovalsListScreen(
             }
             approvalsViewModel.resetShouldShowErrorSnackbar()
         }
-<<<<<<< HEAD
-=======
-        if (approvalsState.logoutResult is Resource.Success) {
-            navController.navigate(Screen.SignInRoute.route) {
-                popUpTo(Screen.ApprovalListRoute.route) {
-                    inclusive = true
-                }
-            }
-            approvalsViewModel.resetLogoutResource()
-        }
->>>>>>> 7ffbc82 (User should go through auth flow every time they enter a cold start)
+
         if (blockHashState.triggerBioPrompt) {
             durableNonceViewModel.resetPromptTrigger()
             bioPrompt.authenticate(promptInfo)
