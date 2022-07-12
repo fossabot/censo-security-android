@@ -48,7 +48,7 @@ fun generateBalanceAccountAddressWhitelistUpdateDetailRows(addressWhitelistUpdat
     }
 
     val destinationsRow = FactsData(
-        title = context.getString(R.string.destinations_title),
+        title = context.getString(R.string.whitelisted_addresses_title),
         facts = destinationsList
     )
     destinationsRowInfoData.add(destinationsRow)
