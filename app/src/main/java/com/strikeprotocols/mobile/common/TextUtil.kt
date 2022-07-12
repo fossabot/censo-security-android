@@ -3,9 +3,6 @@ package com.strikeprotocols.mobile.common
 import android.content.Context
 import com.strikeprotocols.mobile.R
 import com.strikeprotocols.mobile.data.EncryptionManagerException
-import com.strikeprotocols.mobile.data.models.approval.AccountType
-import com.strikeprotocols.mobile.data.models.approval.SlotUpdateType
-import com.strikeprotocols.mobile.data.models.approval.SolanaApprovalRequestType
 import com.strikeprotocols.mobile.presentation.approval_disposition.ApprovalDispositionError
 
 fun Int.convertApprovalsNeededToDisplayMessage(context: Context): String {
@@ -20,6 +17,13 @@ fun Int.convertApprovalsNeededToDisplayMessage(context: Context): String {
             "$this ${context.getString(R.string.more_approvals_needed)}"
         }
     }
+}
+
+fun String.toWalletName(): String {
+    if (this.lowercase().endsWith("wallet")) {
+        return this
+    }
+    return "$this Wallet"
 }
 
 fun String.convertPublicKeyToDisplayText(): String {

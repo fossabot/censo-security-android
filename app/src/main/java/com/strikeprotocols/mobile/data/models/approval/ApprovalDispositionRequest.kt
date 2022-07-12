@@ -43,7 +43,6 @@ data class ApprovalDispositionRequest(
             is AddressBookUpdate -> 10
             is BalanceAccountNameUpdate -> 11
             is BalanceAccountPolicyUpdate -> 12
-            is SPLTokenAccountCreation -> 13
             is BalanceAccountAddressWhitelistUpdate -> 14
 
             is LoginApprovalRequest,
@@ -190,16 +189,6 @@ data class ApprovalDispositionRequest(
                 buffer.write(requestType.combinedBytes())
                 buffer.toByteArray()
             }
-            is SPLTokenAccountCreation -> {
-                val buffer = ByteArrayOutputStream()
-
-                buffer.write(byteArrayOf(retrieveOpCode()))
-                buffer.write(commonBytes)
-                buffer.write(requestType.signingData.walletAddress.base58Bytes())
-                buffer.write(requestType.combinedBytes())
-
-                buffer.toByteArray()
-            }
 
             is DAppTransactionRequest -> {
                 val buffer = ByteArrayOutputStream()
@@ -248,7 +237,6 @@ data class ApprovalDispositionRequest(
             is AddressBookUpdate -> requestType.signingData
             is BalanceAccountNameUpdate -> requestType.signingData
             is BalanceAccountPolicyUpdate -> requestType.signingData
-            is SPLTokenAccountCreation -> requestType.signingData
             is BalanceAccountAddressWhitelistUpdate -> requestType.signingData
             is DAppTransactionRequest -> requestType.signingData
 

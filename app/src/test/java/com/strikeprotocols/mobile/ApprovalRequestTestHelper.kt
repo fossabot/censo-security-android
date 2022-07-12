@@ -424,39 +424,6 @@ fun getBalanceAccountNameUpdate(nonceAccountAddresses: List<String>): SolanaAppr
     )
 }
 
-fun getSPLTokenAccountCreation(nonceAccountAddresses: List<String>): SolanaApprovalRequestType {
-    return SPLTokenAccountCreation(
-        type = ApprovalType.SPL_TOKEN_ACCOUNT_CREATION_TYPE.value,
-        payerBalanceAccount = AccountInfo(
-            name = "Account 1",
-            identifier = "80f3c1de-947d-402d-b34f-899286410b57",
-            accountType = AccountType.BalanceAccount,
-            address = "C4xpbnRNRZr4amKCZaTfguHT72BqvqZ6p9kUnaGVxidi"
-        ),
-        balanceAccounts = listOf(
-            AccountInfo(
-                name = "Account 1",
-                identifier = "80f3c1de-947d-402d-b34f-899286410b57",
-                accountType = AccountType.BalanceAccount,
-                address = "C4xpbnRNRZr4amKCZaTfguHT72BqvqZ6p9kUnaGVxidi"
-            )
-        ),
-        tokenSymbolInfo = SymbolInfo(
-            symbol = "wSOL",
-            symbolDescription = "Wrapped SOL",
-            tokenMintAddress = "So11111111111111111111111111111111111111112"
-        ),
-        signingData = SolanaSigningData(
-            feePayer = "FM36ah2bH8nQWJNPCRzu7R69gE5o6UhujqJFtDpWN5as",
-            walletProgramId = "8pPAcjFSByreFRnRm5YyAdBP2LfiNnWBtBzHtRDcJpUA",
-            multisigOpAccountAddress = "SLnWXM1QTraLWFhCm7JxDZk11PBE5Gu524ASzAC6YjW",
-            walletAddress = "ECzeaMTMBXYXXfVM53n5iPepf8749QUqEzjW8jxefGhh",
-            nonceAccountAddresses = nonceAccountAddresses,
-            initiator = "3wKxhgiogoCaA2uxPYeH7cy3cG4hxRPogrPmDPLS54iZ"
-        )
-    )
-}
-
 fun getDAppTransactionRequest(nonceAccountAddresses: List<String>): SolanaApprovalRequestType {
     return DAppTransactionRequest(
         type = ApprovalType.DAPP_TRANSACTION_REQUEST_TYPE.value,

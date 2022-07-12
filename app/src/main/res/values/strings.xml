@@ -64,17 +64,18 @@
     <string name="unknown_dialog_message">an unknown approval request</string>
     <string name="a_transfer_of_dialog_message">a transfer of</string>
     <string name="a_conversion_of_dialog_message">a conversion of</string>
+    <string name="a_wrap_conversion_of_dialog_message">a swap of</string>
     <string name="the_removal_of_dialog_message">the removal of</string>
     <string name="the_addition_of_dialog_message">the addition of</string>
-    <string name="an_account_creation_of_dialog_message">a wallet creation of</string>
+    <string name="an_account_creation_of_dialog_message">an add wallet for</string>
     <string name="a_dapp_transaction_with_dialog_message">a dApp transaction with</string>
 
-    <string name="vault_config_policy_update_dialog_message">vault config policy update</string>
+    <string name="vault_config_policy_update_dialog_message">an administration policy update</string>
     <string name="settings_update_for_dialog_message">settings update for</string>
     <string name="dapp_book_update_dialog_message">dApp book update</string>
     <string name="address_book_update_dialog_message">address book update</string>
     <string name="wallet_name_change_to_dialog_message">wallet name change to</string>
-    <string name="policy_update_for_dialog_message">policy update for</string>
+    <string name="policy_update_for_dialog_message">transfer approvals update for</string>
     <string name="spl_token_account_dialog_message">SPL token account creation for</string>
 
 
@@ -82,10 +83,10 @@
     <string name="you_are_about_to_approve">You are about to approve</string>
     <string name="you_are_about_to_deny">You are about to deny</string>
     <string name="you_are_about_to_cancel">You are about to cancel</string>
-    <string name="transfer_dialog_title">Transfer</string>
+    <string name="transfer_dialog_title">Send</string>
     <string name="unknown_dialog_title">Unknown</string>
     <string name="conversion_dialog_title">Conversion</string>
-    <string name="signers_update_dialog_title">Signers Update</string>
+    <string name="signers_update_dialog_title">Users Update</string>
     <string name="balance_account_creation_dialog_title">Wallet Creation</string>
     <string name="stake_account_creation_dialog_title">Stake Wallet Creation</string>
     <string name="dapp_transaction_dialog_title">dApp Transaction</string>
@@ -111,16 +112,16 @@
     <string name="approval_expiration">Approval Expiration</string>
     <string name="no_approvers_text">No users may approve requests</string>
     <string name="no_wallet_approvers_text">No wallet approvers</string>
-    <string name="wrap_conversion_dialog_title">Conversion</string>
-    <string name="wallet_config_dialog_title">Vault Config Policy Update</string>
-    <string name="balance_account_settings_dialog_title">Wallet Settings Update</string>
+    <string name="wrap_conversion_dialog_title">Swap</string>
+    <string name="wallet_config_dialog_title">Update Administration Policy</string>
+    <string name="balance_account_settings_dialog_title">Update Wallet Settings</string>
     <string name="dapp_book_update_dialog_title">dApp Book Update</string>
-    <string name="address_book_dialog_title">Address Book Update</string>
+    <string name="address_book_dialog_title">Address Book</string>
     <string name="balance_account_name_dialog_title">Wallet Name Update</string>
-    <string name="balance_account_policy_dialog_title">Wallet Policy Update</string>
+    <string name="balance_account_policy_dialog_title">Update Transfer Approvals</string>
     <string name="spl_token_account_dialog_title">SPL Token Account Creation</string>
-    <string name="balance_acct_whitelist_update_dialog_title">Replace Transfer Whitelist</string>
-    <string name="balance_account_whitelist_dialog_message">transfer whitelist update for</string>
+    <string name="balance_acct_whitelist_update_dialog_title">Edit Whitelist Addresses</string>
+    <string name="balance_account_whitelist_dialog_message">edit whitelist addresses for</string>
     <string name="key_pair_generation_failed">Unable to generate key pair for device. Please retry.</string>
     <string name="decryption_failed">Unable to decrypt data. Please retry.</string>
     <string name="encryption_failed">Unable to encrypt data. Please retry.</string>
@@ -138,38 +139,42 @@
 
     <string name="wallet_change">Wallet Change</string>
     <string name="vault_change">Vault Change</string>
+    <string name="user_change">User Change</string>
+    <string name="administration_change">Administration Change</string>
+    <string name="address_book_change">Address Book Change</string>
     <string name="authentication">Authentication</string>
     <string name="unknown">Unknown</string>
 
-    <string name="add_address_book_update_approval_header">Add Address Book Entry</string>
-    <string name="remove_address_book_update_approval_header">Remove Address Book Entry</string>
-    <string name="balance_account_address_whitelist_update_approval_header">Replace Wallet Whitelist</string>
+    <string name="add_address_book_update_approval_header">Add Address</string>
+    <string name="remove_address_book_update_approval_header">Remove Address</string>
+    <string name="balance_account_address_whitelist_update_approval_header">Edit Whitelist Addresses</string>
     <string name="balance_account_creation_approval_header">Add Wallet</string>
-    <string name="balance_account_name_update_approval_header">Rename Wallet</string>
-    <string name="balance_account_policy_update_approval_header">Replace Wallet Approval Policy</string>
+    <string name="balance_account_name_update_approval_header">Rename</string>
+    <string name="balance_account_policy_update_approval_header">Update Transfer Approvals</string>
     <string name="disable_dapp_balance_account_settings_update_approval_header">Disable dApp Access</string>
     <string name="enable_dapp_balance_account_settings_update_approval_header">Enable dApp Access</string>
-    <string name="disable_transfer_balance_account_settings_update_approval_header">Disable Transfer Whitelist</string>
-    <string name="enable_transfer_balance_account_settings_update_approval_header">Enable Transfer Whitelist</string>
+    <string name="disable_transfer_balance_account_settings_update_approval_header">Disable Whitelist</string>
+    <string name="enable_transfer_balance_account_settings_update_approval_header">Enable Whitelist</string>
     <string name="dapp_book_update_approval_header">Replace dApp Book</string>
     <string name="dapp_transaction_request_approval_header">Execute dApp Transaction</string>
     <string name="login_approval_header">Log In</string>
     <string name="spl_token_account_creation_approval_header">Enable SPL Token</string>
-    <string name="remove_signers_update_approval_header">Remove Signer</string>
-    <string name="add_signers_update_approval_header">Add Signer</string>
-    <string name="wallet_config_policy_update_approval_header">Replace Vault Approval Policy</string>
+    <string name="remove_signers_update_approval_header">Remove User</string>
+    <string name="add_signers_update_approval_header">Add User</string>
+    <string name="wallet_config_policy_update_approval_header">Update Administration Policy</string>
     <string name="unknown_approval_header">Unknown</string>
 
     <string name="conversion_request_approval_header">Convert %1$s %2$s</string>
     <string name="withdrawal_request_approval_header">Send %1$s %2$s</string>
-    <string name="wrap_conversion_request_approval_header">Convert %1$s %2$s</string>
+    <string name="wrap_conversion_request_approval_header">Swap %1$s %2$s</string>
 
     <string name="destinations_title">Destinations</string>
+    <string name="whitelisted_addresses_title">Whitelisted Addresses</string>
     <string name="no_whitelisted_addresses">No whitelisted addresses</string>
 
-    <string name="signer_email">Signer Email</string>
-    <string name="signer_name">Signer Name</string>
-    <string name="vault_approvers">Vault Approvers</string>
+    <string name="signer_email">User Email</string>
+    <string name="signer_name">User Name</string>
+    <string name="vault_approvers">Approvers</string>
     <string name="approvals_required">Approvals Required</string>
 
     <string name="token_title">Token</string>
@@ -178,7 +183,7 @@
     <string name="old_wallet_name_title">Old Wallet Name</string>
     <string name="new_wallet_name_title">New Wallet Name</string>
     <string name="wallet_title">Wallet</string>
-    <string name="approvers">Approvers</string>
+    <string name="approvers">Transfer Approvers</string>
     <string name="details_title">Details</string>
     <string name="status">status</string>
     <string name="approvals_received">Approvals Received</string>
@@ -214,22 +219,22 @@
 
     <string name="start_over">Start over</string>
     <string name="copy_key">Copy Key</string>
-    <string name="time_to_back_up">It\'s time to back up\nyour private key</string>
+    <string name="time_to_back_up">It\'s time to back up\nyour secret recovery phrase</string>
     <string name="how_would_you_save_it">How would you like to save it?</string>
     <string name="password_manager">Password Manager</string>
     <string name="pen_and_paper">Pen and Paper</string>
-    <string name="copy_private_key">Copy Private Key</string>
-    <string name="copy_key_message">Copy your private key\nto your clipboard</string>
+    <string name="copy_private_key">Copy Secret Recovery Phrase</string>
+    <string name="copy_key_message">Copy your secret recovery phrase\nto your clipboard</string>
     <string name="copied_to_clipboard">Copied to your clipboard!</string>
-    <string name="paste_your_key">Paste your key in your Password Manager and come back here when it\'s saved</string>
+    <string name="paste_your_key">Paste your phrase in your Password Manager and come back here when it\'s saved</string>
     <string name="enter_key_title">We\'ve cleared your clipboard.</string>
-    <string name="enter_key_message">Open your password manager, copy your private key, and paste it here.</string>
-    <string name="key_not_valid_title">Uh oh. That key is not correct.</string>
-    <string name="key_not_valid_message">You can try again or go back to copy your key.</string>
+    <string name="enter_key_message">Open your password manager, copy your secret recovery phrase, and paste it here.</string>
+    <string name="key_not_valid_title">Uh oh. That phrase is not correct.</string>
+    <string name="key_not_valid_message">You can try again or go back to copy your phrase.</string>
 
     <string name="phrase_enter_key_title">We\'ve cleared your clipboard.</string>
     <string name="phrase_enter_key_message">Open your password manager or wherever you keep your phrase, and paste it here.</string>
-    <string name="phrase_key_not_valid_title">Uh oh. That key is not correct.</string>
+    <string name="phrase_key_not_valid_title">Uh oh. That phrase is not correct.</string>
     <string name="phrase_key_not_valid_message">You can try again, or contact Strike if you can not recreate it.</string>
 
     <string name="confirm_private_key">Confirm private key</string>
@@ -251,6 +256,6 @@
     <string name="next">Next</string>
     <string name="next_icon_content_desc">next icon</string>
 
-    <string name="saved_the_key"><![CDATA[I saved the key ->]]></string>
+    <string name="saved_the_phrase"><![CDATA[I saved the phrase ->]]></string>
 
 </resources>

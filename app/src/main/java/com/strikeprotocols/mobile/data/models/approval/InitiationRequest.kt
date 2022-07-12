@@ -50,7 +50,6 @@ data class InitiationRequest(
             is AddressBookUpdate -> requestType.signingData
             is BalanceAccountNameUpdate -> requestType.signingData
             is BalanceAccountPolicyUpdate -> requestType.signingData
-            is SPLTokenAccountCreation -> requestType.signingData
             is BalanceAccountAddressWhitelistUpdate -> requestType.signingData
             is LoginApprovalRequest,
             is AcceptVaultInvitation,
@@ -71,7 +70,6 @@ data class InitiationRequest(
         is AddressBookUpdate -> 22
         is BalanceAccountNameUpdate -> 24
         is BalanceAccountPolicyUpdate -> 26
-        is SPLTokenAccountCreation -> 29
         is BalanceAccountAddressWhitelistUpdate -> 33
 
         is UnknownApprovalType,
@@ -248,13 +246,6 @@ data class InitiationRequest(
                 buffer.write(requestType.combinedBytes())
                 return buffer.toByteArray()
             }
-            is SPLTokenAccountCreation -> {
-                val buffer = ByteArrayOutputStream()
-                buffer.write(byteArrayOf(opCode))
-                buffer.write(commonBytes)
-                buffer.write(requestType.combinedBytes())
-                return buffer.toByteArray()
-            }
             is WalletConfigPolicyUpdate -> {
                 val buffer = ByteArrayOutputStream()
                 buffer.write(byteArrayOf(opCode))
@@ -359,41 +350,6 @@ data class InitiationRequest(
                     AccountMeta(publicKey = SYSVAR_CLOCK_PUBKEY, isSigner = false, isWritable = false),
                     AccountMeta(publicKey = PublicKey(signingData.feePayer), isSigner = true, isWritable = false)
                 )
-            }
-            is SPLTokenAccountCreation -> {
-                val tokenMintPublicKey = PublicKey(requestType.tokenSymbolInfo.tokenMintAddress)
-
-                val accounts = mutableListOf(
-                    AccountMeta(opAccountPublicKey(), isSigner = false, isWritable = true),
-                    AccountMeta(
-                        PublicKey(requestType.signingData.walletAddress),
-                        isSigner = false,
-                        isWritable = false
-                    ),
-                    AccountMeta(approverPublicKey, isSigner = true, isWritable = false),
-                    AccountMeta(tokenMintPublicKey, isSigner = false, isWritable = false),
-                    AccountMeta(SYSVAR_CLOCK_PUBKEY, isSigner = false, isWritable = false),
-                    AccountMeta(publicKey = PublicKey(signingData.feePayer), isSigner = true, isWritable = false)
-                )
-
-                for (balanceAccount in requestType.balanceAccounts) {
-                    balanceAccount.address?.let {
-                        val balanceAccountTokenAddress =
-                            PublicKey.tokenAddress(
-                                wallet = PublicKey(balanceAccount.address),
-                                tokenMint = tokenMintPublicKey
-                            )
-                        accounts.add(
-                            AccountMeta(
-                                publicKey = balanceAccountTokenAddress,
-                                isSigner = false,
-                                isWritable = false
-                            )
-                        )
-                    }
-                }
-
-                accounts
             }
             else -> {
                 listOf(

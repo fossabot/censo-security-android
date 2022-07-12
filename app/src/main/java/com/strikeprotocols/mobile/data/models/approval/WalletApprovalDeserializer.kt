@@ -189,12 +189,6 @@ class WalletApprovalDeserializer : JsonDeserializer<WalletApproval> {
                     SolanaApprovalRequestType.DAppBookUpdate::class.java
                 )
             }
-            ApprovalType.SPL_TOKEN_ACCOUNT_CREATION_TYPE -> {
-                Gson().fromJson(
-                    details,
-                    SolanaApprovalRequestType.SPLTokenAccountCreation::class.java
-                )
-            }
             ApprovalType.WALLET_CONFIG_POLICY_UPDATE_TYPE -> {
                 Gson().fromJson(
                     details,

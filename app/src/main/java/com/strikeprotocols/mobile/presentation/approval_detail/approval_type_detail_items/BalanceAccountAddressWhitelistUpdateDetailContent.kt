@@ -3,17 +3,16 @@ package com.strikeprotocols.mobile.presentation.approval_detail.approval_type_de
 import android.content.Context
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.strikeprotocols.mobile.R
-import com.strikeprotocols.mobile.common.maskAddress
+import com.strikeprotocols.mobile.common.toWalletName
 import com.strikeprotocols.mobile.data.models.approval.SolanaApprovalRequestType
-import com.strikeprotocols.mobile.presentation.approvals.ApprovalContentHeader
+import com.strikeprotocols.mobile.presentation.approvals.ApprovalRowContentHeader
 import com.strikeprotocols.mobile.presentation.approvals.approval_type_row_items.*
-import com.strikeprotocols.mobile.presentation.components.AccountChangeItem
 import com.strikeprotocols.mobile.presentation.components.FactRow
 import com.strikeprotocols.mobile.presentation.components.FactsData
 
@@ -22,10 +21,9 @@ fun BalanceAccountAddressWhitelistUpdateDetailContent(
     addressWhitelistUpdate: SolanaApprovalRequestType.BalanceAccountAddressWhitelistUpdate
 ) {
     val header = addressWhitelistUpdate.getHeader(LocalContext.current)
-    val accountName = addressWhitelistUpdate.accountInfo.name
-    val accountType = addressWhitelistUpdate.accountInfo.accountType.getUITitle(LocalContext.current)
 
-    AccountChangeItem(header = header, title = accountName, subtitle = accountType, headerTopSpacing = 24, headerBottomSpacing = 24)
+    ApprovalRowContentHeader(header = header, topSpacing = 16, bottomSpacing = 8)
+    ApprovalSubtitle(text = addressWhitelistUpdate.accountInfo.name.toWalletName(), fontSize = 20.sp)
     Spacer(modifier = Modifier.height(16.dp))
 
     val destinationsRowInfoData =

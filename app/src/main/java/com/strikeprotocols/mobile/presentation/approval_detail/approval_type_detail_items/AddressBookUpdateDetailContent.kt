@@ -27,7 +27,6 @@ fun AddressBookUpdateDetailContent(
     val address = entryMetaData?.second?.value?.address?.maskAddress() ?: stringResource(id = R.string.not_applicable)
 
     ApprovalContentHeader(header = header, topSpacing = 24, bottomSpacing = 8)
-    ApprovalSubtitle(text = name)
     Spacer(modifier = Modifier.height(24.dp))
     val factsData = FactsData(
         facts = listOf(

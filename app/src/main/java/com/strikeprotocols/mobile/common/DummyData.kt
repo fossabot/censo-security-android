@@ -218,13 +218,6 @@ class MockedApprovals {
                 )
             )
 
-        val splTokenAccountCreationRequest =
-            getWalletApprovalRequest(
-                getSPLTokenAccountCreation(
-                    nonceAccountAddresses = listOf("AaFj4THN8CJmDPyJjPuDpsfC5FZys2Wmczust5UfmqeN")
-                )
-            )
-
         val signersUpdateRequest =
             getWalletApprovalRequest(
                 getSignersUpdateRequest(
@@ -291,7 +284,6 @@ class MockedApprovals {
             balanceAccountAddressWhitelistUpdateRequest,
             balanceAccountNameUpdateRequest,
             balanceAccountPolicyUpdateRequest,
-            splTokenAccountCreationRequest,
             walletConfigPolicyUpdateRequest,
             unknownRequest,
             wrapConversionRequest,
@@ -781,39 +773,6 @@ class MockedApprovals {
                 walletProgramId = "7kNPVcK2cpyaZsLsqmhZbjcbt433vYUckH1PM5gZeJ1L",
                 multisigOpAccountAddress = "7DY87mHHiSSyxFBbhCYbTpQE5M4Jk9Z9hymJ7UzL3sPm",
                 walletAddress = "4XaqL4MtTUDrncTGBqvTC9ketf8WVqrUocDkYhKAnDju",
-                nonceAccountAddresses = nonceAccountAddresses,
-                initiator = "3wKxhgiogoCaA2uxPYeH7cy3cG4hxRPogrPmDPLS54iZ"
-            )
-        )
-    }
-
-    fun getSPLTokenAccountCreation(nonceAccountAddresses: List<String>): SolanaApprovalRequestType {
-        return SolanaApprovalRequestType.SPLTokenAccountCreation(
-            type = ApprovalType.SPL_TOKEN_ACCOUNT_CREATION_TYPE.value,
-            payerBalanceAccount = AccountInfo(
-                name = "Account 1",
-                identifier = "80f3c1de-947d-402d-b34f-899286410b57",
-                accountType = AccountType.BalanceAccount,
-                address = "C4xpbnRNRZr4amKCZaTfguHT72BqvqZ6p9kUnaGVxidi"
-            ),
-            balanceAccounts = listOf(
-                AccountInfo(
-                    name = "Account 1",
-                    identifier = "80f3c1de-947d-402d-b34f-899286410b57",
-                    accountType = AccountType.BalanceAccount,
-                    address = "C4xpbnRNRZr4amKCZaTfguHT72BqvqZ6p9kUnaGVxidi"
-                )
-            ),
-            tokenSymbolInfo = SymbolInfo(
-                symbol = "wSOL",
-                symbolDescription = "Wrapped SOL",
-                tokenMintAddress = "So11111111111111111111111111111111111111112"
-            ),
-            signingData = SolanaSigningData(
-                feePayer = "FM36ah2bH8nQWJNPCRzu7R69gE5o6UhujqJFtDpWN5as",
-                walletProgramId = "8pPAcjFSByreFRnRm5YyAdBP2LfiNnWBtBzHtRDcJpUA",
-                multisigOpAccountAddress = "SLnWXM1QTraLWFhCm7JxDZk11PBE5Gu524ASzAC6YjW",
-                walletAddress = "ECzeaMTMBXYXXfVM53n5iPepf8749QUqEzjW8jxefGhh",
                 nonceAccountAddresses = nonceAccountAddresses,
                 initiator = "3wKxhgiogoCaA2uxPYeH7cy3cG4hxRPogrPmDPLS54iZ"
             )

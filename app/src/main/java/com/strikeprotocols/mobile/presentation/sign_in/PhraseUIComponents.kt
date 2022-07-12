@@ -238,7 +238,7 @@ fun CopyKeyUI(phrase: String, phraseCopied: Boolean, phraseSaved: Boolean, onNav
                             modifier = Modifier
                                 .height(height = 82.dp)
                                 .padding(bottom = 24.dp),
-                            text = "I saved the key ->"
+                            text = "I saved the phrase ->"
                         ) {
                             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P) {
                                 clipboard.clearPrimaryClip()
@@ -637,7 +637,7 @@ fun WriteWordUI(
             ) {
                 if (index == SignInViewModel.LAST_WORD_RANGE_SET_INDEX) {
                     AuthFlowButton(
-                        text = stringResource(R.string.saved_the_key),
+                        text = stringResource(R.string.saved_the_phrase),
                         modifier = Modifier.padding(horizontal = 44.dp)
                     ) {
                         Toast.makeText(context, "Coming soon...", Toast.LENGTH_LONG).show()

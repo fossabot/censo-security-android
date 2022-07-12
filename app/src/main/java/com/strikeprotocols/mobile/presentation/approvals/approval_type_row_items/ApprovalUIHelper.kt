@@ -12,6 +12,7 @@ import androidx.compose.ui.unit.sp
 import com.strikeprotocols.mobile.R
 import com.strikeprotocols.mobile.common.convertSecondsIntoCountdownText
 import com.strikeprotocols.mobile.common.maskAddress
+import com.strikeprotocols.mobile.common.toWalletName
 import com.strikeprotocols.mobile.data.models.ApprovalDisposition
 import com.strikeprotocols.mobile.data.models.approval.*
 import com.strikeprotocols.mobile.data.models.approval.AccountType.*
@@ -63,8 +64,6 @@ fun SolanaApprovalRequestType.getHeader(context: Context): String {
             context.getString(R.string.dapp_transaction_request_approval_header)
         is LoginApprovalRequest ->
             context.getString(R.string.login_approval_header)
-        is SPLTokenAccountCreation ->
-            context.getString(R.string.spl_token_account_creation_approval_header)
         is SignersUpdate -> {
             if (slotUpdateType == SlotUpdateType.Clear) {
                 context.getString(R.string.remove_signers_update_approval_header)
@@ -100,7 +99,6 @@ fun SolanaApprovalRequestType.getApprovalTypeDialogTitle(context: Context): Stri
         is AddressBookUpdate -> R.string.address_book_dialog_title
         is BalanceAccountNameUpdate -> R.string.balance_account_name_dialog_title
         is BalanceAccountPolicyUpdate -> R.string.balance_account_policy_dialog_title
-        is SPLTokenAccountCreation -> R.string.spl_token_account_dialog_title
         is BalanceAccountAddressWhitelistUpdate -> R.string.balance_acct_whitelist_update_dialog_title
         is BalanceAccountCreation -> {
             if (accountInfo.accountType == BalanceAccount) {
@@ -204,11 +202,6 @@ fun SolanaApprovalRequestType.getApprovalRowMetaData(context: Context): Approval
                 Icons.Filled.Login,
                 context.getString(R.string.login_icon_content_desc),
             )
-        is SPLTokenAccountCreation ->
-            Pair(
-                Icons.Filled.Login,
-                context.getString(R.string.login_icon_content_desc),
-            )
         is WalletConfigPolicyUpdate ->
             Pair(
                 Icons.Filled.Login,
@@ -245,15 +238,16 @@ fun SolanaApprovalRequestType.getRowTitle(context: Context): String =
         is BalanceAccountPolicyUpdate,
         is BalanceAccountSettingsUpdate,
         is BalanceAccountAddressWhitelistUpdate,
-        is DAppTransactionRequest,
-        is SPLTokenAccountCreation -> context.getString(R.string.wallet_change)
+        is BalanceAccountCreation,
+        is DAppTransactionRequest -> context.getString(R.string.wallet_change)
 
         is SignersUpdate,
+        is AcceptVaultInvitation -> context.getString(R.string.user_change)
+
         is AddressBookUpdate,
-        is BalanceAccountCreation,
-        is WalletConfigPolicyUpdate,
-        is AcceptVaultInvitation,
-        is DAppBookUpdate -> context.getString(R.string.vault_change)
+        is DAppBookUpdate -> context.getString(R.string.address_book_change)
+
+        is WalletConfigPolicyUpdate -> context.getString(R.string.administration_change)
 
         is LoginApprovalRequest -> context.getString(R.string.authentication)
 
@@ -295,7 +289,7 @@ private fun SolanaApprovalRequestType.getApprovalTypeDialogMessage(context: Cont
             context.getString(R.string.login_approval_dialog_message)
 
         is WrapConversionRequest -> {
-            "${context.getString(R.string.a_conversion_of_dialog_message)} ${symbolAndAmountInfo.formattedAmount()} ${symbolAndAmountInfo.symbolInfo.symbol} to ${destinationSymbolInfo.symbol}"
+            "${context.getString(R.string.a_wrap_conversion_of_dialog_message)} ${symbolAndAmountInfo.formattedAmount()} ${symbolAndAmountInfo.symbolInfo.symbol} to ${destinationSymbolInfo.symbol}"
         }
         is WalletConfigPolicyUpdate -> {
             context.getString(R.string.vault_config_policy_update_dialog_message)
@@ -317,9 +311,6 @@ private fun SolanaApprovalRequestType.getApprovalTypeDialogMessage(context: Cont
         }
         is BalanceAccountPolicyUpdate -> {
             "${context.getString(R.string.policy_update_for_dialog_message)} ${accountInfo.name}"
-        }
-        is SPLTokenAccountCreation -> {
-            "${context.getString(R.string.spl_token_account_dialog_message)} ${tokenSymbolInfo.symbolDescription}"
         }
         is BalanceAccountAddressWhitelistUpdate -> {
             "${context.getString(R.string.balance_account_whitelist_dialog_message)} ${accountInfo.name}"
@@ -371,7 +362,7 @@ fun getApprovalTimerText(context: Context, timeRemainingInSeconds: Long?) : Stri
 }
 
 fun buildFromToDisplayText(from: String, to: String, context: Context): String {
-    return "$from ${context.getString(R.string.to).lowercase()} $to"
+    return "${from.toWalletName()} ${context.getString(R.string.to).lowercase()} ${to.toWalletName()}"
 }
 
 private fun List<SlotSignerInfo>.sortApprovers() = this.sortedBy { it.value.name }

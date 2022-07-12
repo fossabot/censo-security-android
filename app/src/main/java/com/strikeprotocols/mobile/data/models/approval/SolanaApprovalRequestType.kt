@@ -303,26 +303,6 @@ sealed class SolanaApprovalRequestType {
 
     }
 
-    data class SPLTokenAccountCreation(
-        val type: String,
-        val payerBalanceAccount: AccountInfo,
-        val balanceAccounts: List<AccountInfo>,
-        val tokenSymbolInfo: SymbolInfo,
-        var signingData: SolanaSigningData
-    ) : SolanaApprovalRequestType() {
-
-        fun combinedBytes() : ByteArray {
-            val buffer = ByteArrayOutputStream()
-
-            buffer.write(payerBalanceAccount.identifier.sha256HashBytes())
-            buffer.write(byteArrayOf(balanceAccounts.size.toByte()))
-            buffer.write(balanceAccounts.flatMap { it.identifier.sha256HashBytes().toList() }.toByteArray())
-            buffer.write(tokenSymbolInfo.tokenMintAddress.base58Bytes())
-
-            return buffer.toByteArray()
-        }
-    }
-
     data class BalanceAccountAddressWhitelistUpdate(
         val type: String,
         val accountInfo: AccountInfo,
@@ -385,7 +365,6 @@ sealed class SolanaApprovalRequestType {
             is AddressBookUpdate -> signingData.nonceAccountAddresses
             is BalanceAccountNameUpdate -> signingData.nonceAccountAddresses
             is BalanceAccountPolicyUpdate -> signingData.nonceAccountAddresses
-            is SPLTokenAccountCreation -> signingData.nonceAccountAddresses
             is BalanceAccountAddressWhitelistUpdate -> signingData.nonceAccountAddresses
             is LoginApprovalRequest, is UnknownApprovalType, is AcceptVaultInvitation -> emptyList()
         }
@@ -406,7 +385,6 @@ enum class ApprovalType(val value: String) {
     ADDRESS_BOOK_TYPE("AddressBookUpdate"),
     DAPP_BOOK_UPDATE_TYPE("DAppBookUpdate"),
     WALLET_CONFIG_POLICY_UPDATE_TYPE("WalletConfigPolicyUpdate"),
-    SPL_TOKEN_ACCOUNT_CREATION_TYPE("SPLTokenAccountCreation"),
     BALANCE_ACCOUNT_ADDRESS_WHITE_LIST_UPDATE_TYPE("BalanceAccountAddressWhitelistUpdate"),
     ACCEPT_VAULT_INVITATION_TYPE("AcceptVaultInvitation"),
 
@@ -428,7 +406,6 @@ enum class ApprovalType(val value: String) {
                 ADDRESS_BOOK_TYPE.value -> ADDRESS_BOOK_TYPE
                 DAPP_BOOK_UPDATE_TYPE.value -> DAPP_BOOK_UPDATE_TYPE
                 WALLET_CONFIG_POLICY_UPDATE_TYPE.value -> WALLET_CONFIG_POLICY_UPDATE_TYPE
-                SPL_TOKEN_ACCOUNT_CREATION_TYPE.value -> SPL_TOKEN_ACCOUNT_CREATION_TYPE
                 BALANCE_ACCOUNT_ADDRESS_WHITE_LIST_UPDATE_TYPE.value -> BALANCE_ACCOUNT_ADDRESS_WHITE_LIST_UPDATE_TYPE
                 ACCEPT_VAULT_INVITATION_TYPE.value -> ACCEPT_VAULT_INVITATION_TYPE
                 else -> UNKNOWN_TYPE

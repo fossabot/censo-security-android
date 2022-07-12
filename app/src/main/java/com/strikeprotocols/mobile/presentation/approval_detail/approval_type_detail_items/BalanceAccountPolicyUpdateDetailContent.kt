@@ -7,8 +7,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.strikeprotocols.mobile.R
 import com.strikeprotocols.mobile.common.convertSecondsIntoReadableText
+import com.strikeprotocols.mobile.common.toWalletName
 import com.strikeprotocols.mobile.data.models.approval.SolanaApprovalRequestType
 import com.strikeprotocols.mobile.presentation.approvals.ApprovalContentHeader
 import com.strikeprotocols.mobile.presentation.approvals.approval_type_row_items.getHeader
@@ -23,7 +25,7 @@ fun BalanceAccountPolicyUpdateDetailContent(
     val header = accountPolicyUpdate.getHeader(LocalContext.current)
 
     ApprovalContentHeader(header = header, topSpacing = 16, bottomSpacing = 8)
-    ApprovalSubtitle(text = accountPolicyUpdate.accountInfo.name)
+    ApprovalSubtitle(text = accountPolicyUpdate.accountInfo.name.toWalletName(), fontSize = 20.sp)
 
     Spacer(modifier = Modifier.height(24.dp))
 
