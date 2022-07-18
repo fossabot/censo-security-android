@@ -1,6 +1,5 @@
 package com.strikeprotocols.mobile.data.models.approval
 
-import androidx.annotation.Keep
 import com.google.gson.JsonElement
 import com.google.gson.JsonObject
 import com.google.gson.JsonPrimitive
@@ -335,7 +334,6 @@ sealed class SolanaApprovalRequestType {
         val name: String?
     ) : SolanaApprovalRequestType()
 
-    @Keep
     data class AcceptVaultInvitation(
         val type: String,
         val vaultGuid: String,

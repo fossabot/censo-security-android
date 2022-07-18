@@ -77,7 +77,6 @@ android {
         release {
             resValue "string", "app_name", appName
             minifyEnabled true
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt')
             buildConfigField "String", "BASE_URL", "\"https://brooklyn.strikeprotocols.com/\""
             buildConfigField "String", "SOLANA_URL", "\"https://solana-validator.strikeprotocols.com\""
             buildConfigField "String", "SOLANA_COMMITMENT", "\"finalized\""
