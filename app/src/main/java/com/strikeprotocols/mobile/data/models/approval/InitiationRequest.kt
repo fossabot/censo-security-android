@@ -24,6 +24,7 @@ import com.strikeprotocols.mobile.data.models.approval.TransactionInstruction.Co
 import com.strikeprotocols.mobile.presentation.approval_disposition.ApprovalDispositionError
 import org.bouncycastle.crypto.params.Ed25519PrivateKeyParameters
 import java.io.ByteArrayOutputStream
+import java.util.Base64
 
 data class InitiationRequest(
     val requestId: String,
@@ -326,7 +327,8 @@ data class InitiationRequest(
                         tokenMint = WRAPPED_SOL_MINT
                     )
 
-                listOf(
+                val isUnwrap = requestType.destinationSymbolInfo.symbol == "SOL"
+                listOfNotNull(
                     AccountMeta(opAccountPublicKey(), isSigner = false, isWritable = true),
                     AccountMeta(PublicKey(signingData.walletAddress), isSigner = false, isWritable = false),
                     AccountMeta(sourcePublicKey, isSigner = false, isWritable = true),
@@ -335,10 +337,35 @@ data class InitiationRequest(
                     AccountMeta(approverPublicKey, isSigner = true, isWritable = false),
                     AccountMeta(SYSVAR_CLOCK_PUBKEY, isSigner = false, isWritable = false),
                     AccountMeta(publicKey = PublicKey(signingData.feePayer), isSigner = true, isWritable = false),
+                    if (isUnwrap) {
+                        AccountMeta(
+                            PublicKey.findProgramAddress(
+                                listOf(
+                                    b64Decoder.decode(signingData.walletGuidHash),
+                                    opAccountPublicKey().bytes
+                                ), PublicKey(signingData.walletProgramId)
+                            ).address,
+                            isSigner = false,
+                            isWritable = true
+                        )
+                    } else null,
                     AccountMeta(SYS_PROGRAM_ID, isSigner = false, isWritable = false),
                     AccountMeta(TOKEN_PROGRAM_ID, isSigner = false, isWritable = false),
                     AccountMeta(SYSVAR_RENT_PUBKEY, isSigner = false, isWritable = false),
                     AccountMeta(ASSOCIATED_TOKEN_PROGRAM_ID, isSigner = false, isWritable = false),
+                    if (isUnwrap) {
+                        AccountMeta(
+                            PublicKey.findProgramAddress(
+                                listOf(
+                                    b64Decoder.decode(signingData.walletGuidHash),
+                                    b64Decoder.decode(signingData.feeAccountGuidHash),
+                                ),
+                                PublicKey(signingData.walletProgramId)
+                            ).address,
+                            isSigner = false,
+                            isWritable = true
+                        )
+                    } else null,
                 )
             }
             is DAppTransactionRequest -> {

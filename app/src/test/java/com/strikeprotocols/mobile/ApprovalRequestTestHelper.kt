@@ -39,7 +39,10 @@ fun getSignersUpdateRequest(nonceAccountAddresses: List<String>): SolanaApproval
             multisigOpAccountAddress = "SLnWXM1QTraLWFhCm7JxDZk11PBE5Gu524ASzAC6YjW",
             walletAddress = "ECzeaMTMBXYXXfVM53n5iPepf8749QUqEzjW8jxefGhh",
             nonceAccountAddresses = nonceAccountAddresses,
-            initiator = "3wKxhgiogoCaA2uxPYeH7cy3cG4hxRPogrPmDPLS54iZ"
+            initiator = "3wKxhgiogoCaA2uxPYeH7cy3cG4hxRPogrPmDPLS54iZ",
+            strikeFeeAmount = 0,
+            feeAccountGuidHash = emptyHash,
+            walletGuidHash = emptyHash,
         )
     )
 }
@@ -63,7 +66,10 @@ fun getSignersUpdateWalletRequest(nonceAccountAddresses: List<String>) : WalletA
                 multisigOpAccountAddress = "Hx9JnkPHioA9eu92y7jho1TxNaBCHYbw8zaSxvkGXSdD",
                 walletAddress = "FWhBukWcdXaMqZhJMvAAEH6PH81nV6JSpBEmwdvWgUjW",
                 nonceAccountAddresses = nonceAccountAddresses,
-                initiator = "3wKxhgiogoCaA2uxPYeH7cy3cG4hxRPogrPmDPLS54iZ"
+                initiator = "3wKxhgiogoCaA2uxPYeH7cy3cG4hxRPogrPmDPLS54iZ",
+                strikeFeeAmount = 0,
+                feeAccountGuidHash = emptyHash,
+                walletGuidHash = emptyHash,
             )
         )
     )
@@ -102,7 +108,10 @@ fun getBalanceAccountCreationRequest(nonceAccountAddresses: List<String>) : Bala
             multisigOpAccountAddress = "2DBQ368KgyPkmqd6fKsQpmpMhBTDTuW6wWESbxDs5otz",
             walletAddress = "JCd6uutAtgsbxDfM54ss4TyeG6kakvSfdxJwjBTjkPLh",
             nonceAccountAddresses = nonceAccountAddresses,
-            initiator = "3wKxhgiogoCaA2uxPYeH7cy3cG4hxRPogrPmDPLS54iZ"
+            initiator = "3wKxhgiogoCaA2uxPYeH7cy3cG4hxRPogrPmDPLS54iZ",
+            strikeFeeAmount = 0,
+            feeAccountGuidHash = emptyHash,
+            walletGuidHash = emptyHash,
         )
     )
 }
@@ -137,7 +146,10 @@ fun getSolWithdrawalRequest(nonceAccountAddresses: List<String>) : WithdrawalReq
             multisigOpAccountAddress = "9NDFtaczqouZ9SGTfd489EfN3KvMQgrAjpuu4QEr9Kys",
             walletAddress = "JCd6uutAtgsbxDfM54ss4TyeG6kakvSfdxJwjBTjkPLh",
             nonceAccountAddresses = nonceAccountAddresses,
-            initiator = "3wKxhgiogoCaA2uxPYeH7cy3cG4hxRPogrPmDPLS54iZ"
+            initiator = "3wKxhgiogoCaA2uxPYeH7cy3cG4hxRPogrPmDPLS54iZ",
+            strikeFeeAmount = 0,
+            feeAccountGuidHash = emptyHash,
+            walletGuidHash = emptyHash,
         )
     )
 }
@@ -172,7 +184,10 @@ fun getSplWithdrawalRequest(nonceAccountAddresses: List<String>) : WithdrawalReq
             multisigOpAccountAddress = "6UcFAr9rqGfFEtLxnYdW6QjeRor3aej5akLpYpXUkPWX",
             walletAddress = "7fvoSJ6iNAyTFvBDuAWuciXWYiyUBtJfCUswZF3YGbUN",
             nonceAccountAddresses = nonceAccountAddresses,
-            initiator = "3wKxhgiogoCaA2uxPYeH7cy3cG4hxRPogrPmDPLS54iZ"
+            initiator = "3wKxhgiogoCaA2uxPYeH7cy3cG4hxRPogrPmDPLS54iZ",
+            strikeFeeAmount = 0,
+            feeAccountGuidHash = emptyHash,
+            walletGuidHash = emptyHash,
         )
     )
 }
@@ -212,7 +227,10 @@ fun getConversionRequest(nonceAccountAddresses: List<String>): ConversionRequest
             multisigOpAccountAddress = "11111111111111111111111111111111",
             walletAddress = "2sGiNkpwYod6c1Wcd6H1ycd85KwykMfb8ZCt7t3XEp4h",
             nonceAccountAddresses = nonceAccountAddresses,
-            initiator = "3wKxhgiogoCaA2uxPYeH7cy3cG4hxRPogrPmDPLS54iZ"
+            initiator = "3wKxhgiogoCaA2uxPYeH7cy3cG4hxRPogrPmDPLS54iZ",
+            strikeFeeAmount = 0,
+            feeAccountGuidHash = emptyHash,
+            walletGuidHash = emptyHash,
         )
     )
 }
@@ -246,7 +264,10 @@ fun getWrapConversionRequest(nonceAccountAddresses: List<String>): WrapConversio
             multisigOpAccountAddress = "11111111111111111111111111111111",
             walletAddress = "Ebse7xEiKuhe3bWY6dXiWB8QS4QDhr8fRBgH4tUKR2Ys",
             nonceAccountAddresses = nonceAccountAddresses,
-            initiator = "3wKxhgiogoCaA2uxPYeH7cy3cG4hxRPogrPmDPLS54iZ"
+            initiator = "3wKxhgiogoCaA2uxPYeH7cy3cG4hxRPogrPmDPLS54iZ",
+            strikeFeeAmount = 0,
+            feeAccountGuidHash = emptyHash,
+            walletGuidHash = emptyHash,
         )
     )
 }
@@ -256,9 +277,9 @@ fun getUnwrapConversionRequest(nonceAccountAddresses: List<String>) : SolanaAppr
         type = ApprovalType.WRAP_CONVERSION_REQUEST_TYPE.value,
         account= AccountInfo(
             name= "Account 1",
-            identifier= "82666cf4-3f31-4504-a1a2-5df9b35ba5b3",
+            identifier= "c2a6711d-8430-429f-816a-876eb62dd19e",
             accountType= AccountType.BalanceAccount,
-            address= "BSHKeDQL8NKBSmbX2M4svSqGL57qFhe7qvw72hpvgnZY"
+            address= "7dMB51drmhKy9qQ8GjFPsaRDnadGCvn4iLWedqajbmUg"
         ),
         symbolAndAmountInfo= SymbolAndAmountInfo(
             symbolInfo= SymbolInfo(
@@ -275,12 +296,15 @@ fun getUnwrapConversionRequest(nonceAccountAddresses: List<String>) : SolanaAppr
             tokenMintAddress= "11111111111111111111111111111111"
         ),
         signingData= SolanaSigningData(
-            feePayer= "FM36ah2bH8nQWJNPCRzu7R69gE5o6UhujqJFtDpWN5as",
-            walletProgramId= "DaGSQwGd1GZnscN2Mu5d1CPYqYXAQMV29Q4Zk9yDhZLp",
+            feePayer= "87VXbkJsqdDvXYfDBtS4kW4TcFor7ogofZXbXjT7t7AU",
+            walletProgramId= "8S1mgAomg5mcJ6rC38xHMMJyFKTHxQc2dHgNrmQKzAz",
             multisigOpAccountAddress= "11111111111111111111111111111111",
-            walletAddress= "Ebse7xEiKuhe3bWY6dXiWB8QS4QDhr8fRBgH4tUKR2Ys",
+            walletAddress= "HZmqaRJWQxB6B4DXCBmY5W8xjL2Wn5Q6rGHtajxUDbra",
             nonceAccountAddresses= nonceAccountAddresses,
-            initiator = "3wKxhgiogoCaA2uxPYeH7cy3cG4hxRPogrPmDPLS54iZ"
+            initiator = "3S3WAHv5h7gyEVTPQRuz6sf8poKM439zr14pHF43MtLK",
+            strikeFeeAmount = 2039280,
+            feeAccountGuidHash = "Oe1VO8ObkbQ2jHnzOD6tIGQNkX/sExJpdGOksGK47VU=",
+            walletGuidHash = "/Fz5hXppVfCrsvkgU8zXy5e3IO99xOmbQJuF7DUkHfw=",
         )
     )
 }
@@ -306,7 +330,10 @@ fun getAddAddressBookEntry(nonceAccountAddresses: List<String>): SolanaApprovalR
             multisigOpAccountAddress = "Dpt714om7J3B3f1ygptgoEnFvHo3aiXjeLPP7TqjHJhq",
             walletAddress = "JCd6uutAtgsbxDfM54ss4TyeG6kakvSfdxJwjBTjkPLh",
             nonceAccountAddresses = nonceAccountAddresses,
-            initiator = "3wKxhgiogoCaA2uxPYeH7cy3cG4hxRPogrPmDPLS54iZ"
+            initiator = "3wKxhgiogoCaA2uxPYeH7cy3cG4hxRPogrPmDPLS54iZ",
+            strikeFeeAmount = 0,
+            feeAccountGuidHash = emptyHash,
+            walletGuidHash = emptyHash,
         )
     )
 }
@@ -328,7 +355,10 @@ fun getAddDAppBookEntry(nonceAccountAddresses: List<String>) : SolanaApprovalReq
             multisigOpAccountAddress= "Hn2CJuYyyB2H3wwmdHPy1Aun2Jkye3MCSVajzUvw55A9",
             walletAddress= "Re4dLGch8a1G98PeRtpHa5ApS6Gnik444CqB5BQ8rY1",
             nonceAccountAddresses= nonceAccountAddresses,
-            initiator = "3wKxhgiogoCaA2uxPYeH7cy3cG4hxRPogrPmDPLS54iZ"
+            initiator = "3wKxhgiogoCaA2uxPYeH7cy3cG4hxRPogrPmDPLS54iZ",
+            strikeFeeAmount = 0,
+            feeAccountGuidHash = emptyHash,
+            walletGuidHash = emptyHash,
         )
     )
 }
@@ -364,7 +394,10 @@ fun getWalletConfigPolicyUpdate(nonceAccountAddresses: List<String>): SolanaAppr
             multisigOpAccountAddress = "F6iUTdJDE4vnTgBanCtBgtoNHag57Uaut82xATGVVps3",
             walletAddress = "JCd6uutAtgsbxDfM54ss4TyeG6kakvSfdxJwjBTjkPLh",
             nonceAccountAddresses = nonceAccountAddresses,
-            initiator = "3wKxhgiogoCaA2uxPYeH7cy3cG4hxRPogrPmDPLS54iZ"
+            initiator = "3wKxhgiogoCaA2uxPYeH7cy3cG4hxRPogrPmDPLS54iZ",
+            strikeFeeAmount = 0,
+            feeAccountGuidHash = emptyHash,
+            walletGuidHash = emptyHash,
         )
     )
 }
@@ -398,7 +431,10 @@ fun getBalanceAccountPolicyUpdate(nonceAccountAddresses: List<String>) : SolanaA
             multisigOpAccountAddress= "DbdTEwihgEYJYAgXBKEqQGknGyHsRnxE5coeZaVS4T9y",
             walletAddress= "ECzeaMTMBXYXXfVM53n5iPepf8749QUqEzjW8jxefGhh",
             nonceAccountAddresses= nonceAccountAddresses,
-            initiator = "3wKxhgiogoCaA2uxPYeH7cy3cG4hxRPogrPmDPLS54iZ"
+            initiator = "3wKxhgiogoCaA2uxPYeH7cy3cG4hxRPogrPmDPLS54iZ",
+            strikeFeeAmount = 0,
+            feeAccountGuidHash = emptyHash,
+            walletGuidHash = emptyHash,
         )
     )
 }
@@ -419,7 +455,10 @@ fun getBalanceAccountNameUpdate(nonceAccountAddresses: List<String>): SolanaAppr
             multisigOpAccountAddress = "7DY87mHHiSSyxFBbhCYbTpQE5M4Jk9Z9hymJ7UzL3sPm",
             walletAddress = "4XaqL4MtTUDrncTGBqvTC9ketf8WVqrUocDkYhKAnDju",
             nonceAccountAddresses = nonceAccountAddresses,
-            initiator = "3wKxhgiogoCaA2uxPYeH7cy3cG4hxRPogrPmDPLS54iZ"
+            initiator = "3wKxhgiogoCaA2uxPYeH7cy3cG4hxRPogrPmDPLS54iZ",
+            strikeFeeAmount = 0,
+            feeAccountGuidHash = emptyHash,
+            walletGuidHash = emptyHash,
         )
     )
 }
@@ -493,7 +532,10 @@ fun getDAppTransactionRequest(nonceAccountAddresses: List<String>): SolanaApprov
             multisigOpAccountAddress = "22btwB54QFYCLFVf53k64Jhj8KnpYCx2HwJmsqTq8Ly2",
             walletAddress = "3CwacbyswAFN914pyjBRGrZm5m7QdSYuNHdnJWeTrJ85",
             nonceAccountAddresses = nonceAccountAddresses,
-            initiator = "9CZ2ZaGe961oLCWJUpr16ofZxBM4yK9tGfbdwj57JNJP"
+            initiator = "9CZ2ZaGe961oLCWJUpr16ofZxBM4yK9tGfbdwj57JNJP",
+            strikeFeeAmount = 0,
+            feeAccountGuidHash = emptyHash,
+            walletGuidHash = emptyHash,
         )
     )
 }
@@ -564,7 +606,10 @@ fun getBalanceAccountAddressWhitelistUpdate(nonceAccountAddresses: List<String>)
             multisigOpAccountAddress = "71S5qEAD3DMn7QY9fdb2uR1TV7kiAfcAqNHfQfyFUSME",
             walletAddress = "AoEAvW2TvZYmy2WbmqN4nXdJT8o21RbJP6xNK2yR4of",
             nonceAccountAddresses = nonceAccountAddresses,
-            initiator = "3wKxhgiogoCaA2uxPYeH7cy3cG4hxRPogrPmDPLS54iZ"
+            initiator = "3wKxhgiogoCaA2uxPYeH7cy3cG4hxRPogrPmDPLS54iZ",
+            strikeFeeAmount = 0,
+            feeAccountGuidHash = emptyHash,
+            walletGuidHash = emptyHash,
         )
     )
 }
@@ -586,7 +631,10 @@ fun getBalanceAccountSettingsUpdate(nonceAccountAddresses: List<String>): Solana
             multisigOpAccountAddress = "Dp4oaRWRtBxQdf5Lg2zti3TCjsUsxv4rUBgtf2HSQnVb",
             walletAddress = "JCd6uutAtgsbxDfM54ss4TyeG6kakvSfdxJwjBTjkPLh",
             nonceAccountAddresses = nonceAccountAddresses,
-            initiator = "3wKxhgiogoCaA2uxPYeH7cy3cG4hxRPogrPmDPLS54iZ"
+            initiator = "3wKxhgiogoCaA2uxPYeH7cy3cG4hxRPogrPmDPLS54iZ",
+            strikeFeeAmount = 0,
+            feeAccountGuidHash = emptyHash,
+            walletGuidHash = emptyHash,
         )
     )
 }
@@ -611,7 +659,10 @@ fun getRemoveDAppBookEntry(nonceAccountAddresses: List<String>): SolanaApprovalR
             multisigOpAccountAddress = "9CfoFci2agjCJ7bWqfgKEFSAc5zB6UR63MrK61nRaJzm",
             walletAddress = "Re4dLGch8a1G98PeRtpHa5ApS6Gnik444CqB5BQ8rY1",
             nonceAccountAddresses = nonceAccountAddresses,
-            initiator = "3wKxhgiogoCaA2uxPYeH7cy3cG4hxRPogrPmDPLS54iZ"
+            initiator = "3wKxhgiogoCaA2uxPYeH7cy3cG4hxRPogrPmDPLS54iZ",
+            strikeFeeAmount = 0,
+            feeAccountGuidHash = emptyHash,
+            walletGuidHash = emptyHash,
         )
     )
 }
