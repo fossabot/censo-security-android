@@ -20,11 +20,5 @@ fun AcceptVaultInvitationDetailContent(
 ) {
     val header = acceptVaultInvitation.getHeader(LocalContext.current)
     ApprovalRowContentHeader(header = header, bottomSpacing = 36)
-    val factsData = FactsData(
-        title = "",
-        facts = listOf(Pair(stringResource(R.string.vault_name), acceptVaultInvitation.vaultName))
-    )
-
-    FactRow(factsData = factsData)
     Spacer(modifier = Modifier.height(24.dp))
 }

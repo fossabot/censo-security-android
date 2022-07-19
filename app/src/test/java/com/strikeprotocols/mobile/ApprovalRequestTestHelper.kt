@@ -17,6 +17,7 @@ fun getWalletApprovalRequest(solanaApprovalRequestType: SolanaApprovalRequestTyp
         numberOfDispositionsRequired = 1,
         numberOfApprovalsReceived = 1,
         numberOfDeniesReceived = 1,
+        vaultName = "Test Vault",
         details = SolanaApprovalRequestDetails.ApprovalRequestDetails(solanaApprovalRequestType)
     )
 }
@@ -560,6 +561,7 @@ fun getWalletInitiationRequest( requestType: SolanaApprovalRequestType, initiati
         numberOfDispositionsRequired= 1,
         numberOfApprovalsReceived= 1,
         numberOfDeniesReceived= 1,
+        vaultName = "Test Vault",
         details= SolanaApprovalRequestDetails.MultiSignOpInitiationDetails(initiation, requestType= requestType)
     )
 }

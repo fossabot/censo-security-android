@@ -17,6 +17,7 @@ data class WalletApproval(
     val submitterEmail: String?,
     val submitterName: String?,
     val walletType: String?,
+    val vaultName: String?,
     @Transient val details: SolanaApprovalRequestDetails?
 ) {
 

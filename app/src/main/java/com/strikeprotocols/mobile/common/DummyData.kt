@@ -44,6 +44,7 @@ class GeneralDummyData {
         submitterEmail = "some_submitter@org.com",
         submitterName = "Some Submitter",
         walletType = "Solana",
+        vaultName = "Test Vault",
         details = SolanaApprovalRequestDetails.ApprovalRequestDetails(SolanaApprovalRequestType.UnknownApprovalType)
     )
 
@@ -379,6 +380,7 @@ class MockedApprovals {
             numberOfDispositionsRequired = 1,
             numberOfApprovalsReceived = 1,
             numberOfDeniesReceived = 1,
+            vaultName = "Test Vault",
             details = SolanaApprovalRequestDetails.ApprovalRequestDetails(solanaApprovalRequestType)
         )
     }
@@ -912,6 +914,7 @@ class MockedApprovals {
             numberOfDispositionsRequired= 1,
             numberOfApprovalsReceived= 1,
             numberOfDeniesReceived= 1,
+            vaultName = "Test Vault",
             details= SolanaApprovalRequestDetails.MultiSignOpInitiationDetails(initiation, requestType= requestType)
         )
     }

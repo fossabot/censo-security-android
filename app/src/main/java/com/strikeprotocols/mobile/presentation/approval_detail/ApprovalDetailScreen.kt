@@ -277,7 +277,8 @@ fun ApprovalDetails(
                 approvalsReceived = approval?.numberOfApprovalsReceived ?: 0,
                 totalApprovals = approval?.numberOfDispositionsRequired ?: 0,
                 denialsReceived = approval?.numberOfDeniesReceived ?: 0,
-                expiresIn = expiresInText
+                expiresIn = expiresInText,
+                vaultName = approval?.vaultName
             )
             Spacer(modifier = Modifier.height(28.dp))
 
@@ -316,18 +317,17 @@ fun ApprovalStatus(
     approvalsReceived: Int,
     totalApprovals: Int,
     denialsReceived: Int,
-    expiresIn: String?
+    expiresIn: String?,
+    vaultName: String?
 ) {
 
-    val facts = mutableListOf(
+    val facts = listOfNotNull(
+        vaultName?.let { Pair(stringResource(R.string.vault_name), vaultName) },
         Pair(stringResource(R.string.requested_by), requestedBy),
         Pair(stringResource(R.string.approvals_received), "$approvalsReceived ${stringResource(id = R.string.of)} $totalApprovals"),
         Pair(stringResource(R.string.denials_received), "$denialsReceived ${stringResource(id = R.string.of)} $totalApprovals"),
+        expiresIn?.let { Pair(stringResource(R.string.expires_in), expiresIn) }
     )
-
-    if (expiresIn != null) {
-        facts.add(Pair(stringResource(R.string.expires_in), expiresIn))
-    }
     
     val factsData = FactsData(title = stringResource(R.string.status), facts = facts)
     
