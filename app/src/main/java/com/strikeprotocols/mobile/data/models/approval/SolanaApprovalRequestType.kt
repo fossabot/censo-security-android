@@ -623,10 +623,16 @@ data class SymbolAndAmountInfo(
     }
 }
 
+data class NftMetadata(
+    val name: String
+)
+
 data class SymbolInfo(
     val symbol: String,
     val symbolDescription: String,
-    val tokenMintAddress: String
+    val tokenMintAddress: String,
+    val imageUrl: String? = null,
+    val nftMetadata: NftMetadata? = null
 ) {
     fun getSOLProgramValue() : Byte = if (symbol == "SOL") 0 else 1
 }

@@ -169,7 +169,7 @@
 
     <string name="signer_email">User Email</string>
     <string name="signer_name">User Name</string>
-    <string name="vault_approvers">Approvers</string>
+    <string name="vault_approvers">Administrators</string>
     <string name="approvals_required">Approvals Required</string>
 
     <string name="name">Name</string>
@@ -190,6 +190,7 @@
     <string name="destination">Destination</string>
     <string name="destination_address">Destination Address</string>
     <string name="swap_for">Swap for</string>
+    <string name="nft_name">NFT Name</string>
 
     <string name="hours">Hours</string>
     <string name="minutes">Minutes</string>

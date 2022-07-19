@@ -37,7 +37,7 @@ fun WithdrawalRequestDetailContent(
     Spacer(modifier = Modifier.height(24.dp))
 
     val factsData = FactsData(
-        facts = listOf(
+        facts = listOfNotNull(
             Pair(
                 stringResource(R.string.from_wallet),
                 fromAccount
@@ -49,7 +49,13 @@ fun WithdrawalRequestDetailContent(
             Pair(
                 stringResource(R.string.destination_address),
                 address.maskAddress()
-            )
+            ),
+            if (withdrawalRequest.symbolAndAmountInfo.symbolInfo.nftMetadata != null) {
+                Pair(
+                    stringResource(R.string.nft_name),
+                    withdrawalRequest.symbolAndAmountInfo.symbolInfo.nftMetadata.name
+                )
+            } else null
         )
     )
     FactRow(factsData = factsData)
