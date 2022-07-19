@@ -4,6 +4,7 @@
     package="com.strikeprotocols.mobile">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <queries>
         <package android:name="com.lastpass.lpandroid" />
@@ -47,6 +48,17 @@
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
         </service>
+
+        <service android:name="com.raygun.raygun4android.services.CrashReportingPostService"
+            android:exported="false"
+            android:permission="android.permission.BIND_JOB_SERVICE"
+            android:process=":crashreportingpostservice"/>
+        <service android:name="com.raygun.raygun4android.services.RUMPostService"
+            android:exported="false"
+            android:permission="android.permission.BIND_JOB_SERVICE"
+            android:process=":rumpostservice"/>
+        <meta-data android:name="com.raygun.raygun4android.apikey"
+            android:value="@string/RAYGUN_APP_ID" />
 
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_channel_id"

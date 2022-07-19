@@ -19,6 +19,7 @@ import androidx.navigation.*
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.raygun.raygun4android.RaygunClient
 import com.strikeprotocols.mobile.common.BiometricUtil
 import com.strikeprotocols.mobile.data.*
 import com.strikeprotocols.mobile.data.models.approval.WalletApproval
@@ -61,14 +62,9 @@ class MainActivity : FragmentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // Create channel to show notifications.
-        val channelId = getString(R.string.default_notification_channel_id)
-        val channelName = getString(R.string.default_notification_channel_name)
-        val notificationManager = getSystemService(NotificationManager::class.java)
-        notificationManager?.createNotificationChannel(
-            NotificationChannel(channelId,
-            channelName, NotificationManager.IMPORTANCE_HIGH)
-        )
+
+        setupRayGunCrashReporting()
+        setupPushChannel()
 
         setContent {
             val context = LocalContext.current
@@ -202,5 +198,20 @@ class MainActivity : FragmentActivity() {
     override fun onDestroy() {
         super.onDestroy()
         authProvider.clearAllListeners()
+    }
+
+    private fun setupPushChannel() {
+        val channelId = getString(R.string.default_notification_channel_id)
+        val channelName = getString(R.string.default_notification_channel_name)
+        val notificationManager = getSystemService(NotificationManager::class.java)
+        notificationManager?.createNotificationChannel(
+            NotificationChannel(channelId,
+                channelName, NotificationManager.IMPORTANCE_HIGH)
+        )
+    }
+
+    private fun setupRayGunCrashReporting() {
+        RaygunClient.init(application);
+        RaygunClient.enableCrashReporting();
     }
 }

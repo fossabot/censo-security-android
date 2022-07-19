@@ -83,6 +83,7 @@ android {
             buildConfigField "String", "OKTA_CLIENT_ID", "\"0oa7ajzug1y8O0CPe357\""
             buildConfigField "String", "OKTA_ISSUER_ID", "\"aus7834x2w3eqeZSr357\""
             buildConfigField "String", "REDIRECT_SUFFIX", "\"\""
+            resValue "string", "RAYGUN_APP_ID", "\"vuxX53AURVfZS87D1WPqeg\""
             debuggable false
         }
         demoOne {
@@ -95,6 +96,7 @@ android {
             buildConfigField "String", "OKTA_CLIENT_ID", "\"0oa7ajsmclS0GyzMw357\""
             buildConfigField "String", "OKTA_ISSUER_ID", "\"aus7834x2w3eqeZSr357\""
             buildConfigField "String", "REDIRECT_SUFFIX", "\"-demo\""
+            resValue "string", "RAYGUN_APP_ID", "\"CtOnGQjIo1U8dELkoUf0iw\""
             debuggable false
         }
         demoTwo {
@@ -117,6 +119,7 @@ android {
             buildConfigField "String", "OKTA_CLIENT_ID", "\"0oa73mddnlx5MMo7j357\""
             buildConfigField "String", "OKTA_ISSUER_ID", "\"aus783fl9oAoVKJv7357\""
             buildConfigField "String", "REDIRECT_SUFFIX", "\"-dev\""
+            resValue "string", "RAYGUN_APP_ID", "\"L9T2bPaEjr3Lede3SNpFJw\""
             debuggable false
         }
         auth {
@@ -243,6 +246,9 @@ dependencies {
 
     // BIP39
     implementation "cash.z.ecc.android:kotlin-bip39:1.0.2"
+
+    //Raygun crash reporting
+    implementation 'com.raygun:raygun4android:4.0.1'
 
     //Unit testing
     testImplementation 'junit:junit:4.13.2'

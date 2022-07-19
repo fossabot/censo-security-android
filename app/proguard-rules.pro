@@ -19,3 +19,7 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+
+-keep class com.raygun.raygun4android.** { *; }
+-keepattributes Exceptions, Signature, InnerClasses, SourceFile, LineNumberTable
+-renamesourcefileattribute SourceFile
