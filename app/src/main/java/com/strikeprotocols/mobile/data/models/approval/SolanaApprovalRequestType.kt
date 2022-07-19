@@ -5,9 +5,6 @@ import com.google.gson.JsonObject
 import com.google.gson.JsonPrimitive
 import com.google.gson.annotations.SerializedName
 import com.strikeprotocols.mobile.common.BaseWrapper
-import com.strikeprotocols.mobile.common.strikeLog
-import org.web3j.abi.datatypes.Bool
-import java.io.BufferedOutputStream
 import java.io.ByteArrayOutputStream
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
@@ -506,21 +503,29 @@ data class WhitelistUpdate(
     }
 }
 
+val b64Encoder: Base64.Encoder = Base64.getEncoder()
+val b64Decoder: Base64.Decoder = Base64.getDecoder()
+val emptyHash: String = b64Encoder.encodeToString(ByteArray(size = 32))
+
 data class SolanaSigningData(
     val feePayer: String,
     val walletProgramId: String,
     val multisigOpAccountAddress: String,
     val walletAddress: String,
     val nonceAccountAddresses: List<String>,
-    val initiator: String
+    val initiator: String,
+    val strikeFeeAmount: Long,
+    val feeAccountGuidHash: String,
+    val walletGuidHash: String,
 ) {
+
     fun commonOpHashBytes() : ByteArray {
         val buffer = ByteArrayOutputStream()
 
         buffer.write(initiator.base58Bytes())
         buffer.write(feePayer.base58Bytes())
-        buffer.writeLongLE(0)
-        buffer.write(ByteArray(size = 32))
+        buffer.writeLongLE(strikeFeeAmount)
+        buffer.write(b64Decoder.decode(feeAccountGuidHash))
 
         return buffer.toByteArray()
     }
@@ -528,9 +533,13 @@ data class SolanaSigningData(
     fun commonInitiationBytes() : ByteArray {
         val buffer = ByteArrayOutputStream()
 
-        buffer.writeLongLE(0)
-        buffer.write(byteArrayOf(0))
-        buffer.write(ByteArray(size = 32))
+        buffer.writeLongLE(strikeFeeAmount)
+        buffer.write(
+            byteArrayOf(
+                if (feeAccountGuidHash == emptyHash) 0 else 1
+            )
+        )
+        buffer.write(b64Decoder.decode(feeAccountGuidHash))
 
         return buffer.toByteArray()
     }
