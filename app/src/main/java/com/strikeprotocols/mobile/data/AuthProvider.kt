@@ -25,7 +25,6 @@ import com.okta.oidc.results.Result as OktaResult
 
 interface AuthProvider {
 
-    val isAuthenticated: Boolean
     val isExpired: Boolean
     val token: String?
 
@@ -55,8 +54,6 @@ class OktaAuth(
     private val authClient: AuthClient?
     private lateinit var authenticationClient: AuthenticationClient
 
-    override val isAuthenticated: Boolean
-        get() = authClient?.sessionClient?.isAuthenticated == true
     override val isExpired: Boolean
         get() =
             try {
@@ -194,40 +191,25 @@ class OktaAuth(
         }
 
     override suspend fun authenticate(sessionToken: String): String = suspendCoroutine { cont ->
-        if (!isAuthenticated) {
-            authClient?.signIn(
-                sessionToken, null, object : RequestCallback<OktaResult, AuthorizationException> {
-                    override fun onSuccess(result: OktaResult) {
-                        cont.resumeWith(Result.success(sessionToken))
-                    }
-
-                    override fun onError(
-                        error: String?,
-                        exception: AuthorizationException?
-                    ) {
-                        authClient.sessionClient.clear()
-                        cont.resumeWith(
-                            Result.failure(
-                                exception ?: AuthorizationException.GeneralErrors.NETWORK_ERROR
-                            )
-                        )
-                    }
-                })
-        } else {
-            try {
-                val safeToken = token
-
-                if (!safeToken.isNullOrEmpty()) {
-                    cont.resumeWith(Result.success(safeToken))
-                } else {
-                    authClient?.sessionClient?.clear()
-                    cont.resumeWith(Result.failure(TokenExpiredException()))
+        authClient?.sessionClient?.clear()
+        authClient?.signIn(
+            sessionToken, null, object : RequestCallback<OktaResult, AuthorizationException> {
+                override fun onSuccess(result: OktaResult) {
+                    cont.resumeWith(Result.success(sessionToken))
                 }
-            } catch(e: AuthorizationException) {
-                authClient?.sessionClient?.clear()
-                cont.resumeWith(Result.failure(TokenExpiredException()))
-            }
-        }
+
+                override fun onError(
+                    error: String?,
+                    exception: AuthorizationException?
+                ) {
+                    authClient.sessionClient.clear()
+                    cont.resumeWith(
+                        Result.failure(
+                            exception ?: AuthorizationException.GeneralErrors.NETWORK_ERROR
+                        )
+                    )
+                }
+            })
     }
 
     fun retrieveValidToken(tokens: Tokens?) =
