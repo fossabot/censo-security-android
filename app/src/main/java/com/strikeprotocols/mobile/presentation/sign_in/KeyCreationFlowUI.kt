@@ -40,7 +40,7 @@ fun KeyCreationFlowUI(
         KeyCreationFlowStep.WRITE_WORD_STEP,
         KeyCreationFlowStep.PHRASE_COPIED_STEP,
         KeyCreationFlowStep.PHRASE_SAVED_STEP -> stringResource(R.string.start_over)
-        KeyCreationFlowStep.VERIFY_WORDS_STEP -> stringResource(R.string.write_down_key)
+        KeyCreationFlowStep.VERIFY_WORDS_STEP -> stringResource(R.string.verify_phrase)
         KeyCreationFlowStep.CONFIRM_KEY_ENTRY_STEP,
         KeyCreationFlowStep.CONFIRM_KEY_ERROR_STEP -> stringResource(R.string.copy_key)
         KeyCreationFlowStep.ALL_SET_STEP -> ""
@@ -135,7 +135,7 @@ fun KeyCreationFlowUI(
                             retry = retryKeyCreation
                         )
                     else -> EntryScreenPhraseUI(
-                        title = stringResource(R.string.time_to_back_up),
+                        title = stringResource(R.string.phrase_generated),
                         subtitle = stringResource(R.string.how_would_you_save_it),
                         buttonOneText = stringResource(R.string.password_manager),
                         buttonTwoText = stringResource(R.string.pen_and_paper),
