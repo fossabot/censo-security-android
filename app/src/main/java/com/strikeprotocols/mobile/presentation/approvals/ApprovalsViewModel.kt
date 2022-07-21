@@ -7,8 +7,6 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.strikeprotocols.mobile.common.Resource
-import com.strikeprotocols.mobile.common.formatISO8601IntoSeconds
-import com.strikeprotocols.mobile.common.strikeLog
 import com.strikeprotocols.mobile.data.ApprovalsRepository
 import com.strikeprotocols.mobile.data.PushRepository
 import com.strikeprotocols.mobile.data.StrikeUserData
@@ -26,7 +24,6 @@ import com.strikeprotocols.mobile.presentation.durable_nonce.DurableNonceViewMod
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import java.util.*
 import javax.inject.Inject
 import kotlin.Exception
 

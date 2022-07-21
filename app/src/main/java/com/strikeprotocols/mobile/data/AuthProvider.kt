@@ -112,6 +112,7 @@ class OktaAuth(
             RequestCallback<UserInfo, AuthorizationException> {
             override fun onSuccess(result: UserInfo) {
                 if (result.get(OKTA_EMAIL_KEY) != null) {
+                    SharedPrefsHelper.saveUserEmail(result[OKTA_EMAIL_KEY] as String)
                     cont.resumeWith(Result.success(result[OKTA_EMAIL_KEY] as String))
                 } else {
                     cont.resumeWith(Result.failure(NO_EMAIL_EXCEPTION))

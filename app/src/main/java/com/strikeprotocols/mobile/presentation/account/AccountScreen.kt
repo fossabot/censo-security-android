@@ -8,8 +8,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.rounded.ArrowBack
-import androidx.compose.material.icons.rounded.Close
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
@@ -17,7 +17,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.capitalize
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -26,13 +25,11 @@ import androidx.navigation.NavController
 import com.strikeprotocols.mobile.BuildConfig
 import com.strikeprotocols.mobile.R
 import com.strikeprotocols.mobile.common.Resource
-import com.strikeprotocols.mobile.data.StrikeUserData
 import com.strikeprotocols.mobile.presentation.Screen
 import com.strikeprotocols.mobile.presentation.approval_detail.approval_type_detail_items.AccountRow
 import com.strikeprotocols.mobile.presentation.approvals.ApprovalsViewModel
-import com.strikeprotocols.mobile.presentation.components.StrikeTopAppBar
+import com.strikeprotocols.mobile.presentation.components.StrikeCenteredTopAppBar
 import com.strikeprotocols.mobile.ui.theme.*
-import kotlinx.coroutines.launch
 import java.util.*
 
 
@@ -64,14 +61,24 @@ fun AccountScreen(
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
-            StrikeTopAppBar(
-                title = "",
+            StrikeCenteredTopAppBar(
+                title = stringResource(id = R.string.user),
                 onAppBarIconClick = { navController.navigateUp() },
-                navigationIconContentDes = stringResource(id = R.string.content_des_back_icon),
-                navigationIcon = Icons.Rounded.ArrowBack,
+                showNavIcon = false,
+                navigationIcon = Icons.Filled.ArrowBack,
+                navigationIconContentDes = "",
                 actions = {
-                    TextButton(onClick = { navController.navigateUp() }) {
-                        Text(stringResource(R.string.done), color = StrikeWhite, fontSize = 18.sp)
+                    Box(modifier = Modifier
+                        .clickable { navController.navigateUp() }
+                        .padding(horizontal = 12.dp)
+                        .align(alignment = Alignment.CenterVertically)
+                        .fillMaxHeight()) {
+                        Text(
+                            modifier = Modifier.align(alignment = Alignment.Center),
+                            text = stringResource(id = R.string.done),
+                            color = StrikeWhite,
+                            textAlign = TextAlign.Center
+                        )
                     }
                 }
             )
@@ -88,17 +95,17 @@ fun AccountScreen(
 
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.weight(1f).verticalScroll(rememberScrollState()),
+                    modifier = Modifier
+                        .weight(1f)
+                        .verticalScroll(rememberScrollState()),
                     ) {
                     Spacer(modifier = Modifier.height(44.dp))
-                    //todo: str-257 use value from cached StrikeUser data. That is in bip-39-auth branch.
                     AccountRow(
                         titleColor = StrikeWhite,
                         title = stringResource(R.string.email),
                         value = approvalsState.email
                     )
                     Divider(modifier = Modifier.height(0.5.dp), color = DividerGrey)
-                    //todo: str-257 use value from cached StrikeUser data. That is in bip-39-auth branch.
                     AccountRow(
                         titleColor = StrikeWhite,
                         title = stringResource(R.string.name),

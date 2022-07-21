@@ -228,7 +228,7 @@ fun ApprovalDetailsTopAppBar(
     navigationIcon: ImageVector,
     navigationIconContentDes: String
 ) {
-    StrikeTopAppBar(
+    StrikeCenteredTopAppBar(
         title = stringResource(R.string.details_title),
         onAppBarIconClick = { onAppBarIconClick() },
         navigationIcon = navigationIcon,

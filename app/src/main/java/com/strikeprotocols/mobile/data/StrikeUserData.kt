@@ -11,7 +11,7 @@ interface StrikeUserData {
 }
 
 
-object StrikeUserDataImpl : StrikeUserData {
+class StrikeUserDataImpl(val userRepository: UserRepository) : StrikeUserData {
     private var strikeUser: VerifyUser? = null
     private var email: String = ""
 
@@ -20,7 +20,12 @@ object StrikeUserDataImpl : StrikeUserData {
         email = userEmail
     }
 
-    override fun getEmail() = email
+    override fun getEmail(): String {
+        if (email.isEmpty()) {
+            email = userRepository.retrieveCachedUserEmail()
+        }
+        return email
+    }
 
     override fun setStrikeUser(verifyUser: VerifyUser?) {
         strikeUser = verifyUser

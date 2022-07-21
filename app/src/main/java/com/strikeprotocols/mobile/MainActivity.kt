@@ -126,7 +126,7 @@ class MainActivity : FragmentActivity() {
 
         NavHost(
             navController = navController,
-            startDestination = Screen.SignInRoute.route
+            startDestination = Screen.SignInRoute.route,
         ) {
             composable(
                 route = Screen.SignInRoute.route

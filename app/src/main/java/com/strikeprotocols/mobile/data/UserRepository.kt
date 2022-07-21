@@ -20,9 +20,9 @@ interface UserRepository {
     suspend fun setUserLoggedIn()
     suspend fun logOut() : Boolean
     suspend fun getSavedPrivateKey(): String
-    suspend fun clearGeneratedAuthData()
     suspend fun regenerateDataAndUploadToBackend(): WalletSigner
     suspend fun retrieveUserEmail(): String
+    fun retrieveCachedUserEmail(): String
     suspend fun saveUserEmail(email: String)
     suspend fun generatePhrase() : String
     suspend fun resetPassword(email: String)
@@ -123,12 +123,6 @@ class UserRepositoryImpl(
         )
     }
 
-    override suspend fun clearGeneratedAuthData() {
-        val userEmail = retrieveUserEmail()
-        saveUserEmail("")
-        securePreferences.clearSolanaKey(email = userEmail)
-    }
-
     override suspend fun regenerateDataAndUploadToBackend() : WalletSigner {
         val userEmail = retrieveUserEmail()
         val solanaKey = securePreferences.retrieveSolanaKey(userEmail)
@@ -149,6 +143,8 @@ class UserRepositoryImpl(
             ""
         }
     }
+
+    override fun retrieveCachedUserEmail() = SharedPrefsHelper.retrieveUserEmail()
 
     override suspend fun saveUserEmail(email: String) {
         SharedPrefsHelper.saveUserEmail(email)

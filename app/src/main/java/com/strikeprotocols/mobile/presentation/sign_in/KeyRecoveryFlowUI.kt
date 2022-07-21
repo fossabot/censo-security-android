@@ -3,6 +3,7 @@ package com.strikeprotocols.mobile.presentation.sign_in
 import android.annotation.SuppressLint
 import android.content.Context
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.Scaffold
 import androidx.compose.material.icons.Icons
@@ -12,7 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import com.strikeprotocols.mobile.R
 import com.strikeprotocols.mobile.common.Resource
-import com.strikeprotocols.mobile.presentation.components.StrikeTopAppBar
+import com.strikeprotocols.mobile.presentation.components.StrikeAuthTopAppBar
 
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
@@ -46,20 +47,12 @@ fun KeyRecoveryFlowUI(
         modifier = Modifier.fillMaxSize(),
         topBar = {
             if (screenTitle.isNotEmpty()) {
-                StrikeTopAppBar(
+                StrikeAuthTopAppBar(
                     title = screenTitle,
-                    navigationIcon = Icons.Rounded.ArrowBack,
                     onAppBarIconClick = { onBackNavigate() },
-                    navigationIconContentDes = screenTitle
                 )
             } else {
-                StrikeTopAppBar(
-                    title = "",
-                    onAppBarIconClick = { },
-                    navigationIcon = Icons.Rounded.ArrowBack,
-                    showNavIcon = false,
-                    navigationIconContentDes = ""
-                )
+               Spacer(modifier = Modifier)
             }
         },
         content = {

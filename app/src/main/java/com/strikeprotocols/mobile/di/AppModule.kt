@@ -95,8 +95,8 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideStrikeUserData(): StrikeUserData {
-        return StrikeUserDataImpl
+    fun provideStrikeUserData(userRepository: UserRepository): StrikeUserData {
+        return StrikeUserDataImpl(userRepository)
     }
 
 }

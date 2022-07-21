@@ -89,6 +89,7 @@ class SignInViewModel @Inject constructor(
             }
 
             if (userLoggedIn) {
+                strikeUserData.setEmail(userRepository.retrieveCachedUserEmail())
                 triggerAutoAuthFlow()
             }
             state = state.copy(loggedInStatusResult = Resource.Uninitialized)
@@ -105,6 +106,7 @@ class SignInViewModel @Inject constructor(
                     val sessionToken = userRepository.retrieveSessionToken(state.email, state.password)
                     val token = userRepository.authenticate(sessionToken)
                     userRepository.saveUserEmail(state.email)
+                    strikeUserData.setEmail(state.email)
                     state.copy(loginResult = Resource.Success(token))
                 } catch (e: Exception) {
                     state.copy(loginResult = Resource.Error(e.message ?: NO_INTERNET_ERROR))
@@ -146,8 +148,6 @@ class SignInViewModel @Inject constructor(
 
     fun setUserLoggedInSuccess() {
         viewModelScope.launch {
-            userRepository.saveUserEmail(state.email)
-            strikeUserData.setEmail(state.email)
             userRepository.setUserLoggedIn()
             submitNotificationTokenForRegistration()
         }
@@ -331,8 +331,6 @@ class SignInViewModel @Inject constructor(
                     )
                 } catch (e: Exception) {
                     setCreateKeyError(e.message ?: PhraseException.DEFAULT_ERROR)
-                    //TODO: Zak 278 We want to handle this better,
-                    // at this point we may need to generate a new phrase for the user and restart the flow
                     state.copy(
                         keyCreationFlowStep = KeyCreationFlowStep.ENTRY_STEP
                     )
@@ -482,9 +480,7 @@ class SignInViewModel @Inject constructor(
     }
 
     private fun verifiedPhraseFailure(exception: Exception?) {
-        //todo: need to wipe more state here on ticket str-256. That state does not currently exist, but will after we finalize UI.
         viewModelScope.launch {
-            userRepository.clearGeneratedAuthData()
             state = state.copy(
                 keyCreationFlowStep = KeyCreationFlowStep.CONFIRM_KEY_ERROR_STEP,
             )

@@ -264,5 +264,7 @@
     <string name="reset_pswd_email_sent">Reset password email sent!</string>
     <string name="unable_send_reset_email">Unable to send reset email. Please try again or reset your password from our website.</string>
     <string name="sign_in_subtitle">Sign in with the account you\ncreated on the web</string>
+    <string name="back">back</string>
+    <string name="user">User</string>
 
 </resources>

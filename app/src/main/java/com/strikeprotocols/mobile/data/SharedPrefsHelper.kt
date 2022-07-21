@@ -65,6 +65,7 @@ object SharedPrefsHelper {
     }
 
     fun saveUserEmail(email: String) {
+        if (email.isEmpty()) return
         val editor = sharedPrefs.edit()
         editor.putString(USER_EMAIL, email.lowercase())
         editor.apply()

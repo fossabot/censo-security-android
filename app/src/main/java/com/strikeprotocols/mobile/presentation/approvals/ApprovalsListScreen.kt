@@ -35,13 +35,11 @@ import com.strikeprotocols.mobile.data.models.approval.SolanaApprovalRequestType
 import com.strikeprotocols.mobile.data.models.approval.WalletApproval
 import com.strikeprotocols.mobile.presentation.Screen
 import com.strikeprotocols.mobile.presentation.approvals.approval_type_row_items.*
-import com.strikeprotocols.mobile.presentation.components.StrikeTopAppBar
 import com.strikeprotocols.mobile.presentation.components.*
 import com.strikeprotocols.mobile.presentation.durable_nonce.DurableNonceViewModel
 import com.strikeprotocols.mobile.ui.theme.*
 import kotlinx.coroutines.launch
 import com.strikeprotocols.mobile.ui.theme.BackgroundBlack
-import com.strikeprotocols.mobile.ui.theme.StrikeWhite
 
 @Composable
 fun ApprovalsListScreen(
@@ -235,7 +233,7 @@ fun ApprovalsListTopAppBar(
     navigationIcon: ImageVector,
     navigationIconContentDes: String
 ) {
-    StrikeTopAppBar(
+    StrikeCenteredTopAppBar(
         title = title,
         onAppBarIconClick = { onAppBarIconClick() },
         navigationIcon = navigationIcon,
