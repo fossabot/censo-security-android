@@ -11,9 +11,9 @@ plugins {
 def final appName = 'Strike Mobile'
 def final coreAppId = "com.strikeprotocols.mobile"
 
-String versionNameMajor = 0
+String versionNameMajor = 2
 String versionNameMinor = 0
-String versionNamePatch = 1
+String versionNamePatch = 0
 
 android {
     Boolean signBuild = false
@@ -44,7 +44,7 @@ android {
         applicationId coreAppId
         minSdk 26
         targetSdk 32
-        versionCode 14
+        versionCode 1
 
         buildConfigField "int", "versionNameMajor", versionNameMajor
         buildConfigField "int", "versionNameMinor", versionNameMinor
