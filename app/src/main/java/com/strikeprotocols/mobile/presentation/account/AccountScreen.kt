@@ -3,7 +3,9 @@ package com.strikeprotocols.mobile.presentation.account
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ArrowBack
@@ -24,6 +26,7 @@ import androidx.navigation.NavController
 import com.strikeprotocols.mobile.BuildConfig
 import com.strikeprotocols.mobile.R
 import com.strikeprotocols.mobile.common.Resource
+import com.strikeprotocols.mobile.data.StrikeUserData
 import com.strikeprotocols.mobile.presentation.Screen
 import com.strikeprotocols.mobile.presentation.approval_detail.approval_type_detail_items.AccountRow
 import com.strikeprotocols.mobile.presentation.approvals.ApprovalsViewModel
@@ -36,7 +39,7 @@ import java.util.*
 @Composable
 fun AccountScreen(
     navController: NavController,
-    approvalsViewModel: ApprovalsViewModel,
+    approvalsViewModel: ApprovalsViewModel
 ) {
 
     val appVersionText =
@@ -62,7 +65,7 @@ fun AccountScreen(
         modifier = Modifier.fillMaxSize(),
         topBar = {
             StrikeTopAppBar(
-                title = stringResource(R.string.user),
+                title = "",
                 onAppBarIconClick = { navController.navigateUp() },
                 navigationIconContentDes = stringResource(id = R.string.content_des_back_icon),
                 navigationIcon = Icons.Rounded.ArrowBack,
@@ -85,20 +88,21 @@ fun AccountScreen(
 
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
-                ) {
+                    modifier = Modifier.weight(1f).verticalScroll(rememberScrollState()),
+                    ) {
                     Spacer(modifier = Modifier.height(44.dp))
                     //todo: str-257 use value from cached StrikeUser data. That is in bip-39-auth branch.
                     AccountRow(
                         titleColor = StrikeWhite,
                         title = stringResource(R.string.email),
-                        value = ""
+                        value = approvalsState.email
                     )
                     Divider(modifier = Modifier.height(0.5.dp), color = DividerGrey)
                     //todo: str-257 use value from cached StrikeUser data. That is in bip-39-auth branch.
                     AccountRow(
                         titleColor = StrikeWhite,
                         title = stringResource(R.string.name),
-                        value = "",
+                        value = approvalsState.name
                     )
                     Spacer(modifier = Modifier.height(64.dp))
                     Text(
@@ -135,7 +139,6 @@ fun AccountScreen(
 
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
-
                     ) {
                     Text(
                         text = appVersionText,

@@ -7,6 +7,10 @@ import com.strikeprotocols.mobile.presentation.approval_disposition.ApprovalDisp
 import com.strikeprotocols.mobile.presentation.durable_nonce.DurableNonceViewModel
 
 data class ApprovalsState(
+
+    val email: String = "",
+    val name: String = "",
+
     val shouldShowErrorSnackbar: Boolean = false,
     val shouldDisplayConfirmDisposition: ConfirmDispositionDialogDetails? = null,
     val shouldDisplayApprovalDispositionError: Boolean = false,

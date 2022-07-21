@@ -147,6 +147,7 @@ class SignInViewModel @Inject constructor(
     fun setUserLoggedInSuccess() {
         viewModelScope.launch {
             userRepository.saveUserEmail(state.email)
+            strikeUserData.setEmail(state.email)
             userRepository.setUserLoggedIn()
             submitNotificationTokenForRegistration()
         }

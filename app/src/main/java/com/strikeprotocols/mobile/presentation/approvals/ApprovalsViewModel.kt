@@ -11,6 +11,7 @@ import com.strikeprotocols.mobile.common.formatISO8601IntoSeconds
 import com.strikeprotocols.mobile.common.strikeLog
 import com.strikeprotocols.mobile.data.ApprovalsRepository
 import com.strikeprotocols.mobile.data.PushRepository
+import com.strikeprotocols.mobile.data.StrikeUserData
 import com.strikeprotocols.mobile.data.UserRepository
 import com.strikeprotocols.mobile.data.models.ApprovalDisposition
 import com.strikeprotocols.mobile.data.models.InitiationDisposition
@@ -33,7 +34,8 @@ import kotlin.Exception
 class ApprovalsViewModel @Inject constructor(
     private val approvalsRepository: ApprovalsRepository,
     private val userRepository: UserRepository,
-    private val pushRepository: PushRepository
+    private val pushRepository: PushRepository,
+    private val strikeUserData: StrikeUserData,
 ) : ViewModel() {
 
     private var timer: CountDownTimer? = null
@@ -56,10 +58,18 @@ class ApprovalsViewModel @Inject constructor(
 
     fun onStart() {
         startCountDown()
+        setUserInfo()
     }
 
     fun onStop() {
         timer?.cancel()
+    }
+
+    private fun setUserInfo() {
+        state = state.copy(
+            email = strikeUserData.getEmail(),
+            name = strikeUserData.getStrikeUser()?.fullName ?: ""
+        )
     }
 
     private fun startCountDown() {

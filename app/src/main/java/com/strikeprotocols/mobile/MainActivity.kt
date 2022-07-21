@@ -164,7 +164,10 @@ class MainActivity : FragmentActivity() {
             composable(
                 route = Screen.AccountRoute.route
             ) {
-                AccountScreen(navController = navController, approvalsViewModel = approvalsViewModel)
+                AccountScreen(
+                    navController = navController,
+                    approvalsViewModel = approvalsViewModel
+                )
             }
         }
     }
