@@ -1,6 +1,7 @@
 package com.strikeprotocols.mobile.presentation.components
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
@@ -10,6 +11,7 @@ import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
@@ -25,9 +27,9 @@ import com.strikeprotocols.mobile.ui.theme.UnfocusedGrey
 @ExperimentalComposeUiApi
 @Composable
 fun SignInTextField(
+    modifier: Modifier = Modifier,
     valueText: String,
     onValueChange: (newValue: String) -> Unit,
-    placeholder: String,
     keyboardType: KeyboardType,
     errorEnabled: Boolean = false,
     onDoneAction: () -> Unit = { },
@@ -42,11 +44,10 @@ fun SignInTextField(
 
     Column {
         OutlinedTextField(
-            modifier = Modifier.fillMaxWidth(),
+            singleLine = true,
+            modifier = modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(8.dp),
             value = valueText,
-            placeholder = {
-                Text(text = placeholder, color = UnfocusedGrey)
-            },
             textStyle = MaterialTheme.typography.body1,
             visualTransformation =
             if (passwordVisibility || !isPassword) {
@@ -67,32 +68,32 @@ fun SignInTextField(
             onValueChange = onValueChange,
             colors = TextFieldDefaults.outlinedTextFieldColors(
                 focusedBorderColor = StrikePurple,
-                unfocusedBorderColor = UnfocusedGrey,
-                textColor = StrikeWhite
+                unfocusedBorderColor = Color.Transparent,
+                textColor = Color.Black,
+                backgroundColor = Color.White
             ),
             isError = errorEnabled,
             trailingIcon =
-                if (isPassword) {
-                    {
-                        val image =
-                            if (passwordVisibility) Icons.Filled.Visibility else Icons.Filled.VisibilityOff
-                        val contentDescription =
-                            if (passwordVisibility) R.string.hide_password_content_description else R.string.show_password_content_description
-                        IconButton(onClick = onPasswordClick) {
-                            Icon(
-                                imageVector = image,
-                                tint = UnfocusedGrey,
-                                contentDescription = stringResource(contentDescription)
-                            )
-                        }
+            if (isPassword) {
+                {
+                    val image =
+                        if (passwordVisibility) Icons.Filled.Visibility else Icons.Filled.VisibilityOff
+                    val contentDescription =
+                        if (passwordVisibility) R.string.hide_password_content_description else R.string.show_password_content_description
+                    IconButton(onClick = onPasswordClick) {
+                        Icon(
+                            imageVector = image,
+                            tint = Color.Black,
+                            contentDescription = stringResource(contentDescription)
+                        )
                     }
-                } else {
-                    null
                 }
+            } else {
+                null
+            }
         )
 
-        if(errorEnabled) {
-
+        if (errorEnabled) {
             var errorMessage = errorText
 
             if (errorMessage.isEmpty()) {
@@ -102,14 +103,13 @@ fun SignInTextField(
                     } else {
                         stringResource(R.string.invalid_email_error)
                     }
-                }
+            }
 
-            Spacer(modifier = Modifier.height(4.dp))
+            Spacer(modifier = Modifier.height(6.dp))
             Text(
                 text = errorMessage,
                 color = MaterialTheme.colors.error,
-                style = MaterialTheme.typography.caption,
-                modifier = Modifier.padding(start = 16.dp)
+                modifier = modifier
             )
         }
 

@@ -68,15 +68,21 @@ fun ResetPasswordScreen(
                     )
                 }
                 Spacer(modifier = Modifier.height(48.dp))
+                Text(
+                    modifier = Modifier.fillMaxWidth(),
+                    text = stringResource(id = R.string.email_hint),
+                    color = StrikeWhite,
+                    fontSize = 18.sp
+                )
+                Spacer(modifier = Modifier.size(20.dp))
                 SignInTextField(
                     valueText = resetPasswordState.email,
                     onValueChange = resetPasswordViewModel::updateEmail,
-                    placeholder = stringResource(R.string.email_hint),
                     keyboardType = KeyboardType.Email,
                     errorEnabled = resetPasswordState.emailErrorEnabled,
                     errorText =
                     if (resetPasswordState.resetPasswordResult is Resource.Error) {
-                        "Unable to send reset email. Please try again or reset your password from our website." ?: ""
+                        stringResource(R.string.unable_send_reset_email)
                     } else {
                         ""
                     },

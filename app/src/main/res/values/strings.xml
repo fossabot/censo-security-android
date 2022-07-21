@@ -6,7 +6,7 @@
      -->
     <string name="default_notification_channel_name" translatable="true">Approvals</string>
 
-    <string name="sign_in_button">Sign in</string>
+    <string name="sign_in_button">Sign In</string>
     <string name="email_hint">Email</string>
     <string name="password_hint">Password</string>
     <string name="hide_password_content_description">hide password</string>
@@ -259,8 +259,10 @@
     <string name="finishing_auth">Finishing up auth…</string>
     <string name="i_saved_key"><![CDATA[I saved the recovery phrase ->]]></string>
 
-    <string name="reset_password">Reset Password</string>
+    <string name="reset_password">Forgot password?</string>
     <string name="retry_recover_password">Retry</string>
     <string name="reset_pswd_email_sent">Reset password email sent!</string>
+    <string name="unable_send_reset_email">Unable to send reset email. Please try again or reset your password from our website.</string>
+    <string name="sign_in_subtitle">Sign in with the account you\ncreated on the web</string>
 
 </resources>
