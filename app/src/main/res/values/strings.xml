@@ -260,4 +260,8 @@
     <string name="finishing_auth">Finishing up auth…</string>
     <string name="i_saved_key"><![CDATA[I saved the recovery phrase ->]]></string>
 
+    <string name="reset_password">Reset Password</string>
+    <string name="retry_recover_password">Retry</string>
+    <string name="reset_pswd_email_sent">Reset password email sent!</string>
+
 </resources>

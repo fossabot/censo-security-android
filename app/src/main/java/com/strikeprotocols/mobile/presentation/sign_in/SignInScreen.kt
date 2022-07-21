@@ -3,6 +3,7 @@ package com.strikeprotocols.mobile.presentation.sign_in
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
@@ -16,7 +17,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -140,7 +143,8 @@ fun SignInScreen(
             onValueChange = viewModel::updateEmail,
             placeholder = stringResource(R.string.email_hint),
             keyboardType = KeyboardType.Email,
-            errorEnabled = state.emailErrorEnabled
+            errorEnabled = state.emailErrorEnabled,
+            showDoneAction = false
         )
         Spacer(modifier = Modifier.size(20.dp))
         SignInTextField(
@@ -152,9 +156,22 @@ fun SignInScreen(
             passwordVisibility = passwordVisibility.value,
             onDoneAction = viewModel::attemptLogin,
             errorEnabled = state.passwordErrorEnabled,
-            isPassword = true
+            isPassword = true,
+            showDoneAction = true
         )
-
+        Spacer(modifier = Modifier.size(12.dp))
+        Box(modifier = Modifier.fillMaxWidth()) {
+            Text(
+                modifier = Modifier
+                    .align(Alignment.CenterEnd)
+                    .clickable { navController.navigate(Screen.ResetPasswordRoute.route) }
+                    .padding(top = 12.dp, bottom = 24.dp),
+                text = stringResource(R.string.reset_password),
+                color = StrikePurple,
+                textAlign = TextAlign.End,
+                fontWeight = FontWeight.W400
+            )
+        }
         Spacer(modifier = Modifier.weight(6f))
         Button(
             modifier = Modifier

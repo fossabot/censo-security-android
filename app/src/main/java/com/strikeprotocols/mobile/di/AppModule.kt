@@ -38,9 +38,17 @@ object AppModule {
 
     @Provides
     @Singleton
+    fun provideAnchorService(): AnchorApiService {
+        return AnchorApiService.create()
+    }
+
+
+    @Provides
+    @Singleton
     fun provideUserRepository(
         authProvider: AuthProvider,
         api: BrooklynApiService,
+        anchorApiService: AnchorApiService,
         encryptionManager: EncryptionManager,
         securePreferences: SecurePreferences,
         phraseValidator: PhraseValidator
@@ -48,6 +56,7 @@ object AppModule {
         return UserRepositoryImpl(
             authProvider = authProvider,
             api = api,
+            anchorApiService = anchorApiService,
             encryptionManager = encryptionManager,
             securePreferences = securePreferences,
             phraseValidator = phraseValidator

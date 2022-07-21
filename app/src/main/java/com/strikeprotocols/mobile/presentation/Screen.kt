@@ -12,6 +12,8 @@ sealed class Screen(val route: String) {
         const val BIOMETRY_AVAILABLE_ARG = "biometry available"
     }
     object AccountRoute : Screen("account_screen")
+    object ResetPasswordRoute : Screen("reset_password_screen")
+
 
     fun buildScreenDeepLinkUri() = "$STRIKE_PROTOCOLS_URI${this.route}"
 

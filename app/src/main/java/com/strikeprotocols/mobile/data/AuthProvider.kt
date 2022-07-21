@@ -23,6 +23,7 @@ import com.strikeprotocols.mobile.data.OktaAuth.Companion.OKTA_EMAIL_KEY
 import kotlin.coroutines.suspendCoroutine
 import com.okta.oidc.results.Result as OktaResult
 
+
 interface AuthProvider {
 
     val isExpired: Boolean

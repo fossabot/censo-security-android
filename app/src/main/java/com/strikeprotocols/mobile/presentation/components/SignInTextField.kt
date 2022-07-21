@@ -34,6 +34,8 @@ fun SignInTextField(
     onPasswordClick: () -> Unit = { },
     passwordVisibility: Boolean = false,
     isPassword: Boolean = false,
+    showDoneAction: Boolean = false,
+    errorText: String = ""
 ) {
 
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -54,7 +56,7 @@ fun SignInTextField(
             },
             keyboardOptions = KeyboardOptions(
                 keyboardType = keyboardType,
-                imeAction = if (isPassword) ImeAction.Done else ImeAction.Next
+                imeAction = if (showDoneAction) ImeAction.Done else ImeAction.Next
             ),
             keyboardActions = KeyboardActions(
                 onDone = {
@@ -90,12 +92,21 @@ fun SignInTextField(
         )
 
         if(errorEnabled) {
-            val errorStringId =
-                if(isPassword) R.string.invalid_password_error else R.string.invalid_email_error
+
+            var errorMessage = errorText
+
+            if (errorMessage.isEmpty()) {
+                errorMessage =
+                    if (isPassword) {
+                        stringResource(R.string.invalid_password_error)
+                    } else {
+                        stringResource(R.string.invalid_email_error)
+                    }
+                }
 
             Spacer(modifier = Modifier.height(4.dp))
             Text(
-                text = stringResource(errorStringId),
+                text = errorMessage,
                 color = MaterialTheme.colors.error,
                 style = MaterialTheme.typography.caption,
                 modifier = Modifier.padding(start = 16.dp)

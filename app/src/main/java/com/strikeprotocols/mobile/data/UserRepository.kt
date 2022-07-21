@@ -25,6 +25,7 @@ interface UserRepository {
     suspend fun retrieveUserEmail(): String
     suspend fun saveUserEmail(email: String)
     suspend fun generatePhrase() : String
+    suspend fun resetPassword(email: String)
     suspend fun doesUserHaveValidLocalKey(
         verifyUser: VerifyUser,
         walletSigners: List<WalletSigner?>
@@ -34,6 +35,7 @@ interface UserRepository {
 class UserRepositoryImpl(
     private val authProvider: AuthProvider,
     private val api: BrooklynApiService,
+    private val anchorApiService: AnchorApiService,
     private val encryptionManager: EncryptionManager,
     private val securePreferences: SecurePreferences,
     private val phraseValidator: PhraseValidator
@@ -153,6 +155,10 @@ class UserRepositoryImpl(
     }
 
     override suspend fun generatePhrase(): String = encryptionManager.generatePhrase()
+
+    override suspend fun resetPassword(email: String) {
+        anchorApiService.recoverPassword(email)
+    }
 
     override suspend fun userLoggedIn() = SharedPrefsHelper.isUserLoggedIn()
     override suspend fun setUserLoggedIn() = SharedPrefsHelper.setUserLoggedIn(true)

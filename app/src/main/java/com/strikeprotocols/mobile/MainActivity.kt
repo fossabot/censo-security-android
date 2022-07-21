@@ -31,6 +31,7 @@ import com.strikeprotocols.mobile.presentation.approvals.ApprovalsViewModel
 import com.strikeprotocols.mobile.presentation.biometry_disabled.BiometryDisabledScreen
 import com.strikeprotocols.mobile.presentation.components.OnLifecycleEvent
 import com.strikeprotocols.mobile.presentation.contact_strike.ContactStrikeScreen
+import com.strikeprotocols.mobile.presentation.reset_password.ResetPasswordScreen
 import com.strikeprotocols.mobile.presentation.sign_in.SignInScreen
 import com.strikeprotocols.mobile.service.MessagingService.Companion.NOTIFICATION_DISPLAYED_KEY
 import com.strikeprotocols.mobile.ui.theme.BackgroundBlack
@@ -168,6 +169,11 @@ class MainActivity : FragmentActivity() {
                     navController = navController,
                     approvalsViewModel = approvalsViewModel
                 )
+            }
+            composable(
+                route = Screen.ResetPasswordRoute.route
+            ) {
+                ResetPasswordScreen(navController = navController)
             }
         }
     }
