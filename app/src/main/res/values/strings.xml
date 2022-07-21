@@ -198,7 +198,6 @@
     <string name="sign_out">Sign Out</string>
     <string name="app_version">App Version</string>
     <string name="done">Done</string>
-    <string name="user">User</string>
     <string name="get_help">Get Help</string>
     <string name="security_notice">SECURITY NOTICE:</string>
     <string name="security_message">To help protect your account\'s security Strike will never request any confidential information in regards to your account (such as password or secret recovery phrase).</string>
