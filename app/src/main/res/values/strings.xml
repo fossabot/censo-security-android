@@ -247,7 +247,7 @@
     <string name="next">Next</string>
     <string name="next_icon_content_desc">next icon</string>
 
-    <string name="saved_the_phrase"><![CDATA[I saved the recovery phrase ->]]></string>
+    <string name="saved_the_phrase">I saved the recovery phrase &#10132;</string>
     <string name="enter_word_number">Enter word #</string>
     <string name="enter_each_word_to_verify">Enter each word to verify you have the recovery phrase written down correctly</string>
     <string name="that_word_is_not_correct">That word is not correct.</string>
@@ -257,7 +257,7 @@
     <string name="failed_load_data">Unable to complete auth.\nPlease retry.</string>
     <string name="retry">Retry</string>
     <string name="finishing_auth">Finishing up auth…</string>
-    <string name="i_saved_key"><![CDATA[I saved the recovery phrase ->]]></string>
+    <string name="i_saved_key">I saved the recovery phrase &#10132;</string>
 
     <string name="reset_password">Forgot password?</string>
     <string name="retry_recover_password">Retry</string>

@@ -510,7 +510,9 @@ fun AuthFlowButton(
             .clip(RoundedCornerShape(8.dp)),
         onClick = onClick,
     ) {
-        Row() {
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
             if (imageVector != null) {
                 Icon(
                     imageVector = imageVector,
@@ -523,7 +525,8 @@ fun AuthFlowButton(
                 modifier = Modifier.padding(vertical = textPadding),
                 text = text,
                 fontSize = 18.sp,
-                color = StrikeWhite
+                color = StrikeWhite,
+                textAlign = TextAlign.Center
             )
         }
     }
