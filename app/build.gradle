@@ -79,7 +79,7 @@ android {
             minifyEnabled true
             buildConfigField "String", "BASE_URL", "\"https://brooklyn.strikeprotocols.com/\""
             buildConfigField "String", "ANCHOR_URL", "\"https://wallet.strikeprotocols.com/\""
-            buildConfigField "String", "SOLANA_URL", "\"https://solana-validator.strikeprotocols.com\""
+            buildConfigField "String", "SOLANA_URL", "\"https://api.mainnet-beta.solana.com\""
             buildConfigField "String", "SOLANA_COMMITMENT", "\"finalized\""
             buildConfigField "String", "OKTA_CLIENT_ID", "\"0oa7ajzug1y8O0CPe357\""
             buildConfigField "String", "OKTA_ISSUER_ID", "\"aus7834x2w3eqeZSr357\""
