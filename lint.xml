@@ -12,8 +12,14 @@
     <issue id="DuplicateStrings">
         <ignore path="**/strings.xml" />
     </issue>
+    <issue id="LogNotTimber">
+        <ignore path="**/StrikeLog.kt" />
+    </issue>
     <issue id="InvalidPackage">
         <ignore regexp="kotlinx.coroutines.debug.AgentPremain"/>
+    </issue>
+    <issue id="ConvertToWebp">
+        <ignore path="**/ic_launcher_round.png" />
     </issue>
     <issue id="VectorPath" severity="ignore"/>
 </lint>
