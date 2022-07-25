@@ -6,8 +6,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.Scaffold
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.ArrowBack
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -91,8 +89,8 @@ fun KeyRecoveryFlowUI(
                         allSetState = keyRecoveryState
                     )
                     else -> EntryScreenPhraseUI(
-                        title = stringResource(R.string.lets_recreate_key),
-                        subtitle = stringResource(R.string.how_would_you_enter),
+                        title = stringResource(R.string.time_to_restore_key),
+                        subtitle = stringResource(R.string.how_did_you_back_it_up),
                         buttonOneText = stringResource(R.string.paste_phrase),
                         buttonTwoText = stringResource(R.string.by_keyboard),
                         onExit = onExit,

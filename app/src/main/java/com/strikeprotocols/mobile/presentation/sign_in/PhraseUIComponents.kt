@@ -18,6 +18,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.NavigateBefore
 import androidx.compose.material.icons.filled.NavigateNext
+import androidx.compose.material.icons.outlined.AccountCircle
 import androidx.compose.material.icons.outlined.ContentCopy
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.runtime.*
@@ -102,29 +103,31 @@ fun EntryScreenPhraseUI(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(horizontal = 40.dp),
+            .padding(horizontal = 32.dp)
+            .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.SpaceAround
+        verticalArrangement = Arrangement.SpaceBetween
     ) {
-        Box(modifier = Modifier.fillMaxWidth()) {
-            IconButton(modifier = Modifier.align(Alignment.CenterEnd), onClick = onExit) {
+        Spacer(modifier = Modifier.weight(0.25f))
+        Box(modifier = Modifier
+            .fillMaxWidth()) {
+            IconButton(modifier = Modifier.align(Alignment.CenterStart), onClick = onExit) {
                 Icon(
-                    modifier = Modifier.size(36.dp),
-                    imageVector = Icons.Rounded.Close,
-                    contentDescription = stringResource(R.string.exit_flow),
+                    modifier = Modifier.size(32.dp),
+                    imageVector = Icons.Outlined.AccountCircle,
+                    contentDescription = stringResource(id = R.string.content_des_account_icon),
                     tint = StrikeWhite
                 )
             }
         }
-        Spacer(modifier = Modifier.height(56.dp))
+        Spacer(modifier = Modifier.weight(2.5f))
         Image(
             painter = painterResource(R.drawable.ic_key_auth),
-            contentDescription = "",
+            contentDescription = stringResource(R.string.key_icon_content_desc),
             colorFilter = ColorFilter.colorMatrix(matrix)
         )
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.weight(1.0f))
         Text(
-            modifier = Modifier.padding(horizontal = 12.dp),
             text = title,
             color = StrikeWhite,
             fontSize = 28.sp,
@@ -132,48 +135,50 @@ fun EntryScreenPhraseUI(
             textAlign = TextAlign.Center,
             letterSpacing = 0.23.sp
         )
-        Spacer(modifier = Modifier.height(72.dp))
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally
+        Spacer(modifier = Modifier.weight(0.8f))
+        Text(
+            text = subtitle,
+            color = StrikeWhite,
+            fontSize = 18.sp,
+            textAlign = TextAlign.Center,
+            letterSpacing = 0.23.sp
+        )
+        Spacer(modifier = Modifier.weight(0.8f))
+        AuthFlowButton(
+            text = buttonOneText,
+            textPadding = 1.dp
         ) {
-            Text(
-                text = subtitle,
-                color = StrikeWhite,
-                fontSize = 18.sp,
-                textAlign = TextAlign.Center,
-                letterSpacing = 0.23.sp
-            )
-            Spacer(modifier = Modifier.height(24.dp))
-            AuthFlowButton(text = buttonOneText, textPadding = 1.dp) {
-                if (creationFlow) {
-                    onPhraseFlowAction(
-                        PhraseFlowAction.ChangeCreationFlowStep(
-                            KeyCreationFlowStep.COPY_PHRASE_STEP
-                        )
+            if (creationFlow) {
+                onPhraseFlowAction(
+                    PhraseFlowAction.ChangeCreationFlowStep(
+                        KeyCreationFlowStep.COPY_PHRASE_STEP
                     )
-                } else {
-                    onPhraseFlowAction(
-                        PhraseFlowAction.ChangeRecoveryFlowStep(
-                            KeyRecoveryFlowStep.CONFIRM_KEY_ENTRY_STEP
-                        )
+                )
+            } else {
+                onPhraseFlowAction(
+                    PhraseFlowAction.ChangeRecoveryFlowStep(
+                        KeyRecoveryFlowStep.CONFIRM_KEY_ENTRY_STEP
                     )
-                }
-            }
-            Spacer(modifier = Modifier.height(18.dp))
-            AuthFlowButton(text = buttonTwoText, textPadding = 1.dp) {
-                if (creationFlow) {
-                    onPhraseFlowAction(PhraseFlowAction.LaunchManualKeyCreation)
-                } else {
-                    onPhraseFlowAction(
-                        PhraseFlowAction.ChangeRecoveryFlowStep(
-                            KeyRecoveryFlowStep.VERIFY_WORDS_STEP
-                        )
-                    )
-                    onNavigate()
-                }
+                )
             }
         }
-        Spacer(modifier = Modifier.height(56.dp))
+        Spacer(modifier = Modifier.weight(0.25f))
+        AuthFlowButton(
+            text = buttonTwoText,
+            textPadding = 1.dp
+        ) {
+            if (creationFlow) {
+                onPhraseFlowAction(PhraseFlowAction.LaunchManualKeyCreation)
+            } else {
+                onPhraseFlowAction(
+                    PhraseFlowAction.ChangeRecoveryFlowStep(
+                        KeyRecoveryFlowStep.VERIFY_WORDS_STEP
+                    )
+                )
+                onNavigate()
+            }
+        }
+        Spacer(modifier = Modifier.weight(1.5f))
     }
 }
 

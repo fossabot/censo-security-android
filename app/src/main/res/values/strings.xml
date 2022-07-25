@@ -203,7 +203,7 @@
 
     <string name="start_over">Start over</string>
     <string name="copy_key">Copy Recovery Phrase</string>
-    <string name="phrase_generated">Your secret recovery phrase has been generated</string>
+    <string name="phrase_generated">It\'s time to back up your secret recovery phrase</string>
     <string name="how_would_you_save_it">How would you like to save it?</string>
     <string name="password_manager">Password Manager</string>
     <string name="pen_and_paper">Pen and Paper</string>
@@ -224,13 +224,12 @@
     <string name="continue_to_strike">Continue to Strike</string>
     <string name="recreate_key_phrase">Paste Private Key</string>
     <string name="paste_phrase">Paste Phrase</string>
-    <string name="how_would_you_enter">How would you like to enter it?</string>
-    <string name="lets_recreate_key">Let\'s recreate your private key</string>
+    <string name="how_did_you_back_it_up">How did you back it up?</string>
+    <string name="time_to_restore_key">It\'s time to restore your private key using your secret recovery phrase</string>
     <string name="by_keyboard">Enter With Keyboard</string>
 
     <string name="write_each_word_down">Write each word down\nin order</string>
     <string name="showing_of_words">Showing %1$s - %2$s of 24</string>
-    <string name="exit_flow">exit flow</string>
     <string name="phrase_words_empty">Phrase words were not generated, please start over and try again</string>
 
     <string name="previous">Previous</string>
@@ -260,5 +259,6 @@
     <string name="vault">Vault</string>
     <string name="update_biometric_settings">Unable to open biometry settings. Please open device settings.</string>
     <string name="default_error_message">Unable to retrieve data.\n\nPlease make sure you are connected to internet and try again.</string>
+    <string name="key_icon_content_desc">key image</string>
 
 </resources>
