@@ -304,7 +304,6 @@ fun ConfirmKeyUI(
     errorEnabled: Boolean = false,
     pastedPhrase: String,
     verifyPastedPhrase: (String) -> Unit,
-    onNavigate: () -> Unit,
     header: String,
     title: String,
     message: String,
@@ -312,22 +311,22 @@ fun ConfirmKeyUI(
     Column(
         modifier = Modifier
             .fillMaxWidth()
+            .verticalScroll(rememberScrollState())
             .padding(horizontal = 20.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Top
     ) {
         Spacer(modifier = Modifier.height(24.dp))
         Text(
-            modifier = Modifier.clickable { onNavigate() },
             text = header,
             color = StrikeWhite,
-            fontSize = 22.sp,
+            fontSize = 28.sp,
             fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Center,
             letterSpacing = 0.23.sp
         )
-        Spacer(modifier = Modifier.height(36.dp))
-        if(title.isNotEmpty()) {
+        if (title.isNotEmpty()) {
+            Spacer(modifier = Modifier.height(30.dp))
             Text(
                 text = title,
                 color = StrikeWhite,
@@ -335,22 +334,23 @@ fun ConfirmKeyUI(
                 textAlign = TextAlign.Center,
                 letterSpacing = 0.23.sp
             )
-            Spacer(modifier = Modifier.height(12.dp))
         }
+        Spacer(modifier = Modifier.height(30.dp))
         Text(
+            modifier = Modifier.padding(horizontal = 24.dp),
             text = message,
             color = StrikeWhite,
             fontSize = 18.sp,
             textAlign = TextAlign.Center,
             letterSpacing = 0.23.sp
         )
-        Spacer(modifier = Modifier.height(44.dp))
+        Spacer(modifier = Modifier.height(50.dp))
         OutlinedTextField(
             enabled = true,
             shape = RoundedCornerShape(8.dp),
             visualTransformation = PasswordVisualTransformation(),
             modifier = Modifier
-                .background(color = Color.Black)
+                .background(color = Color.Black, shape = RoundedCornerShape(8.dp))
                 .fillMaxWidth(),
             colors = TextFieldDefaults.outlinedTextFieldColors(
                 focusedBorderColor = if (errorEnabled) Color.Red else StrikePurple,

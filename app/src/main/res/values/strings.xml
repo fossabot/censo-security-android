@@ -211,18 +211,14 @@
     <string name="copy_key_message">Copy your recovery phrase to\nyour clipboard</string>
     <string name="copied_to_clipboard">Copied to your clipboard!\n\nPaste the recovery phrase in your Password Manager and come back here when it\'s saved</string>
     <string name="enter_key_title">We\'ve cleared your clipboard.</string>
-    <string name="enter_key_message">Open your password manager, copy your secret recovery phrase, and paste it here.</string>
+    <string name="enter_key_message">Open your password manager, copy your recovery phrase, and paste it here.</string>
     <string name="key_not_valid_title">Uh oh. That phrase is not correct.</string>
     <string name="key_not_valid_message">You can try again or go back to copy your phrase.</string>
 
-    <string name="phrase_enter_key_message">Open your password manager, copy your private key, and paste it here.</string>
-    <string name="phrase_key_not_valid_title">Uh oh. That key is not correct.</string>
-    <string name="phrase_key_not_valid_message">You can try again, or contact Strike if you can not recreate it.</string>
-
-    <string name="confirm_private_key">Confirm secret recovery phrase</string>
+    <string name="confirm_recovery_phrase">Confirm recovery phrase</string>
     <string name="all_set">You\'re all set.</string>
     <string name="continue_to_strike">Continue to Strike</string>
-    <string name="recreate_key_phrase">Paste Private Key</string>
+    <string name="confirm_recovery_phrase_header">Confirm recovery phrase</string>
     <string name="paste_phrase">Paste Phrase</string>
     <string name="how_did_you_back_it_up">How did you back it up?</string>
     <string name="time_to_restore_key">It\'s time to restore your private key using your secret recovery phrase</string>

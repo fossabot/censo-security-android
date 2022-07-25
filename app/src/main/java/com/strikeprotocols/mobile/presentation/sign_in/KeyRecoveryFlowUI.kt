@@ -68,20 +68,18 @@ fun KeyRecoveryFlowUI(
                         pastedPhrase = pastedPhrase,
                         errorEnabled = false,
                         verifyPastedPhrase = verifyPastedPhrase,
-                        onNavigate = onNavigate,
-                        header = stringResource(R.string.recreate_key_phrase),
+                        header = stringResource(R.string.confirm_recovery_phrase_header),
                         title = "",
-                        message = stringResource(R.string.phrase_enter_key_message)
+                        message = stringResource(R.string.enter_key_message)
                     )
 
                     KeyRecoveryFlowStep.CONFIRM_KEY_ERROR_STEP -> ConfirmKeyUI(
                         pastedPhrase = pastedPhrase,
                         errorEnabled = true,
                         verifyPastedPhrase = verifyPastedPhrase,
-                        onNavigate = onNavigate,
-                        header = stringResource(R.string.recreate_key_phrase),
-                        title = stringResource(R.string.phrase_key_not_valid_title),
-                        message = stringResource(R.string.phrase_key_not_valid_message)
+                        header = stringResource(R.string.confirm_recovery_phrase_header),
+                        title = stringResource(R.string.key_not_valid_title),
+                        message = stringResource(R.string.key_not_valid_message)
                     )
                     KeyRecoveryFlowStep.ALL_SET_STEP -> AllSetUI(
                         onNavigate = onNavigate,

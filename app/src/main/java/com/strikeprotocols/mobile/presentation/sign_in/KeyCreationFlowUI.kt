@@ -4,8 +4,6 @@ import android.annotation.SuppressLint
 import android.content.Context
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.ArrowBack
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -106,8 +104,7 @@ fun KeyCreationFlowUI(
                         pastedPhrase = pastedPhrase,
                         errorEnabled = false,
                         verifyPastedPhrase = verifyPastedPhrase,
-                        onNavigate = onNavigate,
-                        header = stringResource(R.string.confirm_private_key),
+                        header = stringResource(R.string.confirm_recovery_phrase),
                         title = stringResource(R.string.enter_key_title),
                         message = stringResource(R.string.enter_key_message)
                     )
@@ -115,8 +112,7 @@ fun KeyCreationFlowUI(
                         pastedPhrase = pastedPhrase,
                         errorEnabled = true,
                         verifyPastedPhrase = verifyPastedPhrase,
-                        onNavigate = onNavigate,
-                        header = stringResource(R.string.confirm_private_key),
+                        header = stringResource(R.string.confirm_recovery_phrase),
                         title = stringResource(R.string.key_not_valid_title),
                         message = stringResource(R.string.key_not_valid_message)
                     )
