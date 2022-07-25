@@ -21,6 +21,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.raygun.raygun4android.RaygunClient
 import com.strikeprotocols.mobile.common.BiometricUtil
+import com.strikeprotocols.mobile.common.CrashReportingUtil
+import com.strikeprotocols.mobile.common.strikeLog
 import com.strikeprotocols.mobile.data.*
 import com.strikeprotocols.mobile.data.models.approval.WalletApproval
 import com.strikeprotocols.mobile.presentation.Screen
@@ -194,14 +196,32 @@ class MainActivity : FragmentActivity() {
 
     override fun onResume() {
         super.onResume()
-        val intentFilter = IntentFilter()
-        intentFilter.addAction(BuildConfig.APPLICATION_ID)
-        registerReceiver(notificationDisplayedBroadcastReceiver, intentFilter)
+        try {
+            val intentFilter = IntentFilter()
+            intentFilter.addAction(BuildConfig.APPLICATION_ID)
+            registerReceiver(notificationDisplayedBroadcastReceiver, intentFilter)
+        } catch (e: Exception) {
+            RaygunClient.send(
+                e, listOf(
+                    CrashReportingUtil.BROADCAST_RECEIVER_TAG,
+                    CrashReportingUtil.MANUALLY_REPORTED_TAG,
+                )
+            )
+        }
     }
 
-    override fun onStop() {
-        super.onStop()
-        unregisterReceiver(notificationDisplayedBroadcastReceiver)
+    override fun onPause() {
+        super.onPause()
+        try {
+            unregisterReceiver(notificationDisplayedBroadcastReceiver)
+        } catch (e: Exception) {
+            RaygunClient.send(
+                e, listOf(
+                    CrashReportingUtil.BROADCAST_RECEIVER_TAG,
+                    CrashReportingUtil.MANUALLY_REPORTED_TAG,
+                )
+            )
+        }
     }
 
     override fun onDestroy() {
