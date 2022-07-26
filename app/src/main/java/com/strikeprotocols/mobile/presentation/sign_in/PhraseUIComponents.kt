@@ -15,7 +15,6 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.material.TextFieldDefaults.TextFieldDecorationBox
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.NavigateBefore
 import androidx.compose.material.icons.filled.NavigateNext
 import androidx.compose.material.icons.outlined.AccountCircle
@@ -440,71 +439,56 @@ fun AllSetUI(
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(60.dp),
-                        color = StrikeWhite,
-                        strokeWidth = 5.dp,
-                    )
-                    Spacer(modifier = Modifier.height(24.dp))
-                    Text(
-                        text = stringResource(R.string.finishing_auth),
-                        color = StrikeWhite,
-                        fontSize = 20.sp
-                    )
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp)
+                            .border(width = 1.5.dp, color = UnfocusedGrey.copy(alpha = 0.50f))
+                            .background(color = Color.Black)
+                            .zIndex(2.5f),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Spacer(modifier = Modifier.height(36.dp))
+                        Text(
+                            modifier = Modifier.padding(horizontal = 8.dp),
+                            text = stringResource(R.string.registering_key_auth),
+                            textAlign = TextAlign.Center,
+                            color = StrikeWhite,
+                            fontSize = 16.sp
+                        )
+                        Spacer(modifier = Modifier.height(36.dp))
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(20.dp),
+                            color = StrikeWhite,
+                            strokeWidth = 2.5.dp,
+                        )
+                        Spacer(modifier = Modifier.height(36.dp))
+                    }
                 }
             }
             is Resource.Error -> {
                 Column(
                     modifier = Modifier.align(Alignment.Center),
+                    verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Box(
-                        contentAlignment = Alignment.Center,
-                        modifier = Modifier
-                            .background(color = DetailDenyRed, shape = CircleShape)
-                            .padding(15.dp)
-                            .layout() { measurable, constraints ->
-                                // Measure the composable
-                                val placeable = measurable.measure(constraints)
-
-                                //get the current max dimension to assign width=height
-                                val currentHeight = placeable.height
-                                var heightCircle = currentHeight
-                                if (placeable.width > heightCircle)
-                                    heightCircle = placeable.width
-
-                                //assign the dimension and the center position
-                                layout(heightCircle, heightCircle) {
-                                    // Where the composable gets placed
-                                    placeable.placeRelative(0, (heightCircle - currentHeight) / 2)
-                                }
-                            }
-                    ) {
-                        Icon(
-                            imageVector = Icons.Filled.Close,
-                            contentDescription = stringResource(R.string.clear),
-                            tint = StrikeWhite
-                        )
-                    }
-                    Spacer(modifier = Modifier.height(32.dp))
                     Text(
-                        text = stringResource(R.string.failed_load_data),
+                        text = stringResource(R.string.something_went_wrong),
                         color = StrikeWhite,
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Bold,
+                        fontSize = 16.sp,
                         textAlign = TextAlign.Center,
                         letterSpacing = 0.23.sp,
                         lineHeight = 32.sp
                     )
-                }
-                AuthFlowButton(
-                    modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .padding(bottom = 56.dp),
-                    text = stringResource(R.string.retry),
-                    textPadding = 4.dp
-                ) {
-                    retry()
+                    Spacer(modifier = Modifier.height(24.dp))
+                    SmallAuthFlowButton(
+                        modifier = Modifier.wrapContentWidth(),
+                        text = stringResource(R.string.retry),
+                        textPadding = 4.dp
+                    ) {
+                        retry()
+                    }
                 }
             }
         }
@@ -536,6 +520,32 @@ fun AuthFlowButton(
                 )
                 Spacer(modifier = Modifier.width(24.dp))
             }
+            Text(
+                modifier = Modifier.padding(vertical = textPadding),
+                text = text,
+                fontSize = 18.sp,
+                color = StrikeWhite,
+                textAlign = TextAlign.Center
+            )
+        }
+    }
+}
+
+@Composable
+fun SmallAuthFlowButton(
+    modifier: Modifier = Modifier,
+    textPadding: Dp = 0.dp,
+    text: String,
+    onClick: () -> Unit
+) {
+    Button(
+        modifier = modifier
+            .clip(RoundedCornerShape(8.dp)),
+        onClick = onClick,
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
             Text(
                 modifier = Modifier.padding(vertical = textPadding),
                 text = text,

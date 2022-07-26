@@ -240,9 +240,9 @@
     <string name="verify_phrase">Verify recovery phrase</string>
     <string name="do_not_leave_text_field_empty">Please do not leave the text field empty when submitting a word</string>
     <string name="key_recovery_failed">Key recovery failed</string>
-    <string name="failed_load_data">Unable to complete auth.\nPlease retry.</string>
+    <string name="something_went_wrong">Something went wrong</string>
     <string name="retry">Retry</string>
-    <string name="finishing_auth">Finishing up auth…</string>
+    <string name="registering_key_auth">Registering your key with Strike…</string>
     <string name="i_saved_key">I saved the recovery phrase &#10132;</string>
 
     <string name="reset_password">Forgot password?</string>
