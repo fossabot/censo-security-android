@@ -36,9 +36,7 @@ fun UnknownApprovalItem(
     ) {
         ApprovalItemHeader(
             timeRemainingInSeconds = timeRemainingInSeconds,
-            approvalImageVector = accountRowMetaData.approvalImageVector,
-            approvalImageContentDescription = accountRowMetaData.approvalImageContentDescription,
-            approvalType = accountRowMetaData.approvalTypeTitle
+            vaultName = null
         )
 
         Text(

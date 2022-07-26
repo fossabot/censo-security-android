@@ -26,6 +26,14 @@ fun String.toWalletName(): String {
     return "$this Wallet"
 }
 
+fun String.toVaultName(context: Context): String {
+    if (this.lowercase().endsWith("vault")) {
+        return this
+    }
+
+    return "$this ${context.getString(R.string.vault)}"
+}
+
 fun String.convertPublicKeyToDisplayText(): String {
     if (this.length <= 9) {
         return ""

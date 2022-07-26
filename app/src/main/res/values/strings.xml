@@ -31,6 +31,8 @@
     <string name="expires_in">Expires in</string>
     <string name="content_des_back_icon">Back Icon</string>
     <string name="requested_by">Initiated By</string>
+    <string name="invited_by">Invited By</string>
+    <string name="invited_by_email">Invited By Email</string>
     <string name="no_more_approvals_needed">No more approvals needed</string>
     <string name="more_approval_needed">more approval needed</string>
     <string name="more_approvals_needed">more approvals needed</string>
@@ -60,7 +62,6 @@
 
     <string name="update_strike_mobile">Update Strike Mobile…</string>
     <string name="unknown_approval_tip">You have an unknown approval request. Please update this app to see the request details</string>
-    <string name="approval_type_unknown_content_des">Unknown Request Icon</string>
     <string name="unknown_dialog_message">an unknown approval request</string>
     <string name="a_transfer_of_dialog_message">a transfer of</string>
     <string name="a_conversion_of_dialog_message">a conversion of</string>
@@ -90,17 +91,11 @@
     <string name="stake_account_creation_dialog_title">Stake Wallet Creation</string>
     <string name="dapp_transaction_dialog_title">dApp Transaction</string>
     <string name="login_approval_dialog_title">Login Approval</string>
-    <string name="approval_type_dapp_content_des">DApp Transaction Icon</string>
     <string name="arrow_forward_content_des">Arrow Forward Icon</string>
     <string name="arrow_back_content_des">Arrow Back Icon</string>
 
-    <string name="signers_update_icon_content_desc">Signers Update Icon</string>
     <string name="balance_account_title">Balance Account</string>
-    <string name="stake_account_title">Stake Account</string>
-    <string name="balance_account_creation_icon_content_desc">balance account creation icon</string>
-    <string name="conversion_icon_desc">Conversion Icon</string>
-    <string name="login_icon_content_desc">Login Icon</string>
-    <string name="transfer_icon_content_desc">Transfer Icon</string>
+    <string name="stake_account_title">Stake Account</string>\
     <string name="not_applicable">N/A</string>
 
     <string name="usd_equivalent">USD equivalent</string>
@@ -134,13 +129,6 @@
 
     <string name="wallet_signers_fail_title">Unable To Retrieve User Wallet</string>
     <string name="wallet_signers_fail_message">We were unable to retrieve user wallet details to complete login.\n\nPlease try again.</string>
-
-    <string name="wallet_change">Wallet Change</string>
-    <string name="user_change">User Change</string>
-    <string name="administration_change">Administration Change</string>
-    <string name="address_book_change">Address Book Change</string>
-    <string name="authentication">Authentication</string>
-    <string name="unknown">Unknown</string>
 
     <string name="add_address_book_update_approval_header">Add Address</string>
     <string name="remove_address_book_update_approval_header">Remove Address</string>
@@ -203,9 +191,9 @@
     <string name="security_message">To help protect your account\'s security Strike will never request any confidential information in regards to your account (such as password or secret recovery phrase).</string>
     <string name="email">Email</string>
 
-    <string name="accept_vault_invitation_approval_header">Accept Vault Invitation</string>
-    <string name="accept_vault_invitation_dialog_title">Accept Vault Invitation</string>
-    <string name="accept_vault_invitation_dialog_message">accept vault invitation</string>
+    <string name="accept_vault_invitation_approval_header">Accept Invitation</string>
+    <string name="accept_vault_invitation_dialog_title">Accept Invitation</string>
+    <string name="accept_vault_invitation_dialog_message">accept invitation</string>
     <string name="vault_name">Vault Name</string>
     <string name="clear">Clear</string>
 
@@ -266,5 +254,6 @@
     <string name="sign_in_subtitle">Sign in with the account you\ncreated on the web</string>
     <string name="back">back</string>
     <string name="user">User</string>
+    <string name="vault">Vault</string>
 
 </resources>

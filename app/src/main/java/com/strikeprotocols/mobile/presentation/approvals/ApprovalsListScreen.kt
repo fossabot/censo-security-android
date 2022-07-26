@@ -288,7 +288,7 @@ fun ApprovalsList(
 
                     walletApproval?.let { safeApproval ->
                         val type = safeApproval.getSolanaApprovalRequestType()
-                        val rowMetaData = type.getApprovalRowMetaData(LocalContext.current)
+                        val rowMetaData = type.getApprovalRowMetaData(safeApproval.vaultName?.toVaultName(context))
 
                         val calculatedTimerSecondsLeft = getSecondsLeftUntilCountdownIsOver(safeApproval.submitDate, safeApproval.approvalTimeoutInSeconds)
                         val timeRemainingInSeconds = if (shouldRefreshTimers) calculatedTimerSecondsLeft else calculatedTimerSecondsLeft

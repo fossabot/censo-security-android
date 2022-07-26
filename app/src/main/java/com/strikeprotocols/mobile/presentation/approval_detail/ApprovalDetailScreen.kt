@@ -31,6 +31,7 @@ import com.strikeprotocols.mobile.common.*
 import com.strikeprotocols.mobile.common.BiometricUtil.createBioPrompt
 import com.strikeprotocols.mobile.common.BiometricUtil.getBasicBiometricPromptBuilder
 import com.strikeprotocols.mobile.data.models.ApprovalDisposition
+import com.strikeprotocols.mobile.data.models.approval.SolanaApprovalRequestType
 import com.strikeprotocols.mobile.data.models.approval.WalletApproval
 import com.strikeprotocols.mobile.presentation.approvals.ApprovalsViewModel
 import com.strikeprotocols.mobile.presentation.approvals.approval_type_row_items.getApprovalTypeDialogTitle
@@ -257,7 +258,7 @@ fun ApprovalDetails(
                 .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            approval?.let { safeApproval ->
+            val requestType = approval?.let { safeApproval ->
                 val type = safeApproval.getSolanaApprovalRequestType()
 
                 //Defensive coding,
@@ -265,6 +266,7 @@ fun ApprovalDetails(
                 if (type != UnknownApprovalType) {
                     ApprovalDetailContent(approval = safeApproval, type = type)
                 }
+                type
             }
 
             val expiresInText = getApprovalTimerText(
@@ -274,11 +276,13 @@ fun ApprovalDetails(
 
             ApprovalStatus(
                 requestedBy = approval?.submitterEmail ?: "",
+                requestedByName = approval?.submitterName ?: "",
                 approvalsReceived = approval?.numberOfApprovalsReceived ?: 0,
                 totalApprovals = approval?.numberOfDispositionsRequired ?: 0,
                 denialsReceived = approval?.numberOfDeniesReceived ?: 0,
                 expiresIn = expiresInText,
-                vaultName = approval?.vaultName
+                vaultName = approval?.vaultName,
+                requestType = requestType
             )
             Spacer(modifier = Modifier.height(28.dp))
 
@@ -314,22 +318,36 @@ fun ApprovalDetails(
 @Composable
 fun ApprovalStatus(
     requestedBy: String,
+    requestedByName: String,
     approvalsReceived: Int,
     totalApprovals: Int,
     denialsReceived: Int,
     expiresIn: String?,
-    vaultName: String?
+    vaultName: String?,
+    requestType: SolanaApprovalRequestType?
 ) {
 
-    val facts = listOfNotNull(
-        vaultName?.let { Pair(stringResource(R.string.vault_name), vaultName) },
-        Pair(stringResource(R.string.requested_by), requestedBy),
-        Pair(stringResource(R.string.approvals_received), "$approvalsReceived ${stringResource(id = R.string.of)} $totalApprovals"),
-        Pair(stringResource(R.string.denials_received), "$denialsReceived ${stringResource(id = R.string.of)} $totalApprovals"),
-        expiresIn?.let { Pair(stringResource(R.string.expires_in), expiresIn) }
-    )
+    val facts = mutableListOf<Pair<String, String>>()
+    vaultName?.let { facts.add(Pair(stringResource(R.string.vault_name), vaultName)) }
+    val sectionTitle = if (requestType is AcceptVaultInvitation) {
+        facts.add(Pair(stringResource(R.string.invited_by), requestedByName))
+        facts.add(Pair(stringResource(R.string.invited_by_email), requestedBy))
+        ""
+    } else {
+        facts.add(Pair(stringResource(R.string.requested_by), requestedBy))
+        facts.add(Pair(
+            stringResource(R.string.approvals_received),
+            "$approvalsReceived ${stringResource(id = R.string.of)} $totalApprovals"
+        ))
+        facts.add(Pair(
+            stringResource(R.string.denials_received),
+            "$denialsReceived ${stringResource(id = R.string.of)} $totalApprovals"
+        ))
+        stringResource(R.string.status)
+    }
+    expiresIn?.let { facts.add(Pair(stringResource(R.string.expires_in), expiresIn))  }
     
-    val factsData = FactsData(title = stringResource(R.string.status), facts = facts)
+    val factsData = FactsData(title = sectionTitle, facts = facts.toList())
     
     FactRow(factsData = factsData)
 }

@@ -31,9 +31,7 @@ fun ApprovalRowItem(
     ) {
         ApprovalItemHeader(
             timeRemainingInSeconds = timeRemainingInSeconds,
-            approvalImageVector = rowMetaData.approvalImageVector,
-            approvalImageContentDescription = rowMetaData.approvalImageContentDescription,
-            approvalType = rowMetaData.approvalTypeTitle
+            vaultName = rowMetaData.vaultName
         )
         content()
         ApprovalButtonRow(
@@ -45,7 +43,5 @@ fun ApprovalRowItem(
 }
 
 data class ApprovalRowMetaData(
-    val approvalImageVector : ImageVector,
-    val approvalImageContentDescription : String,
-    val approvalTypeTitle : String
+    val vaultName : String?
 )

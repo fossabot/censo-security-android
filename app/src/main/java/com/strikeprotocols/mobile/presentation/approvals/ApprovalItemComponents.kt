@@ -20,15 +20,12 @@ import com.strikeprotocols.mobile.data.models.approval.WalletApproval
 import com.strikeprotocols.mobile.presentation.approval_detail.approval_type_detail_items.*
 import com.strikeprotocols.mobile.presentation.approvals.approval_type_row_items.*
 import com.strikeprotocols.mobile.ui.theme.*
-import java.util.*
 
 
 @Composable
 fun ApprovalItemHeader(
     timeRemainingInSeconds: Long?,
-    approvalImageVector: ImageVector,
-    approvalImageContentDescription: String,
-    approvalType: String
+    vaultName: String?
 ) {
     Row(
         modifier = Modifier
@@ -38,11 +35,9 @@ fun ApprovalItemHeader(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        ApprovalType(
+        VaultTitle(
             modifier = Modifier.weight(7.5f),
-            approvalImageVector = approvalImageVector,
-            approvalImageContentDescription = approvalImageContentDescription,
-            approvalType = approvalType
+            vaultName = vaultName ?: ""
         )
 
         convertSecondsIntoCountdownText(LocalContext.current, timeRemainingInSeconds)?.let { timerText ->
@@ -130,25 +125,17 @@ fun ApprovalButtonRow(
 
 
 @Composable
-fun ApprovalType(
-    approvalImageVector: ImageVector,
-    approvalImageContentDescription: String,
-    approvalType: String,
+fun VaultTitle(
+    vaultName: String,
     modifier: Modifier = Modifier
 ) {
     Row(
         modifier = modifier,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Icon(
-            modifier = Modifier.padding(end = 2.dp),
-            imageVector = approvalImageVector,
-            tint = StrikeWhite,
-            contentDescription = approvalImageContentDescription
-        )
         Text(
             modifier = Modifier.padding(start = 2.dp),
-            text = approvalType.uppercase(Locale.getDefault()),
+            text = vaultName,
             color = StrikeWhite
         )
     }
