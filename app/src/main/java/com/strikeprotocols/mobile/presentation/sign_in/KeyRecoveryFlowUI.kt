@@ -27,8 +27,10 @@ fun KeyRecoveryFlowUI(
     wordInput: String,
     wordInputChange: (String) -> Unit,
     wordVerificationErrorEnabled: Boolean,
+    navigatePreviousWord: () -> Unit,
+    navigateNextWord: () -> Unit,
     retryKeyRecovery: () -> Unit,
-    onSubmitWord: (Context) -> Unit,
+    onSubmitWord: (String) -> Unit,
     keyRecoveryState: Resource<Boolean>
 ) {
     val screenTitle = when (keyRecoveryFlowStep) {
@@ -62,7 +64,10 @@ fun KeyRecoveryFlowUI(
                         value = wordInput,
                         onValueChanged = wordInputChange,
                         onSubmitWord = onSubmitWord,
-                        errorEnabled = wordVerificationErrorEnabled
+                        onPreviousWordNavigate = navigatePreviousWord,
+                        onNextWordNavigate = navigateNextWord,
+                        errorEnabled = wordVerificationErrorEnabled,
+                        isCreationFlow = false
                     )
                     KeyRecoveryFlowStep.CONFIRM_KEY_ENTRY_STEP -> ConfirmKeyUI(
                         pastedPhrase = pastedPhrase,

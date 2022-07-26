@@ -232,10 +232,12 @@
     <string name="previous_icon_content_desc">previous icon</string>
     <string name="next">Next</string>
     <string name="next_icon_content_desc">next icon</string>
+    <string name="finish">Finish</string>
+    <string name="finish_icon_content_desc">finish icon</string>
 
     <string name="saved_the_phrase">I saved the recovery phrase &#10132;</string>
     <string name="enter_word_number">Enter word #</string>
-    <string name="enter_each_word_to_verify">Enter each word to verify you have the recovery phrase written down correctly</string>
+    <string name="enter_each_word_to_verify">Enter each word of your recovery phrase to restore your key</string>
     <string name="that_word_is_not_correct">That word is not correct.</string>
     <string name="verify_phrase">Verify recovery phrase</string>
     <string name="do_not_leave_text_field_empty">Please do not leave the text field empty when submitting a word</string>

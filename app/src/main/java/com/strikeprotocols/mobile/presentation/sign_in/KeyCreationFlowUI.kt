@@ -28,7 +28,7 @@ fun KeyCreationFlowUI(
     wordInputChange: (String) -> Unit,
     wordVerificationErrorEnabled: Boolean,
     retryKeyCreation: () -> Unit,
-    onSubmitWord: (Context) -> Unit,
+    onSubmitWord: (String) -> Unit,
     keyCreationState: Resource<Boolean>
 ) {
 
@@ -97,7 +97,10 @@ fun KeyCreationFlowUI(
                             value = wordInput,
                             onValueChanged = wordInputChange,
                             errorEnabled = wordVerificationErrorEnabled,
-                            onSubmitWord = onSubmitWord
+                            onSubmitWord = onSubmitWord,
+                            onPreviousWordNavigate = {},
+                            onNextWordNavigate = {},
+                            isCreationFlow = true
                         )
                     }
                     KeyCreationFlowStep.CONFIRM_KEY_ENTRY_STEP -> ConfirmKeyUI(

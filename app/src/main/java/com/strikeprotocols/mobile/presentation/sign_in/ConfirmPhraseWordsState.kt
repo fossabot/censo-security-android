@@ -17,6 +17,7 @@ data class ConfirmPhraseWordsState(
         const val DEFAULT_WORD_INDEX = -1
         const val DEFAULT_WORDS_VERIFIED = 0
 
+        const val PHRASE_WORD_FIRST_INDEX = 0
         const val PHRASE_WORD_SECOND_TO_LAST_INDEX = 23
         const val PHRASE_WORD_COUNT = 24
     }

@@ -294,9 +294,11 @@ fun SignInScreen(
                 wordInput = state.confirmPhraseWordsState.wordInput,
                 wordInputChange = viewModel::updateWordInput,
                 wordVerificationErrorEnabled = state.confirmPhraseWordsState.errorEnabled,
+                navigatePreviousWord = viewModel::navigatePreviousWord,
+                navigateNextWord = viewModel::navigateNextWord,
                 onSubmitWord = viewModel::submitWordInput,
                 keyRecoveryState = state.finalizingKeyRecovery,
-                retryKeyRecovery = viewModel::retryKeyRecoveryFromPhrase
+                retryKeyRecovery = viewModel::retryKeyRecoveryFromPhrase,
             )
         }
     }

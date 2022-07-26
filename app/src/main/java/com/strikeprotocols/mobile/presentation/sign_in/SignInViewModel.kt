@@ -67,8 +67,25 @@ class SignInViewModel @Inject constructor(
         }
     }
 
-    fun submitWordInput(context: Context) {
-        handleWordSubmitted(context = context)
+    fun submitWordInput(errorMessage: String) {
+        handleWordSubmitted(errorMessage = errorMessage)
+    }
+
+    fun navigatePreviousWord() {
+        if (state.confirmPhraseWordsState.wordIndex == 0) {
+            return
+        }
+
+        handlePreviousWordNavigationRecoveryFlow()
+    }
+
+    //Navigate to next word should also act as a submitWord
+    fun navigateNextWord() {
+        if (state.confirmPhraseWordsState.wordInput.isEmpty() || state.confirmPhraseWordsState.wordInput.isBlank()) {
+            return
+        }
+
+        addWordInputToRecoveryPhraseWords(word = state.confirmPhraseWordsState.wordInput, index = state.confirmPhraseWordsState.wordIndex)
     }
     //endregion
 
@@ -627,12 +644,12 @@ class SignInViewModel @Inject constructor(
         return IndexedPhraseWord(wordIndex = index, wordValue = phraseWord)
     }
 
-    private fun handleWordSubmitted(context: Context) {
+    private fun handleWordSubmitted(errorMessage: String) {
         val word = state.confirmPhraseWordsState.wordInput.trim()
         val index = state.confirmPhraseWordsState.wordIndex
 
         if (word.isEmpty()) {
-            state = state.copy(showToast = Resource.Success(context.getString(R.string.do_not_leave_text_field_empty)))
+            state = state.copy(showToast = Resource.Success(errorMessage))
             return
         } else {
 
@@ -670,6 +687,20 @@ class SignInViewModel @Inject constructor(
 
     private fun addWordInputToRecoveryPhraseWords(word: String, index: Int) {
         val words = state.confirmPhraseWordsState.words.toMutableList()
+
+        //Check to see if we are dealing with a previously submitted word
+        if (words.size > index) {
+            if (words[index] == word) {
+                getNextWordToDisplay(index = index)
+                return
+            } else {
+                replacePreviouslySubmittedWordWithEditedInput(editedWordInput = word, index = index)
+                return
+            }
+        }
+
+        //If we are not dealing with a previously submitted word,
+        // then accept the new word and move forward
         words.add(index = index, element = word)
 
         state = state.copy(
@@ -686,17 +717,87 @@ class SignInViewModel @Inject constructor(
         }
     }
 
+    //region Word navigation recovery flow
+    private fun getNextWordToDisplay(index: Int) {
+        val words = state.confirmPhraseWordsState.words.toMutableList()
+
+        val wordInput = getNextWordInput(words, index)
+
+        state = state.copy(
+            confirmPhraseWordsState = state.confirmPhraseWordsState.copy(
+                wordIndex = index + 1,//Increment by one
+                wordInput = wordInput,
+                errorEnabled = false
+            )
+        )
+    }
+
+    private fun replacePreviouslySubmittedWordWithEditedInput(editedWordInput: String, index: Int) {
+        val words = state.confirmPhraseWordsState.words.toMutableList()
+        //Replace the old word with the edited word
+        words.set(index = index, element = editedWordInput)
+
+        val wordInput = getNextWordInput(words, index)
+
+        state = state.copy(
+            confirmPhraseWordsState = state.confirmPhraseWordsState.copy(
+                wordIndex = index + 1,//Increment by one
+                wordInput = wordInput,
+                errorEnabled = false,
+                words = words
+            )
+        )
+    }
+
+    private fun getNextWordInput(words: List<String>, index: Int) =
+        try {
+            words[index + 1]
+        } catch (e: IndexOutOfBoundsException) {
+            ""
+        }
+    //endregion
+
     private fun handleWordVerified() {
-        //If 23 words are verified and this method gets call, we have verified the last word
-        if (state.confirmPhraseWordsState.wordsVerified == ConfirmPhraseWordsState.PHRASE_WORD_SECOND_TO_LAST_INDEX) {
+        //If 23 words are verified and we are the last word Index this method gets call, we have verified the last word
+        if (state.confirmPhraseWordsState.wordsVerified == ConfirmPhraseWordsState.PHRASE_WORD_SECOND_TO_LAST_INDEX
+            && state.confirmPhraseWordsState.wordIndex + 1 == ConfirmPhraseWordsState.PHRASE_WORD_COUNT
+        ) {
             handleUserVerifiedAllPhraseWords()
             return
         }
 
+        val wordIndex = state.confirmPhraseWordsState.wordIndex
+        val wordsVerified = state.confirmPhraseWordsState.wordsVerified
+
         val phrase = state.confirmPhraseWordsState.phrase
-        val nextIndex = state.confirmPhraseWordsState.wordIndex + 1
+        val nextIndex = wordIndex + 1
 
         val nextWordToVerify = getPhraseWordAtIndex(phrase = phrase, index = nextIndex)
+
+        if (wordIndex < wordsVerified) {
+            //Need to decide if the user has to provide input for the next word or if they already verified the word
+            if (wordIndex == wordsVerified - 1) {
+                //The user needs to input the next word
+                state = state.copy(
+                    confirmPhraseWordsState = state.confirmPhraseWordsState.copy(
+                        phraseWordToVerify = nextWordToVerify.wordValue,
+                        wordIndex = nextWordToVerify.wordIndex,
+                        wordInput = "",
+                        errorEnabled = false
+                    )
+                )
+            } else {
+                state = state.copy(
+                    confirmPhraseWordsState = state.confirmPhraseWordsState.copy(
+                        phraseWordToVerify = nextWordToVerify.wordValue,
+                        wordIndex = nextWordToVerify.wordIndex,
+                        wordInput = nextWordToVerify.wordValue,
+                        errorEnabled = false
+                    )
+                )
+            }
+            return
+        }
 
         state = state.copy(
             confirmPhraseWordsState = state.confirmPhraseWordsState.copy(
@@ -765,6 +866,16 @@ class SignInViewModel @Inject constructor(
             verifiedPhraseSuccess()
         }
         resetConfirmPhraseWordsState()
+    }
+
+    private fun handlePreviousWordNavigationRecoveryFlow() {
+        val decrementedWordIndex = state.confirmPhraseWordsState.wordIndex - 1
+        val wordInputToDisplay = state.confirmPhraseWordsState.words[decrementedWordIndex]
+
+        state = state.copy(confirmPhraseWordsState = state.confirmPhraseWordsState.copy(
+            wordIndex = decrementedWordIndex,
+            wordInput = wordInputToDisplay
+        ))
     }
 
     //region Get Auth Flow State + Respond to Auth Flow State

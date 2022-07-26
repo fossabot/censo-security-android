@@ -20,7 +20,6 @@ import androidx.compose.material.icons.filled.NavigateBefore
 import androidx.compose.material.icons.filled.NavigateNext
 import androidx.compose.material.icons.outlined.AccountCircle
 import androidx.compose.material.icons.outlined.ContentCopy
-import androidx.compose.material.icons.rounded.Close
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -40,6 +39,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -821,17 +821,25 @@ fun VerifyPhraseWordUI(
     wordIndex: Int,
     value: String,
     onValueChanged: (String) -> Unit,
-    onSubmitWord: (Context) -> Unit,
+    onSubmitWord: (String) -> Unit,
+    onPreviousWordNavigate: () -> Unit,
+    onNextWordNavigate: () -> Unit,
+    isCreationFlow: Boolean,
     errorEnabled: Boolean
 ) {
+    val isFirstWord = wordIndex == ConfirmPhraseWordsState.PHRASE_WORD_FIRST_INDEX
+    val isLastWord = wordIndex == ConfirmPhraseWordsState.PHRASE_WORD_SECOND_TO_LAST_INDEX
+
     Column(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.SpaceBetween
     ) {
         Spacer(modifier = Modifier.weight(0.1f))
         Text(
-            modifier = Modifier.padding(horizontal = 24.dp),
+            modifier = Modifier.padding(horizontal = 36.dp),
             text = stringResource(R.string.enter_each_word_to_verify),
             color = SubtitleLightGrey,
             fontSize = 18.sp,
@@ -839,7 +847,7 @@ fun VerifyPhraseWordUI(
             fontWeight = FontWeight.SemiBold,
             letterSpacing = 0.3.sp
         )
-        Spacer(modifier = Modifier.weight(0.2f))
+        Spacer(modifier = Modifier.weight(0.05f))
         Text(
             text = stringResource(R.string.enter_word_number),
             color = StrikeWhite,
@@ -852,61 +860,48 @@ fun VerifyPhraseWordUI(
             color = StrikeWhite,
             fontSize = 76.sp
         )
-        Spacer(modifier = Modifier.weight(0.5f))
-    }
+        Spacer(modifier = Modifier.weight(0.1f))
 
-    StickyTextField(
-        value = value,
-        onValueChanged = onValueChanged,
-        onSubmitWord = onSubmitWord,
-        errorEnabled = errorEnabled
-    )
-}
-
-@Composable
-fun StickyTextField(
-    value: String,
-    onValueChanged: (String) -> Unit,
-    onSubmitWord: (Context) -> Unit,
-    errorEnabled: Boolean
-) {
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.BottomCenter
-    ) {
-
-        Column(
-            verticalArrangement = Arrangement.Bottom,
-            horizontalAlignment = Alignment.CenterHorizontally
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            if (errorEnabled) {
-                Text(
-                    modifier = Modifier
-                        .background(GreyText.copy(alpha = 0.15f))
-                        .fillMaxWidth(),
-                    text = stringResource(R.string.that_word_is_not_correct),
-                    textAlign = TextAlign.Center,
-                    color = ErrorRed,
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.SemiBold
-                )
-            }
-
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(BackgroundBlack),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center
+            Column(
+                modifier = Modifier.padding(horizontal = 16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
             ) {
+                if (errorEnabled) {
+                    Text(
+                        modifier = Modifier
+                            .background(GreyText.copy(alpha = 0.15f))
+                            .fillMaxWidth(),
+                        text = stringResource(R.string.that_word_is_not_correct),
+                        textAlign = TextAlign.Center,
+                        color = ErrorRed,
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
                 VerifyWordTextField(
                     text = value,
                     onTextChange = onValueChanged,
                     errorEnabled = errorEnabled,
                     onSubmitWord = onSubmitWord
                 )
+
+                if (!isCreationFlow) {
+                    WordNavigationButtons(
+                        value = value,
+                        isFirstWord = isFirstWord,
+                        isLastWord = isLastWord,
+                        onPreviousWordNavigate = onPreviousWordNavigate,
+                        onNextWordNavigate = onNextWordNavigate
+                    )
+                }
             }
         }
+        Spacer(modifier = Modifier.weight(0.45f))
     }
 }
 
@@ -916,30 +911,29 @@ fun VerifyWordTextField(
     text: String,
     onTextChange: (String) -> Unit,
     errorEnabled: Boolean,
-    onSubmitWord: (Context) -> Unit
+    onSubmitWord: (String) -> Unit
 ) {
-    val context = LocalContext.current
     val singleLine = true
     val enabled = true
     val interactionSource = remember { MutableInteractionSource() }
+    val errorMessage = stringResource(id = R.string.do_not_leave_text_field_empty)
 
     BasicTextField(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 20.dp, vertical = 12.dp)
             .background(
-                VerifyWordsBackground,
+                Color.Black,
                 RoundedCornerShape(8.dp)
             )
             .border(
-                width = 1.5.dp,
-                color = if (errorEnabled) ErrorBorderRed else StatusGreyText,
+                width = 1.dp,
+                color = if (errorEnabled) ErrorBorderRed else VerifyWordsBorder,
                 shape = RoundedCornerShape(8.dp)
             ),
         value = text,
         onValueChange = onTextChange,
         textStyle = LocalTextStyle.current.copy(
-            color = Color.Black,
+            color = StrikeWhite,
             textAlign = TextAlign.Center,
             fontSize = 28.sp,
             letterSpacing = 0.75.sp,
@@ -951,7 +945,7 @@ fun VerifyWordTextField(
             keyboardType = KeyboardType.Text
         ),
         keyboardActions = KeyboardActions(
-            onNext = { onSubmitWord(context) }
+            onNext = { onSubmitWord(errorMessage) }
         ),
         interactionSource = interactionSource,
         cursorBrush = SolidColor(StrikePurple),
@@ -969,3 +963,75 @@ fun VerifyWordTextField(
         )
     }
 }
+
+@Composable
+private fun WordNavigationButtons(
+    value: String,
+    onPreviousWordNavigate: () -> Unit,
+    onNextWordNavigate: () -> Unit,
+    isFirstWord: Boolean,
+    isLastWord: Boolean
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        //Previous Button
+        val previousButtonVisibility = if (isFirstWord) 0f else 1f
+        TextButton(
+            modifier = Modifier
+                .background(Color.Transparent)
+                .padding(0.dp)
+                .alpha(previousButtonVisibility),
+            contentPadding = PaddingValues(0.dp),
+            onClick = onPreviousWordNavigate
+        ) {
+            Icon(
+                modifier = Modifier.padding(horizontal = 0.dp, vertical = 4.dp),
+                imageVector = Icons.Filled.NavigateBefore,
+                contentDescription = stringResource(R.string.previous_icon_content_desc),
+                tint = StrikeWhite
+            )
+            Text(
+                text = stringResource(R.string.previous),
+                color = StrikeWhite,
+                fontSize = 16.sp
+            )
+        }
+
+        //Next Button
+        val nextButtonText = getNextButtonText(lastWord = isLastWord, LocalContext.current)
+        val nextButtonContentDes = getNextButtonContentDescription(lastWord = isLastWord, LocalContext.current)
+        val nextButtonEnabled = value.isNotEmpty() && value.isNotBlank()
+        TextButton(
+            modifier = Modifier
+                .background(Color.Transparent)
+                .padding(0.dp),
+            contentPadding = PaddingValues(0.dp),
+            enabled = nextButtonEnabled,
+            onClick = onNextWordNavigate
+        ) {
+            Text(
+                text = nextButtonText,
+                color = if (nextButtonEnabled) StrikeWhite else GreyText,
+                fontSize = 16.sp
+            )
+            Icon(
+                modifier = Modifier.padding(horizontal = 0.dp, vertical = 4.dp),
+                imageVector = Icons.Filled.NavigateNext,
+                contentDescription = nextButtonContentDes,
+                tint = if (nextButtonEnabled) StrikeWhite else GreyText
+            )
+        }
+    }
+}
+
+private fun getNextButtonText(lastWord: Boolean, context: Context) =
+    if (lastWord) context.getString(R.string.finish)
+    else context.getString(R.string.next)
+
+private fun getNextButtonContentDescription(lastWord: Boolean, context: Context) =
+    if (lastWord) context.getString(R.string.finish_icon_content_desc)
+    else context.getString(R.string.next_icon_content_desc)
