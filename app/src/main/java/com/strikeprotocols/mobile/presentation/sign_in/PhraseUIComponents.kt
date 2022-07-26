@@ -185,13 +185,14 @@ fun CopyKeyUI(phrase: String, phraseCopied: Boolean, phraseSaved: Boolean, onNav
         context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
 
     Column(
-        modifier = Modifier.padding(horizontal = 40.dp),
+        modifier = Modifier
+            .padding(horizontal = 40.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .weight(1f)
+                .weight(0.8f)
         ) {
             Column(
                 modifier = Modifier.fillMaxSize(),
@@ -201,7 +202,7 @@ fun CopyKeyUI(phrase: String, phraseCopied: Boolean, phraseSaved: Boolean, onNav
                 Text(
                     text = stringResource(R.string.copy_key_message),
                     color = StrikeWhite,
-                    fontSize = 22.sp,
+                    fontSize = 24.sp,
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Center,
                     letterSpacing = 0.23.sp
@@ -216,14 +217,14 @@ fun CopyKeyUI(phrase: String, phraseCopied: Boolean, phraseSaved: Boolean, onNav
                     clipboard.setPrimaryClip(clip)
                     onNavigate()
                 }
-                Spacer(modifier = Modifier.height(56.dp))
+                Spacer(modifier = Modifier.height(30.dp))
             }
         }
 
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .weight(1f)
+                .weight(1.2f)
         ) {
             if (phraseCopied) {
                 Column(
@@ -235,6 +236,7 @@ fun CopyKeyUI(phrase: String, phraseCopied: Boolean, phraseSaved: Boolean, onNav
                         painter = painterResource(R.drawable.ic_check),
                         contentDescription = "",
                     )
+                    Spacer(modifier = Modifier.height(12.dp))
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
@@ -245,7 +247,7 @@ fun CopyKeyUI(phrase: String, phraseCopied: Boolean, phraseSaved: Boolean, onNav
                             textAlign = TextAlign.Center,
                             letterSpacing = 0.23.sp
                         )
-                        Spacer(modifier = Modifier.height(24.dp))
+                        Spacer(modifier = Modifier.height(20.dp))
                         Text(
                             text = stringResource(R.string.paste_your_key),
                             color = StrikeWhite,
@@ -254,11 +256,11 @@ fun CopyKeyUI(phrase: String, phraseCopied: Boolean, phraseSaved: Boolean, onNav
                             letterSpacing = 0.23.sp
                         )
                     }
-                    Spacer(modifier = Modifier.height(56.dp))
+                    Spacer(modifier = Modifier.height(32.dp))
                     if (phraseSaved) {
                         AuthFlowButton(
                             modifier = Modifier
-                                .height(height = 82.dp)
+                                .height(height = 116.dp)
                                 .padding(bottom = 24.dp),
                             text = stringResource(R.string.i_saved_key)
                         ) {

@@ -204,7 +204,7 @@
     <string name="password_manager">Password Manager</string>
     <string name="pen_and_paper">Pen and Paper</string>
     <string name="copy_private_key">Copy Recovery Phrase</string>
-    <string name="copy_key_message">Copy your secret recovery phrase to your clipboard</string>
+    <string name="copy_key_message">Copy your recovery phrase to\nyour clipboard</string>
     <string name="copied_to_clipboard">Copied to your clipboard!</string>
     <string name="paste_your_key">Paste the recovery phrase in your Password Manager and come back here when it\'s saved</string>
     <string name="enter_key_title">We\'ve cleared your clipboard.</string>
