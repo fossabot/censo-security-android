@@ -10,6 +10,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.viewModelScope
 import cash.z.ecc.android.bip39.Mnemonics
 import com.google.firebase.messaging.FirebaseMessaging
+import com.raygun.raygun4android.RaygunClient
 import com.strikeprotocols.mobile.R
 import com.strikeprotocols.mobile.common.*
 import com.strikeprotocols.mobile.data.*
@@ -165,9 +166,20 @@ class SignInViewModel @Inject constructor(
                     token = token
                 )
                 pushRepository.addPushNotification(pushBody = pushBody)
+            } else {
+                if (token.isEmpty()) {
+                    throw Exception("Firebase push token is empty")
+                } else if (deviceId.isEmpty()) {
+                    throw Exception("Device id is empty")
+                }
             }
         } catch (e: Exception) {
-
+            RaygunClient.send(
+                e, listOf(
+                    CrashReportingUtil.PUSH_NOTIFICATION_TAG,
+                    CrashReportingUtil.MANUALLY_REPORTED_TAG,
+                )
+            )
         }
     }
 

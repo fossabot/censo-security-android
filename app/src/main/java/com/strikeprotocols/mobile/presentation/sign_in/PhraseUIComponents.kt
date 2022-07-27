@@ -263,7 +263,26 @@ fun CopyKeyUI(phrase: String, phraseCopied: Boolean, phraseSaved: Boolean, onNav
                             text = stringResource(R.string.i_saved_key)
                         ) {
                             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P) {
-                                clipboard.clearPrimaryClip()
+                                try {
+                                    if (clipboard.hasPrimaryClip()) {
+                                        clipboard.clearPrimaryClip()
+                                    } else {
+                                        val clip: ClipData =
+                                            ClipData.newPlainText(
+                                                SignInViewModel.CLIPBOARD_LABEL_PHRASE,
+                                                ""
+                                            )
+                                        clipboard.setPrimaryClip(clip)
+                                    }
+                                } catch (e: Exception) {
+
+                                    val clip: ClipData =
+                                        ClipData.newPlainText(
+                                            SignInViewModel.CLIPBOARD_LABEL_PHRASE,
+                                            ""
+                                        )
+                                    clipboard.setPrimaryClip(clip)
+                                }
                             } else {
                                 val clip: ClipData =
                                     ClipData.newPlainText(
