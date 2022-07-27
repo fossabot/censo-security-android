@@ -20,7 +20,7 @@ object BiometricUtil {
             .setTitle(context.getString(R.string.biometry_check))
             .setSubtitle(context.getString(R.string.performing_biometry_check))
             .setNegativeButtonText(context.getString(R.string.cancel))
-            .setAllowedAuthenticators(BiometricManager.Authenticators.BIOMETRIC_STRONG)
+            .setAllowedAuthenticators(BiometricManager.Authenticators.BIOMETRIC_WEAK)
 
     fun createBioPrompt(fragmentActivity: FragmentActivity, onSuccess: () -> Unit, onFail: () -> Unit) =
         BiometricPrompt(fragmentActivity, object : BiometricPrompt.AuthenticationCallback() {
@@ -42,7 +42,7 @@ object BiometricUtil {
 
     fun checkForBiometricFeaturesOnDevice(context: Context): Companion.BiometricsStatus {
         //Checking the biometric status of the device, if it is enabled, disabled, or not available
-        return when (BiometricManager.from(context).canAuthenticate(BIOMETRIC_STRONG)) {
+        return when (BiometricManager.from(context).canAuthenticate(BiometricManager.Authenticators.BIOMETRIC_WEAK)) {
             BiometricManager.BIOMETRIC_SUCCESS -> {
                 Companion.BiometricsStatus.BIOMETRICS_ENABLED
             }
