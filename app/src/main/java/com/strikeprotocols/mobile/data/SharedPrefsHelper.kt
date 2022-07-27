@@ -33,41 +33,41 @@ object SharedPrefsHelper {
     fun saveSolanaKey(encryptedPrefs: SharedPreferences, email: String, solanaKey: ByteArray) {
         val data = if (solanaKey.isEmpty()) "" else BaseWrapper.encode(solanaKey)
         val editor = encryptedPrefs.edit()
-        editor.putString("${email.lowercase()}$SOLANA_KEY", data)
+        editor.putString("${email.lowercase().trim()}$SOLANA_KEY", data)
         editor.apply()
     }
 
     fun retrieveSolanaKey(encryptedPrefs: SharedPreferences, email: String): String {
-        return encryptedPrefs.getString("${email.lowercase()}$SOLANA_KEY", "") ?: ""
+        return encryptedPrefs.getString("${email.lowercase().trim()}$SOLANA_KEY", "") ?: ""
     }
 
     fun clearSolanaKey(encryptedPrefs: SharedPreferences, email: String) {
         val editor = encryptedPrefs.edit()
-        editor.putString("${email.lowercase()}$SOLANA_KEY", "")
+        editor.putString("${email.lowercase().trim()}$SOLANA_KEY", "")
         editor.apply()
     }
 
     fun saveRootSeed(encryptedPrefs: SharedPreferences, email: String, rootSeed: ByteArray) {
         val data = if (rootSeed.isEmpty()) "" else BaseWrapper.encode(rootSeed)
         val editor = encryptedPrefs.edit()
-        editor.putString("${email.lowercase()}$ROOT_SEED", data)
+        editor.putString("${email.lowercase().trim()}$ROOT_SEED", data)
         editor.apply()
     }
 
     fun retrieveRootSeed(encryptedPrefs: SharedPreferences, email: String): String {
-        return encryptedPrefs.getString("${email.lowercase()}$ROOT_SEED", "") ?: ""
+        return encryptedPrefs.getString("${email.lowercase().trim()}$ROOT_SEED", "") ?: ""
     }
 
     fun clearRootSeed(encryptedPrefs: SharedPreferences, email: String) {
         val editor = encryptedPrefs.edit()
-        editor.putString("${email.lowercase()}$ROOT_SEED", "")
+        editor.putString("${email.lowercase().trim()}$ROOT_SEED", "")
         editor.apply()
     }
 
     fun saveUserEmail(email: String) {
         if (email.isEmpty()) return
         val editor = sharedPrefs.edit()
-        editor.putString(USER_EMAIL, email.lowercase())
+        editor.putString(USER_EMAIL, email.lowercase().trim())
         editor.apply()
     }
 
@@ -78,7 +78,7 @@ object SharedPrefsHelper {
     }
 
     fun retrieveUserEmail(): String =
-        sharedPrefs.getString(USER_EMAIL, "")?.lowercase() ?: ""
+        sharedPrefs.getString(USER_EMAIL, "")?.lowercase()?.trim() ?: ""
 
 
 }

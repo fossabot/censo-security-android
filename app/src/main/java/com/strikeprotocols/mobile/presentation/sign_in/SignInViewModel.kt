@@ -45,7 +45,7 @@ class SignInViewModel @Inject constructor(
 
     //region Handle User Input
     fun updateEmail(updatedEmail: String) {
-        state = state.copy(email = updatedEmail, emailErrorEnabled = false)
+        state = state.copy(email = updatedEmail.trim(), emailErrorEnabled = false)
     }
 
     fun updatePassword(updatedPassword: String) {
