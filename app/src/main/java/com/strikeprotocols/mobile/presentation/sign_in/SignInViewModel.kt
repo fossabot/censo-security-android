@@ -171,6 +171,8 @@ class SignInViewModel @Inject constructor(
                     throw Exception("Firebase push token is empty")
                 } else if (deviceId.isEmpty()) {
                     throw Exception("Device id is empty")
+                } else {
+                    throw Exception("Unable to create push body")
                 }
             }
         } catch (e: Exception) {
