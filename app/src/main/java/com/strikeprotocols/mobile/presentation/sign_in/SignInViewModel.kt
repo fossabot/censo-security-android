@@ -108,6 +108,7 @@ class SignInViewModel @Inject constructor(
                     val token = userRepository.authenticate(sessionToken)
                     userRepository.saveUserEmail(state.email)
                     strikeUserData.setEmail(state.email)
+                    submitNotificationTokenForRegistration()
                     state.copy(loginResult = Resource.Success(token))
                 } catch (e: Exception) {
                     state.copy(loginResult = Resource.Error(e.message ?: NO_INTERNET_ERROR))
