@@ -199,6 +199,7 @@ fun CopyKeyUI(phrase: String, phraseCopied: Boolean, phraseSaved: Boolean, onNav
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Bottom
             ) {
+                Spacer(modifier = Modifier.weight(3.0f))
                 Text(
                     text = stringResource(R.string.copy_key_message),
                     color = StrikeWhite,
@@ -207,7 +208,7 @@ fun CopyKeyUI(phrase: String, phraseCopied: Boolean, phraseSaved: Boolean, onNav
                     textAlign = TextAlign.Center,
                     letterSpacing = 0.23.sp
                 )
-                Spacer(modifier = Modifier.height(36.dp))
+                Spacer(modifier = Modifier.weight(0.75f))
                 AuthFlowButton(
                     text = stringResource(R.string.copy_private_key),
                     imageVector = Icons.Outlined.ContentCopy
@@ -217,7 +218,6 @@ fun CopyKeyUI(phrase: String, phraseCopied: Boolean, phraseSaved: Boolean, onNav
                     clipboard.setPrimaryClip(clip)
                     onNavigate()
                 }
-                Spacer(modifier = Modifier.height(30.dp))
             }
         }
 
@@ -232,31 +232,20 @@ fun CopyKeyUI(phrase: String, phraseCopied: Boolean, phraseSaved: Boolean, onNav
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.SpaceBetween
                 ) {
+                    Spacer(modifier = Modifier.weight(0.5f))
                     Image(
                         painter = painterResource(R.drawable.ic_check),
                         contentDescription = "",
                     )
-                    Spacer(modifier = Modifier.height(12.dp))
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Text(
-                            text = stringResource(R.string.copied_to_clipboard),
-                            color = StrikeWhite,
-                            fontSize = 18.sp,
-                            textAlign = TextAlign.Center,
-                            letterSpacing = 0.23.sp
-                        )
-                        Spacer(modifier = Modifier.height(20.dp))
-                        Text(
-                            text = stringResource(R.string.paste_your_key),
-                            color = StrikeWhite,
-                            fontSize = 18.sp,
-                            textAlign = TextAlign.Center,
-                            letterSpacing = 0.23.sp
-                        )
-                    }
-                    Spacer(modifier = Modifier.height(32.dp))
+                    Spacer(modifier = Modifier.weight(0.5f))
+                    Text(
+                        text = stringResource(R.string.copied_to_clipboard),
+                        color = StrikeWhite,
+                        fontSize = 18.sp,
+                        textAlign = TextAlign.Center,
+                        letterSpacing = 0.23.sp
+                    )
+                    Spacer(modifier = Modifier.weight(1.0f))
                     if (phraseSaved) {
                         AuthFlowButton(
                             modifier = Modifier
