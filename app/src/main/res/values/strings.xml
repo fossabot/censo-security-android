@@ -56,8 +56,8 @@
     <string name="approval_disposition_error_submit">Failure submitting data to the server</string>
     <string name="approval_disposition_error_title">Something went wrong</string>
 
-    <string name="biometry_disabled_message">This app requires biometry functionality to be enabled, please enable biometric security in the device settings.</string>
-    <string name="biometry_unavailable_message">This app requires biometry functionality to be used, unfortunately this device does not have biometry functionality.</string>
+    <string name="biometry_disabled_message">You must enable biometric security in your device settings.\n\nIf you already have biometry enabled, you may need to enable a different biometric option to meet the security threshold of the Strike Security App.</string>
+    <string name="biometry_unavailable_message">Your device does not support biometric security at the level required for the Strike Security App.</string>
     <string name="biometry_deeplink_device_settings">Device Biometry Settings</string>
 
     <string name="update_strike_mobile">Update Strike Mobile…</string>
@@ -254,5 +254,6 @@
     <string name="back">back</string>
     <string name="user">User</string>
     <string name="vault">Vault</string>
+    <string name="update_biometric_settings">Unable to open biometry settings. Please open device settings.</string>
 
 </resources>
