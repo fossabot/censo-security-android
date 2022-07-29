@@ -142,7 +142,7 @@ class ApprovalDetailsViewModel @Inject constructor(
         )
     }
 
-    fun setMultipleAccounts(multipleAccounts: DurableNonceViewModel.MultipleAccounts) {
+    fun setMultipleAccounts(multipleAccounts: DurableNonceViewModel.MultipleAccounts?) {
         state = state.copy(multipleAccounts = multipleAccounts)
         registerApprovalDisposition()
     }

@@ -220,3 +220,34 @@ fun ApprovalDetailContent(approval: WalletApproval, type: SolanaApprovalRequestT
         else -> Text(text = stringResource(R.string.unknown_approval_item))
     }
 }
+
+@Composable
+fun DurableNonceErrorDialog(
+    dismissDialog: () -> Unit
+) {
+    AlertDialog(
+        backgroundColor = UnfocusedGrey,
+        onDismissRequest = dismissDialog,
+        title = {
+            Text(
+                text = stringResource(R.string.approval_disposition_error_title),
+                color = StrikeWhite,
+                fontSize = 22.sp
+            )
+        },
+        text = {
+            Text(
+                text = stringResource(R.string.default_error_message),
+                color = StrikeWhite,
+                fontSize = 16.sp
+            )
+        },
+        confirmButton = {
+            TextButton(
+                onClick = dismissDialog
+            ) {
+                Text(text = stringResource(R.string.ok))
+            }
+        }
+    )
+}

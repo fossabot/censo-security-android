@@ -48,7 +48,7 @@ fun ApprovalsListScreen(
     durableNonceViewModel: DurableNonceViewModel = hiltViewModel()
 ) {
     val approvalsState = approvalsViewModel.state
-    val blockHashState = durableNonceViewModel.state
+    val durableNonceState = durableNonceViewModel.state
 
     val context = LocalContext.current as FragmentActivity
 
@@ -85,7 +85,7 @@ fun ApprovalsListScreen(
 
     val snackbarRefreshErrorString = stringResource(R.string.snackbar_refresh_error)
 
-    LaunchedEffect(key1 = approvalsState, key2 = blockHashState) {
+    LaunchedEffect(key1 = approvalsState, key2 = durableNonceState) {
         if (approvalsState.shouldShowErrorSnackbar) {
             coroutineScope.launch {
                 scaffoldState.snackbarHostState.showSnackbar(
@@ -95,15 +95,13 @@ fun ApprovalsListScreen(
             approvalsViewModel.resetShouldShowErrorSnackbar()
         }
 
-        if (blockHashState.triggerBioPrompt) {
+        if (durableNonceState.triggerBioPrompt) {
             durableNonceViewModel.resetPromptTrigger()
             bioPrompt.authenticate(promptInfo)
         }
-        if (blockHashState.multipleAccountsResult is Resource.Success) {
-            if (blockHashState.multipleAccounts != null) {
-                approvalsViewModel.setMultipleAccounts(blockHashState.multipleAccounts)
-                durableNonceViewModel.resetState()
-            }
+        if (durableNonceState.multipleAccountsResult is Resource.Success) {
+            approvalsViewModel.setMultipleAccounts(durableNonceState.multipleAccounts)
+            durableNonceViewModel.resetState()
         }
         if (approvalsState.approvalDispositionState?.registerApprovalDispositionResult is Resource.Success ||
             approvalsState.approvalDispositionState?.initiationDispositionResult is Resource.Success) {
@@ -140,7 +138,7 @@ fun ApprovalsListScreen(
         },
         content = { innerPadding ->
             ApprovalsList(
-                isRefreshing = approvalsState.loadingData || blockHashState.isLoading,
+                isRefreshing = approvalsState.loadingData || durableNonceState.isLoading,
                 onRefresh = approvalsViewModel::refreshData,
                 onApproveClicked = { approval ->
                     approvalsViewModel.setShouldDisplayConfirmDispositionDialog(
@@ -219,6 +217,12 @@ fun ApprovalsListScreen(
                         }
                     )
                 }
+            }
+
+            if (durableNonceState.multipleAccountsResult is Resource.Error) {
+                DurableNonceErrorDialog(
+                    dismissDialog = durableNonceViewModel::resetMultipleAccountsResource
+                )
             }
         }
     )

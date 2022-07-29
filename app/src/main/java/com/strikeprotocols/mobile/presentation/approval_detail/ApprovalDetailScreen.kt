@@ -39,6 +39,7 @@ import com.strikeprotocols.mobile.presentation.approvals.approval_type_row_items
 import com.strikeprotocols.mobile.ui.theme.*
 import com.strikeprotocols.mobile.data.models.approval.SolanaApprovalRequestType.*
 import com.strikeprotocols.mobile.presentation.approvals.ApprovalDetailContent
+import com.strikeprotocols.mobile.presentation.approvals.DurableNonceErrorDialog
 import com.strikeprotocols.mobile.presentation.approvals.approval_type_row_items.getApprovalTimerText
 import com.strikeprotocols.mobile.presentation.components.*
 import com.strikeprotocols.mobile.presentation.durable_nonce.DurableNonceViewModel
@@ -83,10 +84,8 @@ fun ApprovalDetailsScreen(
             bioPrompt.authenticate(promptInfo)
         }
         if (durableNonceState.multipleAccountsResult is Resource.Success) {
-            if (durableNonceState.multipleAccounts != null) {
-                approvalDetailsViewModel.setMultipleAccounts(durableNonceState.multipleAccounts)
-                durableNonceViewModel.resetState()
-            }
+            approvalDetailsViewModel.setMultipleAccounts(durableNonceState.multipleAccounts)
+            durableNonceViewModel.resetState()
         }
         if (approvalDetailsState.approvalDispositionState?.registerApprovalDispositionResult is Resource.Success
             || approvalDetailsState.approvalDispositionState?.initiationDispositionResult is Resource.Success
@@ -216,6 +215,12 @@ fun ApprovalDetailsScreen(
                         }
                     )
                 }
+            }
+
+            if (durableNonceState.multipleAccountsResult is Resource.Error) {
+                DurableNonceErrorDialog(
+                    dismissDialog = durableNonceViewModel::resetMultipleAccountsResource
+                )
             }
         }
     )

@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.strikeprotocols.mobile.BuildConfig
 import com.strikeprotocols.mobile.common.Resource
+import com.strikeprotocols.mobile.common.strikeLog
 import com.strikeprotocols.mobile.data.SolanaApiService
 import com.strikeprotocols.mobile.data.models.Nonce
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -29,6 +30,10 @@ class DurableNonceViewModel @Inject constructor(
 
     fun resetState() {
         state = DurableNonceState()
+    }
+
+    fun resetMultipleAccountsResource() {
+        state = state.copy(multipleAccountsResult = Resource.Uninitialized)
     }
 
     fun setPromptTrigger() {
@@ -68,7 +73,7 @@ class DurableNonceViewModel @Inject constructor(
                     multipleAccounts = multipleAccounts
                 )
             } catch (e: Exception) {
-                state.copy(multipleAccountsResult = Resource.Success(null))
+                state.copy(multipleAccountsResult = Resource.Error(e.message ?: ""))
             }
         }
     }

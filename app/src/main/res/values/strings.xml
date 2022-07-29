@@ -255,5 +255,6 @@
     <string name="user">User</string>
     <string name="vault">Vault</string>
     <string name="update_biometric_settings">Unable to open biometry settings. Please open device settings.</string>
+    <string name="default_error_message">Unable to retrieve data.\n\nPlease make sure you are connected to internet and try again.</string>
 
 </resources>
