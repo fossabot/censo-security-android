@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import android.content.ClipboardManager
+import android.os.Build
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.*
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -43,8 +44,10 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
+import com.strikeprotocols.mobile.BuildConfig
 import com.strikeprotocols.mobile.R
 import com.strikeprotocols.mobile.common.Resource
+import com.strikeprotocols.mobile.common.strikeLog
 import com.strikeprotocols.mobile.data.models.IndexedPhraseWord
 import com.strikeprotocols.mobile.presentation.sign_in.PhraseUICompanion.DISPLAY_RANGE_SET
 import com.strikeprotocols.mobile.ui.theme.*
@@ -61,23 +64,41 @@ object PhraseUICompanion {
 
 @Composable
 fun PhraseBackground() {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .alpha(0.30f)
-            .blur(250.dp)
-            .background(
-                brush = Brush.radialGradient(
-                    colorStops = arrayOf(
-                        0.0f to Color(0xFF996cfd),
-                        2.50f to Color(0xFF7351BE),
-                        5.0f to Color(0xFF4D367F),
-                        7.5f to Color(0xFF261B3F),
-                        10.0f to Color(0xFF000000),
+    when {
+        Build.VERSION.SDK_INT >= Build.VERSION_CODES.S ->
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .alpha(0.50f)
+                    .blur(250.dp)
+                    .background(
+                        brush = Brush.radialGradient(
+                            colorStops = arrayOf(
+                                0.0f to Color(0xFF996cfd),
+                                2.50f to Color(0xFF7351BE),
+                                5.0f to Color(0xFF4D367F),
+                                7.5f to Color(0xFF261B3F),
+                                10.0f to Color(0xFF000000),
+                            )
+                        )
                     )
-                )
             )
-    )
+        else ->
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .alpha(0.40f)
+                    .blur(250.dp)
+                    .background(
+                        brush = Brush.radialGradient(
+                            colorStops = arrayOf(
+                                0.0f to Color(0xFF996cfd),
+                                10.0f to Color(0xFF000000)
+                            )
+                        )
+                    )
+            )
+    }
 }
 
 @Composable
