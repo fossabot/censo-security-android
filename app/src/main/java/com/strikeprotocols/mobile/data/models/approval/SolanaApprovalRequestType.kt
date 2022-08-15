@@ -380,7 +380,8 @@ sealed class SolanaApprovalRequestType {
             is BalanceAccountAddressWhitelistUpdate -> {
                 signingData()?.nonceAccountAddressesSlot ?: 0
             }
-            is LoginApprovalRequest, is UnknownApprovalType, is AcceptVaultInvitation -> 0
+            is LoginApprovalRequest, is UnknownApprovalType,
+            is AcceptVaultInvitation, is PasswordReset -> 0
         }
     }
 
@@ -399,7 +400,8 @@ sealed class SolanaApprovalRequestType {
             is BalanceAccountNameUpdate -> signingData
             is BalanceAccountPolicyUpdate -> signingData
             is BalanceAccountAddressWhitelistUpdate -> signingData
-            is LoginApprovalRequest, is UnknownApprovalType, is AcceptVaultInvitation -> null
+            is LoginApprovalRequest, is UnknownApprovalType,
+            is AcceptVaultInvitation, is PasswordReset -> null
         }
 
 }
