@@ -15,7 +15,7 @@ jobs:
   call-workflow-passing-data:
     uses: ./.github/workflows/core_workflow.yml
     with:
-      variant: DemoOne
+      variant: PreProd
     secrets:
       googleServices: ${{ secrets.GOOGLE_SERVICES }}
       firebaseToken: ${{ secrets.FIREBASE_TOKEN }}
