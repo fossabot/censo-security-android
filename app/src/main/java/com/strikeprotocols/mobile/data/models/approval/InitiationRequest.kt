@@ -285,7 +285,8 @@ data class InitiationRequest(
                         instructionBatch = instructionBatch,
                         signingData = signingData,
                         opAccountPublicKey = opAccountPublicKey(),
-                        dataAccountPublicKey = dataAccountPublicKey()
+                        dataAccountPublicKey = dataAccountPublicKey(),
+                        walletAccountPublicKey = PublicKey(requestType.signingData.walletAddress),
                     )
                 }
             } else {

@@ -12,7 +12,8 @@ class SupplyDappInstruction(
     val instructionBatch: SolanaInstructionBatch,
     val signingData: SolanaSigningData,
     val opAccountPublicKey: PublicKey,
-    val dataAccountPublicKey: PublicKey
+    val dataAccountPublicKey: PublicKey,
+    val walletAccountPublicKey: PublicKey,
 ) : Signable {
 
     override fun retrieveSignableData(approverPublicKey: String?): ByteArray {
@@ -21,6 +22,7 @@ class SupplyDappInstruction(
         val keyList = listOf(
             AccountMeta(publicKey = opAccountPublicKey, isSigner = false, isWritable = true),
             AccountMeta(publicKey = dataAccountPublicKey, isSigner = false, isWritable = true),
+            AccountMeta(publicKey = walletAccountPublicKey, isSigner = false, isWritable = false),
             AccountMeta(
                 publicKey = PublicKey(approverPublicKey),
                 isSigner = true, isWritable = false
