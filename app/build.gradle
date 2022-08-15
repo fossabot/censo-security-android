@@ -90,7 +90,7 @@ android {
         }
         preProd {
             resValue "string", "app_name", "PreProd Strike"
-            applicationIdSuffix ".preprod"
+            applicationIdSuffix ".demo"
             minifyEnabled true
             buildConfigField "String", "BASE_URL", "\"https://brooklyn-preprod.strikeprotocols.com/\""
             buildConfigField "String", "ANCHOR_URL", "\"https://preprod.strikeprotocols.com/\""
@@ -99,36 +99,24 @@ android {
             buildConfigField "String", "SOLANA_COMMITMENT", "\"finalized\""
             buildConfigField "String", "OKTA_CLIENT_ID", "\"0oa7ajwuye2dZD4e6357\""
             buildConfigField "String", "OKTA_ISSUER_ID", "\"aus7834x2w3eqeZSr357\""
-            buildConfigField "String", "REDIRECT_SUFFIX", "\"\""
-            resValue "string", "RAYGUN_APP_ID", "\"CtOnGQjIo1U8dELkoUf0iw\""
-            debuggable false
-        }
-        demoOne {
-            resValue "string", "app_name", "Demo1 Strike"
-            applicationIdSuffix ".demo"
-            minifyEnabled false
-            buildConfigField "String", "BASE_URL", "\"https://brooklyn-demo1.strikeprotocols.com/\""
-            buildConfigField "String", "ANCHOR_URL", "\"https://demo1.strikeprotocols.com/\""
-            buildConfigField "String", "SOLANA_URL", "\"https://api.mainnet-beta.solana.com\""
-            buildConfigField "String", "MIN_VERSION_ENDPOINT", "\"strike-security-app-version-dev.json\""
-            buildConfigField "String", "SOLANA_COMMITMENT", "\"finalized\""
-            buildConfigField "String", "OKTA_CLIENT_ID", "\"0oa7ajsmclS0GyzMw357\""
-            buildConfigField "String", "OKTA_ISSUER_ID", "\"aus7834x2w3eqeZSr357\""
             buildConfigField "String", "REDIRECT_SUFFIX", "\"-demo\""
             resValue "string", "RAYGUN_APP_ID", "\"CtOnGQjIo1U8dELkoUf0iw\""
             debuggable false
         }
         demoTwo {
-            initWith demoOne
             resValue "string", "app_name", "Demo2 Strike"
             applicationIdSuffix ".demo2"
+            minifyEnabled false
             buildConfigField "String", "BASE_URL", "\"https://brooklyn-demo2.strikeprotocols.com/\""
             buildConfigField "String", "ANCHOR_URL", "\"https://demo2.strikeprotocols.com/\""
             buildConfigField "String", "SOLANA_URL", "\"https://solana-validator-demo2.strikeprotocols.com\""
             buildConfigField "String", "MIN_VERSION_ENDPOINT", "\"strike-security-app-version-dev.json\""
             buildConfigField "String", "SOLANA_COMMITMENT", "\"confirmed\""
             buildConfigField "String", "OKTA_CLIENT_ID", "\"0oa7ajsmclS0GyzMw357\""
+            buildConfigField "String", "OKTA_ISSUER_ID", "\"aus7834x2w3eqeZSr357\""
             buildConfigField "String", "REDIRECT_SUFFIX", "\"-demo-2\""
+            resValue "string", "RAYGUN_APP_ID", "\"CtOnGQjIo1U8dELkoUf0iw\""
+            debuggable false
         }
         preRelease {
             resValue "string", "app_name", "PreRelease Strike"
