@@ -15,7 +15,7 @@ class ParseApprovalRequestTypes {
     fun parseAllApprovalRequestTypes() {
         val allApprovalRequests = getFullListOfApprovalItems()
 
-        assertEquals(12, allApprovalRequests.size)
+        assertEquals(13, allApprovalRequests.size)
 
         allApprovalRequests.forEach { approvalRequest ->
             assertNotNull(approvalRequest)
@@ -191,6 +191,11 @@ class ParseApprovalRequestTypes {
             JsonParser.parseString(acceptVaultInvitationJson.trim())
         val acceptVaultInvitationApproval = deserializer.parseData(acceptVaultInvitationJson)
         allApprovalRequests.add(acceptVaultInvitationApproval)
+
+        val passwordResetJson: JsonElement =
+            JsonParser.parseString(passwordResetJson.trim())
+        val passwordResetApproval = deserializer.parseData(passwordResetJson)
+        allApprovalRequests.add(passwordResetApproval)
 
         return allApprovalRequests
     }

@@ -11,10 +11,10 @@ import com.strikeprotocols.mobile.presentation.approvals.ApprovalRowContentHeade
 import com.strikeprotocols.mobile.presentation.approvals.approval_type_row_items.getHeader
 
 @Composable
-fun AcceptVaultInvitationDetailContent(
-    acceptVaultInvitation: SolanaApprovalRequestType.AcceptVaultInvitation
+fun PasswordResetDetailContent(
+    passwordReset: SolanaApprovalRequestType.PasswordReset
 ) {
-    val header = acceptVaultInvitation.getHeader(LocalContext.current)
+    val header = passwordReset.getHeader(LocalContext.current)
     ApprovalRowContentHeader(header = header, bottomSpacing = 36)
     Spacer(modifier = Modifier.height(24.dp))
 }

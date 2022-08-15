@@ -54,6 +54,7 @@ data class InitiationRequest(
             is BalanceAccountAddressWhitelistUpdate -> requestType.signingData
             is LoginApprovalRequest,
             is AcceptVaultInvitation,
+            is PasswordReset,
             is UnknownApprovalType ->
                 throw Exception(UNKNOWN_INITIATION)
         }
@@ -75,6 +76,7 @@ data class InitiationRequest(
 
         is UnknownApprovalType,
         is AcceptVaultInvitation,
+        is PasswordReset,
         is LoginApprovalRequest -> 0
     }
 
@@ -269,7 +271,7 @@ data class InitiationRequest(
                 return buffer.toByteArray()
             }
 
-            is LoginApprovalRequest, is AcceptVaultInvitation, is UnknownApprovalType -> {
+            is LoginApprovalRequest, is AcceptVaultInvitation, is UnknownApprovalType, is PasswordReset -> {
                 throw Exception("Unknown Approval")
             }
         }

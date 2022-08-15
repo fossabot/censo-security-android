@@ -135,6 +135,8 @@ class MockedApprovals {
 
     val acceptVaultInvitationJson = """{"id": "422e3504-4eea-493a-a0dd-64a001115540", "walletType": "Solana", "submitDate": "2022-06-21T14:20:38.145+00:00", "submitterName": "User 1", "submitterEmail": "authorized1@org1", "approvalTimeoutInSeconds": 9223372036854775807, "numberOfDispositionsRequired": 1, "numberOfApprovalsReceived": 0, "numberOfDeniesReceived": 0, "programVersion": null, "details": {"type": "AcceptVaultInvitation", "vaultGuid": "58e03f93-b9bc-4f22-b485-8e7a0abd8440", "vaultName": "Test Organization 1"}, "vaultName": "Test Organization 1"}"""
 
+    val passwordResetJson = """{"id": "422e3504-4eea-493a-a0dd-64a001115540", "walletType": "Solana", "submitDate": "2022-06-21T14:20:38.145+00:00", "submitterName": "User 1", "submitterEmail": "authorized1@org1", "approvalTimeoutInSeconds": 9223372036854775807, "numberOfDispositionsRequired": 1, "numberOfApprovalsReceived": 0, "numberOfDeniesReceived": 0, "programVersion": null, "details": {"type": "PasswordReset"}, "vaultName": null}"""
+
     // Initiation for a balance account creation:
     val multiSigWithBalanceAccountCreationJson = """
     {"id": "922b51bd-cd83-4a11-a7ce-156bf7573923", "walletType": "Solana", "submitDate": "2022-04-05T14:42:58.170+00:00", "submitterName": "User 1", "submitterEmail": "authorized1@org1", "approvalTimeoutInSeconds": 1800, "numberOfDispositionsRequired": 1, "numberOfApprovalsReceived": 0, "numberOfDeniesReceived": 0, "details": {"type": "MultisigOpInitiation", "details": {"type": "BalanceAccountCreation", "accountSlot": 0, "accountInfo": {"identifier": "00a56503-e4cf-40a8-9eca-508093cf225e", "name": "Account 1", "accountType": "BalanceAccount"}, "approvalsRequired": 1, "approvalTimeout": 3600000, "approvers": [{"slotId": 0, "value": {"publicKey": "Ffs2XpnxtSBH5xTHQtece1jrmdVjT2syTceQHkjKXK1e", "name": "User 1", "email": "authorized1@org1"}}], "whitelistEnabled": "Off", "dappsEnabled": "Off", "addressBookSlot": 0, "stakingValidator": null, "signingData": {"feePayer": "FM36ah2bH8nQWJNPCRzu7R69gE5o6UhujqJFtDpWN5as", "walletProgramId": "GN694sm2Ex1GcnamYwqfjSs6XJ7xadTXiZqBwvGvQyT8", "multisigOpAccountAddress": "11111111111111111111111111111111", "walletAddress": "6JmmkmowSLQ3jFQacREDNwbrD3Hj7Eyj9MvK8eBTzV5q"}}, "opAccountCreationInfo": {"accountSize": 848, "minBalanceForRentExemption": 6792960}, "dataAccountCreationInfo": null}}
@@ -266,6 +268,10 @@ class MockedApprovals {
         val acceptVaultInvitationApproval =
             WalletApprovalDeserializer().parseData(acceptVaultRequest)
 
+        val passwordResetRequest: JsonElement =
+            JsonParser.parseString(passwordResetJson.trim())
+        val passwordResetApproval =
+            WalletApprovalDeserializer().parseData(passwordResetRequest)
 
         val unknownRequest =
             getWalletApprovalRequest(
@@ -274,6 +280,7 @@ class MockedApprovals {
 
         return listOf(
             acceptVaultInvitationApproval,
+            passwordResetApproval,
             withdrawalRequest,
             conversionRequest,
             loginApproval,
@@ -288,7 +295,7 @@ class MockedApprovals {
             walletConfigPolicyUpdateRequest,
             unknownRequest,
             wrapConversionRequest,
-            dappBookUpdateRequest
+            dappBookUpdateRequest,
         )
     }
 

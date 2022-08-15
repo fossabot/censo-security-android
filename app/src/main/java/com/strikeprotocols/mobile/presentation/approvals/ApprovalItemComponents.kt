@@ -143,7 +143,8 @@ fun VaultTitle(
 
 @Composable
 fun ApprovalRowContent(
-    type: SolanaApprovalRequestType
+    type: SolanaApprovalRequestType,
+    approval: WalletApproval,
 ) {
     when (type) {
         is SolanaApprovalRequestType.WithdrawalRequest ->
@@ -176,6 +177,8 @@ fun ApprovalRowContent(
             WrapConversionRequestRowContent(wrapConversionRequest = type)
         is SolanaApprovalRequestType.AcceptVaultInvitation ->
             AcceptVaultInvitationRowContent(acceptVaultInvitation = type)
+        is SolanaApprovalRequestType.PasswordReset ->
+            PasswordResetRowContent(passwordReset = type, email = approval.submitterEmail ?: "")
         else -> {
             val header = type.getHeader(LocalContext.current)
             Text(text = header)
@@ -217,6 +220,8 @@ fun ApprovalDetailContent(approval: WalletApproval, type: SolanaApprovalRequestT
             WrapConversionRequestDetailContent(wrapConversionRequest = type)
         is SolanaApprovalRequestType.AcceptVaultInvitation ->
             AcceptVaultInvitationDetailContent(acceptVaultInvitation = type)
+        is SolanaApprovalRequestType.PasswordReset ->
+            PasswordResetDetailContent(passwordReset = type)
         else -> Text(text = stringResource(R.string.unknown_approval_item))
     }
 }

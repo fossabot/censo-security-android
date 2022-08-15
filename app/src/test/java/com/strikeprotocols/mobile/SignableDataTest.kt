@@ -854,4 +854,34 @@ class SignableDataTest {
         }
     }
 
+    @Test
+    fun testPasswordReset() {
+        val deserializer = WalletApprovalDeserializer()
+        val passwordResetJson: JsonElement =
+            JsonParser.parseString(passwordResetJson.trim())
+        val passwordResetApproval = deserializer.parseData(passwordResetJson)
+
+
+        val approvalDispositionRequest = ApprovalDispositionRequest(
+            approvalDisposition = ApprovalDisposition.APPROVE,
+            requestId = passwordResetApproval.id!!,
+            requestType = passwordResetApproval.getSolanaApprovalRequestType(),
+            nonces = listOf(),
+            email = "dont care"
+        )
+
+        when (approvalDispositionRequest.requestType) {
+            is SolanaApprovalRequestType.PasswordReset -> {
+                val signableData =
+                    approvalDispositionRequest.retrieveSignableData(approverPublicKey = "GYFxPGjuBXYKg1S91zgpVZCLP4guLGRho27bTAkAzjVL")
+                assertEquals(
+                    String(signableData, charset = Charsets.UTF_8),
+                    ""
+                )
+            }
+            else ->
+                assertTrue("should not get here", false)
+        }
+    }
+
 }

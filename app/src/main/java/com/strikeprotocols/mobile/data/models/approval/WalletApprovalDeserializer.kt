@@ -213,6 +213,12 @@ class WalletApprovalDeserializer : JsonDeserializer<WalletApproval> {
                     SolanaApprovalRequestType.AcceptVaultInvitation::class.java
                 )
             }
+            ApprovalType.PASSWORD_RESET_TYPE -> {
+                Gson().fromJson(
+                    details,
+                    SolanaApprovalRequestType.PasswordReset::class.java
+                )
+            }
             else -> SolanaApprovalRequestType.UnknownApprovalType
         }
     }

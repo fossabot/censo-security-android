@@ -323,7 +323,8 @@ fun ApprovalsList(
                                 positiveButtonText = safeApproval.approveButtonCaption(context)
                             ) {
                                 ApprovalRowContent(
-                                    type = type
+                                    type = type,
+                                    approval = safeApproval
                                 )
                             }
 

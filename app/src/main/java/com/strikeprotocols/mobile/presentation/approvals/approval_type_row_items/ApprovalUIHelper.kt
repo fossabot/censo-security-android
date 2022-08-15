@@ -73,6 +73,8 @@ fun SolanaApprovalRequestType.getHeader(context: Context): String {
         }
         is AcceptVaultInvitation ->
             context.getString(R.string.accept_vault_invitation_approval_header)
+        is PasswordReset ->
+            context.getString(R.string.password_reset_approval_header)
         is WalletConfigPolicyUpdate ->
             context.getString(R.string.wallet_config_policy_update_approval_header)
         is WithdrawalRequest ->
@@ -108,6 +110,7 @@ fun SolanaApprovalRequestType.getApprovalTypeDialogTitle(context: Context): Stri
             }
         }
         is AcceptVaultInvitation -> R.string.accept_vault_invitation_dialog_title
+        is PasswordReset -> R.string.password_reset_dialog_title
     }
 
     return context.getString(stringResId)
@@ -202,6 +205,9 @@ private fun SolanaApprovalRequestType.getApprovalTypeDialogMessage(context: Cont
         }
         is BalanceAccountAddressWhitelistUpdate -> {
             "${context.getString(R.string.balance_account_whitelist_dialog_message)} ${accountInfo.name}"
+        }
+        is PasswordReset -> {
+            context.getString(R.string.password_reset_dialog_message)
         }
     }
 }

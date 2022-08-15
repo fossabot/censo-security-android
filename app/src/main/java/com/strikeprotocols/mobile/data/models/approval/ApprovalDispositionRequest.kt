@@ -47,7 +47,8 @@ data class ApprovalDispositionRequest(
 
             is LoginApprovalRequest,
             is UnknownApprovalType,
-            is AcceptVaultInvitation -> 0
+            is AcceptVaultInvitation,
+            is PasswordReset -> 0
         }
     }
 
@@ -215,7 +216,7 @@ data class ApprovalDispositionRequest(
                 buffer.write(hashBytes)
                 buffer.toByteArray()
             }
-            is LoginApprovalRequest, is AcceptVaultInvitation -> throw Exception(
+            is LoginApprovalRequest, is AcceptVaultInvitation, is PasswordReset -> throw Exception(
                 INVALID_REQUEST_APPROVAL
             )
             is UnknownApprovalType -> throw Exception(
@@ -240,7 +241,7 @@ data class ApprovalDispositionRequest(
             is BalanceAccountAddressWhitelistUpdate -> requestType.signingData
             is DAppTransactionRequest -> requestType.signingData
 
-            is LoginApprovalRequest, is AcceptVaultInvitation -> throw Exception(
+            is LoginApprovalRequest, is AcceptVaultInvitation, is PasswordReset -> throw Exception(
                 INVALID_REQUEST_APPROVAL
             )
             is UnknownApprovalType -> throw Exception(
@@ -267,6 +268,8 @@ data class ApprovalDispositionRequest(
                 requestType.jwtToken.toByteArray(charset = Charsets.UTF_8)
             is AcceptVaultInvitation ->
                 requestType.vaultName.toByteArray(charset = Charsets.UTF_8)
+            is PasswordReset ->
+                "".toByteArray(charset = Charsets.UTF_8)
             else -> {
                 if (approverPublicKey == null) throw Exception(MISSING_KEY)
 

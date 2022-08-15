@@ -197,6 +197,10 @@
     <string name="vault_name">Vault Name</string>
     <string name="clear">Clear</string>
 
+    <string name="password_reset_approval_header">Password Reset</string>
+    <string name="password_reset_dialog_title">Password Reset</string>
+    <string name="password_reset_dialog_message">Password Reset</string>
+
     <string name="start_over">Start over</string>
     <string name="copy_key">Copy Recovery Phrase</string>
     <string name="phrase_generated">Your secret recovery phrase has been generated</string>

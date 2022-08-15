@@ -340,6 +340,10 @@ sealed class SolanaApprovalRequestType {
         val vaultName: String
     ) : SolanaApprovalRequestType()
 
+    data class PasswordReset(
+        val type: String
+    ) : SolanaApprovalRequestType()
+
     object UnknownApprovalType : SolanaApprovalRequestType()
 
     companion object {
@@ -363,7 +367,7 @@ sealed class SolanaApprovalRequestType {
             is BalanceAccountNameUpdate -> signingData.nonceAccountAddresses
             is BalanceAccountPolicyUpdate -> signingData.nonceAccountAddresses
             is BalanceAccountAddressWhitelistUpdate -> signingData.nonceAccountAddresses
-            is LoginApprovalRequest, is UnknownApprovalType, is AcceptVaultInvitation -> emptyList()
+            is LoginApprovalRequest, is UnknownApprovalType, is AcceptVaultInvitation, is PasswordReset -> emptyList()
         }
     }
 }
@@ -384,6 +388,7 @@ enum class ApprovalType(val value: String) {
     WALLET_CONFIG_POLICY_UPDATE_TYPE("WalletConfigPolicyUpdate"),
     BALANCE_ACCOUNT_ADDRESS_WHITE_LIST_UPDATE_TYPE("BalanceAccountAddressWhitelistUpdate"),
     ACCEPT_VAULT_INVITATION_TYPE("AcceptVaultInvitation"),
+    PASSWORD_RESET_TYPE("PasswordReset"),
 
     UNKNOWN_TYPE("");
 
@@ -405,6 +410,7 @@ enum class ApprovalType(val value: String) {
                 WALLET_CONFIG_POLICY_UPDATE_TYPE.value -> WALLET_CONFIG_POLICY_UPDATE_TYPE
                 BALANCE_ACCOUNT_ADDRESS_WHITE_LIST_UPDATE_TYPE.value -> BALANCE_ACCOUNT_ADDRESS_WHITE_LIST_UPDATE_TYPE
                 ACCEPT_VAULT_INVITATION_TYPE.value -> ACCEPT_VAULT_INVITATION_TYPE
+                PASSWORD_RESET_TYPE.value -> PASSWORD_RESET_TYPE
                 else -> UNKNOWN_TYPE
             }
     }
