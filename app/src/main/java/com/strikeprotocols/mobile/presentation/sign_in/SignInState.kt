@@ -53,8 +53,4 @@ data class SignInState(
 
     fun emailValid() = Patterns.EMAIL_ADDRESS.matcher(email).matches()
     fun passwordValid() = password.isNotEmpty()
-
-    companion object {
-        const val DEFAULT_SIGN_IN_ERROR_MESSAGE = "Something Went Wrong"
-    }
 }

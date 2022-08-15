@@ -17,7 +17,6 @@ import com.strikeprotocols.mobile.data.models.IndexedPhraseWord
 import com.strikeprotocols.mobile.data.models.PushBody
 import com.strikeprotocols.mobile.data.models.VerifyUser
 import com.strikeprotocols.mobile.data.models.WalletSigner
-import com.strikeprotocols.mobile.presentation.sign_in.SignInState.Companion.DEFAULT_SIGN_IN_ERROR_MESSAGE
 import kotlinx.coroutines.*
 import kotlinx.coroutines.tasks.await
 

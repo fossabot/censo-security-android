@@ -169,8 +169,7 @@ fun ApprovalRowContent(
             BalanceAccountPolicyUpdateRowContent(accountPolicyUpdate = type)
         is SolanaApprovalRequestType.BalanceAccountSettingsUpdate -> 
             BalanceAccountSettingsUpdateRowContent(accountSettingsUpdate = type)
-        is SolanaApprovalRequestType.DAppBookUpdate -> 
-            DAppBookUpdateRowContent(dAppBookUpdate = type)
+        is SolanaApprovalRequestType.DAppBookUpdate -> DAppBookUpdateRowContent()
         is SolanaApprovalRequestType.WalletConfigPolicyUpdate -> 
             WalletConfigPolicyUpdateRowContent(walletConfigPolicyUpdate = type)
         is SolanaApprovalRequestType.WrapConversionRequest -> 
@@ -212,8 +211,7 @@ fun ApprovalDetailContent(approval: WalletApproval, type: SolanaApprovalRequestT
             BalanceAccountPolicyUpdateDetailContent(accountPolicyUpdate = type)
         is SolanaApprovalRequestType.BalanceAccountSettingsUpdate ->
             BalanceAccountSettingsUpdateDetailContent(accountSettingsUpdate = type)
-        is SolanaApprovalRequestType.DAppBookUpdate ->
-            DAppBookUpdateDetailContent(dAppBookUpdate = type)
+        is SolanaApprovalRequestType.DAppBookUpdate -> DAppBookUpdateDetailContent()
         is SolanaApprovalRequestType.WalletConfigPolicyUpdate ->
             WalletConfigPolicyUpdateDetailContent(walletConfigPolicyUpdate = type)
         is SolanaApprovalRequestType.WrapConversionRequest ->

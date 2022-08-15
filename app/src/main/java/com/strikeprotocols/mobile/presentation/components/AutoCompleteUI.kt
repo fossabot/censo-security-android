@@ -35,7 +35,6 @@ fun <T> AutoCompleteUI(
     itemContent: @Composable (T) -> Unit = {}
 ) {
 
-    val view = LocalView.current
     val lazyListState = rememberLazyListState()
     LazyColumn(
         state = lazyListState,

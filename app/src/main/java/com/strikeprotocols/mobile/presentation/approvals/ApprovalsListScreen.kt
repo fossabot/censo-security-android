@@ -350,7 +350,6 @@ fun ApprovalsList(
                         if (type.isUnknownTypeOrUIUnimplemented()) {
                             UnknownApprovalItem(
                                 timeRemainingInSeconds = timeRemainingInSeconds,
-                                accountRowMetaData = rowMetaData,
                                 onUpdateAppClicked = {
                                     val playStoreIntent = Intent(Intent.ACTION_VIEW).apply {
                                         data =

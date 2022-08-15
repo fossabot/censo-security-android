@@ -39,15 +39,12 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
-import com.strikeprotocols.mobile.BuildConfig
 import com.strikeprotocols.mobile.R
 import com.strikeprotocols.mobile.common.Resource
-import com.strikeprotocols.mobile.common.strikeLog
 import com.strikeprotocols.mobile.data.models.IndexedPhraseWord
 import com.strikeprotocols.mobile.data.models.WalletSigner
 import com.strikeprotocols.mobile.presentation.sign_in.PhraseUICompanion.DISPLAY_RANGE_SET
@@ -279,20 +276,10 @@ fun CopyKeyUI(phrase: String, phraseCopied: Boolean, phraseSaved: Boolean, onNav
                                 .padding(bottom = 24.dp),
                             text = stringResource(R.string.i_saved_key)
                         ) {
-                            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P) {
-                                try {
-                                    if (clipboard.hasPrimaryClip()) {
-                                        clipboard.clearPrimaryClip()
-                                    } else {
-                                        val clip: ClipData =
-                                            ClipData.newPlainText(
-                                                SignInViewModel.CLIPBOARD_LABEL_PHRASE,
-                                                ""
-                                            )
-                                        clipboard.setPrimaryClip(clip)
-                                    }
-                                } catch (e: Exception) {
-
+                            try {
+                                if (clipboard.hasPrimaryClip()) {
+                                    clipboard.clearPrimaryClip()
+                                } else {
                                     val clip: ClipData =
                                         ClipData.newPlainText(
                                             SignInViewModel.CLIPBOARD_LABEL_PHRASE,
@@ -300,7 +287,7 @@ fun CopyKeyUI(phrase: String, phraseCopied: Boolean, phraseSaved: Boolean, onNav
                                         )
                                     clipboard.setPrimaryClip(clip)
                                 }
-                            } else {
+                            } catch (e: Exception) {
                                 val clip: ClipData =
                                     ClipData.newPlainText(
                                         SignInViewModel.CLIPBOARD_LABEL_PHRASE,

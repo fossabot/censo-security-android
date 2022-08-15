@@ -42,7 +42,7 @@ android {
 
     defaultConfig {
         applicationId coreAppId
-        minSdk 26
+        minSdk 30
         targetSdk 32
         versionCode 9
 
