@@ -13,7 +13,6 @@ data class ApprovalsState(
 
     val shouldShowErrorSnackbar: Boolean = false,
     val shouldDisplayConfirmDisposition: ConfirmDispositionDialogDetails? = null,
-    val shouldDisplayApprovalDispositionError: Boolean = false,
     val multipleAccounts: DurableNonceViewModel.MultipleAccounts? = null,
 
     //Async Data

@@ -7,10 +7,13 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.strikeprotocols.mobile.BuildConfig
 import com.strikeprotocols.mobile.common.Resource
-import com.strikeprotocols.mobile.common.strikeLog
-import com.strikeprotocols.mobile.data.SolanaApiService
+import com.strikeprotocols.mobile.common.StrikeError
+import com.strikeprotocols.mobile.data.BaseRepository.Companion.NO_CODE
+import com.strikeprotocols.mobile.data.BaseRepository.Companion.TOO_MANY_REQUESTS_CODE
+import com.strikeprotocols.mobile.data.SolanaRepository
 import com.strikeprotocols.mobile.data.models.Nonce
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.util.*
 import javax.inject.Inject
@@ -18,14 +21,23 @@ import kotlin.Exception
 
 @HiltViewModel
 class DurableNonceViewModel @Inject constructor(
-    private val solanaApiService: SolanaApiService
+    private val solanaRepository: SolanaRepository
 ) : ViewModel() {
+
+    private var nonceRetryCount: Int
 
     var state by mutableStateOf(DurableNonceState())
         private set
 
-    fun setNonceAccountAddresses(nonceAccountAddresses: List<String>) {
-        state = state.copy(nonceAccountAddresses = nonceAccountAddresses)
+    init {
+        nonceRetryCount = 0
+    }
+
+    fun setInitialData(nonceAccountAddresses: List<String>, minimumNonceAccountAddressesSlot: Int) {
+        state = state.copy(
+            nonceAccountAddresses = nonceAccountAddresses,
+            minimumNonceAccountAddressesSlot = minimumNonceAccountAddressesSlot
+        )
     }
 
     fun resetState() {
@@ -58,22 +70,56 @@ class DurableNonceViewModel @Inject constructor(
     private fun retrieveMultipleAccounts() {
         viewModelScope.launch {
             state = state.copy(multipleAccountsResult = Resource.Loading())
-            state = try {
-                val multipleAccountsBody =
-                    MultipleAccountsBody(
-                        params = RPCParam(keys = state.nonceAccountAddresses)
-                    )
-                val multipleAccountsResult =
-                    solanaApiService.multipleAccounts(multipleAccountsBody)
 
+            val multipleAccountsBody =
+                MultipleAccountsBody(
+                    params = RPCParam(keys = state.nonceAccountAddresses)
+                )
+            val multipleAccountsResult =
+                solanaRepository.getMultipleAccounts(multipleAccountsBody)
+
+            if (multipleAccountsResult is Resource.Success) {
+
+                val multipleAccountsResponse = multipleAccountsResult.data
+
+                if (state.minimumNonceAccountAddressesSlot > (multipleAccountsResponse?.slot ?: 0)
+                    && nonceRetryCount < NONCE_RETRIES
+                ) {
+                    nonceRetryCount++
+                    retrieveMultipleAccounts()
+                    return@launch
+                } else if (nonceRetryCount >= NONCE_RETRIES) {
+                    nonceRetryCount = 0
+                    state = state.copy(
+                        multipleAccountsResult = Resource.Error(
+                            strikeError = StrikeError.DefaultApiError(statusCode = NO_CODE),
+                            exception = Exception(
+                                UNABLE_TO_RETRIEVE_VALID_NONCE
+                            )
+                        )
+                    )
+                    return@launch
+                }
+
+                nonceRetryCount = 0
                 val multipleAccounts =
-                    MultipleAccounts(nonces = multipleAccountsResult.nonces)
-                state.copy(
-                    multipleAccountsResult = Resource.Success(multipleAccountsResult),
+                    MultipleAccounts(nonces = multipleAccountsResponse?.nonces ?: emptyList())
+                state = state.copy(
+                    multipleAccountsResult = Resource.Success(multipleAccountsResponse),
                     multipleAccounts = multipleAccounts
                 )
-            } catch (e: Exception) {
-                state.copy(multipleAccountsResult = Resource.Error(e.message ?: ""))
+            } else if (multipleAccountsResult is Resource.Error) {
+                if (multipleAccountsResult.strikeError is StrikeError.ApiError) {
+                    if (multipleAccountsResult.strikeError.statusCode == TOO_MANY_REQUESTS_CODE) {
+                        delay(TOO_MANY_REQUESTS_DELAY)
+                        nonceRetryCount++
+                        retrieveMultipleAccounts()
+                    } else {
+                        state = state.copy(
+                            multipleAccountsResult = multipleAccountsResult
+                        )
+                    }
+                }
             }
         }
     }
@@ -82,6 +128,10 @@ class DurableNonceViewModel @Inject constructor(
         const val MULTIPLE_ACCOUNTS_METHOD = "getMultipleAccounts"
         const val RPC_VERSION = "2.0"
         const val BASE_64 = "base64"
+        const val UNABLE_TO_RETRIEVE_VALID_NONCE = "Unable to retrieve valid nonce data"
+
+        const val NONCE_RETRIES = 20
+        const val TOO_MANY_REQUESTS_DELAY: Long = 10_000L
     }
 
     inner class MultipleAccounts(

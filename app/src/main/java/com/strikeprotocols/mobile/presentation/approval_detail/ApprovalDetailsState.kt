@@ -7,7 +7,6 @@ import com.strikeprotocols.mobile.presentation.durable_nonce.DurableNonceViewMod
 data class ApprovalDetailsState(
     val shouldKickOutUserToApprovalsScreen: Boolean = false,
     val shouldDisplayConfirmDisposition: ConfirmDispositionDialogDetails? = null,
-    val shouldDisplayApprovalDispositionError: Boolean = false,
     val screenWasBackgrounded: Boolean = false,
     val approval: WalletApproval? = null,
     val multipleAccounts: DurableNonceViewModel.MultipleAccounts? = null,

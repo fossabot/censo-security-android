@@ -45,13 +45,20 @@ object AppModule {
 
     @Provides
     @Singleton
+    fun provideSemVersionService(): SemVersionApiService {
+        return SemVersionApiService.create()
+    }
+
+    @Provides
+    @Singleton
     fun provideUserRepository(
         authProvider: AuthProvider,
         api: BrooklynApiService,
         anchorApiService: AnchorApiService,
         encryptionManager: EncryptionManager,
         securePreferences: SecurePreferences,
-        phraseValidator: PhraseValidator
+        phraseValidator: PhraseValidator,
+        semVersionApiService: SemVersionApiService
     ): UserRepository {
         return UserRepositoryImpl(
             authProvider = authProvider,
@@ -59,6 +66,7 @@ object AppModule {
             anchorApiService = anchorApiService,
             encryptionManager = encryptionManager,
             securePreferences = securePreferences,
+            versionApiService = semVersionApiService,
             phraseValidator = phraseValidator
         )
     }
@@ -73,6 +81,12 @@ object AppModule {
     @Singleton
     fun providePushRepository(api: BrooklynApiService, @ApplicationContext applicationContext: Context): PushRepository {
         return PushRepositoryImpl(api, applicationContext)
+    }
+
+    @Provides
+    @Singleton
+    fun provideSolanaRepository(api: SolanaApiService): SolanaRepository {
+        return SolanaRepositoryImpl(api)
     }
 
     @Provides

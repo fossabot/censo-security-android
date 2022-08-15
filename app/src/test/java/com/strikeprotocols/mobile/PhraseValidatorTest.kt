@@ -3,7 +3,7 @@ package com.strikeprotocols.mobile
 import com.strikeprotocols.mobile.data.PhraseValidator.Companion.NOT_ENOUGH_WORDS
 import com.strikeprotocols.mobile.data.PhraseValidator.Companion.TOO_MANY_WORDS
 import com.strikeprotocols.mobile.data.PhraseValidatorImpl
-import junit.framework.Assert.assertEquals
+import junit.framework.TestCase.assertEquals
 import org.junit.Test
 
 class PhraseValidatorTest {

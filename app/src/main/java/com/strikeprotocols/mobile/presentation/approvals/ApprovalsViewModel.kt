@@ -17,13 +17,13 @@ import com.strikeprotocols.mobile.data.models.RegisterApprovalDisposition
 import com.strikeprotocols.mobile.data.models.approval.SolanaApprovalRequestDetails
 import com.strikeprotocols.mobile.data.models.approval.WalletApproval
 import com.strikeprotocols.mobile.presentation.approval_detail.ConfirmDispositionDialogDetails
-import com.strikeprotocols.mobile.presentation.approval_disposition.ApprovalDispositionError
 import com.strikeprotocols.mobile.presentation.approval_disposition.ApprovalDispositionState
 import com.strikeprotocols.mobile.presentation.approvals.ApprovalsViewModel.Companion.UPDATE_COUNTDOWN
 import com.strikeprotocols.mobile.presentation.durable_nonce.DurableNonceViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import org.web3j.crypto.Wallet
 import javax.inject.Inject
 import kotlin.Exception
 
@@ -114,14 +114,6 @@ class ApprovalsViewModel @Inject constructor(
         state = state.copy(shouldDisplayConfirmDisposition = null)
     }
 
-    fun setShouldDisplayApprovalDispositionError() {
-        state = state.copy(shouldDisplayApprovalDispositionError = true)
-    }
-
-    private fun resetShouldDisplayApprovalDispositionError() {
-        state = state.copy(shouldDisplayApprovalDispositionError = false)
-    }
-
     fun resetShouldShowErrorSnackbar() {
         state = state.copy(shouldShowErrorSnackbar = false)
     }
@@ -164,35 +156,48 @@ class ApprovalsViewModel @Inject constructor(
     }
 
     fun dismissApprovalDispositionError() {
-        resetShouldDisplayApprovalDispositionError()
         resetApprovalDispositionState()
     }
 
 
-    fun resetApprovalDispositionState() {
+    private fun resetApprovalDispositionState() {
         state = state.copy(
             approvalDispositionState = ApprovalDispositionState()
         )
+    }
+
+    fun resetWalletApprovalsResult() {
+        state = state.copy(walletApprovalsResult = Resource.Uninitialized)
     }
 
 
     //region API Calls
     private fun retrieveWalletApprovals() {
         viewModelScope.launch {
+            val cachedApprovals = state.approvals.toList()
+
             state = state.copy(walletApprovalsResult = Resource.Loading())
             delay(250)
-            state = try {
-                val walletApprovals = approvalsRepository.getWalletApprovals()
-                state.copy(
-                    walletApprovalsResult = Resource.Success(walletApprovals),
-                    approvals = walletApprovals
-                )
-            } catch (e: Exception) {
-                state.copy(
-                    walletApprovalsResult = Resource.Error(e.message ?: ""),
-                    shouldShowErrorSnackbar = true
-                )
-            }
+
+            val walletApprovalsResource = approvalsRepository.getWalletApprovals()
+
+            val approvals =
+                when (walletApprovalsResource) {
+                    is Resource.Success -> {
+                        walletApprovalsResource.data ?: emptyList()
+                    }
+                    is Resource.Error -> {
+                        cachedApprovals
+                    }
+                    else -> {
+                        emptyList()
+                    }
+                }
+
+            state = state.copy(
+                walletApprovalsResult = walletApprovalsResource,
+                approvals = approvals
+            )
         }
     }
 
@@ -203,15 +208,25 @@ class ApprovalsViewModel @Inject constructor(
                     registerApprovalDispositionResult = Resource.Loading()
                 )
             )
+
+            val isInitiationRequest =
+                state.selectedApproval?.details is SolanaApprovalRequestDetails.MultiSignOpInitiationDetails
             //Data retrieval and checks
             val nonces = state.multipleAccounts?.nonces
             if (nonces == null) {
-                state = state.copy(
-                    approvalDispositionState = state.approvalDispositionState?.copy(
-                        approvalDispositionError = ApprovalDispositionError.DURABLE_NONCE_FAILURE,
-                        registerApprovalDispositionResult = Resource.Error(ApprovalDispositionError.DURABLE_NONCE_FAILURE.error)
+                state = if (isInitiationRequest) {
+                    state.copy(
+                        approvalDispositionState = state.approvalDispositionState?.copy(
+                            initiationDispositionResult = Resource.Error()
+                        )
                     )
-                )
+                } else {
+                    state.copy(
+                        approvalDispositionState = state.approvalDispositionState?.copy(
+                            registerApprovalDispositionResult = Resource.Error()
+                        )
+                    )
+                }
                 return@launch
             }
 
@@ -219,12 +234,19 @@ class ApprovalsViewModel @Inject constructor(
                 state.selectedApproval?.getSolanaApprovalRequestType()
             val approvalId = state.selectedApproval?.id ?: ""
             if (solanaApprovalRequestType == null) {
-                state = state.copy(
-                    approvalDispositionState = state.approvalDispositionState?.copy(
-                        approvalDispositionError = ApprovalDispositionError.SIGNING_DATA_FAILURE,
-                        registerApprovalDispositionResult = Resource.Error(ApprovalDispositionError.SIGNING_DATA_FAILURE.error)
+                state = if (isInitiationRequest) {
+                    state.copy(
+                        approvalDispositionState = state.approvalDispositionState?.copy(
+                            initiationDispositionResult = Resource.Error()
+                        )
                     )
-                )
+                } else {
+                    state.copy(
+                        approvalDispositionState = state.approvalDispositionState?.copy(
+                            registerApprovalDispositionResult = Resource.Error()
+                        )
+                    )
+                }
                 return@launch
             }
 
@@ -232,71 +254,58 @@ class ApprovalsViewModel @Inject constructor(
             val approvalDisposition =
                 if (recentApprovalDisposition is Resource.Success) recentApprovalDisposition.data else null
             if (approvalDisposition == null) {
-                state = state.copy(
-                    approvalDispositionState = state.approvalDispositionState?.copy(
-                        approvalDispositionError = ApprovalDispositionError.APPROVAL_DISPOSITION_FAILURE,
-                        registerApprovalDispositionResult = Resource.Error(ApprovalDispositionError.APPROVAL_DISPOSITION_FAILURE.error)
+                state = if (isInitiationRequest) {
+                    state.copy(
+                        approvalDispositionState = state.approvalDispositionState?.copy(
+                            initiationDispositionResult = Resource.Error()
+                        )
                     )
-                )
+                } else {
+                    state.copy(
+                        approvalDispositionState = state.approvalDispositionState?.copy(
+                            registerApprovalDispositionResult = Resource.Error()
+                        )
+                    )
+                }
                 return@launch
             }
 
-            if (state.selectedApproval?.details is SolanaApprovalRequestDetails.MultiSignOpInitiationDetails) {
-                try {
-                    val multiSignOpDetails =
-                        state.selectedApproval?.details as SolanaApprovalRequestDetails.MultiSignOpInitiationDetails
-                    val initiationDisposition = InitiationDisposition(
-                        approvalDisposition = approvalDisposition,
-                        nonces = nonces,
-                        multiSigOpInitiationDetails = multiSignOpDetails
-                    )
+            if (isInitiationRequest) {
+                val multiSignOpDetails =
+                    state.selectedApproval?.details as SolanaApprovalRequestDetails.MultiSignOpInitiationDetails
+                val initiationDisposition = InitiationDisposition(
+                    approvalDisposition = approvalDisposition,
+                    nonces = nonces,
+                    multiSigOpInitiationDetails = multiSignOpDetails
+                )
 
-                    val initiationResponse = approvalsRepository.approveOrDenyInitiation(
-                        requestId = approvalId,
-                        initialDisposition = initiationDisposition
-                    )
+                val initiationResponseResource = approvalsRepository.approveOrDenyInitiation(
+                    requestId = approvalId,
+                    initialDisposition = initiationDisposition
+                )
 
-                    state = state.copy(
-                        approvalDispositionState = state.approvalDispositionState?.copy(
-                            initiationDispositionResult = Resource.Success(initiationResponse)
-                        )
+                state = state.copy(
+                    approvalDispositionState = state.approvalDispositionState?.copy(
+                        initiationDispositionResult = initiationResponseResource
                     )
-                } catch (e: Exception) {
-                    state = state.copy(
-                        approvalDispositionState = state.approvalDispositionState?.copy(
-                            approvalDispositionError = ApprovalDispositionError.SUBMIT_FAILURE,
-                            initiationDispositionResult = Resource.Error(e.message ?: "")
-                        )
-                    )
-                }
+                )
             } else {
-                try {
-                    val registerApprovalDisposition = RegisterApprovalDisposition(
-                        approvalDisposition = approvalDisposition,
-                        solanaApprovalRequestType = solanaApprovalRequestType,
-                        nonces = nonces,
-                    )
+                val registerApprovalDisposition = RegisterApprovalDisposition(
+                    approvalDisposition = approvalDisposition,
+                    solanaApprovalRequestType = solanaApprovalRequestType,
+                    nonces = nonces,
+                )
 
-                    val approvalDispositionResponse =
-                        approvalsRepository.approveOrDenyDisposition(
-                            requestId = approvalId,
-                            registerApprovalDisposition = registerApprovalDisposition
-                        )
-                    state = state.copy(
-                        approvalDispositionState = state.approvalDispositionState?.copy(
-                            registerApprovalDispositionResult = Resource.Success(
-                                approvalDispositionResponse
-                            )
-                        )
+                val approvalDispositionResource =
+                    approvalsRepository.approveOrDenyDisposition(
+                        requestId = approvalId,
+                        registerApprovalDisposition = registerApprovalDisposition
                     )
-                } catch (e: Exception) {
-                    state = state.copy(
-                        approvalDispositionState = state.approvalDispositionState?.copy(
-                            approvalDispositionError = ApprovalDispositionError.SUBMIT_FAILURE,
-                            registerApprovalDispositionResult = Resource.Error(e.message ?: "")
-                        )
+                state = state.copy(
+                    approvalDispositionState = state.approvalDispositionState?.copy(
+                        registerApprovalDispositionResult = approvalDispositionResource
                     )
-                }
+                )
             }
         }
     }

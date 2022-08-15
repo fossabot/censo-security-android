@@ -42,18 +42,11 @@
     <string name="snackbar_refresh_error">Something went wrong, please try again</string>
     <string name="auth_flow_exception">Something went wrong, please try again</string>
 
-    <string name="phrase_dialog_title">Secret Phrase</string>
-
     <string name="approval_expired">Expired</string>
     <string name="confirm">Confirm</string>
     <string name="biometry_check">Biometric Check</string>
     <string name="performing_biometry_check">Performing biometric check before submitting disposition</string>
 
-    <string name="approval_disposition_error_general">Unable to register approval decision.</string>
-    <string name="approval_disposition_error">Failure with recording approval disposition</string>
-    <string name="approval_disposition_error_signing_data">Failure signing disposition data</string>
-    <string name="approval_disposition_error_nonces">Failure retrieving nonces from blockchain</string>
-    <string name="approval_disposition_error_submit">Failure submitting data to the server</string>
     <string name="approval_disposition_error_title">Something went wrong</string>
 
     <string name="biometry_disabled_message">You must enable biometric security in your device settings.\n\nIf you already have biometry enabled, you may need to enable a different biometric option to meet the security threshold of the Strike Security App.</string>
@@ -121,14 +114,6 @@
     <string name="key_regeneration_failed">Unable to regenerate key pair. Please retry.</string>
     <string name="sign_data_failed">Unable to sign data. Please retry.</string>
     <string name="verify_key_failed">Unable to verify data. Please retry.</string>
-    <string name="unable_to_add_wallet_signer_title">Unable To Add Wallet Signer</string>
-    <string name="unable_to_add_wallet_signer_message">We were unable to add the wallet signer to the app. Please retry login.</string>
-
-    <string name="verify_user_fail_title">Unable To Retrieve User Details</string>
-    <string name="verify_user_fail_message">We were unable to retrieve user details to complete login.\n\nPlease try again.</string>
-
-    <string name="wallet_signers_fail_title">Unable To Retrieve User Wallet</string>
-    <string name="wallet_signers_fail_message">We were unable to retrieve user wallet details to complete login.\n\nPlease try again.</string>
 
     <string name="add_address_book_update_approval_header">Add Address</string>
     <string name="remove_address_book_update_approval_header">Remove Address</string>
@@ -258,5 +243,11 @@
     <string name="update_biometric_settings">Unable to open biometry settings. Please open device settings.</string>
     <string name="default_error_message">Unable to retrieve data.\n\nPlease make sure you are connected to internet and try again.</string>
     <string name="key_icon_content_desc">key image</string>
+    <string name="strike_maintenance_message">Strike is upgrading its service, we should be back online shortly. Please retry in a few minutes</string>
+    <string name="not_connected_to_internet">You don\'t seem to be connected to the internet. Please check your connection and retry</string>
+    <string name="request_timed_out">Your request timed out. Please retry</string>
+
+    <string name="minimum_app_version">This version of Strike Securities is outdated. Please update this app to continue using it.</string>
+    <string name="update_app">Update App</string>
 
 </resources>

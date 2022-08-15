@@ -11,6 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import com.strikeprotocols.mobile.R
 import com.strikeprotocols.mobile.common.Resource
+import com.strikeprotocols.mobile.data.models.WalletSigner
 import com.strikeprotocols.mobile.presentation.components.StrikeAuthTopAppBar
 
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
@@ -31,7 +32,7 @@ fun KeyRecoveryFlowUI(
     navigateNextWord: () -> Unit,
     retryKeyRecovery: () -> Unit,
     onSubmitWord: (String) -> Unit,
-    keyRecoveryState: Resource<Boolean>
+    keyRecoveryState: Resource<WalletSigner?>
 ) {
     val screenTitle = when (keyRecoveryFlowStep) {
         KeyRecoveryFlowStep.VERIFY_WORDS_STEP,

@@ -31,19 +31,11 @@ class ResetPasswordViewModel @Inject constructor(
 
         viewModelScope.launch(Dispatchers.IO) {
             state = state.copy(resetPasswordResult = Resource.Loading())
-            state = try {
-                userRepository.resetPassword(state.email)
-                state.copy(
-                    resetPasswordResult = Resource.Success(Unit)
-                )
-            } catch (e: Exception) {
-                state.copy(
-                    resetPasswordResult = Resource.Error(
-                        e.message ?: "Unable to reset password, please contact Strike support."
-                    ),
-                    emailErrorEnabled = true
-                )
-            }
+            val resetPasswordResource = userRepository.resetPassword(state.email)
+            state = state.copy(
+                resetPasswordResult = resetPasswordResource,
+                emailErrorEnabled = resetPasswordResource is Resource.Error
+            )
         }
     }
 }

@@ -4,6 +4,7 @@ import cash.z.ecc.android.bip39.Mnemonics
 import cash.z.ecc.android.bip39.toSeed
 import com.strikeprotocols.mobile.common.*
 import com.strikeprotocols.mobile.data.AuthDataException.*
+import com.strikeprotocols.mobile.data.models.SemanticVersionResponse
 import com.strikeprotocols.mobile.data.models.VerifyUser
 import com.strikeprotocols.mobile.data.models.WalletSigner
 import com.strikeprotocols.mobile.data.models.WalletSigner.Companion.WALLET_TYPE_SOLANA
@@ -11,25 +12,26 @@ import com.strikeprotocols.mobile.data.models.WalletSigner.Companion.WALLET_TYPE
 interface UserRepository {
     suspend fun authenticate(sessionToken: String): String
     suspend fun retrieveSessionToken(username: String, password: String): String
-    suspend fun verifyUser(): VerifyUser
-    suspend fun getWalletSigners(): List<WalletSigner?>
-    suspend fun addWalletSigner(walletSignerBody: WalletSigner): WalletSigner
+    suspend fun verifyUser(): Resource<VerifyUser>
+    suspend fun getWalletSigners(): Resource<List<WalletSigner?>>
+    suspend fun addWalletSigner(walletSignerBody: WalletSigner):Resource<WalletSigner>
     suspend fun generateInitialAuthDataAndSaveKeyToUser(mnemonic: Mnemonics.MnemonicCode): InitialAuthData
     suspend fun regenerateAuthDataAndSaveKeyToUser(phrase: String, backendPublicKey: String)
     suspend fun userLoggedIn(): Boolean
     suspend fun setUserLoggedIn()
     suspend fun logOut() : Boolean
     suspend fun getSavedPrivateKey(): String
-    suspend fun regenerateDataAndUploadToBackend(): WalletSigner
+    suspend fun regenerateDataAndUploadToBackend(): Resource<WalletSigner>
     suspend fun retrieveUserEmail(): String
     fun retrieveCachedUserEmail(): String
     suspend fun saveUserEmail(email: String)
     suspend fun generatePhrase() : String
-    suspend fun resetPassword(email: String)
+    suspend fun resetPassword(email: String) : Resource<Unit>
     suspend fun doesUserHaveValidLocalKey(
         verifyUser: VerifyUser,
         walletSigners: List<WalletSigner?>
     ): Boolean
+    suspend fun checkMinimumVersion() : Resource<SemanticVersionResponse>
 }
 
 class UserRepositoryImpl(
@@ -38,25 +40,23 @@ class UserRepositoryImpl(
     private val anchorApiService: AnchorApiService,
     private val encryptionManager: EncryptionManager,
     private val securePreferences: SecurePreferences,
-    private val phraseValidator: PhraseValidator
-) : UserRepository {
+    private val phraseValidator: PhraseValidator,
+    private val versionApiService: SemVersionApiService
+) : UserRepository, BaseRepository() {
     override suspend fun retrieveSessionToken(username: String, password: String): String =
         authProvider.getSessionToken(username, password)
 
     override suspend fun authenticate(sessionToken: String): String =
         authProvider.authenticate(sessionToken)
 
-    override suspend fun verifyUser(): VerifyUser {
-        return api.verifyUser()
-    }
+    override suspend fun verifyUser(): Resource<VerifyUser> =
+        retrieveApiResource { api.verifyUser() }
 
-    override suspend fun getWalletSigners(): List<WalletSigner?> {
-        return api.walletSigners()
-    }
+    override suspend fun getWalletSigners(): Resource<List<WalletSigner?>> =
+        retrieveApiResource { api.walletSigners() }
 
-    override suspend fun addWalletSigner(walletSignerBody: WalletSigner): WalletSigner {
-        return api.addWalletSigner(walletSignerBody = walletSignerBody)
-    }
+    override suspend fun addWalletSigner(walletSignerBody: WalletSigner): Resource<WalletSigner> =
+        retrieveApiResource { api.addWalletSigner(walletSignerBody = walletSignerBody) }
 
     override suspend fun generateInitialAuthDataAndSaveKeyToUser(mnemonic: Mnemonics.MnemonicCode): InitialAuthData {
         val userEmail = retrieveUserEmail()
@@ -123,17 +123,21 @@ class UserRepositoryImpl(
         )
     }
 
-    override suspend fun regenerateDataAndUploadToBackend() : WalletSigner {
-        val userEmail = retrieveUserEmail()
-        val solanaKey = securePreferences.retrieveSolanaKey(userEmail)
-        val publicKey = encryptionManager.regeneratePublicKey(privateKey = solanaKey)
+    override suspend fun regenerateDataAndUploadToBackend() : Resource<WalletSigner> {
+        return try {
+            val userEmail = retrieveUserEmail()
+            val solanaKey = securePreferences.retrieveSolanaKey(userEmail)
+            val publicKey = encryptionManager.regeneratePublicKey(privateKey = solanaKey)
 
-        val walletSigner = WalletSigner(
-            publicKey = publicKey,
-            walletType = WALLET_TYPE_SOLANA
-        )
+            val walletSigner = WalletSigner(
+                publicKey = publicKey,
+                walletType = WALLET_TYPE_SOLANA
+            )
 
-        return api.addWalletSigner(walletSigner)
+            retrieveApiResource { api.addWalletSigner(walletSigner) }
+        } catch (e: Exception) {
+            Resource.Error()
+        }
     }
 
     override suspend fun retrieveUserEmail(): String {
@@ -152,8 +156,10 @@ class UserRepositoryImpl(
 
     override suspend fun generatePhrase(): String = encryptionManager.generatePhrase()
 
-    override suspend fun resetPassword(email: String) {
-        anchorApiService.recoverPassword(email)
+    override suspend fun resetPassword(email: String) : Resource<Unit> {
+        return retrieveApiResource {
+            anchorApiService.recoverPassword(email)
+        }
     }
 
     override suspend fun userLoggedIn() = SharedPrefsHelper.isUserLoggedIn()
@@ -193,10 +199,15 @@ class UserRepositoryImpl(
         //api call to get wallet signer
         for (walletSigner in walletSigners) {
             if (walletSigner?.publicKey != null && walletSigner.publicKey == publicKey) {
-                val validPair = encryptionManager.verifyKeyPair(
-                    privateKey = privateKey,
-                    publicKey = walletSigner.publicKey,
-                )
+                val validPair =
+                    try {
+                        encryptionManager.verifyKeyPair(
+                            privateKey = privateKey,
+                            publicKey = walletSigner.publicKey,
+                        )
+                    } catch (e: Exception) {
+                        false
+                    }
 
                 if (validPair) {
                     return true
@@ -207,6 +218,11 @@ class UserRepositoryImpl(
         return false
     }
 
+    override suspend fun checkMinimumVersion(): Resource<SemanticVersionResponse> {
+        return retrieveApiResource {
+            versionApiService.getMinimumVersion()
+        }
+    }
 }
 
 data class InitialAuthData(val walletSignerBody: WalletSigner)

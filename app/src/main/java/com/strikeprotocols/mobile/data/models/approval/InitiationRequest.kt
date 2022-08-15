@@ -7,10 +7,6 @@ import com.strikeprotocols.mobile.data.generateEphemeralPrivateKey
 import com.strikeprotocols.mobile.data.models.ApprovalDisposition
 import com.strikeprotocols.mobile.data.models.Nonce
 import com.strikeprotocols.mobile.data.models.SupplyDappInstruction
-import com.strikeprotocols.mobile.data.models.approval.ApprovalConstants.MISSING_APPROVER_KEY
-import com.strikeprotocols.mobile.data.models.approval.ApprovalConstants.MISSING_DATA_ACCOUNT_CREATION
-import com.strikeprotocols.mobile.data.models.approval.ApprovalConstants.MISSING_SOURCE_KEY
-import com.strikeprotocols.mobile.data.models.approval.ApprovalConstants.NOT_ENOUGH_NONCE_ACCOUNTS
 import com.strikeprotocols.mobile.data.models.approval.PublicKey.Companion.ASSOCIATED_TOKEN_PROGRAM_ID
 import com.strikeprotocols.mobile.data.models.approval.PublicKey.Companion.EMPTY_KEY
 import com.strikeprotocols.mobile.data.models.approval.PublicKey.Companion.SYSVAR_CLOCK_PUBKEY
@@ -21,7 +17,6 @@ import com.strikeprotocols.mobile.data.models.approval.PublicKey.Companion.WRAPP
 import com.strikeprotocols.mobile.data.models.approval.SolanaApprovalRequestType.*
 import com.strikeprotocols.mobile.data.models.approval.SolanaApprovalRequestType.Companion.UNKNOWN_INITIATION
 import com.strikeprotocols.mobile.data.models.approval.TransactionInstruction.Companion.createAdvanceNonceInstruction
-import com.strikeprotocols.mobile.presentation.approval_disposition.ApprovalDispositionError
 import org.bouncycastle.crypto.params.Ed25519PrivateKeyParameters
 import java.io.ByteArrayOutputStream
 import java.util.Base64
@@ -146,7 +141,7 @@ data class InitiationRequest(
 
     private fun createDataAccountTransactionInstructionData() : ByteArray {
         val dataAccountCreationInfo =
-            initiation.dataAccountCreationInfo ?: throw Exception(MISSING_DATA_ACCOUNT_CREATION)
+            initiation.dataAccountCreationInfo ?: throw Exception("MISSING_DATA_ACCOUNT_CREATION")
 
         val buffer = ByteArrayOutputStream()
         buffer.writeIntLE(0)
@@ -320,7 +315,7 @@ data class InitiationRequest(
             }
             is WrapConversionRequest -> {
                 if(requestType.account.address == null) {
-                    throw Exception(MISSING_SOURCE_KEY)
+                    throw Exception("MISSING_SOURCE_KEY")
                 }
 
                 val sourcePublicKey = PublicKey(requestType.account.address)
@@ -433,7 +428,7 @@ data class InitiationRequest(
                 userEmail = email,
             )
         } catch (e: Exception) {
-            throw Exception(ApprovalDispositionError.SIGNING_DATA_FAILURE.error)
+            throw Exception("SIGNING_DATA_FAILURE")
         }
 
         val nonce = nonces.firstOrNull()?.value ?: ""
@@ -446,7 +441,7 @@ data class InitiationRequest(
                 userEmail = email
             )
         } catch (e: Exception) {
-            throw Exception(ApprovalDispositionError.SIGNING_DATA_FAILURE.error)
+            throw Exception("SIGNING_DATA_FAILURE")
         }
 
         val opAccountAddress = opAccountPublicKey().toBase58()
@@ -520,14 +515,14 @@ data class InitiationRequest(
 
     override fun retrieveSignableData(approverPublicKey: String?): ByteArray {
         if(approverPublicKey == null) {
-            throw Exception(MISSING_APPROVER_KEY)
+            throw Exception("MISSING_APPROVER_KEY")
         }
 
         val nonce = nonces.firstOrNull()
         val nonceAccountAddress = requestType.nonceAccountAddresses().firstOrNull()
 
         if (nonce == null || nonceAccountAddress == null) {
-            throw Exception(NOT_ENOUGH_NONCE_ACCOUNTS)
+            throw Exception("NOT_ENOUGH_NONCE_ACCOUNTS")
         }
 
         val instructions = mutableListOf<TransactionInstruction>()

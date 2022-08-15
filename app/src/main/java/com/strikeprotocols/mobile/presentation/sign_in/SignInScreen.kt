@@ -25,7 +25,6 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
-import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
@@ -36,6 +35,7 @@ import com.strikeprotocols.mobile.common.Resource
 import com.strikeprotocols.mobile.common.getAuthFlowErrorMessage
 import com.strikeprotocols.mobile.presentation.Screen
 import com.strikeprotocols.mobile.presentation.components.SignInTextField
+import com.strikeprotocols.mobile.presentation.components.StrikeErrorScreen
 import com.strikeprotocols.mobile.ui.theme.*
 
 
@@ -298,7 +298,7 @@ fun SignInScreen(
                 navigateNextWord = viewModel::navigateNextWord,
                 onSubmitWord = viewModel::submitWordInput,
                 keyRecoveryState = state.finalizingKeyRecovery,
-                retryKeyRecovery = viewModel::retryKeyRecoveryFromPhrase,
+                retryKeyRecovery = {},
             )
         }
     }
@@ -359,37 +359,43 @@ fun SignInScreen(
 
     if (state.verifyUserResult is Resource.Error) {
         viewModel.loadingFinished()
-        PhraseAlertDialog(
-            dialogTitle = stringResource(R.string.verify_user_fail_title),
-            dialogText = stringResource(R.string.verify_user_fail_message),
-            onConfirm = {
-                viewModel.loadingFinished()
-                viewModel.resetVerifyUserResult()
+
+        StrikeErrorScreen(
+            errorResource = state.verifyUserResult,
+            onDismiss = {
+                viewModel.dismissVerifyUserError()
+            },
+            onRetry = {
+                viewModel.retryRetrieveVerifyUserDetails()
             }
         )
     }
 
     if (state.walletSignersResult is Resource.Error) {
         viewModel.loadingFinished()
-        PhraseAlertDialog(
-            dialogTitle = stringResource(R.string.wallet_signers_fail_title),
-            dialogText = stringResource(R.string.wallet_signers_fail_message),
-            onConfirm = {
-                viewModel.loadingFinished()
-                viewModel.resetWalletSignersCall()
+
+        StrikeErrorScreen(
+            errorResource = state.walletSignersResult,
+            onDismiss = {
+                viewModel.dismissVerifyUserError()
+            },
+            onRetry = {
+                viewModel.retryRetrieveVerifyUserDetails()
             }
         )
     }
 
-    if(state.addWalletSignerResult is Resource.Error || state.regenerateData is Resource.Error) {
+    if(state.regenerateData is Resource.Error) {
         viewModel.loadingFinished()
-        PhraseAlertDialog(
-            dialogTitle = stringResource(R.string.unable_to_add_wallet_signer_title),
-            dialogText = stringResource(R.string.unable_to_add_wallet_signer_message),
-            onConfirm = {
+
+        StrikeErrorScreen(
+            errorResource = state.regenerateData,
+            onDismiss = {
                 viewModel.loadingFinished()
-                viewModel.resetAddWalletSignersCall()
                 viewModel.resetRegenerateData()
+            },
+            onRetry = {
+                viewModel.retryRegenerateData()
             }
         )
     }
@@ -474,37 +480,4 @@ fun SignInScreen(
         viewModel.resetShowToast()
     }
     //endregion
-}
-
-@Composable
-fun PhraseAlertDialog(
-    dialogTitle: String = stringResource(id = R.string.phrase_dialog_title),
-    dialogText: String,
-    onConfirm: () -> Unit,
-) {
-    AlertDialog(
-        backgroundColor = UnfocusedGrey,
-        onDismissRequest = onConfirm,
-        confirmButton = {
-            TextButton(
-                onClick = onConfirm
-            ) {
-                Text(text = stringResource(R.string.ok))
-            }
-        },
-        title = {
-            Text(
-                text = dialogTitle,
-                color = StrikeWhite,
-                fontSize = 22.sp
-            )
-        },
-        text = {
-            Text(
-                text = dialogText,
-                color = StrikeWhite,
-                fontSize = 17.sp
-            )
-        }
-    )
 }

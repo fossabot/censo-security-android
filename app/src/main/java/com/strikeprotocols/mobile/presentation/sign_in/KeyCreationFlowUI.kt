@@ -9,6 +9,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import com.strikeprotocols.mobile.R
 import com.strikeprotocols.mobile.common.Resource
+import com.strikeprotocols.mobile.data.models.WalletSigner
 import com.strikeprotocols.mobile.presentation.components.StrikeAuthTopAppBar
 
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
@@ -29,7 +30,7 @@ fun KeyCreationFlowUI(
     wordVerificationErrorEnabled: Boolean,
     retryKeyCreation: () -> Unit,
     onSubmitWord: (String) -> Unit,
-    keyCreationState: Resource<Boolean>
+    keyCreationState: Resource<WalletSigner?>
 ) {
 
     val screenTitle = when (phraseVerificationFlowStep) {

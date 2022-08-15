@@ -370,6 +370,38 @@ sealed class SolanaApprovalRequestType {
             is LoginApprovalRequest, is UnknownApprovalType, is AcceptVaultInvitation, is PasswordReset -> emptyList()
         }
     }
+
+    fun nonceAccountAddressesSlot() : Int {
+        return when(this) {
+            is WithdrawalRequest, is ConversionRequest, is SignersUpdate,
+            is BalanceAccountCreation, is DAppTransactionRequest, is WrapConversionRequest,
+            is WalletConfigPolicyUpdate, is BalanceAccountSettingsUpdate, is DAppBookUpdate,
+            is AddressBookUpdate, is BalanceAccountNameUpdate, is BalanceAccountPolicyUpdate,
+            is BalanceAccountAddressWhitelistUpdate -> {
+                signingData()?.nonceAccountAddressesSlot ?: 0
+            }
+            is LoginApprovalRequest, is UnknownApprovalType, is AcceptVaultInvitation -> 0
+        }
+    }
+
+    private fun signingData(): SolanaSigningData? =
+        when (this) {
+            is WithdrawalRequest -> signingData
+            is ConversionRequest -> signingData
+            is SignersUpdate -> signingData
+            is BalanceAccountCreation -> signingData
+            is DAppTransactionRequest -> signingData
+            is WrapConversionRequest -> signingData
+            is WalletConfigPolicyUpdate -> signingData
+            is BalanceAccountSettingsUpdate -> signingData
+            is DAppBookUpdate -> signingData
+            is AddressBookUpdate -> signingData
+            is BalanceAccountNameUpdate -> signingData
+            is BalanceAccountPolicyUpdate -> signingData
+            is BalanceAccountAddressWhitelistUpdate -> signingData
+            is LoginApprovalRequest, is UnknownApprovalType, is AcceptVaultInvitation -> null
+        }
+
 }
 
 enum class ApprovalType(val value: String) {
@@ -519,6 +551,7 @@ data class SolanaSigningData(
     val multisigOpAccountAddress: String,
     val walletAddress: String,
     val nonceAccountAddresses: List<String>,
+    val nonceAccountAddressesSlot: Int,
     val initiator: String,
     val strikeFeeAmount: Long,
     val feeAccountGuidHash: String,

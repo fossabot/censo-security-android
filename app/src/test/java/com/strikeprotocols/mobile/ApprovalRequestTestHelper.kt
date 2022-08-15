@@ -44,6 +44,7 @@ fun getSignersUpdateRequest(nonceAccountAddresses: List<String>): SolanaApproval
             strikeFeeAmount = 0,
             feeAccountGuidHash = emptyHash,
             walletGuidHash = emptyHash,
+            nonceAccountAddressesSlot = 2272
         )
     )
 }
@@ -71,6 +72,7 @@ fun getSignersUpdateWalletRequest(nonceAccountAddresses: List<String>) : WalletA
                 strikeFeeAmount = 0,
                 feeAccountGuidHash = emptyHash,
                 walletGuidHash = emptyHash,
+                nonceAccountAddressesSlot = 2272
             )
         )
     )
@@ -113,6 +115,7 @@ fun getBalanceAccountCreationRequest(nonceAccountAddresses: List<String>) : Bala
             strikeFeeAmount = 0,
             feeAccountGuidHash = emptyHash,
             walletGuidHash = emptyHash,
+            nonceAccountAddressesSlot = 2272
         )
     )
 }
@@ -151,6 +154,7 @@ fun getSolWithdrawalRequest(nonceAccountAddresses: List<String>) : WithdrawalReq
             strikeFeeAmount = 0,
             feeAccountGuidHash = emptyHash,
             walletGuidHash = emptyHash,
+            nonceAccountAddressesSlot = 2272
         )
     )
 }
@@ -189,6 +193,7 @@ fun getSplWithdrawalRequest(nonceAccountAddresses: List<String>) : WithdrawalReq
             strikeFeeAmount = 0,
             feeAccountGuidHash = emptyHash,
             walletGuidHash = emptyHash,
+            nonceAccountAddressesSlot = 2272
         )
     )
 }
@@ -232,6 +237,7 @@ fun getConversionRequest(nonceAccountAddresses: List<String>): ConversionRequest
             strikeFeeAmount = 0,
             feeAccountGuidHash = emptyHash,
             walletGuidHash = emptyHash,
+            nonceAccountAddressesSlot = 2272
         )
     )
 }
@@ -269,6 +275,7 @@ fun getWrapConversionRequest(nonceAccountAddresses: List<String>): WrapConversio
             strikeFeeAmount = 0,
             feeAccountGuidHash = emptyHash,
             walletGuidHash = emptyHash,
+            nonceAccountAddressesSlot = 2272
         )
     )
 }
@@ -306,6 +313,7 @@ fun getUnwrapConversionRequest(nonceAccountAddresses: List<String>) : SolanaAppr
             strikeFeeAmount = 2039280,
             feeAccountGuidHash = "Oe1VO8ObkbQ2jHnzOD6tIGQNkX/sExJpdGOksGK47VU=",
             walletGuidHash = "/Fz5hXppVfCrsvkgU8zXy5e3IO99xOmbQJuF7DUkHfw=",
+            nonceAccountAddressesSlot = 2272
         )
     )
 }
@@ -335,6 +343,7 @@ fun getAddAddressBookEntry(nonceAccountAddresses: List<String>): SolanaApprovalR
             strikeFeeAmount = 0,
             feeAccountGuidHash = emptyHash,
             walletGuidHash = emptyHash,
+            nonceAccountAddressesSlot = 2272
         )
     )
 }
@@ -360,6 +369,7 @@ fun getAddDAppBookEntry(nonceAccountAddresses: List<String>) : SolanaApprovalReq
             strikeFeeAmount = 0,
             feeAccountGuidHash = emptyHash,
             walletGuidHash = emptyHash,
+            nonceAccountAddressesSlot = 2272
         )
     )
 }
@@ -399,6 +409,7 @@ fun getWalletConfigPolicyUpdate(nonceAccountAddresses: List<String>): SolanaAppr
             strikeFeeAmount = 0,
             feeAccountGuidHash = emptyHash,
             walletGuidHash = emptyHash,
+            nonceAccountAddressesSlot = 2272
         )
     )
 }
@@ -436,6 +447,7 @@ fun getBalanceAccountPolicyUpdate(nonceAccountAddresses: List<String>) : SolanaA
             strikeFeeAmount = 0,
             feeAccountGuidHash = emptyHash,
             walletGuidHash = emptyHash,
+            nonceAccountAddressesSlot = 2272
         )
     )
 }
@@ -460,6 +472,7 @@ fun getBalanceAccountNameUpdate(nonceAccountAddresses: List<String>): SolanaAppr
             strikeFeeAmount = 0,
             feeAccountGuidHash = emptyHash,
             walletGuidHash = emptyHash,
+            nonceAccountAddressesSlot = 2272
         )
     )
 }
@@ -537,6 +550,7 @@ fun getDAppTransactionRequest(nonceAccountAddresses: List<String>): SolanaApprov
             strikeFeeAmount = 0,
             feeAccountGuidHash = emptyHash,
             walletGuidHash = emptyHash,
+            nonceAccountAddressesSlot = 2272
         )
     )
 }
@@ -612,6 +626,7 @@ fun getBalanceAccountAddressWhitelistUpdate(nonceAccountAddresses: List<String>)
             strikeFeeAmount = 0,
             feeAccountGuidHash = emptyHash,
             walletGuidHash = emptyHash,
+            nonceAccountAddressesSlot = 2272
         )
     )
 }
@@ -637,6 +652,7 @@ fun getBalanceAccountSettingsUpdate(nonceAccountAddresses: List<String>): Solana
             strikeFeeAmount = 0,
             feeAccountGuidHash = emptyHash,
             walletGuidHash = emptyHash,
+            nonceAccountAddressesSlot = 2272
         )
     )
 }
@@ -665,6 +681,7 @@ fun getRemoveDAppBookEntry(nonceAccountAddresses: List<String>): SolanaApprovalR
             strikeFeeAmount = 0,
             feeAccountGuidHash = emptyHash,
             walletGuidHash = emptyHash,
+            nonceAccountAddressesSlot = 2272
         )
     )
 }

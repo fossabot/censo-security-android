@@ -3,7 +3,6 @@ package com.strikeprotocols.mobile.common
 import android.content.Context
 import com.strikeprotocols.mobile.R
 import com.strikeprotocols.mobile.data.EncryptionManagerException
-import com.strikeprotocols.mobile.presentation.approval_disposition.ApprovalDispositionError
 
 fun Int.convertApprovalsNeededToDisplayMessage(context: Context): String {
     return when (this) {
@@ -19,6 +18,7 @@ fun Int.convertApprovalsNeededToDisplayMessage(context: Context): String {
     }
 }
 
+//TODO: String resource these loose strings
 fun String.toWalletName(): String {
     if (this.lowercase().endsWith("wallet")) {
         return this
@@ -55,20 +55,6 @@ fun String.maskAddress(): String {
     val end = this.substring(startIndex = this.length - 4)
 
     return StringBuilder().append(start).append("•••").append(end).toString()
-}
-
-
-fun retrieveApprovalDispositionDialogErrorText(
-    approvalDispositionError: ApprovalDispositionError,
-    context: Context
-) = when (approvalDispositionError) {
-    ApprovalDispositionError.SUBMIT_FAILURE -> context.getString(R.string.approval_disposition_error_submit)
-    ApprovalDispositionError.DURABLE_NONCE_FAILURE -> context.getString(R.string.approval_disposition_error_nonces)
-    ApprovalDispositionError.SIGNING_DATA_FAILURE -> context.getString(R.string.approval_disposition_error_signing_data)
-    ApprovalDispositionError.APPROVAL_DISPOSITION_FAILURE -> context.getString(R.string.approval_disposition_error)
-    else -> {
-        context.getString(R.string.approval_disposition_error_general)
-    }
 }
 
 fun getAuthFlowErrorMessage(e: Exception, context: Context): String =

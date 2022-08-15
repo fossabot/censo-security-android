@@ -13,7 +13,7 @@ sealed class Screen(val route: String) {
     }
     object AccountRoute : Screen("account_screen")
     object ResetPasswordRoute : Screen("reset_password_screen")
-
+    object EnforceUpdateRoute : Screen("enforce_update_screen")
 
     fun buildScreenDeepLinkUri() = "$STRIKE_PROTOCOLS_URI${this.route}"
 

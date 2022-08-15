@@ -42,6 +42,13 @@ data class WalletApproval(
             else -> throw Exception(UNKNOWN_REQUEST_APPROVAL)
         }
 
+    fun retrieveAccountAddressesSlot(): Int =
+        when (details) {
+            is SolanaApprovalRequestDetails.ApprovalRequestDetails -> details.requestType.nonceAccountAddressesSlot()
+            is SolanaApprovalRequestDetails.MultiSignOpInitiationDetails -> details.requestType.nonceAccountAddressesSlot()
+            else -> throw Exception(UNKNOWN_REQUEST_APPROVAL)
+        }
+
     fun isInitiationRequest(): Boolean =
         when (details) {
             is SolanaApprovalRequestDetails.ApprovalRequestDetails -> false

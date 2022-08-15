@@ -8,6 +8,7 @@ data class DurableNonceState(
     val userBiometricVerified: DurableNonceViewModel.BiometricVerified? = null,
     val multipleAccounts: DurableNonceViewModel.MultipleAccounts? = null,
     val multipleAccountsResult: Resource<MultipleAccountsResponse> = Resource.Uninitialized,
+    val minimumNonceAccountAddressesSlot: Int = 0,
     val nonceAccountAddresses: List<String> = emptyList()
 ) {
     val isLoading = multipleAccountsResult is Resource.Loading

@@ -12,6 +12,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -38,6 +39,7 @@ fun ResetPasswordScreen(
     resetPasswordViewModel: ResetPasswordViewModel = hiltViewModel()
 ) {
     val resetPasswordState = resetPasswordViewModel.state
+    val context = LocalContext.current
 
     //region Screen Content
     Scaffold(
@@ -82,7 +84,13 @@ fun ResetPasswordScreen(
                     errorEnabled = resetPasswordState.emailErrorEnabled,
                     errorText =
                     if (resetPasswordState.resetPasswordResult is Resource.Error) {
-                        stringResource(R.string.unable_send_reset_email)
+                        val errorReason = resetPasswordState.resetPasswordResult.strikeError?.getErrorMessage(context)
+
+                        if(errorReason == null) {
+                            stringResource(R.string.unable_send_reset_email)
+                        } else {
+                            "${errorReason}\n\n${stringResource(R.string.unable_send_reset_email)}"
+                        }
                     } else {
                         ""
                     },

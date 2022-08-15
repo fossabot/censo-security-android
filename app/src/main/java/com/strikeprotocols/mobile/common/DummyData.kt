@@ -414,6 +414,7 @@ class MockedApprovals {
                 strikeFeeAmount = 0,
                 feeAccountGuidHash = emptyHash,
                 walletGuidHash = emptyHash,
+                nonceAccountAddressesSlot = 2272
             )
         )
     }
@@ -441,6 +442,7 @@ class MockedApprovals {
                     strikeFeeAmount = 0,
                     feeAccountGuidHash = emptyHash,
                     walletGuidHash = emptyHash,
+                    nonceAccountAddressesSlot = 2272
                 )
             )
         )
@@ -483,6 +485,7 @@ class MockedApprovals {
                 strikeFeeAmount = 0,
                 feeAccountGuidHash = emptyHash,
                 walletGuidHash = emptyHash,
+                nonceAccountAddressesSlot = 2272
             )
         )
     }
@@ -521,6 +524,7 @@ class MockedApprovals {
                 strikeFeeAmount = 0,
                 feeAccountGuidHash = emptyHash,
                 walletGuidHash = emptyHash,
+                nonceAccountAddressesSlot = 2272
             )
         )
     }
@@ -559,6 +563,7 @@ class MockedApprovals {
                 strikeFeeAmount = 0,
                 feeAccountGuidHash = emptyHash,
                 walletGuidHash = emptyHash,
+                nonceAccountAddressesSlot = 2272
             )
         )
     }
@@ -602,6 +607,7 @@ class MockedApprovals {
                 strikeFeeAmount = 0,
                 feeAccountGuidHash = emptyHash,
                 walletGuidHash = emptyHash,
+                nonceAccountAddressesSlot = 2272
             )
         )
     }
@@ -639,6 +645,7 @@ class MockedApprovals {
                 strikeFeeAmount = 0,
                 feeAccountGuidHash = emptyHash,
                 walletGuidHash = emptyHash,
+                nonceAccountAddressesSlot = 2272
             )
         )
     }
@@ -676,6 +683,7 @@ class MockedApprovals {
                 strikeFeeAmount = 0,
                 feeAccountGuidHash = emptyHash,
                 walletGuidHash = emptyHash,
+                nonceAccountAddressesSlot = 2272
             )
         )
     }
@@ -704,6 +712,7 @@ class MockedApprovals {
                 strikeFeeAmount = 0,
                 feeAccountGuidHash = emptyHash,
                 walletGuidHash = emptyHash,
+                nonceAccountAddressesSlot = 2272
             )
         )
     }
@@ -751,6 +760,7 @@ class MockedApprovals {
                 strikeFeeAmount = 0,
                 feeAccountGuidHash = emptyHash,
                 walletGuidHash = emptyHash,
+                nonceAccountAddressesSlot = 2272
             )
         )
     }
@@ -796,6 +806,7 @@ class MockedApprovals {
                 strikeFeeAmount = 0,
                 feeAccountGuidHash = emptyHash,
                 walletGuidHash = emptyHash,
+                nonceAccountAddressesSlot = 2272
             )
         )
     }
@@ -820,6 +831,7 @@ class MockedApprovals {
                 strikeFeeAmount = 0,
                 feeAccountGuidHash = emptyHash,
                 walletGuidHash = emptyHash,
+                nonceAccountAddressesSlot = 2272
             )
         )
     }
@@ -897,6 +909,7 @@ class MockedApprovals {
                 strikeFeeAmount = 0,
                 feeAccountGuidHash = emptyHash,
                 walletGuidHash = emptyHash,
+                nonceAccountAddressesSlot = 2272
             )
         )
     }
@@ -972,6 +985,7 @@ class MockedApprovals {
                 strikeFeeAmount = 0,
                 feeAccountGuidHash = emptyHash,
                 walletGuidHash = emptyHash,
+                nonceAccountAddressesSlot = 2272
             )
         )
     }
@@ -997,6 +1011,7 @@ class MockedApprovals {
                 strikeFeeAmount = 0,
                 feeAccountGuidHash = emptyHash,
                 walletGuidHash = emptyHash,
+                nonceAccountAddressesSlot = 2272
             )
         )
     }
@@ -1027,6 +1042,7 @@ class MockedApprovals {
                 strikeFeeAmount = 0,
                 feeAccountGuidHash = emptyHash,
                 walletGuidHash = emptyHash,
+                nonceAccountAddressesSlot = 2272
             )
         )
     }
@@ -1055,6 +1071,7 @@ class MockedApprovals {
                 strikeFeeAmount = 0,
                 feeAccountGuidHash = emptyHash,
                 walletGuidHash = emptyHash,
+                nonceAccountAddressesSlot = 2272
             )
         )
     }

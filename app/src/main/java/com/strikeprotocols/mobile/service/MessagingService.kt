@@ -13,9 +13,11 @@ import androidx.core.app.TaskStackBuilder
 import androidx.core.net.toUri
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
+import com.raygun.raygun4android.RaygunClient
 import com.strikeprotocols.mobile.BuildConfig
 import com.strikeprotocols.mobile.MainActivity
 import com.strikeprotocols.mobile.R
+import com.strikeprotocols.mobile.common.Resource
 import com.strikeprotocols.mobile.common.strikeLog
 import com.strikeprotocols.mobile.data.PushRepository
 import com.strikeprotocols.mobile.data.UserRepository
@@ -87,8 +89,6 @@ class MessagingService : FirebaseMessagingService() {
     fun sendRegistrationToServer(token: String?) {
         token?.let {
             scope.launch {
-                strikeLog(message = "sendRegistrationTokenToServer($token)")
-
                 val deviceId = Settings.Secure.getString(
                     applicationContext.contentResolver, Settings.Secure.ANDROID_ID
                 )
@@ -100,10 +100,8 @@ class MessagingService : FirebaseMessagingService() {
 
                 val pushResponse = pushRepository.addPushNotification(pushBody)
 
-                if (pushResponse != null) {
-                    strikeLog(message = "Successfully registered push token")
-                } else {
-                    strikeLog(message = "Failed to register push token")
+                if (pushResponse is Resource.Error) {
+                    RaygunClient.send(Exception("Failed to register token from automatic registration: ${pushResponse.strikeError}"))
                 }
             }
         }

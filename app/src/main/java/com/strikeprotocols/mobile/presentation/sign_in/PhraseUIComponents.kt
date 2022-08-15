@@ -49,6 +49,7 @@ import com.strikeprotocols.mobile.R
 import com.strikeprotocols.mobile.common.Resource
 import com.strikeprotocols.mobile.common.strikeLog
 import com.strikeprotocols.mobile.data.models.IndexedPhraseWord
+import com.strikeprotocols.mobile.data.models.WalletSigner
 import com.strikeprotocols.mobile.presentation.sign_in.PhraseUICompanion.DISPLAY_RANGE_SET
 import com.strikeprotocols.mobile.ui.theme.*
 
@@ -391,10 +392,12 @@ fun ConfirmKeyUI(
 
 @Composable
 fun AllSetUI(
-    allSetState: Resource<Boolean>,
+    allSetState: Resource<WalletSigner?>,
     retry: () -> Unit,
     onNavigate: () -> Unit
 ) {
+    val context = LocalContext.current
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -495,7 +498,7 @@ fun AllSetUI(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text = stringResource(R.string.something_went_wrong),
+                        text = allSetState.strikeError?.getErrorMessage(context) ?: stringResource(R.string.something_went_wrong),
                         color = StrikeWhite,
                         fontSize = 16.sp,
                         textAlign = TextAlign.Center,

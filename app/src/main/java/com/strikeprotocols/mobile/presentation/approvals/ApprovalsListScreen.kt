@@ -24,6 +24,7 @@ import androidx.core.content.ContextCompat.startActivity
 import androidx.fragment.app.FragmentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.SwipeRefreshIndicator
@@ -31,6 +32,8 @@ import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import com.strikeprotocols.mobile.R
 import com.strikeprotocols.mobile.common.*
 import com.strikeprotocols.mobile.data.models.ApprovalDisposition
+import com.strikeprotocols.mobile.data.models.approval.ApprovalDispositionRequest
+import com.strikeprotocols.mobile.data.models.approval.InitiationRequest
 import com.strikeprotocols.mobile.data.models.approval.SolanaApprovalRequestType.*
 import com.strikeprotocols.mobile.data.models.approval.WalletApproval
 import com.strikeprotocols.mobile.presentation.Screen
@@ -61,15 +64,43 @@ fun ApprovalsListScreen(
         fragmentActivity = context,
         onSuccess = {
             val nonceAddresses = approvalsState.selectedApproval?.retrieveAccountAddresses()
-            nonceAddresses?.let {
-                durableNonceViewModel.setNonceAccountAddresses(nonceAddresses)
-            }
+            val minimumSlotAddress = approvalsState.selectedApproval?.retrieveAccountAddressesSlot()
+            durableNonceViewModel.setInitialData(
+                nonceAccountAddresses = nonceAddresses ?: emptyList(),
+                minimumNonceAccountAddressesSlot = minimumSlotAddress ?: 0
+            )
             durableNonceViewModel.setUserBiometricVerified(isVerified = true)
         },
         onFail = {
             durableNonceViewModel.setUserBiometricVerified(isVerified = false)
         }
     )
+
+    fun retryApprovalDisposition() {
+        approvalsViewModel.dismissApprovalDispositionError()
+        durableNonceViewModel.resetMultipleAccountsResource()
+        approvalsViewModel.resetMultipleAccounts()
+        approvalsState.selectedApproval?.let { approval ->
+            approvalsViewModel.setShouldDisplayConfirmDispositionDialog(
+                approval = approval,
+                isApproving = true,
+                dialogTitle = approval.getSolanaApprovalRequestType()
+                    .getApprovalTypeDialogTitle(context),
+                dialogText = approval.getSolanaApprovalRequestType()
+                    .getDialogFullMessage(
+                        context = context,
+                        approvalDisposition = ApprovalDisposition.APPROVE,
+                        initiationRequest = approval.isInitiationRequest()
+                    )
+            )
+        }
+    }
+
+    fun resetDataAfterErrorDismissed() {
+        approvalsViewModel.dismissApprovalDispositionError()
+        durableNonceViewModel.resetMultipleAccountsResource()
+        approvalsViewModel.resetMultipleAccounts()
+    }
 
     checkForHardRefreshAfterBackNavigation(
         navController = navController,
@@ -94,7 +125,6 @@ fun ApprovalsListScreen(
             }
             approvalsViewModel.resetShouldShowErrorSnackbar()
         }
-
         if (durableNonceState.triggerBioPrompt) {
             durableNonceViewModel.resetPromptTrigger()
             bioPrompt.authenticate(promptInfo)
@@ -103,13 +133,10 @@ fun ApprovalsListScreen(
             approvalsViewModel.setMultipleAccounts(durableNonceState.multipleAccounts)
             durableNonceViewModel.resetState()
         }
+
         if (approvalsState.approvalDispositionState?.registerApprovalDispositionResult is Resource.Success ||
             approvalsState.approvalDispositionState?.initiationDispositionResult is Resource.Success) {
             approvalsViewModel.wipeDataAfterDispositionSuccess()
-        }
-        if (approvalsState.approvalDispositionState?.registerApprovalDispositionResult is Resource.Error ||
-            approvalsState.approvalDispositionState?.initiationDispositionResult is Resource.Error) {
-            approvalsViewModel.setShouldDisplayApprovalDispositionError()
         }
     }
 
@@ -205,23 +232,46 @@ fun ApprovalsListScreen(
                 }
             }
 
-            if (approvalsState.shouldDisplayApprovalDispositionError) {
-                val approvalDispositionError = approvalsState.approvalDispositionState?.approvalDispositionError
-                approvalDispositionError?.let { safeApprovalDispositionError ->
-                    val dialogErrorText = retrieveApprovalDispositionDialogErrorText(safeApprovalDispositionError, context)
-                    StrikeApprovalDispositionErrorAlertDialog(
-                        dialogTitle = stringResource(R.string.approval_disposition_error_title),
-                        dialogText = dialogErrorText,
-                        onConfirm = {
-                            approvalsViewModel.dismissApprovalDispositionError()
-                        }
-                    )
-                }
+            if (approvalsState.walletApprovalsResult is Resource.Error) {
+                StrikeErrorScreen(
+                    errorResource = approvalsState.walletApprovalsResult,
+                    onDismiss = {
+                        approvalsViewModel.resetWalletApprovalsResult()
+                    },
+                    onRetry = {
+                        approvalsViewModel.resetWalletApprovalsResult()
+                        approvalsViewModel.refreshData()
+                    }
+                )
+            }
+
+            if (approvalsState.approvalDispositionState?.registerApprovalDispositionResult is Resource.Error) {
+                StrikeErrorScreen(
+                    errorResource = approvalsState.approvalDispositionState.registerApprovalDispositionResult as Resource.Error<ApprovalDispositionRequest.RegisterApprovalDispositionBody>,
+                    onDismiss = {
+                        resetDataAfterErrorDismissed()
+                    },
+                    onRetry = { retryApprovalDisposition() }
+                )
+            }
+
+            if (approvalsState.approvalDispositionState?.initiationDispositionResult is Resource.Error) {
+                StrikeErrorScreen(
+                    errorResource = approvalsState.approvalDispositionState.initiationDispositionResult as Resource.Error<InitiationRequest.InitiateRequestBody>,
+                    onDismiss = {
+                        resetDataAfterErrorDismissed()
+                    },
+                    onRetry = { retryApprovalDisposition() }
+                )
             }
 
             if (durableNonceState.multipleAccountsResult is Resource.Error) {
-                DurableNonceErrorDialog(
-                    dismissDialog = durableNonceViewModel::resetMultipleAccountsResource
+                StrikeErrorScreen(
+                    errorResource = durableNonceState.multipleAccountsResult,
+                    onDismiss = {
+                        resetDataAfterErrorDismissed()
+                    },
+                    onRetry = { retryApprovalDisposition() }
                 )
             }
         }

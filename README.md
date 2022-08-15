@@ -57,3 +57,27 @@ There is added visual confirmation to see which tests passed or failed on the co
 #windows
 gradlew.bat testDebugUnitTest
 ```
+
+# Creating A Test Build
+
+2 main ways to create a test build.
+
+Both ways will run lint, unit tests, then create a build for Firebase App Tester distribution.
+
+You then need to go into Firebase App Tester to add build notes and which testers you want to give access to the build.
+
+### Branch Trigger
+
+Pushing to:
+
+`develop` will create a prerelease build.
+
+`staging` will create a demo1 and demo2 build.
+
+`master` will create a release build.
+
+### Local Script
+
+Run the local script `upload_build.sh`
+
+Need to pass one argument: `--token` which is the firebase token needed to upload builds to Firebase App Tester.

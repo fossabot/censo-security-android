@@ -22,11 +22,15 @@ import androidx.navigation.compose.rememberNavController
 import com.raygun.raygun4android.RaygunClient
 import com.strikeprotocols.mobile.common.BiometricUtil
 import com.strikeprotocols.mobile.common.CrashReportingUtil
-import com.strikeprotocols.mobile.common.strikeLog
-import com.strikeprotocols.mobile.data.*
+import com.strikeprotocols.mobile.common.Resource
+import com.strikeprotocols.mobile.data.AuthProvider
+import com.strikeprotocols.mobile.data.UserState
+import com.strikeprotocols.mobile.data.UserStateListener
 import com.strikeprotocols.mobile.data.models.approval.WalletApproval
 import com.strikeprotocols.mobile.presentation.Screen
 import com.strikeprotocols.mobile.presentation.account.AccountScreen
+import com.strikeprotocols.mobile.presentation.semantic_version_check.EnforceUpdateScreen
+import com.strikeprotocols.mobile.presentation.semantic_version_check.SemVerViewModel
 import com.strikeprotocols.mobile.presentation.approval_detail.ApprovalDetailsScreen
 import com.strikeprotocols.mobile.presentation.approvals.ApprovalsListScreen
 import com.strikeprotocols.mobile.presentation.approvals.ApprovalsViewModel
@@ -48,6 +52,8 @@ class MainActivity : FragmentActivity() {
     lateinit var authProvider: AuthProvider
 
     val approvalsViewModel: ApprovalsViewModel by viewModels()
+
+    private val semVerViewModel: SemVerViewModel by viewModels()
 
     private var userStateListener: UserStateListener? = null
 
@@ -76,6 +82,8 @@ class MainActivity : FragmentActivity() {
             userStateListener = setupUserStateListener(navController)
             userStateListener?.let { authProvider.addUserStateListener(it) }
 
+            val semVerState = semVerViewModel.state
+
             StrikeMobileTheme {
                 Surface(color = BackgroundBlack) {
                     //NavHost
@@ -89,6 +97,8 @@ class MainActivity : FragmentActivity() {
                         when (event) {
                             Lifecycle.Event.ON_START
                             -> {
+                                semVerViewModel.checkMinimumVersion()
+
                                 when (BiometricUtil.checkForBiometricFeaturesOnDevice(context)) {
                                     BiometricUtil.Companion.BiometricsStatus.BIOMETRICS_ENABLED -> {
                                         //Do nothing, and continue with normal app flow
@@ -100,16 +110,22 @@ class MainActivity : FragmentActivity() {
                                     BiometricUtil.Companion.BiometricsStatus.BIOMETRICS_DISABLED -> {
                                         //Display a screen that this app is unusable without biometrics
                                         // and deeplink user to the settings so they can turn it on
-                                        navController.navigate("${Screen.BiometryDisabledRoute.route}/${biometryDisabledMessage}/${true}", ) {
+                                        navController.navigate("${Screen.BiometryDisabledRoute.route}/${biometryDisabledMessage}/${true}") {
                                             launchSingleTop = true
-                                            popUpTo(Screen.ApprovalListRoute.route) { inclusive = true }
+                                            navController.popBackStack()
+                                            popUpTo(Screen.ApprovalListRoute.route) {
+                                                inclusive = true
+                                            }
                                         }
                                     }
                                     BiometricUtil.Companion.BiometricsStatus.BIOMETRICS_NOT_AVAILABLE -> {
                                         //Display a screen that this app is unusable on this device
-                                        navController.navigate("${Screen.BiometryDisabledRoute.route}/${biometryUnavailableMessage}/${false}", ) {
+                                        navController.navigate("${Screen.BiometryDisabledRoute.route}/${biometryUnavailableMessage}/${false}") {
                                             launchSingleTop = true
-                                            popUpTo(Screen.ApprovalListRoute.route) { inclusive = true }
+                                            navController.popBackStack()
+                                            popUpTo(Screen.ApprovalListRoute.route) {
+                                                inclusive = true
+                                            }
                                         }
                                     }
                                 }
@@ -118,6 +134,16 @@ class MainActivity : FragmentActivity() {
                         }
                     }
                     //endregion
+
+                    if (semVerState.shouldEnforceAppUpdate is Resource.Success
+                        && semVerState.shouldEnforceAppUpdate.data == true) {
+                        navController.navigate(Screen.EnforceUpdateRoute.route) {
+                            launchSingleTop = true
+                            navController.popBackStack()
+                            popUpTo(Screen.SignInRoute.route) { inclusive = true }
+                        }
+                        semVerViewModel.resetShouldEnforceAppUpdate()
+                    }
                 }
             }
         }
@@ -176,6 +202,11 @@ class MainActivity : FragmentActivity() {
                 route = Screen.ResetPasswordRoute.route
             ) {
                 ResetPasswordScreen(navController = navController)
+            }
+            composable(
+                route = Screen.EnforceUpdateRoute.route
+            ) {
+              EnforceUpdateScreen()
             }
         }
     }

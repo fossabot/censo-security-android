@@ -3,7 +3,6 @@ package com.strikeprotocols.mobile.data
 import com.google.gson.*
 import com.strikeprotocols.mobile.BuildConfig
 import com.strikeprotocols.mobile.common.BaseWrapper
-import com.strikeprotocols.mobile.common.strikeLog
 import com.strikeprotocols.mobile.data.models.MultipleAccountsResponse
 import com.strikeprotocols.mobile.data.models.Nonce
 import com.strikeprotocols.mobile.presentation.durable_nonce.DurableNonceViewModel
@@ -12,22 +11,18 @@ import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.*
+import retrofit2.Response as RetrofitResponse
 import java.lang.reflect.Type
-import java.util.concurrent.TimeUnit
 
 
 interface SolanaApiService {
 
     companion object {
 
-        private const val TIMEOUT_LENGTH_SECONDS = 60L
-
         fun create(): SolanaApiService {
 
             val client = OkHttpClient.Builder()
-                .connectTimeout(TIMEOUT_LENGTH_SECONDS, TimeUnit.SECONDS)
-                .writeTimeout(TIMEOUT_LENGTH_SECONDS, TimeUnit.SECONDS)
-                .readTimeout(TIMEOUT_LENGTH_SECONDS, TimeUnit.SECONDS)
+                .cache(null)
 
             if (BuildConfig.DEBUG) {
                 val logger =
@@ -50,7 +45,7 @@ interface SolanaApiService {
     }
 
     @POST("/")
-    suspend fun multipleAccounts(@Body multipleAccountsBody: DurableNonceViewModel.MultipleAccountsBody) : MultipleAccountsResponse
+    suspend fun multipleAccounts(@Body multipleAccountsBody: DurableNonceViewModel.MultipleAccountsBody) : RetrofitResponse<MultipleAccountsResponse>
 }
 
 class RPCSerializer : JsonSerializer<DurableNonceViewModel.RPCParam> {
@@ -91,19 +86,26 @@ class MultipleAccountsDeserializer : JsonDeserializer<MultipleAccountsResponse> 
 
     fun parseData(json: JsonElement?): MultipleAccountsResponse {
         val nonces = mutableListOf<Nonce>()
+        var slot = NO_SLOT
 
         if (json !is JsonObject) {
-            return MultipleAccountsResponse(nonces = nonces)
+            return MultipleAccountsResponse(nonces = nonces, slot = slot)
         }
 
         val result = json.asJsonObject?.get(RESULT_JSON_KEY)
         if (result !is JsonObject) {
-            return MultipleAccountsResponse(nonces = nonces)
+            return MultipleAccountsResponse(nonces = nonces, slot = slot)
+        }
+
+        val context = result.get(CONTEXT_JSON_KEY)
+
+        if (context is JsonObject) {
+            slot = context.getAsJsonPrimitive(SLOT_JSON_KEY).asInt
         }
 
         val values = result.get(VALUE_JSON_KEY)
         if (values !is JsonArray) {
-            return MultipleAccountsResponse(nonces = nonces)
+            return MultipleAccountsResponse(nonces = nonces, slot = slot)
         }
 
         for (value in values) {
@@ -116,18 +118,18 @@ class MultipleAccountsDeserializer : JsonDeserializer<MultipleAccountsResponse> 
                 continue
             }
 
-            var dataAsString = ""
 
-            if (data.asJsonArray.size() > 0) {
-                val nonceText = data.asJsonArray.get(0)
-                if (nonceText.isJsonPrimitive) {
-                    dataAsString = nonceText.asString
+            val dataAsString =
+                if (data.asJsonArray.size() > 0) {
+                    val nonceText = data.asJsonArray.get(0)
+                    if (nonceText.isJsonPrimitive) {
+                        nonceText.asString
+                    } else {
+                        continue
+                    }
                 } else {
                     continue
                 }
-            } else {
-                continue
-            }
 
             val dataByteArray = BaseWrapper.decodeFromBase64(dataAsString)
             if (dataByteArray.size < END_NONCE_INDEX + 1) {
@@ -140,14 +142,17 @@ class MultipleAccountsDeserializer : JsonDeserializer<MultipleAccountsResponse> 
             nonces.add(Nonce(base58Data))
         }
 
-        return MultipleAccountsResponse(nonces = nonces)
+        return MultipleAccountsResponse(nonces = nonces, slot = slot)
     }
 
     companion object {
         const val RESULT_JSON_KEY = "result"
         const val VALUE_JSON_KEY = "value"
         const val DATA_JSON_KEY = "data"
+        const val CONTEXT_JSON_KEY = "context"
+        const val SLOT_JSON_KEY = "slot"
         const val START_NONCE_INDEX = 40
         const val END_NONCE_INDEX = 72
+        const val NO_SLOT = -1
     }
 }

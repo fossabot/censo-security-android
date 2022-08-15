@@ -2,7 +2,6 @@ package com.strikeprotocols.mobile.data.models
 
 import com.strikeprotocols.mobile.data.Signable
 import com.strikeprotocols.mobile.data.models.approval.*
-import com.strikeprotocols.mobile.data.models.approval.ApprovalConstants.MISSING_KEY
 import com.strikeprotocols.mobile.data.models.approval.PublicKey
 import com.strikeprotocols.mobile.data.models.approval.Transaction.compileMessage
 import com.strikeprotocols.mobile.data.models.approval.TransactionInstruction.Companion.createAdvanceNonceInstruction
@@ -17,7 +16,7 @@ class SupplyDappInstruction(
 ) : Signable {
 
     override fun retrieveSignableData(approverPublicKey: String?): ByteArray {
-        if (approverPublicKey == null) throw Exception(MISSING_KEY)
+        if (approverPublicKey == null) throw Exception("MISSING KEY")
 
         val keyList = listOf(
             AccountMeta(publicKey = opAccountPublicKey, isSigner = false, isWritable = true),

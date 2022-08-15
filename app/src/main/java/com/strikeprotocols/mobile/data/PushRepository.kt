@@ -2,12 +2,15 @@ package com.strikeprotocols.mobile.data
 
 import android.content.Context
 import android.provider.Settings
+import com.raygun.raygun4android.RaygunClient
+import com.strikeprotocols.mobile.common.CrashReportingUtil
+import com.strikeprotocols.mobile.common.Resource
 import com.strikeprotocols.mobile.common.strikeLog
 import com.strikeprotocols.mobile.data.models.PushBody
 import javax.inject.Inject
 
 interface PushRepository {
-    suspend fun addPushNotification(pushBody: PushBody): PushBody?
+    suspend fun addPushNotification(pushBody: PushBody): Resource<PushBody?>
     suspend fun removePushNotification()
     suspend fun getDeviceId(): String
 }
@@ -15,20 +18,14 @@ interface PushRepository {
 class PushRepositoryImpl @Inject constructor(
     private val api: BrooklynApiService,
     private val applicationContext: Context
-) : PushRepository {
+) : PushRepository, BaseRepository() {
 
     companion object {
         const val DEVICE_TYPE = "android"
     }
 
-    override suspend fun addPushNotification(pushBody: PushBody): PushBody? {
-        return try {
-            api.addPushNotificationToken(pushBody)
-        } catch (e: Exception) {
-            strikeLog(message = "push registration exception: ${e::class.java} ${e.message}")
-            null
-        }
-    }
+    override suspend fun addPushNotification(pushBody: PushBody): Resource<PushBody?> =
+        retrieveApiResource { api.addPushNotificationToken(pushBody) }
 
     override suspend fun removePushNotification() {
         val deviceId = getDeviceId()
@@ -36,7 +33,12 @@ class PushRepositoryImpl @Inject constructor(
             try {
                 api.removePushNotificationToken(deviceId, DEVICE_TYPE)
             } catch (e: Exception) {
-                strikeLog(message = "push un-registration exception: ${e::class.java} ${e.message}")
+                RaygunClient.send(e,
+                    listOf(
+                        CrashReportingUtil.MANUALLY_REPORTED_TAG,
+                        CrashReportingUtil.PUSH_NOTIFICATION_TAG
+                    )
+                )
             }
         }
     }

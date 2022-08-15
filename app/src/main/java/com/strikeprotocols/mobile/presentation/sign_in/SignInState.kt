@@ -38,8 +38,8 @@ data class SignInState(
     val regenerateData: Resource<WalletSigner> = Resource.Uninitialized,
     val showToast: Resource<String> = Resource.Uninitialized,
 
-    val finalizingKeyCreation: Resource<Boolean> = Resource.Uninitialized,
-    val finalizingKeyRecovery: Resource<Boolean> = Resource.Uninitialized,
+    val finalizingKeyCreation: Resource<WalletSigner?> = Resource.Uninitialized,
+    val finalizingKeyRecovery: Resource<WalletSigner?> = Resource.Uninitialized,
 
     //Exception Data
     val authFlowException: Resource<Exception> = Resource.Uninitialized,

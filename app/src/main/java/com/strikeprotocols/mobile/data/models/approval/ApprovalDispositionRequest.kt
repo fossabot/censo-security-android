@@ -4,11 +4,8 @@ import com.strikeprotocols.mobile.data.EncryptionManager
 import com.strikeprotocols.mobile.data.Signable
 import com.strikeprotocols.mobile.data.models.ApprovalDisposition
 import com.strikeprotocols.mobile.data.models.Nonce
-import com.strikeprotocols.mobile.data.models.approval.ApprovalConstants.MISSING_KEY
-import com.strikeprotocols.mobile.data.models.approval.ApprovalConstants.NOT_ENOUGH_NONCE_ACCOUNTS
 import com.strikeprotocols.mobile.data.models.approval.PublicKey.Companion.SYSVAR_CLOCK_PUBKEY
 import com.strikeprotocols.mobile.data.models.approval.TransactionInstruction.Companion.createAdvanceNonceInstruction
-import com.strikeprotocols.mobile.presentation.approval_disposition.ApprovalDispositionError
 import org.web3j.crypto.Hash
 import java.io.ByteArrayOutputStream
 import kotlin.Exception
@@ -271,7 +268,7 @@ data class ApprovalDispositionRequest(
             is PasswordReset ->
                 "".toByteArray(charset = Charsets.UTF_8)
             else -> {
-                if (approverPublicKey == null) throw Exception(MISSING_KEY)
+                if (approverPublicKey == null) throw Exception("MISSING KEY")
 
                 val signingData = signingData()
 
@@ -279,7 +276,7 @@ data class ApprovalDispositionRequest(
                 val nonceAccountAddress = requestType.nonceAccountAddresses().firstOrNull()
 
                 if (nonce == null || nonceAccountAddress == null) {
-                    throw Exception(NOT_ENOUGH_NONCE_ACCOUNTS)
+                    throw Exception("NOT ENOUGH NONCE ACCOUNTS")
                 }
 
                 val keyList = listOf(
@@ -330,7 +327,7 @@ data class ApprovalDispositionRequest(
                 userEmail = email
             )
         } catch (e: Exception) {
-            throw Exception(ApprovalDispositionError.SIGNING_DATA_FAILURE.error)
+            throw Exception("Signing data failure")
         }
 
         val nonce = if(nonces.isEmpty()) "" else nonces.first().value

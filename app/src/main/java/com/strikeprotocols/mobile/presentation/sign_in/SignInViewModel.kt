@@ -1,6 +1,5 @@
 package com.strikeprotocols.mobile.presentation.sign_in
 
-import android.content.Context
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -11,7 +10,6 @@ import androidx.lifecycle.viewModelScope
 import cash.z.ecc.android.bip39.Mnemonics
 import com.google.firebase.messaging.FirebaseMessaging
 import com.raygun.raygun4android.RaygunClient
-import com.strikeprotocols.mobile.R
 import com.strikeprotocols.mobile.common.*
 import com.strikeprotocols.mobile.data.*
 import com.strikeprotocols.mobile.data.NoInternetException.Companion.NO_INTERNET_ERROR
@@ -51,11 +49,6 @@ class SignInViewModel @Inject constructor(
 
     fun updatePassword(updatedPassword: String) {
         state = state.copy(password = updatedPassword, passwordErrorEnabled = false)
-    }
-
-    fun updatePhrase(phrase: String) {
-        val formattedPhrase = phraseValidator.format(text = phrase)
-        state = state.copy(phrase = formattedPhrase)
     }
 
     fun updateWordInput(input: String) {
@@ -140,29 +133,29 @@ class SignInViewModel @Inject constructor(
     }
 
     private fun retrieveUserVerifyDetails() {
-        val coroutineExceptionHandler = CoroutineExceptionHandler { _, e ->
-            state = state.copy(
-                verifyUserResult = Resource.Error(
-                    e.message ?: NO_INTERNET_ERROR
-                )
-            )
-        }
+        viewModelScope.launch(Dispatchers.IO) {
+            val verifyUserDataResource = userRepository.verifyUser()
 
-        viewModelScope.launch(Dispatchers.IO + coroutineExceptionHandler) {
-            try {
-                val verifyUserData = userRepository.verifyUser()
-                strikeUserData.setStrikeUser(verifyUserData)
-                state = state.copy(verifyUserResult = Resource.Success(verifyUserData))
-                handleAuthFlow(verifyUserData)
-            } catch (e: Exception) {
-                strikeUserData.setStrikeUser(null)
-                state = state.copy(
-                    verifyUserResult = Resource.Error(
-                        e.message ?: DEFAULT_SIGN_IN_ERROR_MESSAGE
-                    )
-                )
+            if (verifyUserDataResource is Resource.Success) {
+                val verifyUser = verifyUserDataResource.data
+
+                if (verifyUser != null) {
+                    strikeUserData.setStrikeUser(verifyUser = verifyUser)
+                    state = state.copy(verifyUserResult = verifyUserDataResource)
+                    handleAuthFlow(verifyUser)
+                } else {
+                    handleVerifyUserError(verifyUserDataResource)
+                }
+
+            } else if (verifyUserDataResource is Resource.Error) {
+                handleVerifyUserError(verifyUserDataResource)
             }
         }
+    }
+
+    private fun handleVerifyUserError(verifyUserDataResource: Resource<VerifyUser>) {
+        strikeUserData.setStrikeUser(null)
+        state = state.copy(verifyUserResult = verifyUserDataResource)
     }
 
     fun setUserLoggedInSuccess() {
@@ -183,7 +176,11 @@ class SignInViewModel @Inject constructor(
                     deviceId = deviceId,
                     token = token
                 )
-                pushRepository.addPushNotification(pushBody = pushBody)
+                val pushResource = pushRepository.addPushNotification(pushBody = pushBody)
+
+                if(pushResource is Resource.Error) {
+                    throw Exception("Push registration failed with code: ${pushResource.strikeError}")
+                }
             } else {
                 if (token.isEmpty()) {
                     throw Exception("Firebase push token is empty")
@@ -203,23 +200,31 @@ class SignInViewModel @Inject constructor(
         }
     }
 
-    private suspend fun attemptAddWalletSigner() {
-        state.initialAuthData?.let { safeInitialAuthData ->
-            val walletSigner =
-                userRepository.addWalletSigner(safeInitialAuthData.walletSignerBody)
-            state = state.copy(addWalletSignerResult = Resource.Success(walletSigner))
-        } ?: restartAuthFlow()
+    private suspend fun attemptAddWalletSigner(walletSignerBody: WalletSigner): Resource<WalletSigner> {
+        val walletSignerResource =
+            userRepository.addWalletSigner(walletSignerBody)
+
+        state = state.copy(addWalletSignerResult = walletSignerResource)
+        return walletSignerResource
+    }
+
+    fun dismissVerifyUserError() {
+        loadingFinished()
+        resetVerifyUserResult()
+        resetWalletSignersCall()
+    }
+
+    fun retryRetrieveVerifyUserDetails() {
+        loadingFinished()
+        resetVerifyUserResult()
+        resetWalletSignersCall()
+        state = state.copy(autoAuthFlowLoading = true)
+        retrieveUserVerifyDetails()
     }
 
     fun retryKeyCreationFromPhrase() {
         viewModelScope.launch {
             verifiedPhraseSuccess()
-        }
-    }
-
-    fun retryKeyRecoveryFromPhrase() {
-        viewModelScope.launch {
-
         }
     }
 
@@ -473,10 +478,10 @@ class SignInViewModel @Inject constructor(
                 if (phraseValidator.isPhraseValid(pastedPhrase) && pastedPhrase == state.phrase) {
                     verifiedPhraseSuccess()
                 } else {
-                    verifiedPhraseFailure(Exception(PhraseException.FAILED_TO_VERIFY_PHRASE))
+                    verifiedPhraseFailure()
                 }
             } catch (e: Exception) {
-                verifiedPhraseFailure(Exception(e.message ?: PhraseException.FAILED_TO_VERIFY_PHRASE))
+                verifiedPhraseFailure()
             }
         }
     }
@@ -492,16 +497,25 @@ class SignInViewModel @Inject constructor(
                     Mnemonics.MnemonicCode(phrase = it)
                 )
                 state = state.copy(initialAuthData = initialAuthData)
-                attemptAddWalletSigner()
-                state =
-                    state.copy(
-                        keyCreationFlowStep = KeyCreationFlowStep.ALL_SET_STEP,
-                        finalizingKeyCreation = Resource.Success(true),
-                        phrase = null
+
+                val addWalletSignerResource =
+                    attemptAddWalletSigner(initialAuthData.walletSignerBody)
+
+                if(addWalletSignerResource is Resource.Success) {
+                    state =
+                        state.copy(
+                            keyCreationFlowStep = KeyCreationFlowStep.ALL_SET_STEP,
+                            finalizingKeyCreation = Resource.Success(addWalletSignerResource.data),
+                            phrase = null
+                        )
+                } else if (addWalletSignerResource is Resource.Error) {
+                    state = state.copy(
+                        finalizingKeyCreation = addWalletSignerResource
                     )
+                }
             } catch (e: Exception) {
                 state = state.copy(
-                    finalizingKeyCreation = Resource.Error(e.message ?: "")
+                    finalizingKeyCreation = Resource.Error(exception = e)
                 )
             }
         } ?: setCreateKeyError(PhraseException.NULL_PHRASE_IN_STATE)
@@ -511,7 +525,7 @@ class SignInViewModel @Inject constructor(
         state = state.copy(createKeyError = message)
     }
 
-    private fun verifiedPhraseFailure(exception: Exception?) {
+    private fun verifiedPhraseFailure() {
         viewModelScope.launch {
             state = state.copy(
                 keyCreationFlowStep = KeyCreationFlowStep.CONFIRM_KEY_ERROR_STEP,
@@ -835,7 +849,7 @@ class SignInViewModel @Inject constructor(
                             userRepository.regenerateAuthDataAndSaveKeyToUser(phrase, publicKey)
                             state = state.copy(
                                 recoverKeyError = null,
-                                finalizingKeyRecovery = Resource.Success(true),
+                                finalizingKeyRecovery = Resource.Success(null),
                                 keyRecoveryFlowStep = KeyRecoveryFlowStep.ALL_SET_STEP
                             )
                         } catch (e: Exception) {
@@ -904,19 +918,22 @@ class SignInViewModel @Inject constructor(
             return UserAuthFlow.LOCAL_KEY_PRESENT_NO_BACKEND_KEYS
         }
 
-        val walletSigners: List<WalletSigner?> =
-            try {
-                userRepository.getWalletSigners()
-            } catch (e: Exception) {
-                throw WalletSignersException()
-            }
+        val walletSignerResource: Resource<List<WalletSigner?>> = userRepository.getWalletSigners()
+        if (walletSignerResource is Resource.Error || walletSignerResource.data == null) {
+            throw WalletSignersException()
+        }
+
+        val walletSigners = walletSignerResource.data
 
         if (savedPrivateKey.isEmpty()) {
             return UserAuthFlow.EXISTING_BACKEND_KEY_LOCAL_KEY_MISSING
         }
 
-        val doesUserHaveValidLocalKey =
+        val doesUserHaveValidLocalKey = try {
             userRepository.doesUserHaveValidLocalKey(verifyUser, walletSigners)
+        } catch (e: Exception) {
+            false
+        }
 
         if (doesUserHaveValidLocalKey) {
             return UserAuthFlow.KEY_VALIDATED
@@ -945,15 +962,17 @@ class SignInViewModel @Inject constructor(
         }
     }
 
-    private fun regenerateData() {
+    fun retryRegenerateData() {
+        loadingFinished()
+        resetRegenerateData()
+        regenerateData()
+    }
+
+    fun regenerateData() {
         state = state.copy(regenerateData = Resource.Loading())
         viewModelScope.launch {
-            state = try {
-                val walletSigner = userRepository.regenerateDataAndUploadToBackend()
-                state.copy(regenerateData = Resource.Success(walletSigner))
-            } catch (e: Exception) {
-                state.copy(regenerateData = Resource.Error(e.message ?: ""))
-            }
+            val walletSignerResource = userRepository.regenerateDataAndUploadToBackend()
+            state = state.copy(regenerateData = walletSignerResource)
         }
     }
 
@@ -970,8 +989,7 @@ class SignInViewModel @Inject constructor(
     private fun handleEncryptionManagerException(exception: Exception) {
         state = if (exception is WalletSignersException) {
             state.copy(
-                walletSignersResult =
-                Resource.Error(exception.message ?: DEFAULT_SIGN_IN_ERROR_MESSAGE)
+                walletSignersResult = Resource.Error(exception = exception)
             )
         } else {
             state.copy(authFlowException = Resource.Success(exception))
@@ -985,5 +1003,4 @@ class SignInViewModel @Inject constructor(
         } ?: resetStateToSendUserBackToLogin()
     }
     //endregion
-
 }
