@@ -22,10 +22,11 @@ prerelease="PreRelease"
 demoOne="DemoOne"
 demoTwo="DemoTwo"
 release="Release"
+preprod="PreProd"
 auth="Auth"
 
 PS3='Please choose environment: '
-options=("$prerelease" "$demoOne" "$demoTwo" "$auth" "$release")
+options=("$prerelease" "$demoOne" "$demoTwo" "$preprod" "$auth" "$release")
 select opt in "${options[@]}"
 do
     case $opt in
@@ -47,6 +48,11 @@ do
        "$auth")
             echo "Creating Auth build..."
             environment=$auth
+            break
+            ;;
+        "$preprod")
+            echo "Creating PreProd build..."
+            environment=$preprod
             break
             ;;
         "$release")
