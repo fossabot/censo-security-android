@@ -10,7 +10,7 @@ import java.util.*
 class GeneralDummyData {
 
     init {
-        if(!BuildConfig.DEBUG) {
+        if (!BuildConfig.DEBUG) {
             throw Exception("Do not use dummy data outside of debug")
         }
     }
@@ -93,7 +93,7 @@ class GeneralDummyData {
 class MockedApprovals {
 
     init {
-        if(!BuildConfig.DEBUG) {
+        if (!BuildConfig.DEBUG) {
             throw Exception("Do not use mocked data outside of debug")
         }
     }

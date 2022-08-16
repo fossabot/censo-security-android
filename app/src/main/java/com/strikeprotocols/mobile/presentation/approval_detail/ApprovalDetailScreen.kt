@@ -468,39 +468,3 @@ fun ApprovalDetailsButtons(
     }
 }
 //endregion
-
-//region Preview
-
-//This stateless composable can be useful for quick iteration on UI
-// and using the preview to test
-@SuppressLint("UnusedMaterialScaffoldPaddingParameter")
-@Composable
-fun StatelessApprovalDetailsScreen() {
-    Scaffold(
-        modifier = Modifier.fillMaxSize(),
-        topBar = {
-            ApprovalDetailsTopAppBar(
-                onAppBarIconClick = {},
-                navigationIcon = Icons.Rounded.ArrowBackIos,
-                navigationIconContentDes = stringResource(id = R.string.content_des_back_icon)
-            )
-        },
-        content = {
-            ApprovalDetails(
-                onApproveClicked = { strikeLog(message = "Approve clicked") },
-                onDenyClicked = { strikeLog(message = "Deny clicked") },
-                timeRemainingInSeconds = 1000,
-                isLoading = false,
-                approval = GeneralDummyData().generateWalletApprovalsDummyData(),
-                initiationRequest = GeneralDummyData().generateWalletApprovalsDummyData().isInitiationRequest()
-            )
-        }
-    )
-}
-
-@Preview(showBackground = true, name = "StatelessApprovalDetailsScreen")
-@Composable
-fun ApprovalDetailsScreenPreview() {
-    StatelessApprovalDetailsScreen()
-}
-//endregion
