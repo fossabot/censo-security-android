@@ -15,7 +15,7 @@ interface UserRepository {
     suspend fun verifyUser(): Resource<VerifyUser>
     suspend fun getWalletSigners(): Resource<List<WalletSigner?>>
     suspend fun addWalletSigner(walletSignerBody: WalletSigner):Resource<WalletSigner>
-    suspend fun generateInitialAuthDataAndSaveKeyToUser(mnemonic: Mnemonics.MnemonicCode): InitialAuthData
+    suspend fun generateInitialAuthDataAndSaveKeyToUser(mnemonic: Mnemonics.MnemonicCode): WalletSigner
     suspend fun regenerateAuthDataAndSaveKeyToUser(phrase: String, backendPublicKey: String)
     suspend fun userLoggedIn(): Boolean
     suspend fun setUserLoggedIn()
@@ -58,7 +58,7 @@ class UserRepositoryImpl(
     override suspend fun addWalletSigner(walletSignerBody: WalletSigner): Resource<WalletSigner> =
         retrieveApiResource { api.addWalletSigner(walletSignerBody = walletSignerBody) }
 
-    override suspend fun generateInitialAuthDataAndSaveKeyToUser(mnemonic: Mnemonics.MnemonicCode): InitialAuthData {
+    override suspend fun generateInitialAuthDataAndSaveKeyToUser(mnemonic: Mnemonics.MnemonicCode): WalletSigner {
         val userEmail = retrieveUserEmail()
         val keyPair = encryptionManager.createKeyPair(mnemonic)
 
@@ -77,12 +77,11 @@ class UserRepositoryImpl(
         securePreferences.saveSolanaKey(
             email = userEmail, privateKey = keyPair.privateKey)
 
-        return InitialAuthData(
-            walletSignerBody = WalletSigner(
-                publicKey = BaseWrapper.encode(keyPair.publicKey),
-                walletType = WalletSigner.WALLET_TYPE_SOLANA
-            )
+        return WalletSigner(
+            publicKey = BaseWrapper.encode(keyPair.publicKey),
+            walletType = WALLET_TYPE_SOLANA
         )
+
     }
 
     override suspend fun regenerateAuthDataAndSaveKeyToUser(phrase: String, backendPublicKey: String) {
@@ -223,11 +222,4 @@ class UserRepositoryImpl(
             versionApiService.getMinimumVersion()
         }
     }
-}
-
-data class InitialAuthData(val walletSignerBody: WalletSigner)
-
-enum class UserAuthFlow {
-    FIRST_LOGIN, LOCAL_KEY_PRESENT_NO_BACKEND_KEYS, KEY_VALIDATED,
-    EXISTING_BACKEND_KEY_LOCAL_KEY_MISSING, NO_LOCAL_KEY_AVAILABLE, NO_VALID_KEY
 }

@@ -1,4 +1,4 @@
-package com.strikeprotocols.mobile.presentation.sign_in
+package com.strikeprotocols.mobile.presentation.key_management
 
 data class ConfirmPhraseWordsState(
     val phrase: String = "",

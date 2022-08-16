@@ -1,4 +1,4 @@
-package com.strikeprotocols.mobile.presentation.sign_in
+package com.strikeprotocols.mobile.presentation.key_management
 
 import android.content.ClipData
 import android.content.Context
@@ -47,7 +47,10 @@ import com.strikeprotocols.mobile.R
 import com.strikeprotocols.mobile.common.Resource
 import com.strikeprotocols.mobile.data.models.IndexedPhraseWord
 import com.strikeprotocols.mobile.data.models.WalletSigner
-import com.strikeprotocols.mobile.presentation.sign_in.PhraseUICompanion.DISPLAY_RANGE_SET
+import com.strikeprotocols.mobile.presentation.key_management.PhraseUICompanion.DISPLAY_RANGE_SET
+import com.strikeprotocols.mobile.presentation.key_management.flows.KeyCreationFlowStep
+import com.strikeprotocols.mobile.presentation.key_management.flows.KeyRecoveryFlowStep
+import com.strikeprotocols.mobile.presentation.key_management.flows.PhraseFlowAction
 import com.strikeprotocols.mobile.ui.theme.*
 
 object PhraseUICompanion {
@@ -114,10 +117,6 @@ fun EntryScreenPhraseUI(
     val matrix = ColorMatrix()
     matrix.setToSaturation(0F)
 
-    BackHandler {
-        onExit()
-    }
-
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -127,8 +126,10 @@ fun EntryScreenPhraseUI(
         verticalArrangement = Arrangement.SpaceBetween
     ) {
         Spacer(modifier = Modifier.weight(0.25f))
-        Box(modifier = Modifier
-            .fillMaxWidth()) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+        ) {
             IconButton(modifier = Modifier.align(Alignment.CenterStart), onClick = onExit) {
                 Icon(
                     modifier = Modifier.size(32.dp),
@@ -237,7 +238,7 @@ fun CopyKeyUI(phrase: String, phraseCopied: Boolean, phraseSaved: Boolean, onNav
                     imageVector = Icons.Outlined.ContentCopy
                 ) {
                     val clip: ClipData =
-                        ClipData.newPlainText(SignInViewModel.CLIPBOARD_LABEL_PHRASE, phrase)
+                        ClipData.newPlainText(KeyManagementViewModel.CLIPBOARD_LABEL_PHRASE, phrase)
                     clipboard.setPrimaryClip(clip)
                     onNavigate()
                 }
@@ -282,7 +283,7 @@ fun CopyKeyUI(phrase: String, phraseCopied: Boolean, phraseSaved: Boolean, onNav
                                 } else {
                                     val clip: ClipData =
                                         ClipData.newPlainText(
-                                            SignInViewModel.CLIPBOARD_LABEL_PHRASE,
+                                            KeyManagementViewModel.CLIPBOARD_LABEL_PHRASE,
                                             ""
                                         )
                                     clipboard.setPrimaryClip(clip)
@@ -290,7 +291,7 @@ fun CopyKeyUI(phrase: String, phraseCopied: Boolean, phraseSaved: Boolean, onNav
                             } catch (e: Exception) {
                                 val clip: ClipData =
                                     ClipData.newPlainText(
-                                        SignInViewModel.CLIPBOARD_LABEL_PHRASE,
+                                        KeyManagementViewModel.CLIPBOARD_LABEL_PHRASE,
                                         ""
                                     )
                                 clipboard.setPrimaryClip(clip)
@@ -485,7 +486,8 @@ fun AllSetUI(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text = allSetState.strikeError?.getErrorMessage(context) ?: stringResource(R.string.something_went_wrong),
+                        text = allSetState.strikeError?.getErrorMessage(context)
+                            ?: stringResource(R.string.something_went_wrong),
                         color = StrikeWhite,
                         fontSize = 16.sp,
                         textAlign = TextAlign.Center,
@@ -778,12 +780,16 @@ fun WriteWordUI(
                 modifier = Modifier.height(72.dp),
                 contentAlignment = Alignment.Center
             ) {
-                if (index == SignInViewModel.LAST_WORD_RANGE_SET_INDEX) {
+                if (index == KeyManagementViewModel.LAST_WORD_RANGE_SET_INDEX) {
                     AuthFlowButton(
                         text = stringResource(R.string.saved_the_phrase),
                         modifier = Modifier.padding(horizontal = 44.dp)
                     ) {
-                        onPhraseFlowAction(PhraseFlowAction.ChangeCreationFlowStep(KeyCreationFlowStep.VERIFY_WORDS_STEP))
+                        onPhraseFlowAction(
+                            PhraseFlowAction.ChangeCreationFlowStep(
+                                KeyCreationFlowStep.VERIFY_WORDS_STEP
+                            )
+                        )
                         onNavigate()
                     }
                 } else {
@@ -993,7 +999,8 @@ private fun WordNavigationButtons(
 
         //Next Button
         val nextButtonText = getNextButtonText(lastWord = isLastWord, LocalContext.current)
-        val nextButtonContentDes = getNextButtonContentDescription(lastWord = isLastWord, LocalContext.current)
+        val nextButtonContentDes =
+            getNextButtonContentDescription(lastWord = isLastWord, LocalContext.current)
         val nextButtonEnabled = value.isNotEmpty() && value.isNotBlank()
         TextButton(
             modifier = Modifier

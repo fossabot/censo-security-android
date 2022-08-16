@@ -1,7 +1,6 @@
-package com.strikeprotocols.mobile.presentation.sign_in
+package com.strikeprotocols.mobile.presentation.key_management.flows
 
 import android.annotation.SuppressLint
-import android.content.Context
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -13,6 +12,27 @@ import com.strikeprotocols.mobile.R
 import com.strikeprotocols.mobile.common.Resource
 import com.strikeprotocols.mobile.data.models.WalletSigner
 import com.strikeprotocols.mobile.presentation.components.StrikeAuthTopAppBar
+import com.strikeprotocols.mobile.presentation.key_management.*
+
+fun moveUserToNextRecoveryScreen(flowStep: KeyRecoveryFlowStep) =
+    when (flowStep) {
+        KeyRecoveryFlowStep.ENTRY_STEP -> KeyRecoveryFlowStep.CONFIRM_KEY_ENTRY_STEP
+        KeyRecoveryFlowStep.VERIFY_WORDS_STEP -> KeyRecoveryFlowStep.VERIFY_WORDS_STEP
+        KeyRecoveryFlowStep.CONFIRM_KEY_ENTRY_STEP -> KeyRecoveryFlowStep.ALL_SET_STEP
+        KeyRecoveryFlowStep.CONFIRM_KEY_ERROR_STEP -> KeyRecoveryFlowStep.ALL_SET_STEP
+        KeyRecoveryFlowStep.ALL_SET_STEP -> KeyRecoveryFlowStep.FINISHED
+        KeyRecoveryFlowStep.FINISHED,
+        KeyRecoveryFlowStep.UNINITIALIZED -> KeyRecoveryFlowStep.UNINITIALIZED
+    }
+
+fun moveUserToPreviousRecoveryScreen(flowStep: KeyRecoveryFlowStep) =
+    when (flowStep) {
+        KeyRecoveryFlowStep.VERIFY_WORDS_STEP, KeyRecoveryFlowStep.CONFIRM_KEY_ENTRY_STEP,
+        KeyRecoveryFlowStep.CONFIRM_KEY_ERROR_STEP -> KeyRecoveryFlowStep.ENTRY_STEP
+        KeyRecoveryFlowStep.ALL_SET_STEP -> KeyRecoveryFlowStep.CONFIRM_KEY_ENTRY_STEP
+        KeyRecoveryFlowStep.ENTRY_STEP, KeyRecoveryFlowStep.FINISHED,
+        KeyRecoveryFlowStep.UNINITIALIZED -> KeyRecoveryFlowStep.UNINITIALIZED
+    }
 
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable

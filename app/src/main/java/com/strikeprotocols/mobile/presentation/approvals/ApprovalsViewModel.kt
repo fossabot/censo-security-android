@@ -9,7 +9,6 @@ import androidx.lifecycle.viewModelScope
 import com.strikeprotocols.mobile.common.Resource
 import com.strikeprotocols.mobile.data.ApprovalsRepository
 import com.strikeprotocols.mobile.data.PushRepository
-import com.strikeprotocols.mobile.data.StrikeUserData
 import com.strikeprotocols.mobile.data.UserRepository
 import com.strikeprotocols.mobile.data.models.ApprovalDisposition
 import com.strikeprotocols.mobile.data.models.InitiationDisposition
@@ -23,16 +22,12 @@ import com.strikeprotocols.mobile.presentation.durable_nonce.DurableNonceViewMod
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import org.web3j.crypto.Wallet
 import javax.inject.Inject
 import kotlin.Exception
 
 @HiltViewModel
 class ApprovalsViewModel @Inject constructor(
-    private val approvalsRepository: ApprovalsRepository,
-    private val userRepository: UserRepository,
-    private val pushRepository: PushRepository,
-    private val strikeUserData: StrikeUserData,
+    private val approvalsRepository: ApprovalsRepository
 ) : ViewModel() {
 
     private var timer: CountDownTimer? = null
@@ -55,18 +50,10 @@ class ApprovalsViewModel @Inject constructor(
 
     fun onStart() {
         startCountDown()
-        setUserInfo()
     }
 
     fun onStop() {
         timer?.cancel()
-    }
-
-    private fun setUserInfo() {
-        state = state.copy(
-            email = strikeUserData.getEmail(),
-            name = strikeUserData.getStrikeUser()?.fullName ?: ""
-        )
     }
 
     private fun startCountDown() {
@@ -116,27 +103,6 @@ class ApprovalsViewModel @Inject constructor(
 
     fun resetShouldShowErrorSnackbar() {
         state = state.copy(shouldShowErrorSnackbar = false)
-    }
-
-    fun logout() {
-        viewModelScope.launch {
-            state = state.copy(logoutResult = Resource.Loading())
-            try {
-                pushRepository.removePushNotification()
-            } catch(e: Exception) {
-                //continue logging out
-            }
-            state = try {
-                val loggedOut = userRepository.logOut()
-                state.copy(logoutResult = Resource.Success(loggedOut))
-            } catch (e: Exception) {
-                state.copy(logoutResult = Resource.Success(false))
-            }
-        }
-    }
-
-    fun resetLogoutResource() {
-        state = state.copy(logoutResult = Resource.Uninitialized)
     }
 
     fun setMultipleAccounts(multipleAccounts: DurableNonceViewModel.MultipleAccounts?) {

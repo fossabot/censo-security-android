@@ -23,6 +23,7 @@ import com.raygun.raygun4android.RaygunClient
 import com.strikeprotocols.mobile.common.BiometricUtil
 import com.strikeprotocols.mobile.common.CrashReportingUtil
 import com.strikeprotocols.mobile.common.Resource
+import com.strikeprotocols.mobile.common.strikeLog
 import com.strikeprotocols.mobile.data.AuthProvider
 import com.strikeprotocols.mobile.data.UserState
 import com.strikeprotocols.mobile.data.UserStateListener
@@ -37,6 +38,9 @@ import com.strikeprotocols.mobile.presentation.approvals.ApprovalsViewModel
 import com.strikeprotocols.mobile.presentation.biometry_disabled.BiometryDisabledScreen
 import com.strikeprotocols.mobile.presentation.components.OnLifecycleEvent
 import com.strikeprotocols.mobile.presentation.contact_strike.ContactStrikeScreen
+import com.strikeprotocols.mobile.presentation.entrance.EntranceScreen
+import com.strikeprotocols.mobile.presentation.key_management.KeyManagementInitialData
+import com.strikeprotocols.mobile.presentation.key_management.KeyManagementScreen
 import com.strikeprotocols.mobile.presentation.reset_password.ResetPasswordScreen
 import com.strikeprotocols.mobile.presentation.sign_in.SignInScreen
 import com.strikeprotocols.mobile.service.MessagingService.Companion.NOTIFICATION_DISPLAYED_KEY
@@ -103,8 +107,8 @@ class MainActivity : FragmentActivity() {
                                     BiometricUtil.Companion.BiometricsStatus.BIOMETRICS_ENABLED -> {
                                         //Do nothing, and continue with normal app flow
                                         if (navController.currentDestination?.route == Screen.BIOMETRY_DISABLED_ROUTE_KEY) {
-                                            navController.popBackStack()
-                                            navController.navigate(Screen.SignInRoute.route)
+                                            navController.backQueue.clear()
+                                            navController.navigate(Screen.EntranceRoute.route)
                                         }
                                     }
                                     BiometricUtil.Companion.BiometricsStatus.BIOMETRICS_DISABLED -> {
@@ -112,20 +116,14 @@ class MainActivity : FragmentActivity() {
                                         // and deeplink user to the settings so they can turn it on
                                         navController.navigate("${Screen.BiometryDisabledRoute.route}/${biometryDisabledMessage}/${true}") {
                                             launchSingleTop = true
-                                            navController.popBackStack()
-                                            popUpTo(Screen.ApprovalListRoute.route) {
-                                                inclusive = true
-                                            }
+                                            navController.backQueue.clear()
                                         }
                                     }
                                     BiometricUtil.Companion.BiometricsStatus.BIOMETRICS_NOT_AVAILABLE -> {
                                         //Display a screen that this app is unusable on this device
                                         navController.navigate("${Screen.BiometryDisabledRoute.route}/${biometryUnavailableMessage}/${false}") {
                                             launchSingleTop = true
-                                            navController.popBackStack()
-                                            popUpTo(Screen.ApprovalListRoute.route) {
-                                                inclusive = true
-                                            }
+                                            navController.backQueue.clear()
                                         }
                                     }
                                 }
@@ -139,8 +137,8 @@ class MainActivity : FragmentActivity() {
                         && semVerState.shouldEnforceAppUpdate.data == true) {
                         navController.navigate(Screen.EnforceUpdateRoute.route) {
                             launchSingleTop = true
-                            navController.popBackStack()
-                            popUpTo(Screen.SignInRoute.route) { inclusive = true }
+                            navController.backQueue.clear()
+                            popUpTo(Screen.EntranceRoute.route) { inclusive = true }
                         }
                         semVerViewModel.resetShouldEnforceAppUpdate()
                     }
@@ -154,8 +152,13 @@ class MainActivity : FragmentActivity() {
 
         NavHost(
             navController = navController,
-            startDestination = Screen.SignInRoute.route,
+            startDestination = Screen.EntranceRoute.route,
         ) {
+            composable(
+                route = Screen.EntranceRoute.route
+            ) {
+                EntranceScreen(navController = navController)
+            }
             composable(
                 route = Screen.SignInRoute.route
             ) {
@@ -194,9 +197,19 @@ class MainActivity : FragmentActivity() {
                 route = Screen.AccountRoute.route
             ) {
                 AccountScreen(
-                    navController = navController,
-                    approvalsViewModel = approvalsViewModel
+                    navController = navController
                 )
+            }
+            composable(
+                route = "${Screen.KeyManagementRoute.route}/{${Screen.KeyManagementRoute.KEY_MGMT_ARG}}",
+                arguments = listOf(navArgument(Screen.KeyManagementRoute.KEY_MGMT_ARG) {
+                    type = NavType.StringType
+                })
+            ) { backStackEntry ->
+                val keyInitialDataArg = backStackEntry.arguments?.get(Screen.KeyManagementRoute.KEY_MGMT_ARG) as String
+                strikeLog(message = "Initial data as string: $keyInitialDataArg")
+                strikeLog(message = "Parse data: ${KeyManagementInitialData.fromJson(keyInitialDataArg)}")
+                KeyManagementScreen(navController = navController, initialData = KeyManagementInitialData.fromJson(keyInitialDataArg))
             }
             composable(
                 route = Screen.ResetPasswordRoute.route
@@ -216,7 +229,7 @@ class MainActivity : FragmentActivity() {
             override fun onUserStateChanged(userState: UserState) {
                 runOnUiThread {
                     if (userState == UserState.REFRESH_TOKEN_EXPIRED) {
-                        navController.navigate(Screen.SignInRoute.route) {
+                        navController.navigate(Screen.EntranceRoute.route) {
                             popUpTo(0)
                         }
                     }

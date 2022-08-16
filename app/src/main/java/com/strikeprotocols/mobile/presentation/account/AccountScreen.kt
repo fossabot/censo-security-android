@@ -9,8 +9,8 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.rounded.ArrowBack
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -21,13 +21,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.strikeprotocols.mobile.BuildConfig
 import com.strikeprotocols.mobile.R
 import com.strikeprotocols.mobile.common.Resource
 import com.strikeprotocols.mobile.presentation.Screen
 import com.strikeprotocols.mobile.presentation.approval_detail.approval_type_detail_items.AccountRow
-import com.strikeprotocols.mobile.presentation.approvals.ApprovalsViewModel
 import com.strikeprotocols.mobile.presentation.components.StrikeCenteredTopAppBar
 import com.strikeprotocols.mobile.ui.theme.*
 import java.util.*
@@ -36,7 +36,7 @@ import java.util.*
 @Composable
 fun AccountScreen(
     navController: NavController,
-    approvalsViewModel: ApprovalsViewModel
+    accountViewModel: AccountViewModel = hiltViewModel()
 ) {
 
     val appVersionText =
@@ -44,16 +44,20 @@ fun AccountScreen(
 
     val localHandler = LocalUriHandler.current
 
-    val approvalsState = approvalsViewModel.state
+    val accountState = accountViewModel.state
 
-    LaunchedEffect(key1 = approvalsState) {
-        if (approvalsState.logoutResult is Resource.Success) {
-            navController.navigate(Screen.SignInRoute.route) {
-                popUpTo(Screen.ApprovalListRoute.route) {
-                    inclusive = true
-                }
+    DisposableEffect(key1 = accountViewModel) {
+        accountViewModel.onStart()
+        onDispose { }
+    }
+
+    LaunchedEffect(key1 = accountState) {
+        if (accountState.logoutResult is Resource.Success) {
+            navController.navigate(Screen.EntranceRoute.route) {
+                launchSingleTop = true
+                navController.backQueue.clear()
             }
-            approvalsViewModel.resetLogoutResource()
+            accountViewModel.resetLogoutResource()
         }
     }
 
@@ -103,13 +107,13 @@ fun AccountScreen(
                     AccountRow(
                         titleColor = StrikeWhite,
                         title = stringResource(R.string.email),
-                        value = approvalsState.email
+                        value = accountState.email
                     )
                     Divider(modifier = Modifier.height(0.5.dp), color = DividerGrey)
                     AccountRow(
                         titleColor = StrikeWhite,
                         title = stringResource(R.string.name),
-                        value = approvalsState.name
+                        value = accountState.name
                     )
                     Spacer(modifier = Modifier.height(64.dp))
                     Text(
@@ -158,7 +162,7 @@ fun AccountScreen(
                         modifier = Modifier
                             .padding(horizontal = 16.dp)
                             .fillMaxWidth(),
-                        onClick = approvalsViewModel::logout,
+                        onClick = accountViewModel::logout,
                         shape = RoundedCornerShape(8.dp),
                         colors = ButtonDefaults.buttonColors(backgroundColor = AccountButtonRed),
                         enabled = true
@@ -171,6 +175,15 @@ fun AccountScreen(
                         )
                     }
                     Spacer(modifier = Modifier.height(24.dp))
+                }
+            }
+
+            if(accountState.logoutResult is Resource.Loading) {
+                Box(modifier = Modifier.fillMaxSize().background(color = Color.Black.copy(alpha = 0.25f)).clickable {  }) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.align(alignment = Alignment.Center).size(60.dp),
+                        color = StrikeWhite
+                    )
                 }
             }
         }

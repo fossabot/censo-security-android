@@ -35,8 +35,6 @@ object Transaction {
             )
         }
 
-        //todo: check if this sort matches iOS version which uses booleans
-        // sort accountMetas, first by signer, then by writable
         accountMetas.sortWith(object : Comparator<AccountMeta> {
             override fun compare(x: AccountMeta?, y: AccountMeta?): Int {
                 if (x?.isSigner != y?.isSigner) {
