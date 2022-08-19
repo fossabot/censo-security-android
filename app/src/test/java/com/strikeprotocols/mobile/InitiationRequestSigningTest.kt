@@ -179,8 +179,8 @@ class InitiationRequestSigningTest {
 
         return InitiationRequest(
             requestId = multiSigBalanceAccountCreationWalletApproval.id!!,
-            initiation = initiation,
             approvalDisposition = if (Random().nextBoolean()) ApprovalDisposition.APPROVE else ApprovalDisposition.DENY,
+            initiation = initiation,
             requestType = multiSigBalanceAccountCreationWalletApproval.getSolanaApprovalRequestType(),
             nonces = exampleNonces,
             email = userEmail
@@ -196,8 +196,8 @@ class InitiationRequestSigningTest {
 
         return InitiationRequest(
             requestId = multiSigSignersUpdateWalletApproval.id!!,
-            initiation = initiation,
             approvalDisposition = if (Random().nextBoolean()) ApprovalDisposition.APPROVE else ApprovalDisposition.DENY,
+            initiation = initiation,
             requestType = multiSigSignersUpdateWalletApproval.getSolanaApprovalRequestType(),
             nonces = exampleNonces,
             email = userEmail
@@ -213,8 +213,8 @@ class InitiationRequestSigningTest {
 
         return InitiationRequest(
             requestId = multiSigWithdrawalRequestWalletApproval.id!!,
-            initiation = initiation,
             approvalDisposition = if (Random().nextBoolean()) ApprovalDisposition.APPROVE else ApprovalDisposition.DENY,
+            initiation = initiation,
             requestType = multiSigWithdrawalRequestWalletApproval.getSolanaApprovalRequestType(),
             nonces = exampleNonces,
             email = userEmail
@@ -230,8 +230,8 @@ class InitiationRequestSigningTest {
 
         return InitiationRequest(
             requestId = multiSigDAppTransactionWalletApproval.id!!,
-            initiation = initiation,
             approvalDisposition = if (Random().nextBoolean()) ApprovalDisposition.APPROVE else ApprovalDisposition.DENY,
+            initiation = initiation,
             requestType = multiSigDAppTransactionWalletApproval.getSolanaApprovalRequestType(),
             nonces = exampleNonces,
             email = userEmail
@@ -247,8 +247,8 @@ class InitiationRequestSigningTest {
 
         return InitiationRequest(
             requestId = multiSigConversionRequestWalletApproval.id!!,
-            initiation = initiation,
             approvalDisposition = if (Random().nextBoolean()) ApprovalDisposition.APPROVE else ApprovalDisposition.DENY,
+            initiation = initiation,
             requestType = multiSigConversionRequestWalletApproval.getSolanaApprovalRequestType(),
             nonces = exampleNonces,
             email = userEmail

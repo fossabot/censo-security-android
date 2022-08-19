@@ -87,10 +87,10 @@ class ApprovalsRepositoryImpl @Inject constructor(
         val initiationRequest = InitiationRequest(
             requestId = requestId,
             approvalDisposition = initialDisposition.approvalDisposition!!,
-            nonces = initialDisposition.nonces!!,
-            email = userEmail,
             initiation = initialDisposition.multiSigOpInitiationDetails!!.multisigOpInitiation,
-            requestType = initialDisposition.multiSigOpInitiationDetails.requestType
+            requestType = initialDisposition.multiSigOpInitiationDetails.requestType,
+            nonces = initialDisposition.nonces!!,
+            email = userEmail
         )
         val initiationRequestBody = try {
             initiationRequest.convertToApiBody(encryptionManager)

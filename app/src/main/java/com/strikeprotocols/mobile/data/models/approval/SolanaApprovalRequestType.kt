@@ -66,7 +66,6 @@ data class ApprovalTypeMetaData(
 
 data class MultiSigOpInitiation(
     val opAccountCreationInfo: MultiSigAccountCreationInfo,
-    val dataAccountCreationInfo: MultiSigAccountCreationInfo?,
     val initiatorIsApprover: Boolean
 ) {
     companion object {
