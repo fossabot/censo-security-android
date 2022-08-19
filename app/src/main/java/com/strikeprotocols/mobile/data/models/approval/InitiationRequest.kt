@@ -19,7 +19,6 @@ import com.strikeprotocols.mobile.data.models.approval.SolanaApprovalRequestType
 import com.strikeprotocols.mobile.data.models.approval.TransactionInstruction.Companion.createAdvanceNonceInstruction
 import org.bouncycastle.crypto.params.Ed25519PrivateKeyParameters
 import java.io.ByteArrayOutputStream
-import java.util.Base64
 
 data class InitiationRequest(
     val requestId: String,
@@ -28,8 +27,7 @@ data class InitiationRequest(
     val requestType: SolanaApprovalRequestType,
     val nonces: List<Nonce>,
     val email: String,
-    val opAccountPrivateKey: Ed25519PrivateKeyParameters = generateEphemeralPrivateKey(),
-    val dataAccountPrivateKey: Ed25519PrivateKeyParameters? = generateEphemeralPrivateKey()
+    val opAccountPrivateKey: Ed25519PrivateKeyParameters = generateEphemeralPrivateKey()
 ) : Signable {
 
     private val signingData : SolanaSigningData =
@@ -84,15 +82,6 @@ data class InitiationRequest(
         return PublicKey(publicKeyAsBase58)
     }
 
-    fun dataAccountPublicKey(): PublicKey {
-        if (dataAccountPrivateKey == null) {
-            throw Exception("Missing data account private key")
-        }
-        val publicKeyParams = dataAccountPrivateKey.generatePublicKey()
-        val publicKeyAsBase58 = BaseWrapper.encode(publicKeyParams.encoded)
-        return PublicKey(publicKeyAsBase58)
-    }
-
     private fun createOpAccountMeta(): List<AccountMeta> {
         return listOf(
             AccountMeta(
@@ -122,41 +111,6 @@ data class InitiationRequest(
             keys = createOpAccountMeta(),
             programId = SYS_PROGRAM_ID,
             data = createOpAccounTransactionInstructionData()
-        )
-
-    private fun createDataAccountMeta(): List<AccountMeta> {
-        return listOf(
-            AccountMeta(
-                publicKey = PublicKey(signingData.feePayer),
-                isSigner = true,
-                isWritable = true
-            ),
-            AccountMeta(
-                publicKey = dataAccountPublicKey(),
-                isSigner = true,
-                isWritable = true
-            )
-        )
-    }
-
-    private fun createDataAccountTransactionInstructionData() : ByteArray {
-        val dataAccountCreationInfo =
-            initiation.dataAccountCreationInfo ?: throw Exception("MISSING_DATA_ACCOUNT_CREATION")
-
-        val buffer = ByteArrayOutputStream()
-        buffer.writeIntLE(0)
-        buffer.writeLongLE(dataAccountCreationInfo.minBalanceForRentExemption)
-        buffer.writeLongLE(dataAccountCreationInfo.accountSize)
-        buffer.write(signingData.walletProgramId.base58Bytes())
-
-        return buffer.toByteArray()
-    }
-
-    private fun createDataAccountInstruction(): TransactionInstruction =
-        TransactionInstruction(
-            keys = createDataAccountMeta(),
-            programId = SYS_PROGRAM_ID,
-            data = createDataAccountTransactionInstructionData()
         )
 
     private fun instructionData() : ByteArray {
@@ -285,7 +239,6 @@ data class InitiationRequest(
                         instructionBatch = instructionBatch,
                         signingData = signingData,
                         opAccountPublicKey = opAccountPublicKey(),
-                        dataAccountPublicKey = dataAccountPublicKey(),
                         walletAccountPublicKey = PublicKey(requestType.signingData.walletAddress),
                     )
                 }
@@ -369,7 +322,6 @@ data class InitiationRequest(
             is DAppTransactionRequest -> {
                 listOf(
                     AccountMeta(publicKey = opAccountPublicKey(), isSigner = false, isWritable = true),
-                    AccountMeta(publicKey = dataAccountPublicKey(), isSigner = false, isWritable = true),
                     AccountMeta(publicKey = PublicKey(signingData.walletAddress), isSigner = false, isWritable = false),
                     AccountMeta(publicKey = approverPublicKey, isSigner = true, isWritable = false),
                     AccountMeta(publicKey = SYSVAR_CLOCK_PUBKEY, isSigner = false, isWritable = false),
@@ -448,14 +400,7 @@ data class InitiationRequest(
         val opAccountAddress = opAccountPublicKey().toBase58()
 
         val supplyDappInstruction =
-            if (dataAccountPrivateKey != null && initiation.dataAccountCreationInfo != null) {
-                val dataAccountAddress = dataAccountPublicKey().toBase58()
-                val dataAccountSignature = encryptionManager.signApprovalInitiationMessage(
-                    ephemeralPrivateKey = dataAccountPrivateKey.encoded,
-                    signable = this,
-                    userEmail = email
-                )
-
+            if (supplyInstructions.isNotEmpty()) {
                 val supplyInstructionInitiatorSignatures = supplyInstructions.map { instruction ->
                     SupplyDappInstructionsTxSignature(
                         nonce = instruction.nonce.value,
@@ -468,8 +413,6 @@ data class InitiationRequest(
                 }
 
                 SupplyDAppInstructions(
-                    dataAccountAddress = dataAccountAddress,
-                    dataAccountSignature = dataAccountSignature,
                     supplyInstructionInitiatorSignatures = supplyInstructionInitiatorSignatures
                 )
             } else {
@@ -498,8 +441,6 @@ data class InitiationRequest(
     )
 
     inner class SupplyDAppInstructions(
-        val dataAccountAddress: String,
-        val dataAccountSignature: String,
         val supplyInstructionInitiatorSignatures: List<SupplyDappInstructionsTxSignature>
     )
 
@@ -536,10 +477,6 @@ data class InitiationRequest(
         )
 
         instructions.add(createOpAccountInstruction())
-
-        if(initiation.dataAccountCreationInfo != null) {
-            instructions.add(createDataAccountInstruction())
-        }
 
         instructions.add(
             TransactionInstruction(

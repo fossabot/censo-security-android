@@ -41,5 +41,4 @@ sealed class StrikeError(val errorCode: Int) {
     class NotEnoughNonceAccountsError : ApprovalSigningError(errorCode = 90)
     class MissingApproverKeyError : ApprovalSigningError(errorCode = 100)
     class MissingSourceKeyError : ApprovalSigningError(errorCode = 110)
-    class MissingDataAccountCreation : ApprovalSigningError(errorCode = 120)
 }
