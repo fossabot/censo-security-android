@@ -17,8 +17,50 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.strikeprotocols.mobile.R
+import com.strikeprotocols.mobile.common.strikeLog
 import com.strikeprotocols.mobile.ui.theme.BackgroundBlack
 import com.strikeprotocols.mobile.ui.theme.StrikeWhite
+
+
+@Composable
+fun StrikeSignInTopAppBar(
+    title: String,
+    onAppBarIconClick: () -> Unit,
+) {
+    TopAppBar(
+        modifier = Modifier.fillMaxWidth(),
+        backgroundColor = Color.Transparent,
+        contentColor = StrikeWhite,
+        elevation = AppBarDefaults.TopAppBarElevation,
+    ) {
+        Row(
+            modifier = Modifier
+                .clickable { onAppBarIconClick() }
+                .padding(horizontal = 16.dp),
+            horizontalArrangement = Arrangement.Start,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            if(title.isNotEmpty()) {
+                Icon(
+                    modifier = Modifier.size(32.dp),
+                    imageVector = Icons.Filled.ChevronLeft,
+                    contentDescription = stringResource(R.string.back),
+                    tint = StrikeWhite
+                )
+                Text(
+                    text = title,
+                    textAlign = TextAlign.Start,
+                    fontSize = 16.sp,
+                    color = StrikeWhite,
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 1
+                )
+            } else {
+                Spacer(modifier = Modifier.height(0.dp))
+            }
+        }
+    }
+}
 
 @Composable
 fun StrikeAuthTopAppBar(

@@ -1,17 +1,18 @@
 package com.strikeprotocols.mobile.data
 
+import android.annotation.SuppressLint
+import android.content.Context
+import android.provider.Settings
 import cash.z.ecc.android.bip39.Mnemonics
 import cash.z.ecc.android.bip39.toSeed
 import com.strikeprotocols.mobile.common.*
 import com.strikeprotocols.mobile.data.AuthDataException.*
-import com.strikeprotocols.mobile.data.models.SemanticVersionResponse
-import com.strikeprotocols.mobile.data.models.VerifyUser
-import com.strikeprotocols.mobile.data.models.WalletSigner
+import com.strikeprotocols.mobile.data.models.*
 import com.strikeprotocols.mobile.data.models.WalletSigner.Companion.WALLET_TYPE_SOLANA
 
 interface UserRepository {
-    suspend fun authenticate(sessionToken: String): String
-    suspend fun retrieveSessionToken(username: String, password: String): String
+    suspend fun login(email: String, password: String): Resource<LoginResponse>
+    suspend fun saveToken(token: String)
     suspend fun verifyUser(): Resource<VerifyUser>
     suspend fun getWalletSigners(): Resource<List<WalletSigner?>>
     suspend fun addWalletSigner(walletSignerBody: WalletSigner):Resource<WalletSigner>
@@ -26,7 +27,6 @@ interface UserRepository {
     fun retrieveCachedUserEmail(): String
     suspend fun saveUserEmail(email: String)
     suspend fun generatePhrase() : String
-    suspend fun resetPassword(email: String) : Resource<Unit>
     suspend fun doesUserHaveValidLocalKey(
         verifyUser: VerifyUser,
         walletSigners: List<WalletSigner?>
@@ -37,17 +37,34 @@ interface UserRepository {
 class UserRepositoryImpl(
     private val authProvider: AuthProvider,
     private val api: BrooklynApiService,
-    private val anchorApiService: AnchorApiService,
     private val encryptionManager: EncryptionManager,
     private val securePreferences: SecurePreferences,
     private val phraseValidator: PhraseValidator,
-    private val versionApiService: SemVersionApiService
+    private val versionApiService: SemVersionApiService,
+    private val applicationContext: Context
 ) : UserRepository, BaseRepository() {
-    override suspend fun retrieveSessionToken(username: String, password: String): String =
-        authProvider.getSessionToken(username, password)
 
-    override suspend fun authenticate(sessionToken: String): String =
-        authProvider.authenticate(sessionToken)
+    @SuppressLint("HardwareIds")
+    override suspend fun login(email: String, password: String): Resource<LoginResponse> {
+        val deviceId = Settings.Secure.getString(
+            applicationContext.contentResolver, Settings.Secure.ANDROID_ID
+        )
+
+        val loginBody = LoginBody(
+            deviceId = deviceId,
+            credentials = LoginCredentials(
+                type = LoginType.PASSWORD_BASED,
+                email = email,
+                password = password
+            )
+        )
+
+        return retrieveApiResource { api.login(loginBody = loginBody) }
+    }
+
+    override suspend fun saveToken(token: String) {
+        securePreferences.saveToken(token = token)
+    }
 
     override suspend fun verifyUser(): Resource<VerifyUser> =
         retrieveApiResource { api.verifyUser() }
@@ -154,12 +171,6 @@ class UserRepositoryImpl(
     }
 
     override suspend fun generatePhrase(): String = encryptionManager.generatePhrase()
-
-    override suspend fun resetPassword(email: String) : Resource<Unit> {
-        return retrieveApiResource {
-            anchorApiService.recoverPassword(email)
-        }
-    }
 
     override suspend fun userLoggedIn() = SharedPrefsHelper.isUserLoggedIn()
     override suspend fun setUserLoggedIn() = SharedPrefsHelper.setUserLoggedIn(true)

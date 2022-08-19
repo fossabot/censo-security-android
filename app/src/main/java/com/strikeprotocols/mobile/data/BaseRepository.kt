@@ -58,6 +58,7 @@ abstract class BaseRepository {
         const val BAD_REQUEST_CODE = 400
         const val NO_CODE = -1
         const val TOO_MANY_REQUESTS_CODE = 429
+        const val UNAUTHORIZED = 401
     }
 
 }

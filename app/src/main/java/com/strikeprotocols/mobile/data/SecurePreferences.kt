@@ -9,6 +9,9 @@ import com.strikeprotocols.mobile.data.SecurePreferencesImpl.Companion.SHARED_PR
 import javax.inject.Inject
 
 interface SecurePreferences {
+    fun saveToken(token: String)
+    fun retrieveToken() : String
+    fun clearToken()
     fun saveSolanaKey(email: String, privateKey: ByteArray)
     fun retrieveSolanaKey(email: String): String
     fun clearSolanaKey(email: String)
@@ -32,6 +35,20 @@ class SecurePreferencesImpl @Inject constructor(applicationContext: Context) :
         EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
         EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
     )
+
+    override fun saveToken(token: String) {
+        SharedPrefsHelper.saveToken(
+            encryptedPrefs = secureSharedPreferences,
+            token = token
+        )
+    }
+
+    override fun retrieveToken() =
+        SharedPrefsHelper.retrieveToken(encryptedPrefs = secureSharedPreferences)
+
+    override fun clearToken() {
+        SharedPrefsHelper.saveToken(secureSharedPreferences, "")
+    }
 
     override fun saveSolanaKey(email: String, privateKey: ByteArray) {
         SharedPrefsHelper.saveSolanaKey(

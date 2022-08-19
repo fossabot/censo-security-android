@@ -60,9 +60,6 @@ android {
 
         proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
 
-        buildConfigField "String", "OKTA_BASE_URL", "\"https://login.strikeprotocols.com\""
-        buildConfigField "String", "OKTA_DOMAIN", "\"https://strike-prime.okta.com\""
-
         manifestPlaceholders = [
                 "appAuthRedirectScheme": "com.strikeprotocols.mobile"
         ]
@@ -78,13 +75,9 @@ android {
             resValue "string", "app_name", appName
             minifyEnabled true
             buildConfigField "String", "BASE_URL", "\"https://brooklyn.strikeprotocols.com/\""
-            buildConfigField "String", "ANCHOR_URL", "\"https://wallet.strikeprotocols.com/\""
             buildConfigField "String", "SOLANA_URL", "\"https://api.mainnet-beta.solana.com\""
             buildConfigField "String", "MIN_VERSION_ENDPOINT", "\"strike-security-app-version.json\""
             buildConfigField "String", "SOLANA_COMMITMENT", "\"finalized\""
-            buildConfigField "String", "OKTA_CLIENT_ID", "\"0oa7ajzug1y8O0CPe357\""
-            buildConfigField "String", "OKTA_ISSUER_ID", "\"aus7834x2w3eqeZSr357\""
-            buildConfigField "String", "REDIRECT_SUFFIX", "\"\""
             resValue "string", "RAYGUN_APP_ID", "\"vuxX53AURVfZS87D1WPqeg\""
             debuggable false
         }
@@ -93,13 +86,9 @@ android {
             applicationIdSuffix ".demo"
             minifyEnabled true
             buildConfigField "String", "BASE_URL", "\"https://brooklyn-preprod.strikeprotocols.com/\""
-            buildConfigField "String", "ANCHOR_URL", "\"https://preprod.strikeprotocols.com/\""
             buildConfigField "String", "SOLANA_URL", "\"https://api.mainnet-beta.solana.com\""
             buildConfigField "String", "MIN_VERSION_ENDPOINT", "\"strike-security-app-version.json\""
             buildConfigField "String", "SOLANA_COMMITMENT", "\"finalized\""
-            buildConfigField "String", "OKTA_CLIENT_ID", "\"0oa7ajwuye2dZD4e6357\""
-            buildConfigField "String", "OKTA_ISSUER_ID", "\"aus7834x2w3eqeZSr357\""
-            buildConfigField "String", "REDIRECT_SUFFIX", "\"-demo\""
             resValue "string", "RAYGUN_APP_ID", "\"CtOnGQjIo1U8dELkoUf0iw\""
             debuggable false
         }
@@ -108,13 +97,9 @@ android {
             applicationIdSuffix ".demo2"
             minifyEnabled false
             buildConfigField "String", "BASE_URL", "\"https://brooklyn-demo2.strikeprotocols.com/\""
-            buildConfigField "String", "ANCHOR_URL", "\"https://demo2.strikeprotocols.com/\""
             buildConfigField "String", "SOLANA_URL", "\"https://solana-validator-demo2.strikeprotocols.com\""
             buildConfigField "String", "MIN_VERSION_ENDPOINT", "\"strike-security-app-version-dev.json\""
             buildConfigField "String", "SOLANA_COMMITMENT", "\"confirmed\""
-            buildConfigField "String", "OKTA_CLIENT_ID", "\"0oa7ajsmclS0GyzMw357\""
-            buildConfigField "String", "OKTA_ISSUER_ID", "\"aus7834x2w3eqeZSr357\""
-            buildConfigField "String", "REDIRECT_SUFFIX", "\"-demo-2\""
             resValue "string", "RAYGUN_APP_ID", "\"CtOnGQjIo1U8dELkoUf0iw\""
             debuggable false
         }
@@ -123,13 +108,9 @@ android {
             applicationIdSuffix ".prerelease"
             minifyEnabled false
             buildConfigField "String", "BASE_URL", "\"https://brooklyn-prerelease.strikeprotocols.com/\""
-            buildConfigField "String", "ANCHOR_URL", "\"https://prerelease.strikeprotocols.com/\""
             buildConfigField "String", "SOLANA_URL", "\"https://solana-validator-prerelease.strikeprotocols.com\""
             buildConfigField "String", "MIN_VERSION_ENDPOINT", "\"strike-security-app-version-dev.json\""
             buildConfigField "String", "SOLANA_COMMITMENT", "\"confirmed\""
-            buildConfigField "String", "OKTA_CLIENT_ID", "\"0oa73mddnlx5MMo7j357\""
-            buildConfigField "String", "OKTA_ISSUER_ID", "\"aus783fl9oAoVKJv7357\""
-            buildConfigField "String", "REDIRECT_SUFFIX", "\"-dev\""
             resValue "string", "RAYGUN_APP_ID", "\"L9T2bPaEjr3Lede3SNpFJw\""
             debuggable false
         }
@@ -234,9 +215,6 @@ dependencies {
     implementation 'com.google.firebase:firebase-messaging-ktx'
     implementation 'com.google.firebase:firebase-analytics-ktx'
 
-    //Okta
-    implementation 'com.okta.android:okta-oidc-android:1.2.6'
-
     //Encrypted Preferences
     implementation 'androidx.security:security-crypto-ktx:1.1.0-alpha03'
 
@@ -244,12 +222,10 @@ dependencies {
     implementation "org.web3j:core:5.0.0"
 
     //Okta + Auth utils
-    implementation 'com.okta.authn.sdk:okta-authn-sdk-api:2.0.7'
     implementation('com.okta.authn.sdk:okta-authn-sdk-impl:2.0.7') {
         exclude group: 'com.okta.sdk', module: 'okta-sdk-httpclient'
     }
 
-    implementation 'com.okta.sdk:okta-sdk-okhttp:2.0.0'
     implementation 'com.auth0.android:jwtdecode:2.0.1'
 
     //Biometrics

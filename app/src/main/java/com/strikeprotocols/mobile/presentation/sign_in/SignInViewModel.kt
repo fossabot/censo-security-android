@@ -12,6 +12,7 @@ import com.raygun.raygun4android.RaygunClient
 import com.strikeprotocols.mobile.common.*
 import com.strikeprotocols.mobile.data.*
 import com.strikeprotocols.mobile.data.NoInternetException.Companion.NO_INTERNET_ERROR
+import com.strikeprotocols.mobile.data.models.LoginResponse
 import com.strikeprotocols.mobile.data.models.PushBody
 import kotlinx.coroutines.*
 import kotlinx.coroutines.tasks.await
@@ -35,18 +36,62 @@ class SignInViewModel @Inject constructor(
         state = state.copy(password = updatedPassword, passwordErrorEnabled = false)
     }
 
+    fun moveBackToEmailScreen() {
+        state = state.copy(loginStep = LoginStep.EMAIL_ENTRY)
+    }
+
+    fun signInActionCompleted() {
+        if(state.loginStep == LoginStep.EMAIL_ENTRY) {
+            checkEmail()
+        } else {
+            checkPassword()
+        }
+    }
+
+    private fun checkEmail() {
+        state = if (state.email.isEmpty()) {
+            state.copy(emailErrorEnabled = true)
+        } else {
+            state.copy(loginStep = LoginStep.PASSWORD_ENTRY)
+        }
+    }
+
+    private fun checkPassword() {
+        if (state.password.isEmpty()) {
+            state = state.copy(passwordErrorEnabled = true)
+        } else {
+            attemptLogin()
+        }
+    }
+    //endregion
+
     //region Login + API Calls
     fun attemptLogin() {
         if (state.signInButtonEnabled) {
             state = state.copy(loginResult = Resource.Loading())
             viewModelScope.launch(Dispatchers.IO) {
                 try {
-                    val sessionToken =
-                        userRepository.retrieveSessionToken(state.email, state.password)
-                    val token = userRepository.authenticate(sessionToken)
-                    userSuccessfullyLoggedIn(token)
+                    val loginResource = userRepository.login(
+                        email = state.email, password = state.password
+                    )
+                    when (loginResource) {
+                        is Resource.Success -> {
+                            val token = loginResource.data?.token
+                            if (token != null) {
+                                userSuccessfullyLoggedIn(token)
+                            } else {
+                                userFailedLogin(e = Exception("NO TOKEN"))
+                            }
+                        }
+                        is Resource.Error -> {
+                            userFailedLogin(resource = loginResource)
+                        }
+                        else -> {
+                            state = state.copy(loginResult = Resource.Loading())
+                        }
+                    }
                 } catch (e: Exception) {
-                    state = state.copy(loginResult = Resource.Error(e.message ?: NO_INTERNET_ERROR))
+                    userFailedLogin(e = e)
                 }
             }
         } else {
@@ -61,8 +106,21 @@ class SignInViewModel @Inject constructor(
         userRepository.saveUserEmail(state.email)
         strikeUserData.setEmail(state.email)
         userRepository.setUserLoggedIn()
+        userRepository.saveToken(token)
         submitNotificationTokenForRegistration()
-        state = state.copy(loginResult = Resource.Success(token))
+        state = state.copy(loginResult = Resource.Success(LoginResponse(token = token)))
+    }
+
+    private fun userFailedLogin(resource: Resource<LoginResponse>? = null, e: Exception? = null) {
+        state = if (resource != null) {
+            state.copy(loginResult = resource)
+        } else {
+            state.copy(
+                loginResult = Resource.Error(
+                    exception = Exception(e?.message ?: NO_INTERNET_ERROR)
+                )
+            )
+        }
     }
 
     private suspend fun submitNotificationTokenForRegistration() {

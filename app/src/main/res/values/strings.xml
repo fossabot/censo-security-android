@@ -231,10 +231,6 @@
     <string name="registering_key_auth">Registering your key with Strike…</string>
     <string name="i_saved_key">I saved the recovery phrase &#10132;</string>
 
-    <string name="reset_password">Forgot password?</string>
-    <string name="retry_recover_password">Retry</string>
-    <string name="reset_pswd_email_sent">Reset password email sent!</string>
-    <string name="unable_send_reset_email">Unable to send reset email. Please try again or reset your password from our website.</string>
     <string name="sign_in_subtitle">Sign in with the account you\ncreated on the web</string>
     <string name="back">back</string>
     <string name="user">User</string>
@@ -254,5 +250,6 @@
     <string name="no_phrase_found" type="id">Unable to use current phrase. Please start over.</string>
     <string name="update_app_entrance_message">Please update your app. If you have updated the app, please close the app and re-enter.</string>
     <string name="update_biometry_entrance_message">Please update your device biometry. If you already updated your biometry, please close the app and re-enter.</string>
+    <string name="signing_in_as">Signing in as</string>
 
 </resources>

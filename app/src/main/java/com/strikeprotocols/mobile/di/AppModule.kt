@@ -4,7 +4,6 @@ import android.content.Context
 import com.strikeprotocols.mobile.data.*
 import com.strikeprotocols.mobile.data.UserRepository
 import com.strikeprotocols.mobile.data.UserRepositoryImpl
-import com.strikeprotocols.mobile.service.MessagingService
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -18,10 +17,11 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideAuthProvider(@ApplicationContext applicationContext: Context,
-                            encryptionManager: EncryptionManager,
-                            securePreferences: SecurePreferences): AuthProvider {
-        return OktaAuth(applicationContext, encryptionManager, securePreferences)
+    fun provideAuthProvider(
+        encryptionManager: EncryptionManager,
+        securePreferences: SecurePreferences
+    ): AuthProvider {
+        return StrikeAuth(encryptionManager, securePreferences)
     }
 
     @Provides
@@ -38,13 +38,6 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideAnchorService(): AnchorApiService {
-        return AnchorApiService.create()
-    }
-
-
-    @Provides
-    @Singleton
     fun provideSemVersionService(): SemVersionApiService {
         return SemVersionApiService.create()
     }
@@ -54,32 +47,39 @@ object AppModule {
     fun provideUserRepository(
         authProvider: AuthProvider,
         api: BrooklynApiService,
-        anchorApiService: AnchorApiService,
         encryptionManager: EncryptionManager,
         securePreferences: SecurePreferences,
         phraseValidator: PhraseValidator,
-        semVersionApiService: SemVersionApiService
+        semVersionApiService: SemVersionApiService,
+        @ApplicationContext applicationContext: Context
     ): UserRepository {
         return UserRepositoryImpl(
             authProvider = authProvider,
             api = api,
-            anchorApiService = anchorApiService,
             encryptionManager = encryptionManager,
             securePreferences = securePreferences,
             versionApiService = semVersionApiService,
-            phraseValidator = phraseValidator
+            phraseValidator = phraseValidator,
+            applicationContext = applicationContext
         )
     }
 
     @Provides
     @Singleton
-    fun provideApprovalsRepository(api: BrooklynApiService, encryptionManager: EncryptionManager, userRepository: UserRepository): ApprovalsRepository {
+    fun provideApprovalsRepository(
+        api: BrooklynApiService,
+        encryptionManager: EncryptionManager,
+        userRepository: UserRepository
+    ): ApprovalsRepository {
         return ApprovalsRepositoryImpl(api, encryptionManager, userRepository)
     }
 
     @Provides
     @Singleton
-    fun providePushRepository(api: BrooklynApiService, @ApplicationContext applicationContext: Context): PushRepository {
+    fun providePushRepository(
+        api: BrooklynApiService,
+        @ApplicationContext applicationContext: Context
+    ): PushRepository {
         return PushRepositoryImpl(api, applicationContext)
     }
 
@@ -103,7 +103,7 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun providePhraseValidator() : PhraseValidator {
+    fun providePhraseValidator(): PhraseValidator {
         return PhraseValidatorImpl()
     }
 

@@ -2,8 +2,8 @@ package com.strikeprotocols.mobile.data
 
 import com.google.gson.*
 import com.strikeprotocols.mobile.BuildConfig
+import com.strikeprotocols.mobile.data.BaseRepository.Companion.UNAUTHORIZED
 import com.strikeprotocols.mobile.data.BrooklynApiService.Companion.AUTH
-import com.strikeprotocols.mobile.data.BrooklynApiService.Companion.X_STRIKE_HEADER
 import com.strikeprotocols.mobile.data.models.*
 import com.strikeprotocols.mobile.data.models.approval.ApprovalDispositionRequest
 import com.strikeprotocols.mobile.data.models.approval.InitiationRequest
@@ -17,8 +17,6 @@ import retrofit2.Response as RetrofitResponse
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.*
 import retrofit2.http.Headers
-import java.util.concurrent.TimeUnit
-
 
 interface BrooklynApiService {
 
@@ -26,8 +24,6 @@ interface BrooklynApiService {
 
         const val AUTH = "Authorization"
         const val AUTH_REQUIRED = "$AUTH: "
-        const val X_STRIKE_HEADER = "X-Strike-Authorization-Signature"
-        const val X_STRIKE_REQUIRED = "$X_STRIKE_HEADER: "
 
         fun create(authProvider: AuthProvider): BrooklynApiService {
 
@@ -53,6 +49,9 @@ interface BrooklynApiService {
         }
     }
 
+    @POST("v1/login")
+    suspend fun login(@Body loginBody: LoginBody) : RetrofitResponse<LoginResponse>
+
     @GET("v1/users")
     @Headers(AUTH_REQUIRED)
     suspend fun verifyUser(): RetrofitResponse<VerifyUser>
@@ -62,11 +61,11 @@ interface BrooklynApiService {
     suspend fun walletSigners(): RetrofitResponse<List<WalletSigner?>>
 
     @POST("v1/wallet-signers")
-    @Headers(AUTH_REQUIRED, X_STRIKE_REQUIRED)
+    @Headers(AUTH_REQUIRED)
     suspend fun addWalletSigner(@Body walletSignerBody: WalletSigner): RetrofitResponse<WalletSigner>
 
     @GET("v1/wallet-approvals")
-    @Headers(AUTH_REQUIRED, X_STRIKE_REQUIRED)
+    @Headers(AUTH_REQUIRED)
     suspend fun getWalletApprovals(): RetrofitResponse<List<WalletApproval?>>
 
     @POST("v1/notification-tokens")
@@ -81,14 +80,14 @@ interface BrooklynApiService {
     ) : RetrofitResponse<Unit>
 
     @POST("v1/wallet-approvals/{request_id}/dispositions")
-    @Headers(AUTH_REQUIRED, X_STRIKE_REQUIRED)
+    @Headers(AUTH_REQUIRED)
     suspend fun approveOrDenyDisposition(
         @Path("request_id") requestId: String,
         @Body registerApprovalDispositionBody: ApprovalDispositionRequest.RegisterApprovalDispositionBody
     ): RetrofitResponse<ApprovalDispositionRequest.RegisterApprovalDispositionBody>
 
     @POST("v1/wallet-approvals/{request_id}/initiations")
-    @Headers(AUTH_REQUIRED, X_STRIKE_REQUIRED)
+    @Headers(AUTH_REQUIRED)
     suspend fun approveOrDenyInitiation(
         @Path("request_id") requestId: String,
         @Body initiationRequestBody: InitiationRequest.InitiateRequestBody
@@ -106,28 +105,24 @@ class AuthInterceptor(private val authProvider: AuthProvider) : Interceptor {
                 val token = runBlocking {
                     authProvider.retrieveToken()
                 }
-                request = if (request.header(X_STRIKE_HEADER) != null) {
-                    val signedToken = runBlocking {
-                        authProvider.signToken(token)
-                    }
+                request =
+                    chain.request().newBuilder()
+                        .removeHeader(AUTH)
+                        .addHeader(AUTH, "Bearer $token")
+                        .build()
 
-                    chain.request().newBuilder()
-                        .removeHeader(X_STRIKE_HEADER)
-                        .removeHeader(AUTH)
-                        .addHeader(AUTH, "Bearer $token")
-                        .addHeader(X_STRIKE_HEADER, signedToken)
-                        .build()
-                } else {
-                    chain.request().newBuilder()
-                        .removeHeader(AUTH)
-                        .addHeader(AUTH, "Bearer $token")
-                        .build()
-                }
             } catch (e: TokenExpiredException) {
                 runBlocking { authProvider.signOut() }
                 authProvider.setUserState(userState = UserState.REFRESH_TOKEN_EXPIRED)
             }
         }
-        return chain.proceed(request)
+        val response = chain.proceed(request)
+
+        if (response.code == UNAUTHORIZED) {
+            runBlocking { authProvider.signOut() }
+            authProvider.setUserState(userState = UserState.REFRESH_TOKEN_EXPIRED)
+        }
+
+        return response
     }
 }

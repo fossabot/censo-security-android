@@ -11,6 +11,7 @@ object SharedPrefsHelper {
 
     private const val USER_LOGGED_IN = "skipped_login"
     private const val USER_EMAIL = "user_email"
+    private const val USER_TOKEN = "user_token"
     private const val SOLANA_KEY = "_solana_key"
     private const val ROOT_SEED = "_root_seed"
 
@@ -28,6 +29,16 @@ object SharedPrefsHelper {
         val editor = sharedPrefs.edit()
         editor.putBoolean(USER_LOGGED_IN, loggedIn)
         editor.apply()
+    }
+
+    fun saveToken(encryptedPrefs: SharedPreferences, token: String) {
+        val editor = encryptedPrefs.edit()
+        editor.putString(USER_TOKEN, token)
+        editor.apply()
+    }
+
+    fun retrieveToken(encryptedPrefs: SharedPreferences): String {
+        return encryptedPrefs.getString(USER_TOKEN, "") ?: ""
     }
 
     fun saveSolanaKey(encryptedPrefs: SharedPreferences, email: String, solanaKey: ByteArray) {

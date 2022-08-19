@@ -41,7 +41,6 @@ import com.strikeprotocols.mobile.presentation.contact_strike.ContactStrikeScree
 import com.strikeprotocols.mobile.presentation.entrance.EntranceScreen
 import com.strikeprotocols.mobile.presentation.key_management.KeyManagementInitialData
 import com.strikeprotocols.mobile.presentation.key_management.KeyManagementScreen
-import com.strikeprotocols.mobile.presentation.reset_password.ResetPasswordScreen
 import com.strikeprotocols.mobile.presentation.sign_in.SignInScreen
 import com.strikeprotocols.mobile.service.MessagingService.Companion.NOTIFICATION_DISPLAYED_KEY
 import com.strikeprotocols.mobile.ui.theme.BackgroundBlack
@@ -210,11 +209,6 @@ class MainActivity : FragmentActivity() {
                 strikeLog(message = "Initial data as string: $keyInitialDataArg")
                 strikeLog(message = "Parse data: ${KeyManagementInitialData.fromJson(keyInitialDataArg)}")
                 KeyManagementScreen(navController = navController, initialData = KeyManagementInitialData.fromJson(keyInitialDataArg))
-            }
-            composable(
-                route = Screen.ResetPasswordRoute.route
-            ) {
-                ResetPasswordScreen(navController = navController)
             }
             composable(
                 route = Screen.EnforceUpdateRoute.route

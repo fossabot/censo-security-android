@@ -21,8 +21,6 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import com.strikeprotocols.mobile.R
 import com.strikeprotocols.mobile.ui.theme.StrikePurple
-import com.strikeprotocols.mobile.ui.theme.StrikeWhite
-import com.strikeprotocols.mobile.ui.theme.UnfocusedGrey
 
 @ExperimentalComposeUiApi
 @Composable
@@ -39,9 +37,6 @@ fun SignInTextField(
     showDoneAction: Boolean = false,
     errorText: String = ""
 ) {
-
-    val keyboardController = LocalSoftwareKeyboardController.current
-
     Column {
         OutlinedTextField(
             singleLine = true,
@@ -60,8 +55,10 @@ fun SignInTextField(
                 imeAction = if (showDoneAction) ImeAction.Done else ImeAction.Next
             ),
             keyboardActions = KeyboardActions(
+                onNext = {
+                    onDoneAction()
+                },
                 onDone = {
-                    keyboardController?.hide()
                     onDoneAction()
                 }
             ),
