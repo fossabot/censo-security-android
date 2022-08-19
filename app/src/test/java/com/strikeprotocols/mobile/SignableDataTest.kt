@@ -2,7 +2,6 @@ package com.strikeprotocols.mobile
 
 import com.google.gson.JsonElement
 import com.google.gson.JsonParser
-import com.strikeprotocols.mobile.common.MockedApprovals
 import com.strikeprotocols.mobile.common.toHexString
 import com.strikeprotocols.mobile.data.models.ApprovalDisposition
 import com.strikeprotocols.mobile.data.models.Nonce
@@ -62,7 +61,6 @@ class SignableDataTest {
     fun testSignersUpdateInitiationRequest() {
         val initiation = MultiSigOpInitiation(
             opAccountCreationInfo = getOpAccountCreationInfo(),
-            dataAccountCreationInfo = null,
             initiatorIsApprover = true
         )
 
@@ -75,14 +73,13 @@ class SignableDataTest {
         )
 
         val initiationRequest = InitiationRequest(
-            approvalDisposition = ApprovalDisposition.APPROVE,
             requestId = request.id!!,
+            approvalDisposition = ApprovalDisposition.APPROVE,
             initiation = initiation,
             requestType = requestType,
             nonces = listOf(Nonce("6HeTZQvWzhX8aLpm7K213scyGExytur2qiXxqLAMKnBb")),
             email = "dont care",
-            opAccountPrivateKey = privateKey,
-            dataAccountPrivateKey = null
+            opAccountPrivateKey = privateKey
         )
 
         Assert.assertEquals(
@@ -118,7 +115,6 @@ class SignableDataTest {
     fun testBalanceAccountCreationInitiationRequest() {
         val initiation = MultiSigOpInitiation(
             opAccountCreationInfo = getOpAccountCreationInfo(),
-            dataAccountCreationInfo = null,
             initiatorIsApprover = true
         )
 
@@ -130,14 +126,13 @@ class SignableDataTest {
             getBalanceAccountCreationRequest(nonceAccountAddresses = listOf("CL8fZq5BzjCBXmixSMKqBsFoCLSFxqN6GvheDQ68HP44"))
         val request = getWalletInitiationRequest(requestType, initiation = initiation)
         val initiationRequest = InitiationRequest(
-            approvalDisposition = ApprovalDisposition.APPROVE,
             requestId = request.id!!,
+            approvalDisposition = ApprovalDisposition.APPROVE,
             initiation = initiation,
             requestType = requestType,
             nonces = listOf(Nonce("QRKqHqP5SNEngXrcK2QeAR2nqx9AmwbHrmYF49ZbkEK")),
             email = "dont care",
-            opAccountPrivateKey = privateKey,
-            dataAccountPrivateKey = null
+            opAccountPrivateKey = privateKey
         )
 
         Assert.assertEquals(
@@ -169,7 +164,6 @@ class SignableDataTest {
     fun testSolWithdrawalRequestInitiationRequest() {
         val initiation = MultiSigOpInitiation(
             opAccountCreationInfo = getOpAccountCreationInfo(),
-            dataAccountCreationInfo = null,
             initiatorIsApprover = true
         )
         val requestType =
@@ -179,14 +173,13 @@ class SignableDataTest {
             keyValueAsHex = ("7de2dc4f438213a502317cc43a58cbe4a23e8680a2438e9166334393effd726f")
         )
         val initiationRequest = InitiationRequest(
-            approvalDisposition = ApprovalDisposition.APPROVE,
             requestId = request.id!!,
+            approvalDisposition = ApprovalDisposition.APPROVE,
             initiation = initiation,
             requestType = requestType,
             nonces = listOf(Nonce("4LTSSabuoUArWeLyAS2nstT4EjmP8L3y8qXYgJqRs6RC")),
             email = "dont care",
-            opAccountPrivateKey = pk,
-            dataAccountPrivateKey = null
+            opAccountPrivateKey = pk
         )
 
         Assert.assertEquals(
@@ -218,7 +211,6 @@ class SignableDataTest {
     fun testSplWithdrawalRequestInitiationRequest() {
         val initiation = MultiSigOpInitiation(
             opAccountCreationInfo = getOpAccountCreationInfo(),
-            dataAccountCreationInfo = null,
             initiatorIsApprover = true
         )
         val requestType =
@@ -228,14 +220,13 @@ class SignableDataTest {
             keyValueAsHex = ("4ba2d7074c6fa66dca792b64260b0513a229fa0849b1ceaa5b9cff1285fedee7")
         )
         val initiationRequest = InitiationRequest(
-            approvalDisposition = ApprovalDisposition.APPROVE,
             requestId = request.id!!,
+            approvalDisposition = ApprovalDisposition.APPROVE,
             initiation = initiation,
             requestType = requestType,
             nonces = listOf(Nonce("9kV51VcoGhA1YFkBxBhd7rG1nz7ZCVcsBpqaaGa1hgCD")),
             email = "dont care",
-            opAccountPrivateKey = pk,
-            dataAccountPrivateKey = null
+            opAccountPrivateKey = pk
         )
 
         Assert.assertEquals(
@@ -267,7 +258,6 @@ class SignableDataTest {
     fun testUSDCConversionRequestInitiationRequest() {
         val initiation = MultiSigOpInitiation(
             opAccountCreationInfo = getOpAccountCreationInfo(),
-            dataAccountCreationInfo = null,
             initiatorIsApprover = true
         )
         val requestType =
@@ -277,14 +267,13 @@ class SignableDataTest {
             keyValueAsHex = ("5f27be66e3eb697a4274f9359c87f9069762a5e2cb7a63a622e923bd6119b963")
         )
         val initiationRequest = InitiationRequest(
-            approvalDisposition = ApprovalDisposition.APPROVE,
             requestId = request.id!!,
+            approvalDisposition = ApprovalDisposition.APPROVE,
             initiation = initiation,
             requestType = requestType,
             nonces = listOf(Nonce("9kV51VcoGhA1YFkBxBhd7rG1nz7ZCVcsBpqaaGa1hgCD")),
             email = "dont care",
-            opAccountPrivateKey = pk,
-            dataAccountPrivateKey = null
+            opAccountPrivateKey = pk
         )
 
         Assert.assertEquals(
@@ -298,7 +287,6 @@ class SignableDataTest {
     fun testWrapConversionRequestInitiationRequest() {
         val initiation = MultiSigOpInitiation(
             opAccountCreationInfo = getOpAccountCreationInfo(),
-            dataAccountCreationInfo = null,
             initiatorIsApprover = true
         )
         val requestType =
@@ -308,14 +296,13 @@ class SignableDataTest {
             keyValueAsHex = ("46b397c81d81f9c745bb61baf28337888907696c5e653a08a98b5ecbcc1c82c8")
         )
         val initiationRequest = InitiationRequest(
-            approvalDisposition = ApprovalDisposition.APPROVE,
             requestId = request.id!!,
+            approvalDisposition = ApprovalDisposition.APPROVE,
             initiation = initiation,
             requestType = requestType,
             nonces = listOf(Nonce("9kV51VcoGhA1YFkBxBhd7rG1nz7ZCVcsBpqaaGa1hgCD")),
             email = "dont care",
-            opAccountPrivateKey = pk,
-            dataAccountPrivateKey = null
+            opAccountPrivateKey = pk
         )
 
         Assert.assertEquals(
@@ -329,7 +316,6 @@ class SignableDataTest {
     fun testUnwrapConversionRequestInitiationRequest() {
         val initiation = MultiSigOpInitiation(
             opAccountCreationInfo = getOpAccountCreationInfo(),
-            dataAccountCreationInfo = null,
             initiatorIsApprover = true
         )
         val requestType =
@@ -339,14 +325,13 @@ class SignableDataTest {
             keyValueAsHex = ("1f00703a5a544f81174fc90ddee2c11a1d43d5011c363a8f943b2adabc78ca52")
         )
         val initiationRequest = InitiationRequest(
-            approvalDisposition = ApprovalDisposition.APPROVE,
             requestId = request.id!!,
+            approvalDisposition = ApprovalDisposition.APPROVE,
             initiation = initiation,
             requestType = requestType,
             nonces = listOf(Nonce("3sW5nKBjmPkCtaXcBQperkPbjjq1zh55WBYzqtn9snjP")),
             email = "dont care",
-            opAccountPrivateKey = pk,
-            dataAccountPrivateKey = null
+            opAccountPrivateKey = pk
         )
 
         Assert.assertEquals(
@@ -359,45 +344,38 @@ class SignableDataTest {
     @Test
     fun testDAppTransactionRequestInitiationRequest() {
         val opAccountPk = generateEphemeralPrivateKeyFromText(
-            keyValueAsHex = ("179ae3647039dd13d58d78fdf31cb35e3b9103fb41720bdc95af9afe03f1662d")
-        )
-        val dataAccountPk = generateEphemeralPrivateKeyFromText(keyValueAsHex = ("6b49f9cd575c582c8f64817cc7dba549bb69e567b6064628bbb6b65d7d1c6ac6")
+            keyValueAsHex = ("4ec791e7966d99d23e8bc41f3822a34d001e2c03605f33759bed2cd74fd40d0c")
         )
 
         val initiation = MultiSigOpInitiation(
-            opAccountCreationInfo = getOpAccountCreationInfo(),
-            dataAccountCreationInfo = MultiSigAccountCreationInfo(
-                accountSize = 2696,
-                minBalanceForRentExemption = 19655040
-            ),
+            opAccountCreationInfo = getOpAccountCreationInfo(3712, 26726400),
             initiatorIsApprover = true
         )
 
         val nonceAccountAddresses = listOf(
-            "6q8QvCakZbrCX9JfaX7wqSqEyH5jSXQfUXkWkdrwKjjR",
-            "B6qJKT9jM179reREPi2bBDGNkPFu7AikcD16meF9oDAq"
+            "2qpuGj3H4iG632vWbayr5Yx3uVb9irMq1cYWiciFbLrG",
+            "7Y9C78kSA8hg4z9QoUii1Eqog7qiQjtuzfSL71wKCzUS"
         )
         val nonces = listOf(
-            Nonce("7c64nnSxKeafeVJXDL8zevw7BrJuJXEBocKtq4ACqtMj"),
-            Nonce("CxHpDahpQjKoVWGS1GxMFZJH5EUo64SRv6tDw18fipxW")
+            Nonce("453hdmRBt3jt9KqHeJAC9pAduuJzTDCJZQBi1kemAQbG"),
+            Nonce("8ZMPfGBZjmqCMe6ngR5sM9XWnsfaHcEGm1GF6M7ifkzL")
         )
 
         val requestType = getDAppTransactionRequest(nonceAccountAddresses = nonceAccountAddresses)
         val request = getWalletInitiationRequest(requestType, initiation = initiation)
         val initiationRequest = InitiationRequest(
-            approvalDisposition = ApprovalDisposition.APPROVE,
             requestId = request.id!!,
+            approvalDisposition = ApprovalDisposition.APPROVE,
             initiation = initiation,
             requestType = requestType,
             nonces = nonces,
             email = "dont care",
-            opAccountPrivateKey = opAccountPk,
-            dataAccountPrivateKey = dataAccountPk
+            opAccountPrivateKey = opAccountPk
         )
 
         Assert.assertEquals(
-            "0401050a69ab8cb05413af9614f898a1f1fdfbc07e7ad5eb2eb1d0f1c49f448bd179c7150f44b95f05109e7d11916ea590ee2fea974c7b8f6770cc1ddf5803d23710c9b52f752b200e8b2e03e7771f9d4939b089d13eabf0bf33727cd15bbe9aacf6725779d318e6a73e07800b2926954fdb8d5a27f1ec0c18c3d6ca58c0425b12a80eec569eb1d501bd3e3c77f977f89c0320e93d84efaf1077cf7da0e3af8dd9e87cd406a7d517192c568ee08a845f73d29788cf035c3145b21ab344d8062ea940000020c679de1ce4f278bd4da2570d112234a9bee1b6190b7058b2f60a12312f9b2606a7d51718c774c928566398691d5eb68b5eb8a39b4b6d5c73555b21000000000000000000000000000000000000000000000000000000000000000000000000a943a3e5f0b9c6a7eb4b22252661255343a37da20a0f14adb3f39a005c5fafe662232d616155a19d0e2b92928affb521a688ca8e045e3a70bc13eba7620b4a6e040803040500040400000008020001340000000080b2720000000000b803000000000000a943a3e5f0b9c6a7eb4b22252661255343a37da20a0f14adb3f39a005c5fafe608020002340000000080e92b0100000000880a000000000000a943a3e5f0b9c6a7eb4b22252661255343a37da20a0f14adb3f39a005c5fafe609060102060307008b0110000000000000000000000000000000000000000000000000000000000000000000000000000000000022cf856d07599f5067980ce99e7f9f23ca40ee4cfbc9e12abbbc50149c9d3bbb5799eb58cf6d907afb115709b5e2979cf8fcacf90c328977c15d618948009ae72e90c13b0d471b592c2984568133a41676460f72c885db57ad26bd5b628f938201",
-            initiationRequest.retrieveSignableData(approverPublicKey = "9CZ2ZaGe961oLCWJUpr16ofZxBM4yK9tGfbdwj57JNJP")
+            "0301050969ab8cb05413af9614f898a1f1fdfbc07e7ad5eb2eb1d0f1c49f448bd179c71566f27f2db441c6844925694845bb7f91fa08bb705b9ffbf9f189a0af46a652fda1df05ed1b96a36d0c048af32557c335b46afae3c8f776640ae5f5cb0eb6b9df1b5dba547244d7e30522b076d82809741955522f259f5dee9a1e15fd218083e506a7d517192c568ee08a845f73d29788cf035c3145b21ab344d8062ea940000083a5c7a7d932826c8487798ee6cfd509c6ea293106e5b8ecca977d2c41e337e206a7d51718c774c928566398691d5eb68b5eb8a39b4b6d5c73555b21000000000000000000000000000000000000000000000000000000000000000000000000fa09491f04ac2239eb373bbef45c45f284a55a980487b9566a58b31bf44fb0352d9c7004f85156016de1317cebf952f64cdbbc7056d5b8a4e300f89a96672607030703030400040400000007020001340000000000d0970100000000800e000000000000fa09491f04ac2239eb373bbef45c45f284a55a980487b9566a58b31bf44fb035080501050206008b011000000000000000000000000000000000000000000000000000000000000000000000000000000000008fa39a0314aaeeb6edf40164c2ef98f4b759f451e6f13044ccbc2a9f8eb070fd0badb583fd3e78be40bd8be44103ef35bc46f819251c20ff210be3a97a62ebc82e90c13b0d471b592c2984568133a41676460f72c885db57ad26bd5b628f938201",
+            initiationRequest.retrieveSignableData(approverPublicKey = "BtstAXkRrjBdpDvknnfPwnr6UquXpUvAPZSFZi8wDftS")
                 .toHexString()
         )
 
@@ -406,26 +384,26 @@ class SignableDataTest {
         Assert.assertEquals(supplyInstructions[0].nonce, nonces[1])
         Assert.assertEquals(supplyInstructions[0].nonceAccountAddress, nonceAccountAddresses[1])
         Assert.assertEquals(
-            "0201030869ab8cb05413af9614f898a1f1fdfbc07e7ad5eb2eb1d0f1c49f448bd179c71579d318e6a73e07800b2926954fdb8d5a27f1ec0c18c3d6ca58c0425b12a80eec9613627b7c3e405880c3383eff26242b7b69eafd4b76ed308fe32634485d9c9a0f44b95f05109e7d11916ea590ee2fea974c7b8f6770cc1ddf5803d23710c9b52f752b200e8b2e03e7771f9d4939b089d13eabf0bf33727cd15bbe9aacf6725706a7d517192c568ee08a845f73d29788cf035c3145b21ab344d8062ea94000000000000000000000000000000000000000000000000000000000000000000000a943a3e5f0b9c6a7eb4b22252661255343a37da20a0f14adb3f39a005c5fafe6b19a832ef4b8133a48e17d0cd56a779299fac0fd77f41dd97051f8a64be75b570206030205000404000000070303040193021c0001008c97258f4e2489f1bb3d1029148e0d830b5a1399daff1084048e7bd8dbe9f8590700031e1fbf344b4b060e7a8cf8727f02c5ff4e52d2f6cfe3471c931d24aee167057801120bc93553699a0a797793414bc7059c5bcd6c596e1049341a5b4be8af8f372a031e1fbf344b4b060e7a8cf8727f02c5ff4e52d2f6cfe3471c931d24aee16705780020ac2e79fc1dac5bc9d5cab6f58ead3c9e9c135e1497a00015600ca33685fa9d0000000000000000000000000000000000000000000000000000000000000000000006ddf6e1d765a193d9cbe146ceeb79ac1cb485ed5f5b37913a8cf5857eff00a90006a7d517192c5c51218cc94c3d4af17f58daee089ba1fd44e3dbd98a000000000400010203ac",
-            supplyInstructions[0].retrieveSignableData(approverPublicKey = "9CZ2ZaGe961oLCWJUpr16ofZxBM4yK9tGfbdwj57JNJP").toHexString()
+            "0201040869ab8cb05413af9614f898a1f1fdfbc07e7ad5eb2eb1d0f1c49f448bd179c715a1df05ed1b96a36d0c048af32557c335b46afae3c8f776640ae5f5cb0eb6b9df61206386ac12c66621091063ee33ff67766782dc8be4d092d563b3f0c69469d366f27f2db441c6844925694845bb7f91fa08bb705b9ffbf9f189a0af46a652fd06a7d517192c568ee08a845f73d29788cf035c3145b21ab344d8062ea940000083a5c7a7d932826c8487798ee6cfd509c6ea293106e5b8ecca977d2c41e337e20000000000000000000000000000000000000000000000000000000000000000fa09491f04ac2239eb373bbef45c45f284a55a980487b9566a58b31bf44fb035704b733ffb52f99a655a10bd88bd595584952862bb9845d8058cc3f0d73e52c90206030204000404000000070303050190021c0001008c97258f4e2489f1bb3d1029148e0d830b5a1399daff1084048e7bd8dbe9f8590700034fd74e0317ab5320172983c9e619f60429b2cd1513230b6dda5c09611995ba5601b4ea2a426fee32cf5fb1e44cd4527e485c614107ee1222acfcf089f01c3ed0e7034fd74e0317ab5320172983c9e619f60429b2cd1513230b6dda5c09611995ba56007c85973e9d59ddddf27b0700a10b00857e9daa46708a4a2f0ef97e3ebb691a580000000000000000000000000000000000000000000000000000000000000000000006ddf6e1d765a193d9cbe146ceeb79ac1cb485ed5f5b37913a8cf5857eff00a90006a7d517192c5c51218cc94c3d4af17f58daee089ba1fd44e3dbd98a00000000010000",
+            supplyInstructions[0].retrieveSignableData(approverPublicKey = "BtstAXkRrjBdpDvknnfPwnr6UquXpUvAPZSFZi8wDftS").toHexString()
         )
     }
 
     @Test
     fun testDAppTransactionRequestApprovalDisposition() {
         val request =
-            getWalletApprovalRequest(getDAppTransactionRequest(nonceAccountAddresses = listOf("6qxrNFPEwqvTprbHjo5VwDCDL3sAzj16Ba1p3hQvzTt6")))
+            getWalletApprovalRequest(getDAppTransactionRequest(nonceAccountAddresses = listOf("49BWf2pjTevVMZk1odBiaT5m1cx4z2Q87A6MPtwtPqAn")))
         val approvalRequest = ApprovalDispositionRequest(
             approvalDisposition = ApprovalDisposition.APPROVE,
             requestId = request.id!!,
             requestType = request.getSolanaApprovalRequestType(),
-            nonces = listOf(Nonce("8tNhhNgromsiM2ieYrvmm79AS6fHZj7r6wf3A2sX71HK")),
+            nonces = listOf(Nonce("47bdPMECePMq44kc97JwNzGtMBynLTJGr9hcsYYb4qgG")),
             email = "dont care"
         )
         Assert.assertEquals(
-            approvalRequest.retrieveSignableData(approverPublicKey = "BgfDEzbk9ZiH1UjmzB78gG6DSoiob8KXzbXWy1Y8dEc8")
+            approvalRequest.retrieveSignableData(approverPublicKey = "4L3kZzJQVbHbpxNLdBK6SFtvJgnrgWDb62hJgNfaGaeS")
                 .toHexString(),
-            "0201040869ab8cb05413af9614f898a1f1fdfbc07e7ad5eb2eb1d0f1c49f448bd179c7159ebdb9e802a55fc6781b8e0e13f1a2306fa6a4b82c21f15168bf624d7ff97f3956d576ed3651827f8030a11e6cb99c70be0fce8788407a66f1c627c317849bd30f44b95f05109e7d11916ea590ee2fea974c7b8f6770cc1ddf5803d23710c9b506a7d517192c568ee08a845f73d29788cf035c3145b21ab344d8062ea940000006a7d51718c774c928566398691d5eb68b5eb8a39b4b6d5c73555b21000000000000000000000000000000000000000000000000000000000000000000000000a943a3e5f0b9c6a7eb4b22252661255343a37da20a0f14adb3f39a005c5fafe6752af7c79311c9bf9adc6b2c48c30084a9efa9bc55bce55e91f06bba36b0d48202060302040004040000000703030105220901c8d7278004f9b6b989430ac3fbdcd9fd937777099acf64f4f2bff5d57ad0e576"
+            "0201040869ab8cb05413af9614f898a1f1fdfbc07e7ad5eb2eb1d0f1c49f448bd179c715317434f927df16dcdac690e2aa964c736536a77f81da2a342a03bdf2437651072eab97a901ae7ae5c9ea3844f680385928c4edc49624eebeb04938445aff421766f27f2db441c6844925694845bb7f91fa08bb705b9ffbf9f189a0af46a652fd06a7d517192c568ee08a845f73d29788cf035c3145b21ab344d8062ea940000006a7d51718c774c928566398691d5eb68b5eb8a39b4b6d5c73555b21000000000000000000000000000000000000000000000000000000000000000000000000fa09491f04ac2239eb373bbef45c45f284a55a980487b9566a58b31bf44fb0352e43b2ea0eba51b2f359f97e77fca863364aaf03b43214d891d625140e75425d0206030204000404000000070303010522090113ee5f2a8938c2f77b07b1b403b54e8180906d1a8408fb65ffa221f6e02e1a7f"
         )
     }
 
@@ -451,7 +429,6 @@ class SignableDataTest {
     fun testAddDAppBookEntryInitiationRequest() {
         val initiation = MultiSigOpInitiation(
             opAccountCreationInfo = getOpAccountCreationInfo(),
-            dataAccountCreationInfo = null,
             initiatorIsApprover = true
         )
         val requestType =
@@ -461,14 +438,13 @@ class SignableDataTest {
             keyValueAsHex = ("72ff8f7fb4a441c93d4003e2bf67dd367e3293311c4f9433c422a2fbf305c477")
         )
         val initiationRequest = InitiationRequest(
-            approvalDisposition = ApprovalDisposition.APPROVE,
             requestId = request.id!!,
+            approvalDisposition = ApprovalDisposition.APPROVE,
             initiation = initiation,
             requestType = requestType,
             nonces = listOf(Nonce("9PGftXH39kRKndTxL4hQppfonLMZQpWWWzvaHzYsAcLy")),
             email = "dont care",
-            opAccountPrivateKey = pk,
-            dataAccountPrivateKey = null
+            opAccountPrivateKey = pk
         )
 
         Assert.assertEquals(
@@ -500,7 +476,6 @@ class SignableDataTest {
     fun testRemoveDAppBookEntryInitiationRequest() {
         val initiation = MultiSigOpInitiation(
             opAccountCreationInfo = getOpAccountCreationInfo(),
-            dataAccountCreationInfo = null,
             initiatorIsApprover = true
         )
         val requestType =
@@ -510,14 +485,13 @@ class SignableDataTest {
             keyValueAsHex = ("1d3462075eae5a46257981c00c20982dd27a88b70a88ff95455dad6bc88859aa")
         )
         val initiationRequest = InitiationRequest(
-            approvalDisposition = ApprovalDisposition.APPROVE,
             requestId = request.id!!,
+            approvalDisposition = ApprovalDisposition.APPROVE,
             initiation = initiation,
             requestType = requestType,
             nonces = listOf(Nonce("9PGftXH39kRKndTxL4hQppfonLMZQpWWWzvaHzYsAcLy")),
             email = "dont care",
-            opAccountPrivateKey = pk,
-            dataAccountPrivateKey = null
+            opAccountPrivateKey = pk
         )
 
         Assert.assertEquals(
@@ -531,7 +505,6 @@ class SignableDataTest {
     fun testAddAddressBookEntryInitiationRequest() {
         val initiation = MultiSigOpInitiation(
             opAccountCreationInfo = getOpAccountCreationInfo(),
-            dataAccountCreationInfo = null,
             initiatorIsApprover = true
         )
         val requestType =
@@ -541,14 +514,13 @@ class SignableDataTest {
             keyValueAsHex = ("a37195e87d53a831c1947e8afe02aec367e78f62fb912f7a614c3a387cd911fa")
         )
         val initiationRequest = InitiationRequest(
-            approvalDisposition = ApprovalDisposition.APPROVE,
             requestId = request.id!!,
+            approvalDisposition = ApprovalDisposition.APPROVE,
             initiation = initiation,
             requestType = requestType,
             nonces = listOf(Nonce("7r8cdEASTnapMjhk569Kwq7mtWwaqjMmkxYe75PBCCK5")),
             email = "dont care",
-            opAccountPrivateKey = pk,
-            dataAccountPrivateKey = null
+            opAccountPrivateKey = pk
         )
 
         Assert.assertEquals(
@@ -598,7 +570,6 @@ class SignableDataTest {
     fun testWalletConfigPolicyUpdateInitiationRequest() {
         val initiation = MultiSigOpInitiation(
             opAccountCreationInfo = getOpAccountCreationInfo(),
-            dataAccountCreationInfo = null,
             initiatorIsApprover = true
         )
         val requestType =
@@ -608,14 +579,13 @@ class SignableDataTest {
             keyValueAsHex = ("57cd2b0b1df0dd87e9001553716f2f4e9e1d2a8d0f4019f3048584cd3e83b385")
         )
         val initiationRequest = InitiationRequest(
-            approvalDisposition = ApprovalDisposition.APPROVE,
             requestId = request.id!!,
+            approvalDisposition = ApprovalDisposition.APPROVE,
             initiation = initiation,
             requestType = requestType,
             nonces = listOf(Nonce("7r8cdEASTnapMjhk569Kwq7mtWwaqjMmkxYe75PBCCK5")),
             email = "dont care",
-            opAccountPrivateKey = pk,
-            dataAccountPrivateKey = null
+            opAccountPrivateKey = pk
         )
 
         Assert.assertEquals(
@@ -647,7 +617,6 @@ class SignableDataTest {
     fun testBalanceAccountSettingsUpdateUpdateInitiationRequest() {
         val initiation = MultiSigOpInitiation(
             opAccountCreationInfo = getOpAccountCreationInfo(),
-            dataAccountCreationInfo = null,
             initiatorIsApprover = true
         )
         val requestType =
@@ -657,14 +626,13 @@ class SignableDataTest {
             keyValueAsHex = ("514c07777ad9cd72f1493191f785170e1c14c5e37c9c6714863c9fa425965545")
         )
         val initiationRequest = InitiationRequest(
-            approvalDisposition = ApprovalDisposition.APPROVE,
             requestId = request.id!!,
+            approvalDisposition = ApprovalDisposition.APPROVE,
             initiation = initiation,
             requestType = requestType,
             nonces = listOf(Nonce("J2gVnUf56KpHARmwbagi3sX2TFHXNBUBGugXtvJrgxJq")),
             email = "dont care",
-            opAccountPrivateKey = pk,
-            dataAccountPrivateKey = null
+            opAccountPrivateKey = pk
         )
 
         Assert.assertEquals(
@@ -696,7 +664,6 @@ class SignableDataTest {
     fun testBalanceAccountPolicyUpdateInitiationRequest() {
         val initiation = MultiSigOpInitiation(
             opAccountCreationInfo = getOpAccountCreationInfo(),
-            dataAccountCreationInfo = null,
             initiatorIsApprover = true
         )
         val requestType =
@@ -706,14 +673,13 @@ class SignableDataTest {
             keyValueAsHex = ("370349daceb62cb1ad6f37fbaba12dc72e36367c57b2ee976527609cd8d3f63e")
         )
         val initiationRequest = InitiationRequest(
-            approvalDisposition = ApprovalDisposition.APPROVE,
             requestId = request.id!!,
+            approvalDisposition = ApprovalDisposition.APPROVE,
             initiation = initiation,
             requestType = requestType,
             nonces = listOf(Nonce("DvKqKEBaJ71C5Hw8Yn45NvsYhpXfAYHybBbUa17nHcUm")),
             email = "dont care",
-            opAccountPrivateKey = pk,
-            dataAccountPrivateKey = null
+            opAccountPrivateKey = pk
         )
 
         Assert.assertEquals(
@@ -748,7 +714,6 @@ class SignableDataTest {
     fun testBalanceAccountAddressWhitelistUpdateInitiationRequest() {
         val initiation = MultiSigOpInitiation(
             opAccountCreationInfo = getOpAccountCreationInfo(),
-            dataAccountCreationInfo = null,
             initiatorIsApprover = true
         )
         val requestType =
@@ -758,14 +723,13 @@ class SignableDataTest {
             keyValueAsHex = ("a9989f27d789b3c2266db5dbd1420e2831cacbb161d6e95bd48323911560fd11")
         )
         val initiationRequest = InitiationRequest(
-            approvalDisposition = ApprovalDisposition.APPROVE,
             requestId = request.id!!,
+            approvalDisposition = ApprovalDisposition.APPROVE,
             initiation = initiation,
             requestType = requestType,
             nonces = listOf(Nonce("Bb2XveQNyXVBJvJUPnsbhRtYqePUi8xbvBaJxk96BKDG")),
             email = "dont care",
-            opAccountPrivateKey = pk,
-            dataAccountPrivateKey = null
+            opAccountPrivateKey = pk
         )
 
         Assert.assertEquals(
@@ -797,7 +761,6 @@ class SignableDataTest {
     fun testBalanceAccountNameUpdateInitiationRequest() {
         val initiation = MultiSigOpInitiation(
             opAccountCreationInfo = getOpAccountCreationInfo(),
-            dataAccountCreationInfo = null,
             initiatorIsApprover = true
         )
         val requestType =
@@ -807,14 +770,13 @@ class SignableDataTest {
             keyValueAsHex = ("7707e53ddb688826e19d5d1d651450222c3d6cf73680fd331430278bba237328")
         )
         val initiationRequest = InitiationRequest(
-            approvalDisposition = ApprovalDisposition.APPROVE,
             requestId = request.id!!,
+            approvalDisposition = ApprovalDisposition.APPROVE,
             initiation = initiation,
             requestType = requestType,
             nonces = listOf(Nonce("9PGftXH39kRKndTxL4hQppfonLMZQpWWWzvaHzYsAcLy")),
             email = "dont care",
-            opAccountPrivateKey = pk,
-            dataAccountPrivateKey = null
+            opAccountPrivateKey = pk
         )
 
         Assert.assertEquals(
