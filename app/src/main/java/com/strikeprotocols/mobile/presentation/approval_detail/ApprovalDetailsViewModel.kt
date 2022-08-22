@@ -43,7 +43,7 @@ class ApprovalDetailsViewModel @Inject constructor(
         timer.stopCountDownTimer()
     }
 
-    private fun setArgsToState(approval: WalletApproval) {
+    fun setArgsToState(approval: WalletApproval) {
         state = state.copy(approval = approval)
     }
 

@@ -22,7 +22,6 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mock
-import org.mockito.MockitoAnnotations
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class ApprovalsViewModelTest : BaseViewModelTest() {
@@ -36,30 +35,18 @@ class ApprovalsViewModelTest : BaseViewModelTest() {
     @Mock
     lateinit var approvalsRepository: ApprovalsRepository
 
-    @Mock
-    lateinit var userRepository: UserRepository
-
-    @Mock
-    lateinit var pushRepository: PushRepository
-
-    @Mock
-    lateinit var strikeUserData: StrikeUserData
-
     private lateinit var approvalsViewModel: ApprovalsViewModel
 
     private val dispatcher = StandardTestDispatcher()
 
-    //region Mock Testing data
-    private val mockApprovals = getWalletApprovals()
+    //region Testing data
+    private val testApprovals = getWalletApprovals()
 
-    private val mockApprovalsSize = mockApprovals.size
-    private val mockApprovalsFirstIndex = 0
-    private val mockApprovalsLastIndex = mockApprovals.size - 1
+    private val testApprovalsSize = testApprovals.size
+    private val testApprovalsFirstIndex = 0
+    private val testApprovalsLastIndex = testApprovals.size - 1
 
-    private val mockUserData = getVerifyUser()
-    private val mockEmail = getUserEmail()
-
-    private val mockNonce = getNonce()
+    private val testNonce = getNonce()
 
     //These are not used in any way other than to fill method parameters
     private val mockDialogTitle = "Title"
@@ -71,20 +58,15 @@ class ApprovalsViewModelTest : BaseViewModelTest() {
     override fun setUp() = runBlocking {
         super.setUp()
         Dispatchers.setMain(dispatcher)
-        MockitoAnnotations.openMocks(this)
 
-        whenever(strikeUserData.getStrikeUser()).thenAnswer { mockUserData }
-        whenever(strikeUserData.getEmail()).thenAnswer { mockEmail }
+        whenever(approvalsRepository.approveOrDenyDisposition(any(), any())).thenAnswer {
+            Resource.Success(data = null)
+        }
+        whenever(approvalsRepository.approveOrDenyInitiation(any(), any())).thenAnswer {
+            Resource.Success(data = null)
+        }
 
-        whenever(approvalsRepository.approveOrDenyDisposition(any(), any())).thenAnswer { Resource.Success(data = null) }
-        whenever(approvalsRepository.approveOrDenyInitiation(any(), any())).thenAnswer { Resource.Success(data = null) }
-
-        approvalsViewModel = ApprovalsViewModel(
-            approvalsRepository = approvalsRepository,
-            userRepository = userRepository,
-            pushRepository = pushRepository,
-            strikeUserData = strikeUserData
-        )
+        approvalsViewModel = ApprovalsViewModel(approvalsRepository = approvalsRepository)
 
         durableNonceViewModel = DurableNonceViewModel(solanaRepository)
     }
@@ -97,7 +79,6 @@ class ApprovalsViewModelTest : BaseViewModelTest() {
 
     //TODO:
     // Timer test, created a sub ticket for this
-    // Test setting strikeUserData [HAVE TO CHANGE TIMER IMPLEMENTATION FIRST]
 
     /**
      * Test retrieving wallet approvals successfully and the state is assigned as expected
@@ -123,7 +104,7 @@ class ApprovalsViewModelTest : BaseViewModelTest() {
 
         verify(approvalsRepository, times(1)).getWalletApprovals()
 
-        assertExpectedWalletApprovalsResultAndExpectedApprovalsSize(expectedResourceState = SUCCESS, expectedSize = mockApprovalsSize)
+        assertExpectedWalletApprovalsResultAndExpectedApprovalsSize(expectedResourceState = SUCCESS, expectedSize = testApprovalsSize)
     }
 
     /**
@@ -171,7 +152,7 @@ class ApprovalsViewModelTest : BaseViewModelTest() {
 
         assertExpectedWalletApprovalsResultAndExpectedApprovalsSize(
             expectedResourceState = SUCCESS,
-            expectedSize = mockApprovalsSize
+            expectedSize = testApprovalsSize
         )
 
         //Second refresh, assert that the refresh was an error, but the approvals were cached
@@ -184,7 +165,7 @@ class ApprovalsViewModelTest : BaseViewModelTest() {
 
         assertExpectedWalletApprovalsResultAndExpectedApprovalsSize(
             expectedResourceState = ERROR,
-            expectedSize = mockApprovalsSize
+            expectedSize = testApprovalsSize
         )
     }
 
@@ -212,7 +193,7 @@ class ApprovalsViewModelTest : BaseViewModelTest() {
 
         assertExpectedWalletApprovalsResultAndExpectedApprovalsSize(
             expectedResourceState = SUCCESS,
-            expectedSize = mockApprovalsSize
+            expectedSize = testApprovalsSize
         )
         //endregion
 
@@ -229,7 +210,7 @@ class ApprovalsViewModelTest : BaseViewModelTest() {
 
         assertExpectedWalletApprovalsResultAndExpectedApprovalsSize(
             expectedResourceState = SUCCESS,
-            expectedSize = mockApprovalsSize
+            expectedSize = testApprovalsSize
         )
     }
 
@@ -259,15 +240,15 @@ class ApprovalsViewModelTest : BaseViewModelTest() {
 
         assertExpectedWalletApprovalsResultAndExpectedApprovalsSize(
             expectedResourceState = SUCCESS,
-            expectedSize = mockApprovalsSize
+            expectedSize = testApprovalsSize
         )
         //endregion
 
         //Assert that the selected approval is null
         assertEquals(null, approvalsViewModel.state.selectedApproval)
 
-        val approval = approvalsViewModel.state.approvals[mockApprovalsFirstIndex]
-        val otherApproval = approvalsViewModel.state.approvals[mockApprovalsLastIndex]
+        val approval = approvalsViewModel.state.approvals[testApprovalsFirstIndex]
+        val otherApproval = approvalsViewModel.state.approvals[testApprovalsLastIndex]
 
         //Set an approval as selected with isApproving = true
         approvalsViewModel.setShouldDisplayConfirmDispositionDialog(
@@ -308,7 +289,7 @@ class ApprovalsViewModelTest : BaseViewModelTest() {
      */
     @Test
     fun `register approval disposition successfully then view model should reflect the success in state`() = runTest {
-        val firstApproval = mockApprovals[mockApprovalsFirstIndex]
+        val firstApproval = testApprovals[testApprovalsFirstIndex]
         //region Get 1 approval in state
         whenever(approvalsRepository.getWalletApprovals()).thenAnswer {
             Resource.Success<List<WalletApproval?>>(
@@ -354,7 +335,7 @@ class ApprovalsViewModelTest : BaseViewModelTest() {
         assertEquals(null, approvalsViewModel.state.multipleAccounts)
 
         //Set nonce data to trigger the registerDisposition call
-        val multipleAccounts = durableNonceViewModel.MultipleAccounts(nonces = listOf(Nonce(mockNonce)))
+        val multipleAccounts = durableNonceViewModel.MultipleAccounts(nonces = listOf(Nonce(testNonce)))
         approvalsViewModel.setMultipleAccounts(multipleAccounts)
 
         assertEquals(multipleAccounts, approvalsViewModel.state.multipleAccounts)
@@ -373,7 +354,7 @@ class ApprovalsViewModelTest : BaseViewModelTest() {
     private suspend fun setupApprovalsRepositoryToReturnApprovalsOnGetApprovals() {
         whenever(approvalsRepository.getWalletApprovals()).thenAnswer {
             Resource.Success<List<WalletApproval?>>(
-                data = mockApprovals
+                data = testApprovals
             )
         }
     }

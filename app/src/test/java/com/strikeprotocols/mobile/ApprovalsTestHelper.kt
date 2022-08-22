@@ -1,8 +1,12 @@
 package com.strikeprotocols.mobile
 
+import com.google.gson.JsonParser
 import com.strikeprotocols.mobile.data.models.Organization
 import com.strikeprotocols.mobile.data.models.VerifyUser
 import com.strikeprotocols.mobile.data.models.approval.WalletApproval
+import com.strikeprotocols.mobile.data.models.approval.WalletApprovalDeserializer
+
+private val deserializer = WalletApprovalDeserializer()
 
 fun getWalletApprovals() : List<WalletApproval> {
     val approvals = mutableListOf<WalletApproval>()
@@ -95,6 +99,34 @@ fun getWalletApprovals() : List<WalletApproval> {
 
     return approvals
 }
+
+fun getLoginApproval() : WalletApproval {
+    val loginApprovalRequestType =
+        getLoginApproval("jwttoken")
+
+    return getWalletApprovalRequest(loginApprovalRequestType)
+}
+
+fun getSignersUpdateWalletApproval() : WalletApproval {
+    val nonceAccountAddresses = listOf(getNonce())
+
+    val signersUpdateRequestType =
+        getSignersUpdateRequest(nonceAccountAddresses)
+
+    return getWalletApprovalRequest(signersUpdateRequestType)
+}
+
+fun getRemoveDAppBookEntryApproval() : WalletApproval {
+    val nonceAccountAddresses = listOf(getNonce())
+
+    val removeDAppBookEntryRequestType =
+        getRemoveDAppBookEntry(nonceAccountAddresses)
+
+    return getWalletApprovalRequest(removeDAppBookEntryRequestType)
+}
+
+fun getMultiSigBalanceAccountCreationWalletApproval(): WalletApproval =
+    deserializer.parseData(JsonParser.parseString(multiSigWithBalanceAccountCreationJson.trim()))
 
 fun getUserEmail() = "jdoe@crypto.org"
 
