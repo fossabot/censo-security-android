@@ -13,7 +13,7 @@ def final coreAppId = "com.strikeprotocols.mobile"
 
 String versionNameMajor = 2
 String versionNameMinor = 0
-String versionNamePatch = 0
+String versionNamePatch = 1
 
 android {
     Boolean signBuild = false
