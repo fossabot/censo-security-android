@@ -1,6 +1,8 @@
 package com.strikeprotocols.mobile.di
 
 import android.content.Context
+import com.strikeprotocols.mobile.common.StrikeCountDownTimer
+import com.strikeprotocols.mobile.common.StrikeCountDownTimerImpl
 import com.strikeprotocols.mobile.data.*
 import com.strikeprotocols.mobile.data.UserRepository
 import com.strikeprotocols.mobile.data.UserRepositoryImpl
@@ -111,6 +113,11 @@ object AppModule {
     @Singleton
     fun provideStrikeUserData(userRepository: UserRepository): StrikeUserData {
         return StrikeUserDataImpl(userRepository)
+    }
+
+    @Provides
+    fun provideStrikeCountDownTimer(): StrikeCountDownTimer {
+        return StrikeCountDownTimerImpl()
     }
 
 }

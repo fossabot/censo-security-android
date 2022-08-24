@@ -1,15 +1,14 @@
 package com.strikeprotocols.mobile.presentation.approvals
 
-import android.os.CountDownTimer
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.strikeprotocols.mobile.common.Resource
+import com.strikeprotocols.mobile.common.StrikeCountDownTimer
+import com.strikeprotocols.mobile.common.StrikeCountDownTimerImpl.Companion.UPDATE_COUNTDOWN
 import com.strikeprotocols.mobile.data.ApprovalsRepository
-import com.strikeprotocols.mobile.data.PushRepository
-import com.strikeprotocols.mobile.data.UserRepository
 import com.strikeprotocols.mobile.data.models.ApprovalDisposition
 import com.strikeprotocols.mobile.data.models.InitiationDisposition
 import com.strikeprotocols.mobile.data.models.RegisterApprovalDisposition
@@ -17,20 +16,17 @@ import com.strikeprotocols.mobile.data.models.approval.SolanaApprovalRequestDeta
 import com.strikeprotocols.mobile.data.models.approval.WalletApproval
 import com.strikeprotocols.mobile.presentation.approval_detail.ConfirmDispositionDialogDetails
 import com.strikeprotocols.mobile.presentation.approval_disposition.ApprovalDispositionState
-import com.strikeprotocols.mobile.presentation.approvals.ApprovalsViewModel.Companion.UPDATE_COUNTDOWN
 import com.strikeprotocols.mobile.presentation.durable_nonce.DurableNonceViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import kotlin.Exception
 
 @HiltViewModel
 class ApprovalsViewModel @Inject constructor(
-    private val approvalsRepository: ApprovalsRepository
+    private val approvalsRepository: ApprovalsRepository,
+    private val timer: StrikeCountDownTimer
 ) : ViewModel() {
-
-    private var timer: CountDownTimer? = null
 
     var state by mutableStateOf(ApprovalsState())
         private set
@@ -49,24 +45,16 @@ class ApprovalsViewModel @Inject constructor(
     }
 
     fun onStart() {
-        startCountDown()
+        timer.startCountDownTimer(UPDATE_COUNTDOWN) {
+            updateShouldRefreshTimers()
+        }
     }
 
     fun onStop() {
-        timer?.cancel()
+        timer.stopCountDownTimer()
     }
 
-    private fun startCountDown() {
-        timer = object : CountDownTimer(Long.MAX_VALUE, UPDATE_COUNTDOWN) {
-            override fun onTick(millisecs: Long) {
-                updateShouldRefreshTimers()
-            }
-            override fun onFinish() {}
-        }
-        timer?.start()
-    }
-
-    fun updateShouldRefreshTimers() {
+    private fun updateShouldRefreshTimers() {
         state = state.copy(shouldRefreshTimers = !state.shouldRefreshTimers)
     }
 
@@ -278,8 +266,6 @@ class ApprovalsViewModel @Inject constructor(
     //endregion
 
     object Companion {
-        const val UPDATE_COUNTDOWN = 1000L
-
         const val KEY_SHOULD_REFRESH_DATA = "KEY_SHOULD_REFRESH_DATA"
     }
 
