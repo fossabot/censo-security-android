@@ -158,7 +158,7 @@ data class InitiationRequest(
                 buffer.write(requestType.account.identifier.sha256HashBytes())
                 buffer.write(requestType.dappInfo.address.base58Bytes())
                 buffer.write(requestType.dappInfo.name.sha256HashBytes())
-                buffer.write(byteArrayOf(requestType.instructions.sumOf { it.instructions.size }.toByte()))
+                buffer.writeShortLE(requestType.instructions.sumOf { it.decodedData().size }.toShort())
                 return buffer.toByteArray()
             }
             is WrapConversionRequest -> {
@@ -231,12 +231,12 @@ data class InitiationRequest(
             if (requestType.instructions.size + 1 == nonces.size
                 && nonces.size == requestType.signingData.nonceAccountAddresses.size) {
 
-                requestType.instructions.withIndex().map { (index, instructionBatch) ->
+                requestType.instructions.withIndex().map { (index, instructionChunk) ->
                     SupplyDappInstruction(
                         nonce = nonces[index + 1],
                         nonceAccountAddress =
                             requestType.signingData.nonceAccountAddresses[index + 1],
-                        instructionBatch = instructionBatch,
+                        instructionChunk = instructionChunk,
                         signingData = signingData,
                         opAccountPublicKey = opAccountPublicKey(),
                         walletAccountPublicKey = PublicKey(requestType.signingData.walletAddress),

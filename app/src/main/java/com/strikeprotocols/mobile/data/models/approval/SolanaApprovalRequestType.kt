@@ -129,7 +129,7 @@ sealed class SolanaApprovalRequestType {
         var account: AccountInfo,
         var dappInfo: SolanaDApp,
         var balanceChanges: List<SymbolAndAmountInfo>,
-        var instructions: List<SolanaInstructionBatch>,
+        var instructions: List<SolanaInstructionChunk>,
         var signingData: SolanaSigningData
     ) : SolanaApprovalRequestType()
 
@@ -724,53 +724,20 @@ data class SolanaDApp(
     val logo: String
 )
 
-data class SolanaInstructionBatch(
-    val from: Byte,
-    val instructions: List<SolanaInstruction>) {
+data class SolanaInstructionChunk(
+    val offset: Short,
+    val instructionData: String) {
+
+    fun decodedData(): ByteArray = Base64.getDecoder().decode(instructionData)
 
     fun combinedBytes(): ByteArray {
         val buffer = ByteArrayOutputStream()
+        val decodedData = decodedData()
         buffer.write(byteArrayOf(28))
-        buffer.write(byteArrayOf(from))
-        buffer.writeShortLE(instructions.size.toShort())
-        buffer.write(instructions.flatMap { it.combinedBytes().toList() }.toByteArray())
+        buffer.writeShortLE(offset)
+        buffer.writeShortLE(decodedData.size.toShort())
+        buffer.write(decodedData)
 
         return buffer.toByteArray()
-    }
-}
-
-data class SolanaInstruction(
-    val programId: String,
-    val accountMetas: List<SolanaAccountMeta>,
-    val data: String
-) {
-    fun combinedBytes(): ByteArray {
-        val b64DecodedData: ByteArray =
-            if (data.isEmpty()) byteArrayOf() else BaseWrapper.decodeFromBase64(data)
-
-        val buffer = ByteArrayOutputStream()
-        buffer.write(programId.base58Bytes())
-        buffer.writeShortLE(accountMetas.size.toShort())
-        buffer.write(accountMetas.flatMap { it.combinedBytes().toList() }.toByteArray())
-        buffer.writeShortLE(b64DecodedData.size.toShort())
-        buffer.write(b64DecodedData)
-
-        return buffer.toByteArray()
-    }
-}
-
-data class SolanaAccountMeta(
-    val address: String,
-    val signer: Boolean,
-    val writable: Boolean
-) {
-    fun combinedBytes(): ByteArray {
-        return byteArrayOf(flags()) + address.base58Bytes()
-    }
-
-    private fun flags(): Byte {
-        val writeValue : Byte = if (writable) 1 else 0
-        val signValue : Byte = if (signer) 2 else 0
-        return (writeValue + signValue).toByte()
     }
 }

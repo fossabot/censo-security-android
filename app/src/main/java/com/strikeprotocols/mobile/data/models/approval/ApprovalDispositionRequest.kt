@@ -190,27 +190,14 @@ data class ApprovalDispositionRequest(
 
             is DAppTransactionRequest -> {
                 val buffer = ByteArrayOutputStream()
-                val hashBytesBuffer = ByteArrayOutputStream()
-                hashBytesBuffer.write(byteArrayOf(retrieveOpCode()))
-                hashBytesBuffer.write(commonBytes)
-                hashBytesBuffer.write(requestType.signingData.walletAddress.base58Bytes())
-                hashBytesBuffer.write(requestType.account.identifier.sha256HashBytes())
-                hashBytesBuffer.write(requestType.dappInfo.address.base58Bytes())
-                hashBytesBuffer.write(requestType.dappInfo.name.sha256HashBytes())
-                hashBytesBuffer.writeShortLE(requestType.instructions.sumOf { it.instructions.size }.toShort())
-
-                var hashBytes = hashBytesBuffer.toByteArray().sha256HashBytes()
-
-                for (instructionBatch in requestType.instructions) {
-                    for (instruction in instructionBatch.instructions) {
-                        val instructionBuffer = ByteArrayOutputStream()
-                        instructionBuffer.write(hashBytes)
-                        instructionBuffer.write(instruction.combinedBytes())
-                        val instructionBytes = instructionBuffer.toByteArray()
-                        hashBytes = instructionBytes.sha256HashBytes()
-                    }
-                }
-                buffer.write(hashBytes)
+                buffer.write(byteArrayOf(retrieveOpCode()))
+                buffer.write(commonBytes)
+                buffer.write(requestType.signingData.walletAddress.base58Bytes())
+                buffer.write(requestType.account.identifier.sha256HashBytes())
+                buffer.write(requestType.dappInfo.address.base58Bytes())
+                buffer.write(requestType.dappInfo.name.sha256HashBytes())
+                buffer.writeShortLE(requestType.instructions.sumOf { it.decodedData().size }.toShort())
+                buffer.write(requestType.instructions.map { it.decodedData() }.reduce { array, next -> array + next })
                 buffer.toByteArray()
             }
             is LoginApprovalRequest, is AcceptVaultInvitation, is PasswordReset -> throw Exception(
@@ -250,12 +237,7 @@ data class ApprovalDispositionRequest(
         val buffer = ByteArrayOutputStream()
         buffer.write(byteArrayOf(opIndex))
         buffer.write(byteArrayOf(solanaProgramValue))
-        buffer.write(
-            when (requestType) {
-                is DAppTransactionRequest -> opHashData()
-                else -> Hash.sha256(opHashData())
-            }
-        )
+        buffer.write(Hash.sha256(opHashData()))
         return buffer.toByteArray()
     }
 

@@ -860,51 +860,13 @@ class MockedApprovals {
             ),
             balanceChanges = emptyList(),
             instructions = listOf(
-                SolanaInstructionBatch(
-                    from = 0,
-                    instructions = listOf(
-                        SolanaInstruction(
-                            programId = "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL",
-                            accountMetas = listOf(
-                                SolanaAccountMeta(
-                                    address = "6zmSor8Y9CXjFExGPZsJA1wk1utAJeRw6NH9a1w2zymX",
-                                    signer = true,
-                                    writable = true
-                                ),
-                                SolanaAccountMeta(
-                                    address = "74FrjocsXjzBzL92efmDBLKczVw7UFzQznCe76grKdeh",
-                                    signer = false,
-                                    writable = true
-                                ),
-                                SolanaAccountMeta(
-                                    address = "6zmSor8Y9CXjFExGPZsJA1wk1utAJeRw6NH9a1w2zymX",
-                                    signer = true,
-                                    writable = true
-                                ),
-                                SolanaAccountMeta(
-                                    address = "EQQKpcUbk6M5ikbK6SjezzMWUBbJB9qWtpEvw4BwuexT",
-                                    signer = false,
-                                    writable = false
-                                ),
-                                SolanaAccountMeta(
-                                    address = "11111111111111111111111111111111",
-                                    signer = false,
-                                    writable = false
-                                ),
-                                SolanaAccountMeta(
-                                    address = "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
-                                    signer = false,
-                                    writable = false
-                                ),
-                                SolanaAccountMeta(
-                                    address = "SysvarRent111111111111111111111111111111111",
-                                    signer = false,
-                                    writable = false
-                                ),
-                            ),
-                            data = "AQIDrA=="
-                        )
-                    )
+                SolanaInstructionChunk(
+                    offset = 0,
+                    instructionData = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAAMfbXr9Pd04d9oxuffFREfSADbnRIPEpVn6V8fj2rrdmAGa4BO3DrDz6LyXzXydHrFWh2+J/9ZlPFdeiuHbyV8P3QwAAgAAAADC6wsAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAAO9DFnzyLMsRmbgWH6JSH00UGHDt6bU14c2amFy43OtpgGa4BO3DrDz6LyXzXydHrFWh2+J/9ZlPFdeiuHbyV8P3QwAAgAAAADC6wsAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAAMkSqNHZ0rdcs4p7lXiRTF5mdcdy2a5YKT6j6+BzOGthQGa4BO3DrDz6LyXzXydHrFWh2+J/9ZlPFdeiuHbyV8P3QwAAgAAAADC6wsAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAAMv6SewjB9Bp/SAwlD3Dp3rVnnZqhlAFfBk8YNOpmSmbgGa4BO3DrDz6LyXzXydHrFWh2+J/9ZlPFdeiuHbyV8P3QwAAgAAAADC6wsAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAANsBX+mLaLauW1bAZ+zXt5Z8/XY7ehn5ra8f6XKuuomsAGa4BO3DrDz6LyXzXydHrFWh2+J/9ZlPFdeiuHbyV8P3QwAAgAAAADC6wsAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAAM8Sd9NN2/+E90TCtcvBH4m11ETLdINd++tdjWUYZWUIwGa4BO3DrDz6LyXzXydHrFWh2+J/9ZlPFdeiuHbyV8P3QwAAgAAAADC6wsAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAAM6Da5ybuajCBKiBb85gQGHPCHZktkOJYZwT+BQHm5N5wGa4BO3DrDz6LyXzXydHrFWh2+J/9ZlPFdeiuHbyV8P3QwAAgA="
+                ),
+                SolanaInstructionChunk(
+                    offset = 788,
+                    instructionData = "AAAAwusLAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgADPa0Joq3Q2jHq6IeVnzS6oclt1ixZHlI7BKopyvdi8WwBmuATtw6w8+i8l818nR6xVodvif/WZTxXXorh28lfD90MAAIAAAAAwusLAAAAAA=="
                 )
             ),
             signingData = SolanaSigningData(

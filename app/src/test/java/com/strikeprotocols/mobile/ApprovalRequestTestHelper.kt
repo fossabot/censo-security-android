@@ -489,74 +489,36 @@ fun getDAppTransactionRequest(nonceAccountAddresses: List<String>): SolanaApprov
         type = ApprovalType.DAPP_TRANSACTION_REQUEST_TYPE.value,
         account = AccountInfo(
             name = "Account 1",
-            identifier = "4c4a24fe-0cb2-427c-b0f8-aa37d014edad",
+            identifier = "f8d0a964-ea88-4843-973a-70e3a6ff8ab8",
             accountType = AccountType.BalanceAccount,
-            address = "6NfdEZkXsnN5fVB7HA788TnvTvWa9fsvkZ7Z7sQW5ZRP"
+            address = "BRZxhTAUTwMokJyCMpuJcGtNdi8j8hApkwDWserqRFKr"
         ),
         dappInfo = SolanaDApp(
-            address = "nb7bwgxXdfbBE3146YZcJh7JkstYvoa7kJuzHoPp6Ty",
+            address = "H2ZSeYCg4MwnCYh73biZJfwMSJ6KuugoH8JLf775cUns",
             name = "DApp Name",
             logo = "dapp-icon"
         ),
         balanceChanges = emptyList(),
         instructions = listOf(
-            SolanaInstructionBatch(
-                from = 0,
-                instructions = listOf(
-                    SolanaInstruction(
-                        programId = "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL",
-                        accountMetas = listOf(
-                            SolanaAccountMeta(
-                                address = "6NfdEZkXsnN5fVB7HA788TnvTvWa9fsvkZ7Z7sQW5ZRP",
-                                signer = true,
-                                writable = true
-                            ),
-                            SolanaAccountMeta(
-                                address = "DBDUyieRkz3JGCmjCtQYzKzeaq3EVo8LzidCeCx3o8m4",
-                                signer = false,
-                                writable = true
-                            ),
-                            SolanaAccountMeta(
-                                address = "6NfdEZkXsnN5fVB7HA788TnvTvWa9fsvkZ7Z7sQW5ZRP",
-                                signer = true,
-                                writable = true
-                            ),
-                            SolanaAccountMeta(
-                                address = "9P5hmZhGoPnXnP9FgKJgERDk1MzL3MnvzeAFUhcbqGFH",
-                                signer = false,
-                                writable = false
-                            ),
-                            SolanaAccountMeta(
-                                address = "11111111111111111111111111111111",
-                                signer = false,
-                                writable = false
-                            ),
-                            SolanaAccountMeta(
-                                address = "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
-                                signer = false,
-                                writable = false
-                            ),
-                            SolanaAccountMeta(
-                                address = "SysvarRent111111111111111111111111111111111",
-                                signer = false,
-                                writable = false
-                            ),
-                        ),
-                        data = "AA=="
-                    )
-                )
+            SolanaInstructionChunk(
+                offset = 0,
+                instructionData = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAAMfbXr9Pd04d9oxuffFREfSADbnRIPEpVn6V8fj2rrdmAGa4BO3DrDz6LyXzXydHrFWh2+J/9ZlPFdeiuHbyV8P3QwAAgAAAADC6wsAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAAO9DFnzyLMsRmbgWH6JSH00UGHDt6bU14c2amFy43OtpgGa4BO3DrDz6LyXzXydHrFWh2+J/9ZlPFdeiuHbyV8P3QwAAgAAAADC6wsAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAAMkSqNHZ0rdcs4p7lXiRTF5mdcdy2a5YKT6j6+BzOGthQGa4BO3DrDz6LyXzXydHrFWh2+J/9ZlPFdeiuHbyV8P3QwAAgAAAADC6wsAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAAMv6SewjB9Bp/SAwlD3Dp3rVnnZqhlAFfBk8YNOpmSmbgGa4BO3DrDz6LyXzXydHrFWh2+J/9ZlPFdeiuHbyV8P3QwAAgAAAADC6wsAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAANsBX+mLaLauW1bAZ+zXt5Z8/XY7ehn5ra8f6XKuuomsAGa4BO3DrDz6LyXzXydHrFWh2+J/9ZlPFdeiuHbyV8P3QwAAgAAAADC6wsAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAAM8Sd9NN2/+E90TCtcvBH4m11ETLdINd++tdjWUYZWUIwGa4BO3DrDz6LyXzXydHrFWh2+J/9ZlPFdeiuHbyV8P3QwAAgAAAADC6wsAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAAM6Da5ybuajCBKiBb85gQGHPCHZktkOJYZwT+BQHm5N5wGa4BO3DrDz6LyXzXydHrFWh2+J/9ZlPFdeiuHbyV8P3QwAAgA="
+            ),
+            SolanaInstructionChunk(
+                offset = 788,
+                instructionData = "AAAAwusLAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgADPa0Joq3Q2jHq6IeVnzS6oclt1ixZHlI7BKopyvdi8WwBmuATtw6w8+i8l818nR6xVodvif/WZTxXXorh28lfD90MAAIAAAAAwusLAAAAAA=="
             )
         ),
         signingData = SolanaSigningData(
             feePayer = "87VXbkJsqdDvXYfDBtS4kW4TcFor7ogofZXbXjT7t7AU",
-            walletProgramId = "Hq38vrTB34LdEQdNDqM5j96ZT9k3LcEPb6GiLAPu7Hrk",
-            multisigOpAccountAddress = "7vs3w6TSF7kFNy7rqNsxryPmvC1VfhWR1k3wK4FgPg5z",
-            walletAddress = "9ru2T5qATxhER5AUyRHn4RBHkHeJFMfPguCTK98YipCH",
+            walletProgramId = "5VouXXXz6WnRT2hGAeKqSoiqgdYMs5cAhtobuUh54AkS",
+            multisigOpAccountAddress = "Az1ZYXQYk1CraDLgLF72ge7bLd8k6kn4GWjPqiXco88t",
+            walletAddress = "GrdFiFNc6xC7fzC8ejcotE3uxPm8UTpndNWiEg4kALKW",
             nonceAccountAddresses = nonceAccountAddresses,
-            initiator = "BtstAXkRrjBdpDvknnfPwnr6UquXpUvAPZSFZi8wDftS",
+            initiator = "6f51NkToPKgK2AY6GGf7scdbwXpZGNmkx6wvCdp9rQPW",
             strikeFeeAmount = 0,
             feeAccountGuidHash = emptyHash,
-            walletGuidHash = "xNO5k8ivvkCXwEB5l1AbG/OfsaBDDlXs0/muBNL2PJQ=",
+            walletGuidHash = "6ETtMeamm1fdYpXyezvfQqisy8nFFEDocw/HGyFFCUM=",
             nonceAccountAddressesSlot = 2272
         )
     )

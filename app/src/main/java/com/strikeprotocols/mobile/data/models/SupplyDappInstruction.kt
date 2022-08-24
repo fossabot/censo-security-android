@@ -9,7 +9,7 @@ import com.strikeprotocols.mobile.data.models.approval.TransactionInstruction.Co
 class SupplyDappInstruction(
     val nonce: Nonce,
     val nonceAccountAddress: String,
-    val instructionBatch: SolanaInstructionBatch,
+    val instructionChunk: SolanaInstructionChunk,
     val signingData: SolanaSigningData,
     val opAccountPublicKey: PublicKey,
     val walletAccountPublicKey: PublicKey,
@@ -38,7 +38,7 @@ class SupplyDappInstruction(
                 TransactionInstruction(
                     keys = keyList,
                     programId = PublicKey(signingData.walletProgramId),
-                    data = instructionBatch.combinedBytes()
+                    data = instructionChunk.combinedBytes()
                 )
             )
         ).serialize()
