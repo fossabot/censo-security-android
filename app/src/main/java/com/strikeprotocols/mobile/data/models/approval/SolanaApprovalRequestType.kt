@@ -692,7 +692,8 @@ data class SlotSignerInfo(
 data class SignerInfo(
     val publicKey: String,
     val name: String,
-    val email: String
+    val email: String,
+    val nameHashIsEmpty: Boolean
 )
 
 enum class SlotUpdateType(val value: String) {

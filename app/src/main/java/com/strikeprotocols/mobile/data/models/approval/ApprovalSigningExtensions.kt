@@ -42,6 +42,12 @@ fun ByteArrayOutputStream.writeLongLE(value: Long) {
 }
 
 fun SlotSignerInfo.combinedBytes(): ByteArray {
+    return byteArrayOf(this.slotId).plus(this.value.publicKey.base58Bytes()).plus(
+        if (this.value.nameHashIsEmpty) ByteArray(32) else this.value.email.sha256HashBytes()
+    )
+}
+
+fun SlotSignerInfo.opHashBytes(): ByteArray {
     return byteArrayOf(this.slotId).plus(this.value.publicKey.base58Bytes())
 }
 

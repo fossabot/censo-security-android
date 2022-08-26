@@ -22,59 +22,63 @@ fun getWalletApprovalRequest(solanaApprovalRequestType: SolanaApprovalRequestTyp
     )
 }
 
-fun getSignersUpdateRequest(nonceAccountAddresses: List<String>): SolanaApprovalRequestType {
+fun getSignersUpdateRequestForApproval(nonceAccountAddresses: List<String>): SolanaApprovalRequestType {
     return SignersUpdate(
         type = ApprovalType.SIGNERS_UPDATE_TYPE.value,
-        slotUpdateType = SlotUpdateType.Clear,
+        slotUpdateType = SlotUpdateType.SetIfEmpty,
         signer = SlotSignerInfo(
             slotId = 2,
             value = SignerInfo(
-                publicKey = "8hyAhcNRc1WS1eZxNy4keGC9mbGoyXZkx75qxmwM3hUc",
+                publicKey = "2XZHYvnhZGmgFB6TQyi3C1FYgeL9N2mK5c6rKfAFVJgg",
                 name = "User 3",
-                email = "user3@org1"
+                email = "user3@org1",
+                nameHashIsEmpty = false,
             )
         ),
         signingData = SolanaSigningData(
-            feePayer = "FM36ah2bH8nQWJNPCRzu7R69gE5o6UhujqJFtDpWN5as",
-            walletProgramId = "8pPAcjFSByreFRnRm5YyAdBP2LfiNnWBtBzHtRDcJpUA",
-            multisigOpAccountAddress = "SLnWXM1QTraLWFhCm7JxDZk11PBE5Gu524ASzAC6YjW",
-            walletAddress = "ECzeaMTMBXYXXfVM53n5iPepf8749QUqEzjW8jxefGhh",
+            feePayer = "87VXbkJsqdDvXYfDBtS4kW4TcFor7ogofZXbXjT7t7AU",
+            walletProgramId = "VbvBzjdJfGC5apNttzS4oi1wGsPFU4EdFw5ijZAHcun",
+            multisigOpAccountAddress = "2nf2bKZtao2hK6f1ke69vq2Qqyj8swg7Ny4MZfR4jxHW",
+            walletAddress = "FvFqGJZEd1BeR2WggMUZPR8zHCHVfqTaEgRUAzcbuB4x",
             nonceAccountAddresses = nonceAccountAddresses,
-            initiator = "3wKxhgiogoCaA2uxPYeH7cy3cG4hxRPogrPmDPLS54iZ",
+            initiator = "HMCoXMD8MozBU8ZFDfGDwTkVpWK2txXwesHdmvRvY95e",
             strikeFeeAmount = 0,
             feeAccountGuidHash = emptyHash,
-            walletGuidHash = emptyHash,
+            walletGuidHash = "4NwP6vHH4z2gopFoMOWR2T+dilDDJuXWKmQt5ckS7Ko=",
             nonceAccountAddressesSlot = 2272
         )
     )
 }
 
+fun getSignersUpdateRequest(nonceAccountAddresses: List<String>) = SignersUpdate(
+        type = ApprovalType.SIGNERS_UPDATE_TYPE.value,
+        slotUpdateType = SlotUpdateType.SetIfEmpty,
+        signer = SlotSignerInfo(
+            slotId = 1,
+            value = SignerInfo(
+                publicKey = "8Mj26LQKUUVMUX7z8Qsvjpz2x6hMLFaER9axqHK4PvP7",
+                name = "User 2",
+                email = "user2@org1",
+                nameHashIsEmpty = false,
+            )
+        ),
+        signingData = SolanaSigningData(
+            feePayer = "87VXbkJsqdDvXYfDBtS4kW4TcFor7ogofZXbXjT7t7AU",
+            walletProgramId = "5JHcZTW5F1e5zWHb5zVWgi6pwbKuynRS3fyT7v48YEJZ",
+            multisigOpAccountAddress = "GjfqFH8T4BiL6pwtZxdq7BPZK7uaWJBKbooG4iQxSsaM",
+            walletAddress = "4B8ogHEgwh5CtnuCwyTXgxQjEfRgNcUpSTyhhtjKfL5Q",
+            nonceAccountAddresses = nonceAccountAddresses,
+            initiator = "kwwyzySTUJHWBF64u15iwv8bMvcHTNmZzfEh9iDeC7j",
+            strikeFeeAmount = 0,
+            feeAccountGuidHash = emptyHash,
+            walletGuidHash = "LZN57KM3swDiAbOZ1W0iwgGrJ2trzjaUGWX5Qc2zSK4=",
+            nonceAccountAddressesSlot = 2256
+        )
+    )
+
 fun getSignersUpdateWalletRequest(nonceAccountAddresses: List<String>) : WalletApproval {
     return getWalletApprovalRequest(
-        SignersUpdate(
-            type = ApprovalType.SIGNERS_UPDATE_TYPE.value,
-            slotUpdateType = SlotUpdateType.SetIfEmpty,
-            signer = SlotSignerInfo(
-                slotId = 1,
-                value = SignerInfo(
-                    publicKey = "6E5S1pMfe7DfBwYp2KmmYvTup2hduP385dhhoexX8i9",
-                    name = "User 2",
-                    email = "user2@org1"
-                )
-            ),
-            signingData = SolanaSigningData(
-                feePayer = "8UT5JS7vVcGLBHQe19Q5EK6aFA2CYnFG8a5C4dkrTL2B",
-                walletProgramId = "JAbzU4jwUMn92xhZcAX4M6JANEigzVMKKJqy6pA1cNBT",
-                multisigOpAccountAddress = "Hx9JnkPHioA9eu92y7jho1TxNaBCHYbw8zaSxvkGXSdD",
-                walletAddress = "FWhBukWcdXaMqZhJMvAAEH6PH81nV6JSpBEmwdvWgUjW",
-                nonceAccountAddresses = nonceAccountAddresses,
-                initiator = "3wKxhgiogoCaA2uxPYeH7cy3cG4hxRPogrPmDPLS54iZ",
-                strikeFeeAmount = 0,
-                feeAccountGuidHash = emptyHash,
-                walletGuidHash = emptyHash,
-                nonceAccountAddressesSlot = 2272
-            )
-        )
+        getSignersUpdateRequest(nonceAccountAddresses)
     )
 }
 
@@ -97,7 +101,8 @@ fun getBalanceAccountCreationRequest(nonceAccountAddresses: List<String>) : Bala
                     value = SignerInfo(
                         name = "User 1",
                         email = "authorized1@org1",
-                        publicKey = "3wKxhgiogoCaA2uxPYeH7cy3cG4hxRPogrPmDPLS54iZ"
+                        publicKey = "3wKxhgiogoCaA2uxPYeH7cy3cG4hxRPogrPmDPLS54iZ",
+                        nameHashIsEmpty = false,
                     )
                 )
             )
@@ -386,7 +391,8 @@ fun getWalletConfigPolicyUpdate(nonceAccountAddresses: List<String>): SolanaAppr
                     value = SignerInfo(
                         publicKey = "3wKxhgiogoCaA2uxPYeH7cy3cG4hxRPogrPmDPLS54iZ",
                         name = "User 1",
-                        email = "authorized1@org1"
+                        email = "authorized1@org1",
+                        nameHashIsEmpty = false,
                     )
                 ),
                 SlotSignerInfo(
@@ -394,7 +400,8 @@ fun getWalletConfigPolicyUpdate(nonceAccountAddresses: List<String>): SolanaAppr
                     value = SignerInfo(
                         publicKey = "7AH35qStXtrUgRkmqDmhjufNHjF74R1A9cCKT3C3HaAR",
                         name = "User 2",
-                        email = "user2@org1"
+                        email = "user2@org1",
+                        nameHashIsEmpty = false,
                     )
                 ),
             )
@@ -429,11 +436,11 @@ fun getBalanceAccountPolicyUpdate(nonceAccountAddresses: List<String>) : SolanaA
             approvers= listOf(
                 SlotSignerInfo(
                     slotId= 0,
-                    value= SignerInfo(publicKey= "4q8ApWsB3rSW2HPFwc1aWmGgcBMfj7tSKBbb5sBGAB6h", name= "User 1", email= "authorized1@org1")
+                    value= SignerInfo(publicKey= "4q8ApWsB3rSW2HPFwc1aWmGgcBMfj7tSKBbb5sBGAB6h", name= "User 1", email= "authorized1@org1", nameHashIsEmpty = false)
                 ),
                 SlotSignerInfo(
                     slotId= 1,
-                    value= SignerInfo(publicKey= "CDrdR8xX8t83eXxB2ESuHp9AxkiJkUuKnD98zyDfMtrG", name= "User 2", email= "user2@org1")
+                    value= SignerInfo(publicKey= "CDrdR8xX8t83eXxB2ESuHp9AxkiJkUuKnD98zyDfMtrG", name= "User 2", email= "user2@org1", nameHashIsEmpty = false)
                 ),
             )
         ),

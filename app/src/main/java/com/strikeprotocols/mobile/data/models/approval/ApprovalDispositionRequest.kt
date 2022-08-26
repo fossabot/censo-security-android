@@ -102,7 +102,7 @@ data class ApprovalDispositionRequest(
                 buffer.write(commonBytes)
                 buffer.write(requestType.signingData.walletAddress.base58Bytes())
                 buffer.write(byteArrayOf(requestType.slotUpdateType.toSolanaProgramValue()))
-                buffer.write(requestType.signer.combinedBytes())
+                buffer.write(requestType.signer.opHashBytes())
 
                 buffer.toByteArray()
             }

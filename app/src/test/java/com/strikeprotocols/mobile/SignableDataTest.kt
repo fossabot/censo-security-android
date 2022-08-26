@@ -14,16 +14,16 @@ class SignableDataTest {
 
     @Test
     fun testSignersUpdateSerializedOp() {
-        val request = getSignersUpdateWalletRequest(nonceAccountAddresses = listOf("123455"))
+        val request = getSignersUpdateWalletRequest(nonceAccountAddresses = listOf("6XQy8HrrMmsfmajFpWo5tWhDUiESg8obA4NGWJwjNgpR"))
         val approvalRequest = ApprovalDispositionRequest(
             approvalDisposition = ApprovalDisposition.APPROVE,
             requestId = request.id!!,
             requestType = request.getSolanaApprovalRequestType(),
-            nonces = listOf(Nonce("12345")),
+            nonces = listOf(Nonce("EHEtZUo7aAh5VqFvo5PUsfFm3oquJfK3hb8fEJgC4nwM")),
             email = "dont care"
         )
         Assert.assertEquals(
-            "052ba22d14fd3198775d3b9d1b22d6b48743f502ac2129cdf0094af144febf06666f09f8f34b25830470a1920b59fee4de9e04dd0134ba5365ceae769cf9d6637000000000000000000000000000000000000000000000000000000000000000000000000000000000d79ee6b8ae98d572459d5d6572f088a8f6b1f40655eee8c981056b205e41a37500010156b088482c6882a3def445509a410c837a27476140df0c0da4be446071000e",
+            "050b421acb7dfcb45b3fa41c345677eeee6a360e933ebfff2a321e6d6bf23f703a69ab8cb05413af9614f898a1f1fdfbc07e7ad5eb2eb1d0f1c49f448bd179c715000000000000000000000000000000000000000000000000000000000000000000000000000000002f2bb19a6e87510629e1b70680b474648391dc5d898c1f8431eb10c6fbb4cebb00016d50ef7d464988ec20f2782dccf74d4416779bbc5073d0168b12b6f720140656",
             approvalRequest.opHashData().toHexString(),
         )
     }
@@ -31,8 +31,8 @@ class SignableDataTest {
     @Test
     fun testSignersUpdateApprovalDisposition() {
         val walletApproval = getWalletApprovalRequest(
-            solanaApprovalRequestType = getSignersUpdateRequest(
-                listOf("BzZpoiceSXQTtrrZUMU67s6pCJzqCDJAVvgJCRw64fJV")
+            solanaApprovalRequestType = getSignersUpdateRequestForApproval(
+                listOf("Deuspj2g5crN81b6GocKANAhB3Y5D6XseXjiT1bery7Z")
             )
         )
 
@@ -41,35 +41,34 @@ class SignableDataTest {
                 approvalDisposition = ApprovalDisposition.APPROVE,
                 requestId = walletApproval.id!!,
                 requestType = walletApproval.getSolanaApprovalRequestType(),
-                nonces = listOf(Nonce("HPaFoRv9A6T14AhGu5nJWMWTb6YuJYCNZEGnteXe728v")),
+                nonces = listOf(Nonce("FURnHTusWpktnZfRCEWi3iCEY7D8FJTizNX2z9A4byps")),
                 email = "dont care"
             )
 
         val signableData = approvalDispositionRequest.retrieveSignableData(
-            approverPublicKey = "CDrdR8xX8t83eXxB2ESuHp9AxkiJkUuKnD98zyDfMtrG"
+            approverPublicKey = "AztEBjLYWtNgBN3Gzqz5a2g4npNmtZQ29eidUzrKZwhX"
         )
 
         Assert.assertEquals(
-            "02010408d5259a75898e5c16f1b0675c496a9f8ee74dd7687f234ba93c0ff09dfee8af34a6bba3eafd49e6bf5e8facf0faeea7cf500c019cd18cfa625f764213df7b8bd5a3541700f919ae296291c89fcff67de5d3cc0d941dfd342c85e641f6cea2cb56067de40aba79d99d4939c2d114f77607a1b4bb284b5ccf6c5b8bfe7df8307bd506a7d517192c568ee08a845f73d29788cf035c3145b21ab344d8062ea940000006a7d51718c774c928566398691d5eb68b5eb8a39b4b6d5c73555b2100000000000000000000000000000000000000000000000000000000000000000000000074252b614aa502d0fa9eb2aef6eb7b43c25b6db7a61b70ae56b0cde9770fe09bf3835ed0ddfb443583764c93f133c341bdcde7a0c5cd2a40348b67c20722edaf020603020400040400000007030301052209019e212bef13fd898e60f8981adf893ef21b3165905a31ea85d50d3bc0b17130a9",
+            "0201040869ab8cb05413af9614f898a1f1fdfbc07e7ad5eb2eb1d0f1c49f448bd179c715948d361ce4f9bafead45f21c7aec862985622a4c48cee98a4c6293ff70901446bc02853a9410a410b2d6ef666f054e84f35cc47885bf7e9c618eb581938f23941a8dd233c196130bce1a6d6bd2a122cea83c741ae3221705fb0d2074047956b906a7d517192c568ee08a845f73d29788cf035c3145b21ab344d8062ea940000006a7d51718c774c928566398691d5eb68b5eb8a39b4b6d5c73555b210000000000000000000000000000000000000000000000000000000000000000000000000753be561ec13b0065ff6cdef40ac6ae7931c5b82501159ebc2751f3d72720f1d70a51898096a604916bc64710e1e55a46f6d82afd7b54c11d2982282c6f8f5802060302040004040000000703030105220901de59db38ce9ead210c8446f5aae7d31936bbd30c91e3b0fbca116ef80f8db7b6",
             signableData.toHexString()
         )
     }
 
 
-    //Issue here seems to be in data length on the compiledInstruction serializing. That uses the encodeLength from ShortvecEncoding
     @Test
     fun testSignersUpdateInitiationRequest() {
         val initiation = MultiSigOpInitiation(
-            opAccountCreationInfo = getOpAccountCreationInfo(),
+            opAccountCreationInfo = getOpAccountCreationInfo(3649, 26287920),
             initiatorIsApprover = true
         )
 
         val requestType: SolanaApprovalRequestType =
-            getSignersUpdateRequest(nonceAccountAddresses = listOf("5Fx8Nk98DbUcNUe4izqJkcYwfaMGmKRbXi1A7fVPfzj7"))
+            getSignersUpdateRequest(nonceAccountAddresses = listOf("BEhPWZKJoFDHaaJ7qTqZ6cfkR1YKDssHwttBYnp9kZir"))
         val request = getWalletInitiationRequest(requestType, initiation = initiation)
 
         val privateKey = generateEphemeralPrivateKeyFromText(
-            keyValueAsHex = "4ec605d194c0279e9b615464d8c6a723f8995e951b1d192b4123c602389af046"
+            keyValueAsHex = "e754f36891ada48a4cfc71ee4673aa2c77ceaa47da3021e4b64cf56bc91df5d8"
         )
 
         val initiationRequest = InitiationRequest(
@@ -77,14 +76,14 @@ class SignableDataTest {
             approvalDisposition = ApprovalDisposition.APPROVE,
             initiation = initiation,
             requestType = requestType,
-            nonces = listOf(Nonce("6HeTZQvWzhX8aLpm7K213scyGExytur2qiXxqLAMKnBb")),
+            nonces = listOf(Nonce("4oEYPeBwJBWzrbQ1c7jeeUGKWc1afDW7wFuhesE84GLr")),
             email = "dont care",
             opAccountPrivateKey = privateKey
         )
 
         Assert.assertEquals(
-            "03010509d5259a75898e5c16f1b0675c496a9f8ee74dd7687f234ba93c0ff09dfee8af34067de40aba79d99d4939c2d114f77607a1b4bb284b5ccf6c5b8bfe7df8307bd538e70bc45546b0d63742dee544ecc6870f66da475c800d2d793c766b03266cca3f4336251703628ce12796daa20166a1f0da8a9a972775f9f04a256482e2bede06a7d517192c568ee08a845f73d29788cf035c3145b21ab344d8062ea9400000c43a8066d7b0612d9abc74bf23e9bc1230258306dcb561755b8d71c5ad38d5f406a7d51718c774c928566398691d5eb68b5eb8a39b4b6d5c73555b2100000000000000000000000000000000000000000000000000000000000000000000000074252b614aa502d0fa9eb2aef6eb7b43c25b6db7a61b70ae56b0cde9770fe09b4e8e14d4ca1428da3032a7ca98a145dde83e2c86a7a5996eca2a42865f13f62a030703030400040400000007020001340000000080b2720000000000b80300000000000074252b614aa502d0fa9eb2aef6eb7b43c25b6db7a61b70ae56b0cde9770fe09b080501050206004c0c0000000000000000000000000000000000000000000000000000000000000000000000000000000000010272808ca267038e63a906c4ce421be377743b634b97fc1726fd6de085d2bcc9b1",
-            initiationRequest.retrieveSignableData(approverPublicKey = "4q8ApWsB3rSW2HPFwc1aWmGgcBMfj7tSKBbb5sBGAB6h")
+            "0301050969ab8cb05413af9614f898a1f1fdfbc07e7ad5eb2eb1d0f1c49f448bd179c715e9cd9aec3dbf86f831f3a958fe0cacf766c96fe73a870935ae4a1dbc32f9690e0b421acb7dfcb45b3fa41c345677eeee6a360e933ebfff2a321e6d6bf23f703a981716351da1f0ee427fdbcb78f5c2d68ea47b7799000aaf333de3786d72c65306a7d517192c568ee08a845f73d29788cf035c3145b21ab344d8062ea94000002f2bb19a6e87510629e1b70680b474648391dc5d898c1f8431eb10c6fbb4cebb06a7d51718c774c928566398691d5eb68b5eb8a39b4b6d5c73555b210000000000000000000000000000000000000000000000000000000000000000000000003fdc67ec334cbd120c7c9a2826105ef499faac1ec7ca09e6f91ba1cdc31dc236386b16ceef633922978f5ab1386e428471a2a8f74e2619f84101c2aec41821a30307030304000404000000070200013400000000301f910100000000410e0000000000003fdc67ec334cbd120c7c9a2826105ef499faac1ec7ca09e6f91ba1cdc31dc236080501050206006c0c000000000000000000000000000000000000000000000000000000000000000000000000000000000000016d50ef7d464988ec20f2782dccf74d4416779bbc5073d0168b12b6f72014065688c02d478b22653c2576e020b3482da4209fbdd77d35ee43cb522173e4c1b376",
+            initiationRequest.retrieveSignableData(approverPublicKey = "kwwyzySTUJHWBF64u15iwv8bMvcHTNmZzfEh9iDeC7j")
                 .toHexString()
         )
     }

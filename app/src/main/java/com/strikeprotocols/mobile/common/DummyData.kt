@@ -401,7 +401,8 @@ class MockedApprovals {
                 value = SignerInfo(
                     publicKey = "8hyAhcNRc1WS1eZxNy4keGC9mbGoyXZkx75qxmwM3hUc",
                     name = "User 3",
-                    email = "user3@org1"
+                    email = "user3@org1",
+                    nameHashIsEmpty = false,
                 )
             ),
             signingData = SolanaSigningData(
@@ -429,7 +430,8 @@ class MockedApprovals {
                     value = SignerInfo(
                         publicKey = "6E5S1pMfe7DfBwYp2KmmYvTup2hduP385dhhoexX8i9",
                         name = "User 2",
-                        email = "user2@org1"
+                        email = "user2@org1",
+                        nameHashIsEmpty = false,
                     )
                 ),
                 signingData = SolanaSigningData(
@@ -467,7 +469,8 @@ class MockedApprovals {
                         value = SignerInfo(
                             name = "User 1",
                             email = "authorized1@org1",
-                            publicKey = "4q8ApWsB3rSW2HPFwc1aWmGgcBMfj7tSKBbb5sBGAB6h"
+                            publicKey = "4q8ApWsB3rSW2HPFwc1aWmGgcBMfj7tSKBbb5sBGAB6h",
+                            nameHashIsEmpty = false,
                         )
                     )
                 )
@@ -729,7 +732,8 @@ class MockedApprovals {
                         value = SignerInfo(
                             publicKey = "5zpDzYujD8xnZ5B9m93qHCGMSeLDb7eAKCo4kWha7knV",
                             name = "User 1",
-                            email = "authorized1@org1"
+                            email = "authorized1@org1",
+                            nameHashIsEmpty = false,
                         )
                     ),
                     SlotSignerInfo(
@@ -737,7 +741,8 @@ class MockedApprovals {
                         value = SignerInfo(
                             publicKey = "3tSshpPL1WyNR7qDfxPffinndQmgfvTGoZc3PgL65Z9o",
                             name = "User 2",
-                            email = "user2@org1"
+                            email = "user2@org1",
+                            nameHashIsEmpty = false,
                         )
                     ),
                     SlotSignerInfo(
@@ -745,7 +750,8 @@ class MockedApprovals {
                         value = SignerInfo(
                             publicKey = "5rt9dFozMbpPf2mMgiMuu2f4CxQa3pWS1Exo9wHPbwJK",
                             name = "User 3",
-                            email = "user3@org1"
+                            email = "user3@org1",
+                            nameHashIsEmpty = false,
                         )
                     )
                 )
@@ -783,7 +789,8 @@ class MockedApprovals {
                         value = SignerInfo(
                             publicKey = "4q8ApWsB3rSW2HPFwc1aWmGgcBMfj7tSKBbb5sBGAB6h",
                             name = "User 1",
-                            email = "authorized1@org1"
+                            email = "authorized1@org1",
+                            nameHashIsEmpty = false,
                         )
                     ),
                     SlotSignerInfo(
@@ -791,7 +798,8 @@ class MockedApprovals {
                         value = SignerInfo(
                             publicKey = "CDrdR8xX8t83eXxB2ESuHp9AxkiJkUuKnD98zyDfMtrG",
                             name = "User 2",
-                            email = "user2@org1"
+                            email = "user2@org1",
+                            nameHashIsEmpty = false,
                         )
                     ),
                 )
