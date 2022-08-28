@@ -1,9 +1,11 @@
 package com.strikeprotocols.mobile.viewModel
 
+import android.os.CountDownTimer
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.whenever
 import com.strikeprotocols.mobile.*
 import com.strikeprotocols.mobile.common.Resource
+import com.strikeprotocols.mobile.common.StrikeCountDownTimer
 import com.strikeprotocols.mobile.data.ApprovalsRepository
 import com.strikeprotocols.mobile.data.SolanaRepository
 import com.strikeprotocols.mobile.data.models.ApprovalDisposition
@@ -38,6 +40,9 @@ class ApprovalDetailsViewModelTest : BaseViewModelTest() {
 
     private val dispatcher = StandardTestDispatcher()
 
+    @Mock
+    lateinit var countdownTimer: StrikeCountDownTimer
+
     //region Testing data
     private val testLoginApproval = getLoginApproval()
     private val testRemoveDAppBookEntryApproval = getRemoveDAppBookEntryApproval()
@@ -58,7 +63,7 @@ class ApprovalDetailsViewModelTest : BaseViewModelTest() {
         Dispatchers.setMain(dispatcher)
 
         approvalDetailsViewModel =
-            ApprovalDetailsViewModel(approvalsRepository = approvalsRepository)
+            ApprovalDetailsViewModel(approvalsRepository = approvalsRepository, countdownTimer)
 
         durableNonceViewModel = DurableNonceViewModel(solanaRepository)
 

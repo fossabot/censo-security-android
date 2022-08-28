@@ -15,6 +15,7 @@ import com.strikeprotocols.mobile.presentation.approvals.ApprovalsViewModel
 import com.strikeprotocols.mobile.presentation.durable_nonce.DurableNonceViewModel
 import com.strikeprotocols.mobile.ResourceState.ERROR
 import com.strikeprotocols.mobile.ResourceState.SUCCESS
+import com.strikeprotocols.mobile.common.StrikeCountDownTimer
 import junit.framework.TestCase.assertEquals
 import kotlinx.coroutines.*
 import kotlinx.coroutines.test.*
@@ -34,6 +35,9 @@ class ApprovalsViewModelTest : BaseViewModelTest() {
 
     @Mock
     lateinit var approvalsRepository: ApprovalsRepository
+
+    @Mock
+    lateinit var countdownTimer: StrikeCountDownTimer
 
     private lateinit var approvalsViewModel: ApprovalsViewModel
 
@@ -66,7 +70,8 @@ class ApprovalsViewModelTest : BaseViewModelTest() {
             Resource.Success(data = null)
         }
 
-        approvalsViewModel = ApprovalsViewModel(approvalsRepository = approvalsRepository)
+        approvalsViewModel =
+            ApprovalsViewModel(approvalsRepository = approvalsRepository, countdownTimer)
 
         durableNonceViewModel = DurableNonceViewModel(solanaRepository)
     }
