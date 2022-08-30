@@ -12,16 +12,17 @@ data class EntranceState(
 )
 
 /**
- * Total of 6 different destinations for a user.
+ * Total of 7 different destinations for a user.
  * LOGIN
  * HOME
  * INVALID_KEY
  * KEY_MANAGEMENT_CREATION
  * KEY_MANAGEMENT_RECOVERY
+ * KEY_MIGRATION
  * KEY_MANAGEMENT_REGENERATION
  *
  */
 enum class UserDestination {
     LOGIN, KEY_MANAGEMENT_CREATION, KEY_MANAGEMENT_RECOVERY,
-    KEY_MANAGEMENT_REGENERATION, HOME, INVALID_KEY
+    KEY_MANAGEMENT_REGENERATION, KEY_MIGRATION, HOME, INVALID_KEY
 }

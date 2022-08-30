@@ -1,24 +1,27 @@
 package com.strikeprotocols.mobile
 
+import androidx.biometric.BiometricPrompt
 import cash.z.ecc.android.bip39.Mnemonics
 import com.google.gson.JsonParser
+import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.whenever
 import com.strikeprotocols.mobile.common.BaseWrapper
-import com.strikeprotocols.mobile.data.EncryptionManager
-import com.strikeprotocols.mobile.data.EncryptionManagerImpl
-import com.strikeprotocols.mobile.data.SecurePreferences
-import com.strikeprotocols.mobile.data.StrikeKeyPair
+import com.strikeprotocols.mobile.data.*
 import com.strikeprotocols.mobile.data.models.ApprovalDisposition
 import com.strikeprotocols.mobile.data.models.Nonce
+import com.strikeprotocols.mobile.data.models.StoredKeyData
+import com.strikeprotocols.mobile.data.models.StoredKeyData.Companion.SOLANA_KEY
 import com.strikeprotocols.mobile.data.models.approval.InitiationRequest
 import com.strikeprotocols.mobile.data.models.approval.SolanaApprovalRequestDetails
 import com.strikeprotocols.mobile.data.models.approval.WalletApprovalDeserializer
+import org.bouncycastle.util.Store
 import org.junit.Assert.assertNotNull
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mock
 import org.mockito.MockitoAnnotations
 import java.util.*
+import javax.crypto.Cipher
 
 class InitiationRequestSigningTest {
 
@@ -26,6 +29,14 @@ class InitiationRequestSigningTest {
 
     @Mock
     lateinit var securePreferences: SecurePreferences
+
+    @Mock
+    lateinit var cryptographyManager: CryptographyManager
+
+    lateinit var cryptoObject: BiometricPrompt.CryptoObject
+
+    @Mock
+    lateinit var cipher: Cipher
 
     private lateinit var encryptionManager: EncryptionManager
 
@@ -42,16 +53,31 @@ class InitiationRequestSigningTest {
 
     private lateinit var approverPublicKey: String
 
+    private lateinit var storedKeyData: StoredKeyData
+
     @Before
     fun setUp() {
         MockitoAnnotations.openMocks(this)
 
-        encryptionManager = EncryptionManagerImpl(securePreferences)
+        cryptoObject = BiometricPrompt.CryptoObject(cipher)
+
+        encryptionManager = EncryptionManagerImpl(securePreferences, cryptographyManager)
         phrase = encryptionManager.generatePhrase()
         keyPair = encryptionManager.createKeyPair(Mnemonics.MnemonicCode(phrase = phrase))
 
-        whenever(securePreferences.retrieveSolanaKey(userEmail)).then {
-            BaseWrapper.encode(keyPair.privateKey)
+        storedKeyData = StoredKeyData(
+            initVector = BaseWrapper.encode(byteArrayOf(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)),
+            encryptedKeysData = ""
+        )
+
+        whenever(securePreferences.retrieveEncryptedStoredKeys(userEmail)).then {
+            storedKeyData.toJson()
+        }
+
+        whenever(cryptographyManager.decryptData(any(), any())).then {
+            StoredKeyData.mapToJson(hashMapOf(
+                SOLANA_KEY to BaseWrapper.encode(keyPair.privateKey)
+            )).toByteArray()
         }
 
         approverPublicKey = BaseWrapper.encode(keyPair.publicKey)
@@ -62,7 +88,7 @@ class InitiationRequestSigningTest {
     fun fullBalanceAccountIntitiationApiBody() {
         val initiationRequest = generateBalanceAccountInitiationSignableData()
 
-        val apiBody = initiationRequest.convertToApiBody(encryptionManager)
+        val apiBody = initiationRequest.convertToApiBody(encryptionManager, cryptoObject)
 
         assert(apiBody.approvalDisposition == initiationRequest.approvalDisposition)
         assert(apiBody.nonce == exampleNonces.first().value)
@@ -79,7 +105,7 @@ class InitiationRequestSigningTest {
     fun signersUpdateIntitiationApiBody() {
         val initiationRequest = generateSignersUpdateInitiationSignableData()
 
-        val apiBody = initiationRequest.convertToApiBody(encryptionManager)
+        val apiBody = initiationRequest.convertToApiBody(encryptionManager, cryptoObject)
 
         assert(apiBody.approvalDisposition == initiationRequest.approvalDisposition)
         assert(apiBody.nonce == exampleNonces.first().value)
@@ -96,7 +122,7 @@ class InitiationRequestSigningTest {
     fun withdrawalRequestIntitiationApiBody() {
         val initiationRequest = generateWithdrawalRequestInitiationSignableData()
 
-        val apiBody = initiationRequest.convertToApiBody(encryptionManager)
+        val apiBody = initiationRequest.convertToApiBody(encryptionManager, cryptoObject)
 
         assert(apiBody.approvalDisposition == initiationRequest.approvalDisposition)
         assert(apiBody.nonce == exampleNonces.first().value)
@@ -113,7 +139,7 @@ class InitiationRequestSigningTest {
     fun conversionRequestIntitiationApiBody() {
         val initiationRequest = generateConversionRequestInitiationSignableData()
 
-        val apiBody = initiationRequest.convertToApiBody(encryptionManager)
+        val apiBody = initiationRequest.convertToApiBody(encryptionManager, cryptoObject)
 
         assert(apiBody.approvalDisposition == initiationRequest.approvalDisposition)
         assert(apiBody.nonce == exampleNonces.first().value)

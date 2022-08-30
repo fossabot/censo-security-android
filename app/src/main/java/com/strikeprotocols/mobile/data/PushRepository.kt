@@ -5,7 +5,6 @@ import android.provider.Settings
 import com.raygun.raygun4android.RaygunClient
 import com.strikeprotocols.mobile.common.CrashReportingUtil
 import com.strikeprotocols.mobile.common.Resource
-import com.strikeprotocols.mobile.common.strikeLog
 import com.strikeprotocols.mobile.data.models.PushBody
 import javax.inject.Inject
 

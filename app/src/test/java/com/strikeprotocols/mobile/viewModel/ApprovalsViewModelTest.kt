@@ -1,5 +1,6 @@
 package com.strikeprotocols.mobile.viewModel
 
+import androidx.biometric.BiometricPrompt
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.times
 import com.nhaarman.mockitokotlin2.verify
@@ -23,6 +24,7 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mock
+import javax.crypto.Cipher
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class ApprovalsViewModelTest : BaseViewModelTest() {
@@ -38,6 +40,14 @@ class ApprovalsViewModelTest : BaseViewModelTest() {
 
     @Mock
     lateinit var countdownTimer: StrikeCountDownTimer
+
+    @Mock
+    lateinit var keyRepository: KeyRepository
+
+    @Mock
+    lateinit var cipher: Cipher
+
+    lateinit var cryptoObject: BiometricPrompt.CryptoObject
 
     private lateinit var approvalsViewModel: ApprovalsViewModel
 
@@ -63,15 +73,17 @@ class ApprovalsViewModelTest : BaseViewModelTest() {
         super.setUp()
         Dispatchers.setMain(dispatcher)
 
-        whenever(approvalsRepository.approveOrDenyDisposition(any(), any())).thenAnswer {
+        whenever(approvalsRepository.approveOrDenyDisposition(any(), any(), any())).thenAnswer {
             Resource.Success(data = null)
         }
-        whenever(approvalsRepository.approveOrDenyInitiation(any(), any())).thenAnswer {
+        whenever(approvalsRepository.approveOrDenyInitiation(any(), any(), any())).thenAnswer {
             Resource.Success(data = null)
         }
 
         approvalsViewModel =
-            ApprovalsViewModel(approvalsRepository = approvalsRepository, countdownTimer)
+            ApprovalsViewModel(approvalsRepository = approvalsRepository, keyRepository, countdownTimer)
+
+        cryptoObject = BiometricPrompt.CryptoObject(cipher)
 
         durableNonceViewModel = DurableNonceViewModel(solanaRepository)
     }
@@ -344,6 +356,9 @@ class ApprovalsViewModelTest : BaseViewModelTest() {
         approvalsViewModel.setMultipleAccounts(multipleAccounts)
 
         assertEquals(multipleAccounts, approvalsViewModel.state.multipleAccounts)
+
+        //Trigger the register disposition call (user triggers this when they give biometry approval)
+        approvalsViewModel.biometryApproved(cryptoObject)
 
         //Let the viewModel coroutine finish the register disposition call
         advanceUntilIdle()

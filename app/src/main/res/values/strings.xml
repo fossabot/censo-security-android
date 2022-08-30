@@ -44,8 +44,8 @@
 
     <string name="approval_expired">Expired</string>
     <string name="confirm">Confirm</string>
-    <string name="biometry_check">Biometric Check</string>
-    <string name="performing_biometry_check">Performing biometric check before submitting disposition</string>
+    <string name="performing_biometry_check_save">Complete biometry to save your key.</string>
+    <string name="performing_biometry_check_retrieve">Complete biometry to retrieve your key.</string>
 
     <string name="approval_disposition_error_title">Something went wrong</string>
 
@@ -251,5 +251,20 @@
     <string name="update_app_entrance_message">Please update your app. If you have updated the app, please close the app and re-enter.</string>
     <string name="update_biometry_entrance_message">Please update your device biometry. If you already updated your biometry, please close the app and re-enter.</string>
     <string name="signing_in_as">Signing in as</string>
+    <string name="too_many_failed_attempts">Too many failed attempts, please try again later.</string>
+    <string name="too_many_failed_attempts_key_management">Too many failed attempts. Please restart phone if error persists.</string>
+    <string name="key_management_bio_canceled">Biometry approval failed. Please try again.</string>
 
+    <string name="sign_in_error">Sign In Error</string>
+    <string name="error_occurred_signature_login">An error occurred trying to sign you in</string>
+    <string name="use_password">Use Password</string>
+    <string name="try_again">Try Again</string>
+    <string name="migrating_key_loading">Migrating your key behind biometry protection…</string>
+
+    <string name="save_biometry_info">Strike protects your private key using biometric verification.\n\nIf you change the biometry settings on your device, you will need to recover your key from your recovery phrase.</string>
+    <string name="migrate_biometry_info">We are moving your key to biometry protected storage.\n\nIf you change the biometry settings on your device, you will need to recover your key from your recovery phrase.</string>
+    <string name="save_key">Save Key</string>
+    <string name="retrieve_key">Retrieve Key</string>
+    <string name="biometry_login_subtitle">Complete biometry to login to the app. Cancel biometry if you would like to use your password.</string>
+    <string name="biometry_login_title">Biometry Login</string>
 </resources>

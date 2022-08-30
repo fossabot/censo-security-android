@@ -1,22 +1,34 @@
 package com.strikeprotocols.mobile.presentation.key_management
 
 import android.widget.Toast
+import androidx.biometric.BiometricPrompt
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.AlertDialog
-import androidx.compose.material.Text
-import androidx.compose.material.TextButton
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.zIndex
+import androidx.fragment.app.FragmentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.navigation.NavController
 import com.strikeprotocols.mobile.R
+import com.strikeprotocols.mobile.common.BioCryptoUtil
+import com.strikeprotocols.mobile.common.BioPromptReason
 import com.strikeprotocols.mobile.common.Resource
 import com.strikeprotocols.mobile.presentation.Screen
 import com.strikeprotocols.mobile.presentation.key_management.KeyManagementState.Companion.NO_PHRASE_ERROR
@@ -36,7 +48,33 @@ fun KeyManagementScreen(
     initialData: KeyManagementInitialData
 ) {
     val state = viewModel.state
-    val context = LocalContext.current
+    val context = LocalContext.current as FragmentActivity
+
+    val promptInfo = BioCryptoUtil.createPromptInfo(context, isSavingData = true)
+
+    val bioPrompt = BioCryptoUtil.createBioPrompt(
+        fragmentActivity = context,
+        onSuccess = {
+            viewModel.biometryApproved(it!!)
+        },
+        onFail = {
+            if (it == BioCryptoUtil.TOO_MANY_ATTEMPTS_CODE || it == BioCryptoUtil.FINGERPRINT_DISABLED_CODE) {
+                Toast.makeText(
+                    context,
+                    context.getString(R.string.too_many_failed_attempts_key_management),
+                    Toast.LENGTH_LONG
+                ).show()
+            } else {
+                Toast.makeText(
+                    context,
+                    context.getString(R.string.key_management_bio_canceled),
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+            viewModel.biometryFailed()
+        }
+    )
+
 
     val lifecycleOwner: LifecycleOwner = LocalLifecycleOwner.current
 
@@ -102,8 +140,8 @@ fun KeyManagementScreen(
                     navigatePreviousWord = viewModel::navigatePreviousWord,
                     navigateNextWord = viewModel::navigateNextWord,
                     onSubmitWord = viewModel::submitWordInput,
-                    keyRecoveryState = state.addWalletSignerResult,
-                    retryKeyRecovery = {},
+                    keyRecoveryState = state.finalizeKeyFlow,
+                    retryKeyRecovery = viewModel::retryKeyRecoveryFromPhrase,
                 )
             }
         }
@@ -113,9 +151,16 @@ fun KeyManagementScreen(
                 KeyRegenerationFlowUI(
                     onNavigate = viewModel::regenerateKeyNavigationForward,
                     retryKeyCreation = viewModel::retryRegenerateData,
-                    keyRegenerationState = state.addWalletSignerResult
+                    keyRegenerationState = state.finalizeKeyFlow
                 )
             }
+        }
+        KeyManagementFlow.KEY_MIGRATION -> {
+            KeyMigrationFlowUI(
+                onNavigate = viewModel::migrateKeyNavigationForward,
+                retryKeyMigration = viewModel::retryKeyMigration,
+                keyMigrationState = state.finalizeKeyFlow
+            )
         }
         else -> {
             Box {
@@ -135,11 +180,30 @@ fun KeyManagementScreen(
                     wordInputChange = viewModel::updateWordInput,
                     wordVerificationErrorEnabled = state.confirmPhraseWordsState.errorEnabled,
                     onSubmitWord = viewModel::submitWordInput,
-                    keyCreationState = state.addWalletSignerResult,
+                    keyCreationState = state.finalizeKeyFlow,
                     retryKeyCreation = viewModel::retryKeyCreationFromPhrase
                 )
             }
         }
+    }
+
+    if (state.triggerBioPrompt is Resource.Success) {
+        val mainText = when (state.bioPromptReason) {
+            BioPromptReason.MIGRATION -> stringResource(id = R.string.migrate_biometry_info)
+            else -> stringResource(id = R.string.save_biometry_info)
+        }
+
+        PreBiometryDialog(
+            mainText = mainText,
+            buttonText = stringResource(R.string.save_key),
+            onAccept = {
+                bioPrompt.authenticate(
+                    promptInfo,
+                    BiometricPrompt.CryptoObject(state.triggerBioPrompt.data!!)
+                )
+                viewModel.resetPromptTrigger()
+            }
+        )
     }
     //endregion
 

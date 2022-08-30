@@ -2,10 +2,7 @@ package com.strikeprotocols.mobile
 
 import android.app.NotificationChannel
 import android.app.NotificationManager
-import android.content.BroadcastReceiver
-import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
+import android.content.*
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -24,9 +21,7 @@ import com.strikeprotocols.mobile.common.BiometricUtil
 import com.strikeprotocols.mobile.common.CrashReportingUtil
 import com.strikeprotocols.mobile.common.Resource
 import com.strikeprotocols.mobile.common.strikeLog
-import com.strikeprotocols.mobile.data.AuthProvider
-import com.strikeprotocols.mobile.data.UserState
-import com.strikeprotocols.mobile.data.UserStateListener
+import com.strikeprotocols.mobile.data.*
 import com.strikeprotocols.mobile.data.models.approval.WalletApproval
 import com.strikeprotocols.mobile.presentation.Screen
 import com.strikeprotocols.mobile.presentation.account.AccountScreen
@@ -206,8 +201,6 @@ class MainActivity : FragmentActivity() {
                 })
             ) { backStackEntry ->
                 val keyInitialDataArg = backStackEntry.arguments?.get(Screen.KeyManagementRoute.KEY_MGMT_ARG) as String
-                strikeLog(message = "Initial data as string: $keyInitialDataArg")
-                strikeLog(message = "Parse data: ${KeyManagementInitialData.fromJson(keyInitialDataArg)}")
                 KeyManagementScreen(navController = navController, initialData = KeyManagementInitialData.fromJson(keyInitialDataArg))
             }
             composable(
@@ -222,9 +215,10 @@ class MainActivity : FragmentActivity() {
         object : UserStateListener {
             override fun onUserStateChanged(userState: UserState) {
                 runOnUiThread {
-                    if (userState == UserState.REFRESH_TOKEN_EXPIRED) {
+                    if (userState == UserState.REFRESH_TOKEN_EXPIRED || userState == UserState.INVALIDATED_KEY) {
                         navController.navigate(Screen.EntranceRoute.route) {
-                            popUpTo(0)
+                            launchSingleTop = true
+                            navController.backQueue.clear()
                         }
                     }
                 }

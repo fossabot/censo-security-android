@@ -3,10 +3,21 @@ package com.strikeprotocols.mobile.common
 import android.content.Context
 import com.strikeprotocols.mobile.R
 import java.time.OffsetDateTime
+import java.time.ZoneId
+import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.util.*
-import kotlin.math.min
-import kotlin.time.Duration.Companion.days
+
+const val iso8601FullPattern = "yyyy-MM-dd'T'HH:mm:ss.SSSxxx"
+const val HOURS_IN_SECONDS = 3_600
+const val MINUTES_IN_SECONDS = 60
+
+fun generateFormattedTimestamp(): String {
+    val now = ZonedDateTime.now(ZoneId.of("UTC"))
+    val formatter: DateTimeFormatter =
+        DateTimeFormatter.ofPattern(iso8601FullPattern)
+    return now.format(formatter)
+}
 
 fun convertSecondsIntoCountdownText(context: Context, totalTimeInSeconds: Long?): String? {
     if(totalTimeInSeconds == null) return null
@@ -93,8 +104,3 @@ fun String.formatISO8601IntoSeconds() : Long {
         0
     }
 }
-
-const val DAYS_IN_SECONDS = 86_400
-const val HOURS_IN_SECONDS = 3_600
-const val MINUTES_IN_SECONDS = 60
-const val HOURS_IN_DAY = 24

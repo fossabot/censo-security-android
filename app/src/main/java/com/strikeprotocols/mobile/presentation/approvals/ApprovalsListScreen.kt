@@ -4,6 +4,7 @@ import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.net.Uri
 import android.widget.Toast
+import androidx.biometric.BiometricPrompt
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -53,28 +54,44 @@ fun ApprovalsListScreen(
     val approvalsState = approvalsViewModel.state
     val durableNonceState = durableNonceViewModel.state
 
+    fun resetDataAfterErrorDismissed() {
+        approvalsViewModel.dismissApprovalDispositionError()
+        durableNonceViewModel.resetMultipleAccountsResource()
+        approvalsViewModel.resetMultipleAccounts()
+    }
+
     val context = LocalContext.current as FragmentActivity
+
+    val promptInfo = BioCryptoUtil.createPromptInfo(context, isSavingData = false)
+
+    val bioPrompt = BioCryptoUtil.createBioPrompt(
+        fragmentActivity = context,
+        onSuccess = {
+            approvalsViewModel.biometryApproved(it!!)
+        },
+        onFail = {
+            if (it == BioCryptoUtil.TOO_MANY_ATTEMPTS_CODE || it == BioCryptoUtil.FINGERPRINT_DISABLED_CODE) {
+                Toast.makeText(
+                    context,
+                    context.getString(R.string.too_many_failed_attempts),
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+            resetDataAfterErrorDismissed()
+        }
+    )
 
     val scaffoldState = rememberScaffoldState()
     val coroutineScope = rememberCoroutineScope()
 
-    val promptInfo = BiometricUtil.getBasicBiometricPromptBuilder(context).build()
-
-    val bioPrompt = BiometricUtil.createBioPrompt(
-        fragmentActivity = context,
-        onSuccess = {
-            val nonceAddresses = approvalsState.selectedApproval?.retrieveAccountAddresses()
-            val minimumSlotAddress = approvalsState.selectedApproval?.retrieveAccountAddressesSlot()
-            durableNonceViewModel.setInitialData(
-                nonceAccountAddresses = nonceAddresses ?: emptyList(),
-                minimumNonceAccountAddressesSlot = minimumSlotAddress ?: 0
-            )
-            durableNonceViewModel.setUserBiometricVerified(isVerified = true)
-        },
-        onFail = {
-            durableNonceViewModel.setUserBiometricVerified(isVerified = false)
-        }
-    )
+    fun launchNonceWork() {
+        val nonceAddresses = approvalsState.selectedApproval?.retrieveAccountAddresses()
+        val minimumSlotAddress = approvalsState.selectedApproval?.retrieveAccountAddressesSlot()
+        durableNonceViewModel.setInitialData(
+            nonceAccountAddresses = nonceAddresses ?: emptyList(),
+            minimumNonceAccountAddressesSlot = minimumSlotAddress ?: 0
+        )
+    }
 
     fun retryApprovalDisposition() {
         approvalsViewModel.dismissApprovalDispositionError()
@@ -94,12 +111,6 @@ fun ApprovalsListScreen(
                     )
             )
         }
-    }
-
-    fun resetDataAfterErrorDismissed() {
-        approvalsViewModel.dismissApprovalDispositionError()
-        durableNonceViewModel.resetMultipleAccountsResource()
-        approvalsViewModel.resetMultipleAccounts()
     }
 
     checkForHardRefreshAfterBackNavigation(
@@ -125,10 +136,15 @@ fun ApprovalsListScreen(
             }
             approvalsViewModel.resetShouldShowErrorSnackbar()
         }
-        if (durableNonceState.triggerBioPrompt) {
-            durableNonceViewModel.resetPromptTrigger()
-            bioPrompt.authenticate(promptInfo)
+
+        if (approvalsState.bioPromptTrigger is Resource.Success) {
+            bioPrompt.authenticate(
+                promptInfo,
+                BiometricPrompt.CryptoObject(approvalsState.bioPromptTrigger.data!!)
+            )
+            approvalsViewModel.resetPromptTrigger()
         }
+
         if (durableNonceState.multipleAccountsResult is Resource.Success) {
             approvalsViewModel.setMultipleAccounts(durableNonceState.multipleAccounts)
             durableNonceViewModel.resetState()
@@ -214,7 +230,7 @@ fun ApprovalsListScreen(
             if (approvalsState.shouldDisplayConfirmDisposition != null) {
                 if (approvalsState.selectedApproval?.getSolanaApprovalRequestType() is LoginApprovalRequest) {
                     approvalsViewModel.resetShouldDisplayConfirmDisposition()
-                    durableNonceViewModel.setPromptTrigger()
+                    launchNonceWork()
                 } else {
                     approvalsState.shouldDisplayConfirmDisposition.let { safeDialogDetails ->
                         StrikeConfirmDispositionAlertDialog(
@@ -222,7 +238,7 @@ fun ApprovalsListScreen(
                             dialogText = safeDialogDetails.dialogText,
                             onConfirm = {
                                 approvalsViewModel.resetShouldDisplayConfirmDisposition()
-                                durableNonceViewModel.setPromptTrigger()
+                                launchNonceWork()
                             },
                             onDismiss = {
                                 approvalsViewModel.resetShouldDisplayConfirmDisposition()

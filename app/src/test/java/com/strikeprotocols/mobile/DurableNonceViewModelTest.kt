@@ -77,8 +77,6 @@ class DurableNonceViewModelTest {
             nonceAccountAddresses = listOf("7Zpss7rbtz6qU71ywcjcuANnVyQWJrqsZ3oekkR9Hknn")
         )
 
-        durableNonceViewModel.setUserBiometricVerified(true)
-
         verify(solanaRepository, times(1)).getMultipleAccounts(any())
 
         assert(durableNonceViewModel.state.multipleAccountsResult is Resource.Success)
@@ -100,8 +98,6 @@ class DurableNonceViewModelTest {
             minimumNonceAccountAddressesSlot = 5,
             nonceAccountAddresses = listOf("7Zpss7rbtz6qU71ywcjcuANnVyQWJrqsZ3oekkR9Hknn")
         )
-
-        durableNonceViewModel.setUserBiometricVerified(true)
 
         verify(
             solanaRepository,

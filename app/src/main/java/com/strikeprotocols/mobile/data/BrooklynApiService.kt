@@ -100,11 +100,18 @@ class AuthInterceptor(private val authProvider: AuthProvider) : Interceptor {
 
         var request = chain.request().newBuilder().build()
 
-        if (request.header(AUTH) != null) {
+        val authRequired = request.header(AUTH) != null
+
+        if (authRequired) {
             try {
                 val token = runBlocking {
                     authProvider.retrieveToken()
                 }
+
+                if (token.isEmpty()) {
+                    throw TokenExpiredException()
+                }
+
                 request =
                     chain.request().newBuilder()
                         .removeHeader(AUTH)
@@ -118,7 +125,7 @@ class AuthInterceptor(private val authProvider: AuthProvider) : Interceptor {
         }
         val response = chain.proceed(request)
 
-        if (response.code == UNAUTHORIZED) {
+        if (authRequired && response.code == UNAUTHORIZED) {
             runBlocking { authProvider.signOut() }
             authProvider.setUserState(userState = UserState.REFRESH_TOKEN_EXPIRED)
         }

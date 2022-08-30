@@ -49,19 +49,15 @@ object AppModule {
     fun provideUserRepository(
         authProvider: AuthProvider,
         api: BrooklynApiService,
-        encryptionManager: EncryptionManager,
         securePreferences: SecurePreferences,
-        phraseValidator: PhraseValidator,
         semVersionApiService: SemVersionApiService,
         @ApplicationContext applicationContext: Context
     ): UserRepository {
         return UserRepositoryImpl(
             authProvider = authProvider,
             api = api,
-            encryptionManager = encryptionManager,
             securePreferences = securePreferences,
             versionApiService = semVersionApiService,
-            phraseValidator = phraseValidator,
             applicationContext = applicationContext
         )
     }
@@ -93,8 +89,14 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideEncryptionManager(securePreferences: SecurePreferences): EncryptionManager {
-        return EncryptionManagerImpl(securePreferences)
+    fun provideKeyRepository(encryptionManager: EncryptionManager, securePreferences: SecurePreferences, userRepository: UserRepository, api: BrooklynApiService): KeyRepository {
+        return KeyRepositoryImpl(encryptionManager = encryptionManager, securePreferences = securePreferences, userRepository =  userRepository, api =  api)
+    }
+
+    @Provides
+    @Singleton
+    fun provideEncryptionManager(securePreferences: SecurePreferences, cryptographyManager: CryptographyManager): EncryptionManager {
+        return EncryptionManagerImpl(securePreferences, cryptographyManager)
     }
 
     @Provides
@@ -118,6 +120,12 @@ object AppModule {
     @Provides
     fun provideStrikeCountDownTimer(): StrikeCountDownTimer {
         return StrikeCountDownTimerImpl()
+    }
+
+    @Singleton
+    @Provides
+    fun provideCryptographyManager(): CryptographyManager {
+        return CryptographyManagerImpl()
     }
 
 }

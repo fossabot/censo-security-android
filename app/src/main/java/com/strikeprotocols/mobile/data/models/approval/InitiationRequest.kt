@@ -1,5 +1,6 @@
 package com.strikeprotocols.mobile.data.models.approval
 
+import androidx.biometric.BiometricPrompt
 import com.strikeprotocols.mobile.common.BaseWrapper
 import com.strikeprotocols.mobile.data.EncryptionManager
 import com.strikeprotocols.mobile.data.Signable
@@ -374,11 +375,21 @@ data class InitiationRequest(
         )
     }
 
-    fun convertToApiBody(encryptionManager: EncryptionManager): InitiateRequestBody {
+    fun convertToApiBody(
+        encryptionManager: EncryptionManager,
+        cryptoObject: BiometricPrompt.CryptoObject): InitiateRequestBody {
+
+        //get private key here then we can pass to encryption manager methods
+        val privateKeyByteArray = encryptionManager.retrieveSavedKey(
+            email = email, cryptoObject = cryptoObject
+        )
+
+        val privateKey = BaseWrapper.encode(privateKeyByteArray)
+
         val initiatorSignature = try {
             encryptionManager.signApprovalDispositionMessage(
                 signable = this,
-                userEmail = email,
+                solanaKey = privateKey,
             )
         } catch (e: Exception) {
             throw Exception("SIGNING_DATA_FAILURE")
@@ -391,7 +402,7 @@ data class InitiationRequest(
             encryptionManager.signApprovalInitiationMessage(
                 ephemeralPrivateKey = opAccountPrivateKey.encoded,
                 signable = this,
-                userEmail = email
+                solanaKey = privateKey
             )
         } catch (e: Exception) {
             throw Exception("SIGNING_DATA_FAILURE")
@@ -407,7 +418,7 @@ data class InitiationRequest(
                         nonceAccountAddress = instruction.nonceAccountAddress,
                         signature =
                         encryptionManager.signApprovalDispositionMessage(
-                            signable = instruction, userEmail = email
+                            signable = instruction, solanaKey = privateKey
                         )
                     )
                 }

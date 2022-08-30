@@ -56,10 +56,11 @@ class GeneralDummyData {
         companion object {
             //Please note this is to be used for mocked data purposes ONLY
             const val PHRASE =
-                "wedding avoid come master casual have trend maid clump fly gain alter wagon bid rely lava foot buddy orchard already force tent just ladder"
+                "clerk wolf hover poverty salmon rough write any rigid horror sing air super misery critic grain dolphin again milk ocean fragile unveil boss random"
 
-            const val PHRASE_PRIVATE_KEY = "8U8sunPpaWPefPTy4wTwuRkgE9aCFa7iCjvbXRpuw1JY"
-            const val PHRASE_PUBLIC_KEY = "GHNH45yPvJJKvzsJNjxqQWpmeWDF4yU5eWoS21Kqsaia"
+            const val PHRASE_PRIVATE_KEY = "E3tCV5ta4eP5GrouqPbaeM9G6ymZfJu6B5z8jUwYEdUc"
+            const val PHRASE_PUBLIC_KEY = "F7JuLRBbyGAS9nAhDdfNX1LbckBAmCnKMB2xTdZfQS1n"
+            const val ROOT_SEED = "HoihsP3xZgSaRPDxRa8nNFT4cNk3jQyUxx1sKJftGk7d14hJ7F9GwdQCSQbq1aA43koYSdRX5kHAjGLTdTTJQSt"
         }
 
         fun generateVerifyWalletSignersDummyDataWithValidPublicKey() =

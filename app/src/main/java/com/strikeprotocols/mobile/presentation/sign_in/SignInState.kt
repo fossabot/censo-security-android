@@ -5,6 +5,7 @@ import com.strikeprotocols.mobile.common.Resource
 import com.strikeprotocols.mobile.data.models.LoginResponse
 import com.strikeprotocols.mobile.data.models.VerifyUser
 import com.strikeprotocols.mobile.data.models.WalletSigner
+import javax.crypto.Cipher
 
 data class SignInState(
     val email: String = "",
@@ -15,6 +16,7 @@ data class SignInState(
     val loginResult: Resource<LoginResponse> = Resource.Uninitialized,
     val verifyUserResult: Resource<VerifyUser> = Resource.Uninitialized,
     val walletSignersResult: Resource<List<WalletSigner?>> = Resource.Uninitialized,
+    val triggerBioPrompt: Resource<Cipher> = Resource.Uninitialized
 ) {
     val signInButtonEnabled = email.isNotEmpty() && password.isNotEmpty()
 

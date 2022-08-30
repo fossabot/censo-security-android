@@ -38,6 +38,7 @@ class DurableNonceViewModel @Inject constructor(
             nonceAccountAddresses = nonceAccountAddresses,
             minimumNonceAccountAddressesSlot = minimumNonceAccountAddressesSlot
         )
+        retrieveMultipleAccounts()
     }
 
     fun resetState() {
@@ -48,26 +49,7 @@ class DurableNonceViewModel @Inject constructor(
         state = state.copy(multipleAccountsResult = Resource.Uninitialized)
     }
 
-    fun setPromptTrigger() {
-        state = state.copy(triggerBioPrompt = true)
-    }
-
-    fun resetPromptTrigger() {
-        state = state.copy(triggerBioPrompt = false)
-    }
-
-    fun setUserBiometricVerified(isVerified: Boolean) {
-        state = state.copy(
-            userBiometricVerified = BiometricVerified(
-                biometryVerified = isVerified
-            )
-        )
-        if (state.userBiometricVerified?.biometryVerified == true) {
-            retrieveMultipleAccounts()
-        }
-    }
-
-    private fun retrieveMultipleAccounts() {
+    fun retrieveMultipleAccounts() {
         viewModelScope.launch {
             state = state.copy(multipleAccountsResult = Resource.Loading())
 
@@ -136,10 +118,6 @@ class DurableNonceViewModel @Inject constructor(
 
     inner class MultipleAccounts(
         val nonces: List<Nonce>
-    )
-
-    inner class BiometricVerified(
-        val biometryVerified: Boolean
     )
 
     inner class MultipleAccountsBody(

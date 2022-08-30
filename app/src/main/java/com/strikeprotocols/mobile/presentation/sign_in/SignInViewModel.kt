@@ -1,5 +1,6 @@
 package com.strikeprotocols.mobile.presentation.sign_in
 
+import androidx.biometric.BiometricPrompt
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -21,15 +22,29 @@ import kotlinx.coroutines.tasks.await
 class SignInViewModel @Inject constructor(
     private val userRepository: UserRepository,
     private val pushRepository: PushRepository,
+    private val keyRepository: KeyRepository,
     private val strikeUserData: StrikeUserData
 ) : ViewModel() {
 
     var state by mutableStateOf(SignInState())
         private set
 
+    init {
+        getCachedEmail()
+    }
+
+    private fun getCachedEmail() {
+        viewModelScope.launch {
+            val email = userRepository.retrieveCachedUserEmail()
+            state = state.copy(email = email)
+        }
+    }
+
     //region Handle User Input
     fun updateEmail(updatedEmail: String) {
-        state = state.copy(email = updatedEmail.lowercase().trim(), emailErrorEnabled = false)
+        val sanitizedEmail = updatedEmail.lowercase().trim()
+        state = state.copy(email = sanitizedEmail, emailErrorEnabled = false)
+        SharedPrefsHelper.saveUserEmail(sanitizedEmail)
     }
 
     fun updatePassword(updatedPassword: String) {
@@ -49,11 +64,47 @@ class SignInViewModel @Inject constructor(
     }
 
     private fun checkEmail() {
-        state = if (state.email.isEmpty()) {
-            state.copy(emailErrorEnabled = true)
+        if (state.email.isEmpty()) {
+            state = state.copy(emailErrorEnabled = true)
         } else {
-            state.copy(loginStep = LoginStep.PASSWORD_ENTRY)
+            kickOffBiometryLoginOrMoveToPasswordEntry()
         }
+    }
+
+    private fun kickOffBiometryLoginOrMoveToPasswordEntry() {
+        viewModelScope.launch {
+            state = if (keyRepository.havePrivateKey()) {
+                val cipher = keyRepository.getCipherForDecryption()
+                state.copy(triggerBioPrompt = Resource.Success(cipher))
+            } else {
+                state.copy(loginStep = LoginStep.PASSWORD_ENTRY)
+            }
+        }
+    }
+
+    fun biometryApproved(cryptoObject: BiometricPrompt.CryptoObject?) {
+        if (cryptoObject == null) {
+            biometryFailed()
+            return
+        }
+
+        viewModelScope.launch {
+            try {
+                val timestamp = generateFormattedTimestamp()
+                val signedTimestamp = keyRepository.signTimestamp(
+                    timestamp = timestamp,
+                    cryptoObject = cryptoObject
+                )
+
+                loginWithBiometry(timestamp = timestamp, signedTimestamp = signedTimestamp)
+            } catch (e: Exception) {
+                biometryFailed()
+            }
+        }
+    }
+
+    fun biometryFailed() {
+        state = state.copy(loginResult = Resource.Error())
     }
 
     private fun checkPassword() {
@@ -66,34 +117,66 @@ class SignInViewModel @Inject constructor(
     //endregion
 
     //region Login + API Calls
-    fun attemptLogin() {
-        if (state.signInButtonEnabled) {
-            state = state.copy(loginResult = Resource.Loading())
-            viewModelScope.launch(Dispatchers.IO) {
-                try {
-                    val loginResource = userRepository.login(
-                        email = state.email, password = state.password
-                    )
-                    when (loginResource) {
-                        is Resource.Success -> {
-                            val token = loginResource.data?.token
-                            if (token != null) {
-                                userSuccessfullyLoggedIn(token)
-                            } else {
-                                userFailedLogin(e = Exception("NO TOKEN"))
-                            }
-                        }
-                        is Resource.Error -> {
-                            userFailedLogin(resource = loginResource)
-                        }
-                        else -> {
-                            state = state.copy(loginResult = Resource.Loading())
+    private fun loginWithPassword() {
+        state = state.copy(loginResult = Resource.Loading())
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                val loginResource = userRepository.loginWithPassword(
+                    email = state.email, password = state.password
+                )
+                when (loginResource) {
+                    is Resource.Success -> {
+                        val token = loginResource.data?.token
+                        if (token != null) {
+                            userSuccessfullyLoggedIn(token)
+                        } else {
+                            userFailedLogin(e = Exception("NO TOKEN"))
                         }
                     }
-                } catch (e: Exception) {
-                    userFailedLogin(e = e)
+                    is Resource.Error -> {
+                        userFailedLogin(resource = loginResource)
+                    }
+                    else -> {
+                        state = state.copy(loginResult = Resource.Loading())
+                    }
+                }
+            } catch (e: Exception) {
+                userFailedLogin(e = e)
+            }
+        }
+    }
+
+    private suspend fun loginWithBiometry(timestamp: String, signedTimestamp: String) {
+        state = state.copy(loginResult = Resource.Loading())
+        try {
+            val loginResource = userRepository.loginWithTimestamp(
+                email = state.email, timestamp = timestamp, signedTimestamp = signedTimestamp
+            )
+            when (loginResource) {
+                is Resource.Success -> {
+                    val token = loginResource.data?.token
+                    if (token != null) {
+                        userSuccessfullyLoggedIn(token)
+                    } else {
+                        userFailedLogin(e = Exception("NO TOKEN"))
+                    }
+                }
+                is Resource.Error -> {
+                    userFailedLogin(resource = loginResource)
+                }
+                else -> {
+                    state = state.copy(loginResult = Resource.Loading())
                 }
             }
+        } catch (e: Exception) {
+            userFailedLogin(e = e)
+        }
+    }
+
+
+    fun attemptLogin() {
+        if (state.signInButtonEnabled) {
+            loginWithPassword()
         } else {
             state = state.copy(
                 emailErrorEnabled = !state.emailValid(),
@@ -160,5 +243,13 @@ class SignInViewModel @Inject constructor(
 
     fun resetLoginCall() {
         state = state.copy(loginResult = Resource.Uninitialized)
+    }
+
+    fun resetLoginCallAndMoveUserToPasswordEntry() {
+        state = state.copy(loginStep = LoginStep.PASSWORD_ENTRY, loginResult = Resource.Uninitialized)
+    }
+
+    fun resetPromptTrigger() {
+        state = state.copy(triggerBioPrompt = Resource.Uninitialized)
     }
 }

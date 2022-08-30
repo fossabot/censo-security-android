@@ -18,7 +18,6 @@ import com.strikeprotocols.mobile.BuildConfig
 import com.strikeprotocols.mobile.MainActivity
 import com.strikeprotocols.mobile.R
 import com.strikeprotocols.mobile.common.Resource
-import com.strikeprotocols.mobile.common.strikeLog
 import com.strikeprotocols.mobile.data.PushRepository
 import com.strikeprotocols.mobile.data.UserRepository
 import com.strikeprotocols.mobile.data.models.PushBody
@@ -71,7 +70,6 @@ class MessagingService : FirebaseMessagingService() {
             }
 
             if (userLoggedIn) {
-                strikeLog(message = "New Token received, sending to strike backend")
                 sendRegistrationToServer(token)
             }
         }

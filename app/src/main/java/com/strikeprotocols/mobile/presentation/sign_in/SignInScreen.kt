@@ -1,6 +1,8 @@
 package com.strikeprotocols.mobile.presentation.sign_in
 
 import android.annotation.SuppressLint
+import android.widget.Toast
+import androidx.biometric.BiometricPrompt
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -25,9 +27,11 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
+import androidx.fragment.app.FragmentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.strikeprotocols.mobile.R
+import com.strikeprotocols.mobile.common.BioCryptoUtil
 import com.strikeprotocols.mobile.common.Resource
 import com.strikeprotocols.mobile.presentation.Screen
 import com.strikeprotocols.mobile.presentation.components.SignInTextField
@@ -44,7 +48,32 @@ fun SignInScreen(
     viewModel: SignInViewModel = hiltViewModel(),
 ) {
     val state = viewModel.state
-    val context = LocalContext.current
+    val context = LocalContext.current as FragmentActivity
+
+    val promptInfo = BioCryptoUtil.createPromptInfo(context, isSavingData = false, biometryLogin = true)
+
+    val bioPrompt = BioCryptoUtil.createBioPrompt(
+        fragmentActivity = context,
+        onSuccess = {
+            viewModel.biometryApproved(it)
+        },
+        onFail = {
+            if (it == BioCryptoUtil.TOO_MANY_ATTEMPTS_CODE || it == BioCryptoUtil.FINGERPRINT_DISABLED_CODE) {
+                Toast.makeText(
+                    context,
+                    context.getString(R.string.too_many_failed_attempts_key_management),
+                    Toast.LENGTH_LONG
+                ).show()
+            } else {
+                Toast.makeText(
+                    context,
+                    context.getString(R.string.key_management_bio_canceled),
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+            viewModel.biometryFailed()
+        }
+    )
 
     //region LaunchedEffect
     LaunchedEffect(key1 = state) {
@@ -56,6 +85,14 @@ fun SignInScreen(
                     inclusive = true
                 }
             }
+        }
+
+        if(state.triggerBioPrompt is Resource.Success) {
+            viewModel.resetPromptTrigger()
+            bioPrompt.authenticate(
+                promptInfo,
+                BiometricPrompt.CryptoObject(state.triggerBioPrompt.data!!)
+            )
         }
     }
     //endregion
@@ -208,40 +245,78 @@ fun SignInScreen(
             if (state.loginResult is Resource.Error) {
                 val errorReason = state.loginResult.strikeError?.getErrorMessage(context)
 
-                if (errorReason == null) {
-                    stringResource(R.string.login_failed_message)
-                } else {
-                    "${errorReason}\n\n${stringResource(R.string.login_failed_message)}"
-                }
+                if (state.loginStep == LoginStep.PASSWORD_ENTRY) {
 
-                AlertDialog(
-                    backgroundColor = UnfocusedGrey,
-                    onDismissRequest = viewModel::resetLoginCall,
-                    confirmButton = {
-                        TextButton(
-                            onClick = viewModel::resetLoginCall
-                        )
-                        {
-                            Text(text = stringResource(R.string.ok))
-                        }
-                    },
-                    title = {
-                        Text(
-                            text = stringResource(R.string.login_failed_title),
-                            color = StrikeWhite,
-                            fontSize = 20.sp
-                        )
-                    },
-                    text = {
-                        Text(
-                            text = errorReason ?: stringResource(R.string.login_failed_message),
-                            color = StrikeWhite,
-                            fontSize = 16.sp
-                        )
+                    if (errorReason == null) {
+                        stringResource(R.string.login_failed_message)
+                    } else {
+                        "${errorReason}\n\n${stringResource(R.string.login_failed_message)}"
                     }
-                )
+                    
+                    LoginErrorAlertDialog(
+                        title = stringResource(R.string.login_failed_title),
+                        confirmText = stringResource(R.string.ok),
+                        shouldDisplayDismissButton = false,
+                        onDismiss = viewModel::resetLoginCall,
+                        onConfirm = viewModel::resetLoginCall,
+                        errorReason = errorReason,
+                        errorReasonBackup = stringResource(R.string.login_failed_message)
+                    )
+                } else {
+                    LoginErrorAlertDialog(
+                        title = stringResource(R.string.sign_in_error),
+                        confirmText = stringResource(R.string.use_password),
+                        shouldDisplayDismissButton = true,
+                        onDismiss = viewModel::resetLoginCall,
+                        onConfirm = viewModel::resetLoginCallAndMoveUserToPasswordEntry,
+                        errorReason = errorReason,
+                        errorReasonBackup = stringResource(R.string.error_occurred_signature_login)
+                    )
+                }
             }
         }
     )
     //endregion
+}
+
+@Composable
+fun LoginErrorAlertDialog(
+    title: String,
+    confirmText: String,
+    shouldDisplayDismissButton: Boolean,
+    onDismiss: () -> Unit,
+    onConfirm: () -> Unit,
+    errorReason: String?,
+    errorReasonBackup: String
+) {
+    AlertDialog(
+        backgroundColor = UnfocusedGrey,
+        onDismissRequest = onDismiss,
+        confirmButton = {
+            TextButton(onClick = onConfirm) {
+                Text(text = confirmText)
+            }
+        },
+        dismissButton = {
+            if (shouldDisplayDismissButton) {
+                TextButton(onClick = onDismiss) {
+                    Text(text = stringResource(R.string.try_again))
+                }
+            }
+        },
+        title = {
+            Text(
+                text = title,
+                color = StrikeWhite,
+                fontSize = 20.sp
+            )
+        },
+        text = {
+            Text(
+                text = errorReason ?: errorReasonBackup,
+                color = StrikeWhite,
+                fontSize = 16.sp
+            )
+        }
+    )
 }

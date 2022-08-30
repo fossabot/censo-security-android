@@ -15,6 +15,10 @@ sealed class KeyManagementFlowStep() {
     data class RegenerationFlow(val step: KeyRegenerationFlowStep) : KeyManagementFlowStep() {
         override fun isStepFinished() = step == KeyRegenerationFlowStep.FINISHED
     }
+
+    data class MigrationFlow(val step: KeyMigrationFlowStep) : KeyManagementFlowStep() {
+        override fun isStepFinished() = step == KeyMigrationFlowStep.FINISHED
+    }
 }
 
 enum class KeyCreationFlowStep {
@@ -27,6 +31,10 @@ enum class KeyRecoveryFlowStep {
 }
 
 enum class KeyRegenerationFlowStep {
+    ALL_SET_STEP, UNINITIALIZED, FINISHED
+}
+
+enum class KeyMigrationFlowStep {
     ALL_SET_STEP, UNINITIALIZED, FINISHED
 }
 

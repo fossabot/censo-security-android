@@ -13,14 +13,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.strikeprotocols.mobile.R
 import com.strikeprotocols.mobile.common.AndroidUriWrapper
 import com.strikeprotocols.mobile.common.Resource
-import com.strikeprotocols.mobile.common.strikeLog
 import com.strikeprotocols.mobile.presentation.Screen
 import com.strikeprotocols.mobile.presentation.components.StrikeErrorScreen
 import com.strikeprotocols.mobile.presentation.key_management.KeyManagementFlow
@@ -47,12 +45,14 @@ fun EntranceScreen(
                 UserDestination.HOME -> Screen.ApprovalListRoute.route
                 UserDestination.KEY_MANAGEMENT_REGENERATION,
                 UserDestination.KEY_MANAGEMENT_RECOVERY,
+                UserDestination.KEY_MIGRATION,
                 UserDestination.KEY_MANAGEMENT_CREATION -> {
 
                     val flow = when (state.userDestinationResult.data) {
                         UserDestination.KEY_MANAGEMENT_CREATION -> KeyManagementFlow.KEY_CREATION
                         UserDestination.KEY_MANAGEMENT_RECOVERY -> KeyManagementFlow.KEY_RECOVERY
                         UserDestination.KEY_MANAGEMENT_REGENERATION -> KeyManagementFlow.KEY_REGENERATION
+                        UserDestination.KEY_MIGRATION -> KeyManagementFlow.KEY_MIGRATION
                         else -> KeyManagementFlow.KEY_CREATION
                     }
 

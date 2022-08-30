@@ -1,12 +1,13 @@
 package com.strikeprotocols.mobile.viewModel
 
-import android.os.CountDownTimer
+import androidx.biometric.BiometricPrompt
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.whenever
 import com.strikeprotocols.mobile.*
 import com.strikeprotocols.mobile.common.Resource
 import com.strikeprotocols.mobile.common.StrikeCountDownTimer
 import com.strikeprotocols.mobile.data.ApprovalsRepository
+import com.strikeprotocols.mobile.data.KeyRepository
 import com.strikeprotocols.mobile.data.SolanaRepository
 import com.strikeprotocols.mobile.data.models.ApprovalDisposition
 import com.strikeprotocols.mobile.data.models.Nonce
@@ -23,6 +24,7 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mock
+import javax.crypto.Cipher
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class ApprovalDetailsViewModelTest : BaseViewModelTest() {
@@ -35,6 +37,14 @@ class ApprovalDetailsViewModelTest : BaseViewModelTest() {
 
     @Mock
     lateinit var approvalsRepository: ApprovalsRepository
+
+    @Mock
+    lateinit var keyRepository: KeyRepository
+
+    @Mock
+    lateinit var cipher: Cipher
+
+    lateinit var cryptoObject: BiometricPrompt.CryptoObject
 
     private lateinit var approvalDetailsViewModel: ApprovalDetailsViewModel
 
@@ -63,11 +73,13 @@ class ApprovalDetailsViewModelTest : BaseViewModelTest() {
         Dispatchers.setMain(dispatcher)
 
         approvalDetailsViewModel =
-            ApprovalDetailsViewModel(approvalsRepository = approvalsRepository, countdownTimer)
+            ApprovalDetailsViewModel(approvalsRepository = approvalsRepository, keyRepository, countdownTimer)
 
         durableNonceViewModel = DurableNonceViewModel(solanaRepository)
 
         testMultipleAccounts =  durableNonceViewModel.MultipleAccounts(nonces = listOf(Nonce(getNonce())))
+
+        cryptoObject = BiometricPrompt.CryptoObject(cipher)
     }
 
     @After
@@ -89,7 +101,7 @@ class ApprovalDetailsViewModelTest : BaseViewModelTest() {
      */
     @Test
     fun `approve an approval successfully then view model should reflect the success in state`() = runTest {
-        whenever(approvalsRepository.approveOrDenyDisposition(any(), any())).thenAnswer {
+        whenever(approvalsRepository.approveOrDenyDisposition(any(), any(), any())).thenAnswer {
             Resource.Success(data = null)
         }
 
@@ -138,7 +150,7 @@ class ApprovalDetailsViewModelTest : BaseViewModelTest() {
      */
     @Test
     fun `deny an approval successfully then view model should reflect the success in state`() = runTest {
-        whenever(approvalsRepository.approveOrDenyDisposition(any(), any())).thenAnswer {
+        whenever(approvalsRepository.approveOrDenyDisposition(any(), any(), any())).thenAnswer {
             Resource.Success(data = null)
         }
 
@@ -187,7 +199,7 @@ class ApprovalDetailsViewModelTest : BaseViewModelTest() {
      */
     @Test
     fun `approve a multi sig approval successfully then view model should reflect the success in state`() = runTest {
-        whenever(approvalsRepository.approveOrDenyInitiation(any(), any())).thenAnswer {
+        whenever(approvalsRepository.approveOrDenyInitiation(any(), any(), any())).thenAnswer {
             Resource.Success(data = null)
         }
 
@@ -220,7 +232,7 @@ class ApprovalDetailsViewModelTest : BaseViewModelTest() {
 
         advanceUntilIdle()
 
-        assertEquals(true, approvalDetailsViewModel.state.approvalDispositionState?.initiationDispositionResult is Resource.Success)
+        assert(approvalDetailsViewModel.state.approvalDispositionState?.initiationDispositionResult is Resource.Success)
     }
 
     /**
@@ -236,7 +248,7 @@ class ApprovalDetailsViewModelTest : BaseViewModelTest() {
      */
     @Test
     fun `deny a multi sig approval successfully then view model should reflect the success in state`() = runTest {
-        whenever(approvalsRepository.approveOrDenyInitiation(any(), any())).thenAnswer {
+        whenever(approvalsRepository.approveOrDenyInitiation(any(), any(), any())).thenAnswer {
             Resource.Success(data = null)
         }
 
@@ -285,7 +297,7 @@ class ApprovalDetailsViewModelTest : BaseViewModelTest() {
      */
     @Test
     fun `deny an approval but api error occurs then view model should hold retry data and reflect error in state`() = runTest {
-        whenever(approvalsRepository.approveOrDenyDisposition(any(), any())).thenAnswer {
+        whenever(approvalsRepository.approveOrDenyDisposition(any(), any(), any())).thenAnswer {
             Resource.Error(data = null)
         }
 
@@ -337,7 +349,7 @@ class ApprovalDetailsViewModelTest : BaseViewModelTest() {
      */
     @Test
     fun `approve a multi sig approval but api error occurs then view model should hold retry data and reflect error in state`() = runTest {
-        whenever(approvalsRepository.approveOrDenyInitiation(any(), any())).thenAnswer {
+        whenever(approvalsRepository.approveOrDenyInitiation(any(), any(), any())).thenAnswer {
             Resource.Error(data = null)
         }
 
@@ -379,6 +391,7 @@ class ApprovalDetailsViewModelTest : BaseViewModelTest() {
     private fun triggerRegisterDispositionCall() {
         //Set nonce data to trigger register disposition call
         approvalDetailsViewModel.setMultipleAccounts(testMultipleAccounts)
+        approvalDetailsViewModel.biometryApproved(cryptoObject)
     }
 
     //Custom Asserts

@@ -1,15 +1,16 @@
 package com.strikeprotocols.mobile
 
 import cash.z.ecc.android.bip39.Mnemonics
+import cash.z.ecc.android.bip39.toSeed
 import com.google.gson.JsonParser
+import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.whenever
 import com.strikeprotocols.mobile.common.BaseWrapper
-import com.strikeprotocols.mobile.data.EncryptionManager
-import com.strikeprotocols.mobile.data.EncryptionManagerImpl
-import com.strikeprotocols.mobile.data.SecurePreferences
-import com.strikeprotocols.mobile.data.StrikeKeyPair
+import com.strikeprotocols.mobile.data.*
 import com.strikeprotocols.mobile.data.models.ApprovalDisposition
 import com.strikeprotocols.mobile.data.models.Nonce
+import com.strikeprotocols.mobile.data.models.StoredKeyData.Companion.ROOT_SEED
+import com.strikeprotocols.mobile.data.models.StoredKeyData.Companion.SOLANA_KEY
 import com.strikeprotocols.mobile.data.models.approval.*
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
@@ -26,6 +27,9 @@ class ApprovalRequestSigningTest {
     @Mock
     lateinit var securePreferences: SecurePreferences
 
+    @Mock
+    lateinit var cryptographyManager: CryptographyManager
+
     private lateinit var encryptionManager: EncryptionManager
 
     private val exampleNonces =
@@ -38,6 +42,8 @@ class ApprovalRequestSigningTest {
 
     private lateinit var keyPair: StrikeKeyPair
 
+    private lateinit var base58EncodedPrivateKey: String
+
     private lateinit var approverPublicKey: String
 
     private lateinit var phrase: String
@@ -46,13 +52,15 @@ class ApprovalRequestSigningTest {
     fun setUp() {
         MockitoAnnotations.openMocks(this)
 
-        encryptionManager = EncryptionManagerImpl(securePreferences)
+        encryptionManager = EncryptionManagerImpl(securePreferences, cryptographyManager)
 
         phrase = encryptionManager.generatePhrase()
 
         keyPair = encryptionManager.createKeyPair(Mnemonics.MnemonicCode(phrase = phrase))
 
-        whenever(securePreferences.retrieveSolanaKey(userEmail)).then {
+        base58EncodedPrivateKey = BaseWrapper.encode(keyPair.privateKey)
+
+        whenever(securePreferences.retrieveEncryptedStoredKeys(userEmail)).then {
             BaseWrapper.encode(keyPair.privateKey)
         }
 
@@ -224,7 +232,7 @@ class ApprovalRequestSigningTest {
         )
 
         val signature = encryptionManager.signApprovalDispositionMessage(
-            signable = approvalDispositionRequest, userEmail = userEmail
+            signable = approvalDispositionRequest, solanaKey = base58EncodedPrivateKey
         )
 
         println("Signature from balance account creation: $signature")
@@ -246,7 +254,7 @@ class ApprovalRequestSigningTest {
         )
 
         val signature = encryptionManager.signApprovalDispositionMessage(
-            signable = approvalDispositionRequest, userEmail = userEmail
+            signable = approvalDispositionRequest, solanaKey = base58EncodedPrivateKey
         )
 
         println("Signature from withdrawal request: $signature")
@@ -269,7 +277,7 @@ class ApprovalRequestSigningTest {
         )
 
         val signature = encryptionManager.signApprovalDispositionMessage(
-            signable = approvalDispositionRequest, userEmail = userEmail
+            signable = approvalDispositionRequest, solanaKey = base58EncodedPrivateKey
         )
 
         println("Signature from conversion request: $signature")
@@ -292,7 +300,7 @@ class ApprovalRequestSigningTest {
         )
 
         val signature = encryptionManager.signApprovalDispositionMessage(
-            signable = approvalDispositionRequest, userEmail = userEmail
+            signable = approvalDispositionRequest, solanaKey = base58EncodedPrivateKey
         )
 
         println("Signature from signers update: $signature")
@@ -314,7 +322,7 @@ class ApprovalRequestSigningTest {
         )
 
         val signature = encryptionManager.signApprovalDispositionMessage(
-            signable = approvalDispositionRequest, userEmail = userEmail
+            signable = approvalDispositionRequest, solanaKey = base58EncodedPrivateKey
         )
 
         println("Signature from signers update removal: $signature")
@@ -337,7 +345,7 @@ class ApprovalRequestSigningTest {
         )
 
         val signature = encryptionManager.signApprovalDispositionMessage(
-            signable = approvalDispositionRequest, userEmail = userEmail
+            signable = approvalDispositionRequest, solanaKey = base58EncodedPrivateKey
         )
 
         println("Signature from login approval: $signature")
@@ -359,7 +367,7 @@ class ApprovalRequestSigningTest {
         )
 
         val signature = encryptionManager.signApprovalDispositionMessage(
-            signable = approvalDispositionRequest, userEmail = userEmail
+            signable = approvalDispositionRequest, solanaKey = base58EncodedPrivateKey
         )
 
         println("Signature from dapp transaction: $signature")

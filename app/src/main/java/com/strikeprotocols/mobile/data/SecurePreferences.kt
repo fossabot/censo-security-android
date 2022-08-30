@@ -4,20 +4,28 @@ import android.content.Context
 import android.content.SharedPreferences
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
-
 import com.strikeprotocols.mobile.data.SecurePreferencesImpl.Companion.SHARED_PREF_NAME
 import javax.inject.Inject
 
 interface SecurePreferences {
     fun saveToken(token: String)
-    fun retrieveToken() : String
+    fun retrieveToken(): String
     fun clearToken()
-    fun saveSolanaKey(email: String, privateKey: ByteArray)
-    fun retrieveSolanaKey(email: String): String
-    fun clearSolanaKey(email: String)
-    fun saveRootSeed(email: String, rootSeed: ByteArray)
-    fun retrieveRootSeed(email: String) : String
-    fun clearRootSeed(email: String)
+    fun retrieveDeprecatedPrivateKey(email: String): String
+    fun retrieveDeprecatedRootSeed(email: String): String
+    fun clearDeprecatedPrivateKey(email: String)
+    fun clearDeprecatedRootSeed(email: String)
+    fun retrieveEncryptedStoredKeys(email: String): String
+    fun savePublicKey(email: String, publicKey: ByteArray)
+    fun retrievePublicKey(email: String): String
+    fun clearPublicKey(email: String)
+    fun saveAllRelevantKeyData(
+        email: String,
+        publicKey: ByteArray,
+        keyStorageJson: String,
+    )
+
+    fun clearAllRelevantKeyData(email: String)
 }
 
 class SecurePreferencesImpl @Inject constructor(applicationContext: Context) :
@@ -50,34 +58,63 @@ class SecurePreferencesImpl @Inject constructor(applicationContext: Context) :
         SharedPrefsHelper.saveToken(secureSharedPreferences, "")
     }
 
-    override fun saveSolanaKey(email: String, privateKey: ByteArray) {
-        SharedPrefsHelper.saveSolanaKey(
+    override fun retrieveDeprecatedPrivateKey(email: String) =
+        SharedPrefsHelper.retrieveDeprecatedPrivateKey(secureSharedPreferences, email = email)
+
+    override fun retrieveDeprecatedRootSeed(email: String) =
+        SharedPrefsHelper.retrieveDeprecatedRootSeed(secureSharedPreferences, email = email)
+
+    override fun clearDeprecatedPrivateKey(email: String) {
+        SharedPrefsHelper.clearDeprecatedSolanaPrivateKey(secureSharedPreferences, email = email)
+    }
+
+    override fun clearDeprecatedRootSeed(email: String) {
+        SharedPrefsHelper.clearDeprecatedRootSeed(secureSharedPreferences, email = email)
+    }
+
+    override fun retrieveEncryptedStoredKeys(email: String): String {
+        return SharedPrefsHelper.retrieveKeyData(encryptedPrefs = secureSharedPreferences, email)
+            ?: ""
+    }
+
+    override fun savePublicKey(email: String, publicKey: ByteArray) {
+        SharedPrefsHelper.saveSolanaPublicKey(
             encryptedPrefs = secureSharedPreferences,
             email = email,
-            solanaKey = privateKey
+            publicKey = publicKey
         )
     }
 
-    override fun retrieveSolanaKey(email: String) =
-        SharedPrefsHelper.retrieveSolanaKey(encryptedPrefs = secureSharedPreferences, email)
+    override fun retrievePublicKey(email: String) =
+        SharedPrefsHelper.retrieveSolanaPublicKey(
+            encryptedPrefs = secureSharedPreferences, email = email
+        )
 
-    override fun clearSolanaKey(email: String) {
-        SharedPrefsHelper.clearSolanaKey(encryptedPrefs = secureSharedPreferences, email = email)
-    }
 
-    override fun saveRootSeed(email: String, rootSeed: ByteArray) {
-        SharedPrefsHelper.saveRootSeed(
+    override fun clearPublicKey(email: String) {
+        SharedPrefsHelper.clearSolanaPublicKey(
             encryptedPrefs = secureSharedPreferences,
-            email = email,
-            rootSeed = rootSeed
+            email = email
         )
     }
 
-    override fun retrieveRootSeed(email: String) =
-        SharedPrefsHelper.retrieveRootSeed(encryptedPrefs = secureSharedPreferences, email)
+    override fun saveAllRelevantKeyData(
+        email: String,
+        publicKey: ByteArray,
+        keyStorageJson: String,
+    ) {
+        savePublicKey(email = email, publicKey = publicKey)
 
-    override fun clearRootSeed(email: String) {
-        SharedPrefsHelper.clearRootSeed(encryptedPrefs = secureSharedPreferences, email = email)
+        SharedPrefsHelper.saveKeyData(
+            encryptedPrefs = secureSharedPreferences,
+            email = email,
+            keyData = keyStorageJson
+        )
+    }
+
+    override fun clearAllRelevantKeyData(email: String) {
+        clearPublicKey(email)
+        SharedPrefsHelper.clearKeyData(secureSharedPreferences, email)
     }
 
     object Companion {

@@ -6,11 +6,9 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.strikeprotocols.mobile.common.Resource
-import com.strikeprotocols.mobile.common.strikeLog
 import com.strikeprotocols.mobile.data.*
 import com.strikeprotocols.mobile.data.models.VerifyUser
 import com.strikeprotocols.mobile.data.models.WalletSigner
-import com.strikeprotocols.mobile.presentation.key_management.KeyManagementFlow
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -19,6 +17,7 @@ import javax.inject.Inject
 @HiltViewModel
 class EntranceViewModel @Inject constructor(
     private val userRepository: UserRepository,
+    private val keyRepository: KeyRepository,
     private val strikeUserData: StrikeUserData
 ) : ViewModel() {
 
@@ -39,7 +38,6 @@ class EntranceViewModel @Inject constructor(
                 retrieveUserVerifyDetails()
             } else {
                 //1. DESTINATION: Send user to login screen.
-                strikeLog(tag = "TrikeMobile", message = "Sending user to Login.")
                 state =
                     state.copy(
                         userDestinationResult = Resource.Success(UserDestination.LOGIN)
@@ -95,31 +93,35 @@ class EntranceViewModel @Inject constructor(
     //Part 1: Do we need to update key data? create/upload/regenerate
     //Part 2: Is our local key valid? valid/invalid
     private suspend fun determineUserDestination(verifyUser: VerifyUser) {
-        val savedPrivateKey = userRepository.getSavedPrivateKey()
+        val userSavedPrivateKey = keyRepository.havePrivateKey()
         val publicKeysPresent = !verifyUser.publicKeys.isNullOrEmpty()
 
         //region PART 1: Do we need to update our key data?
-        val doesUserNeedToCreateKey = !publicKeysPresent && savedPrivateKey.isEmpty()
-        val doesUserNeedToUploadKeyToBackend = !publicKeysPresent && savedPrivateKey.isNotEmpty()
-        val doesUserNeedToRecoverKey = savedPrivateKey.isEmpty() && publicKeysPresent
+        val doesUserNeedToCreateKey = !publicKeysPresent && !userSavedPrivateKey
+        val doesUserNeedToUploadKeyToBackend = !publicKeysPresent && userSavedPrivateKey
+        val doesUserNeedToRecoverKey = !userSavedPrivateKey && publicKeysPresent
+        val oldKeyPresent = keyRepository.getDeprecatedPrivateKey().isNotEmpty()
 
         when {
+            oldKeyPresent -> {
+                state = state.copy(
+                    userDestinationResult = Resource.Success(UserDestination.KEY_MIGRATION)
+                )
+                return
+            }
             doesUserNeedToCreateKey -> {
-                strikeLog(tag = "TrikeMobile", message = "Sending user to Key Management Creation.")
                 state = state.copy(
                     userDestinationResult = Resource.Success(UserDestination.KEY_MANAGEMENT_CREATION)
                 )
                 return
             }
             doesUserNeedToUploadKeyToBackend -> {
-                strikeLog(tag = "TrikeMobile", message = "Sending user to Key Management Regeneration.")
                 state = state.copy(
                     userDestinationResult = Resource.Success(UserDestination.KEY_MANAGEMENT_REGENERATION),
                 )
                 return
             }
             doesUserNeedToRecoverKey -> {
-                strikeLog(tag = "TrikeMobile", message = "Sending user to Key Management Recovery.")
                 state = state.copy(
                     userDestinationResult = Resource.Success(UserDestination.KEY_MANAGEMENT_RECOVERY),
                 )
@@ -132,17 +134,15 @@ class EntranceViewModel @Inject constructor(
         val walletSigners = getWalletSigners() ?: return
 
         val doesUserHaveValidLocalKey =
-            userRepository.doesUserHaveValidLocalKey(verifyUser, walletSigners)
+            keyRepository.doesUserHaveValidLocalKey(verifyUser, walletSigners)
 
         //5. DESTINATION: User has valid key saved and we let them into the app
         state = if (doesUserHaveValidLocalKey) {
-            strikeLog(tag = "TrikeMobile", message = "Sending user to Home.")
             state.copy(
                 userDestinationResult = Resource.Success(UserDestination.HOME)
             )
             //6. DESTINATION: User has invalid local key saved and we send them to support screen
         } else {
-            strikeLog(tag = "TrikeMobile", message = "Sending user to Invalid Key.")
             state.copy(
                 userDestinationResult = Resource.Success(UserDestination.INVALID_KEY)
             )

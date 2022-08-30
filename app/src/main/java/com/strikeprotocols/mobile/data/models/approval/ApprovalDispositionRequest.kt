@@ -1,5 +1,7 @@
 package com.strikeprotocols.mobile.data.models.approval
 
+import androidx.biometric.BiometricPrompt
+import com.strikeprotocols.mobile.common.BaseWrapper
 import com.strikeprotocols.mobile.data.EncryptionManager
 import com.strikeprotocols.mobile.data.Signable
 import com.strikeprotocols.mobile.data.models.ApprovalDisposition
@@ -302,11 +304,20 @@ data class ApprovalDispositionRequest(
         }
     }
 
-    fun convertToApiBody(encryptionManager: EncryptionManager): RegisterApprovalDispositionBody {
+    fun convertToApiBody(
+        encryptionManager: EncryptionManager,
+        cryptoObject: BiometricPrompt.CryptoObject): RegisterApprovalDispositionBody {
+
+        val privateKeyByteArray = encryptionManager.retrieveSavedKey(
+            email = email, cryptoObject = cryptoObject
+        )
+
+        val privateKey = BaseWrapper.encode(privateKeyByteArray)
+
         val signature = try {
             encryptionManager.signApprovalDispositionMessage(
                 signable = this,
-                userEmail = email
+                solanaKey = privateKey
             )
         } catch (e: Exception) {
             throw Exception("Signing data failure")

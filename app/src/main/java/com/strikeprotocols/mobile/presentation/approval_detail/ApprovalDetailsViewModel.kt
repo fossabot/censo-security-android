@@ -1,5 +1,6 @@
 package com.strikeprotocols.mobile.presentation.approval_detail
 
+import androidx.biometric.BiometricPrompt
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -10,6 +11,7 @@ import com.strikeprotocols.mobile.common.StrikeCountDownTimer
 import com.strikeprotocols.mobile.common.StrikeCountDownTimerImpl.Companion.UPDATE_COUNTDOWN
 import com.strikeprotocols.mobile.common.calculateSecondsLeftUntilCountdownIsOver
 import com.strikeprotocols.mobile.data.ApprovalsRepository
+import com.strikeprotocols.mobile.data.KeyRepository
 import com.strikeprotocols.mobile.data.models.*
 import com.strikeprotocols.mobile.data.models.approval.SolanaApprovalRequestDetails
 import com.strikeprotocols.mobile.data.models.approval.WalletApproval
@@ -23,7 +25,8 @@ import javax.inject.Inject
 @HiltViewModel
 class ApprovalDetailsViewModel @Inject constructor(
     private val approvalsRepository: ApprovalsRepository,
-    private val timer: StrikeCountDownTimer
+    private val keyRepository: KeyRepository,
+    private val timer: StrikeCountDownTimer,
 ) : ViewModel() {
 
     var state by mutableStateOf(ApprovalDetailsState())
@@ -45,6 +48,19 @@ class ApprovalDetailsViewModel @Inject constructor(
 
     fun setArgsToState(approval: WalletApproval) {
         state = state.copy(approval = approval)
+    }
+
+    private fun triggerBioPrompt() {
+        viewModelScope.launch {
+            val cipher = keyRepository.getCipherForDecryption()
+            if(cipher != null) {
+                state = state.copy(bioPromptTrigger = Resource.Success(cipher))
+            }
+        }
+    }
+
+    fun biometryApproved(cryptoObject: BiometricPrompt.CryptoObject) {
+        registerApprovalDisposition(cryptoObject)
     }
 
     fun setShouldDisplayConfirmDispositionDialog(
@@ -87,7 +103,11 @@ class ApprovalDetailsViewModel @Inject constructor(
         state = state.copy(screenWasBackgrounded = false)
     }
 
-    private fun updateRemainingTimeInSeconds() {
+    fun resetPromptTrigger() {
+        state = state.copy(bioPromptTrigger = Resource.Uninitialized)
+    }
+
+    fun updateRemainingTimeInSeconds() {
         state = state.copy(
             remainingTimeInSeconds = calculateSecondsLeftUntilCountdownIsOver(
                 submitDate = state.submitDate,
@@ -127,7 +147,7 @@ class ApprovalDetailsViewModel @Inject constructor(
 
     fun setMultipleAccounts(multipleAccounts: DurableNonceViewModel.MultipleAccounts?) {
         state = state.copy(multipleAccounts = multipleAccounts)
-        registerApprovalDisposition()
+        triggerBioPrompt()
     }
 
     fun resetMultipleAccounts() {
@@ -135,7 +155,7 @@ class ApprovalDetailsViewModel @Inject constructor(
     }
 
     //region API calls
-    private fun registerApprovalDisposition() {
+    private fun registerApprovalDisposition(cryptoObject: BiometricPrompt.CryptoObject) {
         viewModelScope.launch {
             state = state.copy(
                 approvalDispositionState = state.approvalDispositionState?.copy(
@@ -215,7 +235,8 @@ class ApprovalDetailsViewModel @Inject constructor(
 
                 val initiationResponseResource = approvalsRepository.approveOrDenyInitiation(
                     requestId = approvalId,
-                    initialDisposition = initiationDisposition
+                    initialDisposition = initiationDisposition,
+                    cryptoObject = cryptoObject
                 )
 
                 state = state.copy(
@@ -233,7 +254,8 @@ class ApprovalDetailsViewModel @Inject constructor(
                 val approvalDispositionResponseResource =
                     approvalsRepository.approveOrDenyDisposition(
                         requestId = approvalId,
-                        registerApprovalDisposition = registerApprovalDisposition
+                        registerApprovalDisposition = registerApprovalDisposition,
+                        cryptoObject = cryptoObject
                     )
 
                 state = state.copy(

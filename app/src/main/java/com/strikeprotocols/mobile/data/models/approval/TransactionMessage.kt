@@ -1,8 +1,6 @@
 package com.strikeprotocols.mobile.data.models.approval
 
 import com.strikeprotocols.mobile.common.BaseWrapper
-import com.strikeprotocols.mobile.common.strikeLog
-import com.strikeprotocols.mobile.common.toHexString
 import java.io.ByteArrayOutputStream
 
 data class TransactionMessage(

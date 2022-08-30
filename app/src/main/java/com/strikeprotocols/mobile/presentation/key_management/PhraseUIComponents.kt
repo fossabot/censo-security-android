@@ -8,6 +8,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import android.content.ClipboardManager
 import android.os.Build
 import androidx.activity.compose.BackHandler
+import androidx.biometric.BiometricPrompt
 import androidx.compose.foundation.*
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.text.BasicTextField
@@ -382,7 +383,8 @@ fun ConfirmKeyUI(
 fun AllSetUI(
     allSetState: Resource<WalletSigner?>,
     retry: () -> Unit,
-    onNavigate: () -> Unit
+    onNavigate: () -> Unit,
+    loadingText: String? = null
 ) {
     val context = LocalContext.current
 
@@ -464,7 +466,7 @@ fun AllSetUI(
                         Spacer(modifier = Modifier.height(36.dp))
                         Text(
                             modifier = Modifier.padding(horizontal = 8.dp),
-                            text = stringResource(R.string.registering_key_auth),
+                            text = loadingText ?: stringResource(R.string.registering_key_auth),
                             textAlign = TextAlign.Center,
                             color = StrikeWhite,
                             fontSize = 16.sp
@@ -1021,6 +1023,53 @@ private fun WordNavigationButtons(
                 contentDescription = nextButtonContentDes,
                 tint = if (nextButtonEnabled) StrikeWhite else GreyText
             )
+        }
+    }
+}
+
+@Composable
+fun PreBiometryDialog(
+    mainText: String,
+    buttonText: String,
+    onAccept: () -> Unit,
+) {
+    Column(
+        Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp)
+                .border(width = 1.5.dp, color = UnfocusedGrey.copy(alpha = 0.50f))
+                .background(color = Color.Black)
+                .zIndex(2.5f),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Spacer(modifier = Modifier.height(36.dp))
+            Text(
+                modifier = Modifier.padding(horizontal = 16.dp),
+                text = mainText,
+                textAlign = TextAlign.Center,
+                color = StrikeWhite,
+                fontSize = 20.sp
+            )
+            Spacer(modifier = Modifier.height(36.dp))
+            Button(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(8.dp)),
+                onClick = onAccept,
+            ) {
+                Text(
+                    text = buttonText,
+                    fontSize = 18.sp,
+                    color = StrikeWhite,
+                    textAlign = TextAlign.Center
+                )
+            }
+            Spacer(modifier = Modifier.height(36.dp))
         }
     }
 }

@@ -3,7 +3,6 @@ package com.strikeprotocols.mobile.data
 import android.content.Context
 import android.content.SharedPreferences
 import com.strikeprotocols.mobile.common.BaseWrapper
-import com.strikeprotocols.mobile.common.strikeLog
 
 object SharedPrefsHelper {
 
@@ -12,8 +11,11 @@ object SharedPrefsHelper {
     private const val USER_LOGGED_IN = "skipped_login"
     private const val USER_EMAIL = "user_email"
     private const val USER_TOKEN = "user_token"
-    private const val SOLANA_KEY = "_solana_key"
-    private const val ROOT_SEED = "_root_seed"
+    private const val KEY_DATA = "_key_data"
+    private const val SOLANA_PUBLIC_KEY = "_solana_public_key"
+
+    private const val DEPRECATED_SOLANA_PRIVATE_KEY = "_solana_key"
+    private const val DEPRECATED_ROOT_SEED = "_root_seed"
 
     private lateinit var appContext: Context
     private lateinit var sharedPrefs: SharedPreferences
@@ -41,37 +43,40 @@ object SharedPrefsHelper {
         return encryptedPrefs.getString(USER_TOKEN, "") ?: ""
     }
 
-    fun saveSolanaKey(encryptedPrefs: SharedPreferences, email: String, solanaKey: ByteArray) {
-        val data = if (solanaKey.isEmpty()) "" else BaseWrapper.encode(solanaKey)
+    fun saveSolanaPublicKey(
+        encryptedPrefs: SharedPreferences,
+        email: String,
+        publicKey: ByteArray
+    ) {
+        val data = if (publicKey.isEmpty()) "" else BaseWrapper.encode(publicKey)
         val editor = encryptedPrefs.edit()
-        editor.putString("${email.lowercase().trim()}$SOLANA_KEY", data)
+        editor.putString("${email.lowercase().trim()}$SOLANA_PUBLIC_KEY", data)
         editor.apply()
     }
 
-    fun retrieveSolanaKey(encryptedPrefs: SharedPreferences, email: String): String {
-        return encryptedPrefs.getString("${email.lowercase().trim()}$SOLANA_KEY", "") ?: ""
+    fun retrieveSolanaPublicKey(encryptedPrefs: SharedPreferences, email: String): String {
+        return encryptedPrefs.getString("${email.lowercase().trim()}$SOLANA_PUBLIC_KEY", "") ?: ""
     }
 
-    fun clearSolanaKey(encryptedPrefs: SharedPreferences, email: String) {
+    fun clearSolanaPublicKey(encryptedPrefs: SharedPreferences, email: String) {
         val editor = encryptedPrefs.edit()
-        editor.putString("${email.lowercase().trim()}$SOLANA_KEY", "")
+        editor.putString("${email.lowercase().trim()}$SOLANA_PUBLIC_KEY", "")
         editor.apply()
     }
 
-    fun saveRootSeed(encryptedPrefs: SharedPreferences, email: String, rootSeed: ByteArray) {
-        val data = if (rootSeed.isEmpty()) "" else BaseWrapper.encode(rootSeed)
+    fun saveKeyData(encryptedPrefs: SharedPreferences, email: String, keyData: String) {
         val editor = encryptedPrefs.edit()
-        editor.putString("${email.lowercase().trim()}$ROOT_SEED", data)
+        editor.putString("${email.lowercase().trim()}$KEY_DATA", keyData)
         editor.apply()
     }
 
-    fun retrieveRootSeed(encryptedPrefs: SharedPreferences, email: String): String {
-        return encryptedPrefs.getString("${email.lowercase().trim()}$ROOT_SEED", "") ?: ""
+    fun retrieveKeyData(encryptedPrefs: SharedPreferences, email: String): String? {
+        return encryptedPrefs.getString("${email.lowercase().trim()}$KEY_DATA", "")
     }
 
-    fun clearRootSeed(encryptedPrefs: SharedPreferences, email: String) {
+    fun clearKeyData(encryptedPrefs: SharedPreferences, email: String) {
         val editor = encryptedPrefs.edit()
-        editor.putString("${email.lowercase().trim()}$ROOT_SEED", "")
+        editor.putString("${email.lowercase().trim()}$KEY_DATA", "")
         editor.apply()
     }
 
@@ -88,8 +93,25 @@ object SharedPrefsHelper {
         editor.apply()
     }
 
+    fun retrieveDeprecatedRootSeed(encryptedPrefs: SharedPreferences, email: String) =
+        encryptedPrefs.getString("${email.lowercase().trim()}$DEPRECATED_ROOT_SEED", "") ?: ""
+
+    fun clearDeprecatedRootSeed(encryptedPrefs: SharedPreferences, email: String) {
+        val editor = encryptedPrefs.edit()
+        editor.putString("${email.lowercase().trim()}$DEPRECATED_ROOT_SEED", "")
+        editor.apply()
+    }
+
+    fun retrieveDeprecatedPrivateKey(encryptedPrefs: SharedPreferences, email: String) =
+        encryptedPrefs.getString("${email.lowercase().trim()}$DEPRECATED_SOLANA_PRIVATE_KEY", "") ?: ""
+
+    fun clearDeprecatedSolanaPrivateKey(encryptedPrefs: SharedPreferences, email: String) {
+        val editor = encryptedPrefs.edit()
+        editor.putString("${email.lowercase().trim()}$DEPRECATED_SOLANA_PRIVATE_KEY", "")
+        editor.apply()
+    }
+
     fun retrieveUserEmail(): String =
         sharedPrefs.getString(USER_EMAIL, "")?.lowercase()?.trim() ?: ""
-
 
 }

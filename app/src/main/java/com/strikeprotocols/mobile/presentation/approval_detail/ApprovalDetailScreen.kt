@@ -1,6 +1,8 @@
 package com.strikeprotocols.mobile.presentation.approval_detail
 
 import android.annotation.SuppressLint
+import android.widget.Toast
+import androidx.biometric.BiometricPrompt
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -8,12 +10,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.ArrowBackIos
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.icons.rounded.ArrowBack
 import androidx.compose.runtime.DisposableEffect
@@ -25,12 +25,9 @@ import androidx.compose.ui.unit.sp
 import androidx.fragment.app.FragmentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.strikeprotocols.mobile.R
 import com.strikeprotocols.mobile.common.*
-import com.strikeprotocols.mobile.common.BiometricUtil.createBioPrompt
-import com.strikeprotocols.mobile.common.BiometricUtil.getBasicBiometricPromptBuilder
 import com.strikeprotocols.mobile.data.models.ApprovalDisposition
 import com.strikeprotocols.mobile.data.models.approval.ApprovalDispositionRequest
 import com.strikeprotocols.mobile.data.models.approval.InitiationRequest
@@ -42,7 +39,6 @@ import com.strikeprotocols.mobile.presentation.approvals.approval_type_row_items
 import com.strikeprotocols.mobile.ui.theme.*
 import com.strikeprotocols.mobile.data.models.approval.SolanaApprovalRequestType.*
 import com.strikeprotocols.mobile.presentation.approvals.ApprovalDetailContent
-import com.strikeprotocols.mobile.presentation.approvals.DurableNonceErrorDialog
 import com.strikeprotocols.mobile.presentation.approvals.approval_type_row_items.getApprovalTimerText
 import com.strikeprotocols.mobile.presentation.components.*
 import com.strikeprotocols.mobile.presentation.durable_nonce.DurableNonceViewModel
@@ -58,27 +54,45 @@ fun ApprovalDetailsScreen(
     val approvalDetailsState = approvalDetailsViewModel.state
     val durableNonceState = durableNonceViewModel.state
 
+    fun resetDataAfterErrorDismissed() {
+        approvalDetailsViewModel.dismissApprovalDispositionError()
+        durableNonceViewModel.resetMultipleAccountsResource()
+        approvalDetailsViewModel.resetMultipleAccounts()
+    }
+
     val context = LocalContext.current as FragmentActivity
 
-    val promptInfo = getBasicBiometricPromptBuilder(context).build()
+    val promptInfo = BioCryptoUtil.createPromptInfo(context, isSavingData = false)
 
-    val bioPrompt = createBioPrompt(
+    val bioPrompt = BioCryptoUtil.createBioPrompt(
         fragmentActivity = context,
         onSuccess = {
-            approvalDetailsState.approval?.let {
-                val nonceAddresses = approvalDetailsState.approval.retrieveAccountAddresses()
-                val minimumSlotAddress = approvalDetailsState.approval.retrieveAccountAddressesSlot()
-                durableNonceViewModel.setInitialData(
-                    nonceAccountAddresses = nonceAddresses,
-                    minimumNonceAccountAddressesSlot = minimumSlotAddress
-                )
-                durableNonceViewModel.setUserBiometricVerified(isVerified = true)
-            } ?: approvalDetailsViewModel.wipeDataAndKickUserOutToApprovalsScreen()
+            approvalDetailsViewModel.biometryApproved(it!!)
         },
         onFail = {
-            durableNonceViewModel.setUserBiometricVerified(isVerified = false)
+            if (it == BioCryptoUtil.TOO_MANY_ATTEMPTS_CODE || it == BioCryptoUtil.FINGERPRINT_DISABLED_CODE) {
+                Toast.makeText(
+                    context,
+                    context.getString(R.string.too_many_failed_attempts),
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+            resetDataAfterErrorDismissed()
         }
     )
+
+    fun launchNonceWork() {
+        val nonceAddresses = approvalDetailsState.approval?.retrieveAccountAddresses()
+        val minimumSlotAddress = approvalDetailsState.approval?.retrieveAccountAddressesSlot()
+        if (nonceAddresses != null && minimumSlotAddress != null) {
+            durableNonceViewModel.setInitialData(
+                nonceAccountAddresses = nonceAddresses,
+                minimumNonceAccountAddressesSlot = minimumSlotAddress
+            )
+        } else {
+            approvalDetailsViewModel.wipeDataAndKickUserOutToApprovalsScreen()
+        }
+    }
 
     fun retryApprovalDisposition(isApproving: Boolean, isInitiationRequest: Boolean) {
         approvalDetailsViewModel.dismissApprovalDispositionError()
@@ -103,25 +117,23 @@ fun ApprovalDetailsScreen(
         )
     }
 
-    fun resetDataAfterErrorDismissed() {
-        approvalDetailsViewModel.dismissApprovalDispositionError()
-        durableNonceViewModel.resetMultipleAccountsResource()
-        approvalDetailsViewModel.resetMultipleAccounts()
-    }
-
     DisposableEffect(key1 = approvalDetailsViewModel) {
         approvalDetailsViewModel.onStart(approval)
         onDispose { approvalDetailsViewModel.onStop() }
     }
 
     LaunchedEffect(key1 = approvalDetailsState, key2 = durableNonceState) {
-        if (durableNonceState.triggerBioPrompt) {
-            durableNonceViewModel.resetPromptTrigger()
-            bioPrompt.authenticate(promptInfo)
-        }
         if (durableNonceState.multipleAccountsResult is Resource.Success) {
             approvalDetailsViewModel.setMultipleAccounts(durableNonceState.multipleAccounts)
             durableNonceViewModel.resetState()
+        }
+
+        if (approvalDetailsState.bioPromptTrigger is Resource.Success) {
+            bioPrompt.authenticate(
+                promptInfo,
+                BiometricPrompt.CryptoObject(approvalDetailsState.bioPromptTrigger.data!!)
+            )
+            approvalDetailsViewModel.resetPromptTrigger()
         }
 
         if (approvalDetailsState.approvalDispositionState?.registerApprovalDispositionResult is Resource.Success
@@ -215,7 +227,7 @@ fun ApprovalDetailsScreen(
             if (approvalDetailsState.shouldDisplayConfirmDisposition != null) {
                 if (approvalDetailsState.approval?.getSolanaApprovalRequestType() is LoginApprovalRequest) {
                     approvalDetailsViewModel.resetShouldDisplayConfirmDisposition()
-                    durableNonceViewModel.setPromptTrigger()
+                    launchNonceWork()
                 } else {
                     approvalDetailsState.shouldDisplayConfirmDisposition.let { safeDialogDetails ->
                         StrikeConfirmDispositionAlertDialog(
@@ -223,7 +235,7 @@ fun ApprovalDetailsScreen(
                             dialogText = safeDialogDetails.dialogText,
                             onConfirm = {
                                 approvalDetailsViewModel.resetShouldDisplayConfirmDisposition()
-                                durableNonceViewModel.setPromptTrigger()
+                                launchNonceWork()
                             },
                             onDismiss = {
                                 approvalDetailsViewModel.resetShouldDisplayConfirmDisposition()

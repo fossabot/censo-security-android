@@ -118,5 +118,5 @@ interface UserStateListener {
 }
 
 enum class UserState {
-    REFRESH_TOKEN_EXPIRED
+    REFRESH_TOKEN_EXPIRED, INVALIDATED_KEY
 }

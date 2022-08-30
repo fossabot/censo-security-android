@@ -1,5 +1,6 @@
 package com.strikeprotocols.mobile.data
 
+import androidx.biometric.BiometricPrompt
 import cash.z.ecc.android.bip39.Mnemonics
 import cash.z.ecc.android.bip39.toSeed
 import com.strikeprotocols.mobile.common.BaseWrapper
@@ -14,7 +15,13 @@ import org.bouncycastle.crypto.params.Ed25519PrivateKeyParameters
 import org.bouncycastle.crypto.params.Ed25519PublicKeyParameters
 import org.bouncycastle.crypto.signers.Ed25519Signer
 import com.strikeprotocols.mobile.data.EncryptionManagerException.*
+import com.strikeprotocols.mobile.data.EncryptionManagerImpl.Companion.BIO_KEY_NAME
+import com.strikeprotocols.mobile.data.models.StoredKeyData
+import com.strikeprotocols.mobile.data.models.StoredKeyData.Companion.ROOT_SEED
+import com.strikeprotocols.mobile.data.models.StoredKeyData.Companion.SOLANA_KEY
+import java.nio.charset.Charset
 import java.security.SecureRandom
+import javax.crypto.Cipher
 import javax.inject.Inject
 
 fun generateEphemeralPrivateKey(): Ed25519PrivateKeyParameters {
@@ -28,19 +35,25 @@ interface EncryptionManager {
     fun createKeyPair(mnenomic: Mnemonics.MnemonicCode): StrikeKeyPair
     fun signApprovalDispositionMessage(
         signable: Signable,
-        userEmail: String
+        solanaKey: String
     ): String
 
     fun signApprovalInitiationMessage(
         ephemeralPrivateKey: ByteArray,
         signable: Signable,
-        userEmail: String
+        solanaKey: String
     ): String
 
     fun signatures(
-        userEmail: String,
+        solanaKey: String,
         signableSupplyInstructions: SignableSupplyInstructions
     ): List<String>
+
+    fun signDataWithEncryptedKey(
+        data: ByteArray,
+        userEmail: String,
+        cryptoObject: BiometricPrompt.CryptoObject
+    ): ByteArray
 
     fun signData(data: ByteArray, privateKey: ByteArray): ByteArray
     fun verifyData(data: ByteArray, signature: ByteArray, publicKey: ByteArray): Boolean
@@ -51,10 +64,42 @@ interface EncryptionManager {
     fun generatePhrase(): String
 
     fun regeneratePublicKey(privateKey: String): String
+
+    fun saveKeyInformation(
+        privateKey: ByteArray,
+        publicKey: ByteArray,
+        rootSeed: ByteArray,
+        email: String,
+        cryptoObject: BiometricPrompt.CryptoObject
+    )
+
+    fun retrieveSavedKey(
+        email: String,
+        cryptoObject: BiometricPrompt.CryptoObject
+    ): ByteArray
+
+    fun createStoredKeyDataAsJson(
+        solanaKey: String,
+        rootSeed: String,
+        cryptoObject: BiometricPrompt.CryptoObject
+    ): String
+
+    fun retrieveStoredKeys(
+        json: String,
+        cryptoObject: BiometricPrompt.CryptoObject
+    ): HashMap<String, String>
+
+    fun deleteBiometryKeyFromKeystore()
+
+    fun getInitializedCipherForEncryption() : Cipher
+    fun getInitializedCipherForDecryption(initVector: ByteArray) : Cipher
+    fun havePrivateKeyStored(email: String): Boolean
 }
 
-class EncryptionManagerImpl @Inject constructor(private val securePreferences: SecurePreferences) :
-    EncryptionManager {
+class EncryptionManagerImpl @Inject constructor(
+    private val securePreferences: SecurePreferences,
+    private val cryptographyManager: CryptographyManager
+) : EncryptionManager {
 
     //region interface methods
     override fun signData(data: ByteArray, privateKey: ByteArray): ByteArray {
@@ -100,9 +145,9 @@ class EncryptionManagerImpl @Inject constructor(private val securePreferences: S
         }
     }
 
-    override fun signApprovalDispositionMessage(signable: Signable, userEmail: String): String {
-        val solanaKey = securePreferences.retrieveSolanaKey(userEmail)
-
+    override fun signApprovalDispositionMessage(
+        signable: Signable, solanaKey: String
+    ): String {
         if (solanaKey.isEmpty()) {
             throw NoKeyDataException
         }
@@ -121,14 +166,13 @@ class EncryptionManagerImpl @Inject constructor(private val securePreferences: S
     override fun signApprovalInitiationMessage(
         ephemeralPrivateKey: ByteArray,
         signable: Signable,
-        userEmail: String
+        solanaKey: String
     ): String {
-        val privateKey = securePreferences.retrieveSolanaKey(userEmail)
-        if (privateKey.isEmpty()) {
+        if (solanaKey.isEmpty()) {
             throw NoKeyDataException
         }
 
-        val publicKey = regeneratePublicKey(privateKey = privateKey)
+        val publicKey = regeneratePublicKey(privateKey = solanaKey)
 
         val messageToSign = signable.retrieveSignableData(approverPublicKey = publicKey)
 
@@ -141,11 +185,9 @@ class EncryptionManagerImpl @Inject constructor(private val securePreferences: S
     }
 
     override fun signatures(
-        userEmail: String,
+        solanaKey: String,
         signableSupplyInstructions: SignableSupplyInstructions
     ): List<String> {
-        val solanaKey = securePreferences.retrieveSolanaKey(userEmail)
-
         if (solanaKey.isEmpty()) {
             throw NoKeyDataException
         }
@@ -158,6 +200,16 @@ class EncryptionManagerImpl @Inject constructor(private val securePreferences: S
                 BaseWrapper.encodeToBase64(signature)
             }
             .toList()
+    }
+
+    override fun signDataWithEncryptedKey(
+        data: ByteArray,
+        userEmail: String,
+        cryptoObject: BiometricPrompt.CryptoObject
+    ): ByteArray {
+        val privateKey = retrieveSavedKey(email = userEmail, cryptoObject = cryptoObject)
+
+        return signData(data = data, privateKey = privateKey)
     }
 
     override fun verifyKeyPair(privateKey: String?, publicKey: String?, ): Boolean {
@@ -190,10 +242,104 @@ class EncryptionManagerImpl @Inject constructor(private val securePreferences: S
             throw PublicKeyRegenerationFailedException()
         }
     }
+
+    override fun saveKeyInformation(
+        privateKey: ByteArray, publicKey: ByteArray, rootSeed: ByteArray,
+        email: String, cryptoObject: BiometricPrompt.CryptoObject
+    ) {
+        val keyDataAsJson = createStoredKeyDataAsJson(
+            solanaKey = BaseWrapper.encode(privateKey),
+            rootSeed = BaseWrapper.encode(rootSeed),
+            cryptoObject = cryptoObject,
+        )
+
+        securePreferences.saveAllRelevantKeyData(
+            email = email,
+            publicKey = publicKey,
+            keyStorageJson = keyDataAsJson
+        )
+    }
+
+    override fun retrieveSavedKey(
+        email: String,
+        cryptoObject: BiometricPrompt.CryptoObject
+    ): ByteArray {
+        val savedKey = securePreferences.retrieveEncryptedStoredKeys(email)
+
+        val keysMap = retrieveStoredKeys(
+            json = savedKey,
+            cryptoObject = cryptoObject
+        )
+
+        return BaseWrapper.decode(keysMap[SOLANA_KEY] ?: "")
+    }
+
+    override fun getInitializedCipherForEncryption(): Cipher {
+        return cryptographyManager.getInitializedCipherForEncryption(BIO_KEY_NAME)
+    }
+
+    override fun getInitializedCipherForDecryption(initVector: ByteArray): Cipher {
+        return cryptographyManager.getInitializedCipherForDecryption(
+            keyName = BIO_KEY_NAME, initializationVector = initVector
+        )
+    }
+
+    override fun havePrivateKeyStored(email: String) =
+        securePreferences.retrieveEncryptedStoredKeys(email = email).isNotEmpty()
+
+    override fun deleteBiometryKeyFromKeystore() {
+        cryptographyManager.deleteInvalidatedKey(BIO_KEY_NAME)
+    }
+
+    override fun createStoredKeyDataAsJson(
+        solanaKey: String,
+        rootSeed: String,
+        cryptoObject: BiometricPrompt.CryptoObject
+    ): String {
+        val mapOfKeys: HashMap<String, String> =
+            hashMapOf(
+                SOLANA_KEY to solanaKey,
+                ROOT_SEED to rootSeed
+            )
+
+        val jsonMapOfKeys = StoredKeyData.mapToJson(
+            keyMap = mapOfKeys
+        )
+
+        val encryptedKeysData =
+            cryptographyManager.encryptData(jsonMapOfKeys, cryptoObject.cipher!!)
+
+        val storedKeyData = StoredKeyData(
+            initVector = BaseWrapper.encode(encryptedKeysData.initializationVector),
+            encryptedKeysData = BaseWrapper.encode(encryptedKeysData.ciphertext)
+        )
+
+        return storedKeyData.toJson()
+    }
+
+    override fun retrieveStoredKeys(
+        json: String,
+        cryptoObject: BiometricPrompt.CryptoObject
+    ): HashMap<String, String> {
+        val storedKeyData = StoredKeyData.fromJson(json)
+
+        val encryptedKeysData = storedKeyData.encryptedKeysData
+        val decryptedKeyJson = cryptographyManager.decryptData(
+            BaseWrapper.decode(encryptedKeysData),
+            cryptoObject.cipher!!
+        )
+
+        //this is coming out as UTF-8 because we cannot store JSON in Base58
+        val keys =
+            StoredKeyData.mapFromJson(String(decryptedKeyJson, charset = Charset.forName("UTF-8")))
+
+        return keys
+    }
     //endregion
 
     //region companion
     object Companion {
+        const val BIO_KEY_NAME = "biometric_encryption_key"
         const val NO_OFFSET_INDEX = 0
         val DATA_CHECK = BaseWrapper.decode("VerificationCheck")
 
