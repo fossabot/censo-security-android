@@ -5,13 +5,13 @@ import com.nhaarman.mockitokotlin2.times
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
 import com.strikeprotocols.mobile.common.Resource
-import com.strikeprotocols.mobile.common.StrikeError
 import com.strikeprotocols.mobile.data.SolanaRepository
 import com.strikeprotocols.mobile.data.models.MultipleAccountsResponse
 import com.strikeprotocols.mobile.data.models.Nonce
 import com.strikeprotocols.mobile.presentation.durable_nonce.DurableNonceViewModel
 import com.strikeprotocols.mobile.presentation.durable_nonce.DurableNonceViewModel.Companion.UNABLE_TO_RETRIEVE_VALID_NONCE
 import junit.framework.Assert.assertEquals
+import junit.framework.TestCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
@@ -27,19 +27,17 @@ import org.mockito.MockitoAnnotations
 @OptIn(ExperimentalCoroutinesApi::class)
 class DurableNonceViewModelTest {
 
+    //region Testing data
+    private val dispatcher = TestCoroutineDispatcher()
+
     lateinit var durableNonceViewModel: DurableNonceViewModel
 
     @Mock
     lateinit var solanaRepository: SolanaRepository
 
-    @Before
-    fun setUp() {
-        MockitoAnnotations.openMocks(this)
-    }
-
-    private val dispatcher = TestCoroutineDispatcher()
-
     private val minimumSlotInfo = 5
+
+    private val nonceAccountAddresses = listOf(getNonce())
 
     private val validMultipleResponseData =
         MultipleAccountsResponse(
@@ -52,30 +50,80 @@ class DurableNonceViewModelTest {
             nonces = listOf(Nonce("7Zpss7rbtz6qU71ywcjcuANnVyQWJrqsZ3oekkR9Hknn")),
             slot = minimumSlotInfo - 1
         )
+    //endregion
 
+    //region Setup + tearDown
     @Before
     fun setup() {
         Dispatchers.setMain(dispatcher)
         MockitoAnnotations.openMocks(this)
+
+        durableNonceViewModel = DurableNonceViewModel(solanaRepository)
     }
 
     @After
     fun tearDown() {
         Dispatchers.resetMain()
     }
+    //endregion
 
+    //region Focused testing
     @Test
-    fun testRetrievesValidNonceData() = runBlocking {
-        whenever(solanaRepository.getMultipleAccounts(any())).then {
-            Resource.Success(validMultipleResponseData)
-        }
-
-        durableNonceViewModel = DurableNonceViewModel(solanaRepository)
+    fun `setting initial data then view model state should reflect that data`() {
+        //Assert state with default initialization
+        TestCase.assertTrue(durableNonceViewModel.state.nonceAccountAddresses.isEmpty())
+        TestCase.assertEquals(0, durableNonceViewModel.state.minimumNonceAccountAddressesSlot)
 
         durableNonceViewModel.setInitialData(
-            minimumNonceAccountAddressesSlot = minimumSlotInfo,
-            nonceAccountAddresses = listOf("7Zpss7rbtz6qU71ywcjcuANnVyQWJrqsZ3oekkR9Hknn")
+            nonceAccountAddresses = nonceAccountAddresses,
+            minimumNonceAccountAddressesSlot = minimumSlotInfo
         )
+
+        //Assert state is set with data
+        TestCase.assertTrue(durableNonceViewModel.state.nonceAccountAddresses.isNotEmpty())
+        TestCase.assertEquals(minimumSlotInfo, durableNonceViewModel.state.minimumNonceAccountAddressesSlot)
+
+    }
+
+    @Test
+    fun `resetting data then view model state should reflect default initialization data`() {
+        durableNonceViewModel.setInitialData(
+            nonceAccountAddresses = nonceAccountAddresses,
+            minimumNonceAccountAddressesSlot = minimumSlotInfo
+        )
+
+        //Assert state has data set
+        TestCase.assertTrue(durableNonceViewModel.state.nonceAccountAddresses.isNotEmpty())
+        TestCase.assertEquals(minimumSlotInfo, durableNonceViewModel.state.minimumNonceAccountAddressesSlot)
+
+        durableNonceViewModel.resetState()
+
+        //Assert state has default data
+        TestCase.assertTrue(durableNonceViewModel.state.nonceAccountAddresses.isEmpty())
+        TestCase.assertEquals(0, durableNonceViewModel.state.minimumNonceAccountAddressesSlot)
+    }
+
+    @Test
+    fun `resetting multipleAccountsResult then view model state should reflect uninitialized for property`() = runBlocking {
+        setupMultipleAccountsResultWithSuccessData()
+
+        assert(durableNonceViewModel.state.multipleAccountsResult is Resource.Success)
+        assertEquals(
+            (durableNonceViewModel.state.multipleAccountsResult as Resource.Success).data,
+            validMultipleResponseData
+        )
+
+        durableNonceViewModel.resetMultipleAccountsResource()
+
+        //Assert multipleAccountsResult has been reset
+        TestCase.assertTrue(durableNonceViewModel.state.multipleAccountsResult is Resource.Uninitialized)
+    }
+    //endregion
+
+    //region Flow/Functional testing
+    @Test
+    fun testRetrievesValidNonceData() = runBlocking {
+        setupMultipleAccountsResultWithSuccessData()
 
         verify(solanaRepository, times(1)).getMultipleAccounts(any())
 
@@ -92,8 +140,6 @@ class DurableNonceViewModelTest {
             Resource.Success(invalidMultipleResponseData)
         }
 
-        durableNonceViewModel = DurableNonceViewModel(solanaRepository)
-
         durableNonceViewModel.setInitialData(
             minimumNonceAccountAddressesSlot = 5,
             nonceAccountAddresses = listOf("7Zpss7rbtz6qU71ywcjcuANnVyQWJrqsZ3oekkR9Hknn")
@@ -107,4 +153,18 @@ class DurableNonceViewModelTest {
         assert(durableNonceViewModel.state.multipleAccountsResult is Resource.Error)
         assert(durableNonceViewModel.state.multipleAccountsResult.exception?.message == UNABLE_TO_RETRIEVE_VALID_NONCE)
     }
+    //endregion
+
+    //region Helper methods
+    private suspend fun setupMultipleAccountsResultWithSuccessData() {
+        whenever(solanaRepository.getMultipleAccounts(any())).then {
+            Resource.Success(validMultipleResponseData)
+        }
+
+        durableNonceViewModel.setInitialData(
+            minimumNonceAccountAddressesSlot = minimumSlotInfo,
+            nonceAccountAddresses = listOf("7Zpss7rbtz6qU71ywcjcuANnVyQWJrqsZ3oekkR9Hknn")
+        )
+    }
+    //endregion
 }
