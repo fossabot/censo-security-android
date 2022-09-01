@@ -15,6 +15,7 @@ import com.strikeprotocols.mobile.data.models.approval.SolanaApprovalRequestDeta
 import com.strikeprotocols.mobile.data.models.approval.WalletApproval
 import com.strikeprotocols.mobile.presentation.approval_detail.ApprovalDetailsViewModel
 import com.strikeprotocols.mobile.presentation.durable_nonce.DurableNonceViewModel
+import junit.framework.TestCase.assertTrue
 import junit.framework.TestCase.assertEquals
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -72,6 +73,9 @@ class ApprovalDetailsViewModelTest : BaseViewModelTest() {
         super.setUp()
         Dispatchers.setMain(dispatcher)
 
+        whenever(keyRepository.getCipherForDecryption()).thenAnswer {
+            cipher
+        }
         approvalDetailsViewModel =
             ApprovalDetailsViewModel(approvalsRepository = approvalsRepository, keyRepository, countdownTimer)
 
@@ -126,11 +130,7 @@ class ApprovalDetailsViewModelTest : BaseViewModelTest() {
 
         assertExpectedDispositionAndExpectedInitiation(ApprovalDisposition.APPROVE, isInitiationRequest)
 
-        assertEquals(null, approvalDetailsViewModel.state.multipleAccounts)
-
-        triggerRegisterDispositionCall()
-
-        assertEquals(testMultipleAccounts, approvalDetailsViewModel.state.multipleAccounts)
+        triggerRegisterDispositionCallAndAssertNonceDataAndBioPromptState()
 
         advanceUntilIdle()
 
@@ -175,11 +175,7 @@ class ApprovalDetailsViewModelTest : BaseViewModelTest() {
 
         assertExpectedDispositionAndExpectedInitiation(ApprovalDisposition.DENY, isInitiationRequest)
 
-        assertEquals(null, approvalDetailsViewModel.state.multipleAccounts)
-
-        triggerRegisterDispositionCall()
-
-        assertEquals(testMultipleAccounts, approvalDetailsViewModel.state.multipleAccounts)
+        triggerRegisterDispositionCallAndAssertNonceDataAndBioPromptState()
 
         advanceUntilIdle()
 
@@ -224,11 +220,7 @@ class ApprovalDetailsViewModelTest : BaseViewModelTest() {
 
         assertExpectedDispositionAndExpectedInitiation(ApprovalDisposition.APPROVE, isInitiationRequest)
 
-        assertEquals(null, approvalDetailsViewModel.state.multipleAccounts)
-
-        triggerRegisterDispositionCall()
-
-        assertEquals(testMultipleAccounts, approvalDetailsViewModel.state.multipleAccounts)
+        triggerRegisterDispositionCallAndAssertNonceDataAndBioPromptState()
 
         advanceUntilIdle()
 
@@ -273,11 +265,7 @@ class ApprovalDetailsViewModelTest : BaseViewModelTest() {
 
         assertExpectedDispositionAndExpectedInitiation(ApprovalDisposition.DENY, isInitiationRequest)
 
-        assertEquals(null, approvalDetailsViewModel.state.multipleAccounts)
-
-        triggerRegisterDispositionCall()
-
-        assertEquals(testMultipleAccounts, approvalDetailsViewModel.state.multipleAccounts)
+        triggerRegisterDispositionCallAndAssertNonceDataAndBioPromptState()
 
         advanceUntilIdle()
 
@@ -322,11 +310,7 @@ class ApprovalDetailsViewModelTest : BaseViewModelTest() {
 
         assertExpectedDispositionAndExpectedInitiation(ApprovalDisposition.DENY, isInitiationRequest)
 
-        assertEquals(null, approvalDetailsViewModel.state.multipleAccounts)
-
-        triggerRegisterDispositionCall()
-
-        assertEquals(testMultipleAccounts, approvalDetailsViewModel.state.multipleAccounts)
+        triggerRegisterDispositionCallAndAssertNonceDataAndBioPromptState()
 
         advanceUntilIdle()
 
@@ -374,11 +358,7 @@ class ApprovalDetailsViewModelTest : BaseViewModelTest() {
 
         assertExpectedDispositionAndExpectedInitiation(ApprovalDisposition.APPROVE, isInitiationRequest)
 
-        assertEquals(null, approvalDetailsViewModel.state.multipleAccounts)
-
-        triggerRegisterDispositionCall()
-
-        assertEquals(testMultipleAccounts, approvalDetailsViewModel.state.multipleAccounts)
+        triggerRegisterDispositionCallAndAssertNonceDataAndBioPromptState()
 
         advanceUntilIdle()
 
@@ -388,9 +368,17 @@ class ApprovalDetailsViewModelTest : BaseViewModelTest() {
     }
 
     //Helper method
-    private fun triggerRegisterDispositionCall() {
-        //Set nonce data to trigger register disposition call
+    private fun triggerRegisterDispositionCallAndAssertNonceDataAndBioPromptState() = runTest {
+        assertEquals(null, approvalDetailsViewModel.state.multipleAccounts)
+        assertTrue(approvalDetailsViewModel.state.bioPromptTrigger is Resource.Uninitialized)
+
         approvalDetailsViewModel.setMultipleAccounts(testMultipleAccounts)
+
+        advanceUntilIdle()
+
+        assertEquals(testMultipleAccounts, approvalDetailsViewModel.state.multipleAccounts)
+        assertTrue(approvalDetailsViewModel.state.bioPromptTrigger is Resource.Success)
+
         approvalDetailsViewModel.biometryApproved(cryptoObject)
     }
 

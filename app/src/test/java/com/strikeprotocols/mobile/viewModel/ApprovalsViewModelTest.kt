@@ -10,7 +10,6 @@ import com.strikeprotocols.mobile.common.Resource
 import com.strikeprotocols.mobile.data.*
 import com.strikeprotocols.mobile.data.models.ApprovalDisposition
 import com.strikeprotocols.mobile.data.models.Nonce
-import com.strikeprotocols.mobile.data.models.approval.SolanaApprovalRequestDetails
 import com.strikeprotocols.mobile.data.models.approval.WalletApproval
 import com.strikeprotocols.mobile.presentation.approvals.ApprovalsViewModel
 import com.strikeprotocols.mobile.presentation.durable_nonce.DurableNonceViewModel
@@ -18,6 +17,7 @@ import com.strikeprotocols.mobile.ResourceState.ERROR
 import com.strikeprotocols.mobile.ResourceState.SUCCESS
 import com.strikeprotocols.mobile.common.StrikeCountDownTimer
 import junit.framework.TestCase.assertEquals
+import junit.framework.TestCase.assertTrue
 import kotlinx.coroutines.*
 import kotlinx.coroutines.test.*
 import org.junit.After
@@ -56,6 +56,9 @@ class ApprovalsViewModelTest : BaseViewModelTest() {
     //region Testing data
     private val testApprovals = getWalletApprovals()
 
+    private val testMultiSigBalanceAccountCreationWalletApproval =
+        getMultiSigBalanceAccountCreationWalletApproval()
+
     private val testApprovalsSize = testApprovals.size
     private val testApprovalsFirstIndex = 0
     private val testApprovalsLastIndex = testApprovals.size - 1
@@ -78,6 +81,10 @@ class ApprovalsViewModelTest : BaseViewModelTest() {
         }
         whenever(approvalsRepository.approveOrDenyInitiation(any(), any(), any())).thenAnswer {
             Resource.Success(data = null)
+        }
+
+        whenever(keyRepository.getCipherForDecryption()).thenAnswer {
+            cipher
         }
 
         approvalsViewModel =
@@ -344,31 +351,83 @@ class ApprovalsViewModelTest : BaseViewModelTest() {
         )
         //endregion
 
-        //Grab data to know if the approval is initiation or regular
-        val isInitiationRequest =
-            approvalsViewModel.state.selectedApproval?.details is SolanaApprovalRequestDetails.MultiSignOpInitiationDetails
-
-        //Assert that there is no nonce data before setting nonce data
-        assertEquals(null, approvalsViewModel.state.multipleAccounts)
-
-        //Set nonce data to trigger the registerDisposition call
-        val multipleAccounts = durableNonceViewModel.MultipleAccounts(nonces = listOf(Nonce(testNonce)))
-        approvalsViewModel.setMultipleAccounts(multipleAccounts)
-
-        assertEquals(multipleAccounts, approvalsViewModel.state.multipleAccounts)
-
-        //Trigger the register disposition call (user triggers this when they give biometry approval)
-        approvalsViewModel.biometryApproved(cryptoObject)
+        triggerRegisterDispositionCallAndAssertNonceDataAndBioPromptState()
 
         //Let the viewModel coroutine finish the register disposition call
         advanceUntilIdle()
 
         //Assert that the disposition was a success
-        if (isInitiationRequest) {
-            assertEquals(true, approvalsViewModel.state.approvalDispositionState?.initiationDispositionResult is Resource.Success)
-        } else {
-            assertEquals(true, approvalsViewModel.state.approvalDispositionState?.registerApprovalDispositionResult is Resource.Success)
+        assertEquals(true, approvalsViewModel.state.approvalDispositionState?.registerApprovalDispositionResult is Resource.Success)
+    }
+
+    @Test
+    fun `register approval initiation disposition successfully then view model should reflect the success in state`() = runTest {
+        val initiationApproval = testMultiSigBalanceAccountCreationWalletApproval
+
+        //region Get 1 approval in state
+        whenever(approvalsRepository.getWalletApprovals()).thenAnswer {
+            Resource.Success<List<WalletApproval?>>(
+                data = listOf(initiationApproval)
+            )
         }
+
+        assertEquals(true, approvalsViewModel.state.approvals.isEmpty())
+
+        approvalsViewModel.refreshData()
+        advanceUntilIdle()
+
+        verify(approvalsRepository, times(1)).getWalletApprovals()
+
+        assertExpectedWalletApprovalsResultAndExpectedApprovalsSize(
+            expectedResourceState = SUCCESS,
+            expectedSize = 1
+        )
+        //endregion
+
+        //region Set first approval as selected approval
+        assertEquals(null, approvalsViewModel.state.selectedApproval)
+
+        //Set approval as selected with isApproving = true
+        approvalsViewModel.setShouldDisplayConfirmDispositionDialog(
+            approval = initiationApproval,
+            isApproving = true,
+            dialogTitle = mockDialogTitle,
+            dialogText = mockDialogText
+        )
+
+        assertExpectedDispositionAndExpectedSelectedApproval(
+            expectedDisposition = ApprovalDisposition.APPROVE,
+            expectedSelectedApproval = initiationApproval
+        )
+        //endregion
+
+        triggerRegisterDispositionCallAndAssertNonceDataAndBioPromptState()
+
+        //Let the viewModel coroutine finish the register disposition call
+        advanceUntilIdle()
+
+        //Assert that the initiation disposition was a success
+        assertEquals(true, approvalsViewModel.state.approvalDispositionState?.initiationDispositionResult is Resource.Success)
+    }
+
+    //region Helper methods
+    private fun triggerRegisterDispositionCallAndAssertNonceDataAndBioPromptState() = runTest {
+        //Assert that there is no nonce data before setting nonce data and that the bio prompt trigger is uninitialized
+        assertEquals(null, approvalsViewModel.state.multipleAccounts)
+        assertTrue(approvalsViewModel.state.bioPromptTrigger is Resource.Uninitialized)
+
+        //Set nonce data to trigger the registerDisposition call
+        val multipleAccounts = durableNonceViewModel.MultipleAccounts(nonces = listOf(Nonce(testNonce)))
+        approvalsViewModel.setMultipleAccounts(multipleAccounts)
+
+        advanceUntilIdle()
+
+        //Assert nonce data is set and the prompt trigger is success
+        assertTrue(approvalsViewModel.state.bioPromptTrigger is Resource.Success)
+        assertEquals(multipleAccounts, approvalsViewModel.state.multipleAccounts)
+
+        //Trigger the register disposition call (user triggers this when they give biometry approval)
+        approvalsViewModel.biometryApproved(cryptoObject)
     }
 
     private suspend fun setupApprovalsRepositoryToReturnApprovalsOnGetApprovals() {
@@ -384,6 +443,7 @@ class ApprovalsViewModelTest : BaseViewModelTest() {
             Resource.Error<Any?>(exception = Exception())
         }
     }
+    //endregion
 
 
     //Custom Asserts
