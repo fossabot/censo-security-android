@@ -15,8 +15,8 @@ import com.strikeprotocols.mobile.data.models.approval.SolanaApprovalRequestDeta
 import com.strikeprotocols.mobile.data.models.approval.WalletApproval
 import com.strikeprotocols.mobile.presentation.approval_detail.ApprovalDetailsViewModel
 import com.strikeprotocols.mobile.presentation.durable_nonce.DurableNonceViewModel
-import junit.framework.TestCase.assertTrue
-import junit.framework.TestCase.assertEquals
+import junit.framework.TestCase
+import junit.framework.TestCase.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
@@ -30,6 +30,7 @@ import javax.crypto.Cipher
 @OptIn(ExperimentalCoroutinesApi::class)
 class ApprovalDetailsViewModelTest : BaseViewModelTest() {
 
+    //region Mocks and testing objects
     @Mock
     lateinit var solanaRepository: SolanaRepository
 
@@ -45,14 +46,15 @@ class ApprovalDetailsViewModelTest : BaseViewModelTest() {
     @Mock
     lateinit var cipher: Cipher
 
+    @Mock
+    lateinit var countdownTimer: StrikeCountDownTimer
+
     lateinit var cryptoObject: BiometricPrompt.CryptoObject
 
     private lateinit var approvalDetailsViewModel: ApprovalDetailsViewModel
 
     private val dispatcher = StandardTestDispatcher()
-
-    @Mock
-    lateinit var countdownTimer: StrikeCountDownTimer
+    //endregion
 
     //region Testing data
     private val testLoginApproval = getLoginApproval()
@@ -67,7 +69,7 @@ class ApprovalDetailsViewModelTest : BaseViewModelTest() {
     private val mockDialogText = "Text"
     //endregion
 
-    //region
+    //region Setup TearDown
     @Before
     override fun setUp() = runBlocking {
         super.setUp()
@@ -92,6 +94,7 @@ class ApprovalDetailsViewModelTest : BaseViewModelTest() {
     }
     //endregion
 
+    //region Feature Flow Testing
     /**
      * Test approving an approval successfully then the view model should reflect the success in state
      *
@@ -112,7 +115,7 @@ class ApprovalDetailsViewModelTest : BaseViewModelTest() {
         assertApprovalInStateIsNull()
 
         //Set approval in state
-        approvalDetailsViewModel.setArgsToState(testLoginApproval)
+        approvalDetailsViewModel.handleInitialData(testLoginApproval)
 
         assertExpectedApprovalInState(expectedApproval = testLoginApproval)
 
@@ -157,7 +160,7 @@ class ApprovalDetailsViewModelTest : BaseViewModelTest() {
         assertApprovalInStateIsNull()
 
         //Set approval in state
-        approvalDetailsViewModel.setArgsToState(testRemoveDAppBookEntryApproval)
+        approvalDetailsViewModel.handleInitialData(testRemoveDAppBookEntryApproval)
 
         assertExpectedApprovalInState(expectedApproval = testRemoveDAppBookEntryApproval)
 
@@ -202,7 +205,7 @@ class ApprovalDetailsViewModelTest : BaseViewModelTest() {
         assertApprovalInStateIsNull()
 
         //Set approval in state
-        approvalDetailsViewModel.setArgsToState(testMultiSigBalanceAccountCreationWalletApproval)
+        approvalDetailsViewModel.handleInitialData(testMultiSigBalanceAccountCreationWalletApproval)
 
         assertExpectedApprovalInState(expectedApproval = testMultiSigBalanceAccountCreationWalletApproval)
 
@@ -247,7 +250,7 @@ class ApprovalDetailsViewModelTest : BaseViewModelTest() {
         assertApprovalInStateIsNull()
 
         //Set approval in state
-        approvalDetailsViewModel.setArgsToState(testMultiSigBalanceAccountCreationWalletApproval)
+        approvalDetailsViewModel.handleInitialData(testMultiSigBalanceAccountCreationWalletApproval)
 
         assertExpectedApprovalInState(expectedApproval = testMultiSigBalanceAccountCreationWalletApproval)
 
@@ -292,7 +295,7 @@ class ApprovalDetailsViewModelTest : BaseViewModelTest() {
         assertApprovalInStateIsNull()
 
         //Set approval in state
-        approvalDetailsViewModel.setArgsToState(testRemoveDAppBookEntryApproval)
+        approvalDetailsViewModel.handleInitialData(testRemoveDAppBookEntryApproval)
 
         assertExpectedApprovalInState(expectedApproval = testRemoveDAppBookEntryApproval)
 
@@ -340,7 +343,7 @@ class ApprovalDetailsViewModelTest : BaseViewModelTest() {
         assertApprovalInStateIsNull()
 
         //Set approval in state
-        approvalDetailsViewModel.setArgsToState(testMultiSigBalanceAccountCreationWalletApproval)
+        approvalDetailsViewModel.handleInitialData(testMultiSigBalanceAccountCreationWalletApproval)
 
         assertExpectedApprovalInState(expectedApproval = testMultiSigBalanceAccountCreationWalletApproval)
 
@@ -366,8 +369,44 @@ class ApprovalDetailsViewModelTest : BaseViewModelTest() {
         assertEquals(true, approvalDetailsViewModel.state.approvalDispositionState?.approvalRetryData?.isApproving)
         assertEquals(isInitiationRequest, approvalDetailsViewModel.state.approvalDispositionState?.approvalRetryData?.isInitiationRequest)
     }
+    //endregion
 
-    //Helper method
+    //region Focused Testing
+    @Test
+    fun `call handleScreenBackgrounded then view model should set screen backgrounded in state`() {
+        assertFalse(approvalDetailsViewModel.state.screenWasBackgrounded)
+
+        approvalDetailsViewModel.handleScreenBackgrounded()
+
+        assertTrue(approvalDetailsViewModel.state.screenWasBackgrounded)
+    }
+
+    @Test
+    fun `call handleScreenForegrounded after the screen was backgrounded then view model should set state to kick out user`() {
+        assertFalse(approvalDetailsViewModel.state.screenWasBackgrounded)
+
+        approvalDetailsViewModel.handleScreenBackgrounded()
+
+        assertTrue(approvalDetailsViewModel.state.screenWasBackgrounded)
+
+        approvalDetailsViewModel.handleScreenForegrounded()
+
+        assertFalse(approvalDetailsViewModel.state.screenWasBackgrounded)
+        assertTrue(approvalDetailsViewModel.state.shouldKickOutUserToApprovalsScreen)
+    }
+
+    @Test
+    fun `call handleScreenForegrounded when the screen was not backgrounded then view model should do nothing`() {
+        assertFalse(approvalDetailsViewModel.state.screenWasBackgrounded)
+
+        approvalDetailsViewModel.handleScreenForegrounded()
+
+        assertFalse(approvalDetailsViewModel.state.screenWasBackgrounded)
+    }
+    //endregion
+
+    //region Helper method
+
     private fun triggerRegisterDispositionCallAndAssertNonceDataAndBioPromptState() = runTest {
         assertEquals(null, approvalDetailsViewModel.state.multipleAccounts)
         assertTrue(approvalDetailsViewModel.state.bioPromptTrigger is Resource.Uninitialized)
@@ -381,14 +420,15 @@ class ApprovalDetailsViewModelTest : BaseViewModelTest() {
 
         approvalDetailsViewModel.biometryApproved(cryptoObject)
     }
+    //endregion
 
-    //Custom Asserts
+    //region Custom Asserts
     private fun assertApprovalInStateIsNull() {
-        assertEquals(null, approvalDetailsViewModel.state.approval)
+        assertEquals(null, approvalDetailsViewModel.state.selectedApproval)
     }
 
     private fun assertExpectedApprovalInState(expectedApproval: WalletApproval) {
-        assertEquals(expectedApproval, approvalDetailsViewModel.state.approval)
+        assertEquals(expectedApproval, approvalDetailsViewModel.state.selectedApproval)
     }
 
     private fun assertExpectedDispositionAndExpectedInitiation(expectedDisposition: ApprovalDisposition, expectedIsInitiationRequest: Boolean) {
@@ -401,5 +441,6 @@ class ApprovalDetailsViewModelTest : BaseViewModelTest() {
             assertEquals(false, approvalDetailsViewModel.state.shouldDisplayConfirmDisposition?.isApproving)
         }
     }
+    //endregion
 
 }

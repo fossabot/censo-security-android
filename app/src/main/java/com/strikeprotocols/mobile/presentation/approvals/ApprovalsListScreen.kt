@@ -160,7 +160,7 @@ fun ApprovalsListScreen(
         when (event) {
             Lifecycle.Event.ON_START
             -> {
-                approvalsViewModel.refreshData()
+                approvalsViewModel.handleScreenForegrounded()
             }
             else -> Unit
         }

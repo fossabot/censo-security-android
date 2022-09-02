@@ -16,8 +16,7 @@ import com.strikeprotocols.mobile.presentation.durable_nonce.DurableNonceViewMod
 import com.strikeprotocols.mobile.ResourceState.ERROR
 import com.strikeprotocols.mobile.ResourceState.SUCCESS
 import com.strikeprotocols.mobile.common.StrikeCountDownTimer
-import junit.framework.TestCase.assertEquals
-import junit.framework.TestCase.assertTrue
+import junit.framework.TestCase.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.test.*
 import org.junit.After
@@ -29,6 +28,7 @@ import javax.crypto.Cipher
 @OptIn(ExperimentalCoroutinesApi::class)
 class ApprovalsViewModelTest : BaseViewModelTest() {
 
+    //region Mocks and testing objects
     @Mock
     lateinit var solanaRepository: SolanaRepository
 
@@ -52,6 +52,7 @@ class ApprovalsViewModelTest : BaseViewModelTest() {
     private lateinit var approvalsViewModel: ApprovalsViewModel
 
     private val dispatcher = StandardTestDispatcher()
+    //endregion
 
     //region Testing data
     private val testApprovals = getWalletApprovals()
@@ -101,9 +102,7 @@ class ApprovalsViewModelTest : BaseViewModelTest() {
     }
     //endregion
 
-    //TODO:
-    // Timer test, created a sub ticket for this
-
+    //region Feature Flow Testing
     /**
      * Test retrieving wallet approvals successfully and the state is assigned as expected
      *
@@ -409,6 +408,21 @@ class ApprovalsViewModelTest : BaseViewModelTest() {
         //Assert that the initiation disposition was a success
         assertEquals(true, approvalsViewModel.state.approvalDispositionState?.initiationDispositionResult is Resource.Success)
     }
+    //endregion
+
+    //region Focused Testing
+    @Test
+    fun `call handleScreenForegrounded then view model should call refreshData`() = runTest {
+        setupApprovalsRepositoryToReturnApprovalsOnGetApprovals()
+
+        approvalsViewModel.handleScreenForegrounded()
+
+        advanceUntilIdle()
+
+        verify(approvalsRepository, times(1)).getWalletApprovals()
+    }
+
+    //endregion
 
     //region Helper methods
     private fun triggerRegisterDispositionCallAndAssertNonceDataAndBioPromptState() = runTest {
@@ -445,8 +459,7 @@ class ApprovalsViewModelTest : BaseViewModelTest() {
     }
     //endregion
 
-
-    //Custom Asserts
+    //region Custom Asserts
     private fun assertExpectedWalletApprovalsResultAndExpectedApprovalsSize(expectedResourceState: ResourceState, expectedSize: Int) {
         if (expectedResourceState == SUCCESS) {
             assertEquals(true, approvalsViewModel.state.walletApprovalsResult is Resource.Success)
@@ -467,5 +480,6 @@ class ApprovalsViewModelTest : BaseViewModelTest() {
             assertEquals(false, approvalsViewModel.state.shouldDisplayConfirmDisposition?.isApproving)
         }
     }
+    //endregion
 
 }

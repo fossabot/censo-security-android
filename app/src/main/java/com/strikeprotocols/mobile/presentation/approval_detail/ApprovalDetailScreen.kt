@@ -82,8 +82,8 @@ fun ApprovalDetailsScreen(
     )
 
     fun launchNonceWork() {
-        val nonceAddresses = approvalDetailsState.approval?.retrieveAccountAddresses()
-        val minimumSlotAddress = approvalDetailsState.approval?.retrieveAccountAddressesSlot()
+        val nonceAddresses = approvalDetailsState.selectedApproval?.retrieveAccountAddresses()
+        val minimumSlotAddress = approvalDetailsState.selectedApproval?.retrieveAccountAddressesSlot()
         if (nonceAddresses != null && minimumSlotAddress != null) {
             durableNonceViewModel.setInitialData(
                 nonceAccountAddresses = nonceAddresses,
@@ -155,13 +155,10 @@ fun ApprovalDetailsScreen(
         when (event) {
             Lifecycle.Event.ON_START
             -> {
-                if (approvalDetailsState.screenWasBackgrounded) {
-                    approvalDetailsViewModel.resetDetailsScreenWasBackgrounded()
-                    approvalDetailsViewModel.wipeDataAndKickUserOutToApprovalsScreen()
-                }
+                approvalDetailsViewModel.handleScreenForegrounded()
             }
             Lifecycle.Event.ON_PAUSE -> {
-                approvalDetailsViewModel.setDetailsScreenWasBackgrounded()
+                approvalDetailsViewModel.handleScreenBackgrounded()
             }
             else -> Unit
         }
@@ -219,13 +216,19 @@ fun ApprovalDetailsScreen(
                     )
                 },
                 isLoading = approvalDetailsState.loadingData || durableNonceState.isLoading,
-                timeRemainingInSeconds = approvalDetailsState.remainingTimeInSeconds,
-                approval = approvalDetailsState.approval,
-                initiationRequest = approvalDetailsState.approval?.isInitiationRequest() == true
+                shouldRefreshTimer = approvalDetailsState.shouldRefreshTimers,
+                getSecondsLeftUntilCountdownIsOver = { submitDate: String?, totalTimeInSeconds: Int? ->
+                    calculateSecondsLeftUntilCountdownIsOver(
+                        submitDate = submitDate,
+                        totalTimeInSeconds = totalTimeInSeconds
+                    )
+                },
+                approval = approvalDetailsState.selectedApproval,
+                initiationRequest = approvalDetailsState.selectedApproval?.isInitiationRequest() == true
             )
 
             if (approvalDetailsState.shouldDisplayConfirmDisposition != null) {
-                if (approvalDetailsState.approval?.getSolanaApprovalRequestType() is LoginApprovalRequest) {
+                if (approvalDetailsState.selectedApproval?.getSolanaApprovalRequestType() is LoginApprovalRequest) {
                     approvalDetailsViewModel.resetShouldDisplayConfirmDisposition()
                     launchNonceWork()
                 } else {
@@ -323,7 +326,8 @@ fun ApprovalDetailsTopAppBar(
 fun ApprovalDetails(
     onApproveClicked: () -> Unit,
     onDenyClicked: () -> Unit,
-    timeRemainingInSeconds: Long?,
+    shouldRefreshTimer: Boolean,
+    getSecondsLeftUntilCountdownIsOver: (String?, Int?) -> Long?,
     isLoading: Boolean,
     approval: WalletApproval?,
     initiationRequest: Boolean
@@ -350,6 +354,9 @@ fun ApprovalDetails(
                 }
                 type
             }
+
+            val calculatedTimerSecondsLeft = getSecondsLeftUntilCountdownIsOver(approval?.submitDate, approval?.approvalTimeoutInSeconds)
+            val timeRemainingInSeconds = if (shouldRefreshTimer) calculatedTimerSecondsLeft else calculatedTimerSecondsLeft
 
             val expiresInText = getApprovalTimerText(
                 context = LocalContext.current,
