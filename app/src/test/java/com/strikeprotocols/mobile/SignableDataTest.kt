@@ -846,7 +846,7 @@ class SignableDataTest {
                     approvalDispositionRequest.retrieveSignableData(approverPublicKey = "GYFxPGjuBXYKg1S91zgpVZCLP4guLGRho27bTAkAzjVL")
                 assertEquals(
                     String(signableData, charset = Charsets.UTF_8),
-                    ""
+                    passwordResetApproval.id
                 )
             }
             else ->
