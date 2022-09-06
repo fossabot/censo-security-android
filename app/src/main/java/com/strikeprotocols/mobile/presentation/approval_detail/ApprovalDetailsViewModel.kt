@@ -2,7 +2,6 @@ package com.strikeprotocols.mobile.presentation.approval_detail
 
 import com.strikeprotocols.mobile.common.Resource
 import com.strikeprotocols.mobile.common.StrikeCountDownTimer
-import com.strikeprotocols.mobile.common.calculateSecondsLeftUntilCountdownIsOver
 import com.strikeprotocols.mobile.data.ApprovalsRepository
 import com.strikeprotocols.mobile.data.KeyRepository
 import com.strikeprotocols.mobile.data.models.approval.WalletApproval
@@ -34,14 +33,12 @@ class ApprovalDetailsViewModel @Inject constructor(
         approval: WalletApproval?,
         isInitiationRequest: Boolean,
         isApproving: Boolean,
-        dialogTitle: String,
-        dialogText: String
+        dialogMessages: Pair<String, String>
     ) {
 
         val (dialogDetails, approvalDisposition) = getDialogDetailsAndApprovalDispositionType(
             isApproving = isApproving,
-            dialogTitle = dialogTitle,
-            dialogText = dialogText
+            dialogMessages = dialogMessages
         )
 
         state = state.copy(

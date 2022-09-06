@@ -27,13 +27,11 @@ class ApprovalsViewModel @Inject constructor(
         approval: WalletApproval?,
         isInitiationRequest: Boolean,
         isApproving: Boolean,
-        dialogTitle: String,
-        dialogText: String
+        dialogMessages: Pair<String, String>,
     ) {
         val (dialogDetails, approvalDisposition) = getDialogDetailsAndApprovalDispositionType(
             isApproving = isApproving,
-            dialogTitle = dialogTitle,
-            dialogText = dialogText
+            dialogMessages = dialogMessages
         )
 
         state = state.copy(

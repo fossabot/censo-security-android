@@ -195,7 +195,6 @@ fun KeyManagementScreen(
 
         PreBiometryDialog(
             mainText = mainText,
-            buttonText = stringResource(R.string.save_key),
             onAccept = {
                 bioPrompt.authenticate(
                     promptInfo,

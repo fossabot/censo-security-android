@@ -31,8 +31,7 @@ abstract class CommonApprovalsViewModel(
         approval: WalletApproval? = null,
         isInitiationRequest: Boolean = false,
         isApproving: Boolean,
-        dialogTitle: String,
-        dialogText: String
+        dialogMessages: Pair<String, String>
     )
 
     open fun handleInitialData(approval: WalletApproval) {}
@@ -194,11 +193,10 @@ abstract class CommonApprovalsViewModel(
 
     fun getDialogDetailsAndApprovalDispositionType(
         isApproving: Boolean,
-        dialogTitle: String,
-        dialogText: String
+        dialogMessages: Pair<String, String>
     ) : DialogDetailsAndDispositionType {
         val dialogDetails = getDialogDetails(
-            isApproving = isApproving, dialogTitle = dialogTitle, dialogText = dialogText
+            isApproving = isApproving, dialogMessages = dialogMessages
         )
 
         val approvalDisposition = getApprovalDispositionType(isApproving)
@@ -206,12 +204,11 @@ abstract class CommonApprovalsViewModel(
         return DialogDetailsAndDispositionType(dialogDetails, approvalDisposition)
     }
 
-    private fun getDialogDetails(isApproving: Boolean, dialogTitle: String, dialogText: String) =
+    private fun getDialogDetails(isApproving: Boolean, dialogMessages: Pair<String, String>) =
         ConfirmDispositionDialogDetails(
             shouldDisplay = true,
             isApproving = isApproving,
-            dialogTitle = dialogTitle,
-            dialogText = dialogText
+            dialogMessages = dialogMessages
         )
 
     private fun getApprovalDispositionType(isApproving: Boolean) =

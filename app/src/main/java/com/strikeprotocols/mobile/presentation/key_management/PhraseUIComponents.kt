@@ -1030,7 +1030,6 @@ private fun WordNavigationButtons(
 @Composable
 fun PreBiometryDialog(
     mainText: String,
-    buttonText: String,
     onAccept: () -> Unit,
 ) {
     Column(
@@ -1063,7 +1062,7 @@ fun PreBiometryDialog(
                 onClick = onAccept,
             ) {
                 Text(
-                    text = buttonText,
+                    text = stringResource(id = R.string.continue_text),
                     fontSize = 18.sp,
                     color = StrikeWhite,
                     textAlign = TextAlign.Center

@@ -18,7 +18,6 @@
     <string name="login_failed_message">User with email and password not found.\n\nPlease try again.</string>
 
     <string name="cancel">Cancel</string>
-    <string name="dismiss">Dismiss</string>
     <string name="contact_strike">We are unable to verify your key. Please contact Strike directly to resolve this issue.</string>
 
     <string name="approvals">Approvals</string>
@@ -55,40 +54,13 @@
 
     <string name="update_strike_mobile">Update Strike Mobile…</string>
     <string name="unknown_approval_tip">You have an unknown approval request. Please update this app to see the request details</string>
-    <string name="unknown_dialog_message">an unknown approval request</string>
-    <string name="a_transfer_of_dialog_message">a transfer of</string>
-    <string name="a_conversion_of_dialog_message">a conversion of</string>
-    <string name="a_wrap_conversion_of_dialog_message">a swap of</string>
-    <string name="the_removal_of_dialog_message">the removal of</string>
-    <string name="the_addition_of_dialog_message">the addition of</string>
-    <string name="an_account_creation_of_dialog_message">an add wallet for</string>
-    <string name="a_dapp_transaction_with_dialog_message">a dApp transaction with</string>
 
-    <string name="vault_config_policy_update_dialog_message">an administration policy update</string>
-    <string name="settings_update_for_dialog_message">settings update for</string>
-    <string name="dapp_book_update_dialog_message">dApp book update</string>
-    <string name="address_book_update_dialog_message">address book update</string>
-    <string name="wallet_name_change_to_dialog_message">wallet name change to</string>
-    <string name="policy_update_for_dialog_message">transfer approvals update for</string>
-
-
-    <string name="login_approval_dialog_message">Login Approval</string>
-    <string name="you_are_about_to_approve">You are about to approve</string>
-    <string name="you_are_about_to_deny">You are about to deny</string>
-    <string name="you_are_about_to_cancel">You are about to cancel</string>
-    <string name="transfer_dialog_title">Send</string>
-    <string name="unknown_dialog_title">Unknown</string>
-    <string name="conversion_dialog_title">Conversion</string>
-    <string name="signers_update_dialog_title">Users Update</string>
-    <string name="balance_account_creation_dialog_title">Wallet Creation</string>
-    <string name="stake_account_creation_dialog_title">Stake Wallet Creation</string>
-    <string name="dapp_transaction_dialog_title">dApp Transaction</string>
-    <string name="login_approval_dialog_title">Login Approval</string>
+    <string name="you_are_about_to_approve">You are about to approve the following request:</string>
+    <string name="you_are_about_to_deny">You are about to deny the following request:</string>
+    <string name="you_are_about_to_cancel">You are about to cancel the following request:</string>
     <string name="arrow_forward_content_des">Arrow Forward Icon</string>
     <string name="arrow_back_content_des">Arrow Back Icon</string>
 
-    <string name="balance_account_title">Balance Account</string>
-    <string name="stake_account_title">Stake Account</string>\
     <string name="not_applicable">N/A</string>
 
     <string name="usd_equivalent">USD equivalent</string>
@@ -99,15 +71,6 @@
     <string name="approval_expiration">Approval Expiration</string>
     <string name="no_approvers_text">No users may approve requests</string>
     <string name="no_wallet_approvers_text">No wallet approvers</string>
-    <string name="wrap_conversion_dialog_title">Swap</string>
-    <string name="wallet_config_dialog_title">Update Administration Policy</string>
-    <string name="balance_account_settings_dialog_title">Update Wallet Settings</string>
-    <string name="dapp_book_update_dialog_title">dApp Book Update</string>
-    <string name="address_book_dialog_title">Address Book</string>
-    <string name="balance_account_name_dialog_title">Wallet Name Update</string>
-    <string name="balance_account_policy_dialog_title">Update Transfer Approvals</string>
-    <string name="balance_acct_whitelist_update_dialog_title">Edit Whitelist Addresses</string>
-    <string name="balance_account_whitelist_dialog_message">edit whitelist addresses for</string>
     <string name="key_pair_generation_failed">Unable to generate key pair for device. Please retry.</string>
     <string name="decryption_failed">Unable to decrypt data. Please retry.</string>
     <string name="encryption_failed">Unable to encrypt data. Please retry.</string>
@@ -177,14 +140,10 @@
     <string name="email">Email</string>
 
     <string name="accept_vault_invitation_approval_header">Accept Invitation</string>
-    <string name="accept_vault_invitation_dialog_title">Accept Invitation</string>
-    <string name="accept_vault_invitation_dialog_message">accept invitation</string>
     <string name="vault_name">Vault Name</string>
     <string name="clear">Clear</string>
 
     <string name="password_reset_approval_header">Password Reset</string>
-    <string name="password_reset_dialog_title">Password Reset</string>
-    <string name="password_reset_dialog_message">Password Reset</string>
 
     <string name="start_over">Start over</string>
     <string name="copy_key">Copy Recovery Phrase</string>
@@ -258,13 +217,16 @@
     <string name="sign_in_error">Sign In Error</string>
     <string name="error_occurred_signature_login">An error occurred trying to sign you in</string>
     <string name="use_password">Use Password</string>
+    <string name="save_key">Save Key</string>
     <string name="try_again">Try Again</string>
     <string name="migrating_key_loading">Migrating your key behind biometry protection…</string>
 
     <string name="save_biometry_info">Strike protects your private key using biometric verification.\n\nIf you change the biometry settings on your device, you will need to recover your key from your recovery phrase.</string>
     <string name="migrate_biometry_info">We are moving your key to biometry protected storage.\n\nIf you change the biometry settings on your device, you will need to recover your key from your recovery phrase.</string>
-    <string name="save_key">Save Key</string>
     <string name="retrieve_key">Retrieve Key</string>
     <string name="biometry_login_subtitle">Complete biometry to login to the app. Cancel biometry if you would like to use your password.</string>
     <string name="biometry_login_title">Biometry Login</string>
+    <string name="are_you_sure">Are you sure?</string>
+    <string name="continue_text">Continue</string>
+    <string name="close_dialog">close dialog</string>
 </resources>

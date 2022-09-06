@@ -67,8 +67,10 @@ class ApprovalsViewModelTest : BaseViewModelTest() {
     private val testNonce = getNonce()
 
     //These are not used in any way other than to fill method parameters
-    private val mockDialogTitle = "Title"
-    private val mockDialogText = "Text"
+    private val mockDialogSecondaryMessage = "Send 1000 SOL"
+    private val mockDialogMainMessage = "You are about to approve the following request"
+
+    private val mockMessages = Pair(mockDialogMainMessage, mockDialogSecondaryMessage)
     //endregion
 
     //region Before After Work
@@ -277,8 +279,7 @@ class ApprovalsViewModelTest : BaseViewModelTest() {
         approvalsViewModel.setShouldDisplayConfirmDispositionDialog(
             approval = approval,
             isApproving = true,
-            dialogTitle = mockDialogTitle,
-            dialogText = mockDialogText
+            dialogMessages = mockMessages,
         )
 
         assertExpectedDispositionAndExpectedSelectedApproval(
@@ -289,8 +290,7 @@ class ApprovalsViewModelTest : BaseViewModelTest() {
         approvalsViewModel.setShouldDisplayConfirmDispositionDialog(
             approval = otherApproval,
             isApproving = false,
-            dialogTitle = mockDialogTitle,
-            dialogText = mockDialogText
+            dialogMessages = mockMessages,
         )
 
         assertExpectedDispositionAndExpectedSelectedApproval(
@@ -340,8 +340,7 @@ class ApprovalsViewModelTest : BaseViewModelTest() {
         approvalsViewModel.setShouldDisplayConfirmDispositionDialog(
             approval = firstApproval,
             isApproving = true,
-            dialogTitle = mockDialogTitle,
-            dialogText = mockDialogText
+            dialogMessages = mockMessages,
         )
 
         assertExpectedDispositionAndExpectedSelectedApproval(
@@ -390,8 +389,7 @@ class ApprovalsViewModelTest : BaseViewModelTest() {
         approvalsViewModel.setShouldDisplayConfirmDispositionDialog(
             approval = initiationApproval,
             isApproving = true,
-            dialogTitle = mockDialogTitle,
-            dialogText = mockDialogText
+            dialogMessages = mockMessages,
         )
 
         assertExpectedDispositionAndExpectedSelectedApproval(

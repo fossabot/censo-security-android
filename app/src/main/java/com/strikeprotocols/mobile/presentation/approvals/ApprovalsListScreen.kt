@@ -101,13 +101,11 @@ fun ApprovalsListScreen(
             approvalsViewModel.setShouldDisplayConfirmDispositionDialog(
                 approval = approval,
                 isApproving = true,
-                dialogTitle = approval.getSolanaApprovalRequestType()
-                    .getApprovalTypeDialogTitle(context),
-                dialogText = approval.getSolanaApprovalRequestType()
-                    .getDialogFullMessage(
+                dialogMessages = approval.getSolanaApprovalRequestType()
+                    .getDialogMessages(
                         context = context,
                         approvalDisposition = ApprovalDisposition.APPROVE,
-                        initiationRequest = approval.isInitiationRequest()
+                        isInitiationRequest = approval.isInitiationRequest()
                     )
             )
         }
@@ -187,17 +185,15 @@ fun ApprovalsListScreen(
                     approvalsViewModel.setShouldDisplayConfirmDispositionDialog(
                         approval = approval,
                         isApproving = true,
-                        dialogTitle = approval?.getSolanaApprovalRequestType()?.getApprovalTypeDialogTitle(context)
-                            ?: UnknownApprovalType.getApprovalTypeDialogTitle(context),
-                        dialogText = approval?.getSolanaApprovalRequestType()?.getDialogFullMessage(
+                        dialogMessages = approval?.getSolanaApprovalRequestType()?.getDialogMessages(
                             context = context,
                             approvalDisposition = ApprovalDisposition.APPROVE,
-                            initiationRequest = approval.isInitiationRequest()
+                            isInitiationRequest = approval.isInitiationRequest()
                         )
-                            ?: UnknownApprovalType.getDialogFullMessage(
+                            ?: UnknownApprovalType.getDialogMessages(
                                 context = context,
                                 approvalDisposition = ApprovalDisposition.APPROVE,
-                                initiationRequest = approval?.isInitiationRequest() == true
+                                isInitiationRequest = approval?.isInitiationRequest() == true
                             )
                     )
                 },
@@ -232,19 +228,16 @@ fun ApprovalsListScreen(
                     approvalsViewModel.resetShouldDisplayConfirmDisposition()
                     launchNonceWork()
                 } else {
-                    approvalsState.shouldDisplayConfirmDisposition.let { safeDialogDetails ->
-                        StrikeConfirmDispositionAlertDialog(
-                            dialogTitle = safeDialogDetails.dialogTitle,
-                            dialogText = safeDialogDetails.dialogText,
-                            onConfirm = {
-                                approvalsViewModel.resetShouldDisplayConfirmDisposition()
-                                launchNonceWork()
-                            },
-                            onDismiss = {
-                                approvalsViewModel.resetShouldDisplayConfirmDisposition()
-                            }
-                        )
-                    }
+                    StrikeConfirmDispositionAlertDialog(
+                        dialogMessages = approvalsState.shouldDisplayConfirmDisposition.dialogMessages,
+                        onConfirm = {
+                            approvalsViewModel.resetShouldDisplayConfirmDisposition()
+                            launchNonceWork()
+                        },
+                        onDismiss = {
+                            approvalsViewModel.resetShouldDisplayConfirmDisposition()
+                        }
+                    )
                 }
             }
 

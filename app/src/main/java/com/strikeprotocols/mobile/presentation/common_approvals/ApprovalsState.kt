@@ -32,6 +32,5 @@ data class ApprovalsState(
 data class ConfirmDispositionDialogDetails(
     val shouldDisplay: Boolean = false,
     val isApproving: Boolean,
-    val dialogTitle: String,
-    val dialogText: String
+    val dialogMessages: Pair<String, String>
 )

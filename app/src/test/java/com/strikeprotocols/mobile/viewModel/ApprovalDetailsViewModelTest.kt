@@ -65,8 +65,10 @@ class ApprovalDetailsViewModelTest : BaseViewModelTest() {
     private lateinit var testMultipleAccounts: DurableNonceViewModel.MultipleAccounts
 
     //These are not used in any way other than to fill method parameters
-    private val mockDialogTitle = "Title"
-    private val mockDialogText = "Text"
+    private val mockDialogSecondaryMessage = "Send 1000 SOL"
+    private val mockDialogMainMessage = "You are about to approve the following request"
+
+    private val mockMessages = Pair(mockDialogMainMessage, mockDialogSecondaryMessage)
     //endregion
 
     //region Setup TearDown
@@ -127,8 +129,7 @@ class ApprovalDetailsViewModelTest : BaseViewModelTest() {
         approvalDetailsViewModel.setShouldDisplayConfirmDispositionDialog(
             isApproving = true,
             isInitiationRequest = isInitiationRequest,
-            dialogTitle = mockDialogTitle,
-            dialogText = mockDialogText
+            dialogMessages = mockMessages,
         )
 
         assertExpectedDispositionAndExpectedInitiation(ApprovalDisposition.APPROVE, isInitiationRequest)
@@ -172,8 +173,7 @@ class ApprovalDetailsViewModelTest : BaseViewModelTest() {
         approvalDetailsViewModel.setShouldDisplayConfirmDispositionDialog(
             isApproving = false,
             isInitiationRequest = isInitiationRequest,
-            dialogTitle = mockDialogTitle,
-            dialogText = mockDialogText
+            dialogMessages = mockMessages,
         )
 
         assertExpectedDispositionAndExpectedInitiation(ApprovalDisposition.DENY, isInitiationRequest)
@@ -217,8 +217,7 @@ class ApprovalDetailsViewModelTest : BaseViewModelTest() {
         approvalDetailsViewModel.setShouldDisplayConfirmDispositionDialog(
             isApproving = true,
             isInitiationRequest = isInitiationRequest,
-            dialogTitle = mockDialogTitle,
-            dialogText = mockDialogText
+            dialogMessages = mockMessages,
         )
 
         assertExpectedDispositionAndExpectedInitiation(ApprovalDisposition.APPROVE, isInitiationRequest)
@@ -262,8 +261,7 @@ class ApprovalDetailsViewModelTest : BaseViewModelTest() {
         approvalDetailsViewModel.setShouldDisplayConfirmDispositionDialog(
             isApproving = false,
             isInitiationRequest = isInitiationRequest,
-            dialogTitle = mockDialogTitle,
-            dialogText = mockDialogText
+            dialogMessages = mockMessages,
         )
 
         assertExpectedDispositionAndExpectedInitiation(ApprovalDisposition.DENY, isInitiationRequest)
@@ -307,8 +305,7 @@ class ApprovalDetailsViewModelTest : BaseViewModelTest() {
         approvalDetailsViewModel.setShouldDisplayConfirmDispositionDialog(
             isApproving = false,
             isInitiationRequest = isInitiationRequest,
-            dialogTitle = mockDialogTitle,
-            dialogText = mockDialogText
+            dialogMessages = mockMessages,
         )
 
         assertExpectedDispositionAndExpectedInitiation(ApprovalDisposition.DENY, isInitiationRequest)
@@ -355,8 +352,7 @@ class ApprovalDetailsViewModelTest : BaseViewModelTest() {
         approvalDetailsViewModel.setShouldDisplayConfirmDispositionDialog(
             isApproving = true,
             isInitiationRequest = isInitiationRequest,
-            dialogTitle = mockDialogTitle,
-            dialogText = mockDialogText
+            dialogMessages = mockMessages,
         )
 
         assertExpectedDispositionAndExpectedInitiation(ApprovalDisposition.APPROVE, isInitiationRequest)
