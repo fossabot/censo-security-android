@@ -38,7 +38,6 @@
     <string name="nothing_to_approve">Nothing to approve</string>
     <string name="pull_to_refresh">Pull down to refresh approvals</string>
     <string name="content_des_pull_to_refresh_icon">Pull down to refresh icon</string>
-    <string name="snackbar_refresh_error">Something went wrong, please try again</string>
     <string name="auth_flow_exception">Something went wrong, please try again</string>
 
     <string name="approval_expired">Expired</string>
@@ -229,4 +228,5 @@
     <string name="are_you_sure">Are you sure?</string>
     <string name="continue_text">Continue</string>
     <string name="close_dialog">close dialog</string>
+    <string name="dismiss">Dismiss</string>
 </resources>

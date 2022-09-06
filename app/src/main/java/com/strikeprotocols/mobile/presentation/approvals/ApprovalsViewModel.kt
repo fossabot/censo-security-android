@@ -54,17 +54,13 @@ class ApprovalsViewModel @Inject constructor(
         retrieveWalletApprovals()
     }
 
-    private fun resetApprovalsData() {
+    fun resetApprovalsData() {
         state = state.copy(
             approvals = emptyList(),
             walletApprovalsResult = Resource.Uninitialized,
             selectedApproval = null,
             multipleAccounts = null
         )
-    }
-
-    fun resetShouldShowErrorSnackbar() {
-        state = state.copy(shouldShowErrorSnackbar = false)
     }
 
     fun resetWalletApprovalsResult() {

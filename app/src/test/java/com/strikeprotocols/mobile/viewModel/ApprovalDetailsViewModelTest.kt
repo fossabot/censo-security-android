@@ -14,6 +14,7 @@ import com.strikeprotocols.mobile.data.models.Nonce
 import com.strikeprotocols.mobile.data.models.approval.SolanaApprovalRequestDetails
 import com.strikeprotocols.mobile.data.models.approval.WalletApproval
 import com.strikeprotocols.mobile.presentation.approval_detail.ApprovalDetailsViewModel
+import com.strikeprotocols.mobile.presentation.approval_disposition.ApprovalDispositionState
 import com.strikeprotocols.mobile.presentation.durable_nonce.DurableNonceViewModel
 import junit.framework.TestCase
 import junit.framework.TestCase.*
@@ -365,6 +366,31 @@ class ApprovalDetailsViewModelTest : BaseViewModelTest() {
         assertEquals(true, approvalDetailsViewModel.state.approvalDispositionState?.approvalRetryData?.isApproving)
         assertEquals(isInitiationRequest, approvalDetailsViewModel.state.approvalDispositionState?.approvalRetryData?.isInitiationRequest)
     }
+
+    /**
+     * Test the scenario of a user leaving the details screen and selecting a new approval to view the details
+     *
+     * VM has to be re initialized before calling onStart.
+     * We need to do this to mock how the screen would instantiate a new VM instance
+     * when a new approval is selected for viewing the details
+     */
+    @Test
+    fun `set an initial approval, set a new initial approval then view model should reflect the approvals in state`() {
+        assertNull(approvalDetailsViewModel.state.selectedApproval)
+
+        approvalDetailsViewModel.onStart(testLoginApproval)
+
+        assertEquals(testLoginApproval, approvalDetailsViewModel.state.selectedApproval)
+
+        approvalDetailsViewModel.wipeDataAndKickUserOutToApprovalsScreen()
+
+        assertNull(approvalDetailsViewModel.state.selectedApproval)
+
+        approvalDetailsViewModel.onStart(testRemoveDAppBookEntryApproval)
+
+        assertEquals(testRemoveDAppBookEntryApproval, approvalDetailsViewModel.state.selectedApproval)
+    }
+
     //endregion
 
     //region Focused Testing
@@ -398,6 +424,73 @@ class ApprovalDetailsViewModelTest : BaseViewModelTest() {
         approvalDetailsViewModel.handleScreenForegrounded()
 
         assertFalse(approvalDetailsViewModel.state.screenWasBackgrounded)
+    }
+
+    @Test
+    fun `call handleInitialData then view model should set approval in state`() {
+        assertNull(approvalDetailsViewModel.state.selectedApproval)
+
+        approvalDetailsViewModel.handleInitialData(testLoginApproval)
+
+        assertEquals(testLoginApproval, approvalDetailsViewModel.state.selectedApproval)
+    }
+
+    @Test
+    fun `call handleEmptyInitialData then view model should call setShouldKickOutUser and set the property in state`() {
+        assertFalse(approvalDetailsViewModel.state.shouldKickOutUserToApprovalsScreen)
+
+        approvalDetailsViewModel.handleEmptyInitialData()
+
+        assertTrue(approvalDetailsViewModel.state.shouldKickOutUserToApprovalsScreen)
+    }
+
+    @Test
+    fun `call setShouldKickOutUser then view model should call setShouldKickOutUser and set the property in state`() {
+        assertFalse(approvalDetailsViewModel.state.shouldKickOutUserToApprovalsScreen)
+
+        approvalDetailsViewModel.setShouldKickOutUser()
+
+        assertTrue(approvalDetailsViewModel.state.shouldKickOutUserToApprovalsScreen)
+    }
+
+    @Test
+    fun `call resetShouldKickOutUser then view model should reflect the reset data in state`() {
+        assertFalse(approvalDetailsViewModel.state.shouldKickOutUserToApprovalsScreen)
+
+        approvalDetailsViewModel.setShouldKickOutUser()
+
+        assertTrue(approvalDetailsViewModel.state.shouldKickOutUserToApprovalsScreen)
+
+        approvalDetailsViewModel.resetShouldKickOutUser()
+
+        assertFalse(approvalDetailsViewModel.state.shouldKickOutUserToApprovalsScreen)
+    }
+
+    @Test
+    fun `call setShouldDisplayConfirmDispositionDialog then view model should reflect updated state properties`() {
+        //Have to make a method call to get the data to use in asserts during the test
+        val (dialogDetails, approvalDisposition) = approvalDetailsViewModel.getDialogDetailsAndApprovalDispositionType(
+            isApproving = true,
+            dialogMessages = mockMessages
+        )
+
+        //assert initial state
+        assertNull(approvalDetailsViewModel.state.shouldDisplayConfirmDisposition)
+        assertEquals(ApprovalDispositionState(), approvalDetailsViewModel.state.approvalDispositionState)
+
+        approvalDetailsViewModel.setShouldDisplayConfirmDispositionDialog(
+            approval = testLoginApproval,
+            isInitiationRequest = false,
+            isApproving = true,
+            dialogMessages = mockMessages
+        )
+
+        //assert updated state
+        assertEquals(dialogDetails, approvalDetailsViewModel.state.shouldDisplayConfirmDisposition)
+        assertTrue(approvalDetailsViewModel.state.approvalDispositionState?.approvalDisposition is Resource.Success)
+        assertEquals(approvalDisposition, approvalDetailsViewModel.state.approvalDispositionState?.approvalDisposition?.data)
+        assertTrue(approvalDetailsViewModel.state.approvalDispositionState?.approvalRetryData?.isApproving == true)
+        assertTrue(approvalDetailsViewModel.state.approvalDispositionState?.approvalRetryData?.isInitiationRequest == false)
     }
     //endregion
 

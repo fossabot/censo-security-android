@@ -123,17 +123,7 @@ fun ApprovalsListScreen(
     }
     //endregion
 
-    val snackbarRefreshErrorString = stringResource(R.string.snackbar_refresh_error)
-
     LaunchedEffect(key1 = approvalsState, key2 = durableNonceState) {
-        if (approvalsState.shouldShowErrorSnackbar) {
-            coroutineScope.launch {
-                scaffoldState.snackbarHostState.showSnackbar(
-                    message = snackbarRefreshErrorString
-                )
-            }
-            approvalsViewModel.resetShouldShowErrorSnackbar()
-        }
 
         if (approvalsState.bioPromptTrigger is Resource.Success) {
             bioPrompt.authenticate(

@@ -122,7 +122,7 @@ fun StrikeConfirmDispositionAlertDialog(
                         Text(
                             modifier = Modifier.padding(vertical = 2.dp),
                             fontSize = 18.sp,
-                            text = stringResource(R.string.cancel),
+                            text = stringResource(R.string.dismiss),
                             color = StrikeWhite,
                             textAlign = TextAlign.Center
                         )

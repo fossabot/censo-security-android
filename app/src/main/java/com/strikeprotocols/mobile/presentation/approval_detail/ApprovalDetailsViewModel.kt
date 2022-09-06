@@ -7,6 +7,7 @@ import com.strikeprotocols.mobile.data.KeyRepository
 import com.strikeprotocols.mobile.data.models.approval.WalletApproval
 import com.strikeprotocols.mobile.presentation.common_approvals.CommonApprovalsViewModel
 import com.strikeprotocols.mobile.presentation.approval_disposition.ApprovalRetryData
+import com.strikeprotocols.mobile.presentation.common_approvals.ApprovalsState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
@@ -65,7 +66,7 @@ class ApprovalDetailsViewModel @Inject constructor(
     }
     //endregion
 
-    private fun setShouldKickOutUser() {
+    fun setShouldKickOutUser() {
         state = state.copy(
             shouldKickOutUserToApprovalsScreen = true
         )
@@ -78,8 +79,8 @@ class ApprovalDetailsViewModel @Inject constructor(
     }
 
     fun wipeDataAndKickUserOutToApprovalsScreen() {
-        resetApprovalDispositionState()
-        state = state.copy(
+        val cleanState = ApprovalsState()
+        state = cleanState.copy(
             shouldKickOutUserToApprovalsScreen = true
         )
     }

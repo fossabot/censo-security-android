@@ -16,6 +16,8 @@ import com.strikeprotocols.mobile.presentation.durable_nonce.DurableNonceViewMod
 import com.strikeprotocols.mobile.ResourceState.ERROR
 import com.strikeprotocols.mobile.ResourceState.SUCCESS
 import com.strikeprotocols.mobile.common.StrikeCountDownTimer
+import com.strikeprotocols.mobile.presentation.approval_disposition.ApprovalDispositionState
+import com.strikeprotocols.mobile.presentation.common_approvals.CommonApprovalsViewModel
 import junit.framework.TestCase.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.test.*
@@ -420,27 +422,66 @@ class ApprovalsViewModelTest : BaseViewModelTest() {
         verify(approvalsRepository, times(1)).getWalletApprovals()
     }
 
-    //endregion
+    @Test
+    fun `call resetApprovalsData then view model should reflect default state for the respective properties in state`() = runTest {
+        assertExpectedDefaultStateForApprovalsData()
 
-    //region Helper methods
-    private fun triggerRegisterDispositionCallAndAssertNonceDataAndBioPromptState() = runTest {
-        //Assert that there is no nonce data before setting nonce data and that the bio prompt trigger is uninitialized
-        assertEquals(null, approvalsViewModel.state.multipleAccounts)
-        assertTrue(approvalsViewModel.state.bioPromptTrigger is Resource.Uninitialized)
+        setApprovalsDataInStateAndAssertStateWasSet()
 
-        //Set nonce data to trigger the registerDisposition call
-        val multipleAccounts = durableNonceViewModel.MultipleAccounts(nonces = listOf(Nonce(testNonce)))
-        approvalsViewModel.setMultipleAccounts(multipleAccounts)
+        approvalsViewModel.resetApprovalsData()
+
+        assertExpectedDefaultStateForApprovalsData()
+    }
+
+    @Test
+    fun `call resetWalletApprovalsResult then view model should reflect uninitialized in state`() = runTest {
+        setupApprovalsRepositoryToReturnApprovalsOnGetApprovals()
+
+        assertTrue(approvalsViewModel.state.walletApprovalsResult is Resource.Uninitialized)
+
+        approvalsViewModel.refreshData()
 
         advanceUntilIdle()
 
-        //Assert nonce data is set and the prompt trigger is success
-        assertTrue(approvalsViewModel.state.bioPromptTrigger is Resource.Success)
-        assertEquals(multipleAccounts, approvalsViewModel.state.multipleAccounts)
+        verify(approvalsRepository, times(1)).getWalletApprovals()
+        assertExpectedWalletApprovalsResultAndExpectedApprovalsSize(SUCCESS, testApprovalsSize)
 
-        //Trigger the register disposition call (user triggers this when they give biometry approval)
-        approvalsViewModel.biometryApproved(cryptoObject)
+        approvalsViewModel.resetWalletApprovalsResult()
+
+        assertTrue(approvalsViewModel.state.walletApprovalsResult is Resource.Uninitialized)
     }
+
+    @Test
+    fun `call setShouldDisplayConfirmDispositionDialog then view model should reflect updated state properties`() {
+        //Have to make a method call to get the data to use in asserts during the test
+        val (dialogDetails, approvalDisposition) = approvalsViewModel.getDialogDetailsAndApprovalDispositionType(
+            isApproving = true,
+            dialogMessages = mockMessages
+        )
+
+        val testApproval = testApprovals[0]
+
+        //assert initial state
+        assertNull(approvalsViewModel.state.shouldDisplayConfirmDisposition)
+        assertNull(approvalsViewModel.state.selectedApproval)
+        assertEquals(ApprovalDispositionState(), approvalsViewModel.state.approvalDispositionState)
+
+        approvalsViewModel.setShouldDisplayConfirmDispositionDialog(
+            approval = testApproval,
+            isInitiationRequest = false,
+            isApproving = true,
+            dialogMessages = mockMessages
+        )
+
+        //assert updated state
+        assertEquals(dialogDetails, approvalsViewModel.state.shouldDisplayConfirmDisposition)
+        assertEquals(testApproval, approvalsViewModel.state.selectedApproval)
+        assertTrue(approvalsViewModel.state.approvalDispositionState?.approvalDisposition is Resource.Success)
+        assertEquals(approvalDisposition, approvalsViewModel.state.approvalDispositionState?.approvalDisposition?.data)
+    }
+    //endregion
+
+    //region Helper methods & Custom Asserts
 
     private suspend fun setupApprovalsRepositoryToReturnApprovalsOnGetApprovals() {
         whenever(approvalsRepository.getWalletApprovals()).thenAnswer {
@@ -455,9 +496,57 @@ class ApprovalsViewModelTest : BaseViewModelTest() {
             Resource.Error<Any?>(exception = Exception())
         }
     }
-    //endregion
 
-    //region Custom Asserts
+    private fun triggerRegisterDispositionCallAndAssertNonceDataAndBioPromptState() = runTest {
+        setMultipleAccountsAndAssertNonceDataAndBioPromptState()
+
+        //Trigger the register disposition call (user triggers this when they give biometry approval)
+        approvalsViewModel.biometryApproved(cryptoObject)
+    }
+
+    private suspend fun setApprovalsDataInStateAndAssertStateWasSet() = runTest {
+        setupApprovalsRepositoryToReturnApprovalsOnGetApprovals()
+
+        approvalsViewModel.refreshData()
+
+        advanceUntilIdle()
+
+        //Assert expected refresh data
+        assertExpectedWalletApprovalsResultAndExpectedApprovalsSize(
+            expectedResourceState = SUCCESS,
+            expectedSize = testApprovalsSize
+        )
+
+        approvalsViewModel.setShouldDisplayConfirmDispositionDialog(
+            approval = approvalsViewModel.state.approvals[testApprovalsFirstIndex],
+            isApproving = true,
+            dialogMessages = mockMessages
+        )
+
+        //Assert expected selectedApproval and disposition
+        assertExpectedDispositionAndExpectedSelectedApproval(
+            expectedDisposition = ApprovalDisposition.APPROVE,
+            expectedSelectedApproval = approvalsViewModel.state.approvals[testApprovalsFirstIndex]
+        )
+
+        setMultipleAccountsAndAssertNonceDataAndBioPromptState()
+    }
+
+    private fun setMultipleAccountsAndAssertNonceDataAndBioPromptState() = runTest {
+        //Assert that there is no nonce data before setting nonce data and that the bio prompt trigger is uninitialized
+        assertEquals(null, approvalsViewModel.state.multipleAccounts)
+        assertTrue(approvalsViewModel.state.bioPromptTrigger is Resource.Uninitialized)
+
+        val multipleAccounts = durableNonceViewModel.MultipleAccounts(nonces = listOf(Nonce(testNonce)))
+        approvalsViewModel.setMultipleAccounts(multipleAccounts)
+
+        advanceUntilIdle()
+
+        //Assert nonce data is set and the prompt trigger is success
+        assertTrue(approvalsViewModel.state.bioPromptTrigger is Resource.Success)
+        assertEquals(multipleAccounts, approvalsViewModel.state.multipleAccounts)
+    }
+
     private fun assertExpectedWalletApprovalsResultAndExpectedApprovalsSize(expectedResourceState: ResourceState, expectedSize: Int) {
         if (expectedResourceState == SUCCESS) {
             assertEquals(true, approvalsViewModel.state.walletApprovalsResult is Resource.Success)
@@ -478,6 +567,14 @@ class ApprovalsViewModelTest : BaseViewModelTest() {
             assertEquals(false, approvalsViewModel.state.shouldDisplayConfirmDisposition?.isApproving)
         }
     }
+
+    private fun assertExpectedDefaultStateForApprovalsData() {
+        assertTrue(approvalsViewModel.state.approvals.isEmpty())
+        assertTrue(approvalsViewModel.state.walletApprovalsResult is Resource.Uninitialized)
+        assertNull(approvalsViewModel.state.selectedApproval)
+        assertNull(approvalsViewModel.state.multipleAccounts)
+    }
+
     //endregion
 
 }
