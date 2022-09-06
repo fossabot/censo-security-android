@@ -250,7 +250,7 @@ data class ApprovalDispositionRequest(
             is AcceptVaultInvitation ->
                 requestType.vaultName.toByteArray(charset = Charsets.UTF_8)
             is PasswordReset ->
-                "".toByteArray(charset = Charsets.UTF_8)
+                requestId.toByteArray(charset = Charsets.UTF_8)
             else -> {
                 if (approverPublicKey == null) throw Exception("MISSING KEY")
 
