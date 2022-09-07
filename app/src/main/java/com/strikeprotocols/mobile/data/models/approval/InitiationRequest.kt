@@ -282,7 +282,7 @@ data class InitiationRequest(
                 val isUnwrap = requestType.destinationSymbolInfo.symbol == "SOL"
                 listOfNotNull(
                     AccountMeta(opAccountPublicKey(), isSigner = false, isWritable = true),
-                    AccountMeta(PublicKey(signingData.walletAddress), isSigner = false, isWritable = false),
+                    AccountMeta(PublicKey(signingData.walletAddress), isSigner = false, isWritable = true),
                     AccountMeta(sourcePublicKey, isSigner = false, isWritable = true),
                     AccountMeta(sourceTokenPublicKey, isSigner = false, isWritable = true),
                     AccountMeta(WRAPPED_SOL_MINT, isSigner = false, isWritable = false),
@@ -323,7 +323,7 @@ data class InitiationRequest(
             is DAppTransactionRequest -> {
                 listOf(
                     AccountMeta(publicKey = opAccountPublicKey(), isSigner = false, isWritable = true),
-                    AccountMeta(publicKey = PublicKey(signingData.walletAddress), isSigner = false, isWritable = false),
+                    AccountMeta(publicKey = PublicKey(signingData.walletAddress), isSigner = false, isWritable = true),
                     AccountMeta(publicKey = approverPublicKey, isSigner = true, isWritable = false),
                     AccountMeta(publicKey = SYSVAR_CLOCK_PUBKEY, isSigner = false, isWritable = false),
                     AccountMeta(publicKey = PublicKey(signingData.feePayer), isSigner = true, isWritable = false)
@@ -332,7 +332,7 @@ data class InitiationRequest(
             else -> {
                 listOf(
                     AccountMeta(publicKey = opAccountPublicKey(), isSigner = false, isWritable = true),
-                    AccountMeta(publicKey = PublicKey(signingData.walletAddress), isSigner = false, isWritable = false),
+                    AccountMeta(publicKey = PublicKey(signingData.walletAddress), isSigner = false, isWritable = true),
                     AccountMeta(publicKey = approverPublicKey, isSigner = true, isWritable = false),
                     AccountMeta(publicKey = SYSVAR_CLOCK_PUBKEY, isSigner = false, isWritable = false),
                     AccountMeta(publicKey = PublicKey(signingData.feePayer), isSigner = true, isWritable = false)
@@ -360,7 +360,7 @@ data class InitiationRequest(
 
         return listOf(
             AccountMeta(publicKey = opAccountPublicKey(), isSigner = false, isWritable = true),
-            AccountMeta(publicKey = PublicKey(signingData.walletAddress), isSigner = false, isWritable = false),
+            AccountMeta(publicKey = PublicKey(signingData.walletAddress), isSigner = false, isWritable = true),
             AccountMeta(publicKey = sourcePublicKey, isSigner = false, isWritable = true),
             AccountMeta(publicKey = destinationPublicKey, isSigner = false, isWritable = false),
             AccountMeta(publicKey = approverPublicKey, isSigner = true, isWritable = false),
