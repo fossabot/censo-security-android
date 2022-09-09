@@ -10,6 +10,7 @@ import com.strikeprotocols.mobile.data.models.MultipleAccountsResponse
 import com.strikeprotocols.mobile.data.models.Nonce
 import com.strikeprotocols.mobile.presentation.durable_nonce.DurableNonceViewModel
 import com.strikeprotocols.mobile.presentation.durable_nonce.DurableNonceViewModel.Companion.UNABLE_TO_RETRIEVE_VALID_NONCE
+import com.strikeprotocols.mobile.viewModel.BaseViewModelTest
 import junit.framework.Assert.assertEquals
 import junit.framework.TestCase
 import kotlinx.coroutines.Dispatchers
@@ -25,7 +26,7 @@ import org.mockito.Mock
 import org.mockito.MockitoAnnotations
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class DurableNonceViewModelTest {
+class DurableNonceViewModelTest : BaseViewModelTest() {
 
     //region Testing data
     private val dispatcher = TestCoroutineDispatcher()

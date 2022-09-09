@@ -10,7 +10,6 @@ import com.strikeprotocols.mobile.data.*
 import com.strikeprotocols.mobile.data.models.VerifyUser
 import com.strikeprotocols.mobile.data.models.WalletSigner
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -46,31 +45,32 @@ class EntranceViewModel @Inject constructor(
         }
     }
 
-    private fun retrieveUserVerifyDetails() {
-        viewModelScope.launch(Dispatchers.IO) {
-            val verifyUserDataResource = userRepository.verifyUser()
+    private suspend fun retrieveUserVerifyDetails() {
+        val verifyUserDataResource = userRepository.verifyUser()
 
-            if (verifyUserDataResource is Resource.Success) {
-                val verifyUser = verifyUserDataResource.data
+        if (verifyUserDataResource is Resource.Success) {
+            val verifyUser = verifyUserDataResource.data
 
-                if (verifyUser != null) {
-                    strikeUserData.setStrikeUser(verifyUser = verifyUser)
-                    state = state.copy(verifyUserResult = verifyUserDataResource)
-                    determineUserDestination(verifyUser)
-                } else {
-                    handleVerifyUserError(verifyUserDataResource)
-                }
-
-            } else if (verifyUserDataResource is Resource.Error) {
+            if (verifyUser != null) {
+                strikeUserData.setStrikeUser(verifyUser = verifyUser)
+                state = state.copy(verifyUserResult = verifyUserDataResource)
+                determineUserDestination(verifyUser)
+            } else {
                 handleVerifyUserError(verifyUserDataResource)
             }
+
+        } else if (verifyUserDataResource is Resource.Error) {
+            handleVerifyUserError(verifyUserDataResource)
         }
+
     }
 
     fun retryRetrieveVerifyUserDetails() {
         resetVerifyUserResult()
         resetWalletSignersCall()
-        retrieveUserVerifyDetails()
+        viewModelScope.launch {
+            retrieveUserVerifyDetails()
+        }
     }
 
     private fun handleVerifyUserError(verifyUserDataResource: Resource<VerifyUser>) {
