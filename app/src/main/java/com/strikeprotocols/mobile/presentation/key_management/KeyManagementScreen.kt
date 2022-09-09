@@ -2,24 +2,14 @@ package com.strikeprotocols.mobile.presentation.key_management
 
 import android.widget.Toast
 import androidx.biometric.BiometricPrompt
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.zIndex
 import androidx.fragment.app.FragmentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
@@ -127,8 +117,8 @@ fun KeyManagementScreen(
                     pastedPhrase = state.pastedPhrase,
                     keyRecoveryFlowStep =
                         (state.keyManagementFlowStep as KeyManagementFlowStep.RecoveryFlow).step,
-                    onNavigate = viewModel::recoverKeyNavigationForward,
-                    onBackNavigate = viewModel::recoverKeyNavigationBackward,
+                    onNavigate = viewModel::keyRecoveryNavigateForward,
+                    onBackNavigate = viewModel::keyRecoveryNavigateBackward,
                     verifyPastedPhrase = viewModel::verifyPhraseToRecoverKeyPair,
                     onExit = viewModel::exitPhraseFlow,
                     onPhraseFlowAction = viewModel::phraseFlowAction,
@@ -148,7 +138,7 @@ fun KeyManagementScreen(
         KeyManagementFlow.KEY_REGENERATION -> {
             Box {
                 KeyRegenerationFlowUI(
-                    onNavigate = viewModel::regenerateKeyNavigationForward,
+                    onNavigate = viewModel::keyRegenerationNavigateForward,
                     retryKeyCreation = viewModel::retryRegenerateData,
                     keyRegenerationState = state.finalizeKeyFlow
                 )
@@ -156,7 +146,7 @@ fun KeyManagementScreen(
         }
         KeyManagementFlow.KEY_MIGRATION -> {
             KeyMigrationFlowUI(
-                onNavigate = viewModel::migrateKeyNavigationForward,
+                onNavigate = viewModel::keyMigrationNavigateForward,
                 retryKeyMigration = viewModel::retryKeyMigration,
                 keyMigrationState = state.finalizeKeyFlow
             )
@@ -170,8 +160,8 @@ fun KeyManagementScreen(
                         (state.keyManagementFlowStep as KeyManagementFlowStep.CreationFlow).step,
                     wordIndex = state.wordIndex,
                     onPhraseFlowAction = viewModel::phraseFlowAction,
-                    onNavigate = viewModel::createKeyNavigationForward,
-                    onBackNavigate = viewModel::createKeyNavigationBackward,
+                    onNavigate = viewModel::keyCreationNavigateForward,
+                    onBackNavigate = viewModel::keyCreationNavigateBackward,
                     verifyPastedPhrase = viewModel::verifyPastedPhrase,
                     onExit = viewModel::exitPhraseFlow,
                     wordToVerifyIndex = state.confirmPhraseWordsState.wordIndex,

@@ -48,7 +48,7 @@ class KeyManagementViewModel @Inject constructor(
     private fun setArgsToState(keyManagementInitialData: KeyManagementInitialData) {
         viewModelScope.launch {
             when (keyManagementInitialData.flow) {
-                KeyManagementFlow.KEY_CREATION -> {
+                KeyManagementFlow.KEY_CREATION, KeyManagementFlow.UNINITIALIZED -> {
                     val phrase = keyRepository.generatePhrase()
                     state = state.copy(
                         phrase = phrase
@@ -87,14 +87,6 @@ class KeyManagementViewModel @Inject constructor(
                     )
                     triggerBioPromptForMigration()
                 }
-                else -> {
-                    state = state.copy(
-                        initialData = keyManagementInitialData,
-                        keyManagementFlowStep =
-                            KeyManagementFlowStep.CreationFlow(KeyCreationFlowStep.ENTRY_STEP),
-                        keyManagementFlow = keyManagementInitialData.flow
-                    )
-                }
             }
         }
     }
@@ -132,6 +124,8 @@ class KeyManagementViewModel @Inject constructor(
 
     //region RETRY
     fun retryRegenerateData() {
+        //We use resetAddWalletSignersCall() to reset finalizeKeyFlow
+        // and prevent the UI from constantly displaying an error dialog
         resetAddWalletSignersCall()
         regenerateData()
     }
@@ -166,7 +160,7 @@ class KeyManagementViewModel @Inject constructor(
         state = state.copy(goToAccount = Resource.Success(true))
     }
 
-    private fun sendUserBackToStartKeyCreationState() : KeyManagementState {
+    fun retrieveInitialKeyCreationState() : KeyManagementState {
         return state.copy(
             keyManagementFlowStep = KeyManagementFlowStep.CreationFlow(KeyCreationFlowStep.ENTRY_STEP),
             showToast = Resource.Success(NO_PHRASE_ERROR)
@@ -198,7 +192,7 @@ class KeyManagementViewModel @Inject constructor(
         }
     }
 
-    fun createKeyNavigationForward() {
+    fun keyCreationNavigateForward() {
         if (state.keyManagementFlowStep !is KeyManagementFlowStep.CreationFlow) {
             return
         }
@@ -216,14 +210,14 @@ class KeyManagementViewModel @Inject constructor(
                     confirmPhraseWordsState = confirmPhraseWordsState
                 )
             } catch (e: Exception) {
-                sendUserBackToStartKeyCreationState()
+                retrieveInitialKeyCreationState()
             }
         } else {
             state = state.copy(keyManagementFlowStep = KeyManagementFlowStep.CreationFlow(nextStep))
         }
     }
 
-    fun createKeyNavigationBackward() {
+    fun keyCreationNavigateBackward() {
         if (state.keyManagementFlowStep !is KeyManagementFlowStep.CreationFlow) {
             return
         }
@@ -244,7 +238,7 @@ class KeyManagementViewModel @Inject constructor(
         }
     }
 
-    fun recoverKeyNavigationForward() {
+    fun keyRecoveryNavigateForward() {
         if(state.keyManagementFlowStep !is KeyManagementFlowStep.RecoveryFlow) {
             return
         }
@@ -265,7 +259,7 @@ class KeyManagementViewModel @Inject constructor(
         }
     }
 
-    fun recoverKeyNavigationBackward() {
+    fun keyRecoveryNavigateBackward() {
         if (state.keyManagementFlowStep !is KeyManagementFlowStep.RecoveryFlow) {
             return
         }
@@ -278,7 +272,7 @@ class KeyManagementViewModel @Inject constructor(
         state = state.copy(keyManagementFlowStep = KeyManagementFlowStep.RecoveryFlow(nextStep))
     }
 
-    fun regenerateKeyNavigationForward() {
+    fun keyRegenerationNavigateForward() {
         if(state.keyManagementFlowStep !is KeyManagementFlowStep.RegenerationFlow) {
             return
         }
@@ -291,7 +285,7 @@ class KeyManagementViewModel @Inject constructor(
         state = state.copy(keyManagementFlowStep = KeyManagementFlowStep.RegenerationFlow(nextStep))
     }
 
-    fun migrateKeyNavigationForward() {
+    fun keyMigrationNavigateForward() {
         if (state.keyManagementFlowStep !is KeyManagementFlowStep.MigrationFlow) {
             return
         }
@@ -372,7 +366,7 @@ class KeyManagementViewModel @Inject constructor(
         }
     }
 
-    private suspend fun triggerBioPromptForCreate() {
+    suspend fun triggerBioPromptForCreate() {
         val cipher = keyRepository.getCipherForEncryption()
         if(cipher != null) {
             state = state.copy(
@@ -382,7 +376,7 @@ class KeyManagementViewModel @Inject constructor(
         }
     }
 
-    private fun triggerBioPromptForRecover(inputMethod: PhraseInputMethod) {
+    fun triggerBioPromptForRecover(inputMethod: PhraseInputMethod) {
         viewModelScope.launch {
             val cipher = keyRepository.getCipherForEncryption()
             if(cipher != null) {
@@ -395,7 +389,7 @@ class KeyManagementViewModel @Inject constructor(
         }
     }
 
-    private fun triggerBioPromptForMigration() {
+    fun triggerBioPromptForMigration() {
         viewModelScope.launch {
             val cipher = keyRepository.getCipherForEncryption()
             state = state.copy(
@@ -405,7 +399,7 @@ class KeyManagementViewModel @Inject constructor(
         }
     }
 
-    private fun recoverKey(cipher: Cipher) {
+    fun recoverKey(cipher: Cipher) {
         viewModelScope.launch {
             val verifyUser = state.initialData?.verifyUserDetails
             val publicKey = verifyUser?.firstPublicKey()
@@ -455,7 +449,7 @@ class KeyManagementViewModel @Inject constructor(
         val phrase = state.phrase
 
         if (phrase.isNullOrEmpty()) {
-            state = sendUserBackToStartKeyCreationState()
+            state = retrieveInitialKeyCreationState()
             return
         }
 
@@ -513,12 +507,13 @@ class KeyManagementViewModel @Inject constructor(
         }
     }
 
-    private fun recoverKeyFailure() {
+    fun recoverKeyFailure() {
         state = if (state.inputMethod == PhraseInputMethod.PASTED) {
             state.copy(
                 keyManagementFlowStep = KeyManagementFlowStep.RecoveryFlow(KeyRecoveryFlowStep.CONFIRM_KEY_ERROR_STEP)
             )
         } else {
+            //This method call is not needed if we reset the same state object a few lines below
             resetConfirmPhraseWordsState()
             state.copy(
                 phrase = "",
@@ -546,10 +541,10 @@ class KeyManagementViewModel @Inject constructor(
         state = state.copy(wordIndex = wordIndex)
     }
 
-    private fun generateConfirmPhraseWordsStateForCreationFlow(): ConfirmPhraseWordsState {
+    fun generateConfirmPhraseWordsStateForCreationFlow(): ConfirmPhraseWordsState {
         val phrase = state.phrase ?: throw Exception(PhraseException.NULL_PHRASE_IN_STATE)
 
-        val indexedPhraseWord = getPhraseWordAtIndex(phrase = phrase, index = 0)//This does almost the same thing as getWordIndexFromWordSet method
+        val indexedPhraseWord = getPhraseWordAtIndex(phrase = phrase, index = FIRST_WORD_INDEX)//This does almost the same thing as getWordIndexFromWordSet method
 
         return ConfirmPhraseWordsState(
             phrase = phrase,
@@ -562,12 +557,12 @@ class KeyManagementViewModel @Inject constructor(
         )
     }
 
-    private fun generateConfirmPhraseWordsStateForRecoveryFlow(): ConfirmPhraseWordsState {
+    fun generateConfirmPhraseWordsStateForRecoveryFlow(): ConfirmPhraseWordsState {
         //The user will just have to enter 24 words and we just need to keep them and build them into a phrase
         return ConfirmPhraseWordsState(
             phrase = "",
             phraseWordToVerify = "",
-            wordIndex = 0,
+            wordIndex = FIRST_WORD_INDEX,
             wordInput = "",
             errorEnabled = false,
             wordsVerified = 0,
@@ -575,7 +570,7 @@ class KeyManagementViewModel @Inject constructor(
         )
     }
 
-    private fun getPhraseWordAtIndex(phrase: String, index: Int): IndexedPhraseWord {
+    fun getPhraseWordAtIndex(phrase: String, index: Int): IndexedPhraseWord {
         if (!phrase.contains(" ") || phrase.split(" ").size < ConfirmPhraseWordsState.PHRASE_WORD_COUNT) {
             //Does not contain space
             //Does not equal 24 word phrase
