@@ -8,7 +8,6 @@ import javax.inject.Inject
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.viewModelScope
-import com.google.firebase.messaging.FirebaseMessaging
 import com.raygun.raygun4android.RaygunClient
 import com.strikeprotocols.mobile.common.*
 import com.strikeprotocols.mobile.data.*
@@ -16,7 +15,6 @@ import com.strikeprotocols.mobile.data.NoInternetException.Companion.NO_INTERNET
 import com.strikeprotocols.mobile.data.models.LoginResponse
 import com.strikeprotocols.mobile.data.models.PushBody
 import kotlinx.coroutines.*
-import kotlinx.coroutines.tasks.await
 
 @HiltViewModel
 class SignInViewModel @Inject constructor(
@@ -44,7 +42,7 @@ class SignInViewModel @Inject constructor(
     fun updateEmail(updatedEmail: String) {
         val sanitizedEmail = updatedEmail.lowercase().trim()
         state = state.copy(email = sanitizedEmail, emailErrorEnabled = false)
-        SharedPrefsHelper.saveUserEmail(sanitizedEmail)
+        viewModelScope.launch { userRepository.saveUserEmail(sanitizedEmail) }
     }
 
     fun updatePassword(updatedPassword: String) {
@@ -56,7 +54,7 @@ class SignInViewModel @Inject constructor(
     }
 
     fun signInActionCompleted() {
-        if(state.loginStep == LoginStep.EMAIL_ENTRY) {
+        if (state.loginStep == LoginStep.EMAIL_ENTRY) {
             checkEmail()
         } else {
             checkPassword()
@@ -90,7 +88,7 @@ class SignInViewModel @Inject constructor(
 
         viewModelScope.launch {
             try {
-                val timestamp = generateFormattedTimestamp()
+                val timestamp = keyRepository.generateTimestamp()
                 val signedTimestamp = keyRepository.signTimestamp(
                     timestamp = timestamp,
                     cryptoObject = cryptoObject
@@ -119,7 +117,7 @@ class SignInViewModel @Inject constructor(
     //region Login + API Calls
     private fun loginWithPassword() {
         state = state.copy(loginResult = Resource.Loading())
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch {
             try {
                 val loginResource = userRepository.loginWithPassword(
                     email = state.email, password = state.password
@@ -208,7 +206,7 @@ class SignInViewModel @Inject constructor(
 
     private suspend fun submitNotificationTokenForRegistration() {
         try {
-            val token = FirebaseMessaging.getInstance().token.await()
+            val token = pushRepository.retrievePushToken()
 
             val deviceId = pushRepository.getDeviceId()
 
@@ -219,7 +217,7 @@ class SignInViewModel @Inject constructor(
                 )
                 val pushResource = pushRepository.addPushNotification(pushBody = pushBody)
 
-                if(pushResource is Resource.Error) {
+                if (pushResource is Resource.Error) {
                     throw Exception("Push registration failed with code: ${pushResource.strikeError}")
                 }
             } else {

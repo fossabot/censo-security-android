@@ -3,9 +3,11 @@ package com.strikeprotocols.mobile.data
 import android.annotation.SuppressLint
 import android.content.Context
 import android.provider.Settings
+import com.google.firebase.messaging.FirebaseMessaging
 import com.strikeprotocols.mobile.common.*
 import com.strikeprotocols.mobile.data.models.*
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.tasks.await
 
 interface UserRepository {
     suspend fun loginWithPassword(email: String, password: String): Resource<LoginResponse>

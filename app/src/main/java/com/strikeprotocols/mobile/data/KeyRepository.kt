@@ -6,6 +6,7 @@ import cash.z.ecc.android.bip39.Mnemonics
 import cash.z.ecc.android.bip39.toSeed
 import com.strikeprotocols.mobile.common.BaseWrapper
 import com.strikeprotocols.mobile.common.Resource
+import com.strikeprotocols.mobile.common.generateFormattedTimestamp
 import com.strikeprotocols.mobile.data.models.StoredKeyData
 import com.strikeprotocols.mobile.data.models.VerifyUser
 import com.strikeprotocols.mobile.data.models.WalletSigner
@@ -42,6 +43,8 @@ interface KeyRepository {
     suspend fun migrateOldDataToBiometryProtectedStorage(cryptoObject: BiometricPrompt.CryptoObject)
 
     suspend fun havePrivateKey(): Boolean
+
+    suspend fun generateTimestamp() : String
 }
 
 class KeyRepositoryImpl(
@@ -249,4 +252,6 @@ class KeyRepositoryImpl(
         val userEmail = userRepository.retrieveUserEmail()
         return encryptionManager.havePrivateKeyStored(userEmail)
     }
+
+    override suspend fun generateTimestamp() = generateFormattedTimestamp()
 }
