@@ -210,7 +210,6 @@
     <string name="update_biometry_entrance_message">Please update your device biometry. If you already updated your biometry, please close the app and re-enter.</string>
     <string name="signing_in_as">Signing in as</string>
     <string name="too_many_failed_attempts">Too many failed attempts, please try again later.</string>
-    <string name="too_many_failed_attempts_key_management">Too many failed attempts. Please restart phone if error persists.</string>
     <string name="key_management_bio_canceled">Biometry approval failed. Please try again.</string>
 
     <string name="sign_in_error">Sign In Error</string>
@@ -229,6 +228,9 @@
     <string name="continue_text">Continue</string>
     <string name="close_dialog">close dialog</string>
     <string name="dismiss">Dismiss</string>
+
     <string name="add">Add</string>
     <string name="solana">Solana</string>
+
+    <string name="biometry_changed_key_invalidated">Biometry for device has changed. Key invalidated.</string>
 </resources>

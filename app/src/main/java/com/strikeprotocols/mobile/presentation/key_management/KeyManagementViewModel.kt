@@ -16,6 +16,7 @@ import com.strikeprotocols.mobile.data.models.WalletSigner
 import com.strikeprotocols.mobile.presentation.key_management.KeyManagementState.Companion.NO_PHRASE_ERROR
 import com.strikeprotocols.mobile.presentation.key_management.flows.*
 import kotlinx.coroutines.*
+import javax.crypto.Cipher
 
 @HiltViewModel
 class KeyManagementViewModel @Inject constructor(
@@ -404,7 +405,7 @@ class KeyManagementViewModel @Inject constructor(
         }
     }
 
-    private fun recoverKey(cryptoObject: BiometricPrompt.CryptoObject) {
+    private fun recoverKey(cipher: Cipher) {
         viewModelScope.launch {
             val verifyUser = state.initialData?.verifyUserDetails
             val publicKey = verifyUser?.firstPublicKey()
@@ -414,7 +415,7 @@ class KeyManagementViewModel @Inject constructor(
                     keyRepository.regenerateAuthDataAndSaveKeyToUser(
                         phrase = state.phrase ?: "",
                         backendPublicKey = publicKey,
-                        cryptoObject = cryptoObject
+                        cipher = cipher
                     )
                     state = state.copy(finalizeKeyFlow = Resource.Success(null))
                 } catch (e: Exception) {
@@ -426,10 +427,10 @@ class KeyManagementViewModel @Inject constructor(
         }
     }
 
-    private fun migrateKeyData(cryptoObject: BiometricPrompt.CryptoObject) {
+    private fun migrateKeyData(cipher: Cipher) {
         viewModelScope.launch {
             state = try {
-                keyRepository.migrateOldDataToBiometryProtectedStorage(cryptoObject)
+                keyRepository.migrateOldDataToBiometryProtectedStorage(cipher)
                 state.copy(finalizeKeyFlow = Resource.Success(null))
             } catch (e: Exception) {
                 state.copy(finalizeKeyFlow = Resource.Error(exception = e))
@@ -437,11 +438,11 @@ class KeyManagementViewModel @Inject constructor(
         }
     }
 
-    fun biometryApproved(cryptoObject: BiometricPrompt.CryptoObject) {
+    fun biometryApproved(cipher: Cipher) {
         when(state.bioPromptReason) {
-            BioPromptReason.CREATE -> createAndSaveKey(cryptoObject)
-            BioPromptReason.RECOVER -> recoverKey(cryptoObject)
-            BioPromptReason.MIGRATION -> migrateKeyData(cryptoObject)
+            BioPromptReason.CREATE -> createAndSaveKey(cipher)
+            BioPromptReason.RECOVER -> recoverKey(cipher)
+            BioPromptReason.MIGRATION -> migrateKeyData(cipher)
             else -> {}
         }
     }
@@ -450,10 +451,10 @@ class KeyManagementViewModel @Inject constructor(
         state = state.copy(finalizeKeyFlow = Resource.Error())
     }
 
-    private fun createAndSaveKey(cryptoObject: BiometricPrompt.CryptoObject?) {
+    private fun createAndSaveKey(cipher: Cipher) {
         val phrase = state.phrase
 
-        if (phrase.isNullOrEmpty() || cryptoObject == null) {
+        if (phrase.isNullOrEmpty()) {
             state = sendUserBackToStartKeyCreationState()
             return
         }
@@ -462,7 +463,7 @@ class KeyManagementViewModel @Inject constructor(
             try {
                 val walletSigner = keyRepository.generateInitialAuthDataAndSaveKeyToUser(
                     Mnemonics.MnemonicCode(phrase = phrase),
-                    cryptoObject
+                    cipher
                 )
                 state = state.copy(walletSignerToAdd = walletSigner)
 

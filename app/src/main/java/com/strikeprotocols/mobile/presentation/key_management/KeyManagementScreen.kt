@@ -55,23 +55,22 @@ fun KeyManagementScreen(
     val bioPrompt = BioCryptoUtil.createBioPrompt(
         fragmentActivity = context,
         onSuccess = {
-            viewModel.biometryApproved(it!!)
+            val cipher = it?.cipher
+            if (cipher != null) {
+                viewModel.biometryApproved(cipher)
+            } else {
+                BioCryptoUtil.handleBioPromptOnFail(
+                    context = context,
+                    errorCode = BioCryptoUtil.NO_CIPHER_CODE
+                ) {
+                    viewModel.biometryFailed()
+                }
+            }
         },
         onFail = {
-            if (it == BioCryptoUtil.TOO_MANY_ATTEMPTS_CODE || it == BioCryptoUtil.FINGERPRINT_DISABLED_CODE) {
-                Toast.makeText(
-                    context,
-                    context.getString(R.string.too_many_failed_attempts_key_management),
-                    Toast.LENGTH_LONG
-                ).show()
-            } else {
-                Toast.makeText(
-                    context,
-                    context.getString(R.string.key_management_bio_canceled),
-                    Toast.LENGTH_LONG
-                ).show()
+            BioCryptoUtil.handleBioPromptOnFail(context = context, errorCode = it) {
+                viewModel.biometryFailed()
             }
-            viewModel.biometryFailed()
         }
     )
 

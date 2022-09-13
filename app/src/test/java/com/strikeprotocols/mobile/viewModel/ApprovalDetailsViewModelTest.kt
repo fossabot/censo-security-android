@@ -50,8 +50,6 @@ class ApprovalDetailsViewModelTest : BaseViewModelTest() {
     @Mock
     lateinit var countdownTimer: StrikeCountDownTimer
 
-    lateinit var cryptoObject: BiometricPrompt.CryptoObject
-
     private lateinit var approvalDetailsViewModel: ApprovalDetailsViewModel
 
     private val dispatcher = StandardTestDispatcher()
@@ -87,8 +85,6 @@ class ApprovalDetailsViewModelTest : BaseViewModelTest() {
         durableNonceViewModel = DurableNonceViewModel(solanaRepository)
 
         testMultipleAccounts =  durableNonceViewModel.MultipleAccounts(nonces = listOf(Nonce(getNonce())))
-
-        cryptoObject = BiometricPrompt.CryptoObject(cipher)
     }
 
     @After
@@ -507,7 +503,7 @@ class ApprovalDetailsViewModelTest : BaseViewModelTest() {
         assertEquals(testMultipleAccounts, approvalDetailsViewModel.state.multipleAccounts)
         assertTrue(approvalDetailsViewModel.state.bioPromptTrigger is Resource.Success)
 
-        approvalDetailsViewModel.biometryApproved(cryptoObject)
+        approvalDetailsViewModel.biometryApproved(cipher)
     }
     //endregion
 

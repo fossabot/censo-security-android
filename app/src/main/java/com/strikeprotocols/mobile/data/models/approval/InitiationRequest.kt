@@ -20,6 +20,7 @@ import com.strikeprotocols.mobile.data.models.approval.SolanaApprovalRequestType
 import com.strikeprotocols.mobile.data.models.approval.TransactionInstruction.Companion.createAdvanceNonceInstruction
 import org.bouncycastle.crypto.params.Ed25519PrivateKeyParameters
 import java.io.ByteArrayOutputStream
+import javax.crypto.Cipher
 
 data class InitiationRequest(
     val requestId: String,
@@ -384,12 +385,12 @@ data class InitiationRequest(
     }
 
     fun convertToApiBody(
-        encryptionManager: EncryptionManager,
-        cryptoObject: BiometricPrompt.CryptoObject): InitiateRequestBody {
+        encryptionManager: EncryptionManager, cipher: Cipher
+    ): InitiateRequestBody {
 
         //get private key here then we can pass to encryption manager methods
         val privateKeyByteArray = encryptionManager.retrieveSavedKey(
-            email = email, cryptoObject = cryptoObject
+            email = email, cipher = cipher
         )
 
         val privateKey = BaseWrapper.encode(privateKeyByteArray)

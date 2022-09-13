@@ -1,6 +1,5 @@
 package com.strikeprotocols.mobile.data
 
-import androidx.biometric.BiometricPrompt
 import com.strikeprotocols.mobile.common.Resource
 import com.strikeprotocols.mobile.common.StrikeError
 import com.strikeprotocols.mobile.data.models.InitiationDisposition
@@ -8,6 +7,7 @@ import com.strikeprotocols.mobile.data.models.RegisterApprovalDisposition
 import com.strikeprotocols.mobile.data.models.approval.ApprovalDispositionRequest
 import com.strikeprotocols.mobile.data.models.approval.InitiationRequest
 import com.strikeprotocols.mobile.data.models.approval.WalletApproval
+import javax.crypto.Cipher
 import javax.inject.Inject
 
 interface ApprovalsRepository {
@@ -15,12 +15,12 @@ interface ApprovalsRepository {
     suspend fun approveOrDenyDisposition(
         requestId: String,
         registerApprovalDisposition: RegisterApprovalDisposition,
-        cryptoObject: BiometricPrompt.CryptoObject
+        cipher: Cipher
     ): Resource<ApprovalDispositionRequest.RegisterApprovalDispositionBody>
     suspend fun approveOrDenyInitiation(
         requestId: String,
         initialDisposition: InitiationDisposition,
-        cryptoObject: BiometricPrompt.CryptoObject
+        cipher: Cipher,
     ) : Resource<InitiationRequest.InitiateRequestBody>
 }
 
@@ -36,7 +36,7 @@ class ApprovalsRepositoryImpl @Inject constructor(
     override suspend fun approveOrDenyDisposition(
         requestId: String,
         registerApprovalDisposition: RegisterApprovalDisposition,
-        cryptoObject: BiometricPrompt.CryptoObject
+        cipher: Cipher,
     ): Resource<ApprovalDispositionRequest.RegisterApprovalDispositionBody> {
         // Helper method anyItemNull() will check if any of the disposition properties are null,
         // this allows us to use !! operator later in this method without worrying of NPE
@@ -59,7 +59,7 @@ class ApprovalsRepositoryImpl @Inject constructor(
         )
 
         val registerApprovalDispositionBody = try {
-                approvalDispositionRequest.convertToApiBody(encryptionManager, cryptoObject)
+                approvalDispositionRequest.convertToApiBody(encryptionManager, cipher)
         } catch (e: Exception) {
             return Resource.Error(strikeError = StrikeError.SigningDataError())
         }
@@ -75,7 +75,7 @@ class ApprovalsRepositoryImpl @Inject constructor(
     override suspend fun approveOrDenyInitiation(
         requestId: String,
         initialDisposition: InitiationDisposition,
-        cryptoObject: BiometricPrompt.CryptoObject
+        cipher: Cipher,
     ) : Resource<InitiationRequest.InitiateRequestBody> {
         // Helper method anyItemNull() will check if any of the disposition properties are null,
         // this allows us to use !! operator later in this method without worrying of NPE
@@ -98,7 +98,7 @@ class ApprovalsRepositoryImpl @Inject constructor(
             email = userEmail
         )
         val initiationRequestBody = try {
-            initiationRequest.convertToApiBody(encryptionManager, cryptoObject)
+            initiationRequest.convertToApiBody(encryptionManager, cipher)
         } catch (e: Exception) {
             return Resource.Error(strikeError = StrikeError.SigningDataError())
         }

@@ -1,7 +1,6 @@
 package com.strikeprotocols.mobile.data
 
 import android.security.keystore.KeyPermanentlyInvalidatedException
-import androidx.biometric.BiometricPrompt
 import cash.z.ecc.android.bip39.Mnemonics
 import cash.z.ecc.android.bip39.toSeed
 import com.strikeprotocols.mobile.common.BaseWrapper
@@ -17,7 +16,7 @@ interface KeyRepository {
     suspend fun getCipherForDecryption(): Cipher?
     suspend fun signTimestamp(
         timestamp: String,
-        cryptoObject: BiometricPrompt.CryptoObject
+        cipher: Cipher,
     ): String
 
     suspend fun getDeprecatedPrivateKey(): String
@@ -29,18 +28,18 @@ interface KeyRepository {
 
     suspend fun generateInitialAuthDataAndSaveKeyToUser(
         mnemonic: Mnemonics.MnemonicCode,
-        cryptoObject: BiometricPrompt.CryptoObject
+        cipher: Cipher
     ): WalletSigner
 
     suspend fun regenerateAuthDataAndSaveKeyToUser(
         phrase: String,
         backendPublicKey: String,
-        cryptoObject: BiometricPrompt.CryptoObject
+        cipher: Cipher
     )
 
     suspend fun regenerateDataAndUploadToBackend(): Resource<WalletSigner>
 
-    suspend fun migrateOldDataToBiometryProtectedStorage(cryptoObject: BiometricPrompt.CryptoObject)
+    suspend fun migrateOldDataToBiometryProtectedStorage(cipher: Cipher)
 
     suspend fun havePrivateKey(): Boolean
 
@@ -119,7 +118,7 @@ class KeyRepositoryImpl(
 
     override suspend fun signTimestamp(
         timestamp: String,
-        cryptoObject: BiometricPrompt.CryptoObject
+        cipher: Cipher
     ): String {
         val userEmail = userRepository.retrieveUserEmail()
 
@@ -129,7 +128,7 @@ class KeyRepositoryImpl(
             encryptionManager.signDataWithEncryptedKey(
                 data = tokenByteArray,
                 userEmail = userEmail,
-                cryptoObject = cryptoObject
+                cipher = cipher
             )
 
         return BaseWrapper.encodeToBase64(signedTimestamp)
@@ -144,13 +143,13 @@ class KeyRepositoryImpl(
 
     override suspend fun generateInitialAuthDataAndSaveKeyToUser(
         mnemonic: Mnemonics.MnemonicCode,
-        cryptoObject: BiometricPrompt.CryptoObject
+        cipher: Cipher
     ): WalletSigner {
         val userEmail = userRepository.retrieveUserEmail()
         val keyPair = encryptionManager.createKeyPair(mnemonic)
 
         encryptionManager.saveKeyInformation(
-            email = userEmail, cryptoObject = cryptoObject,
+            email = userEmail, cipher = cipher,
             privateKey = keyPair.privateKey, rootSeed = mnemonic.toSeed(),
             publicKey = keyPair.publicKey
         )
@@ -181,7 +180,7 @@ class KeyRepositoryImpl(
     override suspend fun regenerateAuthDataAndSaveKeyToUser(
         phrase: String,
         backendPublicKey: String,
-        cryptoObject: BiometricPrompt.CryptoObject
+        cipher: Cipher
     ) {
         val userEmail = userRepository.retrieveUserEmail()
         //Validate the phrase firsts
@@ -209,14 +208,14 @@ class KeyRepositoryImpl(
         }
 
         encryptionManager.saveKeyInformation(
-            email = userEmail, cryptoObject = cryptoObject,
+            email = userEmail, cipher = cipher,
             privateKey = keyPair.privateKey,
             rootSeed = mnemonic.toSeed(),
             publicKey = keyPair.publicKey
         )
     }
 
-    override suspend fun migrateOldDataToBiometryProtectedStorage(cryptoObject: BiometricPrompt.CryptoObject) {
+    override suspend fun migrateOldDataToBiometryProtectedStorage(cipher: Cipher) {
         val userEmail = userRepository.retrieveUserEmail()
 
         val oldPrivateKey = securePreferences.retrieveDeprecatedPrivateKey(userEmail)
@@ -234,7 +233,7 @@ class KeyRepositoryImpl(
         try {
 
             encryptionManager.saveKeyInformation(
-                email = userEmail, cryptoObject = cryptoObject,
+                email = userEmail, cipher = cipher,
                 privateKey = BaseWrapper.decode(oldPrivateKey),
                 rootSeed = BaseWrapper.decode(oldRootSeed),
                 publicKey = BaseWrapper.decode(publicKey)

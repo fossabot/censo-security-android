@@ -14,6 +14,7 @@ import kotlin.Exception
 import com.strikeprotocols.mobile.data.models.approval.SolanaApprovalRequestType.Companion.INVALID_REQUEST_APPROVAL
 import com.strikeprotocols.mobile.data.models.approval.SolanaApprovalRequestType.Companion.UNKNOWN_REQUEST_APPROVAL
 import com.strikeprotocols.mobile.data.models.approval.SolanaApprovalRequestType.*
+import javax.crypto.Cipher
 
 data class ApprovalDispositionRequest(
     val requestId: String,
@@ -302,10 +303,10 @@ data class ApprovalDispositionRequest(
 
     fun convertToApiBody(
         encryptionManager: EncryptionManager,
-        cryptoObject: BiometricPrompt.CryptoObject): RegisterApprovalDispositionBody {
+        cipher: Cipher): RegisterApprovalDispositionBody {
 
         val privateKeyByteArray = encryptionManager.retrieveSavedKey(
-            email = email, cryptoObject = cryptoObject
+            email = email, cipher = cipher
         )
 
         val privateKey = BaseWrapper.encode(privateKeyByteArray)

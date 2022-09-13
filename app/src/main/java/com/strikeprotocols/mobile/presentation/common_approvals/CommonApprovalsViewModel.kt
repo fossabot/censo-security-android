@@ -1,6 +1,5 @@
 package com.strikeprotocols.mobile.presentation.common_approvals
 
-import androidx.biometric.BiometricPrompt
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -19,6 +18,7 @@ import com.strikeprotocols.mobile.data.models.approval.WalletApproval
 import com.strikeprotocols.mobile.presentation.approval_disposition.ApprovalDispositionState
 import com.strikeprotocols.mobile.presentation.durable_nonce.DurableNonceViewModel
 import kotlinx.coroutines.launch
+import javax.crypto.Cipher
 
 abstract class CommonApprovalsViewModel(
     private val approvalsRepository: ApprovalsRepository,
@@ -76,11 +76,11 @@ abstract class CommonApprovalsViewModel(
         }
     }
 
-    fun biometryApproved(cryptoObject: BiometricPrompt.CryptoObject) {
-        registerApprovalDisposition(cryptoObject)
+    fun biometryApproved(cipher: Cipher) {
+        registerApprovalDisposition(cipher)
     }
 
-    private fun registerApprovalDisposition(cryptoObject: BiometricPrompt.CryptoObject) {
+    private fun registerApprovalDisposition(cipher: Cipher) {
         viewModelScope.launch {
             state = state.copy(
                 approvalDispositionState = state.approvalDispositionState?.copy(
@@ -93,7 +93,7 @@ abstract class CommonApprovalsViewModel(
                 approval = state.selectedApproval,
                 multipleAccounts = state.multipleAccounts,
                 approvalsRepository = approvalsRepository,
-                cryptoObject = cryptoObject
+                cipher = cipher
             )
 
             state = state.copy(approvalDispositionState = approvalDispositionState)
@@ -105,7 +105,7 @@ abstract class CommonApprovalsViewModel(
         approval: WalletApproval?,
         multipleAccounts: DurableNonceViewModel.MultipleAccounts?,
         approvalsRepository: ApprovalsRepository,
-        cryptoObject: BiometricPrompt.CryptoObject
+        cipher: Cipher
     ): ApprovalDispositionState? {
 
         val isInitiationRequest =
@@ -162,7 +162,7 @@ abstract class CommonApprovalsViewModel(
             val initiationResponseResource = approvalsRepository.approveOrDenyInitiation(
                 requestId = approvalId,
                 initialDisposition = initiationDisposition,
-                cryptoObject = cryptoObject
+                cipher = cipher
             )
             return approvalDispositionState.copy(
                 initiationDispositionResult = initiationResponseResource
@@ -178,7 +178,7 @@ abstract class CommonApprovalsViewModel(
                 approvalsRepository.approveOrDenyDisposition(
                     requestId = approvalId,
                     registerApprovalDisposition = registerApprovalDisposition,
-                    cryptoObject = cryptoObject
+                    cipher = cipher
                 )
 
             return approvalDispositionState.copy(

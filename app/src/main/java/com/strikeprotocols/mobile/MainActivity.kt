@@ -4,6 +4,7 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.*
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.material.Surface
@@ -77,7 +78,7 @@ class MainActivity : FragmentActivity() {
             val context = LocalContext.current
             val navController = rememberNavController()
 
-            userStateListener = setupUserStateListener(navController)
+            userStateListener = setupUserStateListener(navController, context)
             userStateListener?.let { authProvider.addUserStateListener(it) }
 
             val semVerState = semVerViewModel.state
@@ -211,10 +212,18 @@ class MainActivity : FragmentActivity() {
         }
     }
 
-    private fun setupUserStateListener(navController: NavController) =
+    private fun setupUserStateListener(navController: NavController, context: Context) =
         object : UserStateListener {
             override fun onUserStateChanged(userState: UserState) {
                 runOnUiThread {
+                    if (userState == UserState.INVALIDATED_KEY) {
+                        Toast.makeText(
+                            context,
+                            getString(R.string.biometry_changed_key_invalidated),
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
+
                     if (userState == UserState.REFRESH_TOKEN_EXPIRED || userState == UserState.INVALIDATED_KEY) {
                         navController.navigate(Screen.EntranceRoute.route) {
                             launchSingleTop = true

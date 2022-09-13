@@ -1,6 +1,5 @@
 package com.strikeprotocols.mobile.presentation.sign_in
 
-import androidx.biometric.BiometricPrompt
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -15,6 +14,7 @@ import com.strikeprotocols.mobile.data.NoInternetException.Companion.NO_INTERNET
 import com.strikeprotocols.mobile.data.models.LoginResponse
 import com.strikeprotocols.mobile.data.models.PushBody
 import kotlinx.coroutines.*
+import javax.crypto.Cipher
 
 @HiltViewModel
 class SignInViewModel @Inject constructor(
@@ -80,18 +80,13 @@ class SignInViewModel @Inject constructor(
         }
     }
 
-    fun biometryApproved(cryptoObject: BiometricPrompt.CryptoObject?) {
-        if (cryptoObject == null) {
-            biometryFailed()
-            return
-        }
-
+    fun biometryApproved(cipher: Cipher) {
         viewModelScope.launch {
             try {
                 val timestamp = keyRepository.generateTimestamp()
                 val signedTimestamp = keyRepository.signTimestamp(
                     timestamp = timestamp,
-                    cryptoObject = cryptoObject
+                    cipher = cipher
                 )
 
                 loginWithBiometry(timestamp = timestamp, signedTimestamp = signedTimestamp)

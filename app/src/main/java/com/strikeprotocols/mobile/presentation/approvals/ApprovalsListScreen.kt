@@ -32,6 +32,7 @@ import com.google.accompanist.swiperefresh.SwipeRefreshIndicator
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import com.strikeprotocols.mobile.R
 import com.strikeprotocols.mobile.common.*
+import com.strikeprotocols.mobile.common.BioCryptoUtil.NO_CIPHER_CODE
 import com.strikeprotocols.mobile.data.models.ApprovalDisposition
 import com.strikeprotocols.mobile.data.models.approval.ApprovalDispositionRequest
 import com.strikeprotocols.mobile.data.models.approval.InitiationRequest
@@ -67,22 +68,23 @@ fun ApprovalsListScreen(
     val bioPrompt = BioCryptoUtil.createBioPrompt(
         fragmentActivity = context,
         onSuccess = {
-            approvalsViewModel.biometryApproved(it!!)
+            val cipher = it?.cipher
+            if (cipher != null) {
+                approvalsViewModel.biometryApproved(cipher)
+            } else {
+                BioCryptoUtil.handleBioPromptOnFail(context = context, errorCode = NO_CIPHER_CODE) {
+                    resetDataAfterErrorDismissed()
+                }
+            }
         },
         onFail = {
-            if (it == BioCryptoUtil.TOO_MANY_ATTEMPTS_CODE || it == BioCryptoUtil.FINGERPRINT_DISABLED_CODE) {
-                Toast.makeText(
-                    context,
-                    context.getString(R.string.too_many_failed_attempts),
-                    Toast.LENGTH_LONG
-                ).show()
+            BioCryptoUtil.handleBioPromptOnFail(context = context, errorCode = it) {
+                resetDataAfterErrorDismissed()
             }
-            resetDataAfterErrorDismissed()
         }
     )
 
     val scaffoldState = rememberScaffoldState()
-    val coroutineScope = rememberCoroutineScope()
 
     fun launchNonceWork() {
         val nonceAddresses = approvalsState.selectedApproval?.retrieveAccountAddresses()

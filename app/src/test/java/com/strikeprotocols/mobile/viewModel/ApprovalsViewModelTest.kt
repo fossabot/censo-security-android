@@ -49,8 +49,6 @@ class ApprovalsViewModelTest : BaseViewModelTest() {
     @Mock
     lateinit var cipher: Cipher
 
-    lateinit var cryptoObject: BiometricPrompt.CryptoObject
-
     private lateinit var approvalsViewModel: ApprovalsViewModel
 
     private val dispatcher = StandardTestDispatcher()
@@ -94,8 +92,6 @@ class ApprovalsViewModelTest : BaseViewModelTest() {
 
         approvalsViewModel =
             ApprovalsViewModel(approvalsRepository = approvalsRepository, keyRepository, countdownTimer)
-
-        cryptoObject = BiometricPrompt.CryptoObject(cipher)
 
         durableNonceViewModel = DurableNonceViewModel(solanaRepository)
     }
@@ -501,7 +497,7 @@ class ApprovalsViewModelTest : BaseViewModelTest() {
         setMultipleAccountsAndAssertNonceDataAndBioPromptState()
 
         //Trigger the register disposition call (user triggers this when they give biometry approval)
-        approvalsViewModel.biometryApproved(cryptoObject)
+        approvalsViewModel.biometryApproved(cipher)
     }
 
     private suspend fun setApprovalsDataInStateAndAssertStateWasSet() = runTest {

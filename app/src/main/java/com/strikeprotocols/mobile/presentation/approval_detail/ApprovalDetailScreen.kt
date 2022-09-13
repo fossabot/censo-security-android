@@ -66,17 +66,22 @@ fun ApprovalDetailsScreen(
     val bioPrompt = BioCryptoUtil.createBioPrompt(
         fragmentActivity = context,
         onSuccess = {
-            approvalDetailsViewModel.biometryApproved(it!!)
+            val cipher = it?.cipher
+            if (cipher != null) {
+                approvalDetailsViewModel.biometryApproved(cipher)
+            } else {
+                BioCryptoUtil.handleBioPromptOnFail(
+                    context = context,
+                    errorCode = BioCryptoUtil.NO_CIPHER_CODE
+                ) {
+                    resetDataAfterErrorDismissed()
+                }
+            }
         },
         onFail = {
-            if (it == BioCryptoUtil.TOO_MANY_ATTEMPTS_CODE || it == BioCryptoUtil.FINGERPRINT_DISABLED_CODE) {
-                Toast.makeText(
-                    context,
-                    context.getString(R.string.too_many_failed_attempts),
-                    Toast.LENGTH_LONG
-                ).show()
+            BioCryptoUtil.handleBioPromptOnFail(context = context, errorCode = it) {
+                resetDataAfterErrorDismissed()
             }
-            resetDataAfterErrorDismissed()
         }
     )
 
