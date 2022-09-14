@@ -46,6 +46,7 @@ data class InitiationRequest(
             is BalanceAccountNameUpdate -> requestType.signingData
             is BalanceAccountPolicyUpdate -> requestType.signingData
             is BalanceAccountAddressWhitelistUpdate -> requestType.signingData
+            is SignData -> requestType.signingData
             is LoginApprovalRequest,
             is AcceptVaultInvitation,
             is PasswordReset,
@@ -67,6 +68,7 @@ data class InitiationRequest(
         is BalanceAccountNameUpdate -> 24
         is BalanceAccountPolicyUpdate -> 26
         is BalanceAccountAddressWhitelistUpdate -> 33
+        is SignData -> 35
 
         is UnknownApprovalType,
         is AcceptVaultInvitation,
@@ -117,6 +119,10 @@ data class InitiationRequest(
     private fun instructionData() : ByteArray {
 
         val commonBytes = signingData.commonInitiationBytes()
+
+        signingData.base64DataToSign?.let {
+            return@instructionData SignDataHelper.serializeSignData(it, commonBytes, 35)
+        }
 
         when(requestType) {
             is BalanceAccountCreation -> {
@@ -220,7 +226,9 @@ data class InitiationRequest(
                 buffer.write(requestType.combinedBytes())
                 return buffer.toByteArray()
             }
-
+            is SignData -> {
+                return SignDataHelper.serializeSignData(requestType.base64Data, commonBytes, opCode)
+            }
             is LoginApprovalRequest, is AcceptVaultInvitation, is UnknownApprovalType, is PasswordReset -> {
                 throw Exception("Unknown Approval")
             }

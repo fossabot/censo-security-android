@@ -72,6 +72,44 @@ class ParseApprovalRequestTypes {
     }
 
     @Test
+    fun testSignDataWithBalanceAccountCreationApprovalParsing() {
+        val deserializer = WalletApprovalDeserializer()
+        val signeDataAsJsonElement: JsonElement = JsonParser.parseString(
+            signDataWithBalanceAccountCreationInitiationJson.trim())
+        val balanceAccountCreationApproval = deserializer.parseData(signeDataAsJsonElement)
+
+        assertNotNull(balanceAccountCreationApproval)
+        assertNotNull(balanceAccountCreationApproval.details)
+
+        val details = balanceAccountCreationApproval.details as SolanaApprovalRequestDetails.MultiSignOpInitiationDetails
+        assertNotEquals(details.requestType, SolanaApprovalRequestType.UnknownApprovalType)
+        assertEquals(
+            details.requestType::class.java,
+            SolanaApprovalRequestType.BalanceAccountCreation::class.java
+        )
+        assertNotNull((details.requestType as SolanaApprovalRequestType.BalanceAccountCreation).signingData.base64DataToSign)
+    }
+
+    @Test
+    fun testSignDataWithPlainStringApprovalParsing() {
+        val deserializer = WalletApprovalDeserializer()
+        val signDataAsJsonElement: JsonElement = JsonParser.parseString(
+            signDataWithPlainStringInitiationJson.trim())
+        val signDataApproval = deserializer.parseData(signDataAsJsonElement)
+
+        assertNotNull(signDataApproval)
+        assertNotNull(signDataApproval.details)
+
+        val details = signDataApproval.details as SolanaApprovalRequestDetails.MultiSignOpInitiationDetails
+        assertNotEquals(details.requestType, SolanaApprovalRequestType.UnknownApprovalType)
+        assertEquals(
+            details.requestType::class.java,
+            SolanaApprovalRequestType.SignData::class.java
+        )
+        assertNull((details.requestType as SolanaApprovalRequestType.SignData).signingData.base64DataToSign)
+    }
+
+    @Test
     fun testLoginApprovalParsing() {
         val deserializer = WalletApprovalDeserializer()
         val signersAsJsonElement: JsonElement = JsonParser.parseString(loginApprovalJson.trim())

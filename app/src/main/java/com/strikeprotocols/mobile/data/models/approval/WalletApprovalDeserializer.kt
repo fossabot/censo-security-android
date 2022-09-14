@@ -1,6 +1,8 @@
 package com.strikeprotocols.mobile.data.models.approval
 
 import com.google.gson.*
+import com.strikeprotocols.mobile.common.BaseWrapper
+import com.strikeprotocols.mobile.data.models.approval.ApprovalTypeMetaData.Companion.DATA_JSON_KEY
 import com.strikeprotocols.mobile.data.models.approval.ApprovalTypeMetaData.Companion.DETAILS_JSON_KEY
 import com.strikeprotocols.mobile.data.models.approval.ApprovalTypeMetaData.Companion.MULTI_SIG_JSON_KEY
 import com.strikeprotocols.mobile.data.models.approval.ApprovalTypeMetaData.Companion.REQUEST_TYPE_JSON_KEY
@@ -79,6 +81,28 @@ class WalletApprovalDeserializer : JsonDeserializer<WalletApproval> {
             ApprovalType.fromString(requestString.asString)
 
         return getStandardApprovalType(approvalType, requestTypeJson)
+    }
+
+    private fun getRequestTypeFromSignDataJson(jsonObject: JsonObject) : SolanaApprovalRequestType {
+        if (!jsonObject.has(DATA_JSON_KEY)) {
+            return SolanaApprovalRequestType.UnknownApprovalType
+        }
+        val dataJson = jsonObject.get(DATA_JSON_KEY)
+
+        if (dataJson !is JsonObject) {
+            return SolanaApprovalRequestType.UnknownApprovalType
+        }
+
+        val requestString = dataJson.get(TYPE_JSON_KEY)
+
+        if(requestString !is JsonPrimitive) {
+            return SolanaApprovalRequestType.UnknownApprovalType
+        }
+
+        val approvalType =
+            ApprovalType.fromString(requestString.asString)
+
+        return getStandardApprovalType(approvalType, dataJson)
     }
 
     fun parseData(json: JsonElement?): WalletApproval {
@@ -218,6 +242,37 @@ class WalletApprovalDeserializer : JsonDeserializer<WalletApproval> {
                     details,
                     SolanaApprovalRequestType.PasswordReset::class.java
                 )
+            }
+            ApprovalType.SIGN_DATA_TYPE -> {
+                val signDataRequest = Gson().fromJson(
+                    details,
+                    SolanaApprovalRequestType.SignData::class.java
+                )
+                //
+                // if the base64 data is an approval type json string, we will return that
+                // type but in the signing data put the string that needs to be signed.
+                // if it not one of the standard approval types, then it just becomes a sign data
+                // that needs to be signed.
+                //
+                val data = String(BaseWrapper.decodeFromBase64(signDataRequest.base64Data))
+
+                val jsonElement = try {
+                    JsonParser.parseString(data)
+                } catch (e: JsonSyntaxException) {
+                    null
+                }
+                if(jsonElement is JsonObject) {
+                    when (val signDataType = getRequestTypeFromSignDataJson(jsonElement)) {
+                        is SolanaApprovalRequestType.BalanceAccountCreation -> {
+                            signDataType.copy(
+                                signingData = signDataRequest.signingData.copy(
+                                    base64DataToSign = signDataRequest.base64Data
+                                )
+                            )
+                        }
+                        else -> signDataRequest
+                    }
+                } else signDataRequest
             }
             else -> SolanaApprovalRequestType.UnknownApprovalType
         }

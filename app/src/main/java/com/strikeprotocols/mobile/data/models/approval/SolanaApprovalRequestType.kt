@@ -4,7 +4,6 @@ import com.google.gson.JsonElement
 import com.google.gson.JsonObject
 import com.google.gson.JsonPrimitive
 import com.google.gson.annotations.SerializedName
-import com.strikeprotocols.mobile.common.BaseWrapper
 import java.io.ByteArrayOutputStream
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
@@ -61,6 +60,7 @@ data class ApprovalTypeMetaData(
         const val TYPE_JSON_KEY = "type"
         const val MULTI_SIG_JSON_KEY = "multisigOpInitiation"
         const val REQUEST_TYPE_JSON_KEY = "requestType"
+        const val DATA_JSON_KEY = "data"
     }
 }
 
@@ -343,6 +343,11 @@ sealed class SolanaApprovalRequestType {
         val type: String
     ) : SolanaApprovalRequestType()
 
+    data class SignData(
+        val base64Data: String,
+        val signingData: SolanaSigningData,
+    ) : SolanaApprovalRequestType()
+
     object UnknownApprovalType : SolanaApprovalRequestType()
 
     companion object {
@@ -366,6 +371,7 @@ sealed class SolanaApprovalRequestType {
             is BalanceAccountNameUpdate -> signingData.nonceAccountAddresses
             is BalanceAccountPolicyUpdate -> signingData.nonceAccountAddresses
             is BalanceAccountAddressWhitelistUpdate -> signingData.nonceAccountAddresses
+            is SignData -> signingData.nonceAccountAddresses
             is LoginApprovalRequest, is UnknownApprovalType, is AcceptVaultInvitation, is PasswordReset -> emptyList()
         }
     }
@@ -376,7 +382,7 @@ sealed class SolanaApprovalRequestType {
             is BalanceAccountCreation, is DAppTransactionRequest, is WrapConversionRequest,
             is WalletConfigPolicyUpdate, is BalanceAccountSettingsUpdate, is DAppBookUpdate,
             is AddressBookUpdate, is BalanceAccountNameUpdate, is BalanceAccountPolicyUpdate,
-            is BalanceAccountAddressWhitelistUpdate -> {
+            is BalanceAccountAddressWhitelistUpdate, is SignData -> {
                 signingData()?.nonceAccountAddressesSlot ?: 0
             }
             is LoginApprovalRequest, is UnknownApprovalType,
@@ -399,6 +405,7 @@ sealed class SolanaApprovalRequestType {
             is BalanceAccountNameUpdate -> signingData
             is BalanceAccountPolicyUpdate -> signingData
             is BalanceAccountAddressWhitelistUpdate -> signingData
+            is SignData -> signingData
             is LoginApprovalRequest, is UnknownApprovalType,
             is AcceptVaultInvitation, is PasswordReset -> null
         }
@@ -422,6 +429,7 @@ enum class ApprovalType(val value: String) {
     BALANCE_ACCOUNT_ADDRESS_WHITE_LIST_UPDATE_TYPE("BalanceAccountAddressWhitelistUpdate"),
     ACCEPT_VAULT_INVITATION_TYPE("AcceptVaultInvitation"),
     PASSWORD_RESET_TYPE("PasswordReset"),
+    SIGN_DATA_TYPE("SignData"),
 
     UNKNOWN_TYPE("");
 
@@ -444,6 +452,7 @@ enum class ApprovalType(val value: String) {
                 BALANCE_ACCOUNT_ADDRESS_WHITE_LIST_UPDATE_TYPE.value -> BALANCE_ACCOUNT_ADDRESS_WHITE_LIST_UPDATE_TYPE
                 ACCEPT_VAULT_INVITATION_TYPE.value -> ACCEPT_VAULT_INVITATION_TYPE
                 PASSWORD_RESET_TYPE.value -> PASSWORD_RESET_TYPE
+                SIGN_DATA_TYPE.value -> SIGN_DATA_TYPE
                 else -> UNKNOWN_TYPE
             }
     }
@@ -458,7 +467,8 @@ data class AccountInfo(
     val name: String,
     val identifier: String,
     val accountType: AccountType,
-    val address: String?
+    val address: String?,
+    val chainName: String? = null
 )
 
 data class ApprovalPolicy(
@@ -557,6 +567,7 @@ data class SolanaSigningData(
     val strikeFeeAmount: Long,
     val feeAccountGuidHash: String,
     val walletGuidHash: String,
+    val base64DataToSign: String? = null,
 ) {
 
     fun commonOpHashBytes() : ByteArray {
@@ -566,6 +577,7 @@ data class SolanaSigningData(
         buffer.write(feePayer.base58Bytes())
         buffer.writeLongLE(strikeFeeAmount)
         buffer.write(b64Decoder.decode(feeAccountGuidHash))
+        buffer.write(walletAddress.base58Bytes())
 
         return buffer.toByteArray()
     }

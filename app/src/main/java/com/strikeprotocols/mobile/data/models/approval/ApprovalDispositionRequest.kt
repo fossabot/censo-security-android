@@ -43,6 +43,7 @@ data class ApprovalDispositionRequest(
             is BalanceAccountNameUpdate -> 11
             is BalanceAccountPolicyUpdate -> 12
             is BalanceAccountAddressWhitelistUpdate -> 14
+            is SignData -> 15
 
             is LoginApprovalRequest,
             is UnknownApprovalType,
@@ -54,13 +55,16 @@ data class ApprovalDispositionRequest(
     fun opHashData(): ByteArray {
         val commonBytes = signingData().commonOpHashBytes()
 
+        signingData().base64DataToSign?.let {
+            return@opHashData SignDataHelper.serializeSignData(it, commonBytes, 15)
+        }
+
         return when (requestType) {
             is BalanceAccountCreation -> {
                 val buffer = ByteArrayOutputStream()
 
                 buffer.write(byteArrayOf(retrieveOpCode()))
                 buffer.write(commonBytes)
-                buffer.write(requestType.signingData.walletAddress.base58Bytes())
                 buffer.write(requestType.combinedBytes())
 
                 buffer.toByteArray()
@@ -73,7 +77,6 @@ data class ApprovalDispositionRequest(
                 opAndCommonBuffer.write(commonBytes)
                 buffer.write(opAndCommonBuffer.toByteArray())
 
-                buffer.write(requestType.signingData.walletAddress.base58Bytes())
                 buffer.write(requestType.account.identifier.sha256HashBytes())
                 buffer.write(requestType.destination.address.base58Bytes())
                 buffer.writeLongLE(requestType.symbolAndAmountInfo.fundamentalAmount())
@@ -89,7 +92,6 @@ data class ApprovalDispositionRequest(
                 opAndCommonBuffer.write(commonBytes)
                 buffer.write(opAndCommonBuffer.toByteArray())
 
-                buffer.write(requestType.signingData.walletAddress.base58Bytes())
                 buffer.write(requestType.account.identifier.sha256HashBytes())
                 buffer.write(requestType.destination.address.base58Bytes())
                 buffer.writeLongLE(requestType.symbolAndAmountInfo.fundamentalAmount())
@@ -102,7 +104,6 @@ data class ApprovalDispositionRequest(
 
                 buffer.write(byteArrayOf(retrieveOpCode()))
                 buffer.write(commonBytes)
-                buffer.write(requestType.signingData.walletAddress.base58Bytes())
                 buffer.write(byteArrayOf(requestType.slotUpdateType.toSolanaProgramValue()))
                 buffer.write(requestType.signer.opHashBytes())
 
@@ -114,7 +115,6 @@ data class ApprovalDispositionRequest(
 
                 buffer.write(byteArrayOf(retrieveOpCode()))
                 buffer.write(commonBytes)
-                buffer.write(requestType.signingData.walletAddress.base58Bytes())
                 buffer.write(requestType.account.identifier.sha256HashBytes())
                 buffer.writeLongLE(requestType.symbolAndAmountInfo.fundamentalAmount())
                 buffer.write(byteArrayOf(requestType.symbolAndAmountInfo.symbolInfo.getSOLProgramValue()))
@@ -126,7 +126,6 @@ data class ApprovalDispositionRequest(
 
                 buffer.write(byteArrayOf(retrieveOpCode()))
                 buffer.write(commonBytes)
-                buffer.write(requestType.signingData.walletAddress.base58Bytes())
                 buffer.write(requestType.approvalPolicy.combinedBytes())
 
                 buffer.toByteArray()
@@ -136,7 +135,6 @@ data class ApprovalDispositionRequest(
 
                 buffer.write(byteArrayOf(retrieveOpCode()))
                 buffer.write(commonBytes)
-                buffer.write(requestType.signingData.walletAddress.base58Bytes())
                 buffer.write(requestType.combinedBytes())
 
                 buffer.toByteArray()
@@ -146,7 +144,6 @@ data class ApprovalDispositionRequest(
 
                 buffer.write(byteArrayOf(retrieveOpCode()))
                 buffer.write(commonBytes)
-                buffer.write(requestType.signingData.walletAddress.base58Bytes())
                 buffer.write(requestType.combinedBytes())
 
                 buffer.toByteArray()
@@ -156,7 +153,6 @@ data class ApprovalDispositionRequest(
 
                 buffer.write(byteArrayOf(retrieveOpCode()))
                 buffer.write(commonBytes)
-                buffer.write(requestType.signingData.walletAddress.base58Bytes())
                 buffer.write(requestType.combinedBytes())
 
                 buffer.toByteArray()
@@ -166,7 +162,6 @@ data class ApprovalDispositionRequest(
 
                 buffer.write(byteArrayOf(retrieveOpCode()))
                 buffer.write(commonBytes)
-                buffer.write(requestType.signingData.walletAddress.base58Bytes())
                 buffer.write(requestType.combinedBytes())
 
                 buffer.toByteArray()
@@ -176,7 +171,6 @@ data class ApprovalDispositionRequest(
 
                 buffer.write(byteArrayOf(retrieveOpCode()))
                 buffer.write(commonBytes)
-                buffer.write(requestType.signingData.walletAddress.base58Bytes())
                 buffer.write(requestType.combinedBytes())
 
                 buffer.toByteArray()
@@ -185,7 +179,6 @@ data class ApprovalDispositionRequest(
                 val buffer = ByteArrayOutputStream()
                 buffer.write(byteArrayOf(retrieveOpCode()))
                 buffer.write(commonBytes)
-                buffer.write(requestType.signingData.walletAddress.base58Bytes())
                 buffer.write(requestType.combinedBytes())
                 buffer.toByteArray()
             }
@@ -194,13 +187,15 @@ data class ApprovalDispositionRequest(
                 val buffer = ByteArrayOutputStream()
                 buffer.write(byteArrayOf(retrieveOpCode()))
                 buffer.write(commonBytes)
-                buffer.write(requestType.signingData.walletAddress.base58Bytes())
                 buffer.write(requestType.account.identifier.sha256HashBytes())
                 buffer.write(requestType.dappInfo.address.base58Bytes())
                 buffer.write(requestType.dappInfo.name.sha256HashBytes())
                 buffer.writeShortLE(requestType.instructions.sumOf { it.decodedData().size }.toShort())
                 buffer.write(requestType.instructions.map { it.decodedData() }.reduce { array, next -> array + next })
                 buffer.toByteArray()
+            }
+            is SignData -> {
+                SignDataHelper.serializeSignData(requestType.base64Data, commonBytes, 15)
             }
             is LoginApprovalRequest, is AcceptVaultInvitation, is PasswordReset -> throw Exception(
                 INVALID_REQUEST_APPROVAL
@@ -226,6 +221,7 @@ data class ApprovalDispositionRequest(
             is BalanceAccountPolicyUpdate -> requestType.signingData
             is BalanceAccountAddressWhitelistUpdate -> requestType.signingData
             is DAppTransactionRequest -> requestType.signingData
+            is SignData -> requestType.signingData
 
             is LoginApprovalRequest, is AcceptVaultInvitation, is PasswordReset -> throw Exception(
                 INVALID_REQUEST_APPROVAL

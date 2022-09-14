@@ -33,7 +33,7 @@ fun SolanaApprovalRequestType.getHeader(context: Context): String {
             context.getString(R.string.balance_account_address_whitelist_update_approval_header)
         is BalanceAccountCreation ->
             if (accountInfo.accountType == BalanceAccount) {
-                context.getString(R.string.balance_account_creation_approval_header)
+                "${context.getString(R.string.add)} ${accountInfo.chainName ?: context.getString(R.string.solana)} ${context.getString(R.string.wallet_title)}"
             } else {
                 context.getString(R.string.balance_account_creation_approval_header)
             }
