@@ -445,7 +445,7 @@ class KeyManagementViewModel @Inject constructor(
         state = state.copy(finalizeKeyFlow = Resource.Error())
     }
 
-    private fun createAndSaveKey(cipher: Cipher) {
+    fun createAndSaveKey(cipher: Cipher) {
         val phrase = state.phrase
 
         if (phrase.isNullOrEmpty()) {

@@ -46,9 +46,6 @@ class KeyManagementViewModelTest : BaseViewModelTest() {
     @Mock
     lateinit var cipher: Cipher
 
-    @Mock
-    lateinit var cryptoObject: BiometricPrompt.CryptoObject
-
     private lateinit var keyMgmtViewModel: KeyManagementViewModel
 
     private val dispatcher = StandardTestDispatcher()
@@ -329,14 +326,14 @@ class KeyManagementViewModelTest : BaseViewModelTest() {
             keyMgmtViewModel.state.keyManagementFlowStep
         )
 
-        keyMgmtViewModel.recoverKey(cryptoObject)
+        keyMgmtViewModel.recoverKey(cipher)
 
         advanceUntilIdle()
 
         verify(keyRepository, times(1)).regenerateAuthDataAndSaveKeyToUser(
             phrase = any(),
             backendPublicKey = any(),
-            cryptoObject = any()
+            cipher = any()
         )
         assertTrue(keyMgmtViewModel.state.finalizeKeyFlow is Resource.Success)
     }
@@ -365,7 +362,7 @@ class KeyManagementViewModelTest : BaseViewModelTest() {
             keyMgmtViewModel.state.keyManagementFlowStep
         )
 
-        keyMgmtViewModel.createAndSaveKey(cryptoObject)
+        keyMgmtViewModel.createAndSaveKey(cipher)
 
         advanceUntilIdle()
 
@@ -918,7 +915,7 @@ class KeyManagementViewModelTest : BaseViewModelTest() {
 
         //This method should fail early because there is no phrase in state.
         // This will trigger the showToast property to be set in state
-        keyMgmtViewModel.createAndSaveKey(cryptoObject)
+        keyMgmtViewModel.createAndSaveKey(cipher)
 
         assertTrue(keyMgmtViewModel.state.showToast is Resource.Success)
         assertEquals(NO_PHRASE_ERROR, keyMgmtViewModel.state.showToast.data)
@@ -991,7 +988,7 @@ class KeyManagementViewModelTest : BaseViewModelTest() {
 
         //Calling this method will trigger
         // migrateOldDataToBiometryProtectedStorage() to be called and an exception to be thrown
-        keyMgmtViewModel.biometryApproved(cryptoObject)
+        keyMgmtViewModel.biometryApproved(cipher)
 
         advanceUntilIdle()
 
@@ -1017,7 +1014,7 @@ class KeyManagementViewModelTest : BaseViewModelTest() {
 
         //Calling this method will trigger
         // migrateOldDataToBiometryProtectedStorage() to be called and an exception to be thrown
-        keyMgmtViewModel.biometryApproved(cryptoObject)
+        keyMgmtViewModel.biometryApproved(cipher)
 
         advanceUntilIdle()
 
@@ -1060,7 +1057,7 @@ class KeyManagementViewModelTest : BaseViewModelTest() {
         assertTrue(keyMgmtViewModel.state.keyRecoveryManualEntryError is Resource.Uninitialized)
 
         //Attempt to recover the key, an exception will be thrown
-        keyMgmtViewModel.recoverKey(cryptoObject)
+        keyMgmtViewModel.recoverKey(cipher)
 
         advanceUntilIdle()
 
@@ -1092,7 +1089,7 @@ class KeyManagementViewModelTest : BaseViewModelTest() {
 
         setCreationFlowDataInStateForConfirmWordsProcessAndAssertChangesInState()
 
-        keyMgmtViewModel.createAndSaveKey(cryptoObject)
+        keyMgmtViewModel.createAndSaveKey(cipher)
 
         advanceUntilIdle()
 
