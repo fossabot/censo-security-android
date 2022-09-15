@@ -1,7 +1,5 @@
 package com.strikeprotocols.mobile.viewModel
 
-import androidx.biometric.BiometricPrompt
-import androidx.compose.ui.text.toUpperCase
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.times
 import com.nhaarman.mockitokotlin2.verify
@@ -25,7 +23,6 @@ import org.junit.Test
 import org.mockito.Mock
 import org.mockito.MockitoAnnotations
 import javax.crypto.Cipher
-import kotlin.math.sign
 
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -251,7 +248,7 @@ class SignInViewModelTest : BaseViewModelTest() {
 
             advanceUntilIdle()
 
-            signInViewModel.biometryApproved(BiometricPrompt.CryptoObject(cipher))
+            signInViewModel.biometryApproved(cipher)
 
             verify(userRepository, times(1)).loginWithTimestamp(
                 validEmail, timestamp, signedTimestamp
@@ -274,7 +271,7 @@ class SignInViewModelTest : BaseViewModelTest() {
 
             advanceUntilIdle()
 
-            signInViewModel.biometryApproved(BiometricPrompt.CryptoObject(cipher))
+            signInViewModel.biometryApproved(cipher)
 
             advanceUntilIdle()
 
@@ -296,7 +293,7 @@ class SignInViewModelTest : BaseViewModelTest() {
 
             advanceUntilIdle()
 
-            signInViewModel.biometryApproved(BiometricPrompt.CryptoObject(cipher))
+            signInViewModel.biometryApproved(cipher)
 
             advanceUntilIdle()
 
@@ -318,31 +315,11 @@ class SignInViewModelTest : BaseViewModelTest() {
 
             advanceUntilIdle()
 
-            signInViewModel.biometryApproved(BiometricPrompt.CryptoObject(cipher))
+            signInViewModel.biometryApproved(cipher)
 
             advanceUntilIdle()
 
             assertFailedLogin()
-        }
-
-    @Test
-    fun `biometry approved without crypto object does not attempt signature based login`() =
-        runTest {
-            whenever(keyRepository.havePrivateKey()).then { true }
-
-            initVM()
-
-            signInViewModel.updateEmail(validEmail)
-            signInViewModel.signInActionCompleted()
-
-            advanceUntilIdle()
-
-            signInViewModel.biometryApproved(null)
-
-            verify(userRepository, times(0)).loginWithTimestamp(
-                validEmail, timestamp, signedTimestamp
-            )
-            assert(signInViewModel.state.loginResult is Resource.Error)
         }
 
     @Test
