@@ -1,6 +1,7 @@
 package com.strikeprotocols.mobile.presentation.sign_in
 
 import android.util.Patterns
+import com.strikeprotocols.mobile.common.BioPromptReason
 import com.strikeprotocols.mobile.common.Resource
 import com.strikeprotocols.mobile.data.models.LoginResponse
 import com.strikeprotocols.mobile.data.models.VerifyUser
@@ -16,8 +17,10 @@ data class SignInState(
     val loginResult: Resource<LoginResponse> = Resource.Uninitialized,
     val verifyUserResult: Resource<VerifyUser> = Resource.Uninitialized,
     val walletSignersResult: Resource<List<WalletSigner?>> = Resource.Uninitialized,
-    val triggerBioPrompt: Resource<Cipher> = Resource.Uninitialized
-) {
+    val triggerBioPrompt: Resource<Cipher> = Resource.Uninitialized,
+    val bioPromptReason: BioPromptReason = BioPromptReason.UNINITIALIZED,
+    val exitLoginFlow : Resource<Unit> = Resource.Uninitialized
+    ) {
     val signInButtonEnabled = email.isNotEmpty() && password.isNotEmpty()
 
     fun emailValid() = Patterns.EMAIL_ADDRESS.matcher(email).matches()

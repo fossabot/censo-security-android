@@ -84,7 +84,7 @@ class ApprovalsViewModelTest : BaseViewModelTest() {
             Resource.Success(data = null)
         }
 
-        whenever(keyRepository.getCipherForDecryption()).thenAnswer {
+        whenever(keyRepository.getCipherForPrivateKeyDecryption()).thenAnswer {
             cipher
         }
 

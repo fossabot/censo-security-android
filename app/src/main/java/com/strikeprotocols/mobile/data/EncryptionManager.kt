@@ -14,6 +14,7 @@ import org.bouncycastle.crypto.params.Ed25519PublicKeyParameters
 import org.bouncycastle.crypto.signers.Ed25519Signer
 import com.strikeprotocols.mobile.data.EncryptionManagerException.*
 import com.strikeprotocols.mobile.data.EncryptionManagerImpl.Companion.BIO_KEY_NAME
+import com.strikeprotocols.mobile.data.EncryptionManagerImpl.Companion.SENTINEL_STATIC_DATA
 import com.strikeprotocols.mobile.data.models.StoredKeyData
 import com.strikeprotocols.mobile.data.models.StoredKeyData.Companion.ROOT_SEED
 import com.strikeprotocols.mobile.data.models.StoredKeyData.Companion.SOLANA_KEY
@@ -109,11 +110,12 @@ interface EncryptionManager {
         cipher: Cipher,
     ): HashMap<String, String>
 
-    fun deleteBiometryKeyFromKeystore()
+    fun deleteBiometryKeyFromKeystore(keyName: String)
 
-    fun getInitializedCipherForEncryption() : Cipher
-    fun getInitializedCipherForDecryption(initVector: ByteArray) : Cipher
+    fun getInitializedCipherForEncryption(keyName: String) : Cipher
+    fun getInitializedCipherForDecryption(keyName: String, initVector: ByteArray) : Cipher
     fun havePrivateKeyStored(email: String): Boolean
+    fun saveSentinelData(email: String, cipher: Cipher)
 }
 
 class EncryptionManagerImpl @Inject constructor(
@@ -352,21 +354,28 @@ class EncryptionManagerImpl @Inject constructor(
         return BaseWrapper.decode(keysMap[keyType] ?: "")
     }
 
-    override fun getInitializedCipherForEncryption(): Cipher {
-        return cryptographyManager.getInitializedCipherForEncryption(BIO_KEY_NAME)
+    override fun getInitializedCipherForEncryption(keyName: String): Cipher {
+        return cryptographyManager.getInitializedCipherForEncryption(keyName)
     }
 
-    override fun getInitializedCipherForDecryption(initVector: ByteArray): Cipher {
+    override fun getInitializedCipherForDecryption(keyName: String, initVector: ByteArray): Cipher {
         return cryptographyManager.getInitializedCipherForDecryption(
-            keyName = BIO_KEY_NAME, initializationVector = initVector
+            keyName = keyName, initializationVector = initVector
         )
     }
 
     override fun havePrivateKeyStored(email: String) =
         securePreferences.retrieveEncryptedStoredKeys(email = email).isNotEmpty()
 
-    override fun deleteBiometryKeyFromKeystore() {
-        cryptographyManager.deleteInvalidatedKey(BIO_KEY_NAME)
+    override fun saveSentinelData(email: String, cipher: Cipher) {
+        val encryptedSentinelData =
+            cryptographyManager.encryptData(SENTINEL_STATIC_DATA, cipher)
+
+        securePreferences.saveSentinelData(email = email, encryptedData = encryptedSentinelData)
+    }
+
+    override fun deleteBiometryKeyFromKeystore(keyName: String) {
+        cryptographyManager.deleteInvalidatedKey(keyName)
     }
 
     override fun createStoredKeyDataAsJson(
@@ -418,6 +427,8 @@ class EncryptionManagerImpl @Inject constructor(
     //region companion
     object Companion {
         const val BIO_KEY_NAME = "biometric_encryption_key"
+        const val SENTINEL_KEY_NAME = "bgrd_biometry_key"
+        const val SENTINEL_STATIC_DATA = "sentinel_static_data"
         const val NO_OFFSET_INDEX = 0
         val DATA_CHECK = BaseWrapper.decode("VerificationCheck")
 

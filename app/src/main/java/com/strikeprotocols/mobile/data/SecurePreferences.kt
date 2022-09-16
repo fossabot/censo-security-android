@@ -16,6 +16,9 @@ interface SecurePreferences {
     fun clearDeprecatedPrivateKey(email: String)
     fun clearDeprecatedRootSeed(email: String)
     fun retrieveEncryptedStoredKeys(email: String): String
+    fun retrieveSentinelData(email: String) : EncryptedData
+    fun saveSentinelData(email: String, encryptedData: EncryptedData)
+    fun clearSentinelData(email: String)
     fun savePublicKey(email: String, publicKey: ByteArray)
     fun retrievePublicKey(email: String): String
     fun clearPublicKey(email: String)
@@ -24,7 +27,6 @@ interface SecurePreferences {
         publicKey: ByteArray,
         keyStorageJson: String,
     )
-
     fun clearAllRelevantKeyData(email: String)
 }
 
@@ -93,6 +95,27 @@ class SecurePreferencesImpl @Inject constructor(applicationContext: Context) :
 
     override fun clearPublicKey(email: String) {
         SharedPrefsHelper.clearSolanaPublicKey(
+            encryptedPrefs = secureSharedPreferences,
+            email = email
+        )
+    }
+
+    override fun saveSentinelData(email: String, encryptedData: EncryptedData) {
+        SharedPrefsHelper.saveBackgroundEncryptedData(
+            email = email,
+            encryptedPrefs = secureSharedPreferences,
+            encryptedData = encryptedData
+        )
+    }
+
+    override fun retrieveSentinelData(email: String) : EncryptedData =
+        SharedPrefsHelper.retrieveBackgroundEncryptedData(
+            encryptedPrefs = secureSharedPreferences, email = email
+        )
+
+
+    override fun clearSentinelData(email: String) {
+        SharedPrefsHelper.clearBackgroundEncryptedData(
             encryptedPrefs = secureSharedPreferences,
             email = email
         )

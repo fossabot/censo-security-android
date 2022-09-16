@@ -1,6 +1,5 @@
 package com.strikeprotocols.mobile.presentation.key_management
 
-import androidx.biometric.BiometricPrompt
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -11,6 +10,7 @@ import androidx.lifecycle.viewModelScope
 import cash.z.ecc.android.bip39.Mnemonics
 import com.strikeprotocols.mobile.common.*
 import com.strikeprotocols.mobile.data.*
+import com.strikeprotocols.mobile.data.EncryptionManagerImpl.Companion.BIO_KEY_NAME
 import com.strikeprotocols.mobile.data.models.IndexedPhraseWord
 import com.strikeprotocols.mobile.data.models.WalletSigner
 import com.strikeprotocols.mobile.presentation.key_management.KeyManagementState.Companion.NO_PHRASE_ERROR
@@ -367,7 +367,7 @@ class KeyManagementViewModel @Inject constructor(
     }
 
     suspend fun triggerBioPromptForCreate() {
-        val cipher = keyRepository.getCipherForEncryption()
+        val cipher = keyRepository.getCipherForEncryption(BIO_KEY_NAME)
         if(cipher != null) {
             state = state.copy(
                 triggerBioPrompt = Resource.Success(cipher),
@@ -378,7 +378,7 @@ class KeyManagementViewModel @Inject constructor(
 
     fun triggerBioPromptForRecover(inputMethod: PhraseInputMethod) {
         viewModelScope.launch {
-            val cipher = keyRepository.getCipherForEncryption()
+            val cipher = keyRepository.getCipherForEncryption(BIO_KEY_NAME)
             if(cipher != null) {
                 state = state.copy(
                     triggerBioPrompt = Resource.Success(cipher),
@@ -391,7 +391,7 @@ class KeyManagementViewModel @Inject constructor(
 
     fun triggerBioPromptForMigration() {
         viewModelScope.launch {
-            val cipher = keyRepository.getCipherForEncryption()
+            val cipher = keyRepository.getCipherForEncryption(BIO_KEY_NAME)
             state = state.copy(
                 triggerBioPrompt = Resource.Success(cipher),
                 bioPromptReason = BioPromptReason.MIGRATION

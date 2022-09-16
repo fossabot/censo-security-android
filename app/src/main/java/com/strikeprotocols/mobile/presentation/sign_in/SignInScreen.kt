@@ -76,8 +76,8 @@ fun SignInScreen(
 
     //region LaunchedEffect
     LaunchedEffect(key1 = state) {
-        if (state.loginResult is Resource.Success) {
-            viewModel.resetLoginCall()
+        if (state.exitLoginFlow is Resource.Success) {
+            viewModel.resetExitLoginFlow()
 
             navController.navigate(Screen.EntranceRoute.route) {
                 popUpTo(Screen.SignInRoute.route) {

@@ -10,6 +10,7 @@ import androidx.lifecycle.viewModelScope
 import com.raygun.raygun4android.RaygunClient
 import com.strikeprotocols.mobile.common.*
 import com.strikeprotocols.mobile.data.*
+import com.strikeprotocols.mobile.data.EncryptionManagerImpl.Companion.SENTINEL_KEY_NAME
 import com.strikeprotocols.mobile.data.NoInternetException.Companion.NO_INTERNET_ERROR
 import com.strikeprotocols.mobile.data.models.LoginResponse
 import com.strikeprotocols.mobile.data.models.PushBody
@@ -71,16 +72,40 @@ class SignInViewModel @Inject constructor(
 
     private fun kickOffBiometryLoginOrMoveToPasswordEntry() {
         viewModelScope.launch {
-            state = if (keyRepository.havePrivateKey()) {
-                val cipher = keyRepository.getCipherForDecryption()
-                state.copy(triggerBioPrompt = Resource.Success(cipher))
+            if (keyRepository.havePrivateKey()) {
+                val cipher = keyRepository.getCipherForPrivateKeyDecryption()
+                if (cipher != null) {
+                    state = state.copy(
+                        triggerBioPrompt = Resource.Success(cipher),
+                        bioPromptReason = BioPromptReason.RETURN_LOGIN
+                    )
+                }
             } else {
-                state.copy(loginStep = LoginStep.PASSWORD_ENTRY)
+                state = state.copy(loginStep = LoginStep.PASSWORD_ENTRY)
             }
         }
     }
 
     fun biometryApproved(cipher: Cipher) {
+        when(state.bioPromptReason) {
+            BioPromptReason.INITIAL_LOGIN -> handleBiometryInitialLogin(cipher)
+            BioPromptReason.RETURN_LOGIN -> handleBiometryReturnLogin(cipher)
+            else -> {}
+        }
+    }
+
+    fun biometryFailed() {
+        state = state.copy(loginResult = Resource.Error())
+    }
+
+    private fun handleBiometryInitialLogin(cipher: Cipher) {
+        viewModelScope.launch {
+            keyRepository.saveSentinelData(cipher)
+            state = state.copy(exitLoginFlow = Resource.Success(Unit))
+        }
+    }
+
+    private fun handleBiometryReturnLogin(cipher: Cipher) {
         viewModelScope.launch {
             try {
                 val timestamp = keyRepository.generateTimestamp()
@@ -94,10 +119,6 @@ class SignInViewModel @Inject constructor(
                 biometryFailed()
             }
         }
-    }
-
-    fun biometryFailed() {
-        state = state.copy(loginResult = Resource.Error())
     }
 
     private fun checkPassword() {
@@ -184,7 +205,12 @@ class SignInViewModel @Inject constructor(
         userRepository.setUserLoggedIn()
         userRepository.saveToken(token)
         submitNotificationTokenForRegistration()
-        state = state.copy(loginResult = Resource.Success(LoginResponse(token = token)))
+        val cipher = keyRepository.getCipherForEncryption(SENTINEL_KEY_NAME)
+        state = state.copy(
+            loginResult = Resource.Success(LoginResponse(token)),
+            triggerBioPrompt = Resource.Success(cipher),
+            bioPromptReason = BioPromptReason.INITIAL_LOGIN
+        )
     }
 
     private fun userFailedLogin(resource: Resource<LoginResponse>? = null, e: Exception? = null) {
@@ -236,6 +262,10 @@ class SignInViewModel @Inject constructor(
 
     fun resetLoginCall() {
         state = state.copy(loginResult = Resource.Uninitialized)
+    }
+
+    fun resetExitLoginFlow() {
+        state = state.copy(exitLoginFlow = Resource.Uninitialized)
     }
 
     fun resetLoginCallAndMoveUserToPasswordEntry() {

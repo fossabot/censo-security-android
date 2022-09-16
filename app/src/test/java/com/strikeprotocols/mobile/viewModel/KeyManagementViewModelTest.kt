@@ -8,6 +8,7 @@ import com.nhaarman.mockitokotlin2.whenever
 import com.strikeprotocols.mobile.*
 import com.strikeprotocols.mobile.common.BioPromptReason
 import com.strikeprotocols.mobile.common.Resource
+import com.strikeprotocols.mobile.data.EncryptionManagerImpl.Companion.BIO_KEY_NAME
 import com.strikeprotocols.mobile.data.KeyRepository
 import com.strikeprotocols.mobile.data.PhraseException
 import com.strikeprotocols.mobile.data.PhraseValidator
@@ -79,7 +80,7 @@ class KeyManagementViewModelTest : BaseViewModelTest() {
             testValidPhrase
         }
 
-        whenever(keyRepository.getCipherForEncryption()).thenAnswer {
+        whenever(keyRepository.getCipherForEncryption(BIO_KEY_NAME)).thenAnswer {
             cipher
         }
 

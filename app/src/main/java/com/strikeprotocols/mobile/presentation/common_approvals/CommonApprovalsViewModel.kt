@@ -69,7 +69,7 @@ abstract class CommonApprovalsViewModel(
 
     private fun triggerBioPrompt() {
         viewModelScope.launch {
-            val cipher = keyRepository.getCipherForDecryption()
+            val cipher = keyRepository.getCipherForPrivateKeyDecryption()
             if (cipher != null) {
                 state = state.copy(bioPromptTrigger = Resource.Success(cipher))
             }

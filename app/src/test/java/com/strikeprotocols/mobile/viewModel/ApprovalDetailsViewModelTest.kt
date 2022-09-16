@@ -74,7 +74,7 @@ class ApprovalDetailsViewModelTest : BaseViewModelTest() {
         super.setUp()
         Dispatchers.setMain(dispatcher)
 
-        whenever(keyRepository.getCipherForDecryption()).thenAnswer {
+        whenever(keyRepository.getCipherForPrivateKeyDecryption()).thenAnswer {
             cipher
         }
         approvalDetailsViewModel =

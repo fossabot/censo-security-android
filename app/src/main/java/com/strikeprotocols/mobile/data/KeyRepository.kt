@@ -7,14 +7,17 @@ import com.strikeprotocols.mobile.common.BaseWrapper
 import com.strikeprotocols.mobile.common.Resource
 import com.strikeprotocols.mobile.common.generateFormattedTimestamp
 import com.strikeprotocols.mobile.data.models.Chain
+import com.strikeprotocols.mobile.data.EncryptionManagerImpl.Companion.SENTINEL_KEY_NAME
+import com.strikeprotocols.mobile.data.EncryptionManagerImpl.Companion.BIO_KEY_NAME
 import com.strikeprotocols.mobile.data.models.StoredKeyData
 import com.strikeprotocols.mobile.data.models.VerifyUser
 import com.strikeprotocols.mobile.data.models.WalletSigner
 import javax.crypto.Cipher
 
 interface KeyRepository {
-    suspend fun getCipherForEncryption(): Cipher?
-    suspend fun getCipherForDecryption(): Cipher?
+    suspend fun getCipherForEncryption(keyName: String): Cipher?
+    suspend fun getCipherForBackgroundDecryption(): Cipher?
+    suspend fun getCipherForPrivateKeyDecryption(): Cipher?
     suspend fun signTimestamp(
         timestamp: String,
         cipher: Cipher,
@@ -45,6 +48,8 @@ interface KeyRepository {
     suspend fun havePrivateKey(): Boolean
 
     suspend fun generateTimestamp() : String
+
+    suspend fun saveSentinelData(cipher: Cipher)
 }
 
 class KeyRepositoryImpl(
@@ -86,9 +91,9 @@ class KeyRepositoryImpl(
         return false
     }
 
-    override suspend fun getCipherForEncryption(): Cipher? {
+    override suspend fun getCipherForEncryption(keyName: String): Cipher? {
         return try {
-            encryptionManager.getInitializedCipherForEncryption()
+            encryptionManager.getInitializedCipherForEncryption(keyName)
         } catch (e: KeyPermanentlyInvalidatedException) {
             wipeAllDataAfterKeyInvalidatedException()
             userRepository.setKeyInvalidated()
@@ -96,13 +101,29 @@ class KeyRepositoryImpl(
         }
     }
 
-    override suspend fun getCipherForDecryption(): Cipher? {
+    override suspend fun getCipherForBackgroundDecryption() : Cipher? {
+        return try {
+            val email = userRepository.retrieveUserEmail()
+            val encryptedData = securePreferences.retrieveSentinelData(email)
+            encryptionManager.getInitializedCipherForDecryption(
+                initVector = encryptedData.initializationVector, keyName = SENTINEL_KEY_NAME
+            )
+        } catch (e: KeyPermanentlyInvalidatedException) {
+            wipeAllDataAfterKeyInvalidatedException()
+            userRepository.setKeyInvalidated()
+            null
+        }
+    }
+
+    override suspend fun getCipherForPrivateKeyDecryption(): Cipher? {
         return try {
             val email = userRepository.retrieveUserEmail()
             val encryptedData = securePreferences.retrieveEncryptedStoredKeys(email)
             val storedKeyData = StoredKeyData.fromJson(encryptedData)
             val initVector = BaseWrapper.decode(storedKeyData.initVector)
-            encryptionManager.getInitializedCipherForDecryption(initVector)
+            encryptionManager.getInitializedCipherForDecryption(
+                initVector = initVector, keyName = BIO_KEY_NAME
+            )
         } catch (e: KeyPermanentlyInvalidatedException) {
             wipeAllDataAfterKeyInvalidatedException()
             userRepository.setKeyInvalidated()
@@ -112,7 +133,8 @@ class KeyRepositoryImpl(
 
     private suspend fun wipeAllDataAfterKeyInvalidatedException() {
         val email = userRepository.retrieveUserEmail()
-        encryptionManager.deleteBiometryKeyFromKeystore()
+        encryptionManager.deleteBiometryKeyFromKeystore(BIO_KEY_NAME)
+        encryptionManager.deleteBiometryKeyFromKeystore(SENTINEL_KEY_NAME)
         securePreferences.clearAllRelevantKeyData(email)
         userRepository.logOut()
     }
@@ -232,7 +254,6 @@ class KeyRepositoryImpl(
         }
 
         try {
-
             encryptionManager.saveKeyInformation(
                 email = userEmail, cipher = cipher,
                 privateKey = BaseWrapper.decode(oldPrivateKey),
@@ -243,7 +264,7 @@ class KeyRepositoryImpl(
             securePreferences.clearDeprecatedPrivateKey(email = userEmail)
             securePreferences.clearDeprecatedRootSeed(email = userEmail)
         } catch (e: Exception) {
-            encryptionManager.deleteBiometryKeyFromKeystore()
+            encryptionManager.deleteBiometryKeyFromKeystore(BIO_KEY_NAME)
             throw e
         }
     }
@@ -254,4 +275,9 @@ class KeyRepositoryImpl(
     }
 
     override suspend fun generateTimestamp() = generateFormattedTimestamp()
+    override suspend fun saveSentinelData(cipher: Cipher) {
+        val userEmail = userRepository.retrieveUserEmail()
+
+        encryptionManager.saveSentinelData(email = userEmail, cipher = cipher)
+    }
 }

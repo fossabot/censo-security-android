@@ -4,11 +4,10 @@ import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.times
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
+import com.strikeprotocols.mobile.common.BioPromptReason
 import com.strikeprotocols.mobile.common.Resource
-import com.strikeprotocols.mobile.data.KeyRepository
-import com.strikeprotocols.mobile.data.PushRepository
-import com.strikeprotocols.mobile.data.StrikeUserData
-import com.strikeprotocols.mobile.data.UserRepository
+import com.strikeprotocols.mobile.data.*
+import com.strikeprotocols.mobile.data.EncryptionManagerImpl.Companion.SENTINEL_KEY_NAME
 import com.strikeprotocols.mobile.data.models.LoginResponse
 import com.strikeprotocols.mobile.data.models.PushBody
 import com.strikeprotocols.mobile.presentation.sign_in.LoginStep
@@ -66,7 +65,7 @@ class SignInViewModelTest : BaseViewModelTest() {
         MockitoAnnotations.openMocks(this)
 
         whenever(userRepository.retrieveCachedUserEmail()).then { "" }
-        whenever(keyRepository.getCipherForDecryption()).then { cipher }
+        whenever(keyRepository.getCipherForPrivateKeyDecryption()).then { cipher }
         whenever(keyRepository.generateTimestamp()).then { timestamp }
         whenever(keyRepository.signTimestamp(any(), any())).then { signedTimestamp }
 
@@ -237,7 +236,24 @@ class SignInViewModelTest : BaseViewModelTest() {
         }
 
     @Test
-    fun `biometry approved attempts signature based login`() =
+    fun `valid email with a private key but null cipher does not attempt biometric login`() =
+        runTest {
+            whenever(keyRepository.havePrivateKey()).then { true }
+            whenever(keyRepository.getCipherForPrivateKeyDecryption()).then { null }
+
+            initVM()
+
+            signInViewModel.updateEmail(validEmail)
+            signInViewModel.signInActionCompleted()
+
+            advanceUntilIdle()
+
+            assert(signInViewModel.state.triggerBioPrompt !is Resource.Success)
+            assert(signInViewModel.state.bioPromptReason == BioPromptReason.UNINITIALIZED)
+        }
+
+    @Test
+    fun `biometry approved during return login attempts signature based login`() =
         runTest {
             whenever(keyRepository.havePrivateKey()).then { true }
 
@@ -254,6 +270,29 @@ class SignInViewModelTest : BaseViewModelTest() {
                 validEmail, timestamp, signedTimestamp
             )
             assert(signInViewModel.state.loginResult is Resource.Loading)
+        }
+
+    @Test
+    fun `biometry approved during initial login attempts saving sentinel data`() =
+        runTest {
+            whenever(keyRepository.havePrivateKey()).then { false }
+            whenever(userRepository.loginWithPassword(validEmail, validPassword)).then {
+                Resource.Success(LoginResponse(jwt))
+            }
+
+            initVM()
+
+            signInViewModel.updateEmail(validEmail)
+            signInViewModel.signInActionCompleted()
+            signInViewModel.updatePassword(validPassword)
+            signInViewModel.signInActionCompleted()
+
+            advanceUntilIdle()
+
+            signInViewModel.biometryApproved(cipher)
+
+            verify(keyRepository, times(1)).saveSentinelData(cipher)
+            assert(signInViewModel.state.exitLoginFlow is Resource.Success)
         }
 
     @Test
@@ -357,6 +396,8 @@ class SignInViewModelTest : BaseViewModelTest() {
         verify(userRepository, times(1)).saveToken(jwt)
         assert(signInViewModel.state.loginResult is Resource.Success)
         assert(signInViewModel.state.loginResult.data?.token == jwt)
+        assertEquals(BioPromptReason.INITIAL_LOGIN, signInViewModel.state.bioPromptReason)
+        assert(signInViewModel.state.triggerBioPrompt is Resource.Success)
         assertPushNotificationRegistrationAttempted()
     }
 

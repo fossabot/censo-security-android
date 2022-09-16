@@ -93,7 +93,7 @@ object BioCryptoUtil {
 }
 
 enum class BioPromptReason {
-    CREATE, RECOVER, MIGRATION, UNINITIALIZED
+    CREATE, RECOVER, MIGRATION, UNINITIALIZED, RETURN_LOGIN, INITIAL_LOGIN
 }
 
 enum class BioPromptFailedReason {

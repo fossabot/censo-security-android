@@ -13,6 +13,8 @@ object SharedPrefsHelper {
     private const val USER_TOKEN = "user_token"
     private const val KEY_DATA = "_key_data"
     private const val SOLANA_PUBLIC_KEY = "_solana_public_key"
+    private const val BGRD_INIT_VECTOR = "_bgrd_init_vector"
+    private const val BGRD_CIPHER_TEXT = "_bgrd_cipher_text"
 
     private const val DEPRECATED_SOLANA_PRIVATE_KEY = "_solana_key"
     private const val DEPRECATED_ROOT_SEED = "_root_seed"
@@ -61,6 +63,50 @@ object SharedPrefsHelper {
     fun clearSolanaPublicKey(encryptedPrefs: SharedPreferences, email: String) {
         val editor = encryptedPrefs.edit()
         editor.putString("${email.lowercase().trim()}$SOLANA_PUBLIC_KEY", "")
+        editor.apply()
+    }
+
+    fun saveBackgroundEncryptedData(
+        encryptedPrefs: SharedPreferences,
+        email: String,
+        encryptedData: EncryptedData
+    ) {
+        val initVector =
+            if (encryptedData.initializationVector.isEmpty()) {
+                ""
+            } else {
+                BaseWrapper.encode(encryptedData.initializationVector)
+            }
+        val cipherText =
+            if (encryptedData.ciphertext.isEmpty()) {
+                ""
+            } else {
+                BaseWrapper.encode(encryptedData.ciphertext)
+            }
+        val editor = encryptedPrefs.edit()
+        editor.putString("${email.lowercase().trim()}$BGRD_INIT_VECTOR", initVector)
+        editor.putString("${email.lowercase().trim()}$BGRD_CIPHER_TEXT", cipherText)
+        editor.apply()
+    }
+
+    fun retrieveBackgroundEncryptedData(
+        encryptedPrefs: SharedPreferences,
+        email: String
+    ): EncryptedData {
+        val savedInitVector =
+            encryptedPrefs.getString("${email.lowercase().trim()}$BGRD_INIT_VECTOR", "") ?: ""
+        val cipherText =
+            encryptedPrefs.getString("${email.lowercase().trim()}$BGRD_CIPHER_TEXT", "") ?: ""
+
+        return EncryptedData(
+            initializationVector = BaseWrapper.decode(savedInitVector),
+            ciphertext = BaseWrapper.decode(cipherText)
+        )
+    }
+
+    fun clearBackgroundEncryptedData(encryptedPrefs: SharedPreferences, email: String) {
+        val editor = encryptedPrefs.edit()
+        editor.putString("${email.lowercase().trim()}$BGRD_INIT_VECTOR", "")
         editor.apply()
     }
 
