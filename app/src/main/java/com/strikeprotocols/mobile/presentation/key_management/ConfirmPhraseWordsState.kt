@@ -1,9 +1,13 @@
 package com.strikeprotocols.mobile.presentation.key_management
 
+import com.strikeprotocols.mobile.presentation.key_management.KeyManagementState.Companion.DEFAULT_WORDS_VERIFIED
+import com.strikeprotocols.mobile.presentation.key_management.KeyManagementState.Companion.FIRST_WORD_INDEX
+import com.strikeprotocols.mobile.presentation.key_management.KeyManagementState.Companion.PHRASE_WORD_COUNT
+
 data class ConfirmPhraseWordsState(
-    val phrase: String = "",
     val phraseWordToVerify: String = "",
-    val wordIndex: Int = DEFAULT_WORD_INDEX,
+    val phraseWordToVerifyIndex: Int = FIRST_WORD_INDEX,
+    val pastedPhrase: String = "",
     val wordInput: String = "",
     val errorEnabled: Boolean = false,
     val wordsVerified: Int = DEFAULT_WORDS_VERIFIED,
@@ -12,13 +16,4 @@ data class ConfirmPhraseWordsState(
 ) {
     val allWordsEntered: Boolean
         get() = words.isNotEmpty() && words.size == PHRASE_WORD_COUNT
-
-    companion object {
-        const val DEFAULT_WORD_INDEX = -1
-        const val DEFAULT_WORDS_VERIFIED = 0
-
-        const val PHRASE_WORD_FIRST_INDEX = 0
-        const val PHRASE_WORD_SECOND_TO_LAST_INDEX = 23
-        const val PHRASE_WORD_COUNT = 24
-    }
 }

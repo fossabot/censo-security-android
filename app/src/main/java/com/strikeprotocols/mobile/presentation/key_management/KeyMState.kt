@@ -17,9 +17,9 @@ data class KeyManagementState(
     val inputMethod: PhraseInputMethod = PhraseInputMethod.MANUAL,
 
     //Phrase
-    val phrase: String? = null,
-    val pastedPhrase: String = "",
-    val wordIndex: Int = 0,
+    val keyGeneratedPhrase: String? = null,
+    val userInputtedPhrase: String = "",
+    val wordIndexForDisplay: Int = FIRST_WORD_INDEX,
     val confirmPhraseWordsState: ConfirmPhraseWordsState = ConfirmPhraseWordsState(),
 
     //API calls
@@ -36,6 +36,16 @@ data class KeyManagementState(
 ) {
     companion object {
         const val NO_PHRASE_ERROR = "no_phrase_error"
+
+        const val DEFAULT_WORDS_VERIFIED = 0
+
+        const val PHRASE_WORD_COUNT = 24
+
+        const val FIRST_WORD_INDEX = 0
+        const val LAST_WORD_INDEX = PHRASE_WORD_COUNT - 1
+
+        const val CHANGE_AMOUNT = 4
+        const val LAST_SET_START_INDEX = PHRASE_WORD_COUNT - CHANGE_AMOUNT
     }
 }
 

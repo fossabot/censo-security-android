@@ -7,8 +7,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import android.content.ClipboardManager
 import android.os.Build
-import androidx.activity.compose.BackHandler
-import androidx.biometric.BiometricPrompt
 import androidx.compose.foundation.*
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.text.BasicTextField
@@ -48,9 +46,13 @@ import com.strikeprotocols.mobile.R
 import com.strikeprotocols.mobile.common.Resource
 import com.strikeprotocols.mobile.data.models.IndexedPhraseWord
 import com.strikeprotocols.mobile.data.models.WalletSigner
+import com.strikeprotocols.mobile.presentation.key_management.KeyManagementState.Companion.FIRST_WORD_INDEX
+import com.strikeprotocols.mobile.presentation.key_management.KeyManagementState.Companion.LAST_SET_START_INDEX
+import com.strikeprotocols.mobile.presentation.key_management.KeyManagementState.Companion.LAST_WORD_INDEX
 import com.strikeprotocols.mobile.presentation.key_management.PhraseUICompanion.DISPLAY_RANGE_SET
 import com.strikeprotocols.mobile.presentation.key_management.flows.KeyCreationFlowStep
 import com.strikeprotocols.mobile.presentation.key_management.flows.KeyRecoveryFlowStep
+import com.strikeprotocols.mobile.presentation.key_management.flows.PhraseEntryAction
 import com.strikeprotocols.mobile.presentation.key_management.flows.PhraseFlowAction
 import com.strikeprotocols.mobile.ui.theme.*
 
@@ -313,7 +315,7 @@ fun CopyKeyUI(phrase: String, phraseCopied: Boolean, phraseSaved: Boolean, onNav
 fun ConfirmKeyUI(
     errorEnabled: Boolean = false,
     pastedPhrase: String,
-    verifyPastedPhrase: (String) -> Unit,
+    onPhraseEntryAction: (PhraseEntryAction) -> Unit,
     header: String,
     title: String,
     message: String,
@@ -372,7 +374,7 @@ fun ConfirmKeyUI(
             value = pastedPhrase,
             onValueChange = {
                 if (it != pastedPhrase) {
-                    verifyPastedPhrase(it)
+                    onPhraseEntryAction(PhraseEntryAction.PastePhrase(phrase = it))
                 }
             }
         )
@@ -782,7 +784,7 @@ fun WriteWordUI(
                 modifier = Modifier.height(72.dp),
                 contentAlignment = Alignment.Center
             ) {
-                if (index == KeyManagementViewModel.LAST_WORD_RANGE_SET_INDEX) {
+                if (index == LAST_SET_START_INDEX) {
                     AuthFlowButton(
                         text = stringResource(R.string.saved_the_phrase),
                         modifier = Modifier.padding(horizontal = 44.dp)
@@ -818,15 +820,12 @@ fun getDisplayIndex(wordIndex: Int) =
 fun VerifyPhraseWordUI(
     wordIndex: Int,
     value: String,
-    onValueChanged: (String) -> Unit,
-    onSubmitWord: (String) -> Unit,
-    onPreviousWordNavigate: () -> Unit,
-    onNextWordNavigate: () -> Unit,
+    onPhraseEntryAction: (PhraseEntryAction) -> Unit,
     isCreationFlow: Boolean,
     errorEnabled: Boolean
 ) {
-    val isFirstWord = wordIndex == ConfirmPhraseWordsState.PHRASE_WORD_FIRST_INDEX
-    val isLastWord = wordIndex == ConfirmPhraseWordsState.PHRASE_WORD_SECOND_TO_LAST_INDEX
+    val isFirstWord = wordIndex == FIRST_WORD_INDEX
+    val isLastWord = wordIndex == LAST_WORD_INDEX
 
     Column(
         modifier = Modifier
@@ -883,9 +882,8 @@ fun VerifyPhraseWordUI(
                 }
                 VerifyWordTextField(
                     text = value,
-                    onTextChange = onValueChanged,
-                    errorEnabled = errorEnabled,
-                    onSubmitWord = onSubmitWord
+                    onPhraseEntryAction = onPhraseEntryAction,
+                    errorEnabled = errorEnabled
                 )
 
                 if (!isCreationFlow) {
@@ -893,8 +891,7 @@ fun VerifyPhraseWordUI(
                         value = value,
                         isFirstWord = isFirstWord,
                         isLastWord = isLastWord,
-                        onPreviousWordNavigate = onPreviousWordNavigate,
-                        onNextWordNavigate = onNextWordNavigate
+                        onPhraseEntryAction = onPhraseEntryAction
                     )
                 }
             }
@@ -907,9 +904,8 @@ fun VerifyPhraseWordUI(
 @Composable
 fun VerifyWordTextField(
     text: String,
-    onTextChange: (String) -> Unit,
     errorEnabled: Boolean,
-    onSubmitWord: (String) -> Unit
+    onPhraseEntryAction: (PhraseEntryAction) -> Unit
 ) {
     val singleLine = true
     val enabled = true
@@ -929,7 +925,9 @@ fun VerifyWordTextField(
                 shape = RoundedCornerShape(8.dp)
             ),
         value = text,
-        onValueChange = onTextChange,
+        onValueChange = { textInput ->
+            onPhraseEntryAction(PhraseEntryAction.UpdateWordInput(wordInput = textInput))
+        },
         textStyle = LocalTextStyle.current.copy(
             color = StrikeWhite,
             textAlign = TextAlign.Center,
@@ -943,7 +941,7 @@ fun VerifyWordTextField(
             keyboardType = KeyboardType.Text
         ),
         keyboardActions = KeyboardActions(
-            onNext = { onSubmitWord(errorMessage) }
+            onNext = { onPhraseEntryAction(PhraseEntryAction.SubmitWordInput(errorMessage)) }
         ),
         interactionSource = interactionSource,
         cursorBrush = SolidColor(StrikePurple),
@@ -965,8 +963,7 @@ fun VerifyWordTextField(
 @Composable
 private fun WordNavigationButtons(
     value: String,
-    onPreviousWordNavigate: () -> Unit,
-    onNextWordNavigate: () -> Unit,
+    onPhraseEntryAction: (PhraseEntryAction) -> Unit,
     isFirstWord: Boolean,
     isLastWord: Boolean
 ) {
@@ -984,7 +981,7 @@ private fun WordNavigationButtons(
                 .padding(0.dp)
                 .alpha(previousButtonVisibility),
             contentPadding = PaddingValues(0.dp),
-            onClick = onPreviousWordNavigate
+            onClick = { onPhraseEntryAction(PhraseEntryAction.NavigatePreviousWord) }
         ) {
             Icon(
                 modifier = Modifier.padding(horizontal = 0.dp, vertical = 4.dp),
@@ -1010,7 +1007,7 @@ private fun WordNavigationButtons(
                 .padding(0.dp),
             contentPadding = PaddingValues(0.dp),
             enabled = nextButtonEnabled,
-            onClick = onNextWordNavigate
+            onClick = { onPhraseEntryAction(PhraseEntryAction.NavigateNextWord) }
         ) {
             Text(
                 text = nextButtonText,

@@ -14,6 +14,7 @@ import com.strikeprotocols.mobile.data.EncryptionManagerImpl.Companion.BIO_KEY_N
 import com.strikeprotocols.mobile.data.models.IndexedPhraseWord
 import com.strikeprotocols.mobile.data.models.WalletSigner
 import com.strikeprotocols.mobile.presentation.key_management.KeyManagementState.Companion.NO_PHRASE_ERROR
+import com.strikeprotocols.mobile.presentation.key_management.KeyManagementState.Companion.FIRST_WORD_INDEX
 import com.strikeprotocols.mobile.presentation.key_management.flows.*
 import kotlinx.coroutines.*
 import javax.crypto.Cipher
@@ -27,12 +28,6 @@ class KeyManagementViewModel @Inject constructor(
 
     companion object {
         const val CLIPBOARD_LABEL_PHRASE = "Phrase"
-
-        const val FIRST_WORD_INDEX = 0
-        const val LAST_WORD_INDEX = 23
-
-        const val LAST_WORD_RANGE_SET_INDEX = 20
-        const val CHANGE_AMOUNT = 4
     }
 
     var state by mutableStateOf(KeyManagementState())
@@ -51,7 +46,7 @@ class KeyManagementViewModel @Inject constructor(
                 KeyManagementFlow.KEY_CREATION, KeyManagementFlow.UNINITIALIZED -> {
                     val phrase = keyRepository.generatePhrase()
                     state = state.copy(
-                        phrase = phrase
+                        keyGeneratedPhrase = phrase
                     )
                     state = state.copy(
                         initialData = keyManagementInitialData,
@@ -64,7 +59,7 @@ class KeyManagementViewModel @Inject constructor(
                     state = state.copy(
                         initialData = keyManagementInitialData,
                         keyManagementFlowStep =
-                            KeyManagementFlowStep.RecoveryFlow(KeyRecoveryFlowStep.ENTRY_STEP),
+                        KeyManagementFlowStep.RecoveryFlow(KeyRecoveryFlowStep.ENTRY_STEP),
                         keyManagementFlow = keyManagementInitialData.flow
                     )
                 }
@@ -72,7 +67,7 @@ class KeyManagementViewModel @Inject constructor(
                     state = state.copy(
                         initialData = keyManagementInitialData,
                         keyManagementFlowStep =
-                            KeyManagementFlowStep.RegenerationFlow(KeyRegenerationFlowStep.ALL_SET_STEP),
+                        KeyManagementFlowStep.RegenerationFlow(KeyRegenerationFlowStep.ALL_SET_STEP),
                         keyManagementFlow = keyManagementInitialData.flow
                     )
                     regenerateData()
@@ -85,7 +80,7 @@ class KeyManagementViewModel @Inject constructor(
                         keyManagementFlow = keyManagementInitialData.flow,
                         finalizeKeyFlow = Resource.Loading(),
                     )
-                    triggerBioPromptForMigration()
+                    triggerBioPrompt()
                 }
             }
         }
@@ -132,7 +127,7 @@ class KeyManagementViewModel @Inject constructor(
 
     fun retryKeyCreationFromPhrase() {
         viewModelScope.launch {
-            verifiedPhraseSuccess()
+            userVerifiedFullPhraseDuringKeyCreation()
         }
     }
 
@@ -142,7 +137,7 @@ class KeyManagementViewModel @Inject constructor(
             finalizeKeyFlow = Resource.Loading()
         )
 
-        triggerBioPromptForRecover(inputMethod = PhraseInputMethod.PASTED)
+        triggerBioPrompt(inputMethod = PhraseInputMethod.PASTED)
     }
 
     fun retryKeyMigration() {
@@ -151,16 +146,138 @@ class KeyManagementViewModel @Inject constructor(
             KeyManagementFlowStep.MigrationFlow(KeyMigrationFlowStep.ALL_SET_STEP),
             finalizeKeyFlow = Resource.Loading(),
         )
-        triggerBioPromptForMigration()
+        triggerBioPrompt()
     }
     //endregion
 
-    //region PHRASE NAVIGATION
+    //region CORE ACTIONS
+    fun triggerBioPrompt(inputMethod: PhraseInputMethod? = null) {
+        viewModelScope.launch {
+            val cipher = keyRepository.getCipherForEncryption(BIO_KEY_NAME)
+            if (cipher != null) {
+                state = when (state.keyManagementFlow) {
+                    KeyManagementFlow.KEY_CREATION -> {
+                        state.copy(
+                            triggerBioPrompt = Resource.Success(cipher),
+                            bioPromptReason = BioPromptReason.CREATE_KEY
+                        )
+                    }
+                    KeyManagementFlow.KEY_RECOVERY -> {
+                        state.copy(
+                            triggerBioPrompt = Resource.Success(cipher),
+                            bioPromptReason = BioPromptReason.RECOVER_KEY,
+                            inputMethod = inputMethod ?: PhraseInputMethod.MANUAL
+                        )
+                    }
+                    KeyManagementFlow.KEY_MIGRATION -> {
+                        state.copy(
+                            triggerBioPrompt = Resource.Success(cipher),
+                            bioPromptReason = BioPromptReason.MIGRATE_BIOMETRIC_KEY
+                        )
+                    }
+                    KeyManagementFlow.KEY_REGENERATION,
+                    KeyManagementFlow.UNINITIALIZED -> {
+                        return@launch
+                    }
+                }
+            }
+        }
+    }
+
+    fun biometryApproved(cipher: Cipher) {
+        when (state.bioPromptReason) {
+            BioPromptReason.CREATE_KEY -> createAndSaveKey(cipher)
+            BioPromptReason.RECOVER_KEY -> recoverKey(cipher)
+            BioPromptReason.MIGRATE_BIOMETRIC_KEY -> migrateKeyData(cipher)
+            else -> {}
+        }
+    }
+
+    fun biometryFailed() {
+        state = state.copy(finalizeKeyFlow = Resource.Error())
+    }
+
+    fun createAndSaveKey(cipher: Cipher) {
+        val phrase = state.keyGeneratedPhrase
+
+        if (phrase.isNullOrEmpty()) {
+            state = retrieveInitialKeyCreationState()
+            return
+        }
+
+        viewModelScope.launch {
+            try {
+                val walletSigner = keyRepository.generateInitialAuthDataAndSaveKeyToUser(
+                    Mnemonics.MnemonicCode(phrase = phrase),
+                    cipher
+                )
+                state = state.copy(walletSignerToAdd = walletSigner)
+
+                val addWalletSignerResource =
+                    attemptAddWalletSigner(walletSigner)
+
+                if (addWalletSignerResource is Resource.Success) {
+                    state =
+                        state.copy(
+                            keyManagementFlowStep = KeyManagementFlowStep.CreationFlow(
+                                KeyCreationFlowStep.ALL_SET_STEP
+                            ),
+                            finalizeKeyFlow = Resource.Success(addWalletSignerResource.data),
+                            keyGeneratedPhrase = null
+                        )
+                } else if (addWalletSignerResource is Resource.Error) {
+                    state = state.copy(
+                        finalizeKeyFlow = addWalletSignerResource
+                    )
+                }
+            } catch (e: Exception) {
+                state = state.copy(
+                    finalizeKeyFlow = Resource.Error(exception = e)
+                )
+            }
+        }
+    }
+
+    fun recoverKey(cipher: Cipher) {
+        viewModelScope.launch {
+            val verifyUser = state.initialData?.verifyUserDetails
+            val publicKey = verifyUser?.firstPublicKey()
+
+            if (verifyUser != null && publicKey != null) {
+                try {
+                    keyRepository.regenerateAuthDataAndSaveKeyToUser(
+                        phrase = state.userInputtedPhrase,
+                        backendPublicKey = publicKey,
+                        cipher = cipher
+                    )
+                    state = state.copy(finalizeKeyFlow = Resource.Success(null))
+                } catch (e: Exception) {
+                    recoverKeyFailure()
+                }
+            } else {
+                recoverKeyFailure()
+            }
+        }
+    }
+
+    private fun migrateKeyData(cipher: Cipher) {
+        viewModelScope.launch {
+            state = try {
+                keyRepository.migrateOldDataToBiometryProtectedStorage(cipher)
+                state.copy(finalizeKeyFlow = Resource.Success(null))
+            } catch (e: Exception) {
+                state.copy(finalizeKeyFlow = Resource.Error(exception = e))
+            }
+        }
+    }
+    //endregion
+
+    //region PHRASE FLOW NAVIGATION
     fun exitPhraseFlow() {
         state = state.copy(goToAccount = Resource.Success(true))
     }
 
-    fun retrieveInitialKeyCreationState() : KeyManagementState {
+    fun retrieveInitialKeyCreationState(): KeyManagementState {
         return state.copy(
             keyManagementFlowStep = KeyManagementFlowStep.CreationFlow(KeyCreationFlowStep.ENTRY_STEP),
             showToast = Resource.Success(NO_PHRASE_ERROR)
@@ -170,24 +287,32 @@ class KeyManagementViewModel @Inject constructor(
     fun phraseFlowAction(phraseFlowAction: PhraseFlowAction) {
         when (phraseFlowAction) {
             is PhraseFlowAction.WordIndexChanged -> {
-                handleWordIndexChanged(increasing = phraseFlowAction.increasing)
+                val updatedWordIndex = PhraseEntryUtil.handleWordIndexChanged(
+                    increasing = phraseFlowAction.increasing,
+                    currentWordIndex = state.wordIndexForDisplay
+                )
+                state = state.copy(wordIndexForDisplay = updatedWordIndex)
             }
             PhraseFlowAction.LaunchManualKeyCreation -> {
                 state = state.copy(
                     keyManagementFlowStep =
                     KeyManagementFlowStep.CreationFlow(KeyCreationFlowStep.WRITE_WORD_STEP),
-                    wordIndex = 0
+                    wordIndexForDisplay = FIRST_WORD_INDEX
                 )
             }
             is PhraseFlowAction.ChangeCreationFlowStep -> {
                 state =
-                    state.copy(keyManagementFlowStep =
-                    KeyManagementFlowStep.CreationFlow(phraseFlowAction.phraseVerificationFlowStep))
+                    state.copy(
+                        keyManagementFlowStep =
+                        KeyManagementFlowStep.CreationFlow(phraseFlowAction.phraseVerificationFlowStep)
+                    )
             }
             is PhraseFlowAction.ChangeRecoveryFlowStep -> {
                 state =
-                    state.copy(keyManagementFlowStep =
-                    KeyManagementFlowStep.RecoveryFlow(phraseFlowAction.phraseGenerationFlowStep))
+                    state.copy(
+                        keyManagementFlowStep =
+                        KeyManagementFlowStep.RecoveryFlow(phraseFlowAction.phraseGenerationFlowStep)
+                    )
             }
         }
     }
@@ -203,15 +328,7 @@ class KeyManagementViewModel @Inject constructor(
         val nextStep = moveUserToNextCreationScreen(creationFlowStep)
 
         if (nextStep == KeyCreationFlowStep.VERIFY_WORDS_STEP) {
-            try {
-                val confirmPhraseWordsState = generateConfirmPhraseWordsStateForCreationFlow()
-                state = state.copy(
-                    keyManagementFlowStep = KeyManagementFlowStep.CreationFlow(KeyCreationFlowStep.VERIFY_WORDS_STEP),
-                    confirmPhraseWordsState = confirmPhraseWordsState
-                )
-            } catch (e: Exception) {
-                retrieveInitialKeyCreationState()
-            }
+            setupConfirmPhraseWordsStateForCreationFlow()
         } else {
             state = state.copy(keyManagementFlowStep = KeyManagementFlowStep.CreationFlow(nextStep))
         }
@@ -239,23 +356,19 @@ class KeyManagementViewModel @Inject constructor(
     }
 
     fun keyRecoveryNavigateForward() {
-        if(state.keyManagementFlowStep !is KeyManagementFlowStep.RecoveryFlow) {
+        if (state.keyManagementFlowStep !is KeyManagementFlowStep.RecoveryFlow) {
             return
         }
 
-        val recoveryFlowStep : KeyRecoveryFlowStep =
+        val recoveryFlowStep: KeyRecoveryFlowStep =
             (state.keyManagementFlowStep as KeyManagementFlowStep.RecoveryFlow).step
 
         val nextStep = moveUserToNextRecoveryScreen(recoveryFlowStep)
 
-        state = if(nextStep == KeyRecoveryFlowStep.VERIFY_WORDS_STEP) {
-            val confirmPhraseWordsState = generateConfirmPhraseWordsStateForRecoveryFlow()
-            state.copy(
-                keyManagementFlowStep = KeyManagementFlowStep.RecoveryFlow(KeyRecoveryFlowStep.VERIFY_WORDS_STEP),
-                confirmPhraseWordsState = confirmPhraseWordsState
-            )
+        if (nextStep == KeyRecoveryFlowStep.VERIFY_WORDS_STEP) {
+            setupConfirmPhraseWordsStateForRecoveryFlow()
         } else {
-            state.copy(keyManagementFlowStep = KeyManagementFlowStep.RecoveryFlow(nextStep))
+            state = state.copy(keyManagementFlowStep = KeyManagementFlowStep.RecoveryFlow(nextStep))
         }
     }
 
@@ -273,11 +386,11 @@ class KeyManagementViewModel @Inject constructor(
     }
 
     fun keyRegenerationNavigateForward() {
-        if(state.keyManagementFlowStep !is KeyManagementFlowStep.RegenerationFlow) {
+        if (state.keyManagementFlowStep !is KeyManagementFlowStep.RegenerationFlow) {
             return
         }
 
-        val regenerationFlowStep : KeyRegenerationFlowStep =
+        val regenerationFlowStep: KeyRegenerationFlowStep =
             (state.keyManagementFlowStep as KeyManagementFlowStep.RegenerationFlow).step
 
         val nextStep = moveToNextRegenerationScreen(regenerationFlowStep)
@@ -297,10 +410,34 @@ class KeyManagementViewModel @Inject constructor(
 
         state = state.copy(keyManagementFlowStep = KeyManagementFlowStep.MigrationFlow(nextStep))
     }
-
     //endregion
 
-    //region PHRASE LOGIC
+    //region USER PHRASE ENTRY ACTIONS
+    fun phraseEntryAction(phraseEntryAction: PhraseEntryAction) {
+        when (phraseEntryAction) {
+            is PhraseEntryAction.NavigateNextWord -> {
+                strikeLog(message = "Navigating to next word")
+                navigateNextWordDuringKeyRecovery()
+            }
+            is PhraseEntryAction.NavigatePreviousWord -> {
+                strikeLog(message = "Navigating to previous word")
+                navigatePreviousWordDuringKeyRecovery()
+            }
+            is PhraseEntryAction.PastePhrase -> {
+                strikeLog(message = "Phrase pasted: ${phraseEntryAction.phrase}")
+                handlePastedPhrase(pastedPhrase = phraseEntryAction.phrase)
+            }
+            is PhraseEntryAction.SubmitWordInput -> {
+                strikeLog(message = "Word Input submitted")
+                submitWordInput(errorMessage = phraseEntryAction.errorMessage)
+            }
+            is PhraseEntryAction.UpdateWordInput -> {
+                strikeLog(message = "Word Input updated: ${phraseEntryAction.wordInput}")
+                updateWordInput(input = phraseEntryAction.wordInput)
+            }
+        }
+    }
+
     fun updateWordInput(input: String) {
         state = state.copy(
             confirmPhraseWordsState = state.confirmPhraseWordsState.copy(
@@ -310,282 +447,88 @@ class KeyManagementViewModel @Inject constructor(
 
         //TODO: Slot in the autocomplete logic here
         if (state.confirmPhraseWordsState.isCreationKeyFlow) {
-            verifyWordInputAgainstPhraseWord()
+            verifyWordInputAgainstPhraseWordKeyCreation()
         }
     }
 
-    fun submitWordInput(errorMessage: String) {
+    private fun submitWordInput(errorMessage: String) {
         handleWordSubmitted(errorMessage = errorMessage)
     }
 
-    fun navigatePreviousWord() {
-        if (state.confirmPhraseWordsState.wordIndex == 0) {
-            return
-        }
-
-        handlePreviousWordNavigationRecoveryFlow()
-    }
-
-    //Navigate to next word should also act as a submitWord
-    fun navigateNextWord() {
+    private fun navigateNextWordDuringKeyRecovery() {
         if (state.confirmPhraseWordsState.wordInput.isEmpty() || state.confirmPhraseWordsState.wordInput.isBlank()) {
             return
         }
 
-        addWordInputToRecoveryPhraseWords(word = state.confirmPhraseWordsState.wordInput, index = state.confirmPhraseWordsState.wordIndex)
-    }
-
-    fun verifyPastedPhrase(pastedPhrase: String) {
-        if (pastedPhrase == state.pastedPhrase) {
-            return
-        }
-
-        viewModelScope.launch {
-            state = state.copy(pastedPhrase = pastedPhrase)
-            try {
-                if (phraseValidator.isPhraseValid(pastedPhrase) && pastedPhrase == state.phrase) {
-                    verifiedPhraseSuccess()
-                } else {
-                    verifiedPhraseFailure()
-                }
-            } catch (e: Exception) {
-                verifiedPhraseFailure()
-            }
-        }
-    }
-
-    private fun verifiedPhraseSuccess() {
-        viewModelScope.launch {
-            state = state.copy(
-                keyManagementFlowStep =
-                KeyManagementFlowStep.CreationFlow(KeyCreationFlowStep.ALL_SET_STEP),
-                finalizeKeyFlow = Resource.Loading(),
-            )
-
-            triggerBioPromptForCreate()
-        }
-    }
-
-    suspend fun triggerBioPromptForCreate() {
-        val cipher = keyRepository.getCipherForEncryption(BIO_KEY_NAME)
-        if(cipher != null) {
-            state = state.copy(
-                triggerBioPrompt = Resource.Success(cipher),
-                bioPromptReason = BioPromptReason.CREATE_KEY
-            )
-        }
-    }
-
-    fun triggerBioPromptForRecover(inputMethod: PhraseInputMethod) {
-        viewModelScope.launch {
-            val cipher = keyRepository.getCipherForEncryption(BIO_KEY_NAME)
-            if(cipher != null) {
-                state = state.copy(
-                    triggerBioPrompt = Resource.Success(cipher),
-                    bioPromptReason = BioPromptReason.RECOVER_KEY,
-                    inputMethod = inputMethod
-                )
-            }
-        }
-    }
-
-    fun triggerBioPromptForMigration() {
-        viewModelScope.launch {
-            val cipher = keyRepository.getCipherForEncryption(BIO_KEY_NAME)
-            state = state.copy(
-                triggerBioPrompt = Resource.Success(cipher),
-                bioPromptReason = BioPromptReason.MIGRATE_BIOMETRIC_KEY
-            )
-        }
-    }
-
-    fun recoverKey(cipher: Cipher) {
-        viewModelScope.launch {
-            val verifyUser = state.initialData?.verifyUserDetails
-            val publicKey = verifyUser?.firstPublicKey()
-
-            if (verifyUser != null && publicKey != null) {
-                try {
-                    keyRepository.regenerateAuthDataAndSaveKeyToUser(
-                        phrase = state.phrase ?: "",
-                        backendPublicKey = publicKey,
-                        cipher = cipher
-                    )
-                    state = state.copy(finalizeKeyFlow = Resource.Success(null))
-                } catch (e: Exception) {
-                    recoverKeyFailure()
-                }
-            } else {
-                recoverKeyFailure()
-            }
-        }
-    }
-
-    private fun migrateKeyData(cipher: Cipher) {
-        viewModelScope.launch {
-            state = try {
-                keyRepository.migrateOldDataToBiometryProtectedStorage(cipher)
-                state.copy(finalizeKeyFlow = Resource.Success(null))
-            } catch (e: Exception) {
-                state.copy(finalizeKeyFlow = Resource.Error(exception = e))
-            }
-        }
-    }
-
-    fun biometryApproved(cipher: Cipher) {
-        when(state.bioPromptReason) {
-            BioPromptReason.CREATE_KEY -> createAndSaveKey(cipher)
-            BioPromptReason.RECOVER_KEY -> recoverKey(cipher)
-            BioPromptReason.MIGRATE_BIOMETRIC_KEY -> migrateKeyData(cipher)
-            else -> {}
-        }
-    }
-
-    fun biometryFailed() {
-        state = state.copy(finalizeKeyFlow = Resource.Error())
-    }
-
-    fun createAndSaveKey(cipher: Cipher) {
-        val phrase = state.phrase
-
-        if (phrase.isNullOrEmpty()) {
-            state = retrieveInitialKeyCreationState()
-            return
-        }
-
-        viewModelScope.launch {
-            try {
-                val walletSigner = keyRepository.generateInitialAuthDataAndSaveKeyToUser(
-                    Mnemonics.MnemonicCode(phrase = phrase),
-                    cipher
-                )
-                state = state.copy(walletSignerToAdd = walletSigner)
-
-                val addWalletSignerResource =
-                    attemptAddWalletSigner(walletSigner)
-
-                if (addWalletSignerResource is Resource.Success) {
-                    state =
-                        state.copy(
-                            keyManagementFlowStep = KeyManagementFlowStep.CreationFlow(
-                                KeyCreationFlowStep.ALL_SET_STEP
-                            ),
-                            finalizeKeyFlow = Resource.Success(addWalletSignerResource.data),
-                            phrase = null
-                        )
-                } else if (addWalletSignerResource is Resource.Error) {
-                    state = state.copy(
-                        finalizeKeyFlow = addWalletSignerResource
-                    )
-                }
-            } catch (e: Exception) {
-                state = state.copy(
-                    finalizeKeyFlow = Resource.Error(exception = e)
-                )
-            }
-        }
-    }
-
-    private fun verifiedPhraseFailure() {
-        viewModelScope.launch {
-            state = state.copy(
-                keyManagementFlowStep = KeyManagementFlowStep.CreationFlow(KeyCreationFlowStep.CONFIRM_KEY_ERROR_STEP),
-            )
-        }
-    }
-
-    //Only used in the recovery key setup
-    fun verifyPhraseToRecoverKeyPair(pastedPhrase: String) {
-        viewModelScope.launch {
-            state = state.copy(
-                keyManagementFlowStep = KeyManagementFlowStep.RecoveryFlow(KeyRecoveryFlowStep.ALL_SET_STEP),
-                finalizeKeyFlow = Resource.Loading(),
-                phrase = pastedPhrase
-            )
-
-            triggerBioPromptForRecover(inputMethod = PhraseInputMethod.PASTED)
-        }
-    }
-
-    fun recoverKeyFailure() {
-        state = if (state.inputMethod == PhraseInputMethod.PASTED) {
-            state.copy(
-                keyManagementFlowStep = KeyManagementFlowStep.RecoveryFlow(KeyRecoveryFlowStep.CONFIRM_KEY_ERROR_STEP)
-            )
-        } else {
-            //This method call is not needed if we reset the same state object a few lines below
-            resetConfirmPhraseWordsState()
-            state.copy(
-                phrase = "",
-                keyManagementFlowStep = KeyManagementFlowStep.RecoveryFlow(KeyRecoveryFlowStep.ENTRY_STEP),
-                keyRecoveryManualEntryError = Resource.Error(),
-                confirmPhraseWordsState = ConfirmPhraseWordsState()
-            )
-        }
-    }
-
-    private fun handleWordIndexChanged(increasing: Boolean) {
-        var wordIndex =
-            if (increasing) {
-                state.wordIndex + CHANGE_AMOUNT
-            } else {
-                state.wordIndex - CHANGE_AMOUNT
-            }
-
-        if (wordIndex > LAST_WORD_INDEX) {
-            wordIndex = FIRST_WORD_INDEX
-        } else if (wordIndex < FIRST_WORD_INDEX) {
-            wordIndex = LAST_WORD_RANGE_SET_INDEX
-        }
-
-        state = state.copy(wordIndex = wordIndex)
-    }
-
-    fun generateConfirmPhraseWordsStateForCreationFlow(): ConfirmPhraseWordsState {
-        val phrase = state.phrase ?: throw Exception(PhraseException.NULL_PHRASE_IN_STATE)
-
-        val indexedPhraseWord = getPhraseWordAtIndex(phrase = phrase, index = FIRST_WORD_INDEX)//This does almost the same thing as getWordIndexFromWordSet method
-
-        return ConfirmPhraseWordsState(
-            phrase = phrase,
-            phraseWordToVerify = indexedPhraseWord.wordValue,
-            wordIndex = indexedPhraseWord.wordIndex,
-            wordInput = "",
-            errorEnabled = false,
-            wordsVerified = 0,
-            isCreationKeyFlow = true
+        //Navigate to next word should also act as a submitWord
+        addWordInputToPhraseWordsDuringKeyRecovery(
+            word = state.confirmPhraseWordsState.wordInput,
+            currentWordIndex = state.confirmPhraseWordsState.phraseWordToVerifyIndex
         )
     }
 
-    fun generateConfirmPhraseWordsStateForRecoveryFlow(): ConfirmPhraseWordsState {
-        //The user will just have to enter 24 words and we just need to keep them and build them into a phrase
-        return ConfirmPhraseWordsState(
-            phrase = "",
-            phraseWordToVerify = "",
-            wordIndex = FIRST_WORD_INDEX,
-            wordInput = "",
-            errorEnabled = false,
-            wordsVerified = 0,
-            isCreationKeyFlow = false
+    private fun navigatePreviousWordDuringKeyRecovery() {
+        if (state.confirmPhraseWordsState.phraseWordToVerifyIndex == 0) {
+            return
+        }
+
+        handlePreviousWordNavigationDuringKeyRecovery()
+    }
+
+    private fun handlePreviousWordNavigationDuringKeyRecovery() {
+        val decrementedWordIndex = state.confirmPhraseWordsState.phraseWordToVerifyIndex - 1
+        val wordInputToDisplay = state.confirmPhraseWordsState.words[decrementedWordIndex]
+
+        state = state.copy(
+            confirmPhraseWordsState = state.confirmPhraseWordsState.copy(
+                phraseWordToVerifyIndex = decrementedWordIndex,
+                wordInput = wordInputToDisplay
+            )
         )
     }
 
-    fun getPhraseWordAtIndex(phrase: String, index: Int): IndexedPhraseWord {
-        if (!phrase.contains(" ") || phrase.split(" ").size < ConfirmPhraseWordsState.PHRASE_WORD_COUNT) {
-            //Does not contain space
-            //Does not equal 24 word phrase
-            throw Exception(PhraseException.INVALID_PHRASE_IN_STATE)
+    fun handlePastedPhrase(pastedPhrase: String) {
+        if (state.keyManagementFlow == KeyManagementFlow.KEY_CREATION) {
+            handlePhrasePastedDuringKeyCreation(pastedPhrase = pastedPhrase)
+        } else if (state.keyManagementFlow == KeyManagementFlow.KEY_RECOVERY) {
+            handlePhrasePastedDuringKeyRecovery(pastedPhrase = pastedPhrase)
         }
-
-        val phraseWords = phrase.split(" ")
-        val phraseWord = phraseWords[index]
-
-        return IndexedPhraseWord(wordIndex = index, wordValue = phraseWord)
     }
 
+    private fun handlePhrasePastedDuringKeyCreation(pastedPhrase: String) {
+        if (pastedPhrase == state.confirmPhraseWordsState.pastedPhrase) {
+            return
+        }
+
+        state = state.copy(
+            inputMethod = PhraseInputMethod.PASTED,
+            confirmPhraseWordsState = state.confirmPhraseWordsState.copy(
+                pastedPhrase = pastedPhrase
+            )
+        )
+        try {
+            if (phraseValidator.isPhraseValid(pastedPhrase) && pastedPhrase == state.keyGeneratedPhrase) {
+                userVerifiedFullPhraseDuringKeyCreation()
+            } else {
+                pastedPhraseVerificationFailureDuringKeyCreation()
+            }
+        } catch (e: Exception) {
+            pastedPhraseVerificationFailureDuringKeyCreation()
+        }
+    }
+
+    private fun handlePhrasePastedDuringKeyRecovery(pastedPhrase: String) {
+        userEnteredFullPhraseDuringKeyRecovery(
+            phrase = pastedPhrase,
+            inputMethod = PhraseInputMethod.PASTED
+        )
+    }
+    //endregion
+
+    //region MANUAL ENTRY PHRASE WORD SUBMISSION LOGIC
     private fun handleWordSubmitted(errorMessage: String) {
         val word = state.confirmPhraseWordsState.wordInput.trim()
-        val index = state.confirmPhraseWordsState.wordIndex
+        val index = state.confirmPhraseWordsState.phraseWordToVerifyIndex
 
         if (word.isEmpty()) {
             state = state.copy(showToast = Resource.Success(errorMessage))
@@ -593,28 +536,39 @@ class KeyManagementViewModel @Inject constructor(
         } else {
 
             if (state.confirmPhraseWordsState.isCreationKeyFlow) {
-                verifyWordSubmittedAgainstPhraseWord()
+                verifyWordSubmittedAgainstPhraseWordKeyCreation()
             } else {
-                addWordInputToRecoveryPhraseWords(word = word, index = index)
+                addWordInputToPhraseWordsDuringKeyRecovery(word = word, currentWordIndex = index)
             }
         }
     }
 
-    private fun verifyWordInputAgainstPhraseWord() {
+    private fun verifyWordInputAgainstPhraseWordKeyCreation() {
         val phraseWord = state.confirmPhraseWordsState.phraseWordToVerify
         val wordInput = state.confirmPhraseWordsState.wordInput
 
         if (phraseWord == wordInput) {
-            handleWordVerified()
+            try {
+                handleWordVerifiedDuringKeyCreation()
+            } catch (e: Exception) {
+                retrieveInitialKeyCreationState()
+            }
         }
     }
 
-    private fun verifyWordSubmittedAgainstPhraseWord() {
+    private fun verifyWordSubmittedAgainstPhraseWordKeyCreation() {
         val phraseWord = state.confirmPhraseWordsState.phraseWordToVerify
         val wordInput = state.confirmPhraseWordsState.wordInput
 
         if (phraseWord == wordInput) {
-            handleWordVerified()
+            try {
+
+                handleWordVerifiedDuringKeyCreation()
+            } catch (e: Exception) {
+                //TODO: Test the state resetting and flow handling when this occurs,
+                // we might need to reset more state here
+                retrieveInitialKeyCreationState()
+            }
         } else {
             state = state.copy(
                 confirmPhraseWordsState = state.confirmPhraseWordsState.copy(
@@ -624,166 +578,175 @@ class KeyManagementViewModel @Inject constructor(
         }
     }
 
-    private fun addWordInputToRecoveryPhraseWords(word: String, index: Int) {
+    private fun handleWordVerifiedDuringKeyCreation() {
+        state = state.copy(
+            confirmPhraseWordsState = PhraseEntryUtil.incrementWordsVerified(
+                state = state.confirmPhraseWordsState
+            )
+        )
+
+        val wordsVerified = state.confirmPhraseWordsState.wordsVerified
+        val wordIndex = state.confirmPhraseWordsState.phraseWordToVerifyIndex
+
+        val allWordsVerified = PhraseEntryUtil.checkIfAllPhraseWordsAreVerifiedDuringKeyCreation(
+            wordsVerified = wordsVerified,
+            wordIndex = wordIndex
+        )
+
+        if (allWordsVerified) {
+            userVerifiedFullPhraseDuringKeyCreation()
+        } else {
+            //Update the state with the next word to verify
+            val phrase =
+                state.keyGeneratedPhrase ?: throw Exception(PhraseException.NULL_PHRASE_IN_STATE)
+            val nextIndex = wordIndex + 1
+
+            val nextWordToVerify =
+                PhraseEntryUtil.getPhraseWordAtIndex(phrase = phrase, index = nextIndex)
+
+            state = state.copy(
+                confirmPhraseWordsState = PhraseEntryUtil.updateConfirmPhraseWordsStateWithNextWordToVerify(
+                    nextWordToVerify = nextWordToVerify,
+                    confirmPhraseWordsState = state.confirmPhraseWordsState
+                )
+            )
+        }
+    }
+
+    private fun addWordInputToPhraseWordsDuringKeyRecovery(word: String, currentWordIndex: Int) {
         val words = state.confirmPhraseWordsState.words.toMutableList()
 
+        val indexedPhraseWord = IndexedPhraseWord(
+            wordIndex = currentWordIndex,
+            wordValue = word
+        )
+
         //Check to see if we are dealing with a previously submitted word
-        if (words.size > index) {
-            if (words[index] == word) {
-                getNextWordToDisplay(index = index)
-                return
+        if (words.size > currentWordIndex) {
+            val updatedState = PhraseEntryUtil.handlePreviouslySubmittedWord(
+                word = indexedPhraseWord,
+                submittedWords = words,
+                state = state
+            )
+
+            if (updatedState != null) {
+                state = updatedState
             } else {
-                replacePreviouslySubmittedWordWithEditedInput(editedWordInput = word, index = index)
-                return
+                state = state.copy(inputMethod = PhraseInputMethod.MANUAL)
+                recoverKeyFailure()
             }
+            return
         }
 
         //If we are not dealing with a previously submitted word,
         // then accept the new word and move forward
-        words.add(index = index, element = word)
-
         state = state.copy(
-            confirmPhraseWordsState = state.confirmPhraseWordsState.copy(
-                wordIndex = index + 1,//Increment by one
-                wordInput = "",
-                errorEnabled = false,
-                words = words
+            confirmPhraseWordsState = PhraseEntryUtil.addWordToPhraseWords(
+                word = indexedPhraseWord,
+                phraseWords = words,
+                state = state.confirmPhraseWordsState
             )
         )
 
         if (state.confirmPhraseWordsState.allWordsEntered) {
-            assemblePhraseFromWords()
+            handleAllWordsEnteredDuringKeyRecovery()
         }
     }
-
-    //region Word navigation recovery flow
-    private fun getNextWordToDisplay(index: Int) {
-        val words = state.confirmPhraseWordsState.words.toMutableList()
-
-        val wordInput = getNextWordInput(words, index)
-
-        state = state.copy(
-            confirmPhraseWordsState = state.confirmPhraseWordsState.copy(
-                wordIndex = index + 1,//Increment by one
-                wordInput = wordInput,
-                errorEnabled = false
-            )
-        )
-    }
-
-    private fun replacePreviouslySubmittedWordWithEditedInput(editedWordInput: String, index: Int) {
-        val words = state.confirmPhraseWordsState.words.toMutableList()
-        //Replace the old word with the edited word
-        words.set(index = index, element = editedWordInput)
-
-        val wordInput = getNextWordInput(words, index)
-
-        state = state.copy(
-            confirmPhraseWordsState = state.confirmPhraseWordsState.copy(
-                wordIndex = index + 1,//Increment by one
-                wordInput = wordInput,
-                errorEnabled = false,
-                words = words
-            )
-        )
-    }
-
-    private fun getNextWordInput(words: List<String>, index: Int) =
-        try {
-            words[index + 1]
-        } catch (e: IndexOutOfBoundsException) {
-            ""
-        }
     //endregion
 
-    private fun handleWordVerified() {
-        //If 23 words are verified and we are the last word Index this method gets call, we have verified the last word
-        if (state.confirmPhraseWordsState.wordsVerified == ConfirmPhraseWordsState.PHRASE_WORD_SECOND_TO_LAST_INDEX
-            && state.confirmPhraseWordsState.wordIndex + 1 == ConfirmPhraseWordsState.PHRASE_WORD_COUNT
-        ) {
-            handleUserVerifiedAllPhraseWords()
-            return
-        }
-
-        val wordIndex = state.confirmPhraseWordsState.wordIndex
-        val wordsVerified = state.confirmPhraseWordsState.wordsVerified
-
-        val phrase = state.confirmPhraseWordsState.phrase
-        val nextIndex = wordIndex + 1
-
-        val nextWordToVerify = getPhraseWordAtIndex(phrase = phrase, index = nextIndex)
-
-        if (wordIndex < wordsVerified) {
-            //Need to decide if the user has to provide input for the next word or if they already verified the word
-            if (wordIndex == wordsVerified - 1) {
-                //The user needs to input the next word
-                state = state.copy(
-                    confirmPhraseWordsState = state.confirmPhraseWordsState.copy(
-                        phraseWordToVerify = nextWordToVerify.wordValue,
-                        wordIndex = nextWordToVerify.wordIndex,
-                        wordInput = "",
-                        errorEnabled = false
-                    )
-                )
-            } else {
-                state = state.copy(
-                    confirmPhraseWordsState = state.confirmPhraseWordsState.copy(
-                        phraseWordToVerify = nextWordToVerify.wordValue,
-                        wordIndex = nextWordToVerify.wordIndex,
-                        wordInput = nextWordToVerify.wordValue,
-                        errorEnabled = false
-                    )
-                )
-            }
-            return
-        }
+    //region MANUAL ENTRY ALL WORDS SUBMITTED LOGIC
+    private fun userVerifiedFullPhraseDuringKeyCreation() {
+        handleUserFinishedPhraseVerificationDuringKeyCreation()
 
         state = state.copy(
-            confirmPhraseWordsState = state.confirmPhraseWordsState.copy(
-                phraseWordToVerify = nextWordToVerify.wordValue,
-                wordIndex = nextWordToVerify.wordIndex,
-                wordInput = "",
-                wordsVerified = state.confirmPhraseWordsState.wordsVerified + 1,
-                errorEnabled = false
-            )
+            keyManagementFlowStep =
+            KeyManagementFlowStep.CreationFlow(KeyCreationFlowStep.ALL_SET_STEP),
+            finalizeKeyFlow = Resource.Loading(),
+        )
+
+        triggerBioPrompt()
+    }
+
+    private fun handleUserFinishedPhraseVerificationDuringKeyCreation() {
+        when (state.inputMethod) {
+            PhraseInputMethod.PASTED -> {}
+            PhraseInputMethod.MANUAL -> {
+                resetConfirmPhraseWordsState()
+            }
+        }
+    }
+
+    private fun handleAllWordsEnteredDuringKeyRecovery() {
+        val phrase =
+            PhraseEntryUtil.assemblePhraseFromWords(words = state.confirmPhraseWordsState.words)
+
+        userEnteredFullPhraseDuringKeyRecovery(
+            phrase = phrase,
+            inputMethod = PhraseInputMethod.MANUAL
         )
     }
 
-    private fun assemblePhraseFromWords() {
-        viewModelScope.launch {
-            val words = state.confirmPhraseWordsState.words
+    private fun userEnteredFullPhraseDuringKeyRecovery(
+        phrase: String,
+        inputMethod: PhraseInputMethod
+    ) {
+        state = state.copy(
+            keyManagementFlowStep = KeyManagementFlowStep.RecoveryFlow(
+                KeyRecoveryFlowStep.ALL_SET_STEP
+            ),
+            finalizeKeyFlow = Resource.Loading(),
+            userInputtedPhrase = phrase
+        )
+        triggerBioPrompt(inputMethod = inputMethod)
+    }
+    //endregion
 
-            val phraseBuilder = StringBuilder()
-            for (word in words) {
-                phraseBuilder.append("$word ")
-            }
-
-            val phrase = phraseBuilder.toString().trim()
-
+    //region MANUAL ENTRY STATE SETUP
+    fun setupConfirmPhraseWordsStateForCreationFlow() {
+        val confirmPhraseWordsState =
+            PhraseEntryUtil.generateConfirmPhraseWordsState(state = state)
+        if (confirmPhraseWordsState != null) {
             state = state.copy(
-                keyManagementFlowStep = KeyManagementFlowStep.RecoveryFlow(KeyRecoveryFlowStep.ALL_SET_STEP),
-                finalizeKeyFlow = Resource.Loading(),
-                phrase = phrase
+                keyManagementFlowStep = KeyManagementFlowStep.CreationFlow(KeyCreationFlowStep.VERIFY_WORDS_STEP),
+                confirmPhraseWordsState = confirmPhraseWordsState
             )
-            triggerBioPromptForRecover(inputMethod = PhraseInputMethod.MANUAL)
+        } else {
+            retrieveInitialKeyCreationState()
         }
     }
 
-    private fun handleUserVerifiedAllPhraseWords() {
-        viewModelScope.launch {
-            verifiedPhraseSuccess()
+    fun setupConfirmPhraseWordsStateForRecoveryFlow() {
+        val confirmPhraseWordsState =
+            PhraseEntryUtil.generateConfirmPhraseWordsState(state = state)
+        if (confirmPhraseWordsState != null) {
+            state = state.copy(
+                keyManagementFlowStep = KeyManagementFlowStep.RecoveryFlow(KeyRecoveryFlowStep.VERIFY_WORDS_STEP),
+                confirmPhraseWordsState = confirmPhraseWordsState
+            )
         }
-        resetConfirmPhraseWordsState()
+    }
+    //endregion
+
+    //region FAILURE HANDLING
+    private fun pastedPhraseVerificationFailureDuringKeyCreation() {
+        state = state.copy(
+            keyManagementFlowStep = KeyManagementFlowStep.CreationFlow(KeyCreationFlowStep.CONFIRM_KEY_ERROR_STEP),
+        )
     }
 
-    private fun handlePreviousWordNavigationRecoveryFlow() {
-        val decrementedWordIndex = state.confirmPhraseWordsState.wordIndex - 1
-        val wordInputToDisplay = state.confirmPhraseWordsState.words[decrementedWordIndex]
-
-        state = state.copy(confirmPhraseWordsState = state.confirmPhraseWordsState.copy(
-            wordIndex = decrementedWordIndex,
-            wordInput = wordInputToDisplay
-        ))
+    fun recoverKeyFailure() {
+        state = if (state.inputMethod == PhraseInputMethod.PASTED) {
+            state.copy(
+                keyManagementFlowStep = KeyManagementFlowStep.RecoveryFlow(KeyRecoveryFlowStep.CONFIRM_KEY_ERROR_STEP)
+            )
+        } else {
+            state.copy(
+                userInputtedPhrase = "",
+                keyManagementFlowStep = KeyManagementFlowStep.RecoveryFlow(KeyRecoveryFlowStep.ENTRY_STEP),
+                keyRecoveryManualEntryError = Resource.Error(),
+                confirmPhraseWordsState = ConfirmPhraseWordsState()
+            )
+        }
     }
     //endregion
 

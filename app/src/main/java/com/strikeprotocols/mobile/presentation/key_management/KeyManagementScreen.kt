@@ -89,21 +89,17 @@ fun KeyManagementScreen(
         KeyManagementFlow.KEY_RECOVERY -> {
             Box {
                 KeyRecoveryFlowUI(
-                    pastedPhrase = state.pastedPhrase,
+                    pastedPhrase = state.confirmPhraseWordsState.pastedPhrase,
                     keyRecoveryFlowStep =
                         (state.keyManagementFlowStep as KeyManagementFlowStep.RecoveryFlow).step,
                     onNavigate = viewModel::keyRecoveryNavigateForward,
                     onBackNavigate = viewModel::keyRecoveryNavigateBackward,
-                    verifyPastedPhrase = viewModel::verifyPhraseToRecoverKeyPair,
                     onExit = viewModel::exitPhraseFlow,
                     onPhraseFlowAction = viewModel::phraseFlowAction,
-                    wordToVerifyIndex = state.confirmPhraseWordsState.wordIndex,
+                    onPhraseEntryAction = viewModel::phraseEntryAction,
+                    wordToVerifyIndex = state.confirmPhraseWordsState.phraseWordToVerifyIndex,
                     wordInput = state.confirmPhraseWordsState.wordInput,
-                    wordInputChange = viewModel::updateWordInput,
                     wordVerificationErrorEnabled = state.confirmPhraseWordsState.errorEnabled,
-                    navigatePreviousWord = viewModel::navigatePreviousWord,
-                    navigateNextWord = viewModel::navigateNextWord,
-                    onSubmitWord = viewModel::submitWordInput,
                     keyRecoveryState = state.finalizeKeyFlow,
                     retryKeyRecovery = viewModel::retryKeyRecoveryFromPhrase,
                 )
@@ -129,21 +125,19 @@ fun KeyManagementScreen(
         else -> {
             Box {
                 KeyCreationFlowUI(
-                    phrase = state.phrase ?: "",
-                    pastedPhrase = state.pastedPhrase,
+                    phrase = state.keyGeneratedPhrase ?: "",
+                    pastedPhrase = state.confirmPhraseWordsState.pastedPhrase,
                     phraseVerificationFlowStep =
                         (state.keyManagementFlowStep as KeyManagementFlowStep.CreationFlow).step,
-                    wordIndex = state.wordIndex,
+                    wordIndexToDisplay = state.wordIndexForDisplay,
                     onPhraseFlowAction = viewModel::phraseFlowAction,
+                    onPhraseEntryAction = viewModel::phraseEntryAction,
                     onNavigate = viewModel::keyCreationNavigateForward,
                     onBackNavigate = viewModel::keyCreationNavigateBackward,
-                    verifyPastedPhrase = viewModel::verifyPastedPhrase,
                     onExit = viewModel::exitPhraseFlow,
-                    wordToVerifyIndex = state.confirmPhraseWordsState.wordIndex,
+                    wordToVerifyIndex = state.confirmPhraseWordsState.phraseWordToVerifyIndex,
                     wordInput = state.confirmPhraseWordsState.wordInput,
-                    wordInputChange = viewModel::updateWordInput,
                     wordVerificationErrorEnabled = state.confirmPhraseWordsState.errorEnabled,
-                    onSubmitWord = viewModel::submitWordInput,
                     keyCreationState = state.finalizeKeyFlow,
                     retryKeyCreation = viewModel::retryKeyCreationFromPhrase
                 )

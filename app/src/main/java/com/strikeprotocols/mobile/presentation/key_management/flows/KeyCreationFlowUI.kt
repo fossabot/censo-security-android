@@ -56,18 +56,16 @@ fun KeyCreationFlowUI(
     phrase: String,
     phraseVerificationFlowStep: KeyCreationFlowStep,
     pastedPhrase: String,
-    wordIndex: Int,
+    wordIndexToDisplay: Int,
     onNavigate: () -> Unit,
     onPhraseFlowAction: (phraseFlowAction: PhraseFlowAction) -> Unit,
+    onPhraseEntryAction: (PhraseEntryAction) -> Unit,
     onBackNavigate: () -> Unit,
     onExit: () -> Unit,
-    verifyPastedPhrase: (String) -> Unit,
     wordToVerifyIndex: Int,
     wordInput: String,
-    wordInputChange: (String) -> Unit,
     wordVerificationErrorEnabled: Boolean,
     retryKeyCreation: () -> Unit,
-    onSubmitWord: (String) -> Unit,
     keyCreationState: Resource<WalletSigner?>
 ) {
 
@@ -125,7 +123,7 @@ fun KeyCreationFlowUI(
                     KeyCreationFlowStep.WRITE_WORD_STEP -> {
                         WriteWordUI(
                             phrase = phrase,
-                            index = wordIndex,
+                            index = wordIndexToDisplay,
                             onPhraseFlowAction = onPhraseFlowAction,
                             onNavigate = onNavigate
                         )
@@ -134,18 +132,15 @@ fun KeyCreationFlowUI(
                         VerifyPhraseWordUI(
                             wordIndex = wordToVerifyIndex,
                             value = wordInput,
-                            onValueChanged = wordInputChange,
+                            onPhraseEntryAction = onPhraseEntryAction,
                             errorEnabled = wordVerificationErrorEnabled,
-                            onSubmitWord = onSubmitWord,
-                            onPreviousWordNavigate = {},
-                            onNextWordNavigate = {},
                             isCreationFlow = true
                         )
                     }
                     KeyCreationFlowStep.CONFIRM_KEY_ENTRY_STEP -> ConfirmKeyUI(
                         pastedPhrase = pastedPhrase,
                         errorEnabled = false,
-                        verifyPastedPhrase = verifyPastedPhrase,
+                        onPhraseEntryAction = onPhraseEntryAction,
                         header = stringResource(R.string.confirm_recovery_phrase),
                         title = stringResource(R.string.enter_key_title),
                         message = stringResource(R.string.enter_key_message)
@@ -153,7 +148,7 @@ fun KeyCreationFlowUI(
                     KeyCreationFlowStep.CONFIRM_KEY_ERROR_STEP -> ConfirmKeyUI(
                         pastedPhrase = pastedPhrase,
                         errorEnabled = true,
-                        verifyPastedPhrase = verifyPastedPhrase,
+                        onPhraseEntryAction = onPhraseEntryAction,
                         header = stringResource(R.string.confirm_recovery_phrase),
                         title = stringResource(R.string.key_not_valid_title),
                         message = stringResource(R.string.key_not_valid_message)

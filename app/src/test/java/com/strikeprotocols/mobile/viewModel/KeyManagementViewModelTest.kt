@@ -6,6 +6,7 @@ import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
 import com.strikeprotocols.mobile.*
 import com.strikeprotocols.mobile.common.BioPromptReason
+import com.strikeprotocols.mobile.common.PhraseEntryUtil
 import com.strikeprotocols.mobile.common.Resource
 import com.strikeprotocols.mobile.data.EncryptionManagerImpl.Companion.BIO_KEY_NAME
 import com.strikeprotocols.mobile.data.KeyRepository
@@ -14,11 +15,11 @@ import com.strikeprotocols.mobile.data.PhraseValidator
 import com.strikeprotocols.mobile.data.UserRepository
 import com.strikeprotocols.mobile.data.models.IndexedPhraseWord
 import com.strikeprotocols.mobile.presentation.key_management.*
+import com.strikeprotocols.mobile.presentation.key_management.KeyManagementState.Companion.CHANGE_AMOUNT
+import com.strikeprotocols.mobile.presentation.key_management.KeyManagementState.Companion.FIRST_WORD_INDEX
+import com.strikeprotocols.mobile.presentation.key_management.KeyManagementState.Companion.LAST_SET_START_INDEX
+import com.strikeprotocols.mobile.presentation.key_management.KeyManagementState.Companion.LAST_WORD_INDEX
 import com.strikeprotocols.mobile.presentation.key_management.KeyManagementState.Companion.NO_PHRASE_ERROR
-import com.strikeprotocols.mobile.presentation.key_management.KeyManagementViewModel.Companion.CHANGE_AMOUNT
-import com.strikeprotocols.mobile.presentation.key_management.KeyManagementViewModel.Companion.FIRST_WORD_INDEX
-import com.strikeprotocols.mobile.presentation.key_management.KeyManagementViewModel.Companion.LAST_WORD_INDEX
-import com.strikeprotocols.mobile.presentation.key_management.KeyManagementViewModel.Companion.LAST_WORD_RANGE_SET_INDEX
 import com.strikeprotocols.mobile.presentation.key_management.flows.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -170,7 +171,7 @@ class KeyManagementViewModelTest : BaseViewModelTest() {
             if (wordIndex != LAST_WORD_INDEX) {
                 //Grab next word for assertions
                 val nextWordToVerify =
-                    keyMgmtViewModel.getPhraseWordAtIndex(
+                    PhraseEntryUtil.getPhraseWordAtIndex(
                         phrase = testValidPhrase,
                         index = wordIndex + 1
                     )
@@ -224,13 +225,14 @@ class KeyManagementViewModelTest : BaseViewModelTest() {
         setCreationFlowDataInStateForConfirmWordsProcessAndAssertChangesInState()
 
         assertTrue(keyMgmtViewModel.state.triggerBioPrompt is Resource.Uninitialized)
-        assertEquals("", keyMgmtViewModel.state.pastedPhrase)
+        assertEquals("", keyMgmtViewModel.state.confirmPhraseWordsState.pastedPhrase)
 
-        keyMgmtViewModel.verifyPastedPhrase(testValidPhrase)
+        keyMgmtViewModel.handlePastedPhrase(testValidPhrase)
 
         advanceUntilIdle()
 
-        assertEquals(testValidPhrase, keyMgmtViewModel.state.pastedPhrase)
+        assertEquals(testValidPhrase, keyMgmtViewModel.state.confirmPhraseWordsState.pastedPhrase)
+        assertEquals(PhraseInputMethod.PASTED, keyMgmtViewModel.state.inputMethod)
         assertTrue(keyMgmtViewModel.state.finalizeKeyFlow is Resource.Loading)
         assertEquals(
             KeyManagementFlowStep.CreationFlow(KeyCreationFlowStep.ALL_SET_STEP),
@@ -246,14 +248,18 @@ class KeyManagementViewModelTest : BaseViewModelTest() {
             false
         }
 
-        assertTrue(keyMgmtViewModel.state.triggerBioPrompt is Resource.Uninitialized)
-        assertEquals("", keyMgmtViewModel.state.pastedPhrase)
-
-        keyMgmtViewModel.verifyPastedPhrase(testInvalidPhrase)
+        keyMgmtViewModel.onStart(testCreationInitialData)
 
         advanceUntilIdle()
 
-        assertEquals(testInvalidPhrase, keyMgmtViewModel.state.pastedPhrase)
+        assertTrue(keyMgmtViewModel.state.triggerBioPrompt is Resource.Uninitialized)
+        assertEquals("", keyMgmtViewModel.state.confirmPhraseWordsState.pastedPhrase)
+
+        keyMgmtViewModel.handlePastedPhrase(testInvalidPhrase)
+
+        advanceUntilIdle()
+
+        assertEquals(testInvalidPhrase, keyMgmtViewModel.state.confirmPhraseWordsState.pastedPhrase)
         assertEquals(
             KeyManagementFlowStep.CreationFlow(KeyCreationFlowStep.CONFIRM_KEY_ERROR_STEP),
             keyMgmtViewModel.state.keyManagementFlowStep
@@ -267,14 +273,18 @@ class KeyManagementViewModelTest : BaseViewModelTest() {
             false
         }
 
-        assertTrue(keyMgmtViewModel.state.triggerBioPrompt is Resource.Uninitialized)
-        assertEquals("", keyMgmtViewModel.state.pastedPhrase)
-
-        keyMgmtViewModel.verifyPastedPhrase(testInvalidPhrase)
+        keyMgmtViewModel.onStart(testCreationInitialData)
 
         advanceUntilIdle()
 
-        assertEquals(testInvalidPhrase, keyMgmtViewModel.state.pastedPhrase)
+        assertTrue(keyMgmtViewModel.state.triggerBioPrompt is Resource.Uninitialized)
+        assertEquals("", keyMgmtViewModel.state.confirmPhraseWordsState.pastedPhrase)
+
+        keyMgmtViewModel.handlePastedPhrase(testInvalidPhrase)
+
+        advanceUntilIdle()
+
+        assertEquals(testInvalidPhrase, keyMgmtViewModel.state.confirmPhraseWordsState.pastedPhrase)
         assertEquals(
             KeyManagementFlowStep.CreationFlow(KeyCreationFlowStep.CONFIRM_KEY_ERROR_STEP),
             keyMgmtViewModel.state.keyManagementFlowStep
@@ -282,7 +292,7 @@ class KeyManagementViewModelTest : BaseViewModelTest() {
         assertTrue(keyMgmtViewModel.state.triggerBioPrompt is Resource.Uninitialized)
 
         //Attempt to verify the same phrase, and assert that the flowStep state has not changed
-        keyMgmtViewModel.verifyPastedPhrase(testInvalidPhrase)
+        keyMgmtViewModel.handlePastedPhrase(testInvalidPhrase)
 
         assertEquals(
             KeyManagementFlowStep.CreationFlow(KeyCreationFlowStep.CONFIRM_KEY_ERROR_STEP),
@@ -294,13 +304,17 @@ class KeyManagementViewModelTest : BaseViewModelTest() {
     @Test
     fun `after the user pastes a phrase during recovery flow ensure bioPrompt is triggered`() = runTest {
         assertTrue(keyMgmtViewModel.state.triggerBioPrompt is Resource.Uninitialized)
-        assertNull(keyMgmtViewModel.state.phrase)
+        assertEquals("", keyMgmtViewModel.state.userInputtedPhrase)
 
-        keyMgmtViewModel.verifyPhraseToRecoverKeyPair(testValidPhrase)
+        keyMgmtViewModel.onStart(testRecoveryInitialData)
 
         advanceUntilIdle()
 
-        assertEquals(testValidPhrase, keyMgmtViewModel.state.phrase)
+        keyMgmtViewModel.handlePastedPhrase(testValidPhrase)
+
+        advanceUntilIdle()
+
+        assertEquals(testValidPhrase, keyMgmtViewModel.state.userInputtedPhrase)
         assertEquals(
             KeyManagementFlowStep.RecoveryFlow(KeyRecoveryFlowStep.ALL_SET_STEP),
             keyMgmtViewModel.state.keyManagementFlowStep
@@ -354,7 +368,7 @@ class KeyManagementViewModelTest : BaseViewModelTest() {
 
         advanceUntilIdle()
 
-        assertEquals(testValidPhrase, keyMgmtViewModel.state.phrase)
+        assertEquals(testValidPhrase, keyMgmtViewModel.state.keyGeneratedPhrase)
         assertEquals(testCreationInitialData, keyMgmtViewModel.state.initialData)
         assertEquals(KeyManagementFlow.KEY_CREATION, keyMgmtViewModel.state.keyManagementFlow)
         assertEquals(
@@ -373,7 +387,7 @@ class KeyManagementViewModelTest : BaseViewModelTest() {
 
         assertTrue(keyMgmtViewModel.state.finalizeKeyFlow is Resource.Success)
         assertEquals(testWalletSigner, keyMgmtViewModel.state.finalizeKeyFlow.data)
-        assertNull(keyMgmtViewModel.state.phrase)
+        assertNull(keyMgmtViewModel.state.keyGeneratedPhrase)
     }
 
     //endregion
@@ -389,7 +403,7 @@ class KeyManagementViewModelTest : BaseViewModelTest() {
 
         advanceUntilIdle()
 
-        assertEquals(testValidPhrase, keyMgmtViewModel.state.phrase)
+        assertEquals(testValidPhrase, keyMgmtViewModel.state.keyGeneratedPhrase)
         assertEquals(testCreationInitialData, keyMgmtViewModel.state.initialData)
         assertEquals(KeyManagementFlow.KEY_CREATION, keyMgmtViewModel.state.keyManagementFlow)
         assertEquals(
@@ -482,7 +496,7 @@ class KeyManagementViewModelTest : BaseViewModelTest() {
 
     @Test
     fun `call phraseFlowAction and pass in WordIndexChanged increasing then view model should increment the word index`() {
-        assertEquals(FIRST_WORD_INDEX, keyMgmtViewModel.state.wordIndex)
+        assertEquals(FIRST_WORD_INDEX, keyMgmtViewModel.state.wordIndexForDisplay)
 
         keyMgmtViewModel.phraseFlowAction(
             phraseFlowAction = PhraseFlowAction.WordIndexChanged(
@@ -490,12 +504,12 @@ class KeyManagementViewModelTest : BaseViewModelTest() {
             )
         )
 
-        assertEquals(FIRST_WORD_INDEX + CHANGE_AMOUNT, keyMgmtViewModel.state.wordIndex)
+        assertEquals(FIRST_WORD_INDEX + CHANGE_AMOUNT, keyMgmtViewModel.state.wordIndexForDisplay)
     }
 
     @Test
     fun `call phraseFlowAction and pass in WordIndexChanged decreasing then view model should decrement the word index`() {
-        assertEquals(FIRST_WORD_INDEX, keyMgmtViewModel.state.wordIndex)
+        assertEquals(FIRST_WORD_INDEX, keyMgmtViewModel.state.wordIndexForDisplay)
 
         keyMgmtViewModel.phraseFlowAction(
             phraseFlowAction = PhraseFlowAction.WordIndexChanged(
@@ -504,12 +518,12 @@ class KeyManagementViewModelTest : BaseViewModelTest() {
         )
 
         //Word index should get set to the last word range set index
-        assertEquals(LAST_WORD_RANGE_SET_INDEX, keyMgmtViewModel.state.wordIndex)
+        assertEquals(LAST_SET_START_INDEX, keyMgmtViewModel.state.wordIndexForDisplay)
     }
 
     @Test
     fun `call phraseFlowAction and pass in LaunchManualKeyCreation then view model should set creation flow step in state`() {
-        assertEquals(FIRST_WORD_INDEX, keyMgmtViewModel.state.wordIndex)
+        assertEquals(FIRST_WORD_INDEX, keyMgmtViewModel.state.wordIndexForDisplay)
         assertEquals(
             KeyManagementFlowStep.CreationFlow(KeyCreationFlowStep.UNINITIALIZED),
             keyMgmtViewModel.state.keyManagementFlowStep
@@ -519,7 +533,7 @@ class KeyManagementViewModelTest : BaseViewModelTest() {
             phraseFlowAction = PhraseFlowAction.LaunchManualKeyCreation
         )
 
-        assertEquals(FIRST_WORD_INDEX, keyMgmtViewModel.state.wordIndex)
+        assertEquals(FIRST_WORD_INDEX, keyMgmtViewModel.state.wordIndexForDisplay)
         assertEquals(
             KeyManagementFlowStep.CreationFlow(KeyCreationFlowStep.WRITE_WORD_STEP),
             keyMgmtViewModel.state.keyManagementFlowStep
@@ -572,41 +586,58 @@ class KeyManagementViewModelTest : BaseViewModelTest() {
 
         advanceUntilIdle()
 
-        assertEquals(testValidPhrase, keyMgmtViewModel.state.phrase)
+        assertEquals(testValidPhrase, keyMgmtViewModel.state.keyGeneratedPhrase)
 
-        val confirmPhraseWordsState =
-            keyMgmtViewModel.generateConfirmPhraseWordsStateForCreationFlow()
+        keyMgmtViewModel.setupConfirmPhraseWordsStateForCreationFlow()
 
-        assertEquals(testValidPhrase, confirmPhraseWordsState.phrase)
-        assertEquals(testValidPhrase.split(" ")[0], confirmPhraseWordsState.phraseWordToVerify)
-        assertEquals(FIRST_WORD_INDEX, confirmPhraseWordsState.wordIndex)
-        assertEquals(0, confirmPhraseWordsState.wordsVerified)
-        assertEquals("", confirmPhraseWordsState.wordInput)
-        assertFalse(confirmPhraseWordsState.errorEnabled)
-        assertTrue(confirmPhraseWordsState.isCreationKeyFlow)
+        assertEquals(
+            testValidPhrase.split(" ")[0],
+            keyMgmtViewModel.state.confirmPhraseWordsState.phraseWordToVerify
+        )
+        assertEquals(
+            FIRST_WORD_INDEX,
+            keyMgmtViewModel.state.confirmPhraseWordsState.phraseWordToVerifyIndex
+        )
+        assertEquals(0, keyMgmtViewModel.state.confirmPhraseWordsState.wordsVerified)
+        assertEquals("", keyMgmtViewModel.state.confirmPhraseWordsState.wordInput)
+        assertEquals(false, keyMgmtViewModel.state.confirmPhraseWordsState.errorEnabled)
+        assertEquals(true, keyMgmtViewModel.state.confirmPhraseWordsState.isCreationKeyFlow)
     }
 
     @Test
-    fun `when there is a null phrase in state generating a confirm words state object should throw an exception`() {
+    fun `when there is a null phrase in state generating a confirm words state object should throw an exception`() = runTest {
+        whenever(keyRepository.generatePhrase()).thenAnswer {
+            null
+        }
+        //Set the creation flow in state,
+        // so that generateConfirmPhraseWordsState() knows which logic to run
+        keyMgmtViewModel.onStart(testCreationInitialData)
+
+        advanceUntilIdle()
+
         try {
-            keyMgmtViewModel.generateConfirmPhraseWordsStateForCreationFlow()
+            keyMgmtViewModel.setupConfirmPhraseWordsStateForCreationFlow()
         } catch (e: Exception) {
             assertEquals(PhraseException.NULL_PHRASE_IN_STATE, e.message)
         }
     }
 
     @Test
-    fun `when user is ready to confirm phrase words during recovery flow generate a confirm words state object`() {
-        val confirmPhraseWordsState =
-            keyMgmtViewModel.generateConfirmPhraseWordsStateForRecoveryFlow()
+    fun `when user is ready to confirm phrase words during recovery flow generate a confirm words state object`() = runTest {
+        //Set the recovery flow in state,
+        // so that generateConfirmPhraseWordsState() knows which logic to run
+        keyMgmtViewModel.onStart(testRecoveryInitialData)
 
-        assertEquals("", confirmPhraseWordsState.phrase)
-        assertEquals("", confirmPhraseWordsState.phraseWordToVerify)
-        assertEquals(FIRST_WORD_INDEX, confirmPhraseWordsState.wordIndex)
-        assertEquals(0, confirmPhraseWordsState.wordsVerified)
-        assertEquals("", confirmPhraseWordsState.wordInput)
-        assertFalse(confirmPhraseWordsState.errorEnabled)
-        assertFalse(confirmPhraseWordsState.isCreationKeyFlow)
+        advanceUntilIdle()
+
+        keyMgmtViewModel.setupConfirmPhraseWordsStateForRecoveryFlow()
+
+        assertEquals("", keyMgmtViewModel.state.confirmPhraseWordsState.phraseWordToVerify)
+        assertEquals(FIRST_WORD_INDEX, keyMgmtViewModel.state.confirmPhraseWordsState.phraseWordToVerifyIndex)
+        assertEquals(0, keyMgmtViewModel.state.confirmPhraseWordsState.wordsVerified)
+        assertEquals("", keyMgmtViewModel.state.confirmPhraseWordsState.wordInput)
+        assertEquals(false, keyMgmtViewModel.state.confirmPhraseWordsState.errorEnabled)
+        assertEquals(false, keyMgmtViewModel.state.confirmPhraseWordsState.isCreationKeyFlow)
     }
 
     //region Focused tests for flow navigation methods
@@ -925,8 +956,12 @@ class KeyManagementViewModelTest : BaseViewModelTest() {
     fun `after user agrees to biometry prompt then reset prompt trigger state property`() = runTest {
         assertTrue(keyMgmtViewModel.state.triggerBioPrompt is Resource.Uninitialized)
 
+        keyMgmtViewModel.onStart(testCreationInitialData)
+
         //Initial bio prompt trigger
-        keyMgmtViewModel.triggerBioPromptForCreate()
+        keyMgmtViewModel.triggerBioPrompt(inputMethod = null)
+
+        advanceUntilIdle()
 
         assertTriggerBioPromptIsSuccessAndHasCipherData()
 
@@ -935,7 +970,7 @@ class KeyManagementViewModelTest : BaseViewModelTest() {
         assertTrue(keyMgmtViewModel.state.triggerBioPrompt is Resource.Uninitialized)
 
         //Trigger bio prompt again
-        keyMgmtViewModel.triggerBioPromptForRecover(PhraseInputMethod.MANUAL)
+        keyMgmtViewModel.triggerBioPrompt(PhraseInputMethod.MANUAL)
 
         advanceUntilIdle()
 
@@ -951,7 +986,9 @@ class KeyManagementViewModelTest : BaseViewModelTest() {
         //default state + setup
         assertTrue(keyMgmtViewModel.state.keyRecoveryManualEntryError is Resource.Uninitialized)
 
-        keyMgmtViewModel.triggerBioPromptForRecover(PhraseInputMethod.MANUAL)
+        keyMgmtViewModel.onStart(testRecoveryInitialData)
+
+        keyMgmtViewModel.triggerBioPrompt(inputMethod = PhraseInputMethod.MANUAL)
 
         advanceUntilIdle()
 
@@ -976,11 +1013,13 @@ class KeyManagementViewModelTest : BaseViewModelTest() {
             throw Exception(defaultErrorMessage)
         }
 
+        keyMgmtViewModel.onStart(testMigrationInitialData)
+
         assertTrue(keyMgmtViewModel.state.finalizeKeyFlow is Resource.Uninitialized)
         assertTrue(keyMgmtViewModel.state.triggerBioPrompt is Resource.Uninitialized)
         assertEquals(BioPromptReason.UNINITIALIZED, keyMgmtViewModel.state.bioPromptReason)
 
-        keyMgmtViewModel.triggerBioPromptForMigration()
+        keyMgmtViewModel.triggerBioPrompt(inputMethod = null)
 
         advanceUntilIdle()
 
@@ -1002,11 +1041,13 @@ class KeyManagementViewModelTest : BaseViewModelTest() {
             throw Exception(defaultErrorMessage)
         }
 
+        keyMgmtViewModel.onStart(testMigrationInitialData)
+
         assertTrue(keyMgmtViewModel.state.finalizeKeyFlow is Resource.Uninitialized)
         assertTrue(keyMgmtViewModel.state.triggerBioPrompt is Resource.Uninitialized)
         assertEquals(BioPromptReason.UNINITIALIZED, keyMgmtViewModel.state.bioPromptReason)
 
-        keyMgmtViewModel.triggerBioPromptForMigration()
+        keyMgmtViewModel.triggerBioPrompt(inputMethod = null)
 
         advanceUntilIdle()
 
@@ -1140,7 +1181,8 @@ class KeyManagementViewModelTest : BaseViewModelTest() {
 
     //region Helper methods
     private fun assertDefaultStateForInitialDataProperties() {
-        assertNull(keyMgmtViewModel.state.phrase)
+        assertNull(keyMgmtViewModel.state.keyGeneratedPhrase)
+        assertEquals("", keyMgmtViewModel.state.userInputtedPhrase)
         assertNull(keyMgmtViewModel.state.initialData)
         assertEquals(KeyManagementFlow.UNINITIALIZED, keyMgmtViewModel.state.keyManagementFlow)
         assertEquals(KeyManagementFlowStep.CreationFlow(KeyCreationFlowStep.UNINITIALIZED), keyMgmtViewModel.state.keyManagementFlowStep)
@@ -1192,7 +1234,7 @@ class KeyManagementViewModelTest : BaseViewModelTest() {
 
         advanceUntilIdle()
 
-        assertEquals(testValidPhrase, keyMgmtViewModel.state.phrase)
+        assertEquals(testValidPhrase, keyMgmtViewModel.state.keyGeneratedPhrase)
 
         //Set verify words step
         keyMgmtViewModel.phraseFlowAction(
@@ -1209,12 +1251,11 @@ class KeyManagementViewModelTest : BaseViewModelTest() {
         //Trigger confirm phrase words state generation
         keyMgmtViewModel.keyCreationNavigateForward()
 
-        assertEquals(testValidPhrase, keyMgmtViewModel.state.confirmPhraseWordsState.phrase)
         assertEquals(
             testValidPhrase.split(" ")[0],
             keyMgmtViewModel.state.confirmPhraseWordsState.phraseWordToVerify
         )
-        assertEquals(FIRST_WORD_INDEX, keyMgmtViewModel.state.confirmPhraseWordsState.wordIndex)
+        assertEquals(FIRST_WORD_INDEX, keyMgmtViewModel.state.confirmPhraseWordsState.phraseWordToVerifyIndex)
         assertEquals(0, keyMgmtViewModel.state.confirmPhraseWordsState.wordsVerified)
         assertEquals("", keyMgmtViewModel.state.confirmPhraseWordsState.wordInput)
         assertFalse(keyMgmtViewModel.state.confirmPhraseWordsState.errorEnabled)
@@ -1228,7 +1269,7 @@ class KeyManagementViewModelTest : BaseViewModelTest() {
         )
         assertEquals(
             nextWordToVerify.wordIndex,
-            keyMgmtViewModel.state.confirmPhraseWordsState.wordIndex
+            keyMgmtViewModel.state.confirmPhraseWordsState.phraseWordToVerifyIndex
         )
         assertEquals(wordsVerified, keyMgmtViewModel.state.confirmPhraseWordsState.wordsVerified)
         assertEquals("", keyMgmtViewModel.state.confirmPhraseWordsState.wordInput)

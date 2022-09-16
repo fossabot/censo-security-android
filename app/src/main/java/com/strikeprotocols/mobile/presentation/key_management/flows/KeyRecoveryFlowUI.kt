@@ -42,16 +42,12 @@ fun KeyRecoveryFlowUI(
     onNavigate: () -> Unit,
     onBackNavigate: () -> Unit,
     onPhraseFlowAction: (phraseFlowAction: PhraseFlowAction) -> Unit,
+    onPhraseEntryAction: (PhraseEntryAction) -> Unit,
     onExit: () -> Unit,
-    verifyPastedPhrase: (String) -> Unit,
     wordToVerifyIndex: Int,
     wordInput: String,
-    wordInputChange: (String) -> Unit,
     wordVerificationErrorEnabled: Boolean,
-    navigatePreviousWord: () -> Unit,
-    navigateNextWord: () -> Unit,
     retryKeyRecovery: () -> Unit,
-    onSubmitWord: (String) -> Unit,
     keyRecoveryState: Resource<WalletSigner?>
 ) {
     val screenTitle = when (keyRecoveryFlowStep) {
@@ -83,17 +79,14 @@ fun KeyRecoveryFlowUI(
                     KeyRecoveryFlowStep.VERIFY_WORDS_STEP -> VerifyPhraseWordUI(
                         wordIndex = wordToVerifyIndex,
                         value = wordInput,
-                        onValueChanged = wordInputChange,
-                        onSubmitWord = onSubmitWord,
-                        onPreviousWordNavigate = navigatePreviousWord,
-                        onNextWordNavigate = navigateNextWord,
+                        onPhraseEntryAction = onPhraseEntryAction,
                         errorEnabled = wordVerificationErrorEnabled,
                         isCreationFlow = false
                     )
                     KeyRecoveryFlowStep.CONFIRM_KEY_ENTRY_STEP -> ConfirmKeyUI(
                         pastedPhrase = pastedPhrase,
                         errorEnabled = false,
-                        verifyPastedPhrase = verifyPastedPhrase,
+                        onPhraseEntryAction = onPhraseEntryAction,
                         header = stringResource(R.string.confirm_recovery_phrase_header),
                         title = "",
                         message = stringResource(R.string.enter_key_message)
@@ -102,7 +95,7 @@ fun KeyRecoveryFlowUI(
                     KeyRecoveryFlowStep.CONFIRM_KEY_ERROR_STEP -> ConfirmKeyUI(
                         pastedPhrase = pastedPhrase,
                         errorEnabled = true,
-                        verifyPastedPhrase = verifyPastedPhrase,
+                        onPhraseEntryAction = onPhraseEntryAction,
                         header = stringResource(R.string.confirm_recovery_phrase_header),
                         title = stringResource(R.string.key_not_valid_title),
                         message = stringResource(R.string.key_not_valid_message)

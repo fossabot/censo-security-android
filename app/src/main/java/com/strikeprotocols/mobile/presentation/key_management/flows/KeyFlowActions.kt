@@ -49,3 +49,12 @@ sealed class PhraseFlowAction {
         val phraseVerificationFlowStep: KeyCreationFlowStep
     ) : PhraseFlowAction()
 }
+
+sealed class PhraseEntryAction {
+    //Navigation actions are only used during Key Recovery Flow
+    object NavigatePreviousWord : PhraseEntryAction()
+    object NavigateNextWord : PhraseEntryAction()
+    data class PastePhrase(val phrase: String) : PhraseEntryAction()
+    data class SubmitWordInput(val errorMessage: String) : PhraseEntryAction()
+    data class UpdateWordInput(val wordInput: String) : PhraseEntryAction()
+}
