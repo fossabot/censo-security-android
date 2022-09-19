@@ -1,24 +1,32 @@
 package com.strikeprotocols.mobile.presentation.semantic_version_check
 
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.raygun.raygun4android.RaygunClient
 import com.strikeprotocols.mobile.BuildConfig
+import com.strikeprotocols.mobile.common.BioCryptoUtil
+import com.strikeprotocols.mobile.common.BioPromptFailedReason
 import com.strikeprotocols.mobile.common.CrashReportingUtil.FORCE_UPGRADE_TAG
 import com.strikeprotocols.mobile.common.CrashReportingUtil.MANUALLY_REPORTED_TAG
 import com.strikeprotocols.mobile.common.Resource
+import com.strikeprotocols.mobile.common.strikeLog
+import com.strikeprotocols.mobile.data.EncryptionManagerImpl
+import com.strikeprotocols.mobile.data.KeyRepository
 import com.strikeprotocols.mobile.data.UserRepository
 import com.strikeprotocols.mobile.data.models.SemanticVersion
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
+import javax.crypto.Cipher
 import javax.inject.Inject
 
 @HiltViewModel
 data class SemVerViewModel @Inject constructor(
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
+    private val keyRepository: KeyRepository
 ) : ViewModel() {
 
     var state by mutableStateOf(SemVerState())
@@ -38,6 +46,55 @@ data class SemVerViewModel @Inject constructor(
         } catch (e: Exception) {
             RaygunClient.send(e, listOf(FORCE_UPGRADE_TAG, MANUALLY_REPORTED_TAG))
         }
+    }
+
+    fun onForeground() {
+        viewModelScope.launch {
+            if (userRepository.userLoggedIn()) {
+                launchBlockingForegroundBiometry()
+            }
+        }
+    }
+
+    private suspend fun launchBlockingForegroundBiometry() {
+        val cipher = keyRepository.getCipherForBackgroundDecryption()
+        if (cipher != null) {
+            strikeLog(message = "Launching bio prompt trigger...")
+            state = state.copy(
+                bioPromptTrigger = Resource.Success(cipher),
+                biometryUnavailable = false
+            )
+        }
+    }
+
+    fun biometryApproved(cipher: Cipher) {
+        strikeLog(message = "Biometry approved!!!")
+        viewModelScope.launch {
+            strikeLog(message = "Biometry approved and here we are.....")
+            val sentinelData = keyRepository.retrieveSentinelData(cipher)
+            strikeLog(message = "Sentinel data is: $sentinelData")
+            state = if (sentinelData == EncryptionManagerImpl.Companion.SENTINEL_STATIC_DATA) {
+                state.copy(bioPromptTrigger = Resource.Uninitialized)
+            } else {
+                //todo: this most likely means we have broken key info and need user to recreate the key
+                state.copy(bioPromptTrigger = Resource.Error())
+            }
+        }
+    }
+
+    fun biometryFailed(errorCode: Int) {
+        strikeLog(message = "Biometry failed!!!")
+        if (BioCryptoUtil.getBioPromptFailedReason(errorCode) == BioPromptFailedReason.FAILED_TOO_MANY_ATTEMPTS) {
+            state = state.copy(biometryUnavailable = true)
+        } else {
+            viewModelScope.launch {
+                launchBlockingForegroundBiometry()
+            }
+        }
+    }
+
+    fun setPromptTriggerToLoading() {
+        state = state.copy(bioPromptTrigger = Resource.Loading())
     }
 
     private fun enforceMinimumVersion(minimumSemanticVersion: String) {

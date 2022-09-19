@@ -50,6 +50,8 @@ interface KeyRepository {
     suspend fun generateTimestamp() : String
 
     suspend fun saveSentinelData(cipher: Cipher)
+
+    suspend fun retrieveSentinelData(cipher: Cipher) : String
 }
 
 class KeyRepositoryImpl(
@@ -279,5 +281,11 @@ class KeyRepositoryImpl(
         val userEmail = userRepository.retrieveUserEmail()
 
         encryptionManager.saveSentinelData(email = userEmail, cipher = cipher)
+    }
+
+    override suspend fun retrieveSentinelData(cipher: Cipher) : String {
+        val userEmail = userRepository.retrieveUserEmail()
+
+        return encryptionManager.retrieveSentinelData(email = userEmail, cipher = cipher)
     }
 }

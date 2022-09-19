@@ -3,6 +3,9 @@ package com.strikeprotocols.mobile.data
 import cash.z.ecc.android.bip39.Mnemonics
 import cash.z.ecc.android.bip39.toSeed
 import com.strikeprotocols.mobile.common.*
+import com.strikeprotocols.mobile.common.BaseWrapper
+import com.strikeprotocols.mobile.common.Ed25519HierarchicalPrivateKey
+import com.strikeprotocols.mobile.common.strikeLog
 import com.strikeprotocols.mobile.data.EncryptionManagerImpl.Companion.DATA_CHECK
 import com.strikeprotocols.mobile.data.EncryptionManagerImpl.Companion.NO_OFFSET_INDEX
 import com.strikeprotocols.mobile.data.EncryptionManagerImpl.Companion.NoKeyDataException
@@ -116,6 +119,7 @@ interface EncryptionManager {
     fun getInitializedCipherForDecryption(keyName: String, initVector: ByteArray) : Cipher
     fun havePrivateKeyStored(email: String): Boolean
     fun saveSentinelData(email: String, cipher: Cipher)
+    fun retrieveSentinelData(email: String, cipher: Cipher): String
 }
 
 class EncryptionManagerImpl @Inject constructor(
@@ -354,6 +358,17 @@ class EncryptionManagerImpl @Inject constructor(
         return BaseWrapper.decode(keysMap[keyType] ?: "")
     }
 
+    override fun retrieveSentinelData(email: String, cipher: Cipher): String {
+        val savedSentinelData = securePreferences.retrieveSentinelData(email)
+
+        val decryptedSentinelData = cryptographyManager.decryptData(
+            savedSentinelData.ciphertext,
+            cipher
+        )
+
+        return String(decryptedSentinelData, charset = Charset.forName("UTF-8"))
+    }
+
     override fun getInitializedCipherForEncryption(keyName: String): Cipher {
         return cryptographyManager.getInitializedCipherForEncryption(keyName)
     }
@@ -369,7 +384,7 @@ class EncryptionManagerImpl @Inject constructor(
 
     override fun saveSentinelData(email: String, cipher: Cipher) {
         val encryptedSentinelData =
-            cryptographyManager.encryptData(SENTINEL_STATIC_DATA, cipher)
+            cryptographyManager.encryptData(data = SENTINEL_STATIC_DATA, cipher = cipher)
 
         securePreferences.saveSentinelData(email = email, encryptedData = encryptedSentinelData)
     }

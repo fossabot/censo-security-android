@@ -63,25 +63,6 @@ fun ApprovalsListScreen(
 
     val promptInfo = BioCryptoUtil.createPromptInfo(context, isSavingData = false)
 
-    val bioPrompt = BioCryptoUtil.createBioPrompt(
-        fragmentActivity = context,
-        onSuccess = {
-            val cipher = it?.cipher
-            if (cipher != null) {
-                approvalsViewModel.biometryApproved(cipher)
-            } else {
-                BioCryptoUtil.handleBioPromptOnFail(context = context, errorCode = NO_CIPHER_CODE) {
-                    resetDataAfterErrorDismissed()
-                }
-            }
-        },
-        onFail = {
-            BioCryptoUtil.handleBioPromptOnFail(context = context, errorCode = it) {
-                resetDataAfterErrorDismissed()
-            }
-        }
-    )
-
     val scaffoldState = rememberScaffoldState()
 
     fun launchNonceWork() {
@@ -126,6 +107,29 @@ fun ApprovalsListScreen(
     LaunchedEffect(key1 = approvalsState, key2 = durableNonceState) {
 
         if (approvalsState.bioPromptTrigger is Resource.Success) {
+            val bioPrompt = BioCryptoUtil.createBioPrompt(
+                fragmentActivity = context,
+                onSuccess = {
+                    strikeLog(message = "Getting success in the frikin aprovals list")
+                    val cipher = it?.cipher
+                    if (cipher != null) {
+                        approvalsViewModel.biometryApproved(cipher)
+                    } else {
+                        BioCryptoUtil.handleBioPromptOnFail(
+                            context = context,
+                            errorCode = NO_CIPHER_CODE
+                        ) {
+                            resetDataAfterErrorDismissed()
+                        }
+                    }
+                },
+                onFail = {
+                    BioCryptoUtil.handleBioPromptOnFail(context = context, errorCode = it) {
+                        resetDataAfterErrorDismissed()
+                    }
+                }
+            )
+
             bioPrompt.authenticate(
                 promptInfo,
                 BiometricPrompt.CryptoObject(approvalsState.bioPromptTrigger.data!!)
@@ -139,7 +143,8 @@ fun ApprovalsListScreen(
         }
 
         if (approvalsState.approvalDispositionState?.registerApprovalDispositionResult is Resource.Success ||
-            approvalsState.approvalDispositionState?.initiationDispositionResult is Resource.Success) {
+            approvalsState.approvalDispositionState?.initiationDispositionResult is Resource.Success
+        ) {
             approvalsViewModel.wipeDataAfterDispositionSuccess()
         }
     }
@@ -343,8 +348,12 @@ fun ApprovalsList(
                         val type = safeApproval.getApprovalRequestType()
                         val rowMetaData = type.getApprovalRowMetaData(safeApproval.vaultName?.toVaultName(context))
 
-                        val calculatedTimerSecondsLeft = getSecondsLeftUntilCountdownIsOver(safeApproval.submitDate, safeApproval.approvalTimeoutInSeconds)
-                        val timeRemainingInSeconds = if (shouldRefreshTimers) calculatedTimerSecondsLeft else calculatedTimerSecondsLeft
+                        val calculatedTimerSecondsLeft = getSecondsLeftUntilCountdownIsOver(
+                            safeApproval.submitDate,
+                            safeApproval.approvalTimeoutInSeconds
+                        )
+                        val timeRemainingInSeconds =
+                            if (shouldRefreshTimers) calculatedTimerSecondsLeft else calculatedTimerSecondsLeft
 
                         if (type.isUnknownTypeOrUIUnimplemented()) {
                             UnknownApprovalItem(
@@ -358,7 +367,11 @@ fun ApprovalsList(
                                     try {
                                         startActivity(context, playStoreIntent, null)
                                     } catch (e: ActivityNotFoundException) {
-                                        Toast.makeText(context, "Play Store not found on this device.", Toast.LENGTH_LONG).show()
+                                        Toast.makeText(
+                                            context,
+                                            "Play Store not found on this device.",
+                                            Toast.LENGTH_LONG
+                                        ).show()
                                     }
                                 }
                             )

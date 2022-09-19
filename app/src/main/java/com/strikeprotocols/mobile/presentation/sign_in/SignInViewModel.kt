@@ -143,6 +143,7 @@ class SignInViewModel @Inject constructor(
                         val token = loginResource.data?.token
                         if (token != null) {
                             userSuccessfullyLoggedIn(token)
+                            handleSuccessfulPasswordLogin(token)
                         } else {
                             userFailedLogin(e = Exception("NO TOKEN"))
                         }
@@ -171,6 +172,7 @@ class SignInViewModel @Inject constructor(
                     val token = loginResource.data?.token
                     if (token != null) {
                         userSuccessfullyLoggedIn(token)
+                        handleSuccessfulBiometryLogin()
                     } else {
                         userFailedLogin(e = Exception("NO TOKEN"))
                     }
@@ -205,12 +207,19 @@ class SignInViewModel @Inject constructor(
         userRepository.setUserLoggedIn()
         userRepository.saveToken(token)
         submitNotificationTokenForRegistration()
+    }
+
+    private suspend fun handleSuccessfulPasswordLogin(token: String) {
         val cipher = keyRepository.getCipherForEncryption(SENTINEL_KEY_NAME)
         state = state.copy(
             loginResult = Resource.Success(LoginResponse(token)),
             triggerBioPrompt = Resource.Success(cipher),
             bioPromptReason = BioPromptReason.INITIAL_LOGIN
         )
+    }
+
+    private fun handleSuccessfulBiometryLogin() {
+        state = state.copy(exitLoginFlow = Resource.Success(Unit))
     }
 
     private fun userFailedLogin(resource: Resource<LoginResponse>? = null, e: Exception? = null) {

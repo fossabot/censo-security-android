@@ -1,6 +1,5 @@
 package com.strikeprotocols.mobile.viewModel
 
-import androidx.biometric.BiometricPrompt
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.times
 import com.nhaarman.mockitokotlin2.verify

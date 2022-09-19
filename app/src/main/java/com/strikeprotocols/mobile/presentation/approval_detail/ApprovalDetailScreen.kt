@@ -62,28 +62,6 @@ fun ApprovalDetailsScreen(
 
     val promptInfo = BioCryptoUtil.createPromptInfo(context, isSavingData = false)
 
-    val bioPrompt = BioCryptoUtil.createBioPrompt(
-        fragmentActivity = context,
-        onSuccess = {
-            val cipher = it?.cipher
-            if (cipher != null) {
-                approvalDetailsViewModel.biometryApproved(cipher)
-            } else {
-                BioCryptoUtil.handleBioPromptOnFail(
-                    context = context,
-                    errorCode = BioCryptoUtil.NO_CIPHER_CODE
-                ) {
-                    resetDataAfterErrorDismissed()
-                }
-            }
-        },
-        onFail = {
-            BioCryptoUtil.handleBioPromptOnFail(context = context, errorCode = it) {
-                resetDataAfterErrorDismissed()
-            }
-        }
-    )
-
     fun launchNonceWork() {
         val nonceAddresses = approvalDetailsState.selectedApproval?.retrieveAccountAddresses()
         val minimumSlotAddress = approvalDetailsState.selectedApproval?.retrieveAccountAddressesSlot()
@@ -129,6 +107,28 @@ fun ApprovalDetailsScreen(
         }
 
         if (approvalDetailsState.bioPromptTrigger is Resource.Success) {
+            val bioPrompt = BioCryptoUtil.createBioPrompt(
+                fragmentActivity = context,
+                onSuccess = {
+                    val cipher = it?.cipher
+                    if (cipher != null) {
+                        approvalDetailsViewModel.biometryApproved(cipher)
+                    } else {
+                        BioCryptoUtil.handleBioPromptOnFail(
+                            context = context,
+                            errorCode = BioCryptoUtil.NO_CIPHER_CODE
+                        ) {
+                            resetDataAfterErrorDismissed()
+                        }
+                    }
+                },
+                onFail = {
+                    BioCryptoUtil.handleBioPromptOnFail(context = context, errorCode = it) {
+                        resetDataAfterErrorDismissed()
+                    }
+                }
+            )
+
             bioPrompt.authenticate(
                 promptInfo,
                 BiometricPrompt.CryptoObject(approvalDetailsState.bioPromptTrigger.data!!)

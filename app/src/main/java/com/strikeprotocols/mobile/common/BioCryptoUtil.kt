@@ -74,7 +74,7 @@ object BioCryptoUtil {
         handleFailure()
     }
 
-    private fun getBioPromptFailedReason(errorCode: Int): BioPromptFailedReason =
+    fun getBioPromptFailedReason(errorCode: Int): BioPromptFailedReason =
         when (errorCode) {
             ERROR_LOCKOUT, ERROR_LOCKOUT_PERMANENT -> BioPromptFailedReason.FAILED_TOO_MANY_ATTEMPTS
             NO_CIPHER_CODE -> BioPromptFailedReason.CIPHER_NULL

@@ -52,28 +52,6 @@ fun SignInScreen(
 
     val promptInfo = BioCryptoUtil.createPromptInfo(context, isSavingData = false, biometryLogin = true)
 
-    val bioPrompt = BioCryptoUtil.createBioPrompt(
-        fragmentActivity = context,
-        onSuccess = {
-            val cipher = it?.cipher
-            if (cipher != null) {
-                viewModel.biometryApproved(cipher)
-            } else {
-                BioCryptoUtil.handleBioPromptOnFail(
-                    context = context,
-                    errorCode = BioCryptoUtil.NO_CIPHER_CODE
-                ) {
-                    viewModel.biometryFailed()
-                }
-            }
-        },
-        onFail = {
-            BioCryptoUtil.handleBioPromptOnFail(context = context, errorCode = it) {
-                viewModel.biometryFailed()
-            }
-        }
-    )
-
     //region LaunchedEffect
     LaunchedEffect(key1 = state) {
         if (state.exitLoginFlow is Resource.Success) {
@@ -88,6 +66,29 @@ fun SignInScreen(
 
         if(state.triggerBioPrompt is Resource.Success) {
             viewModel.resetPromptTrigger()
+
+            val bioPrompt = BioCryptoUtil.createBioPrompt(
+                fragmentActivity = context,
+                onSuccess = {
+                    val cipher = it?.cipher
+                    if (cipher != null) {
+                        viewModel.biometryApproved(cipher)
+                    } else {
+                        BioCryptoUtil.handleBioPromptOnFail(
+                            context = context,
+                            errorCode = BioCryptoUtil.NO_CIPHER_CODE
+                        ) {
+                            viewModel.biometryFailed()
+                        }
+                    }
+                },
+                onFail = {
+                    BioCryptoUtil.handleBioPromptOnFail(context = context, errorCode = it) {
+                        viewModel.biometryFailed()
+                    }
+                }
+            )
+
             bioPrompt.authenticate(
                 promptInfo,
                 BiometricPrompt.CryptoObject(state.triggerBioPrompt.data!!)

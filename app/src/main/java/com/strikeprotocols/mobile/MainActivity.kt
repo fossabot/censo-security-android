@@ -7,10 +7,28 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import androidx.biometric.BiometricPrompt
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Surface
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.Lifecycle
 import androidx.navigation.*
@@ -21,6 +39,8 @@ import com.raygun.raygun4android.RaygunClient
 import com.strikeprotocols.mobile.common.BiometricUtil
 import com.strikeprotocols.mobile.common.CrashReportingUtil
 import com.strikeprotocols.mobile.common.Resource
+import com.strikeprotocols.mobile.common.*
+import com.strikeprotocols.mobile.common.BioCryptoUtil.NO_CIPHER_CODE
 import com.strikeprotocols.mobile.data.*
 import com.strikeprotocols.mobile.data.models.approval.ApprovalRequest
 import com.strikeprotocols.mobile.presentation.Screen
@@ -40,6 +60,7 @@ import com.strikeprotocols.mobile.presentation.sign_in.SignInScreen
 import com.strikeprotocols.mobile.service.MessagingService.Companion.NOTIFICATION_DISPLAYED_KEY
 import com.strikeprotocols.mobile.ui.theme.BackgroundBlack
 import com.strikeprotocols.mobile.ui.theme.StrikeMobileTheme
+import com.strikeprotocols.mobile.ui.theme.StrikeWhite
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -80,7 +101,40 @@ class MainActivity : FragmentActivity() {
             userStateListener = setupUserStateListener(navController, context)
             userStateListener?.let { authProvider.addUserStateListener(it) }
 
+            val promptInfo = BioCryptoUtil.createPromptInfo(context, isSavingData = false)
+
             val semVerState = semVerViewModel.state
+
+
+            LaunchedEffect(key1 = semVerState) {
+
+                if (semVerState.bioPromptTrigger is Resource.Success) {
+                    val bioPrompt = BioCryptoUtil.createBioPrompt(
+                        fragmentActivity = this@MainActivity,
+                        onSuccess = {
+                            val cipher = it?.cipher
+                            if (cipher != null) {
+                                semVerViewModel.biometryApproved(cipher)
+                            } else {
+                                BioCryptoUtil.handleBioPromptOnFail(context = context, errorCode = NO_CIPHER_CODE) {
+                                    semVerViewModel.biometryFailed(errorCode = NO_CIPHER_CODE)
+                                }
+                            }
+                        },
+                        onFail = {
+                            BioCryptoUtil.handleBioPromptOnFail(context = context, errorCode = it) {
+                                semVerViewModel.biometryFailed(errorCode = it)
+                            }
+                        }
+                    )
+
+                    bioPrompt.authenticate(
+                        promptInfo,
+                        BiometricPrompt.CryptoObject(semVerState.bioPromptTrigger.data!!)
+                    )
+                    semVerViewModel.setPromptTriggerToLoading()
+                }
+            }
 
             StrikeMobileTheme {
                 Surface(color = BackgroundBlack) {
@@ -96,6 +150,7 @@ class MainActivity : FragmentActivity() {
                             Lifecycle.Event.ON_START
                             -> {
                                 semVerViewModel.checkMinimumVersion()
+                                semVerViewModel.onForeground()
 
                                 when (BiometricUtil.checkForBiometricFeaturesOnDevice(context)) {
                                     BiometricUtil.Companion.BiometricsStatus.BIOMETRICS_ENABLED -> {
@@ -135,6 +190,31 @@ class MainActivity : FragmentActivity() {
                             popUpTo(Screen.EntranceRoute.route) { inclusive = true }
                         }
                         semVerViewModel.resetShouldEnforceAppUpdate()
+                    }
+
+                    val visibleBlockingUi = semVerState.bioPromptTrigger is Resource.Success
+                            || semVerState.bioPromptTrigger is Resource.Loading
+                    AnimatedVisibility(
+                        visible = visibleBlockingUi,
+                        enter = fadeIn(),
+                        exit = fadeOut()
+                    ) {
+                        Box(
+                            modifier =
+                            Modifier
+                                .fillMaxSize()
+                                .background(color = Color.Black)
+                        ) {
+                            Text(
+                                modifier = Modifier
+                                    .align(Alignment.TopCenter)
+                                    .padding(top = 124.dp, start = 48.dp, end = 48.dp),
+                                text = if(semVerState.biometryUnavailable) getString(R.string.biometry_unavailable) else getString(R.string.foreground_access_app),
+                                fontSize = 24.sp,
+                                color = StrikeWhite,
+                                textAlign = TextAlign.Center
+                            )
+                        }
                     }
                 }
             }

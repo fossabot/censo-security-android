@@ -3,6 +3,7 @@ package com.strikeprotocols.mobile.viewModel
 import com.nhaarman.mockitokotlin2.whenever
 import com.strikeprotocols.mobile.BuildConfig
 import com.strikeprotocols.mobile.common.Resource
+import com.strikeprotocols.mobile.data.KeyRepository
 import com.strikeprotocols.mobile.data.UserRepository
 import com.strikeprotocols.mobile.data.models.OsVersion
 import com.strikeprotocols.mobile.data.models.SemanticVersionResponse
@@ -21,6 +22,9 @@ class SemVerViewModelTest : BaseViewModelTest() {
 
     @Mock
     lateinit var userRepository: UserRepository
+
+    @Mock
+    lateinit var keyRepository: KeyRepository
 
     private lateinit var semVerViewModel: SemVerViewModel
 
@@ -51,7 +55,10 @@ class SemVerViewModelTest : BaseViewModelTest() {
         super.setUp()
         Dispatchers.setMain(dispatcher)
 
-        semVerViewModel = SemVerViewModel(userRepository = userRepository)
+        semVerViewModel = SemVerViewModel(
+            userRepository = userRepository,
+            keyRepository = keyRepository
+        )
 
         currentVersionName = BuildConfig.VERSION_NAME
     }
