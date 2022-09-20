@@ -256,6 +256,7 @@ fun SignInScreen(
                     LoginErrorAlertDialog(
                         title = stringResource(R.string.login_failed_title),
                         confirmText = stringResource(R.string.ok),
+                        dismissText = stringResource(id = R.string.cancel),
                         shouldDisplayDismissButton = false,
                         onDismiss = viewModel::resetLoginCall,
                         onConfirm = viewModel::resetLoginCall,
@@ -265,10 +266,11 @@ fun SignInScreen(
                 } else {
                     LoginErrorAlertDialog(
                         title = stringResource(R.string.sign_in_error),
-                        confirmText = stringResource(R.string.use_password),
+                        confirmText = stringResource(R.string.try_again),
+                        dismissText = stringResource(id = R.string.cancel),
                         shouldDisplayDismissButton = true,
                         onDismiss = viewModel::resetLoginCall,
-                        onConfirm = viewModel::resetLoginCallAndMoveUserToPasswordEntry,
+                        onConfirm = viewModel::kickOffBiometryLoginOrMoveToPasswordEntry,
                         errorReason = errorReason,
                         errorReasonBackup = stringResource(R.string.error_occurred_signature_login)
                     )
@@ -283,6 +285,7 @@ fun SignInScreen(
 fun LoginErrorAlertDialog(
     title: String,
     confirmText: String,
+    dismissText: String,
     shouldDisplayDismissButton: Boolean,
     onDismiss: () -> Unit,
     onConfirm: () -> Unit,
@@ -300,7 +303,7 @@ fun LoginErrorAlertDialog(
         dismissButton = {
             if (shouldDisplayDismissButton) {
                 TextButton(onClick = onDismiss) {
-                    Text(text = stringResource(R.string.try_again))
+                    Text(text = dismissText)
                 }
             }
         },

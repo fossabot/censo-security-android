@@ -17,7 +17,7 @@ sealed class StrikeError(val errorCode: Int) {
                 context.getString(R.string.strike_maintenance_message)
             }
             else -> {
-                context.getString(R.string.something_went_wrong)
+                null
             }
         }
 

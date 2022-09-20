@@ -214,7 +214,6 @@
 
     <string name="sign_in_error">Sign In Error</string>
     <string name="error_occurred_signature_login">An error occurred trying to sign you in</string>
-    <string name="use_password">Use Password</string>
     <string name="save_key">Save Key</string>
     <string name="try_again">Try Again</string>
     <string name="migrating_key_loading">Migrating your key behind biometry protection…</string>

@@ -70,14 +70,15 @@ class SignInViewModel @Inject constructor(
         }
     }
 
-    private fun kickOffBiometryLoginOrMoveToPasswordEntry() {
+    fun kickOffBiometryLoginOrMoveToPasswordEntry() {
         viewModelScope.launch {
             if (keyRepository.havePrivateKey()) {
                 val cipher = keyRepository.getCipherForPrivateKeyDecryption()
                 if (cipher != null) {
                     state = state.copy(
                         triggerBioPrompt = Resource.Success(cipher),
-                        bioPromptReason = BioPromptReason.RETURN_LOGIN
+                        bioPromptReason = BioPromptReason.RETURN_LOGIN,
+                        loginResult = Resource.Uninitialized
                     )
                 }
             } else {
@@ -275,10 +276,6 @@ class SignInViewModel @Inject constructor(
 
     fun resetExitLoginFlow() {
         state = state.copy(exitLoginFlow = Resource.Uninitialized)
-    }
-
-    fun resetLoginCallAndMoveUserToPasswordEntry() {
-        state = state.copy(loginStep = LoginStep.PASSWORD_ENTRY, loginResult = Resource.Uninitialized)
     }
 
     fun resetPromptTrigger() {

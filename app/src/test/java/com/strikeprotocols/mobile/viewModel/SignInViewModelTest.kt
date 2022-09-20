@@ -163,6 +163,7 @@ class SignInViewModelTest : BaseViewModelTest() {
     fun `valid password login triggers successful login`() =
         runTest {
             whenever(keyRepository.havePrivateKey()).then { false }
+            whenever(keyRepository.getCipherForEncryption(SENTINEL_KEY_NAME)).then { cipher }
             whenever(userRepository.loginWithPassword(validEmail, validPassword)).then {
                 Resource.Success(LoginResponse(jwt))
             }
@@ -176,7 +177,14 @@ class SignInViewModelTest : BaseViewModelTest() {
 
             advanceUntilIdle()
 
-            assertSuccessfulLogin()
+            assertSavedDataAfterSuccessfulApiLogin()
+
+            //assert we kicked off next step in login
+            assert(signInViewModel.state.loginResult is Resource.Success)
+            assertEquals(jwt, signInViewModel.state.loginResult.data?.token)
+            assert(signInViewModel.state.triggerBioPrompt is Resource.Success)
+            assertEquals(cipher, signInViewModel.state.triggerBioPrompt.data)
+            assertEquals(BioPromptReason.INITIAL_LOGIN, signInViewModel.state.bioPromptReason)
         }
 
     @Test
@@ -314,7 +322,8 @@ class SignInViewModelTest : BaseViewModelTest() {
 
             advanceUntilIdle()
 
-            assertSuccessfulLogin()
+            assertSavedDataAfterSuccessfulApiLogin()
+            assert(signInViewModel.state.exitLoginFlow is Resource.Success)
         }
 
     @Test
@@ -390,14 +399,10 @@ class SignInViewModelTest : BaseViewModelTest() {
         )
     }
 
-    private suspend fun assertSuccessfulLogin() {
+    private suspend fun assertSavedDataAfterSuccessfulApiLogin() {
         verify(strikeUserData, times(1)).setEmail(validEmail)
         verify(userRepository, times(1)).setUserLoggedIn()
         verify(userRepository, times(1)).saveToken(jwt)
-        assert(signInViewModel.state.loginResult is Resource.Success)
-        assert(signInViewModel.state.loginResult.data?.token == jwt)
-        assertEquals(BioPromptReason.INITIAL_LOGIN, signInViewModel.state.bioPromptReason)
-        assert(signInViewModel.state.triggerBioPrompt is Resource.Success)
         assertPushNotificationRegistrationAttempted()
     }
 
