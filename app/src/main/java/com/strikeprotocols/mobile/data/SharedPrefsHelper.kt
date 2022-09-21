@@ -3,6 +3,7 @@ package com.strikeprotocols.mobile.data
 import android.content.Context
 import android.content.SharedPreferences
 import com.strikeprotocols.mobile.common.BaseWrapper
+import org.web3j.abi.datatypes.Bool
 
 object SharedPrefsHelper {
 
@@ -107,7 +108,17 @@ object SharedPrefsHelper {
     fun clearBackgroundEncryptedData(encryptedPrefs: SharedPreferences, email: String) {
         val editor = encryptedPrefs.edit()
         editor.putString("${email.lowercase().trim()}$BGRD_INIT_VECTOR", "")
+        editor.putString("${email.lowercase().trim()}$BGRD_CIPHER_TEXT", "")
         editor.apply()
+    }
+
+    fun hasSentinelData(encryptedPrefs: SharedPreferences, email: String): Boolean {
+        val savedInitVector =
+            encryptedPrefs.getString("${email.lowercase().trim()}$BGRD_INIT_VECTOR", "") ?: ""
+        val cipherText =
+            encryptedPrefs.getString("${email.lowercase().trim()}$BGRD_CIPHER_TEXT", "") ?: ""
+
+        return savedInitVector.isNotEmpty() && cipherText.isNotEmpty()
     }
 
     fun saveKeyData(encryptedPrefs: SharedPreferences, email: String, keyData: String) {

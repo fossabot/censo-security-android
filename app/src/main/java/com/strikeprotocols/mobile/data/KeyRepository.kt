@@ -12,6 +12,7 @@ import com.strikeprotocols.mobile.data.EncryptionManagerImpl.Companion.BIO_KEY_N
 import com.strikeprotocols.mobile.data.models.StoredKeyData
 import com.strikeprotocols.mobile.data.models.VerifyUser
 import com.strikeprotocols.mobile.data.models.WalletSigner
+import java.security.InvalidAlgorithmParameterException
 import javax.crypto.Cipher
 
 interface KeyRepository {
@@ -46,6 +47,8 @@ interface KeyRepository {
     suspend fun migrateOldDataToBiometryProtectedStorage(cipher: Cipher)
 
     suspend fun havePrivateKey(): Boolean
+
+    suspend fun haveSentinelData() : Boolean
 
     suspend fun generateTimestamp() : String
 
@@ -97,7 +100,11 @@ class KeyRepositoryImpl(
         return try {
             encryptionManager.getInitializedCipherForEncryption(keyName)
         } catch (e: KeyPermanentlyInvalidatedException) {
-            wipeAllDataAfterKeyInvalidatedException()
+            wipeAllDataAfterKeyInvalidatedException(keyName)
+            userRepository.setKeyInvalidated()
+            null
+        } catch (e: InvalidAlgorithmParameterException) {
+            wipeAllDataAfterKeyInvalidatedException(keyName)
             userRepository.setKeyInvalidated()
             null
         }
@@ -111,7 +118,11 @@ class KeyRepositoryImpl(
                 initVector = encryptedData.initializationVector, keyName = SENTINEL_KEY_NAME
             )
         } catch (e: KeyPermanentlyInvalidatedException) {
-            wipeAllDataAfterKeyInvalidatedException()
+            wipeAllDataAfterKeyInvalidatedException(SENTINEL_KEY_NAME)
+            userRepository.setKeyInvalidated()
+            null
+        } catch (e: InvalidAlgorithmParameterException) {
+            wipeAllDataAfterKeyInvalidatedException(SENTINEL_KEY_NAME)
             userRepository.setKeyInvalidated()
             null
         }
@@ -127,18 +138,24 @@ class KeyRepositoryImpl(
                 initVector = initVector, keyName = BIO_KEY_NAME
             )
         } catch (e: KeyPermanentlyInvalidatedException) {
-            wipeAllDataAfterKeyInvalidatedException()
+            wipeAllDataAfterKeyInvalidatedException(BIO_KEY_NAME)
+            userRepository.setKeyInvalidated()
+            null
+        } catch (e: InvalidAlgorithmParameterException) {
+            wipeAllDataAfterKeyInvalidatedException(BIO_KEY_NAME)
             userRepository.setKeyInvalidated()
             null
         }
     }
 
-    private suspend fun wipeAllDataAfterKeyInvalidatedException() {
+    private suspend fun wipeAllDataAfterKeyInvalidatedException(keyName: String) {
         val email = userRepository.retrieveUserEmail()
         encryptionManager.deleteBiometryKeyFromKeystore(BIO_KEY_NAME)
         encryptionManager.deleteBiometryKeyFromKeystore(SENTINEL_KEY_NAME)
         securePreferences.clearAllRelevantKeyData(email)
-        userRepository.logOut()
+        if (keyName == BIO_KEY_NAME) {
+            userRepository.logOut()
+        }
     }
 
     override suspend fun signTimestamp(
@@ -274,6 +291,11 @@ class KeyRepositoryImpl(
     override suspend fun havePrivateKey(): Boolean {
         val userEmail = userRepository.retrieveUserEmail()
         return encryptionManager.havePrivateKeyStored(userEmail)
+    }
+
+    override suspend fun haveSentinelData(): Boolean {
+        val userEmail = userRepository.retrieveUserEmail()
+        return encryptionManager.haveSentinelDataStored(userEmail)
     }
 
     override suspend fun generateTimestamp() = generateFormattedTimestamp()

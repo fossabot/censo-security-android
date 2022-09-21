@@ -5,7 +5,6 @@ import cash.z.ecc.android.bip39.toSeed
 import com.strikeprotocols.mobile.common.*
 import com.strikeprotocols.mobile.common.BaseWrapper
 import com.strikeprotocols.mobile.common.Ed25519HierarchicalPrivateKey
-import com.strikeprotocols.mobile.common.strikeLog
 import com.strikeprotocols.mobile.data.EncryptionManagerImpl.Companion.DATA_CHECK
 import com.strikeprotocols.mobile.data.EncryptionManagerImpl.Companion.NO_OFFSET_INDEX
 import com.strikeprotocols.mobile.data.EncryptionManagerImpl.Companion.NoKeyDataException
@@ -16,7 +15,6 @@ import org.bouncycastle.crypto.params.Ed25519PrivateKeyParameters
 import org.bouncycastle.crypto.params.Ed25519PublicKeyParameters
 import org.bouncycastle.crypto.signers.Ed25519Signer
 import com.strikeprotocols.mobile.data.EncryptionManagerException.*
-import com.strikeprotocols.mobile.data.EncryptionManagerImpl.Companion.BIO_KEY_NAME
 import com.strikeprotocols.mobile.data.EncryptionManagerImpl.Companion.SENTINEL_STATIC_DATA
 import com.strikeprotocols.mobile.data.models.StoredKeyData
 import com.strikeprotocols.mobile.data.models.StoredKeyData.Companion.ROOT_SEED
@@ -118,6 +116,7 @@ interface EncryptionManager {
     fun getInitializedCipherForEncryption(keyName: String) : Cipher
     fun getInitializedCipherForDecryption(keyName: String, initVector: ByteArray) : Cipher
     fun havePrivateKeyStored(email: String): Boolean
+    fun haveSentinelDataStored(email: String): Boolean
     fun saveSentinelData(email: String, cipher: Cipher)
     fun retrieveSentinelData(email: String, cipher: Cipher): String
 }
@@ -381,6 +380,8 @@ class EncryptionManagerImpl @Inject constructor(
 
     override fun havePrivateKeyStored(email: String) =
         securePreferences.retrieveEncryptedStoredKeys(email = email).isNotEmpty()
+
+    override fun haveSentinelDataStored(email: String) = securePreferences.hasSentinelData(email)
 
     override fun saveSentinelData(email: String, cipher: Cipher) {
         val encryptedSentinelData =

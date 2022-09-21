@@ -19,6 +19,7 @@ interface SecurePreferences {
     fun retrieveSentinelData(email: String) : EncryptedData
     fun saveSentinelData(email: String, encryptedData: EncryptedData)
     fun clearSentinelData(email: String)
+    fun hasSentinelData(email: String) : Boolean
     fun savePublicKey(email: String, publicKey: ByteArray)
     fun retrievePublicKey(email: String): String
     fun clearPublicKey(email: String)
@@ -120,6 +121,12 @@ class SecurePreferencesImpl @Inject constructor(applicationContext: Context) :
             email = email
         )
     }
+
+    override fun hasSentinelData(email: String) =
+        SharedPrefsHelper.hasSentinelData(
+            encryptedPrefs = secureSharedPreferences,
+            email = email
+        )
 
     override fun saveAllRelevantKeyData(
         email: String,

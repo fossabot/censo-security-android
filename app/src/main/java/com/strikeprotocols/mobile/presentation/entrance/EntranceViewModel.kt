@@ -1,11 +1,13 @@
 package com.strikeprotocols.mobile.presentation.entrance
 
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.strikeprotocols.mobile.common.Resource
+import com.strikeprotocols.mobile.common.strikeLog
 import com.strikeprotocols.mobile.data.*
 import com.strikeprotocols.mobile.data.models.VerifyUser
 import com.strikeprotocols.mobile.data.models.WalletSigner
@@ -93,16 +95,23 @@ class EntranceViewModel @Inject constructor(
     //Part 1: Do we need to update key data? create/upload/regenerate
     //Part 2: Is our local key valid? valid/invalid
     private suspend fun determineUserDestination(verifyUser: VerifyUser) {
+        val userDoesNotHaveSentinelData = !keyRepository.haveSentinelData()
         val userSavedPrivateKey = keyRepository.havePrivateKey()
         val publicKeysPresent = !verifyUser.publicKeys.isNullOrEmpty()
 
-        //region PART 1: Do we need to update our key data?
+        //region PART 1: Do we need to update our key data or save sentinel data?
         val doesUserNeedToCreateKey = !publicKeysPresent && !userSavedPrivateKey
         val doesUserNeedToUploadKeyToBackend = !publicKeysPresent && userSavedPrivateKey
         val doesUserNeedToRecoverKey = !userSavedPrivateKey && publicKeysPresent
         val oldKeyPresent = keyRepository.getDeprecatedPrivateKey().isNotEmpty()
 
         when {
+            userDoesNotHaveSentinelData -> {
+                state = state.copy(
+                    userDestinationResult = Resource.Success(UserDestination.LOGIN)
+                )
+                return
+            }
             oldKeyPresent -> {
                 state = state.copy(
                     userDestinationResult = Resource.Success(UserDestination.KEY_MIGRATION)

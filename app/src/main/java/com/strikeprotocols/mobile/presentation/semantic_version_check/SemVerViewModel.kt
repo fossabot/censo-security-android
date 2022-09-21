@@ -13,7 +13,6 @@ import com.strikeprotocols.mobile.common.BioPromptFailedReason
 import com.strikeprotocols.mobile.common.CrashReportingUtil.FORCE_UPGRADE_TAG
 import com.strikeprotocols.mobile.common.CrashReportingUtil.MANUALLY_REPORTED_TAG
 import com.strikeprotocols.mobile.common.Resource
-import com.strikeprotocols.mobile.common.strikeLog
 import com.strikeprotocols.mobile.data.EncryptionManagerImpl
 import com.strikeprotocols.mobile.data.KeyRepository
 import com.strikeprotocols.mobile.data.UserRepository
@@ -50,7 +49,7 @@ data class SemVerViewModel @Inject constructor(
 
     fun onForeground() {
         viewModelScope.launch {
-            if (userRepository.userLoggedIn()) {
+            if (userRepository.userLoggedIn() && keyRepository.haveSentinelData()) {
                 launchBlockingForegroundBiometry()
             }
         }
@@ -59,7 +58,6 @@ data class SemVerViewModel @Inject constructor(
     private suspend fun launchBlockingForegroundBiometry() {
         val cipher = keyRepository.getCipherForBackgroundDecryption()
         if (cipher != null) {
-            strikeLog(message = "Launching bio prompt trigger...")
             state = state.copy(
                 bioPromptTrigger = Resource.Success(cipher),
                 biometryUnavailable = false
@@ -68,11 +66,8 @@ data class SemVerViewModel @Inject constructor(
     }
 
     fun biometryApproved(cipher: Cipher) {
-        strikeLog(message = "Biometry approved!!!")
         viewModelScope.launch {
-            strikeLog(message = "Biometry approved and here we are.....")
             val sentinelData = keyRepository.retrieveSentinelData(cipher)
-            strikeLog(message = "Sentinel data is: $sentinelData")
             state = if (sentinelData == EncryptionManagerImpl.Companion.SENTINEL_STATIC_DATA) {
                 state.copy(bioPromptTrigger = Resource.Uninitialized)
             } else {
@@ -83,7 +78,6 @@ data class SemVerViewModel @Inject constructor(
     }
 
     fun biometryFailed(errorCode: Int) {
-        strikeLog(message = "Biometry failed!!!")
         if (BioCryptoUtil.getBioPromptFailedReason(errorCode) == BioPromptFailedReason.FAILED_TOO_MANY_ATTEMPTS) {
             state = state.copy(biometryUnavailable = true)
         } else {

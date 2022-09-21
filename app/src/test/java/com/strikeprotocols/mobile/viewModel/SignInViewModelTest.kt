@@ -125,6 +125,62 @@ class SignInViewModelTest : BaseViewModelTest() {
         }
 
     @Test
+    fun `skip to add sentinel data if user is logged in and is missing sentinel data during onStart`() = runTest {
+        whenever(userRepository.retrieveCachedUserEmail()).then { validEmail }
+        whenever(keyRepository.haveSentinelData()).then { false }
+        whenever(userRepository.userLoggedIn()).then { true }
+        whenever(keyRepository.getCipherForEncryption(SENTINEL_KEY_NAME)).then { cipher }
+
+        initVM()
+
+        signInViewModel.onStart()
+
+        advanceUntilIdle()
+
+        assertEquals(LoginStep.PASSWORD_ENTRY, signInViewModel.state.loginStep)
+        assertEquals(validEmail, signInViewModel.state.email)
+        assert(signInViewModel.state.triggerBioPrompt is Resource.Success)
+        assertEquals(cipher, signInViewModel.state.triggerBioPrompt.data)
+        assertEquals(BioPromptReason.INITIAL_LOGIN, signInViewModel.state.bioPromptReason)
+    }
+
+    @Test
+    fun `do not attempt to add sentinel data if user is not logged in during onStart`() = runTest {
+        whenever(userRepository.retrieveCachedUserEmail()).then { validEmail }
+        whenever(userRepository.userLoggedIn()).then { false }
+        whenever(keyRepository.haveSentinelData()).then { false }
+        whenever(keyRepository.getCipherForEncryption(SENTINEL_KEY_NAME)).then { cipher }
+
+        initVM()
+
+        signInViewModel.onStart()
+
+        advanceUntilIdle()
+
+        assertEquals(LoginStep.EMAIL_ENTRY, signInViewModel.state.loginStep)
+        assert(signInViewModel.state.triggerBioPrompt is Resource.Uninitialized)
+        assertEquals(BioPromptReason.UNINITIALIZED, signInViewModel.state.bioPromptReason)
+    }
+
+    @Test
+    fun `do not attempt to add sentinel data if user has sentinel data during onStart`() = runTest {
+        whenever(userRepository.retrieveCachedUserEmail()).then { validEmail }
+        whenever(userRepository.userLoggedIn()).then { true }
+        whenever(keyRepository.haveSentinelData()).then { true }
+        whenever(keyRepository.getCipherForEncryption(SENTINEL_KEY_NAME)).then { cipher }
+
+        initVM()
+
+        signInViewModel.onStart()
+
+        advanceUntilIdle()
+
+        assertEquals(LoginStep.EMAIL_ENTRY, signInViewModel.state.loginStep)
+        assert(signInViewModel.state.triggerBioPrompt is Resource.Uninitialized)
+        assertEquals(BioPromptReason.UNINITIALIZED, signInViewModel.state.bioPromptReason)
+    }
+
+    @Test
     fun `invalid password does not attempt password based login`() =
         runTest {
             whenever(keyRepository.havePrivateKey()).then { false }

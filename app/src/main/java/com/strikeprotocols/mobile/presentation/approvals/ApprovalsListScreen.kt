@@ -110,7 +110,6 @@ fun ApprovalsListScreen(
             val bioPrompt = BioCryptoUtil.createBioPrompt(
                 fragmentActivity = context,
                 onSuccess = {
-                    strikeLog(message = "Getting success in the frikin aprovals list")
                     val cipher = it?.cipher
                     if (cipher != null) {
                         approvalsViewModel.biometryApproved(cipher)

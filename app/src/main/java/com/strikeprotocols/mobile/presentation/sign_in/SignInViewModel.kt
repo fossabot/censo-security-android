@@ -14,6 +14,7 @@ import com.strikeprotocols.mobile.data.EncryptionManagerImpl.Companion.SENTINEL_
 import com.strikeprotocols.mobile.data.NoInternetException.Companion.NO_INTERNET_ERROR
 import com.strikeprotocols.mobile.data.models.LoginResponse
 import com.strikeprotocols.mobile.data.models.PushBody
+import com.strikeprotocols.mobile.presentation.key_management.KeyManagementInitialData
 import kotlinx.coroutines.*
 import javax.crypto.Cipher
 
@@ -30,6 +31,30 @@ class SignInViewModel @Inject constructor(
 
     init {
         getCachedEmail()
+    }
+
+
+    fun onStart() {
+        viewModelScope.launch {
+            val userLoggedIn = try {
+                userRepository.userLoggedIn()
+            } catch (e: Exception) {
+                false
+            }
+
+            val haveSentinelData = keyRepository.haveSentinelData()
+
+            if (userLoggedIn && !haveSentinelData) {
+                val email = userRepository.retrieveCachedUserEmail()
+                val cipher = keyRepository.getCipherForEncryption(SENTINEL_KEY_NAME)
+                state = state.copy(
+                    loginStep = LoginStep.PASSWORD_ENTRY,
+                    email = email,
+                    triggerBioPrompt = Resource.Success(cipher),
+                    bioPromptReason = BioPromptReason.INITIAL_LOGIN
+                )
+            }
+        }
     }
 
     private fun getCachedEmail() {

@@ -53,6 +53,11 @@ fun SignInScreen(
     val promptInfo = BioCryptoUtil.createPromptInfo(context, isSavingData = false, biometryLogin = true)
 
     //region LaunchedEffect
+    DisposableEffect(key1 = viewModel) {
+        viewModel.onStart()
+        onDispose { }
+    }
+
     LaunchedEffect(key1 = state) {
         if (state.exitLoginFlow is Resource.Success) {
             viewModel.resetExitLoginFlow()

@@ -66,9 +66,11 @@ class EntranceViewModelTest : BaseViewModelTest() {
     )
 
     @Before
-    fun setup() {
+    fun setup() = runTest {
         Dispatchers.setMain(dispatcher)
         MockitoAnnotations.openMocks(this)
+
+        whenever(keyRepository.haveSentinelData()).then { true }
 
         entranceViewModel = EntranceViewModel(
             userRepository = userRepository,
@@ -117,6 +119,28 @@ class EntranceViewModelTest : BaseViewModelTest() {
 
         assertTrue(entranceViewModel.state.userDestinationResult is Resource.Success)
         assertTrue(entranceViewModel.state.userDestinationResult.data == UserDestination.KEY_MIGRATION)
+    }
+
+    @Test
+    fun `if user does not have sentinel data send them to sign in`() = runTest {
+        setupLoggedInUserWithValidEmail()
+        whenever(keyRepository.haveSentinelData()).then { false }
+
+        whenever(userRepository.verifyUser()).then {
+            Resource.Success(basicVerifyUserWithValidPublicKey)
+        }
+
+        whenever(keyRepository.havePrivateKey()).then { false }
+        whenever(keyRepository.getDeprecatedPrivateKey()).then { "not empty" }
+
+        entranceViewModel.onStart()
+        advanceUntilIdle()
+
+        verify(strikeUserData, times(1))
+            .setStrikeUser(basicVerifyUserWithValidPublicKey)
+
+        assertTrue(entranceViewModel.state.userDestinationResult is Resource.Success)
+        assertTrue(entranceViewModel.state.userDestinationResult.data == UserDestination.LOGIN)
     }
 
     @Test
