@@ -236,7 +236,7 @@ class KeyManagementViewModelTest : BaseViewModelTest() {
             KeyManagementFlowStep.CreationFlow(KeyCreationFlowStep.ALL_SET_STEP),
             keyMgmtViewModel.state.keyManagementFlowStep
         )
-        assertEquals(BioPromptReason.CREATE, keyMgmtViewModel.state.bioPromptReason)
+        assertEquals(BioPromptReason.CREATE_KEY, keyMgmtViewModel.state.bioPromptReason)
         assertTriggerBioPromptIsSuccessAndHasCipherData()
     }
 
@@ -306,7 +306,7 @@ class KeyManagementViewModelTest : BaseViewModelTest() {
             keyMgmtViewModel.state.keyManagementFlowStep
         )
         assertTrue(keyMgmtViewModel.state.finalizeKeyFlow is Resource.Loading)
-        assertEquals(BioPromptReason.RECOVER, keyMgmtViewModel.state.bioPromptReason)
+        assertEquals(BioPromptReason.RECOVER_KEY, keyMgmtViewModel.state.bioPromptReason)
         assertEquals(PhraseInputMethod.PASTED, keyMgmtViewModel.state.inputMethod)
         assertTriggerBioPromptIsSuccessAndHasCipherData()
     }
@@ -1031,7 +1031,7 @@ class KeyManagementViewModelTest : BaseViewModelTest() {
             keyMgmtViewModel.state.keyManagementFlowStep
         )
         assertTrue(keyMgmtViewModel.state.finalizeKeyFlow is Resource.Loading)
-        assertEquals(BioPromptReason.MIGRATION, keyMgmtViewModel.state.bioPromptReason)
+        assertEquals(BioPromptReason.MIGRATE_BIOMETRIC_KEY, keyMgmtViewModel.state.bioPromptReason)
         assertTriggerBioPromptIsSuccessAndHasCipherData()
     }
 
@@ -1077,7 +1077,7 @@ class KeyManagementViewModelTest : BaseViewModelTest() {
         )
         assertTrue(keyMgmtViewModel.state.finalizeKeyFlow is Resource.Loading)
         assertEquals(PhraseInputMethod.PASTED, keyMgmtViewModel.state.inputMethod)
-        assertEquals(BioPromptReason.RECOVER, keyMgmtViewModel.state.bioPromptReason)
+        assertEquals(BioPromptReason.RECOVER_KEY, keyMgmtViewModel.state.bioPromptReason)
         assertTriggerBioPromptIsSuccessAndHasCipherData()
     }
 
@@ -1104,7 +1104,7 @@ class KeyManagementViewModelTest : BaseViewModelTest() {
             keyMgmtViewModel.state.keyManagementFlowStep
         )
         assertTrue(keyMgmtViewModel.state.finalizeKeyFlow is Resource.Loading)
-        assertEquals(BioPromptReason.CREATE, keyMgmtViewModel.state.bioPromptReason)
+        assertEquals(BioPromptReason.CREATE_KEY, keyMgmtViewModel.state.bioPromptReason)
         assertTriggerBioPromptIsSuccessAndHasCipherData()
     }
 

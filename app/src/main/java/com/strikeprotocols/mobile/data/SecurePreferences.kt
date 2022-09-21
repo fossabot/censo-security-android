@@ -102,7 +102,7 @@ class SecurePreferencesImpl @Inject constructor(applicationContext: Context) :
     }
 
     override fun saveSentinelData(email: String, encryptedData: EncryptedData) {
-        SharedPrefsHelper.saveBackgroundEncryptedData(
+        SharedPrefsHelper.saveSentinelData(
             email = email,
             encryptedPrefs = secureSharedPreferences,
             encryptedData = encryptedData
@@ -110,13 +110,13 @@ class SecurePreferencesImpl @Inject constructor(applicationContext: Context) :
     }
 
     override fun retrieveSentinelData(email: String) : EncryptedData =
-        SharedPrefsHelper.retrieveBackgroundEncryptedData(
+        SharedPrefsHelper.retrieveSentinelData(
             encryptedPrefs = secureSharedPreferences, email = email
         )
 
 
     override fun clearSentinelData(email: String) {
-        SharedPrefsHelper.clearBackgroundEncryptedData(
+        SharedPrefsHelper.clearSentinelData(
             encryptedPrefs = secureSharedPreferences,
             email = email
         )

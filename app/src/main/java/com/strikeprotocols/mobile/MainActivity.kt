@@ -13,10 +13,8 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
+import androidx.compose.material.Button
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -101,14 +99,15 @@ class MainActivity : FragmentActivity() {
             userStateListener = setupUserStateListener(navController, context)
             userStateListener?.let { authProvider.addUserStateListener(it) }
 
-            val promptInfo = BioCryptoUtil.createPromptInfo(context, isSavingData = false)
-
             val semVerState = semVerViewModel.state
 
 
             LaunchedEffect(key1 = semVerState) {
 
                 if (semVerState.bioPromptTrigger is Resource.Success) {
+                    val promptInfo = BioCryptoUtil.createPromptInfo(
+                        context = context, bioPromptReason = semVerState.bioPromptReason)
+
                     val bioPrompt = BioCryptoUtil.createBioPrompt(
                         fragmentActivity = this@MainActivity,
                         onSuccess = {
@@ -192,8 +191,7 @@ class MainActivity : FragmentActivity() {
                         semVerViewModel.resetShouldEnforceAppUpdate()
                     }
 
-                    val visibleBlockingUi = semVerState.bioPromptTrigger is Resource.Success
-                            || semVerState.bioPromptTrigger is Resource.Loading
+                    val visibleBlockingUi = semVerState.bioPromptTrigger !is Resource.Uninitialized
                     AnimatedVisibility(
                         visible = visibleBlockingUi,
                         enter = fadeIn(),
@@ -205,15 +203,32 @@ class MainActivity : FragmentActivity() {
                                 .fillMaxSize()
                                 .background(color = Color.Black)
                         ) {
-                            Text(
-                                modifier = Modifier
-                                    .align(Alignment.TopCenter)
-                                    .padding(top = 124.dp, start = 48.dp, end = 48.dp),
-                                text = if(semVerState.biometryUnavailable) getString(R.string.biometry_unavailable) else getString(R.string.foreground_access_app),
-                                fontSize = 24.sp,
-                                color = StrikeWhite,
-                                textAlign = TextAlign.Center
-                            )
+                            Column(
+                                modifier = Modifier.fillMaxWidth(),
+                                verticalArrangement = Arrangement.Top,
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                Text(
+                                    modifier = Modifier
+                                        .padding(top = 124.dp, start = 48.dp, end = 48.dp),
+                                    text = if (semVerState.biometryUnavailable) getString(R.string.biometry_unavailable) else getString(
+                                        R.string.foreground_access_app
+                                    ),
+                                    fontSize = 24.sp,
+                                    color = StrikeWhite,
+                                    textAlign = TextAlign.Center
+                                )
+                                Spacer(modifier = Modifier.height(24.dp))
+                                if(semVerState.bioPromptTrigger is Resource.Error) {
+                                    Button(onClick = semVerViewModel::retryBiometricGate) {
+                                        Text(
+                                            text = getString(R.string.retry_biometry),
+                                            color = StrikeWhite,
+                                            fontSize = 18.sp
+                                        )
+                                    }
+                                }
+                            }
                         }
                     }
                 }

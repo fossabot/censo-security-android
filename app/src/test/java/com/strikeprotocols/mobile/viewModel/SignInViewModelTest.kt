@@ -13,6 +13,7 @@ import com.strikeprotocols.mobile.data.models.PushBody
 import com.strikeprotocols.mobile.presentation.sign_in.LoginStep
 import com.strikeprotocols.mobile.presentation.sign_in.SignInViewModel
 import junit.framework.TestCase.assertEquals
+import junit.framework.TestCase.assertTrue
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.*
@@ -79,7 +80,7 @@ class SignInViewModelTest : BaseViewModelTest() {
 
         initVM()
 
-        assert(signInViewModel.state.email == validEmail)
+        assertTrue(signInViewModel.state.email == validEmail)
     }
 
     @Test
@@ -92,7 +93,7 @@ class SignInViewModelTest : BaseViewModelTest() {
             signInViewModel.updateEmail(validEmail)
             signInViewModel.signInActionCompleted()
 
-            assert(signInViewModel.state.loginStep == LoginStep.PASSWORD_ENTRY)
+            assertTrue(signInViewModel.state.loginStep == LoginStep.PASSWORD_ENTRY)
         }
 
     @Test
@@ -102,11 +103,11 @@ class SignInViewModelTest : BaseViewModelTest() {
 
             initVM()
 
-            signInViewModel.updateEmail("         ${validEmail.toUpperCase()}        ")
+            signInViewModel.updateEmail("         ${validEmail.uppercase()}        ")
             signInViewModel.signInActionCompleted()
 
-            assert(signInViewModel.state.loginStep == LoginStep.PASSWORD_ENTRY)
-            assert(signInViewModel.state.email == validEmail)
+            assertTrue(signInViewModel.state.loginStep == LoginStep.PASSWORD_ENTRY)
+            assertTrue(signInViewModel.state.email == validEmail)
             verify(userRepository, times(1)).saveUserEmail(validEmail)
         }
 
@@ -139,9 +140,9 @@ class SignInViewModelTest : BaseViewModelTest() {
 
         assertEquals(LoginStep.PASSWORD_ENTRY, signInViewModel.state.loginStep)
         assertEquals(validEmail, signInViewModel.state.email)
-        assert(signInViewModel.state.triggerBioPrompt is Resource.Success)
+        assertTrue(signInViewModel.state.triggerBioPrompt is Resource.Success)
         assertEquals(cipher, signInViewModel.state.triggerBioPrompt.data)
-        assertEquals(BioPromptReason.INITIAL_LOGIN, signInViewModel.state.bioPromptReason)
+        assertEquals(BioPromptReason.SAVE_SENTINEL, signInViewModel.state.bioPromptReason)
     }
 
     @Test
@@ -158,7 +159,7 @@ class SignInViewModelTest : BaseViewModelTest() {
         advanceUntilIdle()
 
         assertEquals(LoginStep.EMAIL_ENTRY, signInViewModel.state.loginStep)
-        assert(signInViewModel.state.triggerBioPrompt is Resource.Uninitialized)
+        assertTrue(signInViewModel.state.triggerBioPrompt is Resource.Uninitialized)
         assertEquals(BioPromptReason.UNINITIALIZED, signInViewModel.state.bioPromptReason)
     }
 
@@ -176,7 +177,7 @@ class SignInViewModelTest : BaseViewModelTest() {
         advanceUntilIdle()
 
         assertEquals(LoginStep.EMAIL_ENTRY, signInViewModel.state.loginStep)
-        assert(signInViewModel.state.triggerBioPrompt is Resource.Uninitialized)
+        assertTrue(signInViewModel.state.triggerBioPrompt is Resource.Uninitialized)
         assertEquals(BioPromptReason.UNINITIALIZED, signInViewModel.state.bioPromptReason)
     }
 
@@ -194,7 +195,7 @@ class SignInViewModelTest : BaseViewModelTest() {
 
             verify(userRepository, times(0))
                 .loginWithPassword(validEmail, invalidPassword)
-            assert(signInViewModel.state.loginResult !is Resource.Loading)
+            assertTrue(signInViewModel.state.loginResult !is Resource.Loading)
             assertEquals(true, signInViewModel.state.passwordErrorEnabled)
         }
 
@@ -212,7 +213,7 @@ class SignInViewModelTest : BaseViewModelTest() {
 
             verify(userRepository, times(1))
                 .loginWithPassword(validEmail, validPassword)
-            assert(signInViewModel.state.loginResult is Resource.Loading)
+            assertTrue(signInViewModel.state.loginResult is Resource.Loading)
         }
 
     @Test
@@ -236,11 +237,11 @@ class SignInViewModelTest : BaseViewModelTest() {
             assertSavedDataAfterSuccessfulApiLogin()
 
             //assert we kicked off next step in login
-            assert(signInViewModel.state.loginResult is Resource.Success)
+            assertTrue(signInViewModel.state.loginResult is Resource.Success)
             assertEquals(jwt, signInViewModel.state.loginResult.data?.token)
-            assert(signInViewModel.state.triggerBioPrompt is Resource.Success)
+            assertTrue(signInViewModel.state.triggerBioPrompt is Resource.Success)
             assertEquals(cipher, signInViewModel.state.triggerBioPrompt.data)
-            assertEquals(BioPromptReason.INITIAL_LOGIN, signInViewModel.state.bioPromptReason)
+            assertEquals(BioPromptReason.SAVE_SENTINEL, signInViewModel.state.bioPromptReason)
         }
 
     @Test
@@ -295,8 +296,8 @@ class SignInViewModelTest : BaseViewModelTest() {
 
             advanceUntilIdle()
 
-            assert(signInViewModel.state.triggerBioPrompt is Resource.Success)
-            assert(signInViewModel.state.triggerBioPrompt.data == cipher)
+            assertTrue(signInViewModel.state.triggerBioPrompt is Resource.Success)
+            assertTrue(signInViewModel.state.triggerBioPrompt.data == cipher)
         }
 
     @Test
@@ -312,8 +313,8 @@ class SignInViewModelTest : BaseViewModelTest() {
 
             advanceUntilIdle()
 
-            assert(signInViewModel.state.triggerBioPrompt !is Resource.Success)
-            assert(signInViewModel.state.bioPromptReason == BioPromptReason.UNINITIALIZED)
+            assertTrue(signInViewModel.state.triggerBioPrompt !is Resource.Success)
+            assertTrue(signInViewModel.state.bioPromptReason == BioPromptReason.UNINITIALIZED)
         }
 
     @Test
@@ -333,7 +334,7 @@ class SignInViewModelTest : BaseViewModelTest() {
             verify(userRepository, times(1)).loginWithTimestamp(
                 validEmail, timestamp, signedTimestamp
             )
-            assert(signInViewModel.state.loginResult is Resource.Loading)
+            assertTrue(signInViewModel.state.loginResult is Resource.Loading)
         }
 
     @Test
@@ -356,12 +357,13 @@ class SignInViewModelTest : BaseViewModelTest() {
             signInViewModel.biometryApproved(cipher)
 
             verify(keyRepository, times(1)).saveSentinelData(cipher)
-            assert(signInViewModel.state.exitLoginFlow is Resource.Success)
+            assertTrue(signInViewModel.state.exitLoginFlow is Resource.Success)
         }
 
     @Test
     fun `valid signature based login triggers successful login`() =
         runTest {
+            whenever(keyRepository.haveSentinelData()).then { true }
             whenever(keyRepository.havePrivateKey()).then { true }
             whenever(userRepository.loginWithTimestamp(any(), any(), any())).then {
                 Resource.Success(LoginResponse(jwt))
@@ -379,7 +381,39 @@ class SignInViewModelTest : BaseViewModelTest() {
             advanceUntilIdle()
 
             assertSavedDataAfterSuccessfulApiLogin()
-            assert(signInViewModel.state.exitLoginFlow is Resource.Success)
+            assertTrue(signInViewModel.state.exitLoginFlow is Resource.Success)
+        }
+
+    @Test
+    fun `valid signature based login with no sentinel data triggers sentinel data save`() =
+        runTest {
+            whenever(keyRepository.getCipherForEncryption(SENTINEL_KEY_NAME)).then { cipher }
+            whenever(keyRepository.haveSentinelData()).then { false }
+            whenever(keyRepository.havePrivateKey()).then { true }
+            whenever(userRepository.loginWithTimestamp(any(), any(), any())).then {
+                Resource.Success(LoginResponse(jwt))
+            }
+
+            initVM()
+
+            signInViewModel.updateEmail(validEmail)
+            signInViewModel.signInActionCompleted()
+
+            advanceUntilIdle()
+
+            signInViewModel.biometryApproved(cipher)
+
+            advanceUntilIdle()
+
+            assertSavedDataAfterSuccessfulApiLogin()
+
+            advanceUntilIdle()
+
+            assertEquals(LoginStep.EMAIL_ENTRY, signInViewModel.state.loginStep)
+            assertEquals(validEmail, signInViewModel.state.email)
+            assertTrue(signInViewModel.state.triggerBioPrompt is Resource.Success)
+            assertEquals(cipher, signInViewModel.state.triggerBioPrompt.data)
+            assertEquals(BioPromptReason.SAVE_SENTINEL, signInViewModel.state.bioPromptReason)
         }
 
     @Test
@@ -443,7 +477,7 @@ class SignInViewModelTest : BaseViewModelTest() {
             verify(userRepository, times(0)).loginWithTimestamp(
                 validEmail, timestamp, signedTimestamp
             )
-            assert(signInViewModel.state.loginResult is Resource.Error)
+            assertTrue(signInViewModel.state.loginResult is Resource.Error)
         }
 
     private fun initVM() {
@@ -463,7 +497,7 @@ class SignInViewModelTest : BaseViewModelTest() {
     }
 
     private fun assertFailedLogin() {
-        assert(signInViewModel.state.loginResult is Resource.Error)
+        assertTrue(signInViewModel.state.loginResult is Resource.Error)
     }
 
     private suspend fun assertPushNotificationRegistrationAttempted() {

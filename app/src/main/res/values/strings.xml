@@ -233,5 +233,6 @@
 
     <string name="biometry_changed_key_invalidated">Biometry for device has changed. Key invalidated.</string>
     <string name="foreground_access_app">Please complete biometry to gain access to the app.</string>
-    <string name="biometry_unavailable">Unable to show biometry to gain access to the app. Please re-authenticate device from lock screen.</string>
+    <string name="biometry_unavailable">Unable to show biometry to gain access to the app.\n\nPlease authenticate device from lock screen.</string>
+    <string name="retry_biometry">Retry Biometry</string>
 </resources>

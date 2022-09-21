@@ -40,8 +40,6 @@ fun KeyManagementScreen(
     val state = viewModel.state
     val context = LocalContext.current as FragmentActivity
 
-    val promptInfo = BioCryptoUtil.createPromptInfo(context, isSavingData = true)
-
     val lifecycleOwner: LifecycleOwner = LocalLifecycleOwner.current
 
     //region DisposableEffect
@@ -155,13 +153,15 @@ fun KeyManagementScreen(
 
     if (state.triggerBioPrompt is Resource.Success) {
         val mainText = when (state.bioPromptReason) {
-            BioPromptReason.MIGRATION -> stringResource(id = R.string.migrate_biometry_info)
+            BioPromptReason.MIGRATE_BIOMETRIC_KEY -> stringResource(id = R.string.migrate_biometry_info)
             else -> stringResource(id = R.string.save_biometry_info)
         }
 
         PreBiometryDialog(
             mainText = mainText,
             onAccept = {
+                val promptInfo = BioCryptoUtil.createPromptInfo(
+                    context = context, bioPromptReason = state.bioPromptReason)
                 val bioPrompt = BioCryptoUtil.createBioPrompt(
                     fragmentActivity = context,
                     onSuccess = {

@@ -50,8 +50,6 @@ fun SignInScreen(
     val state = viewModel.state
     val context = LocalContext.current as FragmentActivity
 
-    val promptInfo = BioCryptoUtil.createPromptInfo(context, isSavingData = false, biometryLogin = true)
-
     //region LaunchedEffect
     DisposableEffect(key1 = viewModel) {
         viewModel.onStart()
@@ -71,6 +69,9 @@ fun SignInScreen(
 
         if(state.triggerBioPrompt is Resource.Success) {
             viewModel.resetPromptTrigger()
+
+            val promptInfo = BioCryptoUtil.createPromptInfo(
+                context = context, bioPromptReason = state.bioPromptReason)
 
             val bioPrompt = BioCryptoUtil.createBioPrompt(
                 fragmentActivity = context,

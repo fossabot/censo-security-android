@@ -361,8 +361,8 @@ class EncryptionManagerImpl @Inject constructor(
         val savedSentinelData = securePreferences.retrieveSentinelData(email)
 
         val decryptedSentinelData = cryptographyManager.decryptData(
-            savedSentinelData.ciphertext,
-            cipher
+            ciphertext = savedSentinelData.ciphertext,
+            cipher = cipher
         )
 
         return String(decryptedSentinelData, charset = Charset.forName("UTF-8"))
@@ -443,7 +443,7 @@ class EncryptionManagerImpl @Inject constructor(
     //region companion
     object Companion {
         const val BIO_KEY_NAME = "biometric_encryption_key"
-        const val SENTINEL_KEY_NAME = "bgrd_biometry_key"
+        const val SENTINEL_KEY_NAME = "sentinel_biometry_key"
         const val SENTINEL_STATIC_DATA = "sentinel_static_data"
         const val NO_OFFSET_INDEX = 0
         val DATA_CHECK = BaseWrapper.decode("VerificationCheck")

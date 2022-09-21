@@ -51,7 +51,7 @@ class SignInViewModel @Inject constructor(
                     loginStep = LoginStep.PASSWORD_ENTRY,
                     email = email,
                     triggerBioPrompt = Resource.Success(cipher),
-                    bioPromptReason = BioPromptReason.INITIAL_LOGIN
+                    bioPromptReason = BioPromptReason.SAVE_SENTINEL
                 )
             }
         }
@@ -114,7 +114,7 @@ class SignInViewModel @Inject constructor(
 
     fun biometryApproved(cipher: Cipher) {
         when(state.bioPromptReason) {
-            BioPromptReason.INITIAL_LOGIN -> handleBiometryInitialLogin(cipher)
+            BioPromptReason.SAVE_SENTINEL -> saveSentinelData(cipher)
             BioPromptReason.RETURN_LOGIN -> handleBiometryReturnLogin(cipher)
             else -> {}
         }
@@ -124,7 +124,7 @@ class SignInViewModel @Inject constructor(
         state = state.copy(loginResult = Resource.Error())
     }
 
-    private fun handleBiometryInitialLogin(cipher: Cipher) {
+    private fun saveSentinelData(cipher: Cipher) {
         viewModelScope.launch {
             keyRepository.saveSentinelData(cipher)
             state = state.copy(exitLoginFlow = Resource.Success(Unit))
@@ -169,7 +169,7 @@ class SignInViewModel @Inject constructor(
                         val token = loginResource.data?.token
                         if (token != null) {
                             userSuccessfullyLoggedIn(token)
-                            handleSuccessfulPasswordLogin(token)
+                            saveSentinelDataToDevice()
                         } else {
                             userFailedLogin(e = Exception("NO TOKEN"))
                         }
@@ -233,19 +233,23 @@ class SignInViewModel @Inject constructor(
         userRepository.setUserLoggedIn()
         userRepository.saveToken(token)
         submitNotificationTokenForRegistration()
+        state = state.copy(loginResult = Resource.Success(LoginResponse(token)))
     }
 
-    private suspend fun handleSuccessfulPasswordLogin(token: String) {
+    private suspend fun saveSentinelDataToDevice() {
         val cipher = keyRepository.getCipherForEncryption(SENTINEL_KEY_NAME)
         state = state.copy(
-            loginResult = Resource.Success(LoginResponse(token)),
             triggerBioPrompt = Resource.Success(cipher),
-            bioPromptReason = BioPromptReason.INITIAL_LOGIN
+            bioPromptReason = BioPromptReason.SAVE_SENTINEL
         )
     }
 
-    private fun handleSuccessfulBiometryLogin() {
-        state = state.copy(exitLoginFlow = Resource.Success(Unit))
+    private suspend fun handleSuccessfulBiometryLogin() {
+        if(keyRepository.haveSentinelData()) {
+            state = state.copy(exitLoginFlow = Resource.Success(Unit))
+        } else {
+            saveSentinelDataToDevice()
+        }
     }
 
     private fun userFailedLogin(resource: Resource<LoginResponse>? = null, e: Exception? = null) {

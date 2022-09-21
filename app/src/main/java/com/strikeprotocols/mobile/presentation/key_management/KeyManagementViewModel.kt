@@ -371,7 +371,7 @@ class KeyManagementViewModel @Inject constructor(
         if(cipher != null) {
             state = state.copy(
                 triggerBioPrompt = Resource.Success(cipher),
-                bioPromptReason = BioPromptReason.CREATE
+                bioPromptReason = BioPromptReason.CREATE_KEY
             )
         }
     }
@@ -382,7 +382,7 @@ class KeyManagementViewModel @Inject constructor(
             if(cipher != null) {
                 state = state.copy(
                     triggerBioPrompt = Resource.Success(cipher),
-                    bioPromptReason = BioPromptReason.RECOVER,
+                    bioPromptReason = BioPromptReason.RECOVER_KEY,
                     inputMethod = inputMethod
                 )
             }
@@ -394,7 +394,7 @@ class KeyManagementViewModel @Inject constructor(
             val cipher = keyRepository.getCipherForEncryption(BIO_KEY_NAME)
             state = state.copy(
                 triggerBioPrompt = Resource.Success(cipher),
-                bioPromptReason = BioPromptReason.MIGRATION
+                bioPromptReason = BioPromptReason.MIGRATE_BIOMETRIC_KEY
             )
         }
     }
@@ -434,9 +434,9 @@ class KeyManagementViewModel @Inject constructor(
 
     fun biometryApproved(cipher: Cipher) {
         when(state.bioPromptReason) {
-            BioPromptReason.CREATE -> createAndSaveKey(cipher)
-            BioPromptReason.RECOVER -> recoverKey(cipher)
-            BioPromptReason.MIGRATION -> migrateKeyData(cipher)
+            BioPromptReason.CREATE_KEY -> createAndSaveKey(cipher)
+            BioPromptReason.RECOVER_KEY -> recoverKey(cipher)
+            BioPromptReason.MIGRATE_BIOMETRIC_KEY -> migrateKeyData(cipher)
             else -> {}
         }
     }

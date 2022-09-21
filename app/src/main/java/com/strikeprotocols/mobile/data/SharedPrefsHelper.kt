@@ -67,7 +67,7 @@ object SharedPrefsHelper {
         editor.apply()
     }
 
-    fun saveBackgroundEncryptedData(
+    fun saveSentinelData(
         encryptedPrefs: SharedPreferences,
         email: String,
         encryptedData: EncryptedData
@@ -90,7 +90,7 @@ object SharedPrefsHelper {
         editor.apply()
     }
 
-    fun retrieveBackgroundEncryptedData(
+    fun retrieveSentinelData(
         encryptedPrefs: SharedPreferences,
         email: String
     ): EncryptedData {
@@ -105,7 +105,7 @@ object SharedPrefsHelper {
         )
     }
 
-    fun clearBackgroundEncryptedData(encryptedPrefs: SharedPreferences, email: String) {
+    fun clearSentinelData(encryptedPrefs: SharedPreferences, email: String) {
         val editor = encryptedPrefs.edit()
         editor.putString("${email.lowercase().trim()}$BGRD_INIT_VECTOR", "")
         editor.putString("${email.lowercase().trim()}$BGRD_CIPHER_TEXT", "")

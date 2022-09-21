@@ -99,32 +99,20 @@ class KeyRepositoryImpl(
     override suspend fun getCipherForEncryption(keyName: String): Cipher? {
         return try {
             encryptionManager.getInitializedCipherForEncryption(keyName)
-        } catch (e: KeyPermanentlyInvalidatedException) {
-            wipeAllDataAfterKeyInvalidatedException(keyName)
-            userRepository.setKeyInvalidated()
-            null
-        } catch (e: InvalidAlgorithmParameterException) {
-            wipeAllDataAfterKeyInvalidatedException(keyName)
-            userRepository.setKeyInvalidated()
-            null
+        } catch (e: Exception) {
+            handleCipherException(e, keyName)
         }
     }
 
-    override suspend fun getCipherForBackgroundDecryption() : Cipher? {
+    override suspend fun getCipherForBackgroundDecryption(): Cipher? {
         return try {
             val email = userRepository.retrieveUserEmail()
             val encryptedData = securePreferences.retrieveSentinelData(email)
             encryptionManager.getInitializedCipherForDecryption(
                 initVector = encryptedData.initializationVector, keyName = SENTINEL_KEY_NAME
             )
-        } catch (e: KeyPermanentlyInvalidatedException) {
-            wipeAllDataAfterKeyInvalidatedException(SENTINEL_KEY_NAME)
-            userRepository.setKeyInvalidated()
-            null
-        } catch (e: InvalidAlgorithmParameterException) {
-            wipeAllDataAfterKeyInvalidatedException(SENTINEL_KEY_NAME)
-            userRepository.setKeyInvalidated()
-            null
+        } catch (e: Exception) {
+            handleCipherException(e, SENTINEL_KEY_NAME)
         }
     }
 
@@ -137,25 +125,34 @@ class KeyRepositoryImpl(
             encryptionManager.getInitializedCipherForDecryption(
                 initVector = initVector, keyName = BIO_KEY_NAME
             )
-        } catch (e: KeyPermanentlyInvalidatedException) {
-            wipeAllDataAfterKeyInvalidatedException(BIO_KEY_NAME)
-            userRepository.setKeyInvalidated()
-            null
-        } catch (e: InvalidAlgorithmParameterException) {
-            wipeAllDataAfterKeyInvalidatedException(BIO_KEY_NAME)
-            userRepository.setKeyInvalidated()
-            null
+        } catch (e: Exception) {
+            handleCipherException(e, BIO_KEY_NAME)
         }
     }
+
+    private suspend fun handleCipherException(e: Exception, keyName: String) : Cipher? {
+        when (e) {
+            is KeyPermanentlyInvalidatedException,
+            is InvalidAlgorithmParameterException,
+            is InvalidKeyPhraseException -> {
+                wipeAllDataAfterKeyInvalidatedException(keyName)
+            }
+            else -> throw  e
+        }
+        return null
+    }
+
 
     private suspend fun wipeAllDataAfterKeyInvalidatedException(keyName: String) {
         val email = userRepository.retrieveUserEmail()
         encryptionManager.deleteBiometryKeyFromKeystore(BIO_KEY_NAME)
         encryptionManager.deleteBiometryKeyFromKeystore(SENTINEL_KEY_NAME)
         securePreferences.clearAllRelevantKeyData(email)
+        securePreferences.clearSentinelData(email)
         if (keyName == BIO_KEY_NAME) {
             userRepository.logOut()
         }
+        userRepository.setKeyInvalidated()
     }
 
     override suspend fun signTimestamp(
