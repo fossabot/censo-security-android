@@ -22,12 +22,12 @@ import javax.crypto.Cipher
 import javax.inject.Inject
 
 @HiltViewModel
-data class SemVerViewModel @Inject constructor(
+data class MainViewModel @Inject constructor(
     private val userRepository: UserRepository,
     private val keyRepository: KeyRepository
 ) : ViewModel() {
 
-    var state by mutableStateOf(SemVerState())
+    var state by mutableStateOf(MainState())
         private set
 
     fun checkMinimumVersion() {
@@ -94,17 +94,13 @@ data class SemVerViewModel @Inject constructor(
         state = try {
             val sentinelData = keyRepository.retrieveSentinelData(cipher)
             if (sentinelData == SENTINEL_STATIC_DATA) {
-                state.copy(
-                    bioPromptTrigger = Resource.Uninitialized,
-                    bioPromptReason = BioPromptReason.UNINITIALIZED
-                )
+                biometrySuccessfulState()
             } else {
-                strikeLog(message = "Failed to retrieve sentinel data: $sentinelData")
                 //todo: this most likely means we have broken key info and need user to recreate the key
                 state.copy(bioPromptTrigger = Resource.Error())
             }
         } catch (e: Exception) {
-            strikeLog(message = "Failed to retrieve sentinel data: $e")
+            //todo: this most likely means we have broken key info and need user to recreate the key
             state.copy(bioPromptTrigger = Resource.Error())
         }
     }
@@ -112,11 +108,9 @@ data class SemVerViewModel @Inject constructor(
     private suspend fun saveSentinelDataAfterBiometricApproval(cipher: Cipher) {
         state = try {
             keyRepository.saveSentinelData(cipher)
-            state.copy(
-                bioPromptTrigger = Resource.Uninitialized,
-                bioPromptReason = BioPromptReason.UNINITIALIZED
-            )
+            biometrySuccessfulState()
         } catch (e: Exception) {
+            //todo: this most likely means we have broken key info and need user to recreate the key
             state.copy(bioPromptTrigger = Resource.Error())
         }
     }
@@ -156,6 +150,12 @@ data class SemVerViewModel @Inject constructor(
             state = state.copy(shouldEnforceAppUpdate = Resource.Success(true))
         }
     }
+
+    private fun biometrySuccessfulState() : MainState =
+        state.copy(
+            bioPromptTrigger = Resource.Uninitialized,
+            bioPromptReason = BioPromptReason.UNINITIALIZED
+        )
 
     fun resetShouldEnforceAppUpdate() {
         state = state.copy(shouldEnforceAppUpdate = Resource.Uninitialized)

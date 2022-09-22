@@ -12,7 +12,6 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Button
 import androidx.compose.material.Surface
@@ -44,7 +43,7 @@ import com.strikeprotocols.mobile.data.models.approval.ApprovalRequest
 import com.strikeprotocols.mobile.presentation.Screen
 import com.strikeprotocols.mobile.presentation.account.AccountScreen
 import com.strikeprotocols.mobile.presentation.semantic_version_check.EnforceUpdateScreen
-import com.strikeprotocols.mobile.presentation.semantic_version_check.SemVerViewModel
+import com.strikeprotocols.mobile.presentation.semantic_version_check.MainViewModel
 import com.strikeprotocols.mobile.presentation.approval_detail.ApprovalDetailsScreen
 import com.strikeprotocols.mobile.presentation.approvals.ApprovalsListScreen
 import com.strikeprotocols.mobile.presentation.approvals.ApprovalsViewModel
@@ -70,7 +69,7 @@ class MainActivity : FragmentActivity() {
 
     val approvalsViewModel: ApprovalsViewModel by viewModels()
 
-    private val semVerViewModel: SemVerViewModel by viewModels()
+    private val mainViewModel: MainViewModel by viewModels()
 
     private var userStateListener: UserStateListener? = null
 
@@ -99,7 +98,7 @@ class MainActivity : FragmentActivity() {
             userStateListener = setupUserStateListener(navController, context)
             userStateListener?.let { authProvider.addUserStateListener(it) }
 
-            val semVerState = semVerViewModel.state
+            val semVerState = mainViewModel.state
 
 
             LaunchedEffect(key1 = semVerState) {
@@ -113,16 +112,16 @@ class MainActivity : FragmentActivity() {
                         onSuccess = {
                             val cipher = it?.cipher
                             if (cipher != null) {
-                                semVerViewModel.biometryApproved(cipher)
+                                mainViewModel.biometryApproved(cipher)
                             } else {
                                 BioCryptoUtil.handleBioPromptOnFail(context = context, errorCode = NO_CIPHER_CODE) {
-                                    semVerViewModel.biometryFailed(errorCode = NO_CIPHER_CODE)
+                                    mainViewModel.biometryFailed(errorCode = NO_CIPHER_CODE)
                                 }
                             }
                         },
                         onFail = {
                             BioCryptoUtil.handleBioPromptOnFail(context = context, errorCode = it) {
-                                semVerViewModel.biometryFailed(errorCode = it)
+                                mainViewModel.biometryFailed(errorCode = it)
                             }
                         }
                     )
@@ -131,7 +130,7 @@ class MainActivity : FragmentActivity() {
                         promptInfo,
                         BiometricPrompt.CryptoObject(semVerState.bioPromptTrigger.data!!)
                     )
-                    semVerViewModel.setPromptTriggerToLoading()
+                    mainViewModel.setPromptTriggerToLoading()
                 }
             }
 
@@ -148,8 +147,8 @@ class MainActivity : FragmentActivity() {
                         when (event) {
                             Lifecycle.Event.ON_START
                             -> {
-                                semVerViewModel.checkMinimumVersion()
-                                semVerViewModel.onForeground()
+                                mainViewModel.checkMinimumVersion()
+                                mainViewModel.onForeground()
 
                                 when (BiometricUtil.checkForBiometricFeaturesOnDevice(context)) {
                                     BiometricUtil.Companion.BiometricsStatus.BIOMETRICS_ENABLED -> {
@@ -188,7 +187,7 @@ class MainActivity : FragmentActivity() {
                             navController.backQueue.clear()
                             popUpTo(Screen.EntranceRoute.route) { inclusive = true }
                         }
-                        semVerViewModel.resetShouldEnforceAppUpdate()
+                        mainViewModel.resetShouldEnforceAppUpdate()
                     }
 
                     val visibleBlockingUi = semVerState.bioPromptTrigger !is Resource.Uninitialized
@@ -220,7 +219,7 @@ class MainActivity : FragmentActivity() {
                                 )
                                 Spacer(modifier = Modifier.height(24.dp))
                                 if(semVerState.bioPromptTrigger is Resource.Error) {
-                                    Button(onClick = semVerViewModel::retryBiometricGate) {
+                                    Button(onClick = mainViewModel::retryBiometricGate) {
                                         Text(
                                             text = getString(R.string.retry_biometry),
                                             color = StrikeWhite,

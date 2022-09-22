@@ -7,7 +7,7 @@ import com.strikeprotocols.mobile.data.KeyRepository
 import com.strikeprotocols.mobile.data.UserRepository
 import com.strikeprotocols.mobile.data.models.OsVersion
 import com.strikeprotocols.mobile.data.models.SemanticVersionResponse
-import com.strikeprotocols.mobile.presentation.semantic_version_check.SemVerViewModel
+import com.strikeprotocols.mobile.presentation.semantic_version_check.MainViewModel
 import junit.framework.TestCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -18,7 +18,7 @@ import org.junit.Test
 import org.mockito.Mock
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class SemVerViewModelTest : BaseViewModelTest() {
+class MainViewModelTest : BaseViewModelTest() {
 
     @Mock
     lateinit var userRepository: UserRepository
@@ -26,7 +26,7 @@ class SemVerViewModelTest : BaseViewModelTest() {
     @Mock
     lateinit var keyRepository: KeyRepository
 
-    private lateinit var semVerViewModel: SemVerViewModel
+    private lateinit var semVerViewModel: MainViewModel
 
     private val dispatcher = StandardTestDispatcher()
 
@@ -55,7 +55,7 @@ class SemVerViewModelTest : BaseViewModelTest() {
         super.setUp()
         Dispatchers.setMain(dispatcher)
 
-        semVerViewModel = SemVerViewModel(
+        semVerViewModel = MainViewModel(
             userRepository = userRepository,
             keyRepository = keyRepository
         )
