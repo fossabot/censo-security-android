@@ -416,23 +416,18 @@ class KeyManagementViewModel @Inject constructor(
     fun phraseEntryAction(phraseEntryAction: PhraseEntryAction) {
         when (phraseEntryAction) {
             is PhraseEntryAction.NavigateNextWord -> {
-                strikeLog(message = "Navigating to next word")
                 navigateNextWordDuringKeyRecovery()
             }
             is PhraseEntryAction.NavigatePreviousWord -> {
-                strikeLog(message = "Navigating to previous word")
                 navigatePreviousWordDuringKeyRecovery()
             }
             is PhraseEntryAction.PastePhrase -> {
-                strikeLog(message = "Phrase pasted: ${phraseEntryAction.phrase}")
                 handlePastedPhrase(pastedPhrase = phraseEntryAction.phrase)
             }
             is PhraseEntryAction.SubmitWordInput -> {
-                strikeLog(message = "Word Input submitted")
                 submitWordInput(errorMessage = phraseEntryAction.errorMessage)
             }
             is PhraseEntryAction.UpdateWordInput -> {
-                strikeLog(message = "Word Input updated: ${phraseEntryAction.wordInput}")
                 updateWordInput(input = phraseEntryAction.wordInput)
             }
         }
