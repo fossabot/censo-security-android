@@ -6,7 +6,9 @@ import com.raygun.raygun4android.RaygunClient
 import com.strikeprotocols.mobile.common.BaseWrapper
 import com.strikeprotocols.mobile.common.CrashReportingUtil.JWT_TAG
 import com.strikeprotocols.mobile.common.CrashReportingUtil.MANUALLY_REPORTED_TAG
+import com.strikeprotocols.mobile.common.strikeLog
 import java.util.*
+import kotlin.collections.HashMap
 
 interface AuthProvider {
 
@@ -25,7 +27,7 @@ class StrikeAuth(
     val securePreferences: SecurePreferences
 ) : AuthProvider {
 
-    private val listeners: MutableList<UserStateListener> = mutableListOf()
+    private val listeners: HashMap<String, UserStateListener> = hashMapOf()
 
     override suspend fun retrieveUserEmail(): String {
         val email = SharedPrefsHelper.retrieveUserEmail()
@@ -93,7 +95,9 @@ class StrikeAuth(
 
     @AnyThread
     override fun addUserStateListener(listener: UserStateListener) {
-        synchronized(listeners) { listeners.add(listener) }
+        synchronized(listeners) {
+            listeners.put(listener::class.java.name, listener)
+        }
     }
 
     @AnyThread
@@ -104,7 +108,7 @@ class StrikeAuth(
     @AnyThread
     override fun setUserState(userState: UserState) {
         synchronized(listeners) {
-            for (listener in listeners) {
+            for (listener in listeners.values) {
                 Thread { listener.onUserStateChanged(userState) }.start()
             }
         }
@@ -118,5 +122,5 @@ interface UserStateListener {
 }
 
 enum class UserState {
-    REFRESH_TOKEN_EXPIRED, INVALIDATED_KEY
+    REFRESH_TOKEN_EXPIRED, INVALIDATED_KEY, INVALID_SENTINEL_DATA
 }

@@ -227,7 +227,7 @@
 
     <string name="biometry_changed_key_invalidated">Biometry for device has changed. Key invalidated.</string>
     <string name="foreground_access_app">Biometry is required to access the Strike Security App</string>
-    <string name="biometry_unavailable">Unable to access biometry to gain access to the app.\n\nPlease authenticate device from lock screen.</string>
-    <string name="retry_biometry">Retry Biometry</string>
     <string name="complete_biometry">Complete Biometry</string>
+    <string name="sentinel_data_invalidated">Biometry for device failed. Please log back into the app.</string>
+    <string name="biometry_unavailable">Unable to show biometry to gain access to the app.\n\nPlease authenticate device from lock screen.</string>
 </resources>

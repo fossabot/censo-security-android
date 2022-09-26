@@ -96,12 +96,10 @@ data class MainViewModel @Inject constructor(
             if (sentinelData == SENTINEL_STATIC_DATA) {
                 biometrySuccessfulState()
             } else {
-                //todo: this most likely means we have broken key info and need user to recreate the key
-                state.copy(bioPromptTrigger = Resource.Error())
+                handleSentinelDataFailureAndGetFailedState()
             }
         } catch (e: Exception) {
-            //todo: this most likely means we have broken key info and need user to recreate the key
-            state.copy(bioPromptTrigger = Resource.Error())
+            handleSentinelDataFailureAndGetFailedState()
         }
     }
 
@@ -110,18 +108,22 @@ data class MainViewModel @Inject constructor(
             keyRepository.saveSentinelData(cipher)
             biometrySuccessfulState()
         } catch (e: Exception) {
-            //todo: this most likely means we have broken key info and need user to recreate the key
-            state.copy(bioPromptTrigger = Resource.Error())
+            handleSentinelDataFailureAndGetFailedState()
         }
     }
 
     fun biometryFailed(errorCode: Int) {
         state =
             if (BioCryptoUtil.getBioPromptFailedReason(errorCode) == BioPromptFailedReason.FAILED_TOO_MANY_ATTEMPTS) {
-                state.copy(biometryUnavailable = true)
+                state.copy(biometryUnavailable = true, bioPromptTrigger = Resource.Error())
             } else {
                 state.copy(bioPromptTrigger = Resource.Error())
             }
+    }
+
+    private suspend fun handleSentinelDataFailureAndGetFailedState(): MainState {
+        keyRepository.removeSentinelDataAndKickUserToAppEntrance()
+        return state.copy(bioPromptTrigger = Resource.Error())
     }
 
     fun retryBiometricGate() {
@@ -156,6 +158,10 @@ data class MainViewModel @Inject constructor(
             bioPromptTrigger = Resource.Uninitialized,
             bioPromptReason = BioPromptReason.UNINITIALIZED
         )
+
+    fun resetBiometry() {
+        state = biometrySuccessfulState()
+    }
 
     fun resetShouldEnforceAppUpdate() {
         state = state.copy(shouldEnforceAppUpdate = Resource.Uninitialized)

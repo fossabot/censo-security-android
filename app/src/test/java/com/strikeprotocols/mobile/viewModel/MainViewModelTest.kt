@@ -1,14 +1,20 @@
 package com.strikeprotocols.mobile.viewModel
 
+import androidx.biometric.BiometricPrompt
+import androidx.biometric.BiometricPrompt.ERROR_USER_CANCELED
 import com.nhaarman.mockitokotlin2.whenever
 import com.strikeprotocols.mobile.BuildConfig
+import com.strikeprotocols.mobile.common.BioPromptReason
 import com.strikeprotocols.mobile.common.Resource
+import com.strikeprotocols.mobile.data.EncryptionManagerImpl.Companion.SENTINEL_KEY_NAME
+import com.strikeprotocols.mobile.data.EncryptionManagerImpl.Companion.SENTINEL_STATIC_DATA
 import com.strikeprotocols.mobile.data.KeyRepository
 import com.strikeprotocols.mobile.data.UserRepository
 import com.strikeprotocols.mobile.data.models.OsVersion
 import com.strikeprotocols.mobile.data.models.SemanticVersionResponse
 import com.strikeprotocols.mobile.presentation.semantic_version_check.MainViewModel
-import junit.framework.TestCase
+import junit.framework.TestCase.assertEquals
+import junit.framework.TestCase.assertTrue
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.*
@@ -16,6 +22,7 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mock
+import javax.crypto.Cipher
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class MainViewModelTest : BaseViewModelTest() {
@@ -26,7 +33,13 @@ class MainViewModelTest : BaseViewModelTest() {
     @Mock
     lateinit var keyRepository: KeyRepository
 
-    private lateinit var semVerViewModel: MainViewModel
+    @Mock
+    lateinit var encryptionCipher: Cipher
+
+    @Mock
+    lateinit var decryptionCipher: Cipher
+
+    private lateinit var mainViewModel: MainViewModel
 
     private val dispatcher = StandardTestDispatcher()
 
@@ -51,11 +64,14 @@ class MainViewModelTest : BaseViewModelTest() {
 
     //region Before After Work
     @Before
-    override fun setUp() {
+    override fun setUp() = runTest {
         super.setUp()
         Dispatchers.setMain(dispatcher)
 
-        semVerViewModel = MainViewModel(
+        whenever(keyRepository.getCipherForBackgroundDecryption()).then { decryptionCipher }
+        whenever(keyRepository.getCipherForEncryption(SENTINEL_KEY_NAME)).then { encryptionCipher }
+
+        mainViewModel = MainViewModel(
             userRepository = userRepository,
             keyRepository = keyRepository
         )
@@ -69,6 +85,220 @@ class MainViewModelTest : BaseViewModelTest() {
     }
     //endregion
 
+    @Test
+    fun `trigger biometry to retrieve sentinel data if user is logged in and we have sentinel data`() =
+        runTest {
+            whenever(userRepository.userLoggedIn()).then { true }
+            whenever(keyRepository.haveSentinelData()).then { true }
+
+            mainViewModel.onForeground()
+
+            advanceUntilIdle()
+
+            assertTrue(mainViewModel.state.bioPromptTrigger is Resource.Success)
+            assertEquals(decryptionCipher, mainViewModel.state.bioPromptTrigger.data)
+            assertEquals(false, mainViewModel.state.biometryUnavailable)
+            assertEquals(BioPromptReason.FOREGROUND_RETRIEVAL, mainViewModel.state.bioPromptReason)
+        }
+
+    @Test
+    fun `trigger biometry to save sentinel data if user is logged in and we have sentinel data`() =
+        runTest {
+            whenever(userRepository.userLoggedIn()).then { true }
+            whenever(keyRepository.haveSentinelData()).then { false }
+
+            mainViewModel.onForeground()
+
+            advanceUntilIdle()
+
+            assertTrue(mainViewModel.state.bioPromptTrigger is Resource.Success)
+            assertEquals(encryptionCipher, mainViewModel.state.bioPromptTrigger.data)
+            assertEquals(false, mainViewModel.state.biometryUnavailable)
+            assertEquals(BioPromptReason.FOREGROUND_SAVE, mainViewModel.state.bioPromptReason)
+        }
+
+
+    @Test
+    fun `biometry approval to retrieve sentinel data clears blocking UI`() =
+        runTest {
+            whenever(userRepository.userLoggedIn()).then { true }
+            whenever(keyRepository.haveSentinelData()).then { true }
+            whenever(keyRepository.retrieveSentinelData(decryptionCipher)).then { SENTINEL_STATIC_DATA }
+
+            mainViewModel.onForeground()
+
+            advanceUntilIdle()
+
+            mainViewModel.biometryApproved(decryptionCipher)
+
+            advanceUntilIdle()
+
+            assertTrue(mainViewModel.state.bioPromptTrigger is Resource.Uninitialized)
+            assertEquals(BioPromptReason.UNINITIALIZED, mainViewModel.state.bioPromptReason)
+        }
+
+    @Test
+    fun `retrieving bad sentinel data does not clear blocking UI and throws error`() =
+        runTest {
+            whenever(userRepository.userLoggedIn()).then { true }
+            whenever(keyRepository.haveSentinelData()).then { true }
+            whenever(keyRepository.retrieveSentinelData(decryptionCipher)).then { "bad data" }
+
+            mainViewModel.onForeground()
+
+            advanceUntilIdle()
+
+            mainViewModel.biometryApproved(decryptionCipher)
+
+            advanceUntilIdle()
+
+            assertTrue(mainViewModel.state.bioPromptTrigger is Resource.Error)
+        }
+
+    @Test
+    fun `biometry approval to save sentinel data clears blocking UI`() =
+        runTest {
+            whenever(userRepository.userLoggedIn()).then { true }
+            whenever(keyRepository.haveSentinelData()).then { false }
+
+            mainViewModel.onForeground()
+
+            advanceUntilIdle()
+
+            mainViewModel.biometryApproved(encryptionCipher)
+
+            advanceUntilIdle()
+
+            assertTrue(mainViewModel.state.bioPromptTrigger is Resource.Uninitialized)
+            assertEquals(BioPromptReason.UNINITIALIZED, mainViewModel.state.bioPromptReason)
+        }
+
+    @Test
+    fun `biometry failure for too many attempts to retrieve sentinel data clears blocking UI`() =
+        runTest {
+            whenever(userRepository.userLoggedIn()).then { true }
+            whenever(keyRepository.haveSentinelData()).then { true }
+            whenever(keyRepository.retrieveSentinelData(decryptionCipher)).then { SENTINEL_STATIC_DATA }
+
+            mainViewModel.onForeground()
+
+            advanceUntilIdle()
+
+            mainViewModel.biometryFailed(BiometricPrompt.ERROR_LOCKOUT)
+
+            advanceUntilIdle()
+
+            assertTrue(mainViewModel.state.bioPromptTrigger is Resource.Error)
+            assertEquals(true, mainViewModel.state.biometryUnavailable)
+        }
+
+
+    @Test
+    fun `biometry failure for too many attempts to save sentinel data clears blocking UI`() =
+        runTest {
+            whenever(userRepository.userLoggedIn()).then { true }
+            whenever(keyRepository.haveSentinelData()).then { false }
+
+            mainViewModel.onForeground()
+
+            advanceUntilIdle()
+
+            mainViewModel.biometryFailed(BiometricPrompt.ERROR_LOCKOUT_PERMANENT)
+
+            advanceUntilIdle()
+
+            assertTrue(mainViewModel.state.bioPromptTrigger is Resource.Error)
+            assertEquals(true, mainViewModel.state.biometryUnavailable)
+        }
+
+    @Test
+    fun `biometry failure for normal error to retrieve sentinel data clears blocking UI`() =
+        runTest {
+            whenever(userRepository.userLoggedIn()).then { true }
+            whenever(keyRepository.haveSentinelData()).then { true }
+            whenever(keyRepository.retrieveSentinelData(decryptionCipher)).then { SENTINEL_STATIC_DATA }
+
+            mainViewModel.onForeground()
+
+            advanceUntilIdle()
+
+            mainViewModel.biometryFailed(ERROR_USER_CANCELED)
+
+            advanceUntilIdle()
+
+            assertTrue(mainViewModel.state.bioPromptTrigger is Resource.Error)
+            assertEquals(false, mainViewModel.state.biometryUnavailable)
+        }
+
+
+    @Test
+    fun `biometry failure for normal error to save sentinel data clears blocking UI`() =
+        runTest {
+            whenever(userRepository.userLoggedIn()).then { true }
+            whenever(keyRepository.haveSentinelData()).then { false }
+
+            mainViewModel.onForeground()
+
+            advanceUntilIdle()
+
+            mainViewModel.biometryFailed(ERROR_USER_CANCELED)
+
+            advanceUntilIdle()
+
+            assertTrue(mainViewModel.state.bioPromptTrigger is Resource.Error)
+            assertEquals(false, mainViewModel.state.biometryUnavailable)
+        }
+
+    @Test
+    fun `biometry failure for retrieve data then retry will kick off biometry again`() =
+        runTest {
+            whenever(userRepository.userLoggedIn()).then { true }
+            whenever(keyRepository.haveSentinelData()).then { true }
+            whenever(keyRepository.retrieveSentinelData(decryptionCipher)).then { SENTINEL_STATIC_DATA }
+
+            mainViewModel.onForeground()
+
+            advanceUntilIdle()
+
+            mainViewModel.biometryFailed(-1)
+
+            advanceUntilIdle()
+
+            mainViewModel.retryBiometricGate()
+
+            advanceUntilIdle()
+
+            assertTrue(mainViewModel.state.bioPromptTrigger is Resource.Success)
+            assertEquals(decryptionCipher, mainViewModel.state.bioPromptTrigger.data)
+            assertEquals(false, mainViewModel.state.biometryUnavailable)
+            assertEquals(BioPromptReason.FOREGROUND_RETRIEVAL, mainViewModel.state.bioPromptReason)
+        }
+
+
+    @Test
+    fun `biometry failure for save data then retry will kick off biometry again`() =
+        runTest {
+            whenever(userRepository.userLoggedIn()).then { true }
+            whenever(keyRepository.haveSentinelData()).then { false }
+
+            mainViewModel.onForeground()
+
+            advanceUntilIdle()
+
+            mainViewModel.biometryFailed(-1)
+
+            advanceUntilIdle()
+
+            mainViewModel.retryBiometricGate()
+
+            advanceUntilIdle()
+
+            assertTrue(mainViewModel.state.bioPromptTrigger is Resource.Success)
+            assertEquals(encryptionCipher, mainViewModel.state.bioPromptTrigger.data)
+            assertEquals(false, mainViewModel.state.biometryUnavailable)
+            assertEquals(BioPromptReason.FOREGROUND_SAVE, mainViewModel.state.bioPromptReason)
+        }
+
     /**
      * Test that when we check the minimum app version and it is greater than the current app version,
      * the view model should enforce the app update
@@ -81,14 +311,14 @@ class MainViewModelTest : BaseViewModelTest() {
     fun `check minimum version is greater than current version then view model should enforce update`() = runTest {
         setMinimumVersionResponse(testHighMinimumVersion)
 
-        TestCase.assertTrue(semVerViewModel.state.shouldEnforceAppUpdate is Resource.Uninitialized)
+        assertTrue(mainViewModel.state.shouldEnforceAppUpdate is Resource.Uninitialized)
 
-        semVerViewModel.checkMinimumVersion()
+        mainViewModel.checkMinimumVersion()
 
         advanceUntilIdle()
 
         //Should be true since we have to enforce the update
-        TestCase.assertTrue(semVerViewModel.state.shouldEnforceAppUpdate.data == true)
+        assertTrue(mainViewModel.state.shouldEnforceAppUpdate.data == true)
     }
 
     /**
@@ -103,14 +333,14 @@ class MainViewModelTest : BaseViewModelTest() {
     fun `check minimum version is lower than current version then view model should not enforce update`() = runTest {
         setMinimumVersionResponse(testLowMinimumVersion)
 
-        TestCase.assertTrue(semVerViewModel.state.shouldEnforceAppUpdate is Resource.Uninitialized)
+        assertTrue(mainViewModel.state.shouldEnforceAppUpdate is Resource.Uninitialized)
 
-        semVerViewModel.checkMinimumVersion()
+        mainViewModel.checkMinimumVersion()
 
         advanceUntilIdle()
 
         //Should still be uninitialized since we do not have to enforce app update
-        TestCase.assertTrue(semVerViewModel.state.shouldEnforceAppUpdate is Resource.Uninitialized)
+        assertTrue(mainViewModel.state.shouldEnforceAppUpdate is Resource.Uninitialized)
     }
 
     /**
@@ -125,13 +355,13 @@ class MainViewModelTest : BaseViewModelTest() {
     fun `check minimum version is the same as current version then view model should not enforce update`() = runTest {
         setMinimumVersionResponse(currentVersionName)
 
-        TestCase.assertTrue(semVerViewModel.state.shouldEnforceAppUpdate is Resource.Uninitialized)
+        assertTrue(mainViewModel.state.shouldEnforceAppUpdate is Resource.Uninitialized)
 
-        semVerViewModel.checkMinimumVersion()
+        mainViewModel.checkMinimumVersion()
 
         advanceUntilIdle()
 
-        TestCase.assertTrue(semVerViewModel.state.shouldEnforceAppUpdate is Resource.Uninitialized)
+        assertTrue(mainViewModel.state.shouldEnforceAppUpdate is Resource.Uninitialized)
     }
 
     /**
@@ -147,13 +377,13 @@ class MainViewModelTest : BaseViewModelTest() {
         val testHigherMajorVersion = "$higherMajorVersion.$currentMinorVersion.$currentPatchVersion"
         setMinimumVersionResponse(minimumVersionResponse = testHigherMajorVersion)
 
-        TestCase.assertTrue(semVerViewModel.state.shouldEnforceAppUpdate is Resource.Uninitialized)
+        assertTrue(mainViewModel.state.shouldEnforceAppUpdate is Resource.Uninitialized)
 
-        semVerViewModel.checkMinimumVersion()
+        mainViewModel.checkMinimumVersion()
 
         advanceUntilIdle()
 
-        TestCase.assertTrue(semVerViewModel.state.shouldEnforceAppUpdate.data == true)
+        assertTrue(mainViewModel.state.shouldEnforceAppUpdate.data == true)
     }
 
     /**
@@ -169,13 +399,13 @@ class MainViewModelTest : BaseViewModelTest() {
         val testHigherMinorVersion = "$currentMajorVersion.$higherMinorVersion.$currentPatchVersion"
         setMinimumVersionResponse(minimumVersionResponse = testHigherMinorVersion)
 
-        TestCase.assertTrue(semVerViewModel.state.shouldEnforceAppUpdate is Resource.Uninitialized)
+        assertTrue(mainViewModel.state.shouldEnforceAppUpdate is Resource.Uninitialized)
 
-        semVerViewModel.checkMinimumVersion()
+        mainViewModel.checkMinimumVersion()
 
         advanceUntilIdle()
 
-        TestCase.assertTrue(semVerViewModel.state.shouldEnforceAppUpdate.data == true)
+        assertTrue(mainViewModel.state.shouldEnforceAppUpdate.data == true)
     }
 
     /**
@@ -191,13 +421,13 @@ class MainViewModelTest : BaseViewModelTest() {
         val testHigherPatchVersion = "$currentMajorVersion.$currentMinorVersion.$higherPatchVersion"
         setMinimumVersionResponse(minimumVersionResponse = testHigherPatchVersion)
 
-        TestCase.assertTrue(semVerViewModel.state.shouldEnforceAppUpdate is Resource.Uninitialized)
+        assertTrue(mainViewModel.state.shouldEnforceAppUpdate is Resource.Uninitialized)
 
-        semVerViewModel.checkMinimumVersion()
+        mainViewModel.checkMinimumVersion()
 
         advanceUntilIdle()
 
-        TestCase.assertTrue(semVerViewModel.state.shouldEnforceAppUpdate.data == true)
+        assertTrue(mainViewModel.state.shouldEnforceAppUpdate.data == true)
     }
 
     @Test
@@ -205,13 +435,13 @@ class MainViewModelTest : BaseViewModelTest() {
         val testLowerMajorVersion = "$lowerMajorVersion.$currentMinorVersion.$currentPatchVersion"
         setMinimumVersionResponse(minimumVersionResponse = testLowerMajorVersion)
 
-        TestCase.assertTrue(semVerViewModel.state.shouldEnforceAppUpdate is Resource.Uninitialized)
+        assertTrue(mainViewModel.state.shouldEnforceAppUpdate is Resource.Uninitialized)
 
-        semVerViewModel.checkMinimumVersion()
+        mainViewModel.checkMinimumVersion()
 
         advanceUntilIdle()
 
-        TestCase.assertTrue(semVerViewModel.state.shouldEnforceAppUpdate is Resource.Uninitialized)
+        assertTrue(mainViewModel.state.shouldEnforceAppUpdate is Resource.Uninitialized)
     }
 
     @Test
@@ -220,13 +450,13 @@ class MainViewModelTest : BaseViewModelTest() {
 
         setMinimumVersionResponse(minimumVersionResponse = testLowerMinorVersion)
 
-        TestCase.assertTrue(semVerViewModel.state.shouldEnforceAppUpdate is Resource.Uninitialized)
+        assertTrue(mainViewModel.state.shouldEnforceAppUpdate is Resource.Uninitialized)
 
-        semVerViewModel.checkMinimumVersion()
+        mainViewModel.checkMinimumVersion()
 
         advanceUntilIdle()
 
-        TestCase.assertTrue(semVerViewModel.state.shouldEnforceAppUpdate is Resource.Uninitialized)
+        assertTrue(mainViewModel.state.shouldEnforceAppUpdate is Resource.Uninitialized)
     }
 
     @Test
@@ -234,13 +464,13 @@ class MainViewModelTest : BaseViewModelTest() {
         val testLowerPatchVersion = "$currentMajorVersion.$currentMinorVersion.$lowerPatchVersion"
         setMinimumVersionResponse(minimumVersionResponse = testLowerPatchVersion)
 
-        TestCase.assertTrue(semVerViewModel.state.shouldEnforceAppUpdate is Resource.Uninitialized)
+        assertTrue(mainViewModel.state.shouldEnforceAppUpdate is Resource.Uninitialized)
 
-        semVerViewModel.checkMinimumVersion()
+        mainViewModel.checkMinimumVersion()
 
         advanceUntilIdle()
 
-        TestCase.assertTrue(semVerViewModel.state.shouldEnforceAppUpdate is Resource.Uninitialized)
+        assertTrue(mainViewModel.state.shouldEnforceAppUpdate is Resource.Uninitialized)
     }
 
     //Helper methods

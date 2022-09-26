@@ -69,7 +69,7 @@ class MainActivity : FragmentActivity() {
 
     val approvalsViewModel: ApprovalsViewModel by viewModels()
 
-    private val mainViewModel: MainViewModel by viewModels()
+    internal val mainViewModel: MainViewModel by viewModels()
 
     private var userStateListener: UserStateListener? = null
 
@@ -220,7 +220,7 @@ class MainActivity : FragmentActivity() {
                                 if(semVerState.bioPromptTrigger is Resource.Error) {
                                     Button(onClick = mainViewModel::retryBiometricGate) {
                                         Text(
-                                            text = getString(R.string.retry_biometry),
+                                            text = getString(R.string.try_again),
                                             color = StrikeWhite,
                                             fontSize = 18.sp
                                         )
@@ -316,7 +316,18 @@ class MainActivity : FragmentActivity() {
                         ).show()
                     }
 
-                    if (userState == UserState.REFRESH_TOKEN_EXPIRED || userState == UserState.INVALIDATED_KEY) {
+                    if (userState == UserState.INVALID_SENTINEL_DATA) {
+                        mainViewModel.resetBiometry()
+
+                        Toast.makeText(
+                            context,
+                            getString(R.string.sentinel_data_invalidated),
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
+
+                    if (userState == UserState.REFRESH_TOKEN_EXPIRED
+                        || userState == UserState.INVALIDATED_KEY || userState == UserState.INVALID_SENTINEL_DATA) {
                         navController.navigate(Screen.EntranceRoute.route) {
                             launchSingleTop = true
                             navController.backQueue.clear()

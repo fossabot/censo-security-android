@@ -55,6 +55,8 @@ interface KeyRepository {
     suspend fun saveSentinelData(cipher: Cipher)
 
     suspend fun retrieveSentinelData(cipher: Cipher) : String
+
+    suspend fun removeSentinelDataAndKickUserToAppEntrance()
 }
 
 class KeyRepositoryImpl(
@@ -153,6 +155,14 @@ class KeyRepositoryImpl(
             userRepository.logOut()
         }
         userRepository.setKeyInvalidated()
+    }
+
+    override suspend fun removeSentinelDataAndKickUserToAppEntrance() {
+        val email = userRepository.retrieveUserEmail()
+        encryptionManager.deleteBiometryKeyFromKeystore(SENTINEL_KEY_NAME)
+        securePreferences.clearSentinelData(email)
+        userRepository.logOut()
+        userRepository.setInvalidSentinelData()
     }
 
     override suspend fun signTimestamp(

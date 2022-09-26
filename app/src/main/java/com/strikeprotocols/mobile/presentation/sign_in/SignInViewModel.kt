@@ -14,7 +14,6 @@ import com.strikeprotocols.mobile.data.EncryptionManagerImpl.Companion.SENTINEL_
 import com.strikeprotocols.mobile.data.NoInternetException.Companion.NO_INTERNET_ERROR
 import com.strikeprotocols.mobile.data.models.LoginResponse
 import com.strikeprotocols.mobile.data.models.PushBody
-import com.strikeprotocols.mobile.presentation.key_management.KeyManagementInitialData
 import kotlinx.coroutines.*
 import javax.crypto.Cipher
 
@@ -126,8 +125,13 @@ class SignInViewModel @Inject constructor(
 
     private fun saveSentinelData(cipher: Cipher) {
         viewModelScope.launch {
-            keyRepository.saveSentinelData(cipher)
-            state = state.copy(exitLoginFlow = Resource.Success(Unit))
+            state = try {
+                keyRepository.saveSentinelData(cipher)
+                state.copy(exitLoginFlow = Resource.Success(Unit))
+            } catch (e: Exception) {
+                keyRepository.removeSentinelDataAndKickUserToAppEntrance()
+                SignInState()
+            }
         }
     }
 
