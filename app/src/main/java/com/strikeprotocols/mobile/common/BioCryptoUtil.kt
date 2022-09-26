@@ -15,41 +15,13 @@ object BioCryptoUtil {
     const val FAIL_ERROR = -1
     const val NO_CIPHER_CODE = -2
 
-    fun createPromptInfo(context: Context, bioPromptReason: BioPromptReason) =
+    fun createPromptInfo(context: Context) =
         BiometricPrompt.PromptInfo.Builder()
-            .setTitle(promptTitle(context, bioPromptReason))
-            .setSubtitle(promptMessage(context, bioPromptReason))
+            .setTitle(context.getString(R.string.complete_biometry))
             .setAllowedAuthenticators(BiometricManager.Authenticators.BIOMETRIC_STRONG)
             .setConfirmationRequired(false)
             .setNegativeButtonText(context.getString(R.string.cancel))
             .build()
-
-    private fun promptTitle(context: Context, bioPromptReason: BioPromptReason): String =
-        when (bioPromptReason) {
-            BioPromptReason.CREATE_KEY,
-            BioPromptReason.RECOVER_KEY,
-            BioPromptReason.MIGRATE_BIOMETRIC_KEY -> context.getString(R.string.save_key)
-            BioPromptReason.UNINITIALIZED -> context.getString(R.string.save_key)
-            BioPromptReason.RETURN_LOGIN -> context.getString(R.string.biometry_login_title)
-            BioPromptReason.SAVE_SENTINEL -> context.getString(R.string.save_key)
-            BioPromptReason.FOREGROUND_RETRIEVAL -> context.getString(R.string.retrieve_key)
-            BioPromptReason.FOREGROUND_SAVE -> context.getString(R.string.save_key)
-            BioPromptReason.APPROVAL -> context.getString(R.string.retrieve_key)
-        }
-
-    private fun promptMessage(context: Context, bioPromptReason: BioPromptReason): String =
-        when (bioPromptReason) {
-            BioPromptReason.CREATE_KEY -> context.getString(R.string.performing_biometry_check_save)
-            BioPromptReason.RECOVER_KEY -> context.getString(R.string.performing_biometry_check_save)
-            BioPromptReason.MIGRATE_BIOMETRIC_KEY -> context.getString(R.string.performing_biometry_check_save)
-            BioPromptReason.UNINITIALIZED -> context.getString(R.string.performing_biometry_check_save)
-            BioPromptReason.RETURN_LOGIN -> context.getString(R.string.biometry_login_subtitle)
-            BioPromptReason.SAVE_SENTINEL -> context.getString(R.string.performing_biometry_check_save)
-            BioPromptReason.FOREGROUND_RETRIEVAL -> context.getString(R.string.performing_biometry_check_retrieve)
-            BioPromptReason.FOREGROUND_SAVE -> context.getString(R.string.performing_biometry_check_save)
-            BioPromptReason.APPROVAL -> context.getString(R.string.performing_biometry_check_retrieve)
-        }
-
 
     fun createBioPrompt(
         fragmentActivity: FragmentActivity,

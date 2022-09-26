@@ -104,8 +104,7 @@ class MainActivity : FragmentActivity() {
             LaunchedEffect(key1 = semVerState) {
 
                 if (semVerState.bioPromptTrigger is Resource.Success) {
-                    val promptInfo = BioCryptoUtil.createPromptInfo(
-                        context = context, bioPromptReason = semVerState.bioPromptReason)
+                    val promptInfo = BioCryptoUtil.createPromptInfo(context = context)
 
                     val bioPrompt = BioCryptoUtil.createBioPrompt(
                         fragmentActivity = this@MainActivity,

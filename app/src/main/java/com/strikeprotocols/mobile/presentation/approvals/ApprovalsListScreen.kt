@@ -61,8 +61,7 @@ fun ApprovalsListScreen(
 
     val context = LocalContext.current as FragmentActivity
 
-    val promptInfo = BioCryptoUtil.createPromptInfo(
-        context = context, bioPromptReason = BioPromptReason.APPROVAL)
+    val promptInfo = BioCryptoUtil.createPromptInfo(context = context)
 
     val scaffoldState = rememberScaffoldState()
 

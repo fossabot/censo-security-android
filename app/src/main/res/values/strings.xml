@@ -42,8 +42,6 @@
 
     <string name="approval_expired">Expired</string>
     <string name="confirm">Confirm</string>
-    <string name="performing_biometry_check_save">Complete biometry to save your key.</string>
-    <string name="performing_biometry_check_retrieve">Complete biometry to retrieve your key.</string>
 
     <string name="approval_disposition_error_title">Something went wrong</string>
 
@@ -214,15 +212,11 @@
 
     <string name="sign_in_error">Sign In Error</string>
     <string name="error_occurred_signature_login">An error occurred trying to sign you in</string>
-    <string name="save_key">Save Key</string>
     <string name="try_again">Try Again</string>
     <string name="migrating_key_loading">Migrating your key behind biometry protection…</string>
 
     <string name="save_biometry_info">Strike protects your private key using biometric verification.\n\nIf you change the biometry settings on your device, you will need to recover your key from your recovery phrase.</string>
     <string name="migrate_biometry_info">We are moving your key to biometry protected storage.\n\nIf you change the biometry settings on your device, you will need to recover your key from your recovery phrase.</string>
-    <string name="retrieve_key">Retrieve Key</string>
-    <string name="biometry_login_subtitle">Complete biometry to login to the app. Cancel biometry if you would like to use your password.</string>
-    <string name="biometry_login_title">Biometry Login</string>
     <string name="are_you_sure">Are you sure?</string>
     <string name="continue_text">Continue</string>
     <string name="close_dialog">close dialog</string>
@@ -232,7 +226,8 @@
     <string name="solana">Solana</string>
 
     <string name="biometry_changed_key_invalidated">Biometry for device has changed. Key invalidated.</string>
-    <string name="foreground_access_app">Please complete biometry to gain access to the app.</string>
-    <string name="biometry_unavailable">Unable to show biometry to gain access to the app.\n\nPlease authenticate device from lock screen.</string>
+    <string name="foreground_access_app">Biometry is required to access the Strike Security App</string>
+    <string name="biometry_unavailable">Unable to access biometry to gain access to the app.\n\nPlease authenticate device from lock screen.</string>
     <string name="retry_biometry">Retry Biometry</string>
+    <string name="complete_biometry">Complete Biometry</string>
 </resources>

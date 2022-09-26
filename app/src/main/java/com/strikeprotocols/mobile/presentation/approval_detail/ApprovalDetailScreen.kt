@@ -60,9 +60,7 @@ fun ApprovalDetailsScreen(
 
     val context = LocalContext.current as FragmentActivity
 
-    val promptInfo = BioCryptoUtil.createPromptInfo(
-        context = context, bioPromptReason = BioPromptReason.APPROVAL
-    )
+    val promptInfo = BioCryptoUtil.createPromptInfo(context = context)
 
     fun launchNonceWork() {
         val nonceAddresses = approvalDetailsState.selectedApproval?.retrieveAccountAddresses()

@@ -154,8 +154,7 @@ fun KeyManagementScreen(
         PreBiometryDialog(
             mainText = mainText,
             onAccept = {
-                val promptInfo = BioCryptoUtil.createPromptInfo(
-                    context = context, bioPromptReason = state.bioPromptReason)
+                val promptInfo = BioCryptoUtil.createPromptInfo(context = context)
                 val bioPrompt = BioCryptoUtil.createBioPrompt(
                     fragmentActivity = context,
                     onSuccess = {
