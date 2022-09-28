@@ -1,5 +1,6 @@
 package com.strikeprotocols.mobile.common
 
+import org.bitcoinj.core.Base58
 import java.util.*
 
 object BaseWrapper {

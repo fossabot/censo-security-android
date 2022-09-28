@@ -3,9 +3,8 @@ package com.strikeprotocols.mobile
 import cash.z.ecc.android.bip39.Mnemonics
 import cash.z.ecc.android.bip39.toSeed
 import com.google.gson.Gson
-import com.strikeprotocols.mobile.common.Base58
-import com.strikeprotocols.mobile.common.Ed25519HierarchicalPrivateKey
-import com.strikeprotocols.mobile.common.toHexString
+import com.strikeprotocols.mobile.common.*
+import org.bitcoinj.core.Base58
 import org.junit.Assert.*
 import org.junit.Test
 import java.util.*
@@ -15,8 +14,8 @@ fun ByteArray.toBase58() = Base58.encode(this)
 class Bip39Bip44ImplementationTest {
     data class TestItem(
         val mnemonic: String,
-        val privateKeyHex: String,
-        val publicKeyBase58: String
+        val privateKey: String,
+        val publicKey: String
     )
 
     data class TestItems(
@@ -24,13 +23,24 @@ class Bip39Bip44ImplementationTest {
     )
 
     @Test
-    fun testWithKnownDataSet() {
-        val testItems = Gson().fromJson(ClassLoader.getSystemResource("bip39-bip44/test-data.json").readText().trimEnd('\n'), TestItems::class.java).items
+    fun testSolanaWithKnownDataSet() {
+        val testItems = Gson().fromJson(ClassLoader.getSystemResource("bip39-bip44/solana-test-data.json").readText().trimEnd('\n'), TestItems::class.java).items
         for (testItem in testItems) {
             val ed25519PrivateKey = Ed25519HierarchicalPrivateKey.fromRootSeed(Mnemonics.MnemonicCode(testItem.mnemonic).toSeed())
             // @solana/web3j code which generated this data set represents the private key as the actual private key(32 bytes) appended with public key (another 32 bytes)
-            assertEquals(testItem.privateKeyHex, (ed25519PrivateKey.privateKeyBytes + ed25519PrivateKey.publicKeyBytes).toHexString().lowercase())
-            assertEquals(testItem.publicKeyBase58, ed25519PrivateKey.publicKeyBytes.toBase58())
+            assertEquals(testItem.privateKey, (ed25519PrivateKey.privateKeyBytes + ed25519PrivateKey.publicKeyBytes).toHexString().lowercase())
+            assertEquals(testItem.publicKey, ed25519PrivateKey.publicKeyBytes.toBase58())
+        }
+    }
+
+    @Test
+    fun testBitcoinWithKnownDataSet() {
+        val testItems = Gson().fromJson(ClassLoader.getSystemResource("bip39-bip44/bitcoin-test-data.json").readText().trimEnd('\n'), TestItems::class.java).items
+        testItems.forEachIndexed { i, testItem ->
+            println("Checking item $i, ${testItem.mnemonic}")
+            val bitcoinKey = BitcoinHierarchicalKey.fromSeedPhrase(testItem.mnemonic).derive(ChildPathNumber(0, false))
+            assertEquals(testItem.privateKey, bitcoinKey.getBase58ExtendedPrivateKey())
+            assertEquals(testItem.publicKey, bitcoinKey.getBase58ExtendedPublicKey())
         }
     }
 
@@ -87,5 +97,43 @@ class Bip39Bip44ImplementationTest {
         val otherPrivateKey = Ed25519HierarchicalPrivateKey.fromRootSeed(Mnemonics.MnemonicCode(otherValidPhrase).toSeed())
 
         assertNotEquals(privateKey.privateKeyBytes.toHexString(), otherPrivateKey.privateKeyBytes.toHexString())
+    }
+
+    @Test
+    fun testBitcoinKeyGeneration() {
+        val seedPhrase =
+            "bacon loop helmet quarter exist notice laundry auction rain bus vanish buyer drama icon response"
+        val expectedXprv =
+            "xprvA3HQivyehcyaqxxDcV3Niye157nbJKpuETYf6aZZup65XHNbyrXrkVZuT5T3i7bTsoCjTXnqWfjLxWdMUgDL3kTM4XftmSQnz7LP6RGiShr"
+        val expectedXpub =
+            "xpub6GGm8SWYXzXt4T2giWaP67ajd9d5hnYkbgUFtxyBU9d4Q5hkXPr7JHtPJN5dD6uNVXb7EEpdZeXvG5XwFVWhUj4Q2ufhYH38fuHK9ERTy3d"
+        val expectedPubKey = "0318287a66643f9db1956c812c533bb3d6b22dce7955d7169d6f8ed39d4e96c909"
+
+        val signingKey = BitcoinHierarchicalKey.fromSeedPhrase(seedPhrase).derive(ChildPathNumber(0, false))
+
+        assertEquals(expectedPubKey, signingKey.getPublicKeyBytes().toHexString().lowercase())
+        assertEquals(expectedXprv, signingKey.getBase58ExtendedPrivateKey())
+        assertEquals(expectedXpub, signingKey.getBase58ExtendedPublicKey())
+
+        // create a verify key from the signing keys extended pub key
+        // have the verifying key verify the signature from the signing key
+        val verifyingKey = BitcoinHierarchicalKey.fromExtendedKey(signingKey.getBase58ExtendedPublicKey())
+        val dataToSign = "hello world".toByteArray(charset("utf-8"))
+        assertTrue(verifyingKey.verifySignature(dataToSign, signingKey.signData(dataToSign)))
+
+        // check new keys from the extended public/private key match the key they came from
+        val keyFromExtendedPriv = BitcoinHierarchicalKey.fromExtendedKey(expectedXprv)
+        assertEquals(keyFromExtendedPriv.getBase58ExtendedPrivateKey(), signingKey.getBase58ExtendedPrivateKey())
+        assertEquals(keyFromExtendedPriv.getBase58ExtendedPublicKey(), signingKey.getBase58ExtendedPublicKey())
+
+        val keyFromExtendedPub = BitcoinHierarchicalKey.fromExtendedKey(expectedXpub)
+        assertNull(keyFromExtendedPub.privateKey)
+        assertEquals(keyFromExtendedPub.getBase58ExtendedPublicKey(), signingKey.getBase58ExtendedPublicKey())
+
+        // check we can derive new children from the extended public and private keys and that the
+        // extended public keys for the new children match
+        val childPubKey = keyFromExtendedPub.derive(ChildPathNumber(1, false))
+        val childPrivateKey = keyFromExtendedPriv.derive(ChildPathNumber(1, false))
+        assertEquals(childPrivateKey.getBase58ExtendedPublicKey(), childPubKey.getBase58ExtendedPublicKey())
     }
 }

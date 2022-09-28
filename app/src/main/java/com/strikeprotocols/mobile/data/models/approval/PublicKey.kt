@@ -1,6 +1,6 @@
 package com.strikeprotocols.mobile.data.models.approval
 
-import com.strikeprotocols.mobile.common.Base58
+import org.bitcoinj.core.Base58
 import org.bouncycastle.math.ec.rfc8032.Ed25519
 import org.web3j.crypto.Hash
 import java.io.ByteArrayOutputStream
@@ -35,7 +35,7 @@ data class PublicKey(val bytes: ByteArray) {
             return key
         }
 
-        fun createProgramAddress(seeds: List<ByteArray>, programId: PublicKey): PublicKey {
+        private fun createProgramAddress(seeds: List<ByteArray>, programId: PublicKey): PublicKey {
             val buffer = ByteArrayOutputStream()
             for (seed in seeds) {
                 require(seed.size <= 32) { "Max seed length exceeded" }
