@@ -1,6 +1,5 @@
 package com.strikeprotocols.mobile.presentation.entrance
 
-import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -11,7 +10,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -19,7 +17,6 @@ import androidx.navigation.NavController
 import com.strikeprotocols.mobile.R
 import com.strikeprotocols.mobile.common.AndroidUriWrapper
 import com.strikeprotocols.mobile.common.Resource
-import com.strikeprotocols.mobile.common.strikeLog
 import com.strikeprotocols.mobile.presentation.Screen
 import com.strikeprotocols.mobile.presentation.components.StrikeErrorScreen
 import com.strikeprotocols.mobile.presentation.key_management.KeyManagementFlow
@@ -33,7 +30,6 @@ fun EntranceScreen(
     viewModel: EntranceViewModel = hiltViewModel(),
 ) {
     val state = viewModel.state
-    val context = LocalContext.current
 
     DisposableEffect(key1 = viewModel) {
         viewModel.onStart()
@@ -70,28 +66,16 @@ fun EntranceScreen(
                         )
                     "${Screen.KeyManagementRoute.route}/$keyManagementJson"
                 }
+                UserDestination.FORCE_UPDATE -> Screen.EnforceUpdateRoute.route
                 UserDestination.INVALID_KEY -> Screen.ContactStrikeRoute.route
                 UserDestination.LOGIN, null -> Screen.SignInRoute.route
             }
 
             viewModel.resetUserDestinationResult()
 
-            val currentDestinationRoute = navController.currentDestination?.route
-            if (currentDestinationRoute != Screen.EnforceUpdateRoute.route
-                && currentDestinationRoute != Screen.BiometryDisabledRoute.route
-            ) {
-                navController.navigate(userDestinationRoute) {
-                    launchSingleTop = true
-                    navController.backQueue.clear()
-                }
-            } else {
-                val messageForUser =
-                    if (currentDestinationRoute == Screen.EnforceUpdateRoute.route) {
-                        context.getString(R.string.update_app_entrance_message)
-                    } else {
-                        context.getString(R.string.update_biometry_entrance_message)
-                    }
-                Toast.makeText(context, messageForUser, Toast.LENGTH_LONG).show()
+            navController.navigate(userDestinationRoute) {
+                launchSingleTop = true
+                navController.backQueue.clear()
             }
         }
     }

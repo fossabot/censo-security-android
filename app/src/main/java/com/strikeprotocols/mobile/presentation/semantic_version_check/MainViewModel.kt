@@ -5,17 +5,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.raygun.raygun4android.RaygunClient
-import com.strikeprotocols.mobile.BuildConfig
 import com.strikeprotocols.mobile.common.*
-import com.strikeprotocols.mobile.common.CrashReportingUtil.FORCE_UPGRADE_TAG
-import com.strikeprotocols.mobile.common.CrashReportingUtil.MANUALLY_REPORTED_TAG
 import com.strikeprotocols.mobile.common.Resource
 import com.strikeprotocols.mobile.data.EncryptionManagerImpl.Companion.SENTINEL_KEY_NAME
 import com.strikeprotocols.mobile.data.EncryptionManagerImpl.Companion.SENTINEL_STATIC_DATA
 import com.strikeprotocols.mobile.data.KeyRepository
 import com.strikeprotocols.mobile.data.UserRepository
-import com.strikeprotocols.mobile.data.models.SemanticVersion
+import com.strikeprotocols.mobile.presentation.Screen
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.crypto.Cipher
@@ -30,26 +26,18 @@ data class MainViewModel @Inject constructor(
     var state by mutableStateOf(MainState())
         private set
 
-    fun checkMinimumVersion() {
-        try {
-            viewModelScope.launch {
-                val semanticVersion = userRepository.checkMinimumVersion()
-                if (semanticVersion is Resource.Success) {
-                    enforceMinimumVersion(
-                        minimumSemanticVersion = semanticVersion.data?.androidVersion?.minimumVersion
-                            ?: BACKUP_VERSION
-                    )
-                }
-            }
-        } catch (e: Exception) {
-            RaygunClient.send(e, listOf(FORCE_UPGRADE_TAG, MANUALLY_REPORTED_TAG))
-        }
-    }
-
-    fun onForeground() {
+    fun onForeground(biometricCapability: BiometricUtil.Companion.BiometricsStatus) {
         viewModelScope.launch {
+            state = state.copy(biometryStatus = biometricCapability)
+
             val userLoggedIn = userRepository.userLoggedIn()
             val haveSentinelData = keyRepository.haveSentinelData()
+
+            if (biometricCapability != BiometricUtil.Companion.BiometricsStatus.BIOMETRICS_ENABLED
+                && !haveSentinelData) {
+                return@launch
+            }
+
             if (userLoggedIn && haveSentinelData) {
                 launchBlockingForegroundBiometryRetrieval()
             } else if (userLoggedIn && !haveSentinelData) {
@@ -58,23 +46,39 @@ data class MainViewModel @Inject constructor(
         }
     }
 
+    fun blockUIStatus(): BlockAppUI {
+        val visibleBlockingUi = state.bioPromptTrigger !is Resource.Uninitialized
+        val biometryDisabled =
+            state.biometryStatus != null && state.biometryStatus != BiometricUtil.Companion.BiometricsStatus.BIOMETRICS_ENABLED
+        val userOnForceUpdate = state.currentDestination == Screen.EnforceUpdateRoute.route
+
+        return when {
+            userOnForceUpdate -> BlockAppUI.NONE
+            biometryDisabled -> BlockAppUI.BIOMETRY_DISABLED
+            visibleBlockingUi -> BlockAppUI.FOREGROUND_BIOMETRY
+            else -> BlockAppUI.NONE
+        }
+    }
+
     private suspend fun launchBlockingForegroundBiometryRetrieval() {
+        state = state.copy(bioPromptTrigger = Resource.Loading())
         val cipher = keyRepository.getCipherForBackgroundDecryption()
         if (cipher != null) {
             state = state.copy(
                 bioPromptTrigger = Resource.Success(cipher),
-                biometryUnavailable = false,
+                biometryTooManyAttempts = false,
                 bioPromptReason = BioPromptReason.FOREGROUND_RETRIEVAL
             )
         }
     }
 
     private suspend fun launchBlockingForegroundBiometrySave() {
+        state = state.copy(bioPromptTrigger = Resource.Loading())
         val cipher = keyRepository.getCipherForEncryption(SENTINEL_KEY_NAME)
         if (cipher != null) {
             state = state.copy(
                 bioPromptTrigger = Resource.Success(cipher),
-                biometryUnavailable = false,
+                biometryTooManyAttempts = false,
                 bioPromptReason = BioPromptReason.FOREGROUND_SAVE
             )
         }
@@ -106,7 +110,10 @@ data class MainViewModel @Inject constructor(
     private suspend fun saveSentinelDataAfterBiometricApproval(cipher: Cipher) {
         state = try {
             keyRepository.saveSentinelData(cipher)
-            biometrySuccessfulState()
+            val updatedState = biometrySuccessfulState()
+            updatedState.copy(
+                sendUserToEntrance = true
+            )
         } catch (e: Exception) {
             handleSentinelDataFailureAndGetFailedState()
         }
@@ -115,7 +122,7 @@ data class MainViewModel @Inject constructor(
     fun biometryFailed(errorCode: Int) {
         state =
             if (BioCryptoUtil.getBioPromptFailedReason(errorCode) == BioPromptFailedReason.FAILED_TOO_MANY_ATTEMPTS) {
-                state.copy(biometryUnavailable = true, bioPromptTrigger = Resource.Error())
+                state.copy(biometryTooManyAttempts = true, bioPromptTrigger = Resource.Error())
             } else {
                 state.copy(bioPromptTrigger = Resource.Error())
             }
@@ -141,30 +148,24 @@ data class MainViewModel @Inject constructor(
         state = state.copy(bioPromptTrigger = Resource.Loading())
     }
 
-    private fun enforceMinimumVersion(minimumSemanticVersion: String) {
-        val appVersion = SemanticVersion.parse(BuildConfig.VERSION_NAME)
-
-        val minimumVersion = SemanticVersion.parse(minimumSemanticVersion)
-
-        val forceUpdate = appVersion.compareTo(minimumVersion)
-
-        if (forceUpdate < 0) {
-            state = state.copy(shouldEnforceAppUpdate = Resource.Success(true))
-        }
-    }
-
     private fun biometrySuccessfulState() : MainState =
         state.copy(
             bioPromptTrigger = Resource.Uninitialized,
             bioPromptReason = BioPromptReason.UNINITIALIZED
         )
 
-    fun resetBiometry() {
-        state = biometrySuccessfulState()
+    fun updateCurrentScreen(currentDestination: String?) {
+        if (currentDestination != state.currentDestination) {
+            state = state.copy(currentDestination = currentDestination)
+        }
     }
 
-    fun resetShouldEnforceAppUpdate() {
-        state = state.copy(shouldEnforceAppUpdate = Resource.Uninitialized)
+    fun resetSendUserToEntrance() {
+        state = state.copy(sendUserToEntrance = false)
+    }
+
+    fun resetBiometry() {
+        state = biometrySuccessfulState()
     }
 
     companion object {

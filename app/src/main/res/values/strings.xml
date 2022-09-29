@@ -204,8 +204,6 @@
     <string name="key_recovery_failed_title">Recovery Failed</string>
 
     <string name="no_phrase_found" type="id">Unable to use current phrase. Please start over.</string>
-    <string name="update_app_entrance_message">Please update your app. If you have updated the app, please close the app and re-enter.</string>
-    <string name="update_biometry_entrance_message">Please update your device biometry. If you already updated your biometry, please close the app and re-enter.</string>
     <string name="signing_in_as">Signing in as</string>
     <string name="too_many_failed_attempts">Too many failed attempts, please try again later.</string>
     <string name="key_management_bio_canceled">Biometry approval failed. Please try again.</string>

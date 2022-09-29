@@ -3,6 +3,7 @@ package com.strikeprotocols.mobile.viewModel
 import com.nhaarman.mockitokotlin2.times
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
+import com.strikeprotocols.mobile.BuildConfig
 import com.strikeprotocols.mobile.common.Resource
 import com.strikeprotocols.mobile.data.KeyRepository
 import com.strikeprotocols.mobile.data.StrikeUserData
@@ -12,9 +13,11 @@ import com.strikeprotocols.mobile.data.models.Organization
 import com.strikeprotocols.mobile.data.models.VerifyUser
 import com.strikeprotocols.mobile.data.models.WalletPublicKey
 import com.strikeprotocols.mobile.data.models.WalletSigner
+import com.strikeprotocols.mobile.data.models.*
 import com.strikeprotocols.mobile.presentation.entrance.EntranceViewModel
 import com.strikeprotocols.mobile.presentation.entrance.UserDestination
 import junit.framework.Assert.assertTrue
+import junit.framework.TestCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
@@ -40,6 +43,23 @@ class EntranceViewModelTest : BaseViewModelTest() {
 
     @Mock
     lateinit var strikeUserData: StrikeUserData
+
+    private lateinit var currentVersionName: String
+
+    private val higherMajorVersion = BuildConfig.versionNameMajor + 1
+    private val higherMinorVersion = BuildConfig.versionNameMinor + 1
+    private val higherPatchVersion = BuildConfig.versionNamePatch + 1
+
+    private val currentMajorVersion = BuildConfig.versionNameMajor
+    private val currentMinorVersion = BuildConfig.versionNameMinor
+    private val currentPatchVersion = BuildConfig.versionNamePatch
+
+    private val lowerMajorVersion = BuildConfig.versionNameMajor - 1
+    private val lowerMinorVersion = BuildConfig.versionNameMinor - 1
+    private val lowerPatchVersion = BuildConfig.versionNamePatch - 1
+
+    private val testHighMinimumVersion = "100.0.0"
+    private val testLowMinimumVersion = "0.0.0"
 
     val email = "legitimate@ok.com"
 
@@ -69,8 +89,14 @@ class EntranceViewModelTest : BaseViewModelTest() {
     fun setup() = runTest {
         Dispatchers.setMain(dispatcher)
         MockitoAnnotations.openMocks(this)
+        currentVersionName = BuildConfig.VERSION_NAME
 
         whenever(keyRepository.haveSentinelData()).then { true }
+        whenever(userRepository.checkMinimumVersion()).then {
+            Resource.Success(
+                SemanticVersionResponse(androidVersion = OsVersion(testLowMinimumVersion))
+            )
+        }
 
         entranceViewModel = EntranceViewModel(
             userRepository = userRepository,
@@ -221,7 +247,12 @@ class EntranceViewModelTest : BaseViewModelTest() {
             whenever(keyRepository.havePrivateKey()).then { true }
             whenever(keyRepository.getDeprecatedPrivateKey()).then { "" }
             whenever(userRepository.getWalletSigners()).then { Resource.Success(validWalletSigners) }
-            whenever(keyRepository.doesUserHaveValidLocalKey(basicVerifyUserWithValidPublicKey, validWalletSigners)).then { true }
+            whenever(
+                keyRepository.doesUserHaveValidLocalKey(
+                    basicVerifyUserWithValidPublicKey,
+                    validWalletSigners
+                )
+            ).then { true }
 
             entranceViewModel.onStart()
             advanceUntilIdle()
@@ -245,7 +276,12 @@ class EntranceViewModelTest : BaseViewModelTest() {
             whenever(keyRepository.havePrivateKey()).then { true }
             whenever(keyRepository.getDeprecatedPrivateKey()).then { "" }
             whenever(userRepository.getWalletSigners()).then { Resource.Success(validWalletSigners) }
-            whenever(keyRepository.doesUserHaveValidLocalKey(basicVerifyUserWithValidPublicKey, validWalletSigners)).then { false }
+            whenever(
+                keyRepository.doesUserHaveValidLocalKey(
+                    basicVerifyUserWithValidPublicKey,
+                    validWalletSigners
+                )
+            ).then { false }
 
             entranceViewModel.onStart()
             advanceUntilIdle()
@@ -311,7 +347,12 @@ class EntranceViewModelTest : BaseViewModelTest() {
             whenever(keyRepository.havePrivateKey()).then { true }
             whenever(keyRepository.getDeprecatedPrivateKey()).then { "" }
             whenever(userRepository.getWalletSigners()).then { Resource.Success(validWalletSigners) }
-            whenever(keyRepository.doesUserHaveValidLocalKey(basicVerifyUserWithValidPublicKey, validWalletSigners)).then { true }
+            whenever(
+                keyRepository.doesUserHaveValidLocalKey(
+                    basicVerifyUserWithValidPublicKey,
+                    validWalletSigners
+                )
+            ).then { true }
 
             entranceViewModel.onStart()
 
@@ -368,6 +409,210 @@ class EntranceViewModelTest : BaseViewModelTest() {
 
             assertTrue(entranceViewModel.state.userDestinationResult is Resource.Success)
             assertTrue(entranceViewModel.state.userDestinationResult.data == UserDestination.HOME)
+        }
+    }
+
+    //todo: get these tests working with new flow
+
+    /**
+     * Test that when we check the minimum app version and it is greater than the current app version,
+     * the view model should enforce the app update
+     *
+     * Assertions:
+     * - assert that the shouldEnforceAppUpdate state property is [Resource.Uninitialized]
+     * - after checking minimum version, assert that shouldEnforceAppUpdate state property is [Resource.Success] and true
+     */
+    @Test
+    fun `check minimum version is greater than current version then view model should enforce update`() =
+        runTest {
+            setMinimumVersionResponse(testHighMinimumVersion)
+
+            TestCase.assertTrue(entranceViewModel.state.userDestinationResult is Resource.Uninitialized)
+
+            entranceViewModel.onStart()
+
+            advanceUntilIdle()
+
+            //Should be true since we have to enforce the update
+            TestCase.assertTrue(entranceViewModel.state.userDestinationResult.data == UserDestination.FORCE_UPDATE)
+        }
+
+    /**
+     * Test that when we check the minimum app version and it is lower than the current app version,
+     * the view model should do nothing and not enforce an app update
+     *
+     * Assertions:
+     * - assert that the shouldEnforceAppUpdate state property is [Resource.Uninitialized]
+     * - after checking minimum version, assert that shouldEnforceAppUpdate state property is still [Resource.Uninitialized]
+     */
+    @Test
+    fun `check minimum version is lower than current version then view model should not enforce update`() =
+        runTest {
+            setMinimumVersionResponse(testLowMinimumVersion)
+
+            TestCase.assertTrue(entranceViewModel.state.userDestinationResult is Resource.Uninitialized)
+
+            entranceViewModel.onStart()
+
+            advanceUntilIdle()
+
+            //Should still be uninitialized since we do not have to enforce app update
+            TestCase.assertTrue(entranceViewModel.state.userDestinationResult.data != UserDestination.FORCE_UPDATE)
+        }
+
+    /**
+     * Test that when we check the minimum version and it is the same as the current version,
+     * the view model should do nothing and not enforce an app update
+     *
+     * Assertions:
+     * - assert that the shouldEnforceAppUpdate state property is [Resource.Uninitialized]
+     * - after checking minimum version, assert that shouldEnforceAppUpdate state property is still [Resource.Uninitialized]
+     */
+    @Test
+    fun `check minimum version is the same as current version then view model should not enforce update`() =
+        runTest {
+            setMinimumVersionResponse(currentVersionName)
+
+            TestCase.assertTrue(entranceViewModel.state.userDestinationResult is Resource.Uninitialized)
+
+            entranceViewModel.onStart()
+
+            advanceUntilIdle()
+
+            TestCase.assertTrue(entranceViewModel.state.userDestinationResult.data != UserDestination.FORCE_UPDATE)
+        }
+
+    /**
+     *  Test that when we check the minimum version and it has a higher major version then the current version,
+     *  the view model should enforce an app update
+     *
+     *  Assertions:
+     * - assert that the shouldEnforceAppUpdate state property is [Resource.Uninitialized]
+     * - after checking minimum version, assert that shouldEnforceAppUpdate state property is [Resource.Success]
+     */
+    @Test
+    fun `check minimum version has higher major number than current version then view model should enforce app update`() =
+        runTest {
+            val testHigherMajorVersion =
+                "$higherMajorVersion.$currentMinorVersion.$currentPatchVersion"
+            setMinimumVersionResponse(minimumVersionResponse = testHigherMajorVersion)
+
+            TestCase.assertTrue(entranceViewModel.state.userDestinationResult is Resource.Uninitialized)
+
+            entranceViewModel.onStart()
+
+            advanceUntilIdle()
+
+            TestCase.assertTrue(entranceViewModel.state.userDestinationResult.data == UserDestination.FORCE_UPDATE)
+        }
+
+    /**
+     *  Test that when we check the minimum version and it has a higher minor version then the current version,
+     *  the view model should enforce an app update
+     *
+     *  Assertions:
+     * - assert that the shouldEnforceAppUpdate state property is [Resource.Uninitialized]
+     * - after checking minimum version, assert that shouldEnforceAppUpdate state property is [Resource.Success]
+     */
+    @Test
+    fun `check minimum version has higher minor number than current version then view model should enforce app update`() =
+        runTest {
+            val testHigherMinorVersion =
+                "$currentMajorVersion.$higherMinorVersion.$currentPatchVersion"
+            setMinimumVersionResponse(minimumVersionResponse = testHigherMinorVersion)
+
+            TestCase.assertTrue(entranceViewModel.state.userDestinationResult is Resource.Uninitialized)
+
+            entranceViewModel.onStart()
+
+            advanceUntilIdle()
+
+            TestCase.assertTrue(entranceViewModel.state.userDestinationResult.data == UserDestination.FORCE_UPDATE)
+        }
+
+    /**
+     *  Test that when we check the minimum version and it has a higher patch version then the current version,
+     *  the view model should enforce an app update
+     *
+     *  Assertions:
+     * - assert that the shouldEnforceAppUpdate state property is [Resource.Uninitialized]
+     * - after checking minimum version, assert that shouldEnforceAppUpdate state property is [Resource.Success]
+     */
+    @Test
+    fun `check minimum version has higher patch number than current version then view model should enforce app update`() =
+        runTest {
+            val testHigherPatchVersion =
+                "$currentMajorVersion.$currentMinorVersion.$higherPatchVersion"
+            setMinimumVersionResponse(minimumVersionResponse = testHigherPatchVersion)
+
+            TestCase.assertTrue(entranceViewModel.state.userDestinationResult is Resource.Uninitialized)
+
+            entranceViewModel.onStart()
+
+            advanceUntilIdle()
+
+            TestCase.assertTrue(entranceViewModel.state.userDestinationResult.data == UserDestination.FORCE_UPDATE)
+        }
+
+    @Test
+    fun `check if minimum version has lower major number than current major number that view model does not enforce app update`() =
+        runTest {
+            val testLowerMajorVersion =
+                "$lowerMajorVersion.$currentMinorVersion.$currentPatchVersion"
+            setMinimumVersionResponse(minimumVersionResponse = testLowerMajorVersion)
+
+            TestCase.assertTrue(entranceViewModel.state.userDestinationResult is Resource.Uninitialized)
+
+            entranceViewModel.onStart()
+
+            advanceUntilIdle()
+
+            TestCase.assertTrue(entranceViewModel.state.userDestinationResult.data != UserDestination.FORCE_UPDATE)
+        }
+
+    @Test
+    fun `check if minimum version has lower minor number than current minimum number that view model does not enforce app update`() =
+        runTest {
+            val testLowerMinorVersion =
+                "$currentMajorVersion.$lowerMinorVersion.$currentPatchVersion"
+
+            setMinimumVersionResponse(minimumVersionResponse = testLowerMinorVersion)
+
+            TestCase.assertTrue(entranceViewModel.state.userDestinationResult is Resource.Uninitialized)
+
+            entranceViewModel.onStart()
+
+            advanceUntilIdle()
+
+            TestCase.assertTrue(entranceViewModel.state.userDestinationResult.data != UserDestination.FORCE_UPDATE)
+        }
+
+    @Test
+    fun `check if minimum version has lower patch number than current patch number that view model does not enforce app update`() =
+        runTest {
+            val testLowerPatchVersion =
+                "$currentMajorVersion.$currentMinorVersion.$lowerPatchVersion"
+            setMinimumVersionResponse(minimumVersionResponse = testLowerPatchVersion)
+
+            TestCase.assertTrue(entranceViewModel.state.userDestinationResult is Resource.Uninitialized)
+
+            entranceViewModel.onStart()
+
+            advanceUntilIdle()
+
+            TestCase.assertTrue(entranceViewModel.state.userDestinationResult.data != UserDestination.FORCE_UPDATE)
+        }
+
+    //Helper methods
+    private fun setMinimumVersionResponse(minimumVersionResponse: String) = runTest {
+        whenever(userRepository.checkMinimumVersion()).thenAnswer {
+            Resource.Success(
+                data = SemanticVersionResponse(
+                    androidVersion = OsVersion(
+                        minimumVersion = minimumVersionResponse
+                    )
+                )
+            )
         }
     }
 

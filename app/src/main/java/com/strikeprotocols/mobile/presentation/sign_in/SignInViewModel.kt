@@ -32,30 +32,6 @@ class SignInViewModel @Inject constructor(
         getCachedEmail()
     }
 
-
-    fun onStart() {
-        viewModelScope.launch {
-            val userLoggedIn = try {
-                userRepository.userLoggedIn()
-            } catch (e: Exception) {
-                false
-            }
-
-            val haveSentinelData = keyRepository.haveSentinelData()
-
-            if (userLoggedIn && !haveSentinelData) {
-                val email = userRepository.retrieveCachedUserEmail()
-                val cipher = keyRepository.getCipherForEncryption(SENTINEL_KEY_NAME)
-                state = state.copy(
-                    loginStep = LoginStep.PASSWORD_ENTRY,
-                    email = email,
-                    triggerBioPrompt = Resource.Success(cipher),
-                    bioPromptReason = BioPromptReason.SAVE_SENTINEL
-                )
-            }
-        }
-    }
-
     private fun getCachedEmail() {
         viewModelScope.launch {
             val email = userRepository.retrieveCachedUserEmail()
@@ -79,10 +55,19 @@ class SignInViewModel @Inject constructor(
     }
 
     fun signInActionCompleted() {
-        if (state.loginStep == LoginStep.EMAIL_ENTRY) {
-            checkEmail()
-        } else {
-            checkPassword()
+        viewModelScope.launch {
+            val userLoggedIn = userRepository.userLoggedIn()
+
+            if (userLoggedIn) {
+                handleReturnLoggedInUser()
+                return@launch
+            }
+
+            if (state.loginStep == LoginStep.EMAIL_ENTRY) {
+                checkEmail()
+            } else {
+                checkPassword()
+            }
         }
     }
 
@@ -202,7 +187,7 @@ class SignInViewModel @Inject constructor(
                     val token = loginResource.data?.token
                     if (token != null) {
                         userSuccessfullyLoggedIn(token)
-                        handleSuccessfulBiometryLogin()
+                        handleReturnLoggedInUser()
                     } else {
                         userFailedLogin(e = Exception("NO TOKEN"))
                     }
@@ -248,7 +233,7 @@ class SignInViewModel @Inject constructor(
         )
     }
 
-    private suspend fun handleSuccessfulBiometryLogin() {
+    private suspend fun handleReturnLoggedInUser() {
         if(keyRepository.haveSentinelData()) {
             state = state.copy(exitLoginFlow = Resource.Success(Unit))
         } else {

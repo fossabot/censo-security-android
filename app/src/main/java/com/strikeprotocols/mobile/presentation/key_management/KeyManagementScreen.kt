@@ -154,33 +154,35 @@ fun KeyManagementScreen(
         PreBiometryDialog(
             mainText = mainText,
             onAccept = {
-                val promptInfo = BioCryptoUtil.createPromptInfo(context = context)
-                val bioPrompt = BioCryptoUtil.createBioPrompt(
-                    fragmentActivity = context,
-                    onSuccess = {
-                        val cipher = it?.cipher
-                        if (cipher != null) {
-                            viewModel.biometryApproved(cipher)
-                        } else {
-                            BioCryptoUtil.handleBioPromptOnFail(
-                                context = context,
-                                errorCode = BioCryptoUtil.NO_CIPHER_CODE
-                            ) {
+                state.triggerBioPrompt.data?.let {
+                    val promptInfo = BioCryptoUtil.createPromptInfo(context = context)
+                    val bioPrompt = BioCryptoUtil.createBioPrompt(
+                        fragmentActivity = context,
+                        onSuccess = {
+                            val cipher = it?.cipher
+                            if (cipher != null) {
+                                viewModel.biometryApproved(cipher)
+                            } else {
+                                BioCryptoUtil.handleBioPromptOnFail(
+                                    context = context,
+                                    errorCode = BioCryptoUtil.NO_CIPHER_CODE
+                                ) {
+                                    viewModel.biometryFailed()
+                                }
+                            }
+                        },
+                        onFail = {
+                            BioCryptoUtil.handleBioPromptOnFail(context = context, errorCode = it) {
                                 viewModel.biometryFailed()
                             }
                         }
-                    },
-                    onFail = {
-                        BioCryptoUtil.handleBioPromptOnFail(context = context, errorCode = it) {
-                            viewModel.biometryFailed()
-                        }
-                    }
-                )
+                    )
 
-                bioPrompt.authenticate(
-                    promptInfo,
-                    BiometricPrompt.CryptoObject(state.triggerBioPrompt.data!!)
-                )
+                    bioPrompt.authenticate(
+                        promptInfo,
+                        BiometricPrompt.CryptoObject(state.triggerBioPrompt.data)
+                    )
+                }
                 viewModel.resetPromptTrigger()
             }
         )

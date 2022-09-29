@@ -8,24 +8,10 @@ import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.biometric.BiometricPrompt
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
-import androidx.compose.material.Button
 import androidx.compose.material.Surface
-import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.Lifecycle
 import androidx.navigation.*
@@ -47,7 +33,6 @@ import com.strikeprotocols.mobile.presentation.semantic_version_check.MainViewMo
 import com.strikeprotocols.mobile.presentation.approval_detail.ApprovalDetailsScreen
 import com.strikeprotocols.mobile.presentation.approvals.ApprovalsListScreen
 import com.strikeprotocols.mobile.presentation.approvals.ApprovalsViewModel
-import com.strikeprotocols.mobile.presentation.biometry_disabled.BiometryDisabledScreen
 import com.strikeprotocols.mobile.presentation.components.OnLifecycleEvent
 import com.strikeprotocols.mobile.presentation.contact_strike.ContactStrikeScreen
 import com.strikeprotocols.mobile.presentation.entrance.EntranceScreen
@@ -57,7 +42,7 @@ import com.strikeprotocols.mobile.presentation.sign_in.SignInScreen
 import com.strikeprotocols.mobile.service.MessagingService.Companion.NOTIFICATION_DISPLAYED_KEY
 import com.strikeprotocols.mobile.ui.theme.BackgroundBlack
 import com.strikeprotocols.mobile.ui.theme.StrikeMobileTheme
-import com.strikeprotocols.mobile.ui.theme.StrikeWhite
+import com.strikeprotocols.mobile.presentation.semantic_version_check.BlockingUI
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -98,12 +83,11 @@ class MainActivity : FragmentActivity() {
             userStateListener = setupUserStateListener(navController, context)
             userStateListener?.let { authProvider.addUserStateListener(it) }
 
-            val semVerState = mainViewModel.state
+            val mainState = mainViewModel.state
 
+            LaunchedEffect(key1 = mainState) {
 
-            LaunchedEffect(key1 = semVerState) {
-
-                if (semVerState.bioPromptTrigger is Resource.Success) {
+                if (mainState.bioPromptTrigger is Resource.Success) {
                     val promptInfo = BioCryptoUtil.createPromptInfo(context = context)
 
                     val bioPrompt = BioCryptoUtil.createBioPrompt(
@@ -125,11 +109,13 @@ class MainActivity : FragmentActivity() {
                         }
                     )
 
-                    bioPrompt.authenticate(
-                        promptInfo,
-                        BiometricPrompt.CryptoObject(semVerState.bioPromptTrigger.data!!)
-                    )
-                    mainViewModel.setPromptTriggerToLoading()
+                    mainState.bioPromptTrigger.data?.let {
+                        bioPrompt.authenticate(
+                            promptInfo,
+                            BiometricPrompt.CryptoObject(mainState.bioPromptTrigger.data)
+                        )
+                        mainViewModel.setPromptTriggerToLoading()
+                    }
                 }
             }
 
@@ -138,97 +124,42 @@ class MainActivity : FragmentActivity() {
                     //NavHost
                     StrikeNavHost(navController = navController)
 
-                    //region Biometric Check
-                    val biometryDisabledMessage = stringResource(R.string.biometry_disabled_message)
-                    val biometryUnavailableMessage = stringResource(R.string.biometry_unavailable_message)
+                    navController.addOnDestinationChangedListener { _, destination, _ ->
+                        mainViewModel.updateCurrentScreen(
+                            destination.route
+                        )
+                    }
 
                     OnLifecycleEvent { _, event ->
                         when (event) {
                             Lifecycle.Event.ON_START
                             -> {
-                                mainViewModel.checkMinimumVersion()
-                                mainViewModel.onForeground()
-
-                                when (BiometricUtil.checkForBiometricFeaturesOnDevice(context)) {
-                                    BiometricUtil.Companion.BiometricsStatus.BIOMETRICS_ENABLED -> {
-                                        //Do nothing, and continue with normal app flow
-                                        if (navController.currentDestination?.route == Screen.BIOMETRY_DISABLED_ROUTE_KEY) {
-                                            navController.backQueue.clear()
-                                            navController.navigate(Screen.EntranceRoute.route)
-                                        }
-                                    }
-                                    BiometricUtil.Companion.BiometricsStatus.BIOMETRICS_DISABLED -> {
-                                        //Display a screen that this app is unusable without biometrics
-                                        // and deeplink user to the settings so they can turn it on
-                                        navController.navigate("${Screen.BiometryDisabledRoute.route}/${biometryDisabledMessage}/${true}") {
-                                            launchSingleTop = true
-                                            navController.backQueue.clear()
-                                        }
-                                    }
-                                    BiometricUtil.Companion.BiometricsStatus.BIOMETRICS_NOT_AVAILABLE -> {
-                                        //Display a screen that this app is unusable on this device
-                                        navController.navigate("${Screen.BiometryDisabledRoute.route}/${biometryUnavailableMessage}/${false}") {
-                                            launchSingleTop = true
-                                            navController.backQueue.clear()
-                                        }
-                                    }
-                                }
+                                mainViewModel.onForeground(
+                                    BiometricUtil.checkForBiometricFeaturesOnDevice(context),
+                                )
                             }
                             else -> Unit
                         }
                     }
                     //endregion
 
-                    if (semVerState.shouldEnforceAppUpdate is Resource.Success
-                        && semVerState.shouldEnforceAppUpdate.data == true) {
-                        navController.navigate(Screen.EnforceUpdateRoute.route) {
+                    if (mainState.sendUserToEntrance) {
+                        navController.navigate(Screen.EntranceRoute.route) {
                             launchSingleTop = true
                             navController.backQueue.clear()
-                            popUpTo(Screen.EntranceRoute.route) { inclusive = true }
                         }
-                        mainViewModel.resetShouldEnforceAppUpdate()
+                        mainViewModel.resetSendUserToEntrance()
                     }
 
-                    val visibleBlockingUi = semVerState.bioPromptTrigger !is Resource.Uninitialized
-                    AnimatedVisibility(
-                        visible = visibleBlockingUi,
-                        enter = fadeIn(),
-                        exit = fadeOut()
-                    ) {
-                        Box(
-                            modifier =
-                            Modifier
-                                .fillMaxSize()
-                                .background(color = Color.Black)
-                        ) {
-                            Column(
-                                modifier = Modifier.fillMaxWidth(),
-                                verticalArrangement = Arrangement.Top,
-                                horizontalAlignment = Alignment.CenterHorizontally
-                            ) {
-                                Text(
-                                    modifier = Modifier
-                                        .padding(top = 124.dp, start = 48.dp, end = 48.dp),
-                                    text = if (semVerState.biometryUnavailable) getString(R.string.biometry_unavailable) else getString(
-                                        R.string.foreground_access_app
-                                    ),
-                                    fontSize = 24.sp,
-                                    color = StrikeWhite,
-                                    textAlign = TextAlign.Center
-                                )
-                                Spacer(modifier = Modifier.height(24.dp))
-                                if(semVerState.bioPromptTrigger is Resource.Error) {
-                                    Button(onClick = mainViewModel::retryBiometricGate) {
-                                        Text(
-                                            text = getString(R.string.try_again),
-                                            color = StrikeWhite,
-                                            fontSize = 18.sp
-                                        )
-                                    }
-                                }
-                            }
-                        }
-                    }
+                    val blockAppUI = mainViewModel.blockUIStatus()
+
+                    BlockingUI(
+                        blockAppUI = blockAppUI,
+                        bioPromptTrigger = mainState.bioPromptTrigger,
+                        biometryUnavailable = mainState.biometryTooManyAttempts,
+                        biometryStatus = mainState.biometryStatus,
+                        retry = mainViewModel::retryBiometricGate
+                    )
                 }
             }
         }
@@ -268,17 +199,6 @@ class MainActivity : FragmentActivity() {
                 route = Screen.ContactStrikeRoute.route
             ) {
                 ContactStrikeScreen()
-            }
-            composable(
-                route = Screen.BIOMETRY_DISABLED_ROUTE_KEY,
-                arguments = listOf(navArgument(Screen.BiometryDisabledRoute.MESSAGE_ARG) { type = NavType.StringType },
-                    navArgument(Screen.BiometryDisabledRoute.BIOMETRY_AVAILABLE_ARG) { type = NavType.BoolType })
-            ) { backStackEntry ->
-                val messageArg = backStackEntry.arguments?.get(Screen.BiometryDisabledRoute.MESSAGE_ARG) as String
-                val biometryAvailableArg = backStackEntry.arguments?.get(Screen.BiometryDisabledRoute.BIOMETRY_AVAILABLE_ARG) as Boolean
-                BiometryDisabledScreen(
-                    message = messageArg,
-                    biometryAvailable = biometryAvailableArg)
             }
             composable(
                 route = Screen.AccountRoute.route

@@ -40,7 +40,7 @@ import com.strikeprotocols.mobile.presentation.key_management.PhraseBackground
 import com.strikeprotocols.mobile.ui.theme.*
 
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
-@OptIn(ExperimentalComposeUiApi::class, ExperimentalFoundationApi::class)
+@OptIn(ExperimentalComposeUiApi::class)
 
 @Composable
 fun SignInScreen(
@@ -51,11 +51,6 @@ fun SignInScreen(
     val context = LocalContext.current as FragmentActivity
 
     //region LaunchedEffect
-    DisposableEffect(key1 = viewModel) {
-        viewModel.onStart()
-        onDispose { }
-    }
-
     LaunchedEffect(key1 = state) {
         if (state.exitLoginFlow is Resource.Success) {
             viewModel.resetExitLoginFlow()
@@ -67,37 +62,39 @@ fun SignInScreen(
             }
         }
 
-        if(state.triggerBioPrompt is Resource.Success) {
+        if (state.triggerBioPrompt is Resource.Success) {
             viewModel.resetPromptTrigger()
 
-            val promptInfo = BioCryptoUtil.createPromptInfo(context = context)
+            state.triggerBioPrompt.data?.let {
+                val promptInfo = BioCryptoUtil.createPromptInfo(context = context)
 
-            val bioPrompt = BioCryptoUtil.createBioPrompt(
-                fragmentActivity = context,
-                onSuccess = {
-                    val cipher = it?.cipher
-                    if (cipher != null) {
-                        viewModel.biometryApproved(cipher)
-                    } else {
-                        BioCryptoUtil.handleBioPromptOnFail(
-                            context = context,
-                            errorCode = BioCryptoUtil.NO_CIPHER_CODE
-                        ) {
+                val bioPrompt = BioCryptoUtil.createBioPrompt(
+                    fragmentActivity = context,
+                    onSuccess = {
+                        val cipher = it?.cipher
+                        if (cipher != null) {
+                            viewModel.biometryApproved(cipher)
+                        } else {
+                            BioCryptoUtil.handleBioPromptOnFail(
+                                context = context,
+                                errorCode = BioCryptoUtil.NO_CIPHER_CODE
+                            ) {
+                                viewModel.biometryFailed()
+                            }
+                        }
+                    },
+                    onFail = {
+                        BioCryptoUtil.handleBioPromptOnFail(context = context, errorCode = it) {
                             viewModel.biometryFailed()
                         }
                     }
-                },
-                onFail = {
-                    BioCryptoUtil.handleBioPromptOnFail(context = context, errorCode = it) {
-                        viewModel.biometryFailed()
-                    }
-                }
-            )
+                )
 
-            bioPrompt.authenticate(
-                promptInfo,
-                BiometricPrompt.CryptoObject(state.triggerBioPrompt.data!!)
-            )
+                bioPrompt.authenticate(
+                    promptInfo,
+                    BiometricPrompt.CryptoObject(state.triggerBioPrompt.data)
+                )
+            }
         }
     }
     //endregion

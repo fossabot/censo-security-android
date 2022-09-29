@@ -87,6 +87,7 @@ class SignInViewModelTest : BaseViewModelTest() {
     fun `valid email with no private key moves us to password entry`() =
         runTest {
             whenever(keyRepository.havePrivateKey()).then { false }
+            whenever(userRepository.userLoggedIn()).then { false }
 
             initVM()
 
@@ -100,6 +101,7 @@ class SignInViewModelTest : BaseViewModelTest() {
     fun `sanitize email when inputted by user`() =
         runTest {
             whenever(keyRepository.havePrivateKey()).then { false }
+            whenever(userRepository.userLoggedIn()).then { false }
 
             initVM()
 
@@ -115,6 +117,7 @@ class SignInViewModelTest : BaseViewModelTest() {
     fun `invalid email with no private key does not move us to password entry`() =
         runTest {
             whenever(keyRepository.havePrivateKey()).then { false }
+            whenever(userRepository.userLoggedIn()).then { false }
 
             initVM()
 
@@ -126,65 +129,10 @@ class SignInViewModelTest : BaseViewModelTest() {
         }
 
     @Test
-    fun `skip to add sentinel data if user is logged in and is missing sentinel data during onStart`() = runTest {
-        whenever(userRepository.retrieveCachedUserEmail()).then { validEmail }
-        whenever(keyRepository.haveSentinelData()).then { false }
-        whenever(userRepository.userLoggedIn()).then { true }
-        whenever(keyRepository.getCipherForEncryption(SENTINEL_KEY_NAME)).then { cipher }
-
-        initVM()
-
-        signInViewModel.onStart()
-
-        advanceUntilIdle()
-
-        assertEquals(LoginStep.PASSWORD_ENTRY, signInViewModel.state.loginStep)
-        assertEquals(validEmail, signInViewModel.state.email)
-        assertTrue(signInViewModel.state.triggerBioPrompt is Resource.Success)
-        assertEquals(cipher, signInViewModel.state.triggerBioPrompt.data)
-        assertEquals(BioPromptReason.SAVE_SENTINEL, signInViewModel.state.bioPromptReason)
-    }
-
-    @Test
-    fun `do not attempt to add sentinel data if user is not logged in during onStart`() = runTest {
-        whenever(userRepository.retrieveCachedUserEmail()).then { validEmail }
-        whenever(userRepository.userLoggedIn()).then { false }
-        whenever(keyRepository.haveSentinelData()).then { false }
-        whenever(keyRepository.getCipherForEncryption(SENTINEL_KEY_NAME)).then { cipher }
-
-        initVM()
-
-        signInViewModel.onStart()
-
-        advanceUntilIdle()
-
-        assertEquals(LoginStep.EMAIL_ENTRY, signInViewModel.state.loginStep)
-        assertTrue(signInViewModel.state.triggerBioPrompt is Resource.Uninitialized)
-        assertEquals(BioPromptReason.UNINITIALIZED, signInViewModel.state.bioPromptReason)
-    }
-
-    @Test
-    fun `do not attempt to add sentinel data if user has sentinel data during onStart`() = runTest {
-        whenever(userRepository.retrieveCachedUserEmail()).then { validEmail }
-        whenever(userRepository.userLoggedIn()).then { true }
-        whenever(keyRepository.haveSentinelData()).then { true }
-        whenever(keyRepository.getCipherForEncryption(SENTINEL_KEY_NAME)).then { cipher }
-
-        initVM()
-
-        signInViewModel.onStart()
-
-        advanceUntilIdle()
-
-        assertEquals(LoginStep.EMAIL_ENTRY, signInViewModel.state.loginStep)
-        assertTrue(signInViewModel.state.triggerBioPrompt is Resource.Uninitialized)
-        assertEquals(BioPromptReason.UNINITIALIZED, signInViewModel.state.bioPromptReason)
-    }
-
-    @Test
     fun `invalid password does not attempt password based login`() =
         runTest {
             whenever(keyRepository.havePrivateKey()).then { false }
+            whenever(userRepository.userLoggedIn()).then { false }
 
             initVM()
 
@@ -203,6 +151,7 @@ class SignInViewModelTest : BaseViewModelTest() {
     fun `valid password attempts password based login`() =
         runTest {
             whenever(keyRepository.havePrivateKey()).then { false }
+            whenever(userRepository.userLoggedIn()).then { false }
 
             initVM()
 
@@ -220,6 +169,7 @@ class SignInViewModelTest : BaseViewModelTest() {
     fun `valid password login triggers successful login`() =
         runTest {
             whenever(keyRepository.havePrivateKey()).then { false }
+            whenever(userRepository.userLoggedIn()).then { false }
             whenever(keyRepository.getCipherForEncryption(SENTINEL_KEY_NAME)).then { cipher }
             whenever(userRepository.loginWithPassword(validEmail, validPassword)).then {
                 Resource.Success(LoginResponse(jwt))
@@ -248,6 +198,7 @@ class SignInViewModelTest : BaseViewModelTest() {
     fun `no token returned on password login triggers login error`() =
         runTest {
             whenever(keyRepository.havePrivateKey()).then { false }
+            whenever(userRepository.userLoggedIn()).then { false }
             whenever(userRepository.loginWithPassword(validEmail, validPassword)).then {
                 Resource.Success(LoginResponse(null))
             }
@@ -268,6 +219,7 @@ class SignInViewModelTest : BaseViewModelTest() {
     fun `invalid password login triggers login error`() =
         runTest {
             whenever(keyRepository.havePrivateKey()).then { false }
+            whenever(userRepository.userLoggedIn()).then { false }
             whenever(userRepository.loginWithPassword(validEmail, validPassword)).then {
                 Resource.Error<LoginResponse>()
             }
@@ -288,6 +240,7 @@ class SignInViewModelTest : BaseViewModelTest() {
     fun `valid email with a private key attempts biometric login`() =
         runTest {
             whenever(keyRepository.havePrivateKey()).then { true }
+            whenever(userRepository.userLoggedIn()).then { false }
 
             initVM()
 
@@ -304,6 +257,7 @@ class SignInViewModelTest : BaseViewModelTest() {
     fun `valid email with a private key but null cipher does not attempt biometric login`() =
         runTest {
             whenever(keyRepository.havePrivateKey()).then { true }
+            whenever(userRepository.userLoggedIn()).then { false }
             whenever(keyRepository.getCipherForPrivateKeyDecryption()).then { null }
 
             initVM()
@@ -321,6 +275,7 @@ class SignInViewModelTest : BaseViewModelTest() {
     fun `biometry approved during return login attempts signature based login`() =
         runTest {
             whenever(keyRepository.havePrivateKey()).then { true }
+            whenever(userRepository.userLoggedIn()).then { false }
 
             initVM()
 
@@ -341,6 +296,7 @@ class SignInViewModelTest : BaseViewModelTest() {
     fun `biometry approved during initial login attempts saving sentinel data`() =
         runTest {
             whenever(keyRepository.havePrivateKey()).then { false }
+            whenever(userRepository.userLoggedIn()).then { false }
             whenever(userRepository.loginWithPassword(validEmail, validPassword)).then {
                 Resource.Success(LoginResponse(jwt))
             }
@@ -364,6 +320,7 @@ class SignInViewModelTest : BaseViewModelTest() {
     fun `valid signature based login triggers successful login`() =
         runTest {
             whenever(keyRepository.haveSentinelData()).then { true }
+            whenever(userRepository.userLoggedIn()).then { false }
             whenever(keyRepository.havePrivateKey()).then { true }
             whenever(userRepository.loginWithTimestamp(any(), any(), any())).then {
                 Resource.Success(LoginResponse(jwt))
@@ -389,6 +346,7 @@ class SignInViewModelTest : BaseViewModelTest() {
         runTest {
             whenever(keyRepository.getCipherForEncryption(SENTINEL_KEY_NAME)).then { cipher }
             whenever(keyRepository.haveSentinelData()).then { false }
+            whenever(userRepository.userLoggedIn()).then { false }
             whenever(keyRepository.havePrivateKey()).then { true }
             whenever(userRepository.loginWithTimestamp(any(), any(), any())).then {
                 Resource.Success(LoginResponse(jwt))
@@ -420,6 +378,7 @@ class SignInViewModelTest : BaseViewModelTest() {
     fun `no token returned on signature based login triggers login error`() =
         runTest {
             whenever(keyRepository.havePrivateKey()).then { true }
+            whenever(userRepository.userLoggedIn()).then { false }
             whenever(userRepository.loginWithTimestamp(any(), any(), any())).then {
                 Resource.Success(LoginResponse(null))
             }
@@ -442,6 +401,7 @@ class SignInViewModelTest : BaseViewModelTest() {
     fun `invalid signature based login triggers login error`() =
         runTest {
             whenever(keyRepository.havePrivateKey()).then { true }
+            whenever(userRepository.userLoggedIn()).then { false }
             whenever(userRepository.loginWithTimestamp(any(), any(), any())).then {
                 Resource.Error<LoginResponse>()
             }
@@ -464,6 +424,7 @@ class SignInViewModelTest : BaseViewModelTest() {
     fun `biometry failure does not attempts signature based login`() =
         runTest {
             whenever(keyRepository.havePrivateKey()).then { true }
+            whenever(userRepository.userLoggedIn()).then { false }
 
             initVM()
 

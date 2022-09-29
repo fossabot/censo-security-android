@@ -107,32 +107,34 @@ fun ApprovalDetailsScreen(
         }
 
         if (approvalDetailsState.bioPromptTrigger is Resource.Success) {
-            val bioPrompt = BioCryptoUtil.createBioPrompt(
-                fragmentActivity = context,
-                onSuccess = {
-                    val cipher = it?.cipher
-                    if (cipher != null) {
-                        approvalDetailsViewModel.biometryApproved(cipher)
-                    } else {
-                        BioCryptoUtil.handleBioPromptOnFail(
-                            context = context,
-                            errorCode = BioCryptoUtil.NO_CIPHER_CODE
-                        ) {
+            approvalDetailsState.bioPromptTrigger.data?.let {
+                val bioPrompt = BioCryptoUtil.createBioPrompt(
+                    fragmentActivity = context,
+                    onSuccess = {
+                        val cipher = it?.cipher
+                        if (cipher != null) {
+                            approvalDetailsViewModel.biometryApproved(cipher)
+                        } else {
+                            BioCryptoUtil.handleBioPromptOnFail(
+                                context = context,
+                                errorCode = BioCryptoUtil.NO_CIPHER_CODE
+                            ) {
+                                resetDataAfterErrorDismissed()
+                            }
+                        }
+                    },
+                    onFail = {
+                        BioCryptoUtil.handleBioPromptOnFail(context = context, errorCode = it) {
                             resetDataAfterErrorDismissed()
                         }
                     }
-                },
-                onFail = {
-                    BioCryptoUtil.handleBioPromptOnFail(context = context, errorCode = it) {
-                        resetDataAfterErrorDismissed()
-                    }
-                }
-            )
+                )
 
-            bioPrompt.authenticate(
-                promptInfo,
-                BiometricPrompt.CryptoObject(approvalDetailsState.bioPromptTrigger.data!!)
-            )
+                bioPrompt.authenticate(
+                    promptInfo,
+                    BiometricPrompt.CryptoObject(approvalDetailsState.bioPromptTrigger.data)
+                )
+            }
             approvalDetailsViewModel.resetPromptTrigger()
         }
 

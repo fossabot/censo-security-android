@@ -1,16 +1,19 @@
 package com.strikeprotocols.mobile.presentation.entrance
 
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.raygun.raygun4android.RaygunClient
+import com.strikeprotocols.mobile.BuildConfig
+import com.strikeprotocols.mobile.common.CrashReportingUtil
 import com.strikeprotocols.mobile.common.Resource
-import com.strikeprotocols.mobile.common.strikeLog
 import com.strikeprotocols.mobile.data.*
+import com.strikeprotocols.mobile.data.models.SemanticVersion
 import com.strikeprotocols.mobile.data.models.VerifyUser
 import com.strikeprotocols.mobile.data.models.WalletSigner
+import com.strikeprotocols.mobile.presentation.semantic_version_check.MainViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -28,22 +31,72 @@ class EntranceViewModel @Inject constructor(
 
     fun onStart() {
         viewModelScope.launch {
-            val userLoggedIn = try {
-                userRepository.userLoggedIn()
-            } catch (e: Exception) {
-                false
-            }
+            checkMinimumVersion()
+        }
+    }
 
-            if (userLoggedIn) {
-                strikeUserData.setEmail(userRepository.retrieveCachedUserEmail())
-                retrieveUserVerifyDetails()
-            } else {
-                //1. DESTINATION: Send user to login screen.
-                state =
-                    state.copy(
-                        userDestinationResult = Resource.Success(UserDestination.LOGIN)
+    private suspend fun checkMinimumVersion() {
+        try {
+            val semanticVersion = userRepository.checkMinimumVersion()
+            if (semanticVersion is Resource.Success) {
+                enforceMinimumVersion(
+                    minimumSemanticVersion = semanticVersion.data?.androidVersion?.minimumVersion
+                        ?: MainViewModel.BACKUP_VERSION
+                )
+            } else if (semanticVersion is Resource.Error) {
+                checkLoggedIn()
+                RaygunClient.send(
+                    semanticVersion.exception ?: Exception("Error retrieving min version"), listOf(
+                        CrashReportingUtil.FORCE_UPGRADE_TAG,
+                        CrashReportingUtil.MANUALLY_REPORTED_TAG
                     )
+                )
             }
+        } catch (e: Exception) {
+            checkLoggedIn()
+            RaygunClient.send(
+                e, listOf(
+                    CrashReportingUtil.FORCE_UPGRADE_TAG,
+                    CrashReportingUtil.MANUALLY_REPORTED_TAG
+                )
+            )
+        }
+    }
+
+    private suspend fun checkLoggedIn() {
+        val userLoggedIn = try {
+            userRepository.userLoggedIn()
+        } catch (e: Exception) {
+            false
+        }
+
+        if (userLoggedIn) {
+            strikeUserData.setEmail(userRepository.retrieveCachedUserEmail())
+            retrieveUserVerifyDetails()
+        } else {
+            //DESTINATION: Send user to login screen.
+            state =
+                state.copy(
+                    userDestinationResult = Resource.Success(UserDestination.LOGIN)
+                )
+        }
+    }
+
+    private suspend fun enforceMinimumVersion(minimumSemanticVersion: String) {
+        val appVersion = SemanticVersion.parse(BuildConfig.VERSION_NAME)
+
+        val minimumVersion = SemanticVersion.parse(minimumSemanticVersion)
+
+        val forceUpdate = appVersion.compareTo(minimumVersion)
+
+        if (forceUpdate < 0) {
+            //DESTINATION: Send user to force update screen.
+            state =
+                state.copy(
+                    userDestinationResult = Resource.Success(UserDestination.FORCE_UPDATE)
+                )
+        } else {
+            checkLoggedIn()
         }
     }
 
@@ -85,7 +138,8 @@ class EntranceViewModel @Inject constructor(
         state = if (walletSignersDataResource is Resource.Error) {
             state.copy(walletSignersResult = walletSignersDataResource)
         } else {
-            state.copy(walletSignersResult =
+            state.copy(
+                walletSignersResult =
                 Resource.Error(exception = Exception("Null wallet signers"))
             )
         }
@@ -145,7 +199,7 @@ class EntranceViewModel @Inject constructor(
         val doesUserHaveValidLocalKey =
             keyRepository.doesUserHaveValidLocalKey(verifyUser, walletSigners)
 
-        //5. DESTINATION: User has valid key saved and we let them into the app
+        //DESTINATION: User has valid key saved and we let them into the app
         state = if (doesUserHaveValidLocalKey) {
             state.copy(
                 userDestinationResult = Resource.Success(UserDestination.HOME)
@@ -159,7 +213,7 @@ class EntranceViewModel @Inject constructor(
         //endregion
     }
 
-    private suspend fun getWalletSigners() : List<WalletSigner?>? {
+    private suspend fun getWalletSigners(): List<WalletSigner?>? {
         val walletSignerResource: Resource<List<WalletSigner?>> = userRepository.getWalletSigners()
 
         return if (walletSignerResource is Resource.Error || walletSignerResource.data == null) {

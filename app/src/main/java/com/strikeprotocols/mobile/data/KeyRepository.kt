@@ -154,7 +154,11 @@ class KeyRepositoryImpl(
         if (keyName == BIO_KEY_NAME) {
             userRepository.logOut()
         }
-        userRepository.setKeyInvalidated()
+        if(keyName == BIO_KEY_NAME) {
+            userRepository.setKeyInvalidated()
+        } else {
+            userRepository.setInvalidSentinelData()
+        }
     }
 
     override suspend fun removeSentinelDataAndKickUserToAppEntrance() {
