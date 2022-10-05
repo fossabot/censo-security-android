@@ -20,6 +20,7 @@ import com.strikeprotocols.mobile.R
 import com.strikeprotocols.mobile.common.BioCryptoUtil
 import com.strikeprotocols.mobile.common.BioPromptReason
 import com.strikeprotocols.mobile.common.Resource
+import com.strikeprotocols.mobile.common.popUpToTop
 import com.strikeprotocols.mobile.presentation.Screen
 import com.strikeprotocols.mobile.presentation.key_management.KeyManagementState.Companion.NO_PHRASE_ERROR
 import com.strikeprotocols.mobile.presentation.key_management.flows.*
@@ -71,7 +72,7 @@ fun KeyManagementScreen(
         if (flowStepIsFinished) {
             navController.navigate(Screen.ApprovalListRoute.route) {
                 launchSingleTop = true
-                navController.backQueue.clear()
+                popUpToTop()
             }
 
             viewModel.resetAddWalletSignersCall()

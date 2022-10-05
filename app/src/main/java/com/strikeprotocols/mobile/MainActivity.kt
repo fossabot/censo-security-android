@@ -146,7 +146,7 @@ class MainActivity : FragmentActivity() {
                     if (mainState.sendUserToEntrance) {
                         navController.navigate(Screen.EntranceRoute.route) {
                             launchSingleTop = true
-                            navController.backQueue.clear()
+                            popUpToTop()
                         }
                         mainViewModel.resetSendUserToEntrance()
                     }
@@ -250,7 +250,7 @@ class MainActivity : FragmentActivity() {
                         || userState == UserState.INVALIDATED_KEY || userState == UserState.INVALID_SENTINEL_DATA) {
                         navController.navigate(Screen.EntranceRoute.route) {
                             launchSingleTop = true
-                            navController.backQueue.clear()
+                            popUpToTop()
                         }
                     }
                 }

@@ -17,6 +17,7 @@ import androidx.navigation.NavController
 import com.strikeprotocols.mobile.R
 import com.strikeprotocols.mobile.common.AndroidUriWrapper
 import com.strikeprotocols.mobile.common.Resource
+import com.strikeprotocols.mobile.common.popUpToTop
 import com.strikeprotocols.mobile.presentation.Screen
 import com.strikeprotocols.mobile.presentation.components.StrikeErrorScreen
 import com.strikeprotocols.mobile.presentation.key_management.KeyManagementFlow
@@ -75,7 +76,7 @@ fun EntranceScreen(
 
             navController.navigate(userDestinationRoute) {
                 launchSingleTop = true
-                navController.backQueue.clear()
+                popUpToTop()
             }
         }
     }

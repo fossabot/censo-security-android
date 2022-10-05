@@ -26,6 +26,7 @@ import androidx.navigation.NavController
 import com.strikeprotocols.mobile.BuildConfig
 import com.strikeprotocols.mobile.R
 import com.strikeprotocols.mobile.common.Resource
+import com.strikeprotocols.mobile.common.popUpToTop
 import com.strikeprotocols.mobile.presentation.Screen
 import com.strikeprotocols.mobile.presentation.approval_detail.approval_type_detail_items.AccountRow
 import com.strikeprotocols.mobile.presentation.components.StrikeCenteredTopAppBar
@@ -55,7 +56,7 @@ fun AccountScreen(
         if (accountState.logoutResult is Resource.Success) {
             navController.navigate(Screen.EntranceRoute.route) {
                 launchSingleTop = true
-                navController.backQueue.clear()
+                popUpToTop()
             }
             accountViewModel.resetLogoutResource()
         }

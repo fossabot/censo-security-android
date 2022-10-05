@@ -17,6 +17,9 @@ sealed class Screen(val route: String) {
     fun buildScreenDeepLinkUri() = "$STRIKE_PROTOCOLS_URI${this.route}"
 
     companion object {
+        //Used for clearing the backstack to the first destination
+        const val START_DESTINATION_ID = 0
+
         //Used for setting up deep linking options for composable screens
         const val STRIKE_PROTOCOLS_URI = "data://strikeprotocols/"
     }
