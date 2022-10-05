@@ -18,5 +18,11 @@
     <issue id="ConvertToWebp">
         <ignore path="**/ic_launcher_round.png" />
     </issue>
+    <issue id="UnknownNullness">
+        <ignore path="**/RuntimeTypeAdapterFactory.java" />
+    </issue>
+    <issue id="SyntheticAccessor">
+        <ignore path="**/RuntimeTypeAdapterFactory.java" />
+    </issue>
     <issue id="VectorPath" severity="ignore"/>
 </lint>

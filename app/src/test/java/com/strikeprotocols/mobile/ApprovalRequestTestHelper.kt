@@ -35,7 +35,7 @@ fun getSignersUpdateRequestForApproval(nonceAccountAddresses: List<String>): Sol
                 nameHashIsEmpty = false,
             )
         ),
-        signingData = SolanaSigningData(
+        signingData = SigningData.SolanaSigningData(
             feePayer = "87VXbkJsqdDvXYfDBtS4kW4TcFor7ogofZXbXjT7t7AU",
             walletProgramId = "VbvBzjdJfGC5apNttzS4oi1wGsPFU4EdFw5ijZAHcun",
             multisigOpAccountAddress = "2nf2bKZtao2hK6f1ke69vq2Qqyj8swg7Ny4MZfR4jxHW",
@@ -62,7 +62,7 @@ fun getSignersUpdateRequest(nonceAccountAddresses: List<String>) = SignersUpdate
                 nameHashIsEmpty = false,
             )
         ),
-        signingData = SolanaSigningData(
+        signingData = SigningData.SolanaSigningData(
             feePayer = "87VXbkJsqdDvXYfDBtS4kW4TcFor7ogofZXbXjT7t7AU",
             walletProgramId = "5JHcZTW5F1e5zWHb5zVWgi6pwbKuynRS3fyT7v48YEJZ",
             multisigOpAccountAddress = "GjfqFH8T4BiL6pwtZxdq7BPZK7uaWJBKbooG4iQxSsaM",
@@ -110,7 +110,7 @@ fun getBalanceAccountCreationRequest(nonceAccountAddresses: List<String>) : Bala
         whitelistEnabled = BooleanSetting.Off,
         dappsEnabled = BooleanSetting.Off,
         addressBookSlot = 1,
-        signingData = SolanaSigningData(
+        signingData = SigningData.SolanaSigningData(
             feePayer = "87VXbkJsqdDvXYfDBtS4kW4TcFor7ogofZXbXjT7t7AU",
             walletProgramId = "db4pdTHvA3XLBgKfwKzdx8DcNpHuWWn63t6u8kbYiuS",
             multisigOpAccountAddress = "2DBQ368KgyPkmqd6fKsQpmpMhBTDTuW6wWESbxDs5otz",
@@ -149,7 +149,7 @@ fun getSolWithdrawalRequest(nonceAccountAddresses: List<String>) : WithdrawalReq
             address = "2DQz5vWgs1PKxPDd9YaYKoemgFriRJqoFRniAQ7Wtuva",
             tag = null
         ),
-        signingData = SolanaSigningData(
+        signingData = SigningData.SolanaSigningData(
             feePayer = "87VXbkJsqdDvXYfDBtS4kW4TcFor7ogofZXbXjT7t7AU",
             walletProgramId = "db4pdTHvA3XLBgKfwKzdx8DcNpHuWWn63t6u8kbYiuS",
             multisigOpAccountAddress = "9NDFtaczqouZ9SGTfd489EfN3KvMQgrAjpuu4QEr9Kys",
@@ -188,7 +188,7 @@ fun getSplWithdrawalRequest(nonceAccountAddresses: List<String>) : WithdrawalReq
             address = "7DhLZAT5buGyXpjpfRNKaHc1imjJaDzCXXTdM59JHrpQ",
             tag = null
         ),
-        signingData = SolanaSigningData(
+        signingData = SigningData.SolanaSigningData(
             feePayer = "FM36ah2bH8nQWJNPCRzu7R69gE5o6UhujqJFtDpWN5as",
             walletProgramId = "zeZ7E8F6UaNYy3ry3Mt6MGUSr679oTKV8tzXVe5B4bP",
             multisigOpAccountAddress = "6UcFAr9rqGfFEtLxnYdW6QjeRor3aej5akLpYpXUkPWX",
@@ -232,7 +232,7 @@ fun getConversionRequest(nonceAccountAddresses: List<String>): ConversionRequest
             symbolDescription = "US Dollar",
             tokenMintAddress = "11111111111111111111111111111111"
         ),
-        signingData = SolanaSigningData(
+        signingData = SigningData.SolanaSigningData(
             feePayer = "FBiyhqgyrv6iRejRgL9tDYxB2jtEB4RH9pnPK2CN5J4m",
             walletProgramId = "CH2nLW24j2Wd1geFGSKkJmbAz1KLhACR9RRD1wHgCH74",
             multisigOpAccountAddress = "11111111111111111111111111111111",
@@ -270,7 +270,7 @@ fun getWrapConversionRequest(nonceAccountAddresses: List<String>): WrapConversio
             symbolDescription = "Wrapped SOL",
             tokenMintAddress = "11111111111111111111111111111111"
         ),
-        signingData = SolanaSigningData(
+        signingData = SigningData.SolanaSigningData(
             feePayer = "FM36ah2bH8nQWJNPCRzu7R69gE5o6UhujqJFtDpWN5as",
             walletProgramId = "DaGSQwGd1GZnscN2Mu5d1CPYqYXAQMV29Q4Zk9yDhZLp",
             multisigOpAccountAddress = "11111111111111111111111111111111",
@@ -308,7 +308,7 @@ fun getUnwrapConversionRequest(nonceAccountAddresses: List<String>) : SolanaAppr
             symbolDescription= "Solana",
             tokenMintAddress= "11111111111111111111111111111111"
         ),
-        signingData= SolanaSigningData(
+        signingData= SigningData.SolanaSigningData(
             feePayer= "87VXbkJsqdDvXYfDBtS4kW4TcFor7ogofZXbXjT7t7AU",
             walletProgramId= "8S1mgAomg5mcJ6rC38xHMMJyFKTHxQc2dHgNrmQKzAz",
             multisigOpAccountAddress= "11111111111111111111111111111111",
@@ -338,7 +338,7 @@ fun getAddAddressBookEntry(nonceAccountAddresses: List<String>): SolanaApprovalR
                 )
             )
         ),
-        signingData = SolanaSigningData(
+        signingData = SigningData.SolanaSigningData(
             feePayer = "87VXbkJsqdDvXYfDBtS4kW4TcFor7ogofZXbXjT7t7AU",
             walletProgramId = "db4pdTHvA3XLBgKfwKzdx8DcNpHuWWn63t6u8kbYiuS",
             multisigOpAccountAddress = "Dpt714om7J3B3f1ygptgoEnFvHo3aiXjeLPP7TqjHJhq",
@@ -364,7 +364,7 @@ fun getAddDAppBookEntry(nonceAccountAddresses: List<String>) : SolanaApprovalReq
             )
         ),
         entriesToRemove= emptyList(),
-        signingData= SolanaSigningData(
+        signingData= SigningData.SolanaSigningData(
             feePayer= "FM36ah2bH8nQWJNPCRzu7R69gE5o6UhujqJFtDpWN5as",
             walletProgramId= "3Nh3QsaXKbTbLM1BLsD4dhT4zeHTPaVbZX3eN3Yg1G2w",
             multisigOpAccountAddress= "Hn2CJuYyyB2H3wwmdHPy1Aun2Jkye3MCSVajzUvw55A9",
@@ -406,7 +406,7 @@ fun getWalletConfigPolicyUpdate(nonceAccountAddresses: List<String>): SolanaAppr
                 ),
             )
         ),
-        signingData = SolanaSigningData(
+        signingData = SigningData.SolanaSigningData(
             feePayer = "87VXbkJsqdDvXYfDBtS4kW4TcFor7ogofZXbXjT7t7AU",
             walletProgramId = "db4pdTHvA3XLBgKfwKzdx8DcNpHuWWn63t6u8kbYiuS",
             multisigOpAccountAddress = "F6iUTdJDE4vnTgBanCtBgtoNHag57Uaut82xATGVVps3",
@@ -444,7 +444,7 @@ fun getBalanceAccountPolicyUpdate(nonceAccountAddresses: List<String>) : SolanaA
                 ),
             )
         ),
-        signingData= SolanaSigningData(
+        signingData= SigningData.SolanaSigningData(
             feePayer= "FM36ah2bH8nQWJNPCRzu7R69gE5o6UhujqJFtDpWN5as",
             walletProgramId= "8pPAcjFSByreFRnRm5YyAdBP2LfiNnWBtBzHtRDcJpUA",
             multisigOpAccountAddress= "DbdTEwihgEYJYAgXBKEqQGknGyHsRnxE5coeZaVS4T9y",
@@ -469,7 +469,7 @@ fun getBalanceAccountNameUpdate(nonceAccountAddresses: List<String>): SolanaAppr
             address = "DcvZ2k6ygvvu2Z5ihrSxRZL7bHJ38gPRgpCie8GzztTP"
         ),
         newAccountName = "New Name",
-        signingData = SolanaSigningData(
+        signingData = SigningData.SolanaSigningData(
             feePayer = "FM36ah2bH8nQWJNPCRzu7R69gE5o6UhujqJFtDpWN5as",
             walletProgramId = "7kNPVcK2cpyaZsLsqmhZbjcbt433vYUckH1PM5gZeJ1L",
             multisigOpAccountAddress = "7DY87mHHiSSyxFBbhCYbTpQE5M4Jk9Z9hymJ7UzL3sPm",
@@ -509,7 +509,7 @@ fun getDAppTransactionRequest(nonceAccountAddresses: List<String>): SolanaApprov
                 instructionData = "AAAAwusLAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgADPa0Joq3Q2jHq6IeVnzS6oclt1ixZHlI7BKopyvdi8WwBmuATtw6w8+i8l818nR6xVodvif/WZTxXXorh28lfD90MAAIAAAAAwusLAAAAAA=="
             )
         ),
-        signingData = SolanaSigningData(
+        signingData = SigningData.SolanaSigningData(
             feePayer = "87VXbkJsqdDvXYfDBtS4kW4TcFor7ogofZXbXjT7t7AU",
             walletProgramId = "5VouXXXz6WnRT2hGAeKqSoiqgdYMs5cAhtobuUh54AkS",
             multisigOpAccountAddress = "Az1ZYXQYk1CraDLgLF72ge7bLd8k6kn4GWjPqiXco88t",
@@ -585,7 +585,7 @@ fun getBalanceAccountAddressWhitelistUpdate(nonceAccountAddresses: List<String>)
                 )
             )
         ),
-        signingData = SolanaSigningData(
+        signingData = SigningData.SolanaSigningData(
             feePayer = "FM36ah2bH8nQWJNPCRzu7R69gE5o6UhujqJFtDpWN5as",
             walletProgramId = "9LM4sYmMHk1VDcFpA8ezPeL8GtEVR5T51Qxcksrf4VX2",
             multisigOpAccountAddress = "71S5qEAD3DMn7QY9fdb2uR1TV7kiAfcAqNHfQfyFUSME",
@@ -611,7 +611,7 @@ fun getBalanceAccountSettingsUpdate(nonceAccountAddresses: List<String>): Solana
         ),
         whitelistEnabled = BooleanSetting.On,
         dappsEnabled = null,
-        signingData = SolanaSigningData(
+        signingData = SigningData.SolanaSigningData(
             feePayer = "87VXbkJsqdDvXYfDBtS4kW4TcFor7ogofZXbXjT7t7AU",
             walletProgramId = "db4pdTHvA3XLBgKfwKzdx8DcNpHuWWn63t6u8kbYiuS",
             multisigOpAccountAddress = "Dp4oaRWRtBxQdf5Lg2zti3TCjsUsxv4rUBgtf2HSQnVb",
@@ -640,7 +640,7 @@ fun getRemoveDAppBookEntry(nonceAccountAddresses: List<String>): SolanaApprovalR
                 )
             )
         ),
-        signingData = SolanaSigningData(
+        signingData = SigningData.SolanaSigningData(
             feePayer = "FM36ah2bH8nQWJNPCRzu7R69gE5o6UhujqJFtDpWN5as",
             walletProgramId = "3Nh3QsaXKbTbLM1BLsD4dhT4zeHTPaVbZX3eN3Yg1G2w",
             multisigOpAccountAddress = "9CfoFci2agjCJ7bWqfgKEFSAc5zB6UR63MrK61nRaJzm",

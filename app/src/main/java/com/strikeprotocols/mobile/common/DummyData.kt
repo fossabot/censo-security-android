@@ -406,7 +406,7 @@ class MockedApprovals {
                     nameHashIsEmpty = false,
                 )
             ),
-            signingData = SolanaSigningData(
+            signingData = SigningData.SolanaSigningData(
                 feePayer = "FM36ah2bH8nQWJNPCRzu7R69gE5o6UhujqJFtDpWN5as",
                 walletProgramId = "8pPAcjFSByreFRnRm5YyAdBP2LfiNnWBtBzHtRDcJpUA",
                 multisigOpAccountAddress = "SLnWXM1QTraLWFhCm7JxDZk11PBE5Gu524ASzAC6YjW",
@@ -435,7 +435,7 @@ class MockedApprovals {
                         nameHashIsEmpty = false,
                     )
                 ),
-                signingData = SolanaSigningData(
+                signingData = SigningData.SolanaSigningData(
                     feePayer = "8UT5JS7vVcGLBHQe19Q5EK6aFA2CYnFG8a5C4dkrTL2B",
                     walletProgramId = "JAbzU4jwUMn92xhZcAX4M6JANEigzVMKKJqy6pA1cNBT",
                     multisigOpAccountAddress = "Hx9JnkPHioA9eu92y7jho1TxNaBCHYbw8zaSxvkGXSdD",
@@ -479,7 +479,7 @@ class MockedApprovals {
             whitelistEnabled = BooleanSetting.Off,
             dappsEnabled = BooleanSetting.Off,
             addressBookSlot = 0,
-            signingData = SolanaSigningData(
+            signingData = SigningData.SolanaSigningData(
                 feePayer = "FM36ah2bH8nQWJNPCRzu7R69gE5o6UhujqJFtDpWN5as",
                 walletProgramId = "8pPAcjFSByreFRnRm5YyAdBP2LfiNnWBtBzHtRDcJpUA",
                 multisigOpAccountAddress = "HypFjU4nfRYwdnNQTyJw8TFxYekptWTQNrTcW7ofMZxu",
@@ -518,7 +518,7 @@ class MockedApprovals {
                 address = "AzntcKp4TjdgRakBBorz6Tp2kC4PQg4gkDgrr9khCETU",
                 tag = null
             ),
-            signingData = SolanaSigningData(
+            signingData = SigningData.SolanaSigningData(
                 feePayer = "FM36ah2bH8nQWJNPCRzu7R69gE5o6UhujqJFtDpWN5as",
                 walletProgramId = "AG23jVQ5EftDonUwCMhgXtr4jQAPdhAtPFw4y84CMeuj",
                 multisigOpAccountAddress = "9NDFtaczqouZ9SGTfd489EfN3KvMQgrAjpuu4QEr9Kys",
@@ -557,7 +557,7 @@ class MockedApprovals {
                 address = "7DhLZAT5buGyXpjpfRNKaHc1imjJaDzCXXTdM59JHrpQ",
                 tag = null
             ),
-            signingData = SolanaSigningData(
+            signingData = SigningData.SolanaSigningData(
                 feePayer = "FM36ah2bH8nQWJNPCRzu7R69gE5o6UhujqJFtDpWN5as",
                 walletProgramId = "zeZ7E8F6UaNYy3ry3Mt6MGUSr679oTKV8tzXVe5B4bP",
                 multisigOpAccountAddress = "6UcFAr9rqGfFEtLxnYdW6QjeRor3aej5akLpYpXUkPWX",
@@ -601,7 +601,7 @@ class MockedApprovals {
                 symbolDescription = "US Dollar",
                 tokenMintAddress = "11111111111111111111111111111111"
             ),
-            signingData = SolanaSigningData(
+            signingData = SigningData.SolanaSigningData(
                 feePayer = "FBiyhqgyrv6iRejRgL9tDYxB2jtEB4RH9pnPK2CN5J4m",
                 walletProgramId = "CH2nLW24j2Wd1geFGSKkJmbAz1KLhACR9RRD1wHgCH74",
                 multisigOpAccountAddress = "11111111111111111111111111111111",
@@ -639,7 +639,7 @@ class MockedApprovals {
                 symbolDescription = "Wrapped SOL",
                 tokenMintAddress = "11111111111111111111111111111111"
             ),
-            signingData = SolanaSigningData(
+            signingData = SigningData.SolanaSigningData(
                 feePayer = "FM36ah2bH8nQWJNPCRzu7R69gE5o6UhujqJFtDpWN5as",
                 walletProgramId = "DaGSQwGd1GZnscN2Mu5d1CPYqYXAQMV29Q4Zk9yDhZLp",
                 multisigOpAccountAddress = "11111111111111111111111111111111",
@@ -677,7 +677,7 @@ class MockedApprovals {
                 symbolDescription = "Solana",
                 tokenMintAddress = "11111111111111111111111111111111"
             ),
-            signingData = SolanaSigningData(
+            signingData = SigningData.SolanaSigningData(
                 feePayer = "FM36ah2bH8nQWJNPCRzu7R69gE5o6UhujqJFtDpWN5as",
                 walletProgramId = "DaGSQwGd1GZnscN2Mu5d1CPYqYXAQMV29Q4Zk9yDhZLp",
                 multisigOpAccountAddress = "11111111111111111111111111111111",
@@ -706,7 +706,7 @@ class MockedApprovals {
                 )
             ),
             entriesToRemove = emptyList(),
-            signingData = SolanaSigningData(
+            signingData = SigningData.SolanaSigningData(
                 feePayer = "FM36ah2bH8nQWJNPCRzu7R69gE5o6UhujqJFtDpWN5as",
                 walletProgramId = "3Nh3QsaXKbTbLM1BLsD4dhT4zeHTPaVbZX3eN3Yg1G2w",
                 multisigOpAccountAddress = "Hn2CJuYyyB2H3wwmdHPy1Aun2Jkye3MCSVajzUvw55A9",
@@ -757,7 +757,7 @@ class MockedApprovals {
                     )
                 )
             ),
-            signingData = SolanaSigningData(
+            signingData = SigningData.SolanaSigningData(
                 feePayer = "FM36ah2bH8nQWJNPCRzu7R69gE5o6UhujqJFtDpWN5as",
                 walletProgramId = "5kx1BNgMpBbEfrrzfqZrmW8xfqpdbC8b34TkwGbXg42r",
                 multisigOpAccountAddress = "F6iUTdJDE4vnTgBanCtBgtoNHag57Uaut82xATGVVps3",
@@ -805,7 +805,7 @@ class MockedApprovals {
                     ),
                 )
             ),
-            signingData = SolanaSigningData(
+            signingData = SigningData.SolanaSigningData(
                 feePayer = "FM36ah2bH8nQWJNPCRzu7R69gE5o6UhujqJFtDpWN5as",
                 walletProgramId = "8pPAcjFSByreFRnRm5YyAdBP2LfiNnWBtBzHtRDcJpUA",
                 multisigOpAccountAddress = "DbdTEwihgEYJYAgXBKEqQGknGyHsRnxE5coeZaVS4T9y",
@@ -830,7 +830,7 @@ class MockedApprovals {
                 address = "DcvZ2k6ygvvu2Z5ihrSxRZL7bHJ38gPRgpCie8GzztTP"
             ),
             newAccountName = "New Name",
-            signingData = SolanaSigningData(
+            signingData = SigningData.SolanaSigningData(
                 feePayer = "FM36ah2bH8nQWJNPCRzu7R69gE5o6UhujqJFtDpWN5as",
                 walletProgramId = "7kNPVcK2cpyaZsLsqmhZbjcbt433vYUckH1PM5gZeJ1L",
                 multisigOpAccountAddress = "7DY87mHHiSSyxFBbhCYbTpQE5M4Jk9Z9hymJ7UzL3sPm",
@@ -870,7 +870,7 @@ class MockedApprovals {
                     instructionData = "AAAAwusLAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgADPa0Joq3Q2jHq6IeVnzS6oclt1ixZHlI7BKopyvdi8WwBmuATtw6w8+i8l818nR6xVodvif/WZTxXXorh28lfD90MAAIAAAAAwusLAAAAAA=="
                 )
             ),
-            signingData = SolanaSigningData(
+            signingData = SigningData.SolanaSigningData(
                 feePayer = "FM36ah2bH8nQWJNPCRzu7R69gE5o6UhujqJFtDpWN5as",
                 walletProgramId = "DafeuJ6v1Mv1cvEVU6EnH2uomCP8nvj9EbKHgXGxGChy",
                 multisigOpAccountAddress = "11111111111111111111111111111111",
@@ -946,7 +946,7 @@ class MockedApprovals {
                     )
                 )
             ),
-            signingData = SolanaSigningData(
+            signingData = SigningData.SolanaSigningData(
                 feePayer = "FM36ah2bH8nQWJNPCRzu7R69gE5o6UhujqJFtDpWN5as",
                 walletProgramId = "9LM4sYmMHk1VDcFpA8ezPeL8GtEVR5T51Qxcksrf4VX2",
                 multisigOpAccountAddress = "71S5qEAD3DMn7QY9fdb2uR1TV7kiAfcAqNHfQfyFUSME",
@@ -972,7 +972,7 @@ class MockedApprovals {
             ),
             whitelistEnabled = BooleanSetting.On,
             dappsEnabled = null,
-            signingData = SolanaSigningData(
+            signingData = SigningData.SolanaSigningData(
                 feePayer = "FM36ah2bH8nQWJNPCRzu7R69gE5o6UhujqJFtDpWN5as",
                 walletProgramId = "7kNPVcK2cpyaZsLsqmhZbjcbt433vYUckH1PM5gZeJ1L",
                 multisigOpAccountAddress = "GM2yp6wzBijkziNSDAXoDsuJ2e76VTLgqTfikh5r9BfD",
@@ -1003,7 +1003,7 @@ class MockedApprovals {
                     )
                 )
             ),
-            signingData = SolanaSigningData(
+            signingData = SigningData.SolanaSigningData(
                 feePayer = "FM36ah2bH8nQWJNPCRzu7R69gE5o6UhujqJFtDpWN5as",
                 walletProgramId = "A2iHua5UQd6RWb6C3ZctQcfVZDoeG5pUvBtRQfWSxSqb",
                 multisigOpAccountAddress = "2Qr2bq8KpyAho1rSnE7TUwXgHW3UpM7KwYEijF11JF2d",
@@ -1032,7 +1032,7 @@ class MockedApprovals {
                     )
                 )
             ),
-            signingData = SolanaSigningData(
+            signingData = SigningData.SolanaSigningData(
                 feePayer = "FM36ah2bH8nQWJNPCRzu7R69gE5o6UhujqJFtDpWN5as",
                 walletProgramId = "3Nh3QsaXKbTbLM1BLsD4dhT4zeHTPaVbZX3eN3Yg1G2w",
                 multisigOpAccountAddress = "9CfoFci2agjCJ7bWqfgKEFSAc5zB6UR63MrK61nRaJzm",

@@ -59,7 +59,7 @@ data class ChildPathNumber(
     }
 }
 
-class BitcoinHierarchicalKey(
+class Secp256k1HierarchicalKey(
     val privateKey: ECPrivateKey?,
     private val chainCode: KeyParameter,
     val depth: Int,
@@ -77,12 +77,19 @@ class BitcoinHierarchicalKey(
         private const val bip32HeaderP2PKHpubTest: Int = 0x043587cf // The 4 byte header that serializes in base58 to "tpub".
         private const val bip32HeaderP2PKHprivTest: Int = 0x04358394 // The 4 byte header that serializes in base58 to "tprv"
 
+        val bitcoinDerivationPath = listOf(
+            ChildPathNumber(44, true),
+            ChildPathNumber(0, true),
+            ChildPathNumber(0, true),
+            ChildPathNumber(0, false)
+        )
+
         fun getECPrivateKey(privateKeyBytes: ByteArray): ECPrivateKey {
             return factory.generatePrivate(ECPrivateKeySpec(BigInteger(1, privateKeyBytes), spec)) as ECPrivateKey
         }
 
-        private fun derivableKey(deriveData: ByteArray): BitcoinHierarchicalKey {
-            return BitcoinHierarchicalKey(
+        private fun derivableKey(deriveData: ByteArray): Secp256k1HierarchicalKey {
+            return Secp256k1HierarchicalKey(
                 getECPrivateKey(deriveData.slice(0..31).toByteArray()),
                 KeyParameter(deriveData, 32, 32),
                 0,
@@ -90,13 +97,13 @@ class BitcoinHierarchicalKey(
             )
         }
 
-        fun fromExtendedKey(base58ExtendedKey: String): BitcoinHierarchicalKey {
+        fun fromExtendedKey(base58ExtendedKey: String): Secp256k1HierarchicalKey {
             return deserialize(BitcoinUtils.verifyChecksum(Base58.decode(base58ExtendedKey)))
         }
 
         private fun deserialize(
             serializedKey: ByteArray
-        ): BitcoinHierarchicalKey {
+        ): Secp256k1HierarchicalKey {
             val buffer = ByteBuffer.wrap(serializedKey)
             val header = buffer.int
             val pub = header == bip32HeaderP2PKHpub || header == bip32HeaderP2PKHpubTest
@@ -114,26 +121,26 @@ class BitcoinHierarchicalKey(
             val data = ByteArray(33)
             buffer.get(data)
             return if (pub) {
-                BitcoinHierarchicalKey(null, KeyParameter(chainCode), depth, childPathNumber, parentFingerprint, data)
+                Secp256k1HierarchicalKey(null, KeyParameter(chainCode), depth, childPathNumber, parentFingerprint, data)
             } else {
-                BitcoinHierarchicalKey(getECPrivateKey(data.slice(1..32).toByteArray()), KeyParameter(chainCode), depth, childPathNumber, parentFingerprint)
+                Secp256k1HierarchicalKey(getECPrivateKey(data.slice(1..32).toByteArray()), KeyParameter(chainCode), depth, childPathNumber, parentFingerprint)
             }
         }
 
         fun fromSeedPhrase(
             seedPhrase: String,
-            pathList: List<ChildPathNumber> = listOf(
-                ChildPathNumber(44, true),
-                ChildPathNumber(0, true),
-                ChildPathNumber(0, true),
-                ChildPathNumber(0, false)
-            )
-        ): BitcoinHierarchicalKey {
-            val result = Mnemonics.MnemonicCode(seedPhrase).toSeed()
+            pathList: List<ChildPathNumber>
+        ): Secp256k1HierarchicalKey {
+            return fromRootSeed(Mnemonics.MnemonicCode(seedPhrase).toSeed(), pathList)
+        }
 
+        fun fromRootSeed(
+            rootSeed: ByteArray,
+            pathList: List<ChildPathNumber>
+        ): Secp256k1HierarchicalKey {
             val hmacSha512 = HMac(SHA512Digest())
             hmacSha512.init(KeyParameter("Bitcoin seed".toByteArray(StandardCharsets.UTF_8)))
-            hmacSha512.update(result, 0, result.size)
+            hmacSha512.update(rootSeed, 0, rootSeed.size)
             val derivedState = ByteArray(hmacSha512.macSize)
             hmacSha512.doFinal(derivedState, 0)
 
@@ -232,7 +239,7 @@ class BitcoinHierarchicalKey(
         return ecdsaSigner.verifySignature(data, r, s)
     }
 
-    fun derive(path: ChildPathNumber): BitcoinHierarchicalKey {
+    fun derive(path: ChildPathNumber): Secp256k1HierarchicalKey {
         val hmacSha512 = HMac(SHA512Digest())
         hmacSha512.init(chainCode)
         val buffer = ByteBuffer.allocate(37)
@@ -256,7 +263,7 @@ class BitcoinHierarchicalKey(
         parentPrivKeyBytes?.let {
             val newPrivKey = privKeyInt.add(BigInteger(1, parentPrivKeyBytes)).mod(spec.n)
 
-            return BitcoinHierarchicalKey(
+            return Secp256k1HierarchicalKey(
                 getECPrivateKey(newPrivKey.toByteArray()),
                 KeyParameter(output, 32, 32),
                 this.depth + 1,
@@ -267,7 +274,7 @@ class BitcoinHierarchicalKey(
             val pubPoint = spec.curve.decodePoint(getPublicKeyFromPrivate(getECPrivateKey(privKeyInt.toByteArray()))).add(
                 spec.curve.decodePoint(getPublicKeyBytes())
             )
-            return BitcoinHierarchicalKey(
+            return Secp256k1HierarchicalKey(
                 null,
                 KeyParameter(output, 32, 32),
                 this.depth + 1,
@@ -329,6 +336,6 @@ class BitcoinHierarchicalKey(
     }
 
     override fun toString(): String {
-        return "BitcoinHierarchicalKey(pubKey=${getPublicKeyBytes().toHexString()}, chainCode=${chainCode.key.toHexString()}, depth=$depth, childPath=$childPathNumber, parentFingerprint=$parentFingerprint)".trimMargin()
+        return "Secp256k1HierarchicalKey(pubKey=${getPublicKeyBytes().toHexString()}, chainCode=${chainCode.key.toHexString()}, depth=$depth, childPath=$childPathNumber, parentFingerprint=$parentFingerprint)".trimMargin()
     }
 }

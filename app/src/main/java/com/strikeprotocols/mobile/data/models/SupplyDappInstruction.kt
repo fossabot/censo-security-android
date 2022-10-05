@@ -10,12 +10,12 @@ class SupplyDappInstruction(
     val nonce: Nonce,
     val nonceAccountAddress: String,
     val instructionChunk: SolanaInstructionChunk,
-    val signingData: SolanaSigningData,
+    val signingData: SigningData.SolanaSigningData,
     val opAccountPublicKey: PublicKey,
     val walletAccountPublicKey: PublicKey,
 ) : Signable {
 
-    override fun retrieveSignableData(approverPublicKey: String?): ByteArray {
+    override fun retrieveSignableData(approverPublicKey: String?): List<ByteArray> {
         if (approverPublicKey == null) throw Exception("MISSING KEY")
 
         val keyList = listOf(
@@ -27,7 +27,7 @@ class SupplyDappInstruction(
             )
         )
 
-        return compileMessage(
+        return listOf(compileMessage(
             feePayer = PublicKey(signingData.feePayer),
             recentBlockhash = nonce.value,
             instructions = listOf(
@@ -41,7 +41,7 @@ class SupplyDappInstruction(
                     data = instructionChunk.combinedBytes()
                 )
             )
-        ).serialize()
+        ).serialize())
     }
 
 }

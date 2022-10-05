@@ -5,10 +5,7 @@ import com.strikeprotocols.mobile.BuildConfig
 import com.strikeprotocols.mobile.data.BaseRepository.Companion.UNAUTHORIZED
 import com.strikeprotocols.mobile.data.BrooklynApiService.Companion.AUTH
 import com.strikeprotocols.mobile.data.models.*
-import com.strikeprotocols.mobile.data.models.approval.ApprovalDispositionRequest
-import com.strikeprotocols.mobile.data.models.approval.InitiationRequest
-import com.strikeprotocols.mobile.data.models.approval.WalletApproval
-import com.strikeprotocols.mobile.data.models.approval.WalletApprovalDeserializer
+import com.strikeprotocols.mobile.data.models.approval.*
 import kotlinx.coroutines.runBlocking
 import okhttp3.*
 import okhttp3.logging.HttpLoggingInterceptor
@@ -38,6 +35,7 @@ interface BrooklynApiService {
 
             val customGson = GsonBuilder()
                 .registerTypeAdapter(WalletApproval::class.java, WalletApprovalDeserializer())
+                .registerTypeAdapterFactory(TypeFactorySettings.approvalSignatureAdapterFactory)
                 .create()
 
             return Retrofit.Builder()

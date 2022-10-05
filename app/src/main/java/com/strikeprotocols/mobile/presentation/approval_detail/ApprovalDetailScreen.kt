@@ -1,7 +1,6 @@
 package com.strikeprotocols.mobile.presentation.approval_detail
 
 import android.annotation.SuppressLint
-import android.widget.Toast
 import androidx.biometric.BiometricPrompt
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -105,7 +104,7 @@ fun ApprovalDetailsScreen(
         approvalDetailsViewModel.setShouldDisplayConfirmDispositionDialog(
             isApproving = isApproving,
             isInitiationRequest = isInitiationRequest,
-            dialogMessages = approval?.getSolanaApprovalRequestType()?.getDialogMessages(
+            dialogMessages = approval?.getApprovalRequestType()?.getDialogMessages(
                 context = context,
                 approvalDisposition = if (isApproving) ApprovalDisposition.APPROVE else ApprovalDisposition.DENY,
                 isInitiationRequest = isInitiationRequest
@@ -182,7 +181,7 @@ fun ApprovalDetailsScreen(
                     approvalDetailsViewModel.setShouldDisplayConfirmDispositionDialog(
                         isApproving = true,
                         isInitiationRequest = isInitiationRequest,
-                        dialogMessages = approval?.getSolanaApprovalRequestType()?.getDialogMessages(
+                        dialogMessages = approval?.getApprovalRequestType()?.getDialogMessages(
                             context = context,
                             approvalDisposition = ApprovalDisposition.APPROVE,
                             isInitiationRequest = isInitiationRequest
@@ -198,7 +197,7 @@ fun ApprovalDetailsScreen(
                     approvalDetailsViewModel.setShouldDisplayConfirmDispositionDialog(
                         isApproving = false,
                         isInitiationRequest = isInitiationRequest,
-                        dialogMessages = approval?.getSolanaApprovalRequestType()?.getDialogMessages(
+                        dialogMessages = approval?.getApprovalRequestType()?.getDialogMessages(
                             context = context,
                             approvalDisposition = ApprovalDisposition.DENY,
                             isInitiationRequest = isInitiationRequest
@@ -223,7 +222,7 @@ fun ApprovalDetailsScreen(
             )
 
             if (approvalDetailsState.shouldDisplayConfirmDisposition != null) {
-                if (approvalDetailsState.selectedApproval?.getSolanaApprovalRequestType() is LoginApprovalRequest) {
+                if (approvalDetailsState.selectedApproval?.getApprovalRequestType() is LoginApprovalRequest) {
                     approvalDetailsViewModel.resetShouldDisplayConfirmDisposition()
                     launchNonceWork()
                 } else {
@@ -337,7 +336,7 @@ fun ApprovalDetails(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             val requestType = approval?.let { safeApproval ->
-                val type = safeApproval.getSolanaApprovalRequestType()
+                val type = safeApproval.getApprovalRequestType()
 
                 //Defensive coding,
                 // we should never have an unknown approval in the details screen

@@ -1,6 +1,5 @@
 package com.strikeprotocols.mobile
 
-import androidx.biometric.BiometricPrompt
 import cash.z.ecc.android.bip39.Mnemonics
 import com.google.gson.JsonParser
 import com.nhaarman.mockitokotlin2.any
@@ -14,7 +13,6 @@ import com.strikeprotocols.mobile.data.models.StoredKeyData.Companion.SOLANA_KEY
 import com.strikeprotocols.mobile.data.models.approval.InitiationRequest
 import com.strikeprotocols.mobile.data.models.approval.SolanaApprovalRequestDetails
 import com.strikeprotocols.mobile.data.models.approval.WalletApprovalDeserializer
-import org.bouncycastle.util.Store
 import org.junit.Assert.assertNotNull
 import org.junit.Before
 import org.junit.Test
@@ -203,7 +201,7 @@ class InitiationRequestSigningTest {
             requestId = multiSigBalanceAccountCreationWalletApproval.id!!,
             approvalDisposition = if (Random().nextBoolean()) ApprovalDisposition.APPROVE else ApprovalDisposition.DENY,
             initiation = initiation,
-            requestType = multiSigBalanceAccountCreationWalletApproval.getSolanaApprovalRequestType(),
+            requestType = multiSigBalanceAccountCreationWalletApproval.getApprovalRequestType(),
             nonces = exampleNonces,
             email = userEmail
         )
@@ -220,7 +218,7 @@ class InitiationRequestSigningTest {
             requestId = multiSigSignersUpdateWalletApproval.id!!,
             approvalDisposition = if (Random().nextBoolean()) ApprovalDisposition.APPROVE else ApprovalDisposition.DENY,
             initiation = initiation,
-            requestType = multiSigSignersUpdateWalletApproval.getSolanaApprovalRequestType(),
+            requestType = multiSigSignersUpdateWalletApproval.getApprovalRequestType(),
             nonces = exampleNonces,
             email = userEmail
         )
@@ -237,7 +235,7 @@ class InitiationRequestSigningTest {
             requestId = multiSigWithdrawalRequestWalletApproval.id!!,
             approvalDisposition = if (Random().nextBoolean()) ApprovalDisposition.APPROVE else ApprovalDisposition.DENY,
             initiation = initiation,
-            requestType = multiSigWithdrawalRequestWalletApproval.getSolanaApprovalRequestType(),
+            requestType = multiSigWithdrawalRequestWalletApproval.getApprovalRequestType(),
             nonces = exampleNonces,
             email = userEmail
         )
@@ -254,7 +252,7 @@ class InitiationRequestSigningTest {
             requestId = multiSigDAppTransactionWalletApproval.id!!,
             approvalDisposition = if (Random().nextBoolean()) ApprovalDisposition.APPROVE else ApprovalDisposition.DENY,
             initiation = initiation,
-            requestType = multiSigDAppTransactionWalletApproval.getSolanaApprovalRequestType(),
+            requestType = multiSigDAppTransactionWalletApproval.getApprovalRequestType(),
             nonces = exampleNonces,
             email = userEmail
         )
@@ -271,7 +269,7 @@ class InitiationRequestSigningTest {
             requestId = multiSigConversionRequestWalletApproval.id!!,
             approvalDisposition = if (Random().nextBoolean()) ApprovalDisposition.APPROVE else ApprovalDisposition.DENY,
             initiation = initiation,
-            requestType = multiSigConversionRequestWalletApproval.getSolanaApprovalRequestType(),
+            requestType = multiSigConversionRequestWalletApproval.getApprovalRequestType(),
             nonces = exampleNonces,
             email = userEmail
         )

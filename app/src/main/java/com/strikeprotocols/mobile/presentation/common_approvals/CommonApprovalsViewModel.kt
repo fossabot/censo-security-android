@@ -124,7 +124,7 @@ abstract class CommonApprovalsViewModel(
             }
 
         val approvalId = approval?.id ?: ""
-        val solanaApprovalRequestType = approval?.getSolanaApprovalRequestType()
+        val solanaApprovalRequestType = approval?.getApprovalRequestType()
         if (solanaApprovalRequestType == null || approval.id == null) {
             return if (isInitiationRequest) {
                 approvalDispositionState?.copy(

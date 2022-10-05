@@ -2,10 +2,13 @@ package com.strikeprotocols.mobile.data.models.approval
 
 import androidx.biometric.BiometricPrompt
 import com.strikeprotocols.mobile.common.BaseWrapper
+import com.strikeprotocols.mobile.common.BaseWrapper.decodeFromBase64
+import com.strikeprotocols.mobile.common.toHexString
 import com.strikeprotocols.mobile.data.EncryptionManager
 import com.strikeprotocols.mobile.data.Signable
 import com.strikeprotocols.mobile.data.models.ApprovalDisposition
 import com.strikeprotocols.mobile.data.models.Nonce
+import com.strikeprotocols.mobile.data.models.StoredKeyData
 import com.strikeprotocols.mobile.data.models.approval.PublicKey.Companion.SYSVAR_CLOCK_PUBKEY
 import com.strikeprotocols.mobile.data.models.approval.TransactionInstruction.Companion.createAdvanceNonceInstruction
 import org.web3j.crypto.Hash
@@ -54,9 +57,13 @@ data class ApprovalDispositionRequest(
     }
 
     fun opHashData(): ByteArray {
-        val commonBytes = signingData().commonOpHashBytes()
+        val signingData: SigningData.SolanaSigningData = when (val s = signingData()) {
+            is SigningData.SolanaSigningData -> s
+            else -> return ByteArray(0)
+        }
+        val commonBytes = signingData.commonOpHashBytes()
 
-        signingData().base64DataToSign?.let {
+        signingData.base64DataToSign?.let {
             return@opHashData SignDataHelper.serializeSignData(it, commonBytes, 15)
         }
 
@@ -207,7 +214,7 @@ data class ApprovalDispositionRequest(
         }
     }
 
-    private fun signingData(): SolanaSigningData =
+    private fun signingData(): SigningData =
         when (requestType) {
             is BalanceAccountCreation -> requestType.signingData
             is WithdrawalRequest -> requestType.signingData
@@ -240,78 +247,122 @@ data class ApprovalDispositionRequest(
         return buffer.toByteArray()
     }
 
-    override fun retrieveSignableData(approverPublicKey: String?): ByteArray {
+    override fun retrieveSignableData(approverPublicKey: String?): List<ByteArray> {
         return when (requestType) {
             is LoginApprovalRequest ->
-                requestType.jwtToken.toByteArray(charset = Charsets.UTF_8)
+                listOf(requestType.jwtToken.toByteArray(charset = Charsets.UTF_8))
             is AcceptVaultInvitation ->
-                requestType.vaultName.toByteArray(charset = Charsets.UTF_8)
+                listOf(requestType.vaultName.toByteArray(charset = Charsets.UTF_8))
             is PasswordReset ->
-                requestId.toByteArray(charset = Charsets.UTF_8)
-            else -> {
-                if (approverPublicKey == null) throw Exception("MISSING KEY")
-
-                val signingData = signingData()
-
-                val nonce = nonces.firstOrNull()
-                val nonceAccountAddress = requestType.nonceAccountAddresses().firstOrNull()
-
-                if (nonce == null || nonceAccountAddress == null) {
-                    throw Exception("NOT ENOUGH NONCE ACCOUNTS")
+                listOf(requestId.toByteArray(charset = Charsets.UTF_8))
+            is WithdrawalRequest -> {
+                when (requestType.signingData) {
+                    is SigningData.SolanaSigningData -> listOf(serializeSolanaRequest(approverPublicKey))
+                    is SigningData.BitcoinSigningData -> requestType.signingData.transaction.txIns.map { decodeFromBase64(it.base64HashForSignature) }
                 }
-
-                val keyList = listOf(
-                    AccountMeta(
-                        publicKey = PublicKey(signingData.multisigOpAccountAddress),
-                        isSigner = false,
-                        isWritable = true
-                    ),
-                    AccountMeta(
-                        publicKey = PublicKey(approverPublicKey),
-                        isSigner = true,
-                        isWritable = false
-                    ),
-                    AccountMeta(
-                        publicKey = SYSVAR_CLOCK_PUBKEY,
-                        isSigner = false,
-                        isWritable = false
-                    )
-                )
-
-                val programId = PublicKey(signingData.walletProgramId)
-
-                val transactionMessage = Transaction.compileMessage(
-                    feePayer = PublicKey(signingData.feePayer),
-                    recentBlockhash = nonce.value,
-                    instructions = listOf(
-                        createAdvanceNonceInstruction(
-                            nonceAccountAddress = nonceAccountAddress,
-                            feePayer = signingData.feePayer
-                        ),
-                        TransactionInstruction(
-                            keys = keyList,
-                            programId = programId,
-                            data = generateTransactionInstructionData()
-                        )
-                    )
-                )
-
-                transactionMessage.serialize()
             }
+            else -> listOf(serializeSolanaRequest(approverPublicKey))
         }
+    }
+
+    fun serializeSolanaRequest(approverPublicKey: String?): ByteArray {
+        if (approverPublicKey == null) throw Exception("MISSING KEY")
+
+        val signingData = signingData() as SigningData.SolanaSigningData
+
+        val nonce = nonces.firstOrNull()
+        val nonceAccountAddress = requestType.nonceAccountAddresses().firstOrNull()
+
+        if (nonce == null || nonceAccountAddress == null) {
+            throw Exception("NOT ENOUGH NONCE ACCOUNTS")
+        }
+
+        val keyList = listOf(
+            AccountMeta(
+                publicKey = PublicKey(signingData.multisigOpAccountAddress),
+                isSigner = false,
+                isWritable = true
+            ),
+            AccountMeta(
+                publicKey = PublicKey(approverPublicKey),
+                isSigner = true,
+                isWritable = false
+            ),
+            AccountMeta(
+                publicKey = SYSVAR_CLOCK_PUBKEY,
+                isSigner = false,
+                isWritable = false
+            )
+        )
+
+        val programId = PublicKey(signingData.walletProgramId)
+
+        val transactionMessage = Transaction.compileMessage(
+            feePayer = PublicKey(signingData.feePayer),
+            recentBlockhash = nonce.value,
+            instructions = listOf(
+                createAdvanceNonceInstruction(
+                    nonceAccountAddress = nonceAccountAddress,
+                    feePayer = signingData.feePayer
+                ),
+                TransactionInstruction(
+                    keys = keyList,
+                    programId = programId,
+                    data = generateTransactionInstructionData()
+                )
+            )
+        )
+
+        return transactionMessage.serialize()
     }
 
     fun convertToApiBody(
         encryptionManager: EncryptionManager,
         cipher: Cipher): RegisterApprovalDispositionBody {
 
+        val signatureInfo: ApprovalSignature = when (requestType) {
+            is LoginApprovalRequest, is PasswordReset, is AcceptVaultInvitation ->
+                ApprovalSignature.NoChainSignature(
+                    signature = signRequestWithSolanaKey(encryptionManager, cipher)
+                )
+            is WithdrawalRequest -> {
+                when (requestType.signingData) {
+                    is SigningData.BitcoinSigningData ->
+                        ApprovalSignature.BitcoinSignatures(
+                            signatures = signRequestWithBitcoinKey(encryptionManager, cipher, requestType.signingData.childKeyIndex
+                            )
+                        )
+                    is SigningData.SolanaSigningData ->
+                        ApprovalSignature.SolanaSignature(
+                            signature = signRequestWithSolanaKey(encryptionManager, cipher),
+                            nonce = nonces.first().value,
+                            nonceAccountAddress = requestType.nonceAccountAddresses().first()
+                        )
+                }
+            }
+            else -> ApprovalSignature.SolanaSignature(
+                signature = signRequestWithSolanaKey(encryptionManager, cipher),
+                nonce = nonces.first().value,
+                nonceAccountAddress = requestType.nonceAccountAddresses().first()
+            )
+        }
+        
+        return RegisterApprovalDispositionBody(
+            approvalDisposition = approvalDisposition,
+            signatureInfo = signatureInfo
+        )
+    }
+
+    private fun signRequestWithSolanaKey(
+        encryptionManager: EncryptionManager,
+        cipher: Cipher): String {
         val privateKeyByteArray = encryptionManager.retrieveSavedKey(
             email = email, cipher = cipher
         )
 
         val privateKey = BaseWrapper.encode(privateKeyByteArray)
 
-        val signature = try {
+        return try {
             encryptionManager.signApprovalDispositionMessage(
                 signable = this,
                 solanaKey = privateKey
@@ -319,22 +370,30 @@ data class ApprovalDispositionRequest(
         } catch (e: Exception) {
             throw Exception("Signing data failure")
         }
+    }
 
-        val nonce = if(nonces.isEmpty()) "" else nonces.first().value
-        val nonceAccountAddress = if(requestType.nonceAccountAddresses().isEmpty()) "" else requestType.nonceAccountAddresses().first()
+    private fun signRequestWithBitcoinKey(
+        encryptionManager: EncryptionManager,
+        cipher: Cipher,
+        childKeyIndex: Int): List<String> {
 
-        return RegisterApprovalDispositionBody(
-            approvalDisposition = approvalDisposition,
-            signature = signature,
-            nonce = nonce,
-            nonceAccountAddress = nonceAccountAddress
+        val privateKeyByteArray = encryptionManager.retrieveSavedKey(
+            email = email, cipher = cipher, keyType = StoredKeyData.BITCOIN_KEY
         )
+
+        return try {
+            encryptionManager.signBitcoinApprovalDispositionMessage(
+                signable = this,
+                bitcoinKey = BaseWrapper.encode(privateKeyByteArray),
+                childKeyIndex = childKeyIndex
+            )
+        } catch (e: Exception) {
+            throw Exception("Signing data failure")
+        }
     }
 
     inner class RegisterApprovalDispositionBody(
         val approvalDisposition: ApprovalDisposition,
-        val nonce: String,
-        val nonceAccountAddress: String,
-        val signature: String
+        val signatureInfo: ApprovalSignature
     )
 }

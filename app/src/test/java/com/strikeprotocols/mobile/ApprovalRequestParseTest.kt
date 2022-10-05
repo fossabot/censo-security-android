@@ -15,7 +15,7 @@ class ParseApprovalRequestTypes {
     fun parseAllApprovalRequestTypes() {
         val allApprovalRequests = getFullListOfApprovalItems()
 
-        assertEquals(13, allApprovalRequests.size)
+        assertEquals(14, allApprovalRequests.size)
 
         allApprovalRequests.forEach { approvalRequest ->
             assertNotNull(approvalRequest)
@@ -202,6 +202,11 @@ class ParseApprovalRequestTypes {
             JsonParser.parseString(withdrawalRequestJson.trim())
         val withdrawalRequestWalletApproval = deserializer.parseData(withdrawalRequestJson)
         allApprovalRequests.add(withdrawalRequestWalletApproval)
+
+        val bitcoinWithdrawalRequestJson: JsonElement =
+            JsonParser.parseString(bitcoinWithdrawalRequestJson.trim())
+        val bitcoinWithdrawalRequestWalletApproval = deserializer.parseData(bitcoinWithdrawalRequestJson)
+        allApprovalRequests.add(bitcoinWithdrawalRequestWalletApproval)
 
         val multiSigWithConversionRequestJson: JsonElement =
             JsonParser.parseString(multiSigWithConversionRequestJson.trim())

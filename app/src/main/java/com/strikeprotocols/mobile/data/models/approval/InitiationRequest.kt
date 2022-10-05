@@ -32,10 +32,10 @@ data class InitiationRequest(
     val opAccountPrivateKey: Ed25519PrivateKeyParameters = generateEphemeralPrivateKey()
 ) : Signable {
 
-    private val signingData : SolanaSigningData =
+    private val signingData : SigningData.SolanaSigningData =
         when (requestType) {
             is BalanceAccountCreation -> requestType.signingData
-            is WithdrawalRequest -> requestType.signingData
+            is WithdrawalRequest -> requestType.signingData as SigningData.SolanaSigningData
             is ConversionRequest -> requestType.signingData
             is SignersUpdate -> requestType.signingData
             is DAppTransactionRequest -> requestType.signingData
@@ -475,7 +475,7 @@ data class InitiationRequest(
         val publicKey: String
     )
 
-    override fun retrieveSignableData(approverPublicKey: String?): ByteArray {
+    override fun retrieveSignableData(approverPublicKey: String?): List<ByteArray> {
         if(approverPublicKey == null) {
             throw Exception("MISSING_APPROVER_KEY")
         }
@@ -506,10 +506,10 @@ data class InitiationRequest(
             )
         )
 
-        return Transaction.compileMessage(
+        return listOf(Transaction.compileMessage(
             feePayer = PublicKey(signingData.feePayer),
             recentBlockhash = nonce.value,
             instructions = instructions
-        ).serialize()
+        ).serialize())
     }
 }

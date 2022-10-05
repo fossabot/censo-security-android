@@ -25,7 +25,6 @@ import androidx.core.content.ContextCompat.startActivity
 import androidx.fragment.app.FragmentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.SwipeRefreshIndicator
@@ -43,7 +42,6 @@ import com.strikeprotocols.mobile.presentation.approvals.approval_type_row_items
 import com.strikeprotocols.mobile.presentation.components.*
 import com.strikeprotocols.mobile.presentation.durable_nonce.DurableNonceViewModel
 import com.strikeprotocols.mobile.ui.theme.*
-import kotlinx.coroutines.launch
 import com.strikeprotocols.mobile.ui.theme.BackgroundBlack
 
 @Composable
@@ -103,7 +101,7 @@ fun ApprovalsListScreen(
             approvalsViewModel.setShouldDisplayConfirmDispositionDialog(
                 approval = approval,
                 isApproving = true,
-                dialogMessages = approval.getSolanaApprovalRequestType()
+                dialogMessages = approval.getApprovalRequestType()
                     .getDialogMessages(
                         context = context,
                         approvalDisposition = ApprovalDisposition.APPROVE,
@@ -177,7 +175,7 @@ fun ApprovalsListScreen(
                     approvalsViewModel.setShouldDisplayConfirmDispositionDialog(
                         approval = approval,
                         isApproving = true,
-                        dialogMessages = approval?.getSolanaApprovalRequestType()?.getDialogMessages(
+                        dialogMessages = approval?.getApprovalRequestType()?.getDialogMessages(
                             context = context,
                             approvalDisposition = ApprovalDisposition.APPROVE,
                             isInitiationRequest = approval.isInitiationRequest()
@@ -216,7 +214,7 @@ fun ApprovalsListScreen(
             }
 
             if (approvalsState.shouldDisplayConfirmDisposition != null) {
-                if (approvalsState.selectedApproval?.getSolanaApprovalRequestType() is LoginApprovalRequest) {
+                if (approvalsState.selectedApproval?.getApprovalRequestType() is LoginApprovalRequest) {
                     approvalsViewModel.resetShouldDisplayConfirmDisposition()
                     launchNonceWork()
                 } else {
@@ -342,7 +340,7 @@ fun ApprovalsList(
                     Spacer(modifier = Modifier.height(12.dp))
 
                     walletApproval?.let { safeApproval ->
-                        val type = safeApproval.getSolanaApprovalRequestType()
+                        val type = safeApproval.getApprovalRequestType()
                         val rowMetaData = type.getApprovalRowMetaData(safeApproval.vaultName?.toVaultName(context))
 
                         val calculatedTimerSecondsLeft = getSecondsLeftUntilCountdownIsOver(safeApproval.submitDate, safeApproval.approvalTimeoutInSeconds)

@@ -79,7 +79,7 @@ sealed class SolanaApprovalRequestType {
         val account: AccountInfo,
         val symbolAndAmountInfo: SymbolAndAmountInfo,
         val destination: DestinationAddress,
-        val signingData: SolanaSigningData
+        val signingData: SigningData
     ) : SolanaApprovalRequestType()
 
     data class ConversionRequest(
@@ -88,14 +88,14 @@ sealed class SolanaApprovalRequestType {
         val symbolAndAmountInfo: SymbolAndAmountInfo,
         val destination: DestinationAddress,
         val destinationSymbolInfo: SymbolInfo,
-        val signingData: SolanaSigningData
+        val signingData: SigningData.SolanaSigningData
     ) : SolanaApprovalRequestType()
 
     data class SignersUpdate(
         val type: String,
         val slotUpdateType: SlotUpdateType,
         val signer: SlotSignerInfo,
-        val signingData: SolanaSigningData
+        val signingData: SigningData.SolanaSigningData
     ) : SolanaApprovalRequestType()
 
     data class BalanceAccountCreation(
@@ -106,7 +106,7 @@ sealed class SolanaApprovalRequestType {
         var whitelistEnabled: BooleanSetting,
         var dappsEnabled: BooleanSetting,
         var addressBookSlot: Byte,
-        var signingData: SolanaSigningData
+        var signingData: SigningData.SolanaSigningData
     ) : SolanaApprovalRequestType() {
 
         fun combinedBytes() : ByteArray {
@@ -130,7 +130,7 @@ sealed class SolanaApprovalRequestType {
         var dappInfo: SolanaDApp,
         var balanceChanges: List<SymbolAndAmountInfo>,
         var instructions: List<SolanaInstructionChunk>,
-        var signingData: SolanaSigningData
+        var signingData: SigningData.SolanaSigningData
     ) : SolanaApprovalRequestType()
 
     data class WrapConversionRequest(
@@ -138,13 +138,13 @@ sealed class SolanaApprovalRequestType {
         val account: AccountInfo,
         val symbolAndAmountInfo: SymbolAndAmountInfo,
         val destinationSymbolInfo: SymbolInfo,
-        var signingData: SolanaSigningData
+        var signingData: SigningData.SolanaSigningData
     ) : SolanaApprovalRequestType()
 
     data class WalletConfigPolicyUpdate(
         val type: String,
         val approvalPolicy: ApprovalPolicy,
-        var signingData: SolanaSigningData
+        var signingData: SigningData.SolanaSigningData
     ) : SolanaApprovalRequestType()
 
     data class BalanceAccountSettingsUpdate(
@@ -152,7 +152,7 @@ sealed class SolanaApprovalRequestType {
         val account: AccountInfo,
         val whitelistEnabled: BooleanSetting?,
         val dappsEnabled: BooleanSetting?,
-        var signingData: SolanaSigningData
+        var signingData: SigningData.SolanaSigningData
     ) : SolanaApprovalRequestType() {
 
         fun changeValue() : SettingsChange? {
@@ -198,7 +198,7 @@ sealed class SolanaApprovalRequestType {
         val type: String,
         val entriesToAdd: List<SlotDAppInfo>,
         val entriesToRemove: List<SlotDAppInfo>,
-        var signingData: SolanaSigningData
+        var signingData: SigningData.SolanaSigningData
     ) : SolanaApprovalRequestType() {
 
         fun combinedBytes() : ByteArray {
@@ -217,7 +217,7 @@ sealed class SolanaApprovalRequestType {
         val type: String,
         val entriesToAdd: List<SlotDestinationInfo>,
         val entriesToRemove: List<SlotDestinationInfo>,
-        var signingData: SolanaSigningData
+        var signingData: SigningData.SolanaSigningData
     ) : SolanaApprovalRequestType() {
 
 
@@ -268,7 +268,7 @@ sealed class SolanaApprovalRequestType {
         val type: String,
         val accountInfo: AccountInfo,
         val newAccountName: String,
-        var signingData: SolanaSigningData
+        var signingData: SigningData.SolanaSigningData
     ) : SolanaApprovalRequestType() {
 
         fun combinedBytes() : ByteArray {
@@ -285,7 +285,7 @@ sealed class SolanaApprovalRequestType {
         val type: String,
         val accountInfo: AccountInfo,
         val approvalPolicy: ApprovalPolicy,
-        var signingData: SolanaSigningData
+        var signingData: SigningData.SolanaSigningData
     ) : SolanaApprovalRequestType() {
 
         fun combinedBytes() : ByteArray {
@@ -303,7 +303,7 @@ sealed class SolanaApprovalRequestType {
         val type: String,
         val accountInfo: AccountInfo,
         val destinations: List<SlotDestinationInfo>,
-        val signingData: SolanaSigningData
+        val signingData: SigningData.SolanaSigningData
     ) : SolanaApprovalRequestType() {
 
         fun combinedBytes() : ByteArray {
@@ -345,7 +345,7 @@ sealed class SolanaApprovalRequestType {
 
     data class SignData(
         val base64Data: String,
-        val signingData: SolanaSigningData,
+        val signingData: SigningData.SolanaSigningData,
     ) : SolanaApprovalRequestType()
 
     object UnknownApprovalType : SolanaApprovalRequestType()
@@ -358,7 +358,10 @@ sealed class SolanaApprovalRequestType {
 
     fun nonceAccountAddresses() : List<String> {
         return when(this) {
-            is WithdrawalRequest -> signingData.nonceAccountAddresses
+            is WithdrawalRequest ->  when(signingData()) {
+                is SigningData.SolanaSigningData -> (signingData as SigningData.SolanaSigningData).nonceAccountAddresses
+                else -> emptyList()
+            }
             is ConversionRequest -> signingData.nonceAccountAddresses
             is SignersUpdate -> signingData.nonceAccountAddresses
             is BalanceAccountCreation -> signingData.nonceAccountAddresses
@@ -383,14 +386,17 @@ sealed class SolanaApprovalRequestType {
             is WalletConfigPolicyUpdate, is BalanceAccountSettingsUpdate, is DAppBookUpdate,
             is AddressBookUpdate, is BalanceAccountNameUpdate, is BalanceAccountPolicyUpdate,
             is BalanceAccountAddressWhitelistUpdate, is SignData -> {
-                signingData()?.nonceAccountAddressesSlot ?: 0
+                when (val signingData = signingData()) {
+                    is SigningData.SolanaSigningData -> signingData.nonceAccountAddressesSlot
+                    else -> 0
+                }
             }
             is LoginApprovalRequest, is UnknownApprovalType,
             is AcceptVaultInvitation, is PasswordReset -> 0
         }
     }
 
-    private fun signingData(): SolanaSigningData? =
+    private fun signingData(): SigningData? =
         when (this) {
             is WithdrawalRequest -> signingData
             is ConversionRequest -> signingData
@@ -556,45 +562,76 @@ val b64Encoder: Base64.Encoder = Base64.getEncoder()
 val b64Decoder: Base64.Decoder = Base64.getDecoder()
 val emptyHash: String = b64Encoder.encodeToString(ByteArray(size = 32))
 
-data class SolanaSigningData(
-    val feePayer: String,
-    val walletProgramId: String,
-    val multisigOpAccountAddress: String,
-    val walletAddress: String,
-    val nonceAccountAddresses: List<String>,
-    val nonceAccountAddressesSlot: Int,
-    val initiator: String,
-    val strikeFeeAmount: Long,
-    val feeAccountGuidHash: String,
-    val walletGuidHash: String,
-    val base64DataToSign: String? = null,
-) {
+data class TransactionInput(
+    val txId: String,
+    val index: Int,
+    val amount: Long,
+    val prevOutScriptHex: String,
+    val base64HashForSignature: String,
+)
 
-    fun commonOpHashBytes() : ByteArray {
-        val buffer = ByteArrayOutputStream()
+data class TransactionOutput(
+    val index: Int,
+    val amount: Long,
+    val pubKeyScriptHex: String,
+    val address: String,
+    val isChange: Boolean
+)
 
-        buffer.write(initiator.base58Bytes())
-        buffer.write(feePayer.base58Bytes())
-        buffer.writeLongLE(strikeFeeAmount)
-        buffer.write(b64Decoder.decode(feeAccountGuidHash))
-        buffer.write(walletAddress.base58Bytes())
+data class BitcoinTransaction(
+    val version: Int,
+    val txIns: List<TransactionInput>,
+    val txOuts: List<TransactionOutput>,
+    val totalFee: Long,
+)
 
-        return buffer.toByteArray()
-    }
 
-    fun commonInitiationBytes() : ByteArray {
-        val buffer = ByteArrayOutputStream()
+sealed class SigningData {
+    data class SolanaSigningData(
+        val feePayer: String,
+        val walletProgramId: String,
+        val multisigOpAccountAddress: String,
+        val walletAddress: String,
+        val nonceAccountAddresses: List<String>,
+        val nonceAccountAddressesSlot: Int,
+        val initiator: String,
+        val strikeFeeAmount: Long,
+        val feeAccountGuidHash: String,
+        val walletGuidHash: String,
+        val base64DataToSign: String? = null,
+    ) : SigningData() {
 
-        buffer.writeLongLE(strikeFeeAmount)
-        buffer.write(
-            byteArrayOf(
-                if (feeAccountGuidHash == emptyHash) 0 else 1
+        fun commonOpHashBytes(): ByteArray {
+            val buffer = ByteArrayOutputStream()
+
+            buffer.write(initiator.base58Bytes())
+            buffer.write(feePayer.base58Bytes())
+            buffer.writeLongLE(strikeFeeAmount)
+            buffer.write(b64Decoder.decode(feeAccountGuidHash))
+            buffer.write(walletAddress.base58Bytes())
+
+            return buffer.toByteArray()
+        }
+
+        fun commonInitiationBytes(): ByteArray {
+            val buffer = ByteArrayOutputStream()
+
+            buffer.writeLongLE(strikeFeeAmount)
+            buffer.write(
+                byteArrayOf(
+                    if (feeAccountGuidHash == emptyHash) 0 else 1
+                )
             )
-        )
-        buffer.write(b64Decoder.decode(feeAccountGuidHash))
+            buffer.write(b64Decoder.decode(feeAccountGuidHash))
 
-        return buffer.toByteArray()
+            return buffer.toByteArray()
+        }
     }
+
+    data class BitcoinSigningData(
+        val childKeyIndex: Int,
+        val transaction: BitcoinTransaction
+    ) : SigningData()
 }
 
 enum class AccountType(val value: String) {

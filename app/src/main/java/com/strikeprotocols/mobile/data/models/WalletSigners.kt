@@ -6,5 +6,6 @@ data class WalletSigner(
 ) {
     companion object {
         const val WALLET_TYPE_SOLANA = "Solana"
+        const val WALLET_TYPE_BITCOIN = "Bitcoin"
     }
 }

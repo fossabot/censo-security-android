@@ -21,7 +21,7 @@ data class WalletApproval(
     @Transient val details: SolanaApprovalRequestDetails?
 ) {
 
-    fun getSolanaApprovalRequestType() =
+    fun getApprovalRequestType() =
         when(details) {
             is SolanaApprovalRequestDetails.ApprovalRequestDetails -> details.requestType
             is SolanaApprovalRequestDetails.MultiSignOpInitiationDetails -> details.requestType
@@ -68,6 +68,8 @@ data class WalletApproval(
         fun toJson(approval: WalletApproval, uriWrapper: UriWrapper): String {
             val jsonString = GsonBuilder()
                 .excludeFieldsWithModifiers(Modifier.STATIC)
+                .registerTypeAdapterFactory(TypeFactorySettings.signingDataAdapterFactory)
+                .registerTypeAdapterFactory(TypeFactorySettings.approvalSignatureAdapterFactory)
                 .create()
                 .toJson(approval)
             return uriWrapper.encode(jsonString)

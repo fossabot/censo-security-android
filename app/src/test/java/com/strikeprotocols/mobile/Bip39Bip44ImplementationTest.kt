@@ -38,7 +38,7 @@ class Bip39Bip44ImplementationTest {
         val testItems = Gson().fromJson(ClassLoader.getSystemResource("bip39-bip44/bitcoin-test-data.json").readText().trimEnd('\n'), TestItems::class.java).items
         testItems.forEachIndexed { i, testItem ->
             println("Checking item $i, ${testItem.mnemonic}")
-            val bitcoinKey = BitcoinHierarchicalKey.fromSeedPhrase(testItem.mnemonic).derive(ChildPathNumber(0, false))
+            val bitcoinKey = Secp256k1HierarchicalKey.fromSeedPhrase(testItem.mnemonic, Secp256k1HierarchicalKey.bitcoinDerivationPath).derive(ChildPathNumber(0, false))
             assertEquals(testItem.privateKey, bitcoinKey.getBase58ExtendedPrivateKey())
             assertEquals(testItem.publicKey, bitcoinKey.getBase58ExtendedPublicKey())
         }
@@ -109,7 +109,10 @@ class Bip39Bip44ImplementationTest {
             "xpub6GGm8SWYXzXt4T2giWaP67ajd9d5hnYkbgUFtxyBU9d4Q5hkXPr7JHtPJN5dD6uNVXb7EEpdZeXvG5XwFVWhUj4Q2ufhYH38fuHK9ERTy3d"
         val expectedPubKey = "0318287a66643f9db1956c812c533bb3d6b22dce7955d7169d6f8ed39d4e96c909"
 
-        val signingKey = BitcoinHierarchicalKey.fromSeedPhrase(seedPhrase).derive(ChildPathNumber(0, false))
+        val signingKey = Secp256k1HierarchicalKey.fromSeedPhrase(
+            seedPhrase,
+            Secp256k1HierarchicalKey.bitcoinDerivationPath
+        ).derive(ChildPathNumber(0, false))
 
         assertEquals(expectedPubKey, signingKey.getPublicKeyBytes().toHexString().lowercase())
         assertEquals(expectedXprv, signingKey.getBase58ExtendedPrivateKey())
@@ -117,16 +120,16 @@ class Bip39Bip44ImplementationTest {
 
         // create a verify key from the signing keys extended pub key
         // have the verifying key verify the signature from the signing key
-        val verifyingKey = BitcoinHierarchicalKey.fromExtendedKey(signingKey.getBase58ExtendedPublicKey())
+        val verifyingKey = Secp256k1HierarchicalKey.fromExtendedKey(signingKey.getBase58ExtendedPublicKey())
         val dataToSign = "hello world".toByteArray(charset("utf-8"))
         assertTrue(verifyingKey.verifySignature(dataToSign, signingKey.signData(dataToSign)))
 
         // check new keys from the extended public/private key match the key they came from
-        val keyFromExtendedPriv = BitcoinHierarchicalKey.fromExtendedKey(expectedXprv)
+        val keyFromExtendedPriv = Secp256k1HierarchicalKey.fromExtendedKey(expectedXprv)
         assertEquals(keyFromExtendedPriv.getBase58ExtendedPrivateKey(), signingKey.getBase58ExtendedPrivateKey())
         assertEquals(keyFromExtendedPriv.getBase58ExtendedPublicKey(), signingKey.getBase58ExtendedPublicKey())
 
-        val keyFromExtendedPub = BitcoinHierarchicalKey.fromExtendedKey(expectedXpub)
+        val keyFromExtendedPub = Secp256k1HierarchicalKey.fromExtendedKey(expectedXpub)
         assertNull(keyFromExtendedPub.privateKey)
         assertEquals(keyFromExtendedPub.getBase58ExtendedPublicKey(), signingKey.getBase58ExtendedPublicKey())
 

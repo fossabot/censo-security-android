@@ -1,17 +1,15 @@
 package com.strikeprotocols.mobile
 
 import cash.z.ecc.android.bip39.Mnemonics
-import cash.z.ecc.android.bip39.toSeed
 import com.google.gson.JsonParser
-import com.nhaarman.mockitokotlin2.any
-import com.nhaarman.mockitokotlin2.whenever
+import com.nhaarman.mockitokotlin2.*
 import com.strikeprotocols.mobile.common.BaseWrapper
 import com.strikeprotocols.mobile.data.*
 import com.strikeprotocols.mobile.data.models.ApprovalDisposition
 import com.strikeprotocols.mobile.data.models.Nonce
-import com.strikeprotocols.mobile.data.models.StoredKeyData.Companion.ROOT_SEED
-import com.strikeprotocols.mobile.data.models.StoredKeyData.Companion.SOLANA_KEY
+import com.strikeprotocols.mobile.data.models.StoredKeyData
 import com.strikeprotocols.mobile.data.models.approval.*
+import org.bitcoinj.core.Base58
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Before
@@ -19,6 +17,7 @@ import org.junit.Test
 import org.mockito.Mock
 import org.mockito.MockitoAnnotations
 import java.util.*
+import javax.crypto.Cipher
 
 class ApprovalRequestSigningTest {
 
@@ -48,6 +47,9 @@ class ApprovalRequestSigningTest {
 
     private lateinit var phrase: String
 
+    private val mockEncryptionManager = mock<EncryptionManager>()
+    private val cipherMock = mock<Cipher>()
+
     @Before
     fun setUp() {
         MockitoAnnotations.openMocks(this)
@@ -65,6 +67,8 @@ class ApprovalRequestSigningTest {
         }
 
         approverPublicKey = BaseWrapper.encode(keyPair.publicKey)
+
+        reset(mockEncryptionManager)
     }
 
     private fun generateSignBalanceAccountCreationSignableData(): ByteArray {
@@ -74,12 +78,12 @@ class ApprovalRequestSigningTest {
         val approvalDispositionRequest = ApprovalDispositionRequest(
             requestId = balanceAccountCreationWalletApproval.id!!,
             approvalDisposition = if (Random().nextBoolean()) ApprovalDisposition.APPROVE else ApprovalDisposition.DENY,
-            requestType = balanceAccountCreationWalletApproval.getSolanaApprovalRequestType(),
+            requestType = balanceAccountCreationWalletApproval.getApprovalRequestType(),
             nonces = exampleNonces,
             email = userEmail
         )
 
-        val signableData = approvalDispositionRequest.retrieveSignableData(approverPublicKey)
+        val signableData = approvalDispositionRequest.retrieveSignableData(approverPublicKey).first()
 
         println("BalanceAccount Signed Data: $signableData")
 
@@ -90,19 +94,44 @@ class ApprovalRequestSigningTest {
         val loginApprovalWalletApproval =
             deserializer.parseData(JsonParser.parseString(loginApprovalJson.trim()))
 
+        val disposition = if (Random().nextBoolean()) ApprovalDisposition.APPROVE else ApprovalDisposition.DENY
         val approvalDispositionRequest = ApprovalDispositionRequest(
             requestId = loginApprovalWalletApproval.id!!,
-            approvalDisposition = if (Random().nextBoolean()) ApprovalDisposition.APPROVE else ApprovalDisposition.DENY,
-            requestType = loginApprovalWalletApproval.getSolanaApprovalRequestType(),
+            approvalDisposition = disposition,
+            requestType = loginApprovalWalletApproval.getApprovalRequestType(),
             nonces = exampleNonces,
             email = userEmail
         )
 
-        val signableData = approvalDispositionRequest.retrieveSignableData(approverPublicKey)
+        val signableData = approvalDispositionRequest.retrieveSignableData(approverPublicKey).first()
 
         println("Login Approval: $signableData")
 
+        verifyNoChainApiBody(approvalDispositionRequest, disposition)
+
         return signableData
+    }
+
+    private fun verifyNoChainApiBody(approvalDispositionRequest: ApprovalDispositionRequest, disposition: ApprovalDisposition) {
+        whenever(mockEncryptionManager.retrieveSavedKey(any(), any(), any())).thenReturn(Base58.decode(base58EncodedPrivateKey))
+        whenever(mockEncryptionManager.signApprovalDispositionMessage(any(), any())).thenReturn("someSignature")
+        val apiBody = approvalDispositionRequest.convertToApiBody(mockEncryptionManager, cipherMock)
+        assertEquals(disposition, apiBody.approvalDisposition)
+        assertEquals(
+            ApprovalSignature.NoChainSignature("someSignature"),
+            apiBody.signatureInfo
+        )
+
+        verify(mockEncryptionManager, times(1)).retrieveSavedKey(
+            "floater@test887123.com",
+            cipherMock,
+            StoredKeyData.SOLANA_KEY
+        )
+
+        verify(mockEncryptionManager, times(1)).signApprovalDispositionMessage(
+            approvalDispositionRequest,
+            base58EncodedPrivateKey,
+        )
     }
 
     private fun generateSignWithdrawalRequestSignableData(): ByteArray {
@@ -112,12 +141,12 @@ class ApprovalRequestSigningTest {
         val approvalDispositionRequest = ApprovalDispositionRequest(
             requestId = withdrawalRequestWalletApproval.id!!,
             approvalDisposition = ApprovalDisposition.APPROVE,
-            requestType = withdrawalRequestWalletApproval.getSolanaApprovalRequestType(),
+            requestType = withdrawalRequestWalletApproval.getApprovalRequestType(),
             nonces = exampleNonces,
             email = userEmail
         )
 
-        val signableData = approvalDispositionRequest.retrieveSignableData(approverPublicKey)
+        val signableData = approvalDispositionRequest.retrieveSignableData(approverPublicKey).first()
 
         println("WithdrawalRequest Signed Data: $signableData")
 
@@ -131,12 +160,12 @@ class ApprovalRequestSigningTest {
         val approvalDispositionRequest = ApprovalDispositionRequest(
             requestId = conversionRequestWalletApproval.id!!,
             approvalDisposition = if (Random().nextBoolean()) ApprovalDisposition.APPROVE else ApprovalDisposition.DENY,
-            requestType = conversionRequestWalletApproval.getSolanaApprovalRequestType(),
+            requestType = conversionRequestWalletApproval.getApprovalRequestType(),
             nonces = exampleNonces,
             email = userEmail
         )
 
-        val signableData = approvalDispositionRequest.retrieveSignableData(approverPublicKey)
+        val signableData = approvalDispositionRequest.retrieveSignableData(approverPublicKey).first()
 
         println("ConversionRequest Signed Data: $signableData")
 
@@ -150,12 +179,12 @@ class ApprovalRequestSigningTest {
         val approvalDispositionRequest = ApprovalDispositionRequest(
             requestId = signersUpdateWalletApproval.id!!,
             approvalDisposition = if (Random().nextBoolean()) ApprovalDisposition.APPROVE else ApprovalDisposition.DENY,
-            requestType = signersUpdateWalletApproval.getSolanaApprovalRequestType(),
+            requestType = signersUpdateWalletApproval.getApprovalRequestType(),
             nonces = exampleNonces,
             email = userEmail
         )
 
-        val signableData = approvalDispositionRequest.retrieveSignableData(approverPublicKey)
+        val signableData = approvalDispositionRequest.retrieveSignableData(approverPublicKey).first()
 
         println("SignersUpdate Signed Data: $signableData")
 
@@ -169,12 +198,12 @@ class ApprovalRequestSigningTest {
         val approvalDispositionRequest = ApprovalDispositionRequest(
             requestId = signersUpdateRemovalWalletApproval.id!!,
             approvalDisposition = if (Random().nextBoolean()) ApprovalDisposition.APPROVE else ApprovalDisposition.DENY,
-            requestType = signersUpdateRemovalWalletApproval.getSolanaApprovalRequestType(),
+            requestType = signersUpdateRemovalWalletApproval.getApprovalRequestType(),
             nonces = exampleNonces,
             email = userEmail
         )
 
-        val signableData = approvalDispositionRequest.retrieveSignableData(approverPublicKey)
+        val signableData = approvalDispositionRequest.retrieveSignableData(approverPublicKey).first()
 
         println("SignersUpdateRemoval Signed Data: $signableData")
 
@@ -226,7 +255,7 @@ class ApprovalRequestSigningTest {
         val approvalDispositionRequest = ApprovalDispositionRequest(
             requestId = balanceAccountCreationWalletApproval.id!!,
             approvalDisposition = if (Random().nextBoolean()) ApprovalDisposition.APPROVE else ApprovalDisposition.DENY,
-            requestType = balanceAccountCreationWalletApproval.getSolanaApprovalRequestType(),
+            requestType = balanceAccountCreationWalletApproval.getApprovalRequestType(),
             nonces = exampleNonces,
             email = userEmail
         )
@@ -245,10 +274,11 @@ class ApprovalRequestSigningTest {
         val withdrawalRequestWalletApproval =
             deserializer.parseData(JsonParser.parseString(withdrawalRequestJson.trim()))
 
+        val disposition = if (Random().nextBoolean()) ApprovalDisposition.APPROVE else ApprovalDisposition.DENY
         val approvalDispositionRequest = ApprovalDispositionRequest(
             requestId = withdrawalRequestWalletApproval.id!!,
-            approvalDisposition = if (Random().nextBoolean()) ApprovalDisposition.APPROVE else ApprovalDisposition.DENY,
-            requestType = withdrawalRequestWalletApproval.getSolanaApprovalRequestType(),
+            approvalDisposition = disposition,
+            requestType = withdrawalRequestWalletApproval.getApprovalRequestType(),
             nonces = exampleNonces,
             email = userEmail
         )
@@ -260,6 +290,76 @@ class ApprovalRequestSigningTest {
         println("Signature from withdrawal request: $signature")
 
         assertNotNull(signature)
+
+        whenever(mockEncryptionManager.retrieveSavedKey(any(), any(), any())).thenReturn(Base58.decode(base58EncodedPrivateKey))
+        whenever(mockEncryptionManager.signApprovalDispositionMessage(any(), any())).thenReturn("someSignature")
+        val apiBody = approvalDispositionRequest.convertToApiBody(mockEncryptionManager, cipherMock)
+        assertEquals(disposition, apiBody.approvalDisposition)
+        assertEquals(
+            ApprovalSignature.SolanaSignature("someSignature", exampleNonces.first().value, "57bGarSm6DxPnWds3KVWMVkDZ9s4D8WGnqm6DSzBiLpN"),
+            apiBody.signatureInfo
+        )
+
+        verify(mockEncryptionManager, times(1)).retrieveSavedKey(
+            "floater@test887123.com",
+            cipherMock,
+            StoredKeyData.SOLANA_KEY
+        )
+
+        verify(mockEncryptionManager, times(1)).signApprovalDispositionMessage(
+            approvalDispositionRequest,
+            base58EncodedPrivateKey,
+        )
+    }
+
+    @Test
+    fun generateSignatureForBitcoinWithdrawalRequest() {
+        val withdrawalRequestWalletApproval =
+            deserializer.parseData(JsonParser.parseString(bitcoinWithdrawalRequestJson.trim()))
+
+        val bitcoinExtendedPrivateKey = "tprv8igBmKYoTNej2GHV2ZvfQ3eJM9yAeDoMs8pTDqJLR1EzCHJc42QrxLGuh6Hh5b248yzeC5DAWyby76b9rbhL7L7GJuAeXY1k7yiYyjajcW4"
+
+        val disposition = if (Random().nextBoolean()) ApprovalDisposition.APPROVE else ApprovalDisposition.DENY
+        val approvalDispositionRequest = ApprovalDispositionRequest(
+            requestId = withdrawalRequestWalletApproval.id!!,
+            approvalDisposition = disposition,
+            requestType = withdrawalRequestWalletApproval.getApprovalRequestType(),
+            nonces = listOf(),
+            email = userEmail
+        )
+
+        val signatures = encryptionManager.signBitcoinApprovalDispositionMessage(
+            signable = approvalDispositionRequest, bitcoinKey = bitcoinExtendedPrivateKey, childKeyIndex = 0
+        )
+
+        val expectedSignatures = listOf(
+            "MEQCIBiSprONqD6ejJ+DnFMBO4J/XuBB0+g1AZbsVhAwVvOxAiAzxIvPIbILK1T3ansYRN64F16OTfxVBV6r+W878BWWUg==",
+            "MEQCIGrIRsSweu+vxPD7bf3cTQQeTKGK6dL3y0bhixPFLdGAAiAS5Ryvpch7KusXaAqMGkmkFt/IzgdpJ2LHTWzXSuPxOw==",
+            "MEMCH19ac8Hpx+fKnzyZSxjFR6uRHnTgyYOa3J995/jAor0CIDJT47QNi9BdGOQBLSApVwAWYxNPlgamvrSbkn7i5uI1"
+        )
+
+        assertEquals(
+            expectedSignatures,
+            signatures,
+        )
+
+        whenever(mockEncryptionManager.retrieveSavedKey(any(), any(), any())).thenReturn(Base58.decode(bitcoinExtendedPrivateKey))
+        whenever(mockEncryptionManager.signBitcoinApprovalDispositionMessage(any(), any(), any())).thenReturn(expectedSignatures)
+        val apiBody = approvalDispositionRequest.convertToApiBody(mockEncryptionManager, cipherMock)
+        assertEquals(disposition, apiBody.approvalDisposition)
+        assertEquals(ApprovalSignature.BitcoinSignatures(expectedSignatures), apiBody.signatureInfo)
+
+        verify(mockEncryptionManager, times(1)).retrieveSavedKey(
+            "floater@test887123.com",
+            cipherMock,
+            StoredKeyData.BITCOIN_KEY
+        )
+
+        verify(mockEncryptionManager, times(1)).signBitcoinApprovalDispositionMessage(
+            approvalDispositionRequest,
+            bitcoinExtendedPrivateKey,
+            0
+        )
     }
 
     @Test
@@ -271,7 +371,7 @@ class ApprovalRequestSigningTest {
         val approvalDispositionRequest = ApprovalDispositionRequest(
             requestId = conversionRequestWalletApproval.id!!,
             approvalDisposition = if (Random().nextBoolean()) ApprovalDisposition.APPROVE else ApprovalDisposition.DENY,
-            requestType = conversionRequestWalletApproval.getSolanaApprovalRequestType(),
+            requestType = conversionRequestWalletApproval.getApprovalRequestType(),
             nonces = exampleNonces,
             email = userEmail
         )
@@ -294,7 +394,7 @@ class ApprovalRequestSigningTest {
         val approvalDispositionRequest = ApprovalDispositionRequest(
             requestId = signersUpdateWalletApproval.id!!,
             approvalDisposition = ApprovalDisposition.APPROVE,
-            requestType = signersUpdateWalletApproval.getSolanaApprovalRequestType(),
+            requestType = signersUpdateWalletApproval.getApprovalRequestType(),
             nonces = exampleNonces,
             email = userEmail
         )
@@ -316,7 +416,7 @@ class ApprovalRequestSigningTest {
         val approvalDispositionRequest = ApprovalDispositionRequest(
             requestId = signersUpdateRemovalWalletApproval.id!!,
             approvalDisposition = ApprovalDisposition.APPROVE,
-            requestType = signersUpdateRemovalWalletApproval.getSolanaApprovalRequestType(),
+            requestType = signersUpdateRemovalWalletApproval.getApprovalRequestType(),
             nonces = exampleNonces,
             email = userEmail
         )
@@ -339,7 +439,7 @@ class ApprovalRequestSigningTest {
         val approvalDispositionRequest = ApprovalDispositionRequest(
             requestId = loginApprovalWalletApproval.id!!,
             approvalDisposition = ApprovalDisposition.APPROVE,
-            requestType = loginApprovalWalletApproval.getSolanaApprovalRequestType(),
+            requestType = loginApprovalWalletApproval.getApprovalRequestType(),
             nonces = exampleNonces,
             email = userEmail
         )
@@ -361,7 +461,7 @@ class ApprovalRequestSigningTest {
         val approvalDispositionRequest = ApprovalDispositionRequest(
             requestId = dappTransactionWalletApproval.id!!,
             approvalDisposition = ApprovalDisposition.APPROVE,
-            requestType = dappTransactionWalletApproval.getSolanaApprovalRequestType(),
+            requestType = dappTransactionWalletApproval.getApprovalRequestType(),
             nonces = listOf(Nonce("Bf1znCzN6V7tczCXfBXZvfBGFimSV79kZD513E2ZiCap")),
             email = userEmail
         )

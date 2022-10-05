@@ -1,10 +1,8 @@
 package com.strikeprotocols.mobile.data
 
-import androidx.biometric.BiometricPrompt
 import cash.z.ecc.android.bip39.Mnemonics
 import cash.z.ecc.android.bip39.toSeed
-import com.strikeprotocols.mobile.common.BaseWrapper
-import com.strikeprotocols.mobile.common.Ed25519HierarchicalPrivateKey
+import com.strikeprotocols.mobile.common.*
 import com.strikeprotocols.mobile.data.EncryptionManagerImpl.Companion.DATA_CHECK
 import com.strikeprotocols.mobile.data.EncryptionManagerImpl.Companion.NO_OFFSET_INDEX
 import com.strikeprotocols.mobile.data.EncryptionManagerImpl.Companion.NoKeyDataException
@@ -37,6 +35,12 @@ interface EncryptionManager {
         signable: Signable,
         solanaKey: String
     ): String
+
+    fun signBitcoinApprovalDispositionMessage(
+        signable: Signable,
+        bitcoinKey: String,
+        childKeyIndex: Int
+    ): List<String>
 
     fun signApprovalInitiationMessage(
         ephemeralPrivateKey: ByteArray,
@@ -76,6 +80,7 @@ interface EncryptionManager {
     fun retrieveSavedKey(
         email: String,
         cipher: Cipher,
+        keyType: String = SOLANA_KEY
     ): ByteArray
 
     fun createStoredKeyDataAsJson(
@@ -154,13 +159,29 @@ class EncryptionManagerImpl @Inject constructor(
 
         val publicKey = regeneratePublicKey(privateKey = solanaKey)
 
-        val messageToSign = signable.retrieveSignableData(approverPublicKey = publicKey)
+        val messageToSign = signable.retrieveSignableData(approverPublicKey = publicKey).first()
 
         val signedData = signData(
             data = messageToSign, privateKey = BaseWrapper.decode(solanaKey)
         )
 
         return BaseWrapper.encodeToBase64(signedData)
+    }
+
+    override fun signBitcoinApprovalDispositionMessage(
+        signable: Signable,
+        bitcoinKey: String,
+        childKeyIndex: Int
+    ): List<String> {
+        if (bitcoinKey.isEmpty()) {
+            throw NoKeyDataException
+        }
+
+        val btcKey = Secp256k1HierarchicalKey.fromExtendedKey(bitcoinKey).derive(ChildPathNumber(childKeyIndex, false))
+
+        return signable.retrieveSignableData(approverPublicKey = btcKey.getPublicKeyBytes().toHexString()).map {
+            BaseWrapper.encodeToBase64(btcKey.signData(it))
+        }
     }
 
     override fun signApprovalInitiationMessage(
@@ -174,7 +195,7 @@ class EncryptionManagerImpl @Inject constructor(
 
         val publicKey = regeneratePublicKey(privateKey = solanaKey)
 
-        val messageToSign = signable.retrieveSignableData(approverPublicKey = publicKey)
+        val messageToSign = signable.retrieveSignableData(approverPublicKey = publicKey).first()
 
         val signedData = signData(
             data = messageToSign,
@@ -263,6 +284,7 @@ class EncryptionManagerImpl @Inject constructor(
     override fun retrieveSavedKey(
         email: String,
         cipher: Cipher,
+        keyType: String
     ): ByteArray {
         val savedKey = securePreferences.retrieveEncryptedStoredKeys(email)
 
@@ -271,7 +293,7 @@ class EncryptionManagerImpl @Inject constructor(
             cipher = cipher,
         )
 
-        return BaseWrapper.decode(keysMap[SOLANA_KEY] ?: "")
+        return BaseWrapper.decode(keysMap[keyType] ?: "")
     }
 
     override fun getInitializedCipherForEncryption(): Cipher {
@@ -375,7 +397,7 @@ data class StrikeKeyPair(
 }
 
 interface Signable {
-    fun retrieveSignableData(approverPublicKey: String?): ByteArray
+    fun retrieveSignableData(approverPublicKey: String?): List<ByteArray>
 }
 
 interface SignableSupplyInstructions {
