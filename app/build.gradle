@@ -13,7 +13,7 @@ def final coreAppId = "com.strikeprotocols.mobile"
 
 String versionNameMajor = 2
 String versionNameMinor = 1
-String versionNamePatch = 0
+String versionNamePatch = 1
 
 android {
     Boolean signBuild = false
@@ -44,7 +44,7 @@ android {
         applicationId coreAppId
         minSdk 30
         targetSdk 32
-        versionCode 21
+        versionCode 22
 
         buildConfigField "int", "versionNameMajor", versionNameMajor
         buildConfigField "int", "versionNameMinor", versionNameMinor
