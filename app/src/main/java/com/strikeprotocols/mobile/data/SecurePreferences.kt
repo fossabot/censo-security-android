@@ -5,30 +5,46 @@ import android.content.SharedPreferences
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
 import com.strikeprotocols.mobile.data.SecurePreferencesImpl.Companion.SHARED_PREF_NAME
+import com.strikeprotocols.mobile.data.models.StoredKeyData
 import javax.inject.Inject
 
 interface SecurePreferences {
+
+    //user data
     fun saveToken(token: String)
     fun retrieveToken(): String
     fun clearToken()
-    fun retrieveDeprecatedPrivateKey(email: String): String
-    fun retrieveDeprecatedRootSeed(email: String): String
-    fun clearDeprecatedPrivateKey(email: String)
-    fun clearDeprecatedRootSeed(email: String)
-    fun retrieveEncryptedStoredKeys(email: String): String
-    fun retrieveSentinelData(email: String) : EncryptedData
+
+    //v1 storage
+    fun retrieveV1SolanaKey(email: String): String
+    fun retrieveV1RootSeed(email: String): String
+    fun clearV1SolanaKey(email: String)
+    fun clearV1RootSeed(email: String)
+    fun userHasV1KeyData(email: String) : Boolean
+    fun clearAllV1KeyData(email: String)
+
+    //v2 storage
+    fun clearAllV2KeyData(email: String)
+    fun retrieveV2RootSeedAndPrivateKey(email: String): String
+    fun retrieveV2SolanaPublicKey(email: String): String
+    fun clearV2SolanaPublicKey(email: String)
+    fun userHasV2Storage(email: String) : Boolean
+
+    //v3 storage
+    fun clearAllV3KeyData(email: String)
+    fun retrieveV3RootSeed(email: String): EncryptedData
+    fun retrieveV3PrivateKeys(email: String): String
+    fun saveV3RootSeed(email: String, encryptedData: EncryptedData)
+    fun saveV3PrivateKeys(email: String, keyJson: String)
+    fun saveV3PublicKeys(email: String, keyJson: String)
+    fun retrieveV3PublicKeys(email: String): HashMap<String, String>
+    fun hasV3RootSeed(email: String) : Boolean
+
+    //sentinel data
+    fun retrieveSentinelData(email: String): EncryptedData
     fun saveSentinelData(email: String, encryptedData: EncryptedData)
     fun clearSentinelData(email: String)
-    fun hasSentinelData(email: String) : Boolean
-    fun savePublicKey(email: String, publicKey: ByteArray)
-    fun retrievePublicKey(email: String): String
-    fun clearPublicKey(email: String)
-    fun saveAllRelevantKeyData(
-        email: String,
-        publicKey: ByteArray,
-        keyStorageJson: String,
-    )
-    fun clearAllRelevantKeyData(email: String)
+    fun hasSentinelData(email: String): Boolean
 }
 
 class SecurePreferencesImpl @Inject constructor(applicationContext: Context) :
@@ -47,6 +63,8 @@ class SecurePreferencesImpl @Inject constructor(applicationContext: Context) :
         EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
     )
 
+    //region User Data Storage
+
     override fun saveToken(token: String) {
         SharedPrefsHelper.saveToken(
             encryptedPrefs = secureSharedPreferences,
@@ -61,45 +79,136 @@ class SecurePreferencesImpl @Inject constructor(applicationContext: Context) :
         SharedPrefsHelper.saveToken(secureSharedPreferences, "")
     }
 
-    override fun retrieveDeprecatedPrivateKey(email: String) =
-        SharedPrefsHelper.retrieveDeprecatedPrivateKey(secureSharedPreferences, email = email)
+    //endregion
 
-    override fun retrieveDeprecatedRootSeed(email: String) =
-        SharedPrefsHelper.retrieveDeprecatedRootSeed(secureSharedPreferences, email = email)
+    //region V1 Storage
+    override fun retrieveV1SolanaKey(email: String) =
+        SharedPrefsHelper.retrieveV1PrivateKey(secureSharedPreferences, email = email)
 
-    override fun clearDeprecatedPrivateKey(email: String) {
-        SharedPrefsHelper.clearDeprecatedSolanaPrivateKey(secureSharedPreferences, email = email)
+    override fun retrieveV1RootSeed(email: String) =
+        SharedPrefsHelper.retrieveV1RootSeed(secureSharedPreferences, email = email)
+
+    override fun clearAllV1KeyData(email: String) {
+        clearV1RootSeed(email)
+        clearV1SolanaKey(email)
     }
 
-    override fun clearDeprecatedRootSeed(email: String) {
-        SharedPrefsHelper.clearDeprecatedRootSeed(secureSharedPreferences, email = email)
+    override fun clearV1SolanaKey(email: String) {
+        SharedPrefsHelper.clearV1SolanaPrivateKey(secureSharedPreferences, email = email)
     }
 
-    override fun retrieveEncryptedStoredKeys(email: String): String {
-        return SharedPrefsHelper.retrieveKeyData(encryptedPrefs = secureSharedPreferences, email)
-            ?: ""
+    override fun clearV1RootSeed(email: String) {
+        SharedPrefsHelper.clearV1RootSeed(secureSharedPreferences, email = email)
     }
 
-    override fun savePublicKey(email: String, publicKey: ByteArray) {
-        SharedPrefsHelper.saveSolanaPublicKey(
+    override fun userHasV1KeyData(email: String): Boolean {
+        return SharedPrefsHelper.retrieveV1PrivateKey(secureSharedPreferences, email = email).isNotEmpty()
+    }
+    //endregion
+
+    //region V2 Storage
+    override fun retrieveV2RootSeedAndPrivateKey(email: String): String {
+        return SharedPrefsHelper.retrieveV2RootSeedAndPrivateKey(
             encryptedPrefs = secureSharedPreferences,
-            email = email,
-            publicKey = publicKey
+            email
         )
     }
 
-    override fun retrievePublicKey(email: String) =
-        SharedPrefsHelper.retrieveSolanaPublicKey(
+    override fun retrieveV2SolanaPublicKey(email: String) =
+        SharedPrefsHelper.retrieveV2SolanaPublicKey(
             encryptedPrefs = secureSharedPreferences, email = email
         )
 
 
-    override fun clearPublicKey(email: String) {
-        SharedPrefsHelper.clearSolanaPublicKey(
+    override fun clearV2SolanaPublicKey(email: String) {
+        SharedPrefsHelper.clearV2SolanaPublicKey(
             encryptedPrefs = secureSharedPreferences,
             email = email
         )
     }
+
+    override fun userHasV2Storage(email: String): Boolean {
+        return SharedPrefsHelper.retrieveV2RootSeedAndPrivateKey(
+            encryptedPrefs = secureSharedPreferences,
+            email = email
+        ).isNotEmpty()
+    }
+
+    override fun clearAllV2KeyData(email: String) {
+        clearV2SolanaPublicKey(email)
+        SharedPrefsHelper.clearV2RootSeedAndPrivateKey(secureSharedPreferences, email)
+    }
+    //endregion
+
+    //region V3 Storage
+    override fun clearAllV3KeyData(email: String) {
+        SharedPrefsHelper.clearV3PrivateKeys(
+            encryptedPrefs = secureSharedPreferences, email = email
+        )
+        SharedPrefsHelper.clearV3PublicKeys(
+            encryptedPrefs = secureSharedPreferences,
+            email = email
+        )
+        SharedPrefsHelper.clearV3RootSeed(
+            encryptedPrefs = secureSharedPreferences,
+            email = email
+        )
+    }
+
+    override fun retrieveV3RootSeed(email: String) =
+        SharedPrefsHelper.retrieveV3RootSeed(
+            encryptedPrefs = secureSharedPreferences, email = email
+        )
+
+    override fun hasV3RootSeed(email: String) =
+        SharedPrefsHelper.hasV3RootSeed(
+            encryptedPrefs = secureSharedPreferences, email = email
+        )
+
+    override fun saveV3RootSeed(email: String, encryptedData: EncryptedData) {
+        SharedPrefsHelper.saveV3RootSeed(
+            email = email,
+            encryptedPrefs = secureSharedPreferences,
+            encryptedData = encryptedData
+        )
+    }
+
+    override fun saveV3PrivateKeys(email: String, keyJson: String) {
+        SharedPrefsHelper.saveV3PrivateKeys(
+            encryptedPrefs = secureSharedPreferences,
+            email = email,
+            keyData = keyJson
+        )
+    }
+
+    override fun retrieveV3PrivateKeys(email: String): String {
+        return SharedPrefsHelper.retrieveV3PrivateKeys(
+            encryptedPrefs = secureSharedPreferences,
+            email
+        ) ?: ""
+    }
+
+    override fun saveV3PublicKeys(email: String, keyJson: String) {
+        SharedPrefsHelper.saveV3PublicKeys(
+            encryptedPrefs = secureSharedPreferences,
+            email = email,
+            keyData = keyJson
+        )
+    }
+
+    override fun retrieveV3PublicKeys(email: String): HashMap<String, String> {
+        val publicKeys = SharedPrefsHelper.retrieveV3PublicKeys(
+            encryptedPrefs = secureSharedPreferences,
+            email
+        ) ?: ""
+
+        if (publicKeys.isEmpty()) return hashMapOf()
+
+        return StoredKeyData.mapFromJson(publicKeys)
+    }
+    //endregion
+
+    //region Sentinel Data Storage
 
     override fun saveSentinelData(email: String, encryptedData: EncryptedData) {
         SharedPrefsHelper.saveSentinelData(
@@ -109,7 +218,7 @@ class SecurePreferencesImpl @Inject constructor(applicationContext: Context) :
         )
     }
 
-    override fun retrieveSentinelData(email: String) : EncryptedData =
+    override fun retrieveSentinelData(email: String): EncryptedData =
         SharedPrefsHelper.retrieveSentinelData(
             encryptedPrefs = secureSharedPreferences, email = email
         )
@@ -128,24 +237,7 @@ class SecurePreferencesImpl @Inject constructor(applicationContext: Context) :
             email = email
         )
 
-    override fun saveAllRelevantKeyData(
-        email: String,
-        publicKey: ByteArray,
-        keyStorageJson: String,
-    ) {
-        savePublicKey(email = email, publicKey = publicKey)
-
-        SharedPrefsHelper.saveKeyData(
-            encryptedPrefs = secureSharedPreferences,
-            email = email,
-            keyData = keyStorageJson
-        )
-    }
-
-    override fun clearAllRelevantKeyData(email: String) {
-        clearPublicKey(email)
-        SharedPrefsHelper.clearKeyData(secureSharedPreferences, email)
-    }
+    //endregion
 
     object Companion {
         const val SHARED_PREF_NAME = "strike_secure_shared_pref"

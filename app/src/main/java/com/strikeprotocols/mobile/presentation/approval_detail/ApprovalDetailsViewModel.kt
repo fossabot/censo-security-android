@@ -5,6 +5,7 @@ import com.strikeprotocols.mobile.common.StrikeCountDownTimer
 import com.strikeprotocols.mobile.data.ApprovalsRepository
 import com.strikeprotocols.mobile.data.KeyRepository
 import com.strikeprotocols.mobile.data.models.approval.ApprovalRequest
+import com.strikeprotocols.mobile.data.models.CipherRepository
 import com.strikeprotocols.mobile.presentation.common_approvals.CommonApprovalsViewModel
 import com.strikeprotocols.mobile.presentation.approval_disposition.ApprovalRetryData
 import com.strikeprotocols.mobile.presentation.common_approvals.ApprovalsState
@@ -15,10 +16,12 @@ import javax.inject.Inject
 class ApprovalDetailsViewModel @Inject constructor(
     approvalsRepository: ApprovalsRepository,
     keyRepository: KeyRepository,
+    cipherRepository: CipherRepository,
     timer: StrikeCountDownTimer,
 ) : CommonApprovalsViewModel(
     approvalsRepository = approvalsRepository,
     keyRepository = keyRepository,
+    cipherRepository = cipherRepository,
     timer = timer
 ) {
     //region Method Overrides

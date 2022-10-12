@@ -39,7 +39,7 @@ class ApprovalRequestSigningTest {
 
     private val userEmail = "floater@test887123.com"
 
-    private lateinit var keyPair: StrikeKeyPair
+    private lateinit var keyPair: TestKeyPair
 
     private lateinit var base58EncodedPrivateKey: String
 
@@ -61,11 +61,11 @@ class ApprovalRequestSigningTest {
 
         phrase = encryptionManager.generatePhrase()
 
-        keyPair = encryptionManager.createKeyPair(Mnemonics.MnemonicCode(phrase = phrase))
+        keyPair = createSolanaKeyPairFromMnemonic(Mnemonics.MnemonicCode(phrase = phrase))
 
         base58EncodedPrivateKey = BaseWrapper.encode(keyPair.privateKey)
 
-        whenever(securePreferences.retrieveEncryptedStoredKeys(userEmail)).then {
+        whenever(securePreferences.retrieveV3PrivateKeys(userEmail)).then {
             BaseWrapper.encode(keyPair.privateKey)
         }
 
@@ -154,7 +154,7 @@ class ApprovalRequestSigningTest {
     }
 
     private fun verifyNoChainApiBody(approvalDispositionRequest: ApprovalDispositionRequest, disposition: ApprovalDisposition) {
-        whenever(mockEncryptionManager.retrieveSavedKey(any(), any(), any())).thenReturn(Base58.decode(base58EncodedPrivateKey))
+        whenever(mockEncryptionManager.retrieveSavedV3Key(any(), any(), any())).thenReturn(Base58.decode(base58EncodedPrivateKey))
         whenever(mockEncryptionManager.signApprovalDispositionMessage(any(), any())).thenReturn(SignedPayload(signature = "someSignature", payload = "somePayload"))
         val apiBody = approvalDispositionRequest.convertToApiBody(mockEncryptionManager, cipherMock)
         assertEquals(disposition, apiBody.approvalDisposition)
@@ -163,7 +163,7 @@ class ApprovalRequestSigningTest {
             apiBody.signatureInfo
         )
 
-        verify(mockEncryptionManager, times(1)).retrieveSavedKey(
+        verify(mockEncryptionManager, times(1)).retrieveSavedV3Key(
             "floater@test887123.com",
             cipherMock,
             StoredKeyData.SOLANA_KEY
@@ -391,7 +391,7 @@ class ApprovalRequestSigningTest {
 
         assertNotNull(signature)
 
-        whenever(mockEncryptionManager.retrieveSavedKey(any(), any(), any())).thenReturn(Base58.decode(base58EncodedPrivateKey))
+        whenever(mockEncryptionManager.retrieveSavedV3Key(any(), any(), any())).thenReturn(Base58.decode(base58EncodedPrivateKey))
         whenever(mockEncryptionManager.signApprovalDispositionMessage(any(), any())).thenReturn(
             SignedPayload(signature = "someSignature", payload = ""))
         val apiBody = approvalDispositionRequest.convertToApiBody(mockEncryptionManager, cipherMock)
@@ -401,7 +401,7 @@ class ApprovalRequestSigningTest {
             apiBody.signatureInfo
         )
 
-        verify(mockEncryptionManager, times(1)).retrieveSavedKey(
+        verify(mockEncryptionManager, times(1)).retrieveSavedV3Key(
             "floater@test887123.com",
             cipherMock,
             StoredKeyData.SOLANA_KEY
@@ -442,13 +442,13 @@ class ApprovalRequestSigningTest {
             signatures,
         )
 
-        whenever(mockEncryptionManager.retrieveSavedKey(any(), any(), any())).thenReturn(Base58.decode(bitcoinExtendedPrivateKey))
+        whenever(mockEncryptionManager.retrieveSavedV3Key(any(), any(), any())).thenReturn(Base58.decode(bitcoinExtendedPrivateKey))
         whenever(mockEncryptionManager.signBitcoinApprovalDispositionMessage(any(), any(), any())).thenReturn(expectedSignatures)
         val apiBody = approvalDispositionRequest.convertToApiBody(mockEncryptionManager, cipherMock)
         assertEquals(disposition, apiBody.approvalDisposition)
         assertEquals(ApprovalSignature.BitcoinSignatures(expectedSignatures.map { it.signature}), apiBody.signatureInfo)
 
-        verify(mockEncryptionManager, times(1)).retrieveSavedKey(
+        verify(mockEncryptionManager, times(1)).retrieveSavedV3Key(
             "floater@test887123.com",
             cipherMock,
             StoredKeyData.BITCOIN_KEY

@@ -578,7 +578,7 @@ data class TransactionInput(
     val txId: String,
     val index: Int,
     val amount: Long,
-    val prevOutScriptHex: String,
+    val inputScriptHex: String,
     val base64HashForSignature: String,
 )
 

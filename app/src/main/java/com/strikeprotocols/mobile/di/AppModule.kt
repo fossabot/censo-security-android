@@ -6,6 +6,8 @@ import com.strikeprotocols.mobile.common.StrikeCountDownTimerImpl
 import com.strikeprotocols.mobile.data.*
 import com.strikeprotocols.mobile.data.UserRepository
 import com.strikeprotocols.mobile.data.UserRepositoryImpl
+import com.strikeprotocols.mobile.data.models.CipherRepository
+import com.strikeprotocols.mobile.data.models.CipherRepositoryImpl
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -89,8 +91,14 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideKeyRepository(encryptionManager: EncryptionManager, securePreferences: SecurePreferences, userRepository: UserRepository, api: BrooklynApiService): KeyRepository {
-        return KeyRepositoryImpl(encryptionManager = encryptionManager, securePreferences = securePreferences, userRepository =  userRepository, api =  api)
+    fun provideKeyRepository(encryptionManager: EncryptionManager, securePreferences: SecurePreferences, userRepository: UserRepository): KeyRepository {
+        return KeyRepositoryImpl(encryptionManager = encryptionManager, securePreferences = securePreferences, userRepository =  userRepository)
+    }
+
+    @Provides
+    @Singleton
+    fun provideCipherRepository(encryptionManager: EncryptionManager, securePreferences: SecurePreferences, userRepository: UserRepository): CipherRepository {
+        return CipherRepositoryImpl(encryptionManager = encryptionManager, securePreferences = securePreferences, userRepository =  userRepository)
     }
 
     @Provides
@@ -126,6 +134,22 @@ object AppModule {
     @Provides
     fun provideCryptographyManager(): CryptographyManager {
         return CryptographyManagerImpl()
+    }
+
+    @Provides
+    @Singleton
+    fun provideMigrationRepository(
+        encryptionManager: EncryptionManager,
+        securePreferences: SecurePreferences,
+        userRepository: UserRepository,
+        api: BrooklynApiService
+    ): MigrationRepository {
+        return MigrationRepositoryImpl(
+            encryptionManager = encryptionManager,
+            securePreferences = securePreferences,
+            userRepository = userRepository,
+            api = api
+        )
     }
 
 }

@@ -38,6 +38,9 @@ import com.strikeprotocols.mobile.presentation.contact_strike.ContactStrikeScree
 import com.strikeprotocols.mobile.presentation.entrance.EntranceScreen
 import com.strikeprotocols.mobile.presentation.key_management.KeyManagementInitialData
 import com.strikeprotocols.mobile.presentation.key_management.KeyManagementScreen
+import com.strikeprotocols.mobile.presentation.migration.VerifyUserInitialData
+import com.strikeprotocols.mobile.presentation.migration.MigrationScreen
+import com.strikeprotocols.mobile.presentation.regeneration.RegenerationScreen
 import com.strikeprotocols.mobile.presentation.sign_in.SignInScreen
 import com.strikeprotocols.mobile.service.MessagingService.Companion.NOTIFICATION_DISPLAYED_KEY
 import com.strikeprotocols.mobile.ui.theme.BackgroundBlack
@@ -215,6 +218,20 @@ class MainActivity : FragmentActivity() {
             ) { backStackEntry ->
                 val keyInitialDataArg = backStackEntry.arguments?.get(Screen.KeyManagementRoute.KEY_MGMT_ARG) as String
                 KeyManagementScreen(navController = navController, initialData = KeyManagementInitialData.fromJson(keyInitialDataArg))
+            }
+            composable(
+                route = "${Screen.MigrationRoute.route}/{${Screen.MigrationRoute.MIGRATION_ARG}}",
+                arguments = listOf(navArgument(Screen.MigrationRoute.MIGRATION_ARG) {
+                    type = NavType.StringType
+                })
+            ) { backStackEntry ->
+                val migrationDataInitialArg = backStackEntry.arguments?.get(Screen.MigrationRoute.MIGRATION_ARG) as String
+                MigrationScreen(navController = navController, initialData = VerifyUserInitialData.fromJson(migrationDataInitialArg))
+            }
+            composable(
+                route = Screen.RegenerationRoute.route,
+            ) {
+                RegenerationScreen(navController = navController)
             }
             composable(
                 route = Screen.EnforceUpdateRoute.route

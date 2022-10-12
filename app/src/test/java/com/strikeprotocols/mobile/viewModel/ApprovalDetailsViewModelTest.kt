@@ -9,6 +9,7 @@ import com.strikeprotocols.mobile.data.ApprovalsRepository
 import com.strikeprotocols.mobile.data.KeyRepository
 import com.strikeprotocols.mobile.data.SolanaRepository
 import com.strikeprotocols.mobile.data.models.ApprovalDisposition
+import com.strikeprotocols.mobile.data.models.CipherRepository
 import com.strikeprotocols.mobile.data.models.Nonce
 import com.strikeprotocols.mobile.data.models.approval.SolanaApprovalRequestDetails
 import com.strikeprotocols.mobile.data.models.approval.ApprovalRequest
@@ -38,6 +39,9 @@ class ApprovalDetailsViewModelTest : BaseViewModelTest() {
 
     @Mock
     lateinit var approvalsRepository: ApprovalsRepository
+
+    @Mock
+    lateinit var cipherRepository: CipherRepository
 
     @Mock
     lateinit var keyRepository: KeyRepository
@@ -74,11 +78,16 @@ class ApprovalDetailsViewModelTest : BaseViewModelTest() {
         super.setUp()
         Dispatchers.setMain(dispatcher)
 
-        whenever(keyRepository.getCipherForPrivateKeyDecryption()).thenAnswer {
+        whenever(cipherRepository.getCipherForV3PrivateKeysDecryption()).thenAnswer {
             cipher
         }
         approvalDetailsViewModel =
-            ApprovalDetailsViewModel(approvalsRepository = approvalsRepository, keyRepository, countdownTimer)
+            ApprovalDetailsViewModel(
+                approvalsRepository = approvalsRepository,
+                keyRepository = keyRepository,
+                cipherRepository = cipherRepository,
+                timer = countdownTimer
+            )
 
         durableNonceViewModel = DurableNonceViewModel(solanaRepository)
 

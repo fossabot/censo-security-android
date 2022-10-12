@@ -1,32 +1,28 @@
-package com.strikeprotocols.mobile.presentation.key_management
+package com.strikeprotocols.mobile.presentation.migration
 
 import com.google.gson.GsonBuilder
 import com.strikeprotocols.mobile.common.UriWrapper
 import com.strikeprotocols.mobile.data.models.VerifyUser
-import com.strikeprotocols.mobile.data.models.WalletSigner
 import java.lang.reflect.Modifier
 
-data class KeyManagementInitialData(
-    val verifyUserDetails: VerifyUser?,
-    val flow: KeyManagementFlow
-) {
+data class VerifyUserInitialData(val verifyUserDetails: VerifyUser?) {
     companion object {
         fun toJson(
-            keyManagementInitialData: KeyManagementInitialData,
+            verifyUserInitialData: VerifyUserInitialData,
             uriWrapper: UriWrapper
         ): String {
             val jsonString = GsonBuilder()
                 .excludeFieldsWithModifiers(Modifier.STATIC)
                 .create()
-                .toJson(keyManagementInitialData)
+                .toJson(verifyUserInitialData)
             return uriWrapper.encode(jsonString)
         }
 
-        fun fromJson(json: String): KeyManagementInitialData {
+        fun fromJson(json: String): VerifyUserInitialData {
             return GsonBuilder()
                 .excludeFieldsWithModifiers(Modifier.STATIC)
                 .create()
-                .fromJson(json, KeyManagementInitialData::class.java)
+                .fromJson(json, VerifyUserInitialData::class.java)
         }
     }
 }

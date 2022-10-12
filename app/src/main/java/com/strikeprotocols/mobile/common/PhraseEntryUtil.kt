@@ -27,8 +27,6 @@ object PhraseEntryUtil {
             KeyManagementFlow.KEY_RECOVERY -> {
                 generateConfirmPhraseWordsStateForRecoveryFlow()
             }
-            KeyManagementFlow.KEY_REGENERATION,
-            KeyManagementFlow.KEY_MIGRATION,
             KeyManagementFlow.UNINITIALIZED -> {
                 null
             }

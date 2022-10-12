@@ -388,7 +388,7 @@ data class InitiationRequest(
     ): InitiateRequestBody {
 
         //get private key here then we can pass to encryption manager methods
-        val privateKeyByteArray = encryptionManager.retrieveSavedKey(
+        val privateKeyByteArray = encryptionManager.retrieveSavedV3Key(
             email = email, cipher = cipher
         )
 

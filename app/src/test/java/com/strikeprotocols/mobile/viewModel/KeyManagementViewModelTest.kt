@@ -1,5 +1,6 @@
 package com.strikeprotocols.mobile.viewModel
 
+import cash.z.ecc.android.bip39.Mnemonics
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.times
 import com.nhaarman.mockitokotlin2.verify
@@ -8,12 +9,13 @@ import com.strikeprotocols.mobile.*
 import com.strikeprotocols.mobile.common.BioPromptReason
 import com.strikeprotocols.mobile.common.PhraseEntryUtil
 import com.strikeprotocols.mobile.common.Resource
-import com.strikeprotocols.mobile.data.EncryptionManagerImpl.Companion.BIO_KEY_NAME
+import com.strikeprotocols.mobile.data.EncryptionManagerImpl.Companion.PRIVATE_KEYS_KEY_NAME
+import com.strikeprotocols.mobile.data.EncryptionManagerImpl.Companion.ROOT_SEED_KEY_NAME
 import com.strikeprotocols.mobile.data.KeyRepository
 import com.strikeprotocols.mobile.data.PhraseException
 import com.strikeprotocols.mobile.data.PhraseValidator
 import com.strikeprotocols.mobile.data.UserRepository
-import com.strikeprotocols.mobile.data.models.IndexedPhraseWord
+import com.strikeprotocols.mobile.data.models.*
 import com.strikeprotocols.mobile.presentation.key_management.*
 import com.strikeprotocols.mobile.presentation.key_management.KeyManagementState.Companion.CHANGE_AMOUNT
 import com.strikeprotocols.mobile.presentation.key_management.KeyManagementState.Companion.FIRST_WORD_INDEX
@@ -42,10 +44,16 @@ class KeyManagementViewModelTest : BaseViewModelTest() {
     lateinit var keyRepository: KeyRepository
 
     @Mock
+    lateinit var cipherRepository: CipherRepository
+
+    @Mock
     lateinit var phraseValidator: PhraseValidator
 
     @Mock
-    lateinit var cipher: Cipher
+    lateinit var rootSeedEncryptionCipher: Cipher
+
+    @Mock
+    lateinit var privateKeysEncryptionCipher: Cipher
 
     private lateinit var keyMgmtViewModel: KeyManagementViewModel
 
@@ -57,17 +65,21 @@ class KeyManagementViewModelTest : BaseViewModelTest() {
 
     private val testRecoveryInitialData = getRecoveryFlowInitialData()
 
-    private val testRegenerationInitialData = getRegenerationFlowInitialData()
-
-    private val testMigrationInitialData = getMigrationFlowInitialData()
-
     private val testValidPhrase = getValidTestingPhrase()
 
     private val testInvalidPhrase = getInvalidTestingPhrase()
 
-    private val testWalletSigner = getWalletSigner()
+    private val testWalletSigners = listOf(getWalletSigner())
 
     private val defaultErrorMessage = "test_err_message"
+
+    private val validPublicKey = WalletPublicKey(
+        chain = Chain.solana,
+        key = "F7JuLRBbyGAS9nAhDdfNX1LbckBAmCnKMB2xTdZfQS1n"
+    )
+
+    val validWalletSigners: List<WalletSigner> =
+        listOf(WalletSigner(publicKey = validPublicKey.key, chain = validPublicKey.chain))
     //endregion
 
     //region Before After Work
@@ -80,19 +92,19 @@ class KeyManagementViewModelTest : BaseViewModelTest() {
             testValidPhrase
         }
 
-        whenever(keyRepository.getCipherForEncryption(BIO_KEY_NAME)).thenAnswer {
-            cipher
+        whenever(cipherRepository.getCipherForEncryption(ROOT_SEED_KEY_NAME)).thenAnswer {
+            rootSeedEncryptionCipher
         }
-
-        whenever(keyRepository.regenerateDataAndUploadToBackend()).thenAnswer {
-            Resource.Success(null)
+        whenever(cipherRepository.getCipherForEncryption(PRIVATE_KEYS_KEY_NAME)).thenAnswer {
+            privateKeysEncryptionCipher
         }
 
         keyMgmtViewModel =
             KeyManagementViewModel(
                 userRepository = userRepository,
                 keyRepository = keyRepository,
-                phraseValidator = phraseValidator
+                phraseValidator = phraseValidator,
+                cipherRepository = cipherRepository
             )
     }
 
@@ -238,7 +250,10 @@ class KeyManagementViewModelTest : BaseViewModelTest() {
             KeyManagementFlowStep.CreationFlow(KeyCreationFlowStep.ALL_SET_STEP),
             keyMgmtViewModel.state.keyManagementFlowStep
         )
-        assertEquals(BioPromptReason.CREATE_KEY, keyMgmtViewModel.state.bioPromptReason)
+        assertEquals(
+            BioPromptReason.SAVE_V3_ROOT_SEED,
+            keyMgmtViewModel.state.bioPromptData.bioPromptReason
+        )
         assertTriggerBioPromptIsSuccessAndHasCipherData()
     }
 
@@ -320,7 +335,10 @@ class KeyManagementViewModelTest : BaseViewModelTest() {
             keyMgmtViewModel.state.keyManagementFlowStep
         )
         assertTrue(keyMgmtViewModel.state.finalizeKeyFlow is Resource.Loading)
-        assertEquals(BioPromptReason.RECOVER_KEY, keyMgmtViewModel.state.bioPromptReason)
+        assertEquals(
+            BioPromptReason.SAVE_V3_ROOT_SEED,
+            keyMgmtViewModel.state.bioPromptData.bioPromptReason
+        )
         assertEquals(PhraseInputMethod.PASTED, keyMgmtViewModel.state.inputMethod)
         assertTriggerBioPromptIsSuccessAndHasCipherData()
     }
@@ -329,24 +347,32 @@ class KeyManagementViewModelTest : BaseViewModelTest() {
     fun `after the user biometry is approved during recovery flow ensure key recovery is a success`() = runTest {
         assertDefaultStateForInitialDataProperties()
 
-        keyMgmtViewModel.onStart(testRecoveryInitialData)
+        //need to have local keys match test data to avoid logic that uploads key. That will be handled in another test.
+        val matchedTestData = testRecoveryInitialData.copy(
+            verifyUserDetails = testRecoveryInitialData.verifyUserDetails?.copy(
+                publicKeys = validWalletSigners.map { WalletPublicKey(it.publicKey, chain = it.chain) }
+            )
+        )
+
+        whenever(keyRepository.saveV3PublicKeys(any())).then { validWalletSigners }
+
+        keyMgmtViewModel.onStart(matchedTestData)
 
         advanceUntilIdle()
 
-        assertEquals(testRecoveryInitialData, keyMgmtViewModel.state.initialData)
+        assertEquals(matchedTestData, keyMgmtViewModel.state.initialData)
         assertEquals(KeyManagementFlow.KEY_RECOVERY, keyMgmtViewModel.state.keyManagementFlow)
         assertEquals(
             KeyManagementFlowStep.RecoveryFlow(KeyRecoveryFlowStep.ENTRY_STEP),
             keyMgmtViewModel.state.keyManagementFlowStep
         )
 
-        keyMgmtViewModel.recoverKey(cipher)
+        keyMgmtViewModel.recoverKey(privateKeysEncryptionCipher)
 
         advanceUntilIdle()
 
-        verify(keyRepository, times(1)).regenerateAuthDataAndSaveKeyToUser(
-            phrase = any(),
-            backendPublicKey = any(),
+        verify(keyRepository, times(1)).saveV3PrivateKeys(
+            mnemonic = any(),
             cipher = any()
         )
         assertTrue(keyMgmtViewModel.state.finalizeKeyFlow is Resource.Success)
@@ -354,12 +380,12 @@ class KeyManagementViewModelTest : BaseViewModelTest() {
 
     @Test
     fun `after the user biometry is approved during creation flow ensure key creation is a success`() = runTest {
-        whenever(keyRepository.generateInitialAuthDataAndSaveKeyToUser(any(), any())).thenAnswer {
-            testWalletSigner
+        whenever(keyRepository.saveV3PublicKeys(any())).thenAnswer {
+            testWalletSigners
         }
 
         whenever(userRepository.addWalletSigner(any())).thenAnswer {
-            Resource.Success(data = testWalletSigner)
+            Resource.Success(data = testWalletSigners)
         }
 
         assertDefaultStateForInitialDataProperties()
@@ -376,17 +402,18 @@ class KeyManagementViewModelTest : BaseViewModelTest() {
             keyMgmtViewModel.state.keyManagementFlowStep
         )
 
-        keyMgmtViewModel.createAndSaveKey(cipher)
+        keyMgmtViewModel.createAndSaveKey(privateKeysEncryptionCipher)
 
         advanceUntilIdle()
 
-        verify(keyRepository, times(1)).generateInitialAuthDataAndSaveKeyToUser(any(), any())
+        verify(keyRepository, times(1)).saveV3PrivateKeys(any(), any())
+        verify(keyRepository, times(1)).saveV3PublicKeys(any())
         verify(userRepository, times(1)).addWalletSigner(any())
 
-        assertEquals(testWalletSigner, keyMgmtViewModel.state.walletSignerToAdd)
+        assertEquals(Signers(testWalletSigners), keyMgmtViewModel.state.walletSignerToAdd)
 
         assertTrue(keyMgmtViewModel.state.finalizeKeyFlow is Resource.Success)
-        assertEquals(testWalletSigner, keyMgmtViewModel.state.finalizeKeyFlow.data)
+        assertEquals(testWalletSigners, keyMgmtViewModel.state.finalizeKeyFlow.data)
         assertNull(keyMgmtViewModel.state.keyGeneratedPhrase)
     }
 
@@ -426,39 +453,6 @@ class KeyManagementViewModelTest : BaseViewModelTest() {
             KeyManagementFlowStep.RecoveryFlow(KeyRecoveryFlowStep.ENTRY_STEP),
             keyMgmtViewModel.state.keyManagementFlowStep
         )
-    }
-
-    @Test
-    fun `call onStart and pass in regeneration flow initial data then view model should reflect that data in state`() = runTest {
-        assertDefaultStateForInitialDataProperties()
-
-        keyMgmtViewModel.onStart(testRegenerationInitialData)
-
-        advanceUntilIdle()
-
-        assertEquals(testRegenerationInitialData, keyMgmtViewModel.state.initialData)
-        assertEquals(KeyManagementFlow.KEY_REGENERATION, keyMgmtViewModel.state.keyManagementFlow)
-        assertEquals(
-            KeyManagementFlowStep.RegenerationFlow(KeyRegenerationFlowStep.ALL_SET_STEP),
-            keyMgmtViewModel.state.keyManagementFlowStep
-        )
-    }
-
-    @Test
-    fun `call onStart and pass in migration flow initial data then view model should reflect that data in state`() = runTest {
-        assertDefaultStateForInitialDataProperties()
-
-        keyMgmtViewModel.onStart(testMigrationInitialData)
-
-        advanceUntilIdle()
-
-        assertEquals(testMigrationInitialData, keyMgmtViewModel.state.initialData)
-        assertEquals(KeyManagementFlow.KEY_MIGRATION, keyMgmtViewModel.state.keyManagementFlow)
-        assertEquals(
-            KeyManagementFlowStep.MigrationFlow(KeyMigrationFlowStep.ALL_SET_STEP),
-            keyMgmtViewModel.state.keyManagementFlowStep
-        )
-        assertTrue(keyMgmtViewModel.state.finalizeKeyFlow is Resource.Loading)
     }
 
     @Test
@@ -804,105 +798,6 @@ class KeyManagementViewModelTest : BaseViewModelTest() {
             keyMgmtViewModel.state.keyManagementFlowStep
         )
     }
-
-    @Test
-    fun `call regenerateKeyNavigationForward and state is not in regeneration flow then view model should return early and not update state`() {
-        callPhraseFlowActionAndAssertChangesInState(
-            phraseFlowAction = PhraseFlowAction.ChangeCreationFlowStep(
-                phraseVerificationFlowStep = KeyCreationFlowStep.ENTRY_STEP
-            ),
-            flowStep = KeyManagementFlowStep.CreationFlow(KeyCreationFlowStep.ENTRY_STEP)
-        )
-
-        keyMgmtViewModel.keyRegenerationNavigateForward()
-
-        assertEquals(
-            KeyManagementFlowStep.CreationFlow(KeyCreationFlowStep.ENTRY_STEP),
-            keyMgmtViewModel.state.keyManagementFlowStep
-        )
-    }
-
-    @Test
-    fun `call regenerateKeyNavigationForward then view model should set next step in state`() = runTest {
-        //region setup code
-        assertDefaultStateForInitialDataProperties()
-
-        keyMgmtViewModel.onStart(testRegenerationInitialData)
-
-        advanceUntilIdle()
-
-        assertEquals(testRegenerationInitialData, keyMgmtViewModel.state.initialData)
-        assertEquals(KeyManagementFlow.KEY_REGENERATION, keyMgmtViewModel.state.keyManagementFlow)
-        assertEquals(
-            KeyManagementFlowStep.RegenerationFlow(KeyRegenerationFlowStep.ALL_SET_STEP),
-            keyMgmtViewModel.state.keyManagementFlowStep
-        )
-        //endregion
-
-        keyMgmtViewModel.keyRegenerationNavigateForward()
-
-        assertEquals(
-            KeyManagementFlowStep.RegenerationFlow(KeyRegenerationFlowStep.FINISHED),
-            keyMgmtViewModel.state.keyManagementFlowStep
-        )
-
-        keyMgmtViewModel.keyRegenerationNavigateForward()
-
-        assertEquals(
-            KeyManagementFlowStep.RegenerationFlow(KeyRegenerationFlowStep.UNINITIALIZED),
-            keyMgmtViewModel.state.keyManagementFlowStep
-        )
-    }
-
-    @Test
-    fun `call migrateKeyNavigationForward and state is not in migration flow then view model should return early and not update state`() {
-        callPhraseFlowActionAndAssertChangesInState(
-            phraseFlowAction = PhraseFlowAction.ChangeCreationFlowStep(
-                phraseVerificationFlowStep = KeyCreationFlowStep.ENTRY_STEP
-            ),
-            flowStep = KeyManagementFlowStep.CreationFlow(KeyCreationFlowStep.ENTRY_STEP)
-        )
-
-        keyMgmtViewModel.keyMigrationNavigateForward()
-
-        assertEquals(
-            KeyManagementFlowStep.CreationFlow(KeyCreationFlowStep.ENTRY_STEP),
-            keyMgmtViewModel.state.keyManagementFlowStep
-        )
-    }
-
-    @Test
-    fun `call migrateKeyNavigationForward then view model should set next step in state`() = runTest {
-        //region setup code
-        assertDefaultStateForInitialDataProperties()
-
-        keyMgmtViewModel.onStart(testMigrationInitialData)
-
-        advanceUntilIdle()
-
-        assertEquals(testMigrationInitialData, keyMgmtViewModel.state.initialData)
-        assertEquals(KeyManagementFlow.KEY_MIGRATION, keyMgmtViewModel.state.keyManagementFlow)
-        assertEquals(
-            KeyManagementFlowStep.MigrationFlow(KeyMigrationFlowStep.ALL_SET_STEP),
-            keyMgmtViewModel.state.keyManagementFlowStep
-        )
-        assertTrue(keyMgmtViewModel.state.finalizeKeyFlow is Resource.Loading)
-        //endregion
-
-        keyMgmtViewModel.keyMigrationNavigateForward()
-
-        assertEquals(
-            KeyManagementFlowStep.MigrationFlow(KeyMigrationFlowStep.FINISHED),
-            keyMgmtViewModel.state.keyManagementFlowStep
-        )
-
-        keyMgmtViewModel.keyMigrationNavigateForward()
-
-        assertEquals(
-            KeyManagementFlowStep.MigrationFlow(KeyMigrationFlowStep.UNINITIALIZED),
-            keyMgmtViewModel.state.keyManagementFlowStep
-        )
-    }
     //endregion
 
     //region Reset state methods
@@ -916,37 +811,12 @@ class KeyManagementViewModelTest : BaseViewModelTest() {
     }
 
     @Test
-    fun `after key flow is finished or regenerate data fails, reset state property`() = runTest {
-        //region Assert default state + setup finalizeKeyFlow in state
-        assertDefaultStateForInitialDataProperties()
-
-        keyMgmtViewModel.onStart(testMigrationInitialData)
-
-        advanceUntilIdle()
-
-        assertEquals(testMigrationInitialData, keyMgmtViewModel.state.initialData)
-        assertEquals(KeyManagementFlow.KEY_MIGRATION, keyMgmtViewModel.state.keyManagementFlow)
-        assertEquals(
-            KeyManagementFlowStep.MigrationFlow(KeyMigrationFlowStep.ALL_SET_STEP),
-            keyMgmtViewModel.state.keyManagementFlowStep
-        )
-        assertTrue(keyMgmtViewModel.state.finalizeKeyFlow is Resource.Loading)
-        //endregion
-
-        //call reset method
-        keyMgmtViewModel.resetAddWalletSignersCall()
-
-        //Assert reset state
-        assertTrue(keyMgmtViewModel.state.finalizeKeyFlow is Resource.Uninitialized)
-    }
-
-    @Test
     fun `after toast is shown reset show toast state property`() = runTest {
         assertTrue(keyMgmtViewModel.state.showToast is Resource.Uninitialized)
 
         //This method should fail early because there is no phrase in state.
         // This will trigger the showToast property to be set in state
-        keyMgmtViewModel.createAndSaveKey(cipher)
+        keyMgmtViewModel.createAndSaveKey(privateKeysEncryptionCipher)
 
         assertTrue(keyMgmtViewModel.state.showToast is Resource.Success)
         assertEquals(NO_PHRASE_ERROR, keyMgmtViewModel.state.showToast.data)
@@ -959,7 +829,7 @@ class KeyManagementViewModelTest : BaseViewModelTest() {
         keyMgmtViewModel.onStart(testCreationInitialData)
 
         //Initial bio prompt trigger
-        keyMgmtViewModel.triggerBioPrompt(inputMethod = null)
+        keyMgmtViewModel.triggerBioPrompt(inputMethod = null, true)
 
         advanceUntilIdle()
 
@@ -970,7 +840,7 @@ class KeyManagementViewModelTest : BaseViewModelTest() {
         assertTrue(keyMgmtViewModel.state.triggerBioPrompt is Resource.Uninitialized)
 
         //Trigger bio prompt again
-        keyMgmtViewModel.triggerBioPrompt(PhraseInputMethod.MANUAL)
+        keyMgmtViewModel.triggerBioPrompt(PhraseInputMethod.MANUAL, true)
 
         advanceUntilIdle()
 
@@ -988,7 +858,7 @@ class KeyManagementViewModelTest : BaseViewModelTest() {
 
         keyMgmtViewModel.onStart(testRecoveryInitialData)
 
-        keyMgmtViewModel.triggerBioPrompt(inputMethod = PhraseInputMethod.MANUAL)
+        keyMgmtViewModel.triggerBioPrompt(inputMethod = PhraseInputMethod.MANUAL, true)
 
         advanceUntilIdle()
 
@@ -1008,77 +878,8 @@ class KeyManagementViewModelTest : BaseViewModelTest() {
 
     //region Retry methods
     @Test
-    fun `after error occurs during key migration then ensure error state is set`() = runTest {
-        whenever(keyRepository.migrateOldDataToBiometryProtectedStorage(any())).thenAnswer {
-            throw Exception(defaultErrorMessage)
-        }
-
-        keyMgmtViewModel.onStart(testMigrationInitialData)
-
-        assertTrue(keyMgmtViewModel.state.finalizeKeyFlow is Resource.Uninitialized)
-        assertTrue(keyMgmtViewModel.state.triggerBioPrompt is Resource.Uninitialized)
-        assertEquals(BioPromptReason.UNINITIALIZED, keyMgmtViewModel.state.bioPromptReason)
-
-        keyMgmtViewModel.triggerBioPrompt(inputMethod = null)
-
-        advanceUntilIdle()
-
-        assertTriggerBioPromptIsSuccessAndHasCipherData()
-
-        //Calling this method will trigger
-        // migrateOldDataToBiometryProtectedStorage() to be called and an exception to be thrown
-        keyMgmtViewModel.biometryApproved(cipher)
-
-        advanceUntilIdle()
-
-        assertTrue(keyMgmtViewModel.state.finalizeKeyFlow is Resource.Error)
-        assertEquals(defaultErrorMessage, keyMgmtViewModel.state.finalizeKeyFlow.exception?.message)
-    }
-
-    @Test
-    fun `after error occurs during key migration then retrying should trigger bio prompt`() = runTest {
-        whenever(keyRepository.migrateOldDataToBiometryProtectedStorage(any())).thenAnswer {
-            throw Exception(defaultErrorMessage)
-        }
-
-        keyMgmtViewModel.onStart(testMigrationInitialData)
-
-        assertTrue(keyMgmtViewModel.state.finalizeKeyFlow is Resource.Uninitialized)
-        assertTrue(keyMgmtViewModel.state.triggerBioPrompt is Resource.Uninitialized)
-        assertEquals(BioPromptReason.UNINITIALIZED, keyMgmtViewModel.state.bioPromptReason)
-
-        keyMgmtViewModel.triggerBioPrompt(inputMethod = null)
-
-        advanceUntilIdle()
-
-        assertTriggerBioPromptIsSuccessAndHasCipherData()
-
-        //Calling this method will trigger
-        // migrateOldDataToBiometryProtectedStorage() to be called and an exception to be thrown
-        keyMgmtViewModel.biometryApproved(cipher)
-
-        advanceUntilIdle()
-
-        assertTrue(keyMgmtViewModel.state.finalizeKeyFlow is Resource.Error)
-        assertEquals(defaultErrorMessage, keyMgmtViewModel.state.finalizeKeyFlow.exception?.message)
-
-        //Now attempt retry and assert that bioPromptTrigger is set again
-        keyMgmtViewModel.retryKeyMigration()
-
-        advanceUntilIdle()
-
-        assertEquals(
-            KeyManagementFlowStep.MigrationFlow(KeyMigrationFlowStep.ALL_SET_STEP),
-            keyMgmtViewModel.state.keyManagementFlowStep
-        )
-        assertTrue(keyMgmtViewModel.state.finalizeKeyFlow is Resource.Loading)
-        assertEquals(BioPromptReason.MIGRATE_BIOMETRIC_KEY, keyMgmtViewModel.state.bioPromptReason)
-        assertTriggerBioPromptIsSuccessAndHasCipherData()
-    }
-
-    @Test
     fun `after error occurs during key recovery then retrying should trigger bio prompt`() = runTest {
-        whenever(keyRepository.regenerateAuthDataAndSaveKeyToUser(any(), any(), any())).thenAnswer {
+        whenever(keyRepository.saveV3PrivateKeys(any(), any())).then {
             throw Exception(defaultErrorMessage)
         }
 
@@ -1098,7 +899,7 @@ class KeyManagementViewModelTest : BaseViewModelTest() {
         assertTrue(keyMgmtViewModel.state.keyRecoveryManualEntryError is Resource.Uninitialized)
 
         //Attempt to recover the key, an exception will be thrown
-        keyMgmtViewModel.recoverKey(cipher)
+        keyMgmtViewModel.recoverKey(privateKeysEncryptionCipher)
 
         advanceUntilIdle()
 
@@ -1118,19 +919,22 @@ class KeyManagementViewModelTest : BaseViewModelTest() {
         )
         assertTrue(keyMgmtViewModel.state.finalizeKeyFlow is Resource.Loading)
         assertEquals(PhraseInputMethod.PASTED, keyMgmtViewModel.state.inputMethod)
-        assertEquals(BioPromptReason.RECOVER_KEY, keyMgmtViewModel.state.bioPromptReason)
+        assertEquals(
+            BioPromptReason.SAVE_V3_ROOT_SEED,
+            keyMgmtViewModel.state.bioPromptData.bioPromptReason
+        )
         assertTriggerBioPromptIsSuccessAndHasCipherData()
     }
 
     @Test
     fun `after error occurs during key creation then retrying should trigger bio prompt`() = runTest {
-        whenever(keyRepository.generateInitialAuthDataAndSaveKeyToUser(any(), any())).thenAnswer {
+        whenever(keyRepository.saveV3PrivateKeys(any(), any())).thenAnswer {
             throw Exception(defaultErrorMessage)
         }
 
         setCreationFlowDataInStateForConfirmWordsProcessAndAssertChangesInState()
 
-        keyMgmtViewModel.createAndSaveKey(cipher)
+        keyMgmtViewModel.createAndSaveKey(privateKeysEncryptionCipher)
 
         advanceUntilIdle()
 
@@ -1145,35 +949,11 @@ class KeyManagementViewModelTest : BaseViewModelTest() {
             keyMgmtViewModel.state.keyManagementFlowStep
         )
         assertTrue(keyMgmtViewModel.state.finalizeKeyFlow is Resource.Loading)
-        assertEquals(BioPromptReason.CREATE_KEY, keyMgmtViewModel.state.bioPromptReason)
+        assertEquals(
+            BioPromptReason.SAVE_V3_ROOT_SEED,
+            keyMgmtViewModel.state.bioPromptData.bioPromptReason
+        )
         assertTriggerBioPromptIsSuccessAndHasCipherData()
-    }
-
-    @Test
-    fun `after error occurs during key regeneration then retrying should trigger bio prompt`() = runTest {
-        whenever(keyRepository.regenerateDataAndUploadToBackend()).thenAnswer {
-            Resource.Error(null)
-        }
-
-        assertTrue(keyMgmtViewModel.state.finalizeKeyFlow is Resource.Uninitialized)
-
-        //Calling onStart with regeneration initial data will trigger the regenerateData method for us
-        keyMgmtViewModel.onStart(testRegenerationInitialData)
-
-        advanceUntilIdle()
-
-        assertTrue(keyMgmtViewModel.state.finalizeKeyFlow is Resource.Error)
-
-        whenever(keyRepository.regenerateDataAndUploadToBackend()).thenAnswer {
-            Resource.Success(testWalletSigner)
-        }
-
-        keyMgmtViewModel.retryRegenerateData()
-
-        advanceUntilIdle()
-
-        assertTrue(keyMgmtViewModel.state.finalizeKeyFlow is Resource.Success)
-        assertEquals(testWalletSigner, keyMgmtViewModel.state.finalizeKeyFlow.data)
     }
     //endregion
 
@@ -1199,7 +979,7 @@ class KeyManagementViewModelTest : BaseViewModelTest() {
 
     private fun assertTriggerBioPromptIsSuccessAndHasCipherData() {
         assertTrue(keyMgmtViewModel.state.triggerBioPrompt is Resource.Success)
-        assertEquals(cipher, keyMgmtViewModel.state.triggerBioPrompt.data)
+        assertEquals(rootSeedEncryptionCipher, keyMgmtViewModel.state.triggerBioPrompt.data)
     }
 
     private fun callExitPhraseFlowAndAssertChangesInState() {

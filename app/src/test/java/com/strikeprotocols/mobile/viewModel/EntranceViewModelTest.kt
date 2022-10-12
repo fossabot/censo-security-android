@@ -1,5 +1,6 @@
 package com.strikeprotocols.mobile.viewModel
 
+import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.times
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
@@ -78,12 +79,12 @@ class EntranceViewModelTest : BaseViewModelTest() {
         key = "F7JuLRBbyGAS9nAhDdfNX1LbckBAmCnKMB2xTdZfQS1n"
     )
 
-    private val basicVerifyUserWithValidPublicKey =
-        basicVerifyUserWithNoPublicKeys.copy(publicKeys = listOf(validPublicKey))
-
     private val validWalletSigners = listOf(
         WalletSigner(chain = Chain.solana, publicKey = validPublicKey.key)
     )
+
+    private val basicVerifyUserWithValidPublicKey =
+        basicVerifyUserWithNoPublicKeys.copy(publicKeys = listOf(validPublicKey))
 
     @Before
     fun setup() = runTest {
@@ -97,6 +98,7 @@ class EntranceViewModelTest : BaseViewModelTest() {
                 SemanticVersionResponse(androidVersion = OsVersion(testLowMinimumVersion))
             )
         }
+        whenever(keyRepository.retrieveV3PublicKeys()).then { validWalletSigners }
 
         entranceViewModel = EntranceViewModel(
             userRepository = userRepository,
@@ -134,8 +136,9 @@ class EntranceViewModelTest : BaseViewModelTest() {
             Resource.Success(basicVerifyUserWithValidPublicKey)
         }
 
-        whenever(keyRepository.havePrivateKey()).then { false }
-        whenever(keyRepository.getDeprecatedPrivateKey()).then { "not empty" }
+        whenever(keyRepository.havePrivateKeys()).then { false }
+        whenever(keyRepository.doesUserHaveV1KeyData()).then { false }
+        whenever(keyRepository.doesUserHaveV2KeyData()).then { true }
 
         entranceViewModel.onStart()
         advanceUntilIdle()
@@ -156,8 +159,9 @@ class EntranceViewModelTest : BaseViewModelTest() {
             Resource.Success(basicVerifyUserWithValidPublicKey)
         }
 
-        whenever(keyRepository.havePrivateKey()).then { false }
-        whenever(keyRepository.getDeprecatedPrivateKey()).then { "not empty" }
+        whenever(keyRepository.havePrivateKeys()).then { false }
+        whenever(keyRepository.doesUserHaveV1KeyData()).then { true }
+        whenever(keyRepository.doesUserHaveV2KeyData()).then { true }
 
         entranceViewModel.onStart()
         advanceUntilIdle()
@@ -178,8 +182,9 @@ class EntranceViewModelTest : BaseViewModelTest() {
                 Resource.Success(basicVerifyUserWithNoPublicKeys)
             }
 
-            whenever(keyRepository.havePrivateKey()).then { false }
-            whenever(keyRepository.getDeprecatedPrivateKey()).then { "" }
+            whenever(keyRepository.havePrivateKeys()).then { false }
+            whenever(keyRepository.doesUserHaveV1KeyData()).then { false }
+            whenever(keyRepository.doesUserHaveV2KeyData()).then { false }
 
             entranceViewModel.onStart()
             advanceUntilIdle()
@@ -200,8 +205,9 @@ class EntranceViewModelTest : BaseViewModelTest() {
                 Resource.Success(basicVerifyUserWithNoPublicKeys)
             }
 
-            whenever(keyRepository.havePrivateKey()).then { true }
-            whenever(keyRepository.getDeprecatedPrivateKey()).then { "" }
+            whenever(keyRepository.havePrivateKeys()).then { true }
+            whenever(keyRepository.doesUserHaveV1KeyData()).then { false }
+            whenever(keyRepository.doesUserHaveV2KeyData()).then { false }
 
             entranceViewModel.onStart()
             advanceUntilIdle()
@@ -210,7 +216,7 @@ class EntranceViewModelTest : BaseViewModelTest() {
                 .setStrikeUser(basicVerifyUserWithNoPublicKeys)
 
             assertTrue(entranceViewModel.state.userDestinationResult is Resource.Success)
-            assertTrue(entranceViewModel.state.userDestinationResult.data == UserDestination.KEY_MANAGEMENT_REGENERATION)
+            assertTrue(entranceViewModel.state.userDestinationResult.data == UserDestination.REGENERATION)
         }
 
     @Test
@@ -222,8 +228,9 @@ class EntranceViewModelTest : BaseViewModelTest() {
                 Resource.Success(basicVerifyUserWithValidPublicKey)
             }
 
-            whenever(keyRepository.havePrivateKey()).then { false }
-            whenever(keyRepository.getDeprecatedPrivateKey()).then { "" }
+            whenever(keyRepository.havePrivateKeys()).then { false }
+            whenever(keyRepository.doesUserHaveV1KeyData()).then { false }
+            whenever(keyRepository.doesUserHaveV2KeyData()).then { false }
 
             entranceViewModel.onStart()
             advanceUntilIdle()
@@ -244,14 +251,11 @@ class EntranceViewModelTest : BaseViewModelTest() {
                 Resource.Success(basicVerifyUserWithValidPublicKey)
             }
 
-            whenever(keyRepository.havePrivateKey()).then { true }
-            whenever(keyRepository.getDeprecatedPrivateKey()).then { "" }
-            whenever(userRepository.getWalletSigners()).then { Resource.Success(validWalletSigners) }
+            whenever(keyRepository.havePrivateKeys()).then { true }
+            whenever(keyRepository.doesUserHaveV1KeyData()).then { false }
+            whenever(keyRepository.doesUserHaveV2KeyData()).then { false }
             whenever(
-                keyRepository.doesUserHaveValidLocalKey(
-                    basicVerifyUserWithValidPublicKey,
-                    validWalletSigners
-                )
+                keyRepository.doesUserHaveValidLocalKey(basicVerifyUserWithValidPublicKey)
             ).then { true }
 
             entranceViewModel.onStart()
@@ -273,14 +277,11 @@ class EntranceViewModelTest : BaseViewModelTest() {
                 Resource.Success(basicVerifyUserWithValidPublicKey)
             }
 
-            whenever(keyRepository.havePrivateKey()).then { true }
-            whenever(keyRepository.getDeprecatedPrivateKey()).then { "" }
-            whenever(userRepository.getWalletSigners()).then { Resource.Success(validWalletSigners) }
+            whenever(keyRepository.havePrivateKeys()).then { true }
+            whenever(keyRepository.doesUserHaveV1KeyData()).then { false }
+            whenever(keyRepository.doesUserHaveV2KeyData()).then { false }
             whenever(
-                keyRepository.doesUserHaveValidLocalKey(
-                    basicVerifyUserWithValidPublicKey,
-                    validWalletSigners
-                )
+                keyRepository.doesUserHaveValidLocalKey(basicVerifyUserWithValidPublicKey)
             ).then { false }
 
             entranceViewModel.onStart()
@@ -291,30 +292,6 @@ class EntranceViewModelTest : BaseViewModelTest() {
 
             assertTrue(entranceViewModel.state.userDestinationResult is Resource.Success)
             assertTrue(entranceViewModel.state.userDestinationResult.data == UserDestination.INVALID_KEY)
-        }
-
-    @Test
-    fun `if wallet signers fails then set user null and do not set a user destination`() =
-        runTest {
-            setupLoggedInUserWithValidEmail()
-
-            whenever(userRepository.verifyUser()).then {
-                Resource.Success(basicVerifyUserWithValidPublicKey)
-            }
-
-            whenever(keyRepository.havePrivateKey()).then { true }
-            whenever(keyRepository.getDeprecatedPrivateKey()).then { "" }
-            whenever(userRepository.getWalletSigners()).then {
-                Resource.Error<List<WalletSigner?>?>()
-            }
-
-            entranceViewModel.onStart()
-            advanceUntilIdle()
-
-            verify(strikeUserData, times(1))
-                .setStrikeUser(null)
-
-            assertTrue(entranceViewModel.state.userDestinationResult is Resource.Uninitialized)
         }
 
     @Test
@@ -344,15 +321,10 @@ class EntranceViewModelTest : BaseViewModelTest() {
                 Resource.Error<VerifyUser>()
             }
 
-            whenever(keyRepository.havePrivateKey()).then { true }
-            whenever(keyRepository.getDeprecatedPrivateKey()).then { "" }
-            whenever(userRepository.getWalletSigners()).then { Resource.Success(validWalletSigners) }
-            whenever(
-                keyRepository.doesUserHaveValidLocalKey(
-                    basicVerifyUserWithValidPublicKey,
-                    validWalletSigners
-                )
-            ).then { true }
+            whenever(keyRepository.havePrivateKeys()).then { true }
+            whenever(keyRepository.doesUserHaveV1KeyData()).then { false }
+            whenever(keyRepository.doesUserHaveV2KeyData()).then { false }
+            whenever(keyRepository.doesUserHaveValidLocalKey(basicVerifyUserWithValidPublicKey)).then { true }
 
             entranceViewModel.onStart()
 
@@ -373,46 +345,6 @@ class EntranceViewModelTest : BaseViewModelTest() {
             assertTrue(entranceViewModel.state.userDestinationResult is Resource.Success)
             assertTrue(entranceViewModel.state.userDestinationResult.data == UserDestination.HOME)
         }
-
-    @Test
-    fun `can continue to home after initial wallet signers failure`() {
-        runTest {
-            setupLoggedInUserWithValidEmail()
-
-            whenever(userRepository.verifyUser()).then {
-                Resource.Success(basicVerifyUserWithValidPublicKey)
-            }
-
-            whenever(keyRepository.havePrivateKey()).then { true }
-            whenever(keyRepository.getDeprecatedPrivateKey()).then { "" }
-            whenever(userRepository.getWalletSigners()).then { Resource.Error<List<WalletSigner?>?>() }
-            whenever(
-                keyRepository.doesUserHaveValidLocalKey(
-                    basicVerifyUserWithValidPublicKey,
-                    validWalletSigners
-                )
-            ).then { true }
-
-            entranceViewModel.onStart()
-
-            verify(strikeUserData, times(1))
-                .setStrikeUser(null)
-
-            assertTrue(entranceViewModel.state.userDestinationResult is Resource.Uninitialized)
-
-            whenever(userRepository.getWalletSigners()).then { Resource.Success(validWalletSigners) }
-
-            entranceViewModel.retryRetrieveVerifyUserDetails()
-
-            verify(strikeUserData, times(2))
-                .setStrikeUser(basicVerifyUserWithValidPublicKey)
-
-            assertTrue(entranceViewModel.state.userDestinationResult is Resource.Success)
-            assertTrue(entranceViewModel.state.userDestinationResult.data == UserDestination.HOME)
-        }
-    }
-
-    //todo: get these tests working with new flow
 
     /**
      * Test that when we check the minimum app version and it is greater than the current app version,

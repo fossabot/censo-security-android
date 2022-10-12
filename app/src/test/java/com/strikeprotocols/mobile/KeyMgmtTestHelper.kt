@@ -7,26 +7,12 @@ import com.strikeprotocols.mobile.presentation.key_management.KeyManagementIniti
 
 fun getCreationFlowInitialData() = KeyManagementInitialData(
     verifyUserDetails = getVerifyUser(),
-    walletSigners = listOf(),
     flow = KeyManagementFlow.KEY_CREATION
 )
 
 fun getRecoveryFlowInitialData() = KeyManagementInitialData(
     verifyUserDetails = getVerifyUser(),
-    walletSigners = listOf(),
     flow = KeyManagementFlow.KEY_RECOVERY
-)
-
-fun getRegenerationFlowInitialData() = KeyManagementInitialData(
-    verifyUserDetails = getVerifyUser(),
-    walletSigners = listOf(),
-    flow = KeyManagementFlow.KEY_REGENERATION
-)
-
-fun getMigrationFlowInitialData() = KeyManagementInitialData(
-    verifyUserDetails = getVerifyUser(),
-    walletSigners = listOf(),
-    flow = KeyManagementFlow.KEY_MIGRATION
 )
 
 fun getValidTestingPhrase() =

@@ -18,7 +18,6 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.navigation.NavController
 import com.strikeprotocols.mobile.R
 import com.strikeprotocols.mobile.common.BioCryptoUtil
-import com.strikeprotocols.mobile.common.BioPromptReason
 import com.strikeprotocols.mobile.common.Resource
 import com.strikeprotocols.mobile.common.popUpToTop
 import com.strikeprotocols.mobile.presentation.Screen
@@ -92,7 +91,7 @@ fun KeyManagementScreen(
                 KeyRecoveryFlowUI(
                     pastedPhrase = state.confirmPhraseWordsState.pastedPhrase,
                     keyRecoveryFlowStep =
-                        (state.keyManagementFlowStep as KeyManagementFlowStep.RecoveryFlow).step,
+                    (state.keyManagementFlowStep as KeyManagementFlowStep.RecoveryFlow).step,
                     onNavigate = viewModel::keyRecoveryNavigateForward,
                     onBackNavigate = viewModel::keyRecoveryNavigateBackward,
                     onExit = viewModel::exitPhraseFlow,
@@ -106,30 +105,13 @@ fun KeyManagementScreen(
                 )
             }
         }
-
-        KeyManagementFlow.KEY_REGENERATION -> {
-            Box {
-                KeyRegenerationFlowUI(
-                    onNavigate = viewModel::keyRegenerationNavigateForward,
-                    retryKeyCreation = viewModel::retryRegenerateData,
-                    keyRegenerationState = state.finalizeKeyFlow
-                )
-            }
-        }
-        KeyManagementFlow.KEY_MIGRATION -> {
-            KeyMigrationFlowUI(
-                onNavigate = viewModel::keyMigrationNavigateForward,
-                retryKeyMigration = viewModel::retryKeyMigration,
-                keyMigrationState = state.finalizeKeyFlow
-            )
-        }
         else -> {
             Box {
                 KeyCreationFlowUI(
                     phrase = state.keyGeneratedPhrase ?: "",
                     pastedPhrase = state.confirmPhraseWordsState.pastedPhrase,
                     phraseVerificationFlowStep =
-                        (state.keyManagementFlowStep as KeyManagementFlowStep.CreationFlow).step,
+                    (state.keyManagementFlowStep as KeyManagementFlowStep.CreationFlow).step,
                     wordIndexToDisplay = state.wordIndexForDisplay,
                     onPhraseFlowAction = viewModel::phraseFlowAction,
                     onPhraseEntryAction = viewModel::phraseEntryAction,
@@ -147,46 +129,47 @@ fun KeyManagementScreen(
     }
 
     if (state.triggerBioPrompt is Resource.Success) {
-        val mainText = when (state.bioPromptReason) {
-            BioPromptReason.MIGRATE_BIOMETRIC_KEY -> stringResource(id = R.string.migrate_biometry_info)
-            else -> stringResource(id = R.string.save_biometry_info)
-        }
-
-        PreBiometryDialog(
-            mainText = mainText,
-            onAccept = {
-                state.triggerBioPrompt.data?.let {
-                    val promptInfo = BioCryptoUtil.createPromptInfo(context = context)
-                    val bioPrompt = BioCryptoUtil.createBioPrompt(
-                        fragmentActivity = context,
-                        onSuccess = {
-                            val cipher = it?.cipher
-                            if (cipher != null) {
-                                viewModel.biometryApproved(cipher)
-                            } else {
-                                BioCryptoUtil.handleBioPromptOnFail(
-                                    context = context,
-                                    errorCode = BioCryptoUtil.NO_CIPHER_CODE
-                                ) {
-                                    viewModel.biometryFailed()
-                                }
-                            }
-                        },
-                        onFail = {
-                            BioCryptoUtil.handleBioPromptOnFail(context = context, errorCode = it) {
+        val kickOffBioPrompt = {
+            state.triggerBioPrompt.data?.let {
+                val promptInfo = BioCryptoUtil.createPromptInfo(context = context)
+                val bioPrompt = BioCryptoUtil.createBioPrompt(
+                    fragmentActivity = context,
+                    onSuccess = {
+                        val cipher = it?.cipher
+                        if (cipher != null) {
+                            viewModel.biometryApproved(cipher)
+                        } else {
+                            BioCryptoUtil.handleBioPromptOnFail(
+                                context = context,
+                                errorCode = BioCryptoUtil.NO_CIPHER_CODE
+                            ) {
                                 viewModel.biometryFailed()
                             }
                         }
-                    )
+                    },
+                    onFail = {
+                        BioCryptoUtil.handleBioPromptOnFail(context = context, errorCode = it) {
+                            viewModel.biometryFailed()
+                        }
+                    }
+                )
 
-                    bioPrompt.authenticate(
-                        promptInfo,
-                        BiometricPrompt.CryptoObject(state.triggerBioPrompt.data)
-                    )
-                }
-                viewModel.resetPromptTrigger()
+                bioPrompt.authenticate(
+                    promptInfo,
+                    BiometricPrompt.CryptoObject(state.triggerBioPrompt.data)
+                )
             }
-        )
+            viewModel.resetPromptTrigger()
+        }
+
+        if (state.bioPromptData.immediate) {
+            kickOffBioPrompt()
+        } else {
+            PreBiometryDialog(
+                mainText = stringResource(id = R.string.save_biometry_info),
+                onAccept = kickOffBioPrompt
+            )
+        }
     }
     //endregion
 
@@ -222,7 +205,7 @@ fun KeyManagementScreen(
 
     if (state.showToast is Resource.Success) {
 
-        val message = if(state.showToast.data == NO_PHRASE_ERROR) {
+        val message = if (state.showToast.data == NO_PHRASE_ERROR) {
             stringResource(id = R.string.no_phrase_found)
         } else {
             state.showToast.data ?: ""

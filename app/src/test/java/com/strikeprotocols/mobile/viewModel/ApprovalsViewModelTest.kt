@@ -15,6 +15,7 @@ import com.strikeprotocols.mobile.presentation.durable_nonce.DurableNonceViewMod
 import com.strikeprotocols.mobile.ResourceState.ERROR
 import com.strikeprotocols.mobile.ResourceState.SUCCESS
 import com.strikeprotocols.mobile.common.StrikeCountDownTimer
+import com.strikeprotocols.mobile.data.models.CipherRepository
 import com.strikeprotocols.mobile.presentation.approval_disposition.ApprovalDispositionState
 import junit.framework.TestCase.*
 import kotlinx.coroutines.*
@@ -37,6 +38,9 @@ class ApprovalsViewModelTest : BaseViewModelTest() {
 
     @Mock
     lateinit var approvalsRepository: ApprovalsRepository
+
+    @Mock
+    lateinit var cipherRepository: CipherRepository
 
     @Mock
     lateinit var countdownTimer: StrikeCountDownTimer
@@ -84,12 +88,17 @@ class ApprovalsViewModelTest : BaseViewModelTest() {
             Resource.Success(data = null)
         }
 
-        whenever(keyRepository.getCipherForPrivateKeyDecryption()).thenAnswer {
+        whenever(cipherRepository.getCipherForV3PrivateKeysDecryption()).thenAnswer {
             cipher
         }
 
         approvalsViewModel =
-            ApprovalsViewModel(approvalsRepository = approvalsRepository, keyRepository, countdownTimer)
+            ApprovalsViewModel(
+                approvalsRepository = approvalsRepository,
+                keyRepository = keyRepository,
+                cipherRepository = cipherRepository,
+                timer = countdownTimer
+            )
 
         durableNonceViewModel = DurableNonceViewModel(solanaRepository)
     }

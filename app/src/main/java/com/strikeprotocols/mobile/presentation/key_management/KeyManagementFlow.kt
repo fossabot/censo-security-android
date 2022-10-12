@@ -1,5 +1,5 @@
 package com.strikeprotocols.mobile.presentation.key_management
 
 enum class KeyManagementFlow {
-    KEY_CREATION, KEY_RECOVERY, KEY_REGENERATION, KEY_MIGRATION, UNINITIALIZED
+    KEY_CREATION, KEY_RECOVERY, UNINITIALIZED
 }

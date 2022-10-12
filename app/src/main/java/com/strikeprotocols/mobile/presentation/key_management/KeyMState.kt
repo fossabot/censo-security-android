@@ -2,7 +2,8 @@ package com.strikeprotocols.mobile.presentation.key_management
 
 import com.strikeprotocols.mobile.common.BioPromptReason
 import com.strikeprotocols.mobile.common.Resource
-import com.strikeprotocols.mobile.data.models.WalletSigner
+import com.strikeprotocols.mobile.data.BioPromptData
+import com.strikeprotocols.mobile.data.models.Signers
 import com.strikeprotocols.mobile.presentation.key_management.flows.KeyCreationFlowStep
 import com.strikeprotocols.mobile.presentation.key_management.flows.KeyManagementFlowStep
 import javax.crypto.Cipher
@@ -23,12 +24,12 @@ data class KeyManagementState(
     val confirmPhraseWordsState: ConfirmPhraseWordsState = ConfirmPhraseWordsState(),
 
     //API calls
-    val finalizeKeyFlow: Resource<WalletSigner> = Resource.Uninitialized,
-    val walletSignerToAdd: WalletSigner? = null,
+    val finalizeKeyFlow: Resource<Signers> = Resource.Uninitialized,
+    val walletSignerToAdd: Signers? = null,
 
     //Utility state
     val triggerBioPrompt: Resource<Cipher> = Resource.Uninitialized,
-    val bioPromptReason: BioPromptReason = BioPromptReason.UNINITIALIZED,
+    val bioPromptData: BioPromptData = BioPromptData(BioPromptReason.UNINITIALIZED, false),
     val showToast: Resource<String> = Resource.Uninitialized,
     val goToAccount: Resource<Boolean> = Resource.Uninitialized,
     val keyRecoveryManualEntryError: Resource<Boolean> = Resource.Uninitialized,

@@ -1,5 +1,6 @@
 package com.strikeprotocols.mobile.common
 
+import org.bouncycastle.crypto.digests.RIPEMD160Digest
 import org.bouncycastle.jce.provider.BouncyCastleProvider
 import org.bouncycastle.util.encoders.Hex
 import java.math.BigInteger
@@ -21,10 +22,13 @@ object BitcoinUtils {
         java.security.Security.addProvider(BouncyCastleProvider())
     }
     private val sha256 = MessageDigest.getInstance("SHA-256")
-    private val rmd = MessageDigest.getInstance("RipeMD160")
 
     fun sha256Hash160(input: ByteArray): ByteArray {
-        return rmd.digest(sha256.digest(input))
+        val digest = RIPEMD160Digest()
+        digest.update(sha256.digest(input), 0, 32)
+        val outArray = ByteArray(20)
+        digest.doFinal(outArray, 0)
+        return outArray
     }
 
     fun addChecksum(input: ByteArray): ByteArray {

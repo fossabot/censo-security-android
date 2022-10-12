@@ -4,6 +4,7 @@ import com.google.gson.JsonElement
 import com.google.gson.JsonParser
 import com.strikeprotocols.mobile.BuildConfig
 import com.strikeprotocols.mobile.data.models.*
+import com.strikeprotocols.mobile.data.models.WalletSigner.Companion.WALLET_TYPE_SOLANA
 import com.strikeprotocols.mobile.data.models.approval.*
 import java.util.*
 

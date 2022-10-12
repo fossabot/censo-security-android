@@ -45,6 +45,7 @@ import androidx.compose.ui.zIndex
 import com.strikeprotocols.mobile.R
 import com.strikeprotocols.mobile.common.Resource
 import com.strikeprotocols.mobile.data.models.IndexedPhraseWord
+import com.strikeprotocols.mobile.data.models.Signers
 import com.strikeprotocols.mobile.data.models.WalletSigner
 import com.strikeprotocols.mobile.presentation.key_management.KeyManagementState.Companion.FIRST_WORD_INDEX
 import com.strikeprotocols.mobile.presentation.key_management.KeyManagementState.Companion.LAST_SET_START_INDEX
@@ -67,7 +68,7 @@ object PhraseUICompanion {
 }
 
 @Composable
-fun PhraseBackground() {
+fun PurpleGradientBackgroundUI() {
     when {
         Build.VERSION.SDK_INT >= Build.VERSION_CODES.S ->
             Box(
@@ -383,7 +384,7 @@ fun ConfirmKeyUI(
 
 @Composable
 fun AllSetUI(
-    allSetState: Resource<WalletSigner?>,
+    allSetState: Resource<Signers>,
     retry: () -> Unit,
     onNavigate: () -> Unit,
     loadingText: String? = null

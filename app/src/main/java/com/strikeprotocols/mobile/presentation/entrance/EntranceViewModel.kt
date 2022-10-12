@@ -12,7 +12,6 @@ import com.strikeprotocols.mobile.common.Resource
 import com.strikeprotocols.mobile.data.*
 import com.strikeprotocols.mobile.data.models.SemanticVersion
 import com.strikeprotocols.mobile.data.models.VerifyUser
-import com.strikeprotocols.mobile.data.models.WalletSigner
 import com.strikeprotocols.mobile.presentation.semantic_version_check.MainViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
@@ -122,7 +121,6 @@ class EntranceViewModel @Inject constructor(
 
     fun retryRetrieveVerifyUserDetails() {
         resetVerifyUserResult()
-        resetWalletSignersCall()
         viewModelScope.launch {
             retrieveUserVerifyDetails()
         }
@@ -133,31 +131,34 @@ class EntranceViewModel @Inject constructor(
         state = state.copy(verifyUserResult = verifyUserDataResource)
     }
 
-    private fun handleWalletSignersError(walletSignersDataResource: Resource<List<WalletSigner?>>) {
-        strikeUserData.setStrikeUser(null)
-        state = if (walletSignersDataResource is Resource.Error) {
-            state.copy(walletSignersResult = walletSignersDataResource)
-        } else {
-            state.copy(
-                walletSignersResult =
-                Resource.Error(exception = Exception("Null wallet signers"))
-            )
-        }
-    }
-
     //2 part method.
-    //Part 1: Do we need to update key data? create/upload/regenerate
+    //Part 1: Do we need to update key data? create/upload/regenerate/migrate
     //Part 2: Is our local key valid? valid/invalid
     private suspend fun determineUserDestination(verifyUser: VerifyUser) {
-        val userDoesNotHaveSentinelData = !keyRepository.haveSentinelData()
-        val userSavedPrivateKey = keyRepository.havePrivateKey()
-        val publicKeysPresent = !verifyUser.publicKeys.isNullOrEmpty()
+        //region Part 1: Check 5 scenarios: Sentinel data, migration, missing keys, never uploaded, and create/recover.
+        //Setup Data
+        val userHasUploadedKeysToBackendBefore = !verifyUser.publicKeys.isNullOrEmpty()
+        val userHasLocallySavedPrivateKeys = keyRepository.havePrivateKeys()
 
-        //region PART 1: Do we need to update our key data or save sentinel data?
-        val doesUserNeedToCreateKey = !publicKeysPresent && !userSavedPrivateKey
-        val doesUserNeedToUploadKeyToBackend = !publicKeysPresent && userSavedPrivateKey
-        val doesUserNeedToRecoverKey = !userSavedPrivateKey && publicKeysPresent
-        val oldKeyPresent = keyRepository.getDeprecatedPrivateKey().isNotEmpty()
+        val localPublicKeys = keyRepository.retrieveV3PublicKeys()
+
+        //Check 1: Does this logged in user need to add sentinel data for background biometry
+        val userDoesNotHaveSentinelData = !keyRepository.haveSentinelData()
+
+        //Check 2: Does this user have any leftover v1/v2 data and need to migrate to v3 storage
+        val userHasV1KeyData = keyRepository.doesUserHaveV1KeyData()
+        val userHasV2KeyData = keyRepository.doesUserHaveV2KeyData()
+
+        //Check 3: Does this user have extra local keys and need to sign + upload these keys to backend
+        val needToUpdateKeysSavedOnBackend = userHasUploadedKeysToBackendBefore &&
+                verifyUser.determineKeysUserNeedsToUpload(localPublicKeys).isNotEmpty()
+
+        //Check 4: User has saved local keys but has not uploaded them to backend
+        val doesUserNeedToUploadKeyToBackend = !userHasUploadedKeysToBackendBefore && userHasLocallySavedPrivateKeys
+
+        //Check 5: This user does not have a local private key and needs to either create a key or recover a key
+        val doesUserNeedToCreateKey = !userHasUploadedKeysToBackendBefore && !userHasLocallySavedPrivateKeys
+        val doesUserNeedToRecoverKey = !userHasLocallySavedPrivateKeys && userHasUploadedKeysToBackendBefore
 
         when {
             userDoesNotHaveSentinelData -> {
@@ -166,7 +167,7 @@ class EntranceViewModel @Inject constructor(
                 )
                 return
             }
-            oldKeyPresent -> {
+            userHasV1KeyData || userHasV2KeyData || needToUpdateKeysSavedOnBackend -> {
                 state = state.copy(
                     userDestinationResult = Resource.Success(UserDestination.KEY_MIGRATION)
                 )
@@ -178,33 +179,31 @@ class EntranceViewModel @Inject constructor(
                 )
                 return
             }
-            doesUserNeedToUploadKeyToBackend -> {
-                state = state.copy(
-                    userDestinationResult = Resource.Success(UserDestination.KEY_MANAGEMENT_REGENERATION),
-                )
-                return
-            }
             doesUserNeedToRecoverKey -> {
                 state = state.copy(
                     userDestinationResult = Resource.Success(UserDestination.KEY_MANAGEMENT_RECOVERY),
                 )
                 return
             }
+            doesUserNeedToUploadKeyToBackend -> {
+                state = state.copy(
+                    userDestinationResult = Resource.Success(UserDestination.REGENERATION)
+                )
+                return
+            }
         }
         //endregion
 
-        //region PART 2: Is our local key valid?
-        val walletSigners = getWalletSigners() ?: return
-
+        //region Part 2: Passed all checks, lets check if our our local key valid?
         val doesUserHaveValidLocalKey =
-            keyRepository.doesUserHaveValidLocalKey(verifyUser, walletSigners)
+            keyRepository.doesUserHaveValidLocalKey(verifyUser)
 
         //DESTINATION: User has valid key saved and we let them into the app
         state = if (doesUserHaveValidLocalKey) {
             state.copy(
                 userDestinationResult = Resource.Success(UserDestination.HOME)
             )
-            //6. DESTINATION: User has invalid local key saved and we send them to support screen
+            //DESTINATION: User has invalid local key saved and we send them to support screen
         } else {
             state.copy(
                 userDestinationResult = Resource.Success(UserDestination.INVALID_KEY)
@@ -213,27 +212,11 @@ class EntranceViewModel @Inject constructor(
         //endregion
     }
 
-    private suspend fun getWalletSigners(): List<WalletSigner?>? {
-        val walletSignerResource: Resource<List<WalletSigner?>> = userRepository.getWalletSigners()
-
-        return if (walletSignerResource is Resource.Error || walletSignerResource.data == null) {
-            handleWalletSignersError(walletSignerResource)
-            null
-        } else {
-            state = state.copy(walletSignersResult = Resource.Success(walletSignerResource.data))
-            walletSignerResource.data
-        }
-    }
-
     fun resetUserDestinationResult() {
         state = state.copy(userDestinationResult = Resource.Uninitialized)
     }
 
     private fun resetVerifyUserResult() {
         state = state.copy(verifyUserResult = Resource.Uninitialized)
-    }
-
-    private fun resetWalletSignersCall() {
-        state = state.copy(walletSignersResult = Resource.Uninitialized)
     }
 }

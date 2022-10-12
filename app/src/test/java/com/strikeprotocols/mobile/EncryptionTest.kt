@@ -27,7 +27,7 @@ class EncryptionTest {
         val encryptionManager = EncryptionManagerImpl(securePreferences, cryptographyManager)
 
         val phrase = encryptionManager.generatePhrase()
-        val keyPair = encryptionManager.createKeyPair(Mnemonics.MnemonicCode(phrase = phrase))
+        val keyPair = createSolanaKeyPairFromMnemonic(Mnemonics.MnemonicCode(phrase = phrase))
 
         val signData = encryptionManager.signData(data = data, privateKey = keyPair.privateKey)
 
@@ -54,9 +54,9 @@ class EncryptionTest {
         val encryptionManager = EncryptionManagerImpl(securePreferences, cryptographyManager)
 
         val phrase = encryptionManager.generatePhrase()
-        val keyPair = encryptionManager.createKeyPair(Mnemonics.MnemonicCode(phrase = phrase))
+        val keyPair = createSolanaKeyPairFromMnemonic(Mnemonics.MnemonicCode(phrase = phrase))
 
-        val regeneratedPublicKey = encryptionManager.regeneratePublicKey(
+        val regeneratedPublicKey = encryptionManager.regenerateSolanaPublicKey(
             privateKey = BaseWrapper.encode(keyPair.privateKey)
         )
 

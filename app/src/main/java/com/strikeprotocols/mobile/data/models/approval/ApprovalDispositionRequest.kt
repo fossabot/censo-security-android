@@ -375,7 +375,7 @@ data class ApprovalDispositionRequest(
     private fun signRequestWithSolanaKey(
         encryptionManager: EncryptionManager,
         cipher: Cipher): SignedPayload {
-        val privateKeyByteArray = encryptionManager.retrieveSavedKey(
+        val privateKeyByteArray = encryptionManager.retrieveSavedV3Key(
             email = email, cipher = cipher
         )
 
@@ -396,7 +396,7 @@ data class ApprovalDispositionRequest(
         cipher: Cipher,
         childKeyIndex: Int): List<SignedPayload> {
 
-        val privateKeyByteArray = encryptionManager.retrieveSavedKey(
+        val privateKeyByteArray = encryptionManager.retrieveSavedV3Key(
             email = email, cipher = cipher, keyType = StoredKeyData.BITCOIN_KEY
         )
 
@@ -415,7 +415,7 @@ data class ApprovalDispositionRequest(
         encryptionManager: EncryptionManager,
         cipher: Cipher): List<SignedPayload> {
 
-        val privateKeyByteArray = encryptionManager.retrieveSavedKey(
+        val privateKeyByteArray = encryptionManager.retrieveSavedV3Key(
             email = email, cipher = cipher, keyType = StoredKeyData.BITCOIN_KEY
         )
 
@@ -433,7 +433,7 @@ data class ApprovalDispositionRequest(
         encryptionManager: EncryptionManager,
         cipher: Cipher): SignedPayload {
 
-        val privateKeyByteArray = encryptionManager.retrieveSavedKey(
+        val privateKeyByteArray = encryptionManager.retrieveSavedV3Key(
             email = email, cipher = cipher, keyType = StoredKeyData.ETHEREUM_KEY
         )
 

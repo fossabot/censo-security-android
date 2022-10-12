@@ -6,6 +6,7 @@ import com.strikeprotocols.mobile.common.StrikeCountDownTimer
 import com.strikeprotocols.mobile.data.ApprovalsRepository
 import com.strikeprotocols.mobile.data.KeyRepository
 import com.strikeprotocols.mobile.data.models.approval.ApprovalRequest
+import com.strikeprotocols.mobile.data.models.CipherRepository
 import com.strikeprotocols.mobile.presentation.common_approvals.CommonApprovalsViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
@@ -16,10 +17,12 @@ import javax.inject.Inject
 class ApprovalsViewModel @Inject constructor(
     private val approvalsRepository: ApprovalsRepository,
     keyRepository: KeyRepository,
+    cipherRepository: CipherRepository,
     timer: StrikeCountDownTimer,
 ) : CommonApprovalsViewModel(
     approvalsRepository = approvalsRepository,
     keyRepository = keyRepository,
+    cipherRepository = cipherRepository,
     timer = timer
 ) {
     //region Method Overrides

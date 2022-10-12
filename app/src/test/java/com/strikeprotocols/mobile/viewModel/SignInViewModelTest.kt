@@ -8,6 +8,7 @@ import com.strikeprotocols.mobile.common.BioPromptReason
 import com.strikeprotocols.mobile.common.Resource
 import com.strikeprotocols.mobile.data.*
 import com.strikeprotocols.mobile.data.EncryptionManagerImpl.Companion.SENTINEL_KEY_NAME
+import com.strikeprotocols.mobile.data.models.CipherRepository
 import com.strikeprotocols.mobile.data.models.LoginResponse
 import com.strikeprotocols.mobile.data.models.PushBody
 import com.strikeprotocols.mobile.presentation.sign_in.LoginStep
@@ -34,6 +35,9 @@ class SignInViewModelTest : BaseViewModelTest() {
 
     @Mock
     lateinit var keyRepository: KeyRepository
+
+    @Mock
+    lateinit var cipherRepository: CipherRepository
 
     @Mock
     lateinit var userRepository: UserRepository
@@ -66,7 +70,7 @@ class SignInViewModelTest : BaseViewModelTest() {
         MockitoAnnotations.openMocks(this)
 
         whenever(userRepository.retrieveCachedUserEmail()).then { "" }
-        whenever(keyRepository.getCipherForPrivateKeyDecryption()).then { cipher }
+        whenever(cipherRepository.getCipherForV3PrivateKeysDecryption()).then { cipher }
         whenever(keyRepository.generateTimestamp()).then { timestamp }
         whenever(keyRepository.signTimestamp(any(), any())).then { signedTimestamp }
 
@@ -86,7 +90,7 @@ class SignInViewModelTest : BaseViewModelTest() {
     @Test
     fun `valid email with no private key moves us to password entry`() =
         runTest {
-            whenever(keyRepository.havePrivateKey()).then { false }
+            whenever(keyRepository.havePrivateKeys()).then { false }
             whenever(userRepository.userLoggedIn()).then { false }
 
             initVM()
@@ -100,7 +104,7 @@ class SignInViewModelTest : BaseViewModelTest() {
     @Test
     fun `sanitize email when inputted by user`() =
         runTest {
-            whenever(keyRepository.havePrivateKey()).then { false }
+            whenever(keyRepository.havePrivateKeys()).then { false }
             whenever(userRepository.userLoggedIn()).then { false }
 
             initVM()
@@ -116,7 +120,7 @@ class SignInViewModelTest : BaseViewModelTest() {
     @Test
     fun `invalid email with no private key does not move us to password entry`() =
         runTest {
-            whenever(keyRepository.havePrivateKey()).then { false }
+            whenever(keyRepository.havePrivateKeys()).then { false }
             whenever(userRepository.userLoggedIn()).then { false }
 
             initVM()
@@ -131,7 +135,7 @@ class SignInViewModelTest : BaseViewModelTest() {
     @Test
     fun `invalid password does not attempt password based login`() =
         runTest {
-            whenever(keyRepository.havePrivateKey()).then { false }
+            whenever(keyRepository.havePrivateKeys()).then { false }
             whenever(userRepository.userLoggedIn()).then { false }
 
             initVM()
@@ -150,7 +154,7 @@ class SignInViewModelTest : BaseViewModelTest() {
     @Test
     fun `valid password attempts password based login`() =
         runTest {
-            whenever(keyRepository.havePrivateKey()).then { false }
+            whenever(keyRepository.havePrivateKeys()).then { false }
             whenever(userRepository.userLoggedIn()).then { false }
 
             initVM()
@@ -168,9 +172,9 @@ class SignInViewModelTest : BaseViewModelTest() {
     @Test
     fun `valid password login triggers successful login`() =
         runTest {
-            whenever(keyRepository.havePrivateKey()).then { false }
+            whenever(keyRepository.havePrivateKeys()).then { false }
             whenever(userRepository.userLoggedIn()).then { false }
-            whenever(keyRepository.getCipherForEncryption(SENTINEL_KEY_NAME)).then { cipher }
+            whenever(cipherRepository.getCipherForEncryption(SENTINEL_KEY_NAME)).then { cipher }
             whenever(userRepository.loginWithPassword(validEmail, validPassword)).then {
                 Resource.Success(LoginResponse(jwt))
             }
@@ -197,7 +201,7 @@ class SignInViewModelTest : BaseViewModelTest() {
     @Test
     fun `no token returned on password login triggers login error`() =
         runTest {
-            whenever(keyRepository.havePrivateKey()).then { false }
+            whenever(keyRepository.havePrivateKeys()).then { false }
             whenever(userRepository.userLoggedIn()).then { false }
             whenever(userRepository.loginWithPassword(validEmail, validPassword)).then {
                 Resource.Success(LoginResponse(null))
@@ -218,7 +222,7 @@ class SignInViewModelTest : BaseViewModelTest() {
     @Test
     fun `invalid password login triggers login error`() =
         runTest {
-            whenever(keyRepository.havePrivateKey()).then { false }
+            whenever(keyRepository.havePrivateKeys()).then { false }
             whenever(userRepository.userLoggedIn()).then { false }
             whenever(userRepository.loginWithPassword(validEmail, validPassword)).then {
                 Resource.Error<LoginResponse>()
@@ -239,7 +243,7 @@ class SignInViewModelTest : BaseViewModelTest() {
     @Test
     fun `valid email with a private key attempts biometric login`() =
         runTest {
-            whenever(keyRepository.havePrivateKey()).then { true }
+            whenever(keyRepository.havePrivateKeys()).then { true }
             whenever(userRepository.userLoggedIn()).then { false }
 
             initVM()
@@ -256,9 +260,9 @@ class SignInViewModelTest : BaseViewModelTest() {
     @Test
     fun `valid email with a private key but null cipher does not attempt biometric login`() =
         runTest {
-            whenever(keyRepository.havePrivateKey()).then { true }
+            whenever(keyRepository.havePrivateKeys()).then { true }
             whenever(userRepository.userLoggedIn()).then { false }
-            whenever(keyRepository.getCipherForPrivateKeyDecryption()).then { null }
+            whenever(cipherRepository.getCipherForV3PrivateKeysDecryption()).then { null }
 
             initVM()
 
@@ -274,7 +278,7 @@ class SignInViewModelTest : BaseViewModelTest() {
     @Test
     fun `biometry approved during return login attempts signature based login`() =
         runTest {
-            whenever(keyRepository.havePrivateKey()).then { true }
+            whenever(keyRepository.havePrivateKeys()).then { true }
             whenever(userRepository.userLoggedIn()).then { false }
 
             initVM()
@@ -295,7 +299,7 @@ class SignInViewModelTest : BaseViewModelTest() {
     @Test
     fun `biometry approved during initial login attempts saving sentinel data`() =
         runTest {
-            whenever(keyRepository.havePrivateKey()).then { false }
+            whenever(keyRepository.havePrivateKeys()).then { false }
             whenever(userRepository.userLoggedIn()).then { false }
             whenever(userRepository.loginWithPassword(validEmail, validPassword)).then {
                 Resource.Success(LoginResponse(jwt))
@@ -321,7 +325,7 @@ class SignInViewModelTest : BaseViewModelTest() {
         runTest {
             whenever(keyRepository.haveSentinelData()).then { true }
             whenever(userRepository.userLoggedIn()).then { false }
-            whenever(keyRepository.havePrivateKey()).then { true }
+            whenever(keyRepository.havePrivateKeys()).then { true }
             whenever(userRepository.loginWithTimestamp(any(), any(), any())).then {
                 Resource.Success(LoginResponse(jwt))
             }
@@ -344,10 +348,10 @@ class SignInViewModelTest : BaseViewModelTest() {
     @Test
     fun `valid signature based login with no sentinel data triggers sentinel data save`() =
         runTest {
-            whenever(keyRepository.getCipherForEncryption(SENTINEL_KEY_NAME)).then { cipher }
+            whenever(cipherRepository.getCipherForEncryption(SENTINEL_KEY_NAME)).then { cipher }
             whenever(keyRepository.haveSentinelData()).then { false }
             whenever(userRepository.userLoggedIn()).then { false }
-            whenever(keyRepository.havePrivateKey()).then { true }
+            whenever(keyRepository.havePrivateKeys()).then { true }
             whenever(userRepository.loginWithTimestamp(any(), any(), any())).then {
                 Resource.Success(LoginResponse(jwt))
             }
@@ -377,7 +381,7 @@ class SignInViewModelTest : BaseViewModelTest() {
     @Test
     fun `no token returned on signature based login triggers login error`() =
         runTest {
-            whenever(keyRepository.havePrivateKey()).then { true }
+            whenever(keyRepository.havePrivateKeys()).then { true }
             whenever(userRepository.userLoggedIn()).then { false }
             whenever(userRepository.loginWithTimestamp(any(), any(), any())).then {
                 Resource.Success(LoginResponse(null))
@@ -400,7 +404,7 @@ class SignInViewModelTest : BaseViewModelTest() {
     @Test
     fun `invalid signature based login triggers login error`() =
         runTest {
-            whenever(keyRepository.havePrivateKey()).then { true }
+            whenever(keyRepository.havePrivateKeys()).then { true }
             whenever(userRepository.userLoggedIn()).then { false }
             whenever(userRepository.loginWithTimestamp(any(), any(), any())).then {
                 Resource.Error<LoginResponse>()
@@ -423,7 +427,7 @@ class SignInViewModelTest : BaseViewModelTest() {
     @Test
     fun `biometry failure does not attempts signature based login`() =
         runTest {
-            whenever(keyRepository.havePrivateKey()).then { true }
+            whenever(keyRepository.havePrivateKeys()).then { true }
             whenever(userRepository.userLoggedIn()).then { false }
 
             initVM()
@@ -446,7 +450,8 @@ class SignInViewModelTest : BaseViewModelTest() {
             keyRepository = keyRepository,
             userRepository = userRepository,
             strikeUserData = strikeUserData,
-            pushRepository = pushRepository
+            pushRepository = pushRepository,
+            cipherRepository = cipherRepository
         )
     }
 

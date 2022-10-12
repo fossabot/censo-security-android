@@ -185,6 +185,7 @@
     <string name="something_went_wrong">Something went wrong</string>
     <string name="retry">Retry</string>
     <string name="registering_key_auth">Registering your key with Strike…</string>
+    <string name="migration_loading_text">Migrating your key behind biometry protection…</string>
     <string name="i_saved_key">I saved the recovery phrase &#10132;</string>
 
     <string name="sign_in_subtitle">Sign in with the account you\ncreated on the web</string>
@@ -211,10 +212,8 @@
     <string name="sign_in_error">Sign In Error</string>
     <string name="error_occurred_signature_login">An error occurred trying to sign you in</string>
     <string name="try_again">Try Again</string>
-    <string name="migrating_key_loading">Migrating your key behind biometry protection…</string>
 
     <string name="save_biometry_info">Strike protects your private key using biometric verification.\n\nIf you change the biometry settings on your device, you will need to recover your key from your recovery phrase.</string>
-    <string name="migrate_biometry_info">We are moving your key to biometry protected storage.\n\nIf you change the biometry settings on your device, you will need to recover your key from your recovery phrase.</string>
     <string name="are_you_sure">Are you sure?</string>
     <string name="continue_text">Continue</string>
     <string name="close_dialog">close dialog</string>
@@ -228,4 +227,6 @@
     <string name="complete_biometry">Complete Biometry</string>
     <string name="sentinel_data_invalidated">Biometry for device failed. Please log back into the app.</string>
     <string name="biometry_unavailable">Unable to show biometry to gain access to the app.\n\nPlease authenticate device from lock screen.</string>
+    <string name="need_complete_migration">Migration restarted. Please complete migration to enter app.</string>
+    <string name="initial_migration_message">As we migrate your data behind biometry, you will see several biometry dialogs. Please complete all to gain access to the Strike Security app.</string>
 </resources>

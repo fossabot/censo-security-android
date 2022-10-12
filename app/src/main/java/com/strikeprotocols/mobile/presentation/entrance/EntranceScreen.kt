@@ -22,6 +22,7 @@ import com.strikeprotocols.mobile.presentation.Screen
 import com.strikeprotocols.mobile.presentation.components.StrikeErrorScreen
 import com.strikeprotocols.mobile.presentation.key_management.KeyManagementFlow
 import com.strikeprotocols.mobile.presentation.key_management.KeyManagementInitialData
+import com.strikeprotocols.mobile.presentation.migration.VerifyUserInitialData
 import com.strikeprotocols.mobile.ui.theme.BackgroundBlack
 import com.strikeprotocols.mobile.ui.theme.StrikeWhite
 
@@ -41,22 +42,30 @@ fun EntranceScreen(
         if (state.userDestinationResult is Resource.Success) {
             val userDestinationRoute = when (state.userDestinationResult.data) {
                 UserDestination.HOME -> Screen.ApprovalListRoute.route
-                UserDestination.KEY_MANAGEMENT_REGENERATION,
-                UserDestination.KEY_MANAGEMENT_RECOVERY,
-                UserDestination.KEY_MIGRATION,
-                UserDestination.KEY_MANAGEMENT_CREATION -> {
+                UserDestination.KEY_MIGRATION -> {
+                    val migrationInitialData = VerifyUserInitialData(
+                        verifyUserDetails = state.verifyUserResult.data,
+                    )
+
+                    val migrationJson =
+                        VerifyUserInitialData.toJson(
+                            migrationInitialData,
+                            AndroidUriWrapper()
+                        )
+                    "${Screen.MigrationRoute.route}/$migrationJson"
+                }
+                UserDestination.REGENERATION -> Screen.RegenerationRoute.route
+                UserDestination.KEY_MANAGEMENT_CREATION,
+                UserDestination.KEY_MANAGEMENT_RECOVERY -> {
 
                     val flow = when (state.userDestinationResult.data) {
                         UserDestination.KEY_MANAGEMENT_CREATION -> KeyManagementFlow.KEY_CREATION
                         UserDestination.KEY_MANAGEMENT_RECOVERY -> KeyManagementFlow.KEY_RECOVERY
-                        UserDestination.KEY_MANAGEMENT_REGENERATION -> KeyManagementFlow.KEY_REGENERATION
-                        UserDestination.KEY_MIGRATION -> KeyManagementFlow.KEY_MIGRATION
                         else -> KeyManagementFlow.KEY_CREATION
                     }
 
                     val keyManagementInitialData = KeyManagementInitialData(
                         verifyUserDetails = state.verifyUserResult.data,
-                        walletSigners = state.walletSignersResult.data,
                         flow = flow
                     )
 
@@ -105,19 +114,6 @@ fun EntranceScreen(
     if (state.verifyUserResult is Resource.Error) {
         StrikeErrorScreen(
             errorResource = state.verifyUserResult,
-            onDismiss = {
-                //since this screen is just loading UI, we always want to retry.
-                viewModel.retryRetrieveVerifyUserDetails()
-            },
-            onRetry = {
-                viewModel.retryRetrieveVerifyUserDetails()
-            }
-        )
-    }
-
-    if (state.walletSignersResult is Resource.Error) {
-        StrikeErrorScreen(
-            errorResource = state.walletSignersResult,
             onDismiss = {
                 //since this screen is just loading UI, we always want to retry.
                 viewModel.retryRetrieveVerifyUserDetails()

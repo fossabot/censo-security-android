@@ -11,6 +11,7 @@ import com.strikeprotocols.mobile.common.StrikeCountDownTimerImpl
 import com.strikeprotocols.mobile.data.ApprovalsRepository
 import com.strikeprotocols.mobile.data.KeyRepository
 import com.strikeprotocols.mobile.data.models.ApprovalDisposition
+import com.strikeprotocols.mobile.data.models.CipherRepository
 import com.strikeprotocols.mobile.data.models.InitiationDisposition
 import com.strikeprotocols.mobile.data.models.RegisterApprovalDisposition
 import com.strikeprotocols.mobile.data.models.approval.SolanaApprovalRequestDetails
@@ -22,6 +23,7 @@ import javax.crypto.Cipher
 
 abstract class CommonApprovalsViewModel(
     private val approvalsRepository: ApprovalsRepository,
+    private val cipherRepository: CipherRepository,
     private val keyRepository: KeyRepository,
     private val timer: StrikeCountDownTimer
 ) : ViewModel() {
@@ -69,7 +71,7 @@ abstract class CommonApprovalsViewModel(
 
     private fun triggerBioPrompt() {
         viewModelScope.launch {
-            val cipher = keyRepository.getCipherForPrivateKeyDecryption()
+            val cipher = cipherRepository.getCipherForV3PrivateKeysDecryption()
             if (cipher != null) {
                 state = state.copy(bioPromptTrigger = Resource.Success(cipher))
             }

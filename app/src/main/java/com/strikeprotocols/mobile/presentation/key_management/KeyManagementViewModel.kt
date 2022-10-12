@@ -10,8 +10,11 @@ import androidx.lifecycle.viewModelScope
 import cash.z.ecc.android.bip39.Mnemonics
 import com.strikeprotocols.mobile.common.*
 import com.strikeprotocols.mobile.data.*
-import com.strikeprotocols.mobile.data.EncryptionManagerImpl.Companion.BIO_KEY_NAME
+import com.strikeprotocols.mobile.data.EncryptionManagerImpl.Companion.PRIVATE_KEYS_KEY_NAME
+import com.strikeprotocols.mobile.data.EncryptionManagerImpl.Companion.ROOT_SEED_KEY_NAME
+import com.strikeprotocols.mobile.data.models.CipherRepository
 import com.strikeprotocols.mobile.data.models.IndexedPhraseWord
+import com.strikeprotocols.mobile.data.models.Signers
 import com.strikeprotocols.mobile.data.models.WalletSigner
 import com.strikeprotocols.mobile.presentation.key_management.KeyManagementState.Companion.NO_PHRASE_ERROR
 import com.strikeprotocols.mobile.presentation.key_management.KeyManagementState.Companion.FIRST_WORD_INDEX
@@ -23,6 +26,7 @@ import javax.crypto.Cipher
 class KeyManagementViewModel @Inject constructor(
     private val userRepository: UserRepository,
     private val keyRepository: KeyRepository,
+    private val cipherRepository: CipherRepository,
     private val phraseValidator: PhraseValidator
 ) : ViewModel() {
 
@@ -63,25 +67,6 @@ class KeyManagementViewModel @Inject constructor(
                         keyManagementFlow = keyManagementInitialData.flow
                     )
                 }
-                KeyManagementFlow.KEY_REGENERATION -> {
-                    state = state.copy(
-                        initialData = keyManagementInitialData,
-                        keyManagementFlowStep =
-                        KeyManagementFlowStep.RegenerationFlow(KeyRegenerationFlowStep.ALL_SET_STEP),
-                        keyManagementFlow = keyManagementInitialData.flow
-                    )
-                    regenerateData()
-                }
-                KeyManagementFlow.KEY_MIGRATION -> {
-                    state = state.copy(
-                        initialData = keyManagementInitialData,
-                        keyManagementFlowStep =
-                        KeyManagementFlowStep.MigrationFlow(KeyMigrationFlowStep.ALL_SET_STEP),
-                        keyManagementFlow = keyManagementInitialData.flow,
-                        finalizeKeyFlow = Resource.Loading(),
-                    )
-                    triggerBioPrompt()
-                }
             }
         }
     }
@@ -100,31 +85,16 @@ class KeyManagementViewModel @Inject constructor(
     //endregion
 
     //region API CALLS
-    private suspend fun attemptAddWalletSigner(walletSignerBody: WalletSigner): Resource<WalletSigner> {
+    private suspend fun attemptAddWalletSigner(walletSignerBody: List<WalletSigner?>?): Resource<Signers> {
         val walletSignerResource =
             userRepository.addWalletSigner(walletSignerBody)
 
         state = state.copy(finalizeKeyFlow = walletSignerResource)
         return walletSignerResource
     }
-
-    private fun regenerateData() {
-        state = state.copy(finalizeKeyFlow = Resource.Loading())
-        viewModelScope.launch {
-            val walletSignerResource = keyRepository.regenerateDataAndUploadToBackend()
-            state = state.copy(finalizeKeyFlow = walletSignerResource)
-        }
-    }
     //endregion
 
     //region RETRY
-    fun retryRegenerateData() {
-        //We use resetAddWalletSignersCall() to reset finalizeKeyFlow
-        // and prevent the UI from constantly displaying an error dialog
-        resetAddWalletSignersCall()
-        regenerateData()
-    }
-
     fun retryKeyCreationFromPhrase() {
         viewModelScope.launch {
             userVerifiedFullPhraseDuringKeyCreation()
@@ -137,45 +107,40 @@ class KeyManagementViewModel @Inject constructor(
             finalizeKeyFlow = Resource.Loading()
         )
 
-        triggerBioPrompt(inputMethod = PhraseInputMethod.PASTED)
-    }
-
-    fun retryKeyMigration() {
-        state = state.copy(
-            keyManagementFlowStep =
-            KeyManagementFlowStep.MigrationFlow(KeyMigrationFlowStep.ALL_SET_STEP),
-            finalizeKeyFlow = Resource.Loading(),
-        )
-        triggerBioPrompt()
+        triggerBioPrompt(inputMethod = PhraseInputMethod.PASTED, rootSeedSave = true)
     }
     //endregion
 
     //region CORE ACTIONS
-    fun triggerBioPrompt(inputMethod: PhraseInputMethod? = null) {
+    fun triggerBioPrompt(inputMethod: PhraseInputMethod? = null, rootSeedSave: Boolean) {
         viewModelScope.launch {
-            val cipher = keyRepository.getCipherForEncryption(BIO_KEY_NAME)
+            val cipher = if (rootSeedSave) {
+                cipherRepository.getCipherForEncryption(ROOT_SEED_KEY_NAME)
+            } else {
+                cipherRepository .getCipherForEncryption(PRIVATE_KEYS_KEY_NAME)
+            }
+
+            val bioPromptData = if (rootSeedSave) {
+                BioPromptData(BioPromptReason.SAVE_V3_ROOT_SEED, false)
+            } else {
+                BioPromptData(BioPromptReason.SAVE_V3_KEYS, true)
+            }
+
             if (cipher != null) {
                 state = when (state.keyManagementFlow) {
                     KeyManagementFlow.KEY_CREATION -> {
                         state.copy(
                             triggerBioPrompt = Resource.Success(cipher),
-                            bioPromptReason = BioPromptReason.CREATE_KEY
+                            bioPromptData = bioPromptData
                         )
                     }
                     KeyManagementFlow.KEY_RECOVERY -> {
                         state.copy(
                             triggerBioPrompt = Resource.Success(cipher),
-                            bioPromptReason = BioPromptReason.RECOVER_KEY,
+                            bioPromptData = bioPromptData,
                             inputMethod = inputMethod ?: PhraseInputMethod.MANUAL
                         )
                     }
-                    KeyManagementFlow.KEY_MIGRATION -> {
-                        state.copy(
-                            triggerBioPrompt = Resource.Success(cipher),
-                            bioPromptReason = BioPromptReason.MIGRATE_BIOMETRIC_KEY
-                        )
-                    }
-                    KeyManagementFlow.KEY_REGENERATION,
                     KeyManagementFlow.UNINITIALIZED -> {
                         return@launch
                     }
@@ -185,16 +150,53 @@ class KeyManagementViewModel @Inject constructor(
     }
 
     fun biometryApproved(cipher: Cipher) {
-        when (state.bioPromptReason) {
-            BioPromptReason.CREATE_KEY -> createAndSaveKey(cipher)
-            BioPromptReason.RECOVER_KEY -> recoverKey(cipher)
-            BioPromptReason.MIGRATE_BIOMETRIC_KEY -> migrateKeyData(cipher)
+        when (state.bioPromptData.bioPromptReason) {
+            BioPromptReason.SAVE_V3_ROOT_SEED -> {
+                saveRootSeed(cipher)
+            }
+            BioPromptReason.SAVE_V3_KEYS -> {
+                if(state.keyManagementFlow == KeyManagementFlow.KEY_CREATION) {
+                    createAndSaveKey(cipher)
+                } else if (state.keyManagementFlow == KeyManagementFlow.KEY_RECOVERY) {
+                    recoverKey(cipher)
+                }
+            }
             else -> {}
         }
     }
 
     fun biometryFailed() {
         state = state.copy(finalizeKeyFlow = Resource.Error())
+    }
+
+    private fun saveRootSeed(cipher: Cipher) {
+        viewModelScope.launch {
+            val phrase = when (state.keyManagementFlow) {
+                KeyManagementFlow.KEY_CREATION -> {
+                    val safePhrase = state.keyGeneratedPhrase
+                    if (safePhrase == null) {
+                        state = retrieveInitialKeyCreationState()
+                        return@launch
+                    } else {
+                        safePhrase
+                    }
+                }
+                KeyManagementFlow.KEY_RECOVERY -> {
+                    state.userInputtedPhrase
+                }
+                else -> {
+                    state = retrieveInitialKeyCreationState()
+                    return@launch
+                }
+            }
+
+            keyRepository.saveV3RootKey(
+                Mnemonics.MnemonicCode(phrase = phrase),
+                cipher = cipher
+            )
+
+            triggerBioPrompt(rootSeedSave = false)
+        }
     }
 
     fun createAndSaveKey(cipher: Cipher) {
@@ -207,14 +209,19 @@ class KeyManagementViewModel @Inject constructor(
 
         viewModelScope.launch {
             try {
-                val walletSigner = keyRepository.generateInitialAuthDataAndSaveKeyToUser(
-                    Mnemonics.MnemonicCode(phrase = phrase),
-                    cipher
+                keyRepository.saveV3PrivateKeys(
+                    mnemonic = Mnemonics.MnemonicCode(phrase = phrase),
+                    cipher = cipher
                 )
-                state = state.copy(walletSignerToAdd = walletSigner)
+
+                //need to update wallet signer call
+                val walletSigners =
+                    keyRepository.saveV3PublicKeys(mnemonic = Mnemonics.MnemonicCode(phrase = phrase))
+
+                state = state.copy(walletSignerToAdd = Signers(walletSigners))
 
                 val addWalletSignerResource =
-                    attemptAddWalletSigner(walletSigner)
+                    attemptAddWalletSigner(walletSigners)
 
                 if (addWalletSignerResource is Resource.Success) {
                     state =
@@ -241,32 +248,51 @@ class KeyManagementViewModel @Inject constructor(
     fun recoverKey(cipher: Cipher) {
         viewModelScope.launch {
             val verifyUser = state.initialData?.verifyUserDetails
-            val publicKey = verifyUser?.firstPublicKey()
+            val publicKeys = verifyUser?.publicKeys
 
-            if (verifyUser != null && publicKey != null) {
+            if (verifyUser != null && !publicKeys.isNullOrEmpty()) {
                 try {
-                    keyRepository.regenerateAuthDataAndSaveKeyToUser(
-                        phrase = state.userInputtedPhrase,
-                        backendPublicKey = publicKey,
+                    keyRepository.saveV3PrivateKeys(
+                        mnemonic = Mnemonics.MnemonicCode(phrase = state.userInputtedPhrase),
                         cipher = cipher
                     )
-                    state = state.copy(finalizeKeyFlow = Resource.Success(null))
+
+                    //need to update wallet signer call
+                    val localKeys = keyRepository.saveV3PublicKeys(
+                        mnemonic = Mnemonics.MnemonicCode(phrase = state.userInputtedPhrase)
+                    )
+
+                    val keysNotSavedOnBackend = verifyUser.determineKeysUserNeedsToUpload(localKeys)
+
+                    if (keysNotSavedOnBackend.isNotEmpty()) {
+                        val signedKeys =
+                            keyRepository.signKeysThatBackendIsMissing(
+                                keysToBeAdded = keysNotSavedOnBackend,
+                                mnemonic = Mnemonics.MnemonicCode(phrase = state.userInputtedPhrase)
+                            )
+
+                        val walletSignerResource =
+                            userRepository.addWalletSigner(signedKeys)
+
+                        if (walletSignerResource is Resource.Success) {
+                            state =
+                                state.copy(
+                                    finalizeKeyFlow = Resource.Success(walletSignerResource.data),
+                                )
+                        } else if (walletSignerResource is Resource.Error) {
+                            state = state.copy(
+                                finalizeKeyFlow = walletSignerResource
+                            )
+                        }
+                    } else {
+                        //no API call needed, move on
+                        state = state.copy(finalizeKeyFlow = Resource.Success(null))
+                    }
                 } catch (e: Exception) {
                     recoverKeyFailure()
                 }
             } else {
                 recoverKeyFailure()
-            }
-        }
-    }
-
-    private fun migrateKeyData(cipher: Cipher) {
-        viewModelScope.launch {
-            state = try {
-                keyRepository.migrateOldDataToBiometryProtectedStorage(cipher)
-                state.copy(finalizeKeyFlow = Resource.Success(null))
-            } catch (e: Exception) {
-                state.copy(finalizeKeyFlow = Resource.Error(exception = e))
             }
         }
     }
@@ -383,32 +409,6 @@ class KeyManagementViewModel @Inject constructor(
         val nextStep = moveUserToPreviousRecoveryScreen(recoveryFlowStep)
 
         state = state.copy(keyManagementFlowStep = KeyManagementFlowStep.RecoveryFlow(nextStep))
-    }
-
-    fun keyRegenerationNavigateForward() {
-        if (state.keyManagementFlowStep !is KeyManagementFlowStep.RegenerationFlow) {
-            return
-        }
-
-        val regenerationFlowStep: KeyRegenerationFlowStep =
-            (state.keyManagementFlowStep as KeyManagementFlowStep.RegenerationFlow).step
-
-        val nextStep = moveToNextRegenerationScreen(regenerationFlowStep)
-
-        state = state.copy(keyManagementFlowStep = KeyManagementFlowStep.RegenerationFlow(nextStep))
-    }
-
-    fun keyMigrationNavigateForward() {
-        if (state.keyManagementFlowStep !is KeyManagementFlowStep.MigrationFlow) {
-            return
-        }
-
-        val regenerationFlowStep: KeyMigrationFlowStep =
-            (state.keyManagementFlowStep as KeyManagementFlowStep.MigrationFlow).step
-
-        val nextStep = moveToNextMigrationScreen(regenerationFlowStep)
-
-        state = state.copy(keyManagementFlowStep = KeyManagementFlowStep.MigrationFlow(nextStep))
     }
     //endregion
 
@@ -557,7 +557,6 @@ class KeyManagementViewModel @Inject constructor(
 
         if (phraseWord == wordInput) {
             try {
-
                 handleWordVerifiedDuringKeyCreation()
             } catch (e: Exception) {
                 //TODO: Test the state resetting and flow handling when this occurs,
@@ -659,7 +658,7 @@ class KeyManagementViewModel @Inject constructor(
             finalizeKeyFlow = Resource.Loading(),
         )
 
-        triggerBioPrompt()
+        triggerBioPrompt(rootSeedSave = true)
     }
 
     private fun handleUserFinishedPhraseVerificationDuringKeyCreation() {
@@ -692,7 +691,7 @@ class KeyManagementViewModel @Inject constructor(
             finalizeKeyFlow = Resource.Loading(),
             userInputtedPhrase = phrase
         )
-        triggerBioPrompt(inputMethod = inputMethod)
+        triggerBioPrompt(inputMethod = inputMethod, rootSeedSave = true)
     }
     //endregion
 

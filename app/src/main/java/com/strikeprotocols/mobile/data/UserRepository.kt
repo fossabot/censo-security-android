@@ -15,7 +15,7 @@ interface UserRepository {
     suspend fun saveToken(token: String)
     suspend fun verifyUser(): Resource<VerifyUser>
     suspend fun getWalletSigners(): Resource<List<WalletSigner?>>
-    suspend fun addWalletSigner(walletSignerBody: WalletSigner): Resource<WalletSigner>
+    suspend fun addWalletSigner(walletSignerBody: List<WalletSigner?>?): Resource<Signers>
     suspend fun userLoggedIn(): Boolean
     suspend fun setUserLoggedIn()
     suspend fun logOut(): Boolean
@@ -89,8 +89,12 @@ class UserRepositoryImpl(
     override suspend fun getWalletSigners(): Resource<List<WalletSigner?>> =
         retrieveApiResource { api.walletSigners() }
 
-    override suspend fun addWalletSigner(walletSignerBody: WalletSigner): Resource<WalletSigner> =
-        retrieveApiResource { api.addWalletSigner(walletSignerBody = walletSignerBody) }
+    override suspend fun addWalletSigner(walletSignerBody: List<WalletSigner?>?): Resource<Signers> =
+        retrieveApiResource {
+            api.addWalletSigner(
+                Signers(walletSignerBody)
+            )
+        }
 
     override suspend fun retrieveUserEmail(): String {
         return try {

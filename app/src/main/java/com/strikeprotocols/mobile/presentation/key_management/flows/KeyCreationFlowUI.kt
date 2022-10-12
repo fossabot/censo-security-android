@@ -8,6 +8,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import com.strikeprotocols.mobile.R
 import com.strikeprotocols.mobile.common.Resource
+import com.strikeprotocols.mobile.data.models.Signers
 import com.strikeprotocols.mobile.data.models.WalletSigner
 import com.strikeprotocols.mobile.presentation.components.StrikeAuthTopAppBar
 import com.strikeprotocols.mobile.presentation.key_management.*
@@ -29,7 +30,7 @@ fun moveUserToNextCreationScreen(flowStep: KeyCreationFlowStep) =
 
 fun moveUserToPreviousCreationScreen(
     flowStep: KeyCreationFlowStep,
-    addWalletSignerResult: Resource<WalletSigner?>) =
+    addWalletSignerResult: Resource<Signers>) =
     when (flowStep) {
         KeyCreationFlowStep.ENTRY_STEP -> KeyCreationFlowStep.UNINITIALIZED
         KeyCreationFlowStep.COPY_PHRASE_STEP,
@@ -66,7 +67,7 @@ fun KeyCreationFlowUI(
     wordInput: String,
     wordVerificationErrorEnabled: Boolean,
     retryKeyCreation: () -> Unit,
-    keyCreationState: Resource<WalletSigner?>
+    keyCreationState: Resource<Signers>
 ) {
 
     val screenTitle = when (phraseVerificationFlowStep) {
@@ -96,7 +97,7 @@ fun KeyCreationFlowUI(
             }
         },
         content = {
-            PhraseBackground()
+            PurpleGradientBackgroundUI()
             Box {
                 when (phraseVerificationFlowStep) {
                     KeyCreationFlowStep.COPY_PHRASE_STEP ->

@@ -6,7 +6,6 @@ import androidx.biometric.BiometricManager
 import androidx.biometric.BiometricPrompt
 import androidx.biometric.BiometricPrompt.ERROR_LOCKOUT
 import androidx.biometric.BiometricPrompt.ERROR_LOCKOUT_PERMANENT
-import androidx.compose.ui.res.stringResource
 import androidx.fragment.app.FragmentActivity
 import com.strikeprotocols.mobile.R
 
@@ -75,8 +74,8 @@ object BioCryptoUtil {
 }
 
 enum class BioPromptReason {
-    CREATE_KEY, RECOVER_KEY, MIGRATE_BIOMETRIC_KEY, UNINITIALIZED, RETURN_LOGIN,
-    SAVE_SENTINEL, FOREGROUND_RETRIEVAL, FOREGROUND_SAVE, APPROVAL
+    UNINITIALIZED, RETURN_LOGIN, SAVE_SENTINEL, FOREGROUND_RETRIEVAL, FOREGROUND_SAVE,
+    RETRIEVE_V2_KEYS, SAVE_V3_KEYS, RETRIEVE_V3_KEYS, RETRIEVE_V3_ROOT_SEED, SAVE_V3_ROOT_SEED
 }
 
 enum class BioPromptFailedReason {

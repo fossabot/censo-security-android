@@ -21,7 +21,7 @@ import androidx.core.content.ContextCompat.startActivity
 import com.strikeprotocols.mobile.R
 import com.strikeprotocols.mobile.common.Resource
 import com.strikeprotocols.mobile.common.StrikeError
-import com.strikeprotocols.mobile.presentation.key_management.PhraseBackground
+import com.strikeprotocols.mobile.presentation.key_management.PurpleGradientBackgroundUI
 import com.strikeprotocols.mobile.ui.theme.BackgroundBlack
 import com.strikeprotocols.mobile.ui.theme.StrikeWhite
 
@@ -45,7 +45,7 @@ fun StrikeErrorScreen(
             .clickable { onDismiss() },
         contentAlignment = Alignment.Center
     ) {
-        PhraseBackground()
+        PurpleGradientBackgroundUI()
 
         Column(
             modifier = Modifier.fillMaxSize(),

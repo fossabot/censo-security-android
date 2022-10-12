@@ -11,6 +11,7 @@ import com.strikeprotocols.mobile.data.EncryptionManagerImpl.Companion.SENTINEL_
 import com.strikeprotocols.mobile.data.EncryptionManagerImpl.Companion.SENTINEL_STATIC_DATA
 import com.strikeprotocols.mobile.data.KeyRepository
 import com.strikeprotocols.mobile.data.UserRepository
+import com.strikeprotocols.mobile.data.models.CipherRepository
 import com.strikeprotocols.mobile.presentation.Screen
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
@@ -20,6 +21,7 @@ import javax.inject.Inject
 @HiltViewModel
 data class MainViewModel @Inject constructor(
     private val userRepository: UserRepository,
+    private val cipherRepository: CipherRepository,
     private val keyRepository: KeyRepository
 ) : ViewModel() {
 
@@ -62,7 +64,7 @@ data class MainViewModel @Inject constructor(
 
     private suspend fun launchBlockingForegroundBiometryRetrieval() {
         state = state.copy(bioPromptTrigger = Resource.Loading())
-        val cipher = keyRepository.getCipherForBackgroundDecryption()
+        val cipher = cipherRepository.getCipherForBackgroundDecryption()
         if (cipher != null) {
             state = state.copy(
                 bioPromptTrigger = Resource.Success(cipher),
@@ -74,7 +76,7 @@ data class MainViewModel @Inject constructor(
 
     private suspend fun launchBlockingForegroundBiometrySave() {
         state = state.copy(bioPromptTrigger = Resource.Loading())
-        val cipher = keyRepository.getCipherForEncryption(SENTINEL_KEY_NAME)
+        val cipher = cipherRepository.getCipherForEncryption(SENTINEL_KEY_NAME)
         if (cipher != null) {
             state = state.copy(
                 bioPromptTrigger = Resource.Success(cipher),

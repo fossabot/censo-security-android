@@ -1,7 +1,6 @@
 package com.strikeprotocols.mobile.presentation.sign_in
 
 import android.annotation.SuppressLint
-import android.widget.Toast
 import androidx.biometric.BiometricPrompt
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
@@ -36,7 +35,7 @@ import com.strikeprotocols.mobile.common.Resource
 import com.strikeprotocols.mobile.presentation.Screen
 import com.strikeprotocols.mobile.presentation.components.SignInTextField
 import com.strikeprotocols.mobile.presentation.components.StrikeSignInTopAppBar
-import com.strikeprotocols.mobile.presentation.key_management.PhraseBackground
+import com.strikeprotocols.mobile.presentation.key_management.PurpleGradientBackgroundUI
 import com.strikeprotocols.mobile.ui.theme.*
 
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
@@ -117,7 +116,7 @@ fun SignInScreen(
         },
         content = {
             Box {
-                PhraseBackground()
+                PurpleGradientBackgroundUI()
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.SpaceBetween,

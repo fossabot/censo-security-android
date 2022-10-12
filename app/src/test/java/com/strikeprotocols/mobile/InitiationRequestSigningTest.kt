@@ -45,7 +45,7 @@ class InitiationRequestSigningTest {
     private val userEmail = "floater@test887123.com"
 
     private lateinit var phrase: String
-    private lateinit var keyPair: StrikeKeyPair
+    private lateinit var keyPair: TestKeyPair
 
     private lateinit var approverPublicKey: String
 
@@ -57,14 +57,14 @@ class InitiationRequestSigningTest {
 
         encryptionManager = EncryptionManagerImpl(securePreferences, cryptographyManager)
         phrase = encryptionManager.generatePhrase()
-        keyPair = encryptionManager.createKeyPair(Mnemonics.MnemonicCode(phrase = phrase))
+        keyPair = createSolanaKeyPairFromMnemonic(Mnemonics.MnemonicCode(phrase = phrase))
 
         storedKeyData = StoredKeyData(
             initVector = BaseWrapper.encode(byteArrayOf(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)),
             encryptedKeysData = ""
         )
 
-        whenever(securePreferences.retrieveEncryptedStoredKeys(userEmail)).then {
+        whenever(securePreferences.retrieveV3PrivateKeys(userEmail)).then {
             storedKeyData.toJson()
         }
 

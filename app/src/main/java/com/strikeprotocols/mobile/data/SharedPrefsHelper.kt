@@ -3,7 +3,6 @@ package com.strikeprotocols.mobile.data
 import android.content.Context
 import android.content.SharedPreferences
 import com.strikeprotocols.mobile.common.BaseWrapper
-import org.web3j.abi.datatypes.Bool
 
 object SharedPrefsHelper {
 
@@ -12,13 +11,24 @@ object SharedPrefsHelper {
     private const val USER_LOGGED_IN = "skipped_login"
     private const val USER_EMAIL = "user_email"
     private const val USER_TOKEN = "user_token"
-    private const val KEY_DATA = "_key_data"
-    private const val SOLANA_PUBLIC_KEY = "_solana_public_key"
+
+    //Sentinel Data Storage
     private const val BGRD_INIT_VECTOR = "_bgrd_init_vector"
     private const val BGRD_CIPHER_TEXT = "_bgrd_cipher_text"
 
-    private const val DEPRECATED_SOLANA_PRIVATE_KEY = "_solana_key"
-    private const val DEPRECATED_ROOT_SEED = "_root_seed"
+    //V1 Key Storage
+    private const val V1_SOLANA_KEY = "_solana_key"
+    private const val V1_ROOT_SEED = "_root_seed"
+
+    //V2 Key Storage
+    private const val V2_ROOT_SEED_PRIVATE_KEYS = "_key_data"
+    private const val V2_SOLANA_PUBLIC_KEY = "_solana_public_key"
+
+    //V3 Key Storage
+    private const val V3_ROOT_SEED = "_v3_root_seed"
+    private const val V3_ROOT_SEED_INIT_VECTOR = "_v3_root_seed_init_vector"
+    private const val V3_PRIVATE_KEYS = "_v3_private_keys_list"
+    private const val V3_PUBLIC_KEYS = "_v3_public_keys_list"
 
     private lateinit var appContext: Context
     private lateinit var sharedPrefs: SharedPreferences
@@ -28,44 +38,7 @@ object SharedPrefsHelper {
         sharedPrefs = appContext.getSharedPreferences(MAIN_PREFS, Context.MODE_PRIVATE)
     }
 
-    fun isUserLoggedIn() = sharedPrefs.getBoolean(USER_LOGGED_IN, false)
-
-    fun setUserLoggedIn(loggedIn: Boolean) {
-        val editor = sharedPrefs.edit()
-        editor.putBoolean(USER_LOGGED_IN, loggedIn)
-        editor.apply()
-    }
-
-    fun saveToken(encryptedPrefs: SharedPreferences, token: String) {
-        val editor = encryptedPrefs.edit()
-        editor.putString(USER_TOKEN, token)
-        editor.apply()
-    }
-
-    fun retrieveToken(encryptedPrefs: SharedPreferences): String {
-        return encryptedPrefs.getString(USER_TOKEN, "") ?: ""
-    }
-
-    fun saveSolanaPublicKey(
-        encryptedPrefs: SharedPreferences,
-        email: String,
-        publicKey: ByteArray
-    ) {
-        val data = if (publicKey.isEmpty()) "" else BaseWrapper.encode(publicKey)
-        val editor = encryptedPrefs.edit()
-        editor.putString("${email.lowercase().trim()}$SOLANA_PUBLIC_KEY", data)
-        editor.apply()
-    }
-
-    fun retrieveSolanaPublicKey(encryptedPrefs: SharedPreferences, email: String): String {
-        return encryptedPrefs.getString("${email.lowercase().trim()}$SOLANA_PUBLIC_KEY", "") ?: ""
-    }
-
-    fun clearSolanaPublicKey(encryptedPrefs: SharedPreferences, email: String) {
-        val editor = encryptedPrefs.edit()
-        editor.putString("${email.lowercase().trim()}$SOLANA_PUBLIC_KEY", "")
-        editor.apply()
-    }
+    //region Sentinel Data Storage
 
     fun saveSentinelData(
         encryptedPrefs: SharedPreferences,
@@ -121,21 +94,142 @@ object SharedPrefsHelper {
         return savedInitVector.isNotEmpty() && cipherText.isNotEmpty()
     }
 
-    fun saveKeyData(encryptedPrefs: SharedPreferences, email: String, keyData: String) {
+    //endregion
+
+    //region V1 Storage
+    fun retrieveV1RootSeed(encryptedPrefs: SharedPreferences, email: String) =
+        encryptedPrefs.getString("${email.lowercase().trim()}$V1_ROOT_SEED", "") ?: ""
+
+    fun clearV1RootSeed(encryptedPrefs: SharedPreferences, email: String) {
         val editor = encryptedPrefs.edit()
-        editor.putString("${email.lowercase().trim()}$KEY_DATA", keyData)
+        editor.putString("${email.lowercase().trim()}$V1_ROOT_SEED", "")
         editor.apply()
     }
 
-    fun retrieveKeyData(encryptedPrefs: SharedPreferences, email: String): String? {
-        return encryptedPrefs.getString("${email.lowercase().trim()}$KEY_DATA", "")
-    }
+    fun retrieveV1PrivateKey(encryptedPrefs: SharedPreferences, email: String) =
+        encryptedPrefs.getString("${email.lowercase().trim()}$V1_SOLANA_KEY", "") ?: ""
 
-    fun clearKeyData(encryptedPrefs: SharedPreferences, email: String) {
+    fun clearV1SolanaPrivateKey(encryptedPrefs: SharedPreferences, email: String) {
         val editor = encryptedPrefs.edit()
-        editor.putString("${email.lowercase().trim()}$KEY_DATA", "")
+        editor.putString("${email.lowercase().trim()}$V1_SOLANA_KEY", "")
         editor.apply()
     }
+    //endregion
+
+    //region V2 Storage
+    fun retrieveV2SolanaPublicKey(encryptedPrefs: SharedPreferences, email: String): String {
+        return encryptedPrefs.getString("${email.lowercase().trim()}$V2_SOLANA_PUBLIC_KEY", "") ?: ""
+    }
+
+    fun clearV2SolanaPublicKey(encryptedPrefs: SharedPreferences, email: String) {
+        val editor = encryptedPrefs.edit()
+        editor.putString("${email.lowercase().trim()}$V2_SOLANA_PUBLIC_KEY", "")
+        editor.apply()
+    }
+
+    fun retrieveV2RootSeedAndPrivateKey(encryptedPrefs: SharedPreferences, email: String): String {
+        return encryptedPrefs.getString("${email.lowercase().trim()}$V2_ROOT_SEED_PRIVATE_KEYS", "") ?: ""
+    }
+
+    fun clearV2RootSeedAndPrivateKey(encryptedPrefs: SharedPreferences, email: String) {
+        val editor = encryptedPrefs.edit()
+        editor.putString("${email.lowercase().trim()}$V2_ROOT_SEED_PRIVATE_KEYS", "")
+        editor.apply()
+    }
+
+    //endregion
+
+    //region V3 Storage
+
+    fun saveV3PrivateKeys(encryptedPrefs: SharedPreferences, email: String, keyData: String) {
+        val editor = encryptedPrefs.edit()
+        editor.putString("${email.lowercase().trim()}$V3_PRIVATE_KEYS", keyData)
+        editor.apply()
+    }
+
+    fun retrieveV3PrivateKeys(encryptedPrefs: SharedPreferences, email: String): String? {
+        return encryptedPrefs.getString("${email.lowercase().trim()}$V3_PRIVATE_KEYS", "")
+    }
+
+    fun clearV3PrivateKeys(encryptedPrefs: SharedPreferences, email: String) {
+        val editor = encryptedPrefs.edit()
+        editor.putString("${email.lowercase().trim()}$V3_PRIVATE_KEYS", "")
+        editor.apply()
+    }
+
+    fun saveV3PublicKeys(encryptedPrefs: SharedPreferences, email: String, keyData: String) {
+        val editor = encryptedPrefs.edit()
+        editor.putString("${email.lowercase().trim()}$V3_PUBLIC_KEYS", keyData)
+        editor.apply()
+    }
+
+    fun retrieveV3PublicKeys(encryptedPrefs: SharedPreferences, email: String): String? {
+        return encryptedPrefs.getString("${email.lowercase().trim()}$V3_PUBLIC_KEYS", "")
+    }
+
+    fun clearV3PublicKeys(encryptedPrefs: SharedPreferences, email: String) {
+        val editor = encryptedPrefs.edit()
+        editor.putString("${email.lowercase().trim()}$V3_PUBLIC_KEYS", "")
+        editor.apply()
+    }
+
+    fun saveV3RootSeed(
+        encryptedPrefs: SharedPreferences,
+        email: String,
+        encryptedData: EncryptedData
+    ) {
+        val initVector =
+            if (encryptedData.initializationVector.isEmpty()) {
+                ""
+            } else {
+                BaseWrapper.encode(encryptedData.initializationVector)
+            }
+        val cipherText =
+            if (encryptedData.ciphertext.isEmpty()) {
+                ""
+            } else {
+                BaseWrapper.encode(encryptedData.ciphertext)
+            }
+        val editor = encryptedPrefs.edit()
+        editor.putString("${email.lowercase().trim()}$V3_ROOT_SEED_INIT_VECTOR", initVector)
+        editor.putString("${email.lowercase().trim()}$V3_ROOT_SEED", cipherText)
+        editor.apply()
+    }
+
+    fun retrieveV3RootSeed(
+        encryptedPrefs: SharedPreferences,
+        email: String
+    ): EncryptedData {
+        val savedInitVector =
+            encryptedPrefs.getString("${email.lowercase().trim()}$V3_ROOT_SEED_INIT_VECTOR", "") ?: ""
+        val cipherText =
+            encryptedPrefs.getString("${email.lowercase().trim()}$V3_ROOT_SEED", "") ?: ""
+
+        return EncryptedData(
+            initializationVector = BaseWrapper.decode(savedInitVector),
+            ciphertext = BaseWrapper.decode(cipherText)
+        )
+    }
+
+    fun hasV3RootSeed(encryptedPrefs: SharedPreferences, email: String): Boolean {
+        val savedInitVector =
+            encryptedPrefs.getString("${email.lowercase().trim()}$V3_ROOT_SEED_INIT_VECTOR", "") ?: ""
+        val cipherText =
+            encryptedPrefs.getString("${email.lowercase().trim()}$V3_ROOT_SEED", "") ?: ""
+
+        return savedInitVector.isNotEmpty() && cipherText.isNotEmpty()
+    }
+
+    fun clearV3RootSeed(encryptedPrefs: SharedPreferences, email: String) {
+        val editor = encryptedPrefs.edit()
+        editor.putString("${email.lowercase().trim()}$V3_ROOT_SEED_INIT_VECTOR", "")
+        editor.putString("${email.lowercase().trim()}$V3_ROOT_SEED", "")
+        editor.apply()
+    }
+
+    //endregion
+
+    //region User Storage
 
     fun saveUserEmail(email: String) {
         if (email.isEmpty()) return
@@ -150,25 +244,25 @@ object SharedPrefsHelper {
         editor.apply()
     }
 
-    fun retrieveDeprecatedRootSeed(encryptedPrefs: SharedPreferences, email: String) =
-        encryptedPrefs.getString("${email.lowercase().trim()}$DEPRECATED_ROOT_SEED", "") ?: ""
-
-    fun clearDeprecatedRootSeed(encryptedPrefs: SharedPreferences, email: String) {
-        val editor = encryptedPrefs.edit()
-        editor.putString("${email.lowercase().trim()}$DEPRECATED_ROOT_SEED", "")
-        editor.apply()
-    }
-
-    fun retrieveDeprecatedPrivateKey(encryptedPrefs: SharedPreferences, email: String) =
-        encryptedPrefs.getString("${email.lowercase().trim()}$DEPRECATED_SOLANA_PRIVATE_KEY", "") ?: ""
-
-    fun clearDeprecatedSolanaPrivateKey(encryptedPrefs: SharedPreferences, email: String) {
-        val editor = encryptedPrefs.edit()
-        editor.putString("${email.lowercase().trim()}$DEPRECATED_SOLANA_PRIVATE_KEY", "")
-        editor.apply()
-    }
-
     fun retrieveUserEmail(): String =
         sharedPrefs.getString(USER_EMAIL, "")?.lowercase()?.trim() ?: ""
 
+    fun isUserLoggedIn() = sharedPrefs.getBoolean(USER_LOGGED_IN, false)
+
+    fun setUserLoggedIn(loggedIn: Boolean) {
+        val editor = sharedPrefs.edit()
+        editor.putBoolean(USER_LOGGED_IN, loggedIn)
+        editor.apply()
+    }
+
+    fun saveToken(encryptedPrefs: SharedPreferences, token: String) {
+        val editor = encryptedPrefs.edit()
+        editor.putString(USER_TOKEN, token)
+        editor.apply()
+    }
+
+    fun retrieveToken(encryptedPrefs: SharedPreferences): String {
+        return encryptedPrefs.getString(USER_TOKEN, "") ?: ""
+    }
+    //endregion
 }

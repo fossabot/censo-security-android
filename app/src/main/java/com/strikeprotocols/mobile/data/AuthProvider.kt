@@ -3,10 +3,8 @@ package com.strikeprotocols.mobile.data
 import androidx.annotation.AnyThread
 import com.auth0.android.jwt.JWT
 import com.raygun.raygun4android.RaygunClient
-import com.strikeprotocols.mobile.common.BaseWrapper
 import com.strikeprotocols.mobile.common.CrashReportingUtil.JWT_TAG
 import com.strikeprotocols.mobile.common.CrashReportingUtil.MANUALLY_REPORTED_TAG
-import com.strikeprotocols.mobile.common.strikeLog
 import java.util.*
 import kotlin.collections.HashMap
 

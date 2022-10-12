@@ -1,7 +1,6 @@
 package com.strikeprotocols.mobile.data
 
 import cash.z.ecc.android.bip39.Mnemonics
-import cash.z.ecc.android.bip39.toSeed
 import com.strikeprotocols.mobile.common.*
 import com.strikeprotocols.mobile.common.BaseWrapper
 import com.strikeprotocols.mobile.common.Ed25519HierarchicalPrivateKey
@@ -17,7 +16,8 @@ import org.bouncycastle.crypto.signers.Ed25519Signer
 import com.strikeprotocols.mobile.data.EncryptionManagerException.*
 import com.strikeprotocols.mobile.data.EncryptionManagerImpl.Companion.SENTINEL_STATIC_DATA
 import com.strikeprotocols.mobile.data.models.StoredKeyData
-import com.strikeprotocols.mobile.data.models.StoredKeyData.Companion.ROOT_SEED
+import com.strikeprotocols.mobile.data.models.StoredKeyData.Companion.BITCOIN_KEY
+import com.strikeprotocols.mobile.data.models.StoredKeyData.Companion.ETHEREUM_KEY
 import com.strikeprotocols.mobile.data.models.StoredKeyData.Companion.SOLANA_KEY
 import java.nio.charset.Charset
 import java.security.SecureRandom
@@ -37,7 +37,8 @@ data class SignedPayload(
 )
 
 interface EncryptionManager {
-    fun createKeyPair(mnenomic: Mnemonics.MnemonicCode): StrikeKeyPair
+
+    //region sign data
     fun signApprovalDispositionMessage(
         signable: Signable,
         solanaKey: String
@@ -74,51 +75,67 @@ interface EncryptionManager {
         data: ByteArray,
         userEmail: String,
         cipher: Cipher,
+        keyType: String
     ): ByteArray
 
     fun signData(data: ByteArray, privateKey: ByteArray): ByteArray
+
+    fun signKeyForMigration(rootSeed: ByteArray, publicKey: String) : ByteArray
+    //endregion
+
+    //region generic key work
     fun verifyData(data: ByteArray, signature: ByteArray, publicKey: ByteArray): Boolean
     fun verifyKeyPair(
         privateKey: String?,
         publicKey: String?,
     ): Boolean
     fun generatePhrase(): String
+    fun regenerateSolanaPublicKey(privateKey: String): String
+    //endregion
 
-    fun regeneratePublicKey(privateKey: String): String
+    //region save/retrieve key data
+    fun havePrivateKeysStored(email: String): Boolean
 
-    fun saveKeyInformation(
-        privateKey: ByteArray,
-        publicKey: ByteArray,
+    fun saveV3RootSeed(
         rootSeed: ByteArray,
         email: String,
-        cipher: Cipher,
+        cipher: Cipher
     )
 
-    fun retrieveSavedKey(
+    fun retrieveRootSeed(email: String, cipher: Cipher): String
+
+    fun saveV3PrivateKeys(
+        rootSeed: ByteArray,
+        email: String,
+        cipher: Cipher
+    )
+
+    fun retrieveSavedV2Key(
         email: String,
         cipher: Cipher,
         keyType: String = SOLANA_KEY
     ): ByteArray
 
-    fun createStoredKeyDataAsJson(
-        solanaKey: String,
-        rootSeed: String,
+    fun retrieveSavedV3Key(
+        email: String,
         cipher: Cipher,
-    ): String
+        keyType: String = SOLANA_KEY
+    ) : ByteArray
 
-    fun retrieveStoredKeys(
-        json: String,
-        cipher: Cipher,
-    ): HashMap<String, String>
+    fun saveV3PublicKeys(rootSeed: ByteArray, email: String) : HashMap<String, String>
+    //endregion
+
+    //region Work with device keystore
 
     fun deleteBiometryKeyFromKeystore(keyName: String)
 
     fun getInitializedCipherForEncryption(keyName: String) : Cipher
     fun getInitializedCipherForDecryption(keyName: String, initVector: ByteArray) : Cipher
-    fun havePrivateKeyStored(email: String): Boolean
     fun haveSentinelDataStored(email: String): Boolean
     fun saveSentinelData(email: String, cipher: Cipher)
     fun retrieveSentinelData(email: String, cipher: Cipher): String
+
+    //endregion
 }
 
 class EncryptionManagerImpl @Inject constructor(
@@ -141,6 +158,15 @@ class EncryptionManagerImpl @Inject constructor(
         }
     }
 
+    override fun signKeyForMigration(rootSeed: ByteArray, publicKey: String): ByteArray {
+        val solanaHierarchicalKey = Ed25519HierarchicalPrivateKey.fromRootSeed(rootSeed)
+
+        return signData(
+            data = BaseWrapper.decode(publicKey),
+            privateKey = solanaHierarchicalKey.privateKeyBytes
+        )
+    }
+
     override fun verifyData(data: ByteArray, signature: ByteArray, publicKey: ByteArray): Boolean {
         try {
             val publicKeyParameter = Ed25519PublicKeyParameters(publicKey.inputStream())
@@ -155,21 +181,6 @@ class EncryptionManagerImpl @Inject constructor(
         }
     }
 
-    override fun createKeyPair(mnenomic: Mnemonics.MnemonicCode): StrikeKeyPair {
-        try {
-            val rootSeed = mnenomic.toSeed()
-            val solanaHierarchicalKey = Ed25519HierarchicalPrivateKey.fromRootSeed(rootSeed)
-
-            return StrikeKeyPair(
-                privateKey = solanaHierarchicalKey.privateKeyBytes,
-                publicKey = solanaHierarchicalKey.publicKeyBytes,
-                rootSeed = rootSeed
-            )
-        } catch (e: Exception) {
-            throw KeyPairGenerationFailedException()
-        }
-    }
-
     override fun signApprovalDispositionMessage(
         signable: Signable, solanaKey: String
     ): SignedPayload {
@@ -177,7 +188,7 @@ class EncryptionManagerImpl @Inject constructor(
             throw NoKeyDataException
         }
 
-        val publicKey = regeneratePublicKey(privateKey = solanaKey)
+        val publicKey = regenerateSolanaPublicKey(privateKey = solanaKey)
 
         val messageToSign = signable.retrieveSignableData(approverPublicKey = publicKey).first()
 
@@ -254,7 +265,7 @@ class EncryptionManagerImpl @Inject constructor(
             throw NoKeyDataException
         }
 
-        val publicKey = regeneratePublicKey(privateKey = solanaKey)
+        val publicKey = regenerateSolanaPublicKey(privateKey = solanaKey)
 
         val messageToSign = signable.retrieveSignableData(approverPublicKey = publicKey).first()
 
@@ -274,7 +285,7 @@ class EncryptionManagerImpl @Inject constructor(
             throw NoKeyDataException
         }
 
-        val publicKey = regeneratePublicKey(privateKey = solanaKey)
+        val publicKey = regenerateSolanaPublicKey(privateKey = solanaKey)
 
         return signableSupplyInstructions.signableSupplyInstructions(approverPublicKey = publicKey)
             .map {
@@ -288,8 +299,9 @@ class EncryptionManagerImpl @Inject constructor(
         data: ByteArray,
         userEmail: String,
         cipher: Cipher,
+        keyType: String
     ): ByteArray {
-        val privateKey = retrieveSavedKey(email = userEmail, cipher = cipher)
+        val privateKey = retrieveSavedV3Key(email = userEmail, cipher = cipher, keyType = keyType)
 
         return signData(data = data, privateKey = privateKey)
     }
@@ -312,7 +324,7 @@ class EncryptionManagerImpl @Inject constructor(
     override fun generatePhrase(): String =
         String(Mnemonics.MnemonicCode(Mnemonics.WordCount.COUNT_24).chars)
 
-    override fun regeneratePublicKey(privateKey: String): String {
+    override fun regenerateSolanaPublicKey(privateKey: String): String {
         try {
             val base58PrivateKey = BaseWrapper.decode(privateKey)
             val privateKeyParam = Ed25519PrivateKeyParameters(base58PrivateKey.inputStream())
@@ -325,29 +337,141 @@ class EncryptionManagerImpl @Inject constructor(
         }
     }
 
-    override fun saveKeyInformation(
-        privateKey: ByteArray, publicKey: ByteArray, rootSeed: ByteArray,
-        email: String, cipher: Cipher
-    ) {
-        val keyDataAsJson = createStoredKeyDataAsJson(
-            solanaKey = BaseWrapper.encode(privateKey),
-            rootSeed = BaseWrapper.encode(rootSeed),
-            cipher = cipher
+    override fun saveV3PublicKeys(rootSeed: ByteArray, email: String) : HashMap<String, String> {
+        val keys = createAllKeys(rootSeed)
+        val solanaPublicKey = BaseWrapper.encode(keys.solanaKey.publicKeyBytes)
+        val bitcoinPublicKey = keys.bitcoinKey.getBase58ExtendedPublicKey()
+        val ethereumPublicKey = keys.ethereumKey.getBase58UncompressedPublicKey()
+
+        val keyDataAsJson = createV3PublicKeyJson(
+            solanaPublicKey = solanaPublicKey,
+            bitcoinPublicKey = bitcoinPublicKey,
+            ethereumPublicKey = ethereumPublicKey
         )
 
-        securePreferences.saveAllRelevantKeyData(
+        securePreferences.saveV3PublicKeys(
             email = email,
-            publicKey = publicKey,
-            keyStorageJson = keyDataAsJson
+            keyJson = keyDataAsJson
+        )
+
+        return hashMapOf(
+            SOLANA_KEY to solanaPublicKey,
+            BITCOIN_KEY to bitcoinPublicKey,
+            ETHEREUM_KEY to ethereumPublicKey
         )
     }
 
-    override fun retrieveSavedKey(
+    override fun saveV3PrivateKeys(rootSeed: ByteArray, email: String, cipher: Cipher) {
+        val keys = createAllKeys(rootSeed)
+        val solanaPrivateKey = BaseWrapper.encode(keys.solanaKey.privateKeyBytes)
+        val bitcoinPrivateKey = keys.bitcoinKey.getBase58ExtendedPrivateKey()
+        val ethereumPrivateKey = keys.ethereumKey.getBase58ExtendedPrivateKey()
+
+        val keyDataAsJson = createV3StoredKeyDataAsJson(
+            solanaKey = solanaPrivateKey,
+            bitcoinKey = bitcoinPrivateKey,
+            ethereumKey = ethereumPrivateKey,
+            cipher = cipher
+        )
+
+        securePreferences.saveV3PrivateKeys(
+            email = email,
+            keyJson = keyDataAsJson
+        )
+    }
+
+    private fun createV3StoredKeyDataAsJson(
+        solanaKey: String,
+        bitcoinKey: String,
+        ethereumKey: String,
+        cipher: Cipher,
+    ): String {
+        val mapOfKeys: HashMap<String, String> =
+            hashMapOf(
+                SOLANA_KEY to solanaKey,
+                BITCOIN_KEY to bitcoinKey,
+                ETHEREUM_KEY to ethereumKey
+            )
+
+        val jsonMapOfKeys = StoredKeyData.mapToJson(
+            keyMap = mapOfKeys
+        )
+
+        val encryptedKeysData =
+            cryptographyManager.encryptData(jsonMapOfKeys, cipher)
+
+        val storedKeyData = StoredKeyData(
+            initVector = BaseWrapper.encode(encryptedKeysData.initializationVector),
+            encryptedKeysData = BaseWrapper.encode(encryptedKeysData.ciphertext)
+        )
+
+        return storedKeyData.toJson()
+    }
+
+    private fun createV3PublicKeyJson(
+        solanaPublicKey: String,
+        bitcoinPublicKey: String,
+        ethereumPublicKey: String
+    ): String {
+        val mapOfKeys: HashMap<String, String> =
+            hashMapOf(
+                SOLANA_KEY to solanaPublicKey,
+                BITCOIN_KEY to bitcoinPublicKey,
+                ETHEREUM_KEY to ethereumPublicKey
+            )
+
+        return StoredKeyData.mapToJson(
+            keyMap = mapOfKeys
+        )
+    }
+
+    private fun createAllKeys(rootSeed: ByteArray): AllKeys {
+        val solanaHierarchicalKey = Ed25519HierarchicalPrivateKey.fromRootSeed(rootSeed)
+
+        //generate bitcoin keys from root seed
+        val bitcoinHierarchicalKey = Secp256k1HierarchicalKey.fromRootSeed(
+            rootSeed, Secp256k1HierarchicalKey.bitcoinDerivationPath
+        )
+
+        val ethereumHierarchicalKey = Secp256k1HierarchicalKey.fromRootSeed(
+            rootSeed, Secp256k1HierarchicalKey.ethereumDerivationPath
+        )
+
+        return AllKeys(
+            solanaKey = solanaHierarchicalKey,
+            bitcoinKey = bitcoinHierarchicalKey,
+            ethereumKey = ethereumHierarchicalKey
+        )
+    }
+
+    override fun saveV3RootSeed(rootSeed: ByteArray, email: String, cipher: Cipher) {
+        val encryptedRootSeed =
+            cryptographyManager.encryptData(data = BaseWrapper.encode(rootSeed), cipher = cipher)
+
+        securePreferences.saveV3RootSeed(email = email, encryptedData = encryptedRootSeed)
+    }
+
+    override fun retrieveSavedV2Key(
         email: String,
         cipher: Cipher,
         keyType: String
     ): ByteArray {
-        val savedKey = securePreferences.retrieveEncryptedStoredKeys(email)
+        val savedKey = securePreferences.retrieveV2RootSeedAndPrivateKey(email)
+
+        val keysMap = retrieveStoredKeys(
+            json = savedKey,
+            cipher = cipher,
+        )
+
+        return BaseWrapper.decode(keysMap[keyType] ?: "")
+    }
+
+    override fun retrieveSavedV3Key(
+        email: String,
+        cipher: Cipher,
+        keyType: String
+    ): ByteArray {
+        val savedKey = securePreferences.retrieveV3PrivateKeys(email)
 
         val keysMap = retrieveStoredKeys(
             json = savedKey,
@@ -368,6 +492,17 @@ class EncryptionManagerImpl @Inject constructor(
         return String(decryptedSentinelData, charset = Charset.forName("UTF-8"))
     }
 
+    override fun retrieveRootSeed(email: String, cipher: Cipher): String {
+        val savedRootSeedData = securePreferences.retrieveV3RootSeed(email)
+
+        val decryptedRootSeed = cryptographyManager.decryptData(
+            ciphertext = savedRootSeedData.ciphertext,
+            cipher = cipher
+        )
+
+        return String(decryptedRootSeed, charset = Charset.forName("UTF-8"))
+    }
+
     override fun getInitializedCipherForEncryption(keyName: String): Cipher {
         return cryptographyManager.getInitializedCipherForEncryption(keyName)
     }
@@ -378,8 +513,8 @@ class EncryptionManagerImpl @Inject constructor(
         )
     }
 
-    override fun havePrivateKeyStored(email: String) =
-        securePreferences.retrieveEncryptedStoredKeys(email = email).isNotEmpty()
+    override fun havePrivateKeysStored(email: String) =
+        securePreferences.retrieveV3PrivateKeys(email = email).isNotEmpty()
 
     override fun haveSentinelDataStored(email: String) = securePreferences.hasSentinelData(email)
 
@@ -394,33 +529,7 @@ class EncryptionManagerImpl @Inject constructor(
         cryptographyManager.deleteInvalidatedKey(keyName)
     }
 
-    override fun createStoredKeyDataAsJson(
-        solanaKey: String,
-        rootSeed: String,
-        cipher: Cipher,
-    ): String {
-        val mapOfKeys: HashMap<String, String> =
-            hashMapOf(
-                SOLANA_KEY to solanaKey,
-                ROOT_SEED to rootSeed
-            )
-
-        val jsonMapOfKeys = StoredKeyData.mapToJson(
-            keyMap = mapOfKeys
-        )
-
-        val encryptedKeysData =
-            cryptographyManager.encryptData(jsonMapOfKeys, cipher)
-
-        val storedKeyData = StoredKeyData(
-            initVector = BaseWrapper.encode(encryptedKeysData.initializationVector),
-            encryptedKeysData = BaseWrapper.encode(encryptedKeysData.ciphertext)
-        )
-
-        return storedKeyData.toJson()
-    }
-
-    override fun retrieveStoredKeys(
+    private fun retrieveStoredKeys(
         json: String,
         cipher: Cipher,
     ): HashMap<String, String> {
@@ -444,6 +553,8 @@ class EncryptionManagerImpl @Inject constructor(
     object Companion {
         const val BIO_KEY_NAME = "biometric_encryption_key"
         const val SENTINEL_KEY_NAME = "sentinel_biometry_key"
+        const val ROOT_SEED_KEY_NAME = "root_seed_encryption_key"
+        const val PRIVATE_KEYS_KEY_NAME = "private_keys_key_name"
         const val SENTINEL_STATIC_DATA = "sentinel_static_data"
         const val NO_OFFSET_INDEX = 0
         val DATA_CHECK = BaseWrapper.decode("VerificationCheck")
@@ -453,31 +564,11 @@ class EncryptionManagerImpl @Inject constructor(
     //endregion
 }
 
-data class StrikeKeyPair(
-    val privateKey: ByteArray,
-    val publicKey: ByteArray,
-    val rootSeed: ByteArray
-) {
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (javaClass != other?.javaClass) return false
-
-        other as StrikeKeyPair
-
-        if (!privateKey.contentEquals(other.privateKey)) return false
-        if (!publicKey.contentEquals(other.publicKey)) return false
-        if (!rootSeed.contentEquals(other.rootSeed)) return false
-
-        return true
-    }
-
-    override fun hashCode(): Int {
-        var result = privateKey.contentHashCode()
-        result = 31 * result + publicKey.contentHashCode()
-        result = 31 * result + rootSeed.contentHashCode()
-        return result
-    }
-}
+data class AllKeys(
+    val solanaKey : Ed25519HierarchicalPrivateKey,
+    val bitcoinKey: Secp256k1HierarchicalKey,
+    val ethereumKey: Secp256k1HierarchicalKey
+)
 
 interface Signable {
     fun retrieveSignableData(approverPublicKey: String?): List<ByteArray>

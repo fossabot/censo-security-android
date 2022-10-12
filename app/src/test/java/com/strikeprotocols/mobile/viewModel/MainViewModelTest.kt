@@ -10,6 +10,7 @@ import com.strikeprotocols.mobile.data.EncryptionManagerImpl.Companion.SENTINEL_
 import com.strikeprotocols.mobile.data.EncryptionManagerImpl.Companion.SENTINEL_STATIC_DATA
 import com.strikeprotocols.mobile.data.KeyRepository
 import com.strikeprotocols.mobile.data.UserRepository
+import com.strikeprotocols.mobile.data.models.CipherRepository
 import com.strikeprotocols.mobile.presentation.semantic_version_check.MainViewModel
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertTrue
@@ -35,6 +36,9 @@ class MainViewModelTest : BaseViewModelTest() {
     lateinit var encryptionCipher: Cipher
 
     @Mock
+    lateinit var cipherRepository: CipherRepository
+
+    @Mock
     lateinit var decryptionCipher: Cipher
 
     private lateinit var mainViewModel: MainViewModel
@@ -47,12 +51,13 @@ class MainViewModelTest : BaseViewModelTest() {
         super.setUp()
         Dispatchers.setMain(dispatcher)
 
-        whenever(keyRepository.getCipherForBackgroundDecryption()).then { decryptionCipher }
-        whenever(keyRepository.getCipherForEncryption(SENTINEL_KEY_NAME)).then { encryptionCipher }
+        whenever(cipherRepository.getCipherForBackgroundDecryption()).then { decryptionCipher }
+        whenever(cipherRepository.getCipherForEncryption(SENTINEL_KEY_NAME)).then { encryptionCipher }
 
         mainViewModel = MainViewModel(
             userRepository = userRepository,
-            keyRepository = keyRepository
+            keyRepository = keyRepository,
+            cipherRepository = cipherRepository
         )
     }
 

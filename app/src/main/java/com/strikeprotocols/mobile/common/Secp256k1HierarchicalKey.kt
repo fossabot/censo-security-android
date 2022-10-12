@@ -84,6 +84,13 @@ class Secp256k1HierarchicalKey(
             ChildPathNumber(0, false)
         )
 
+        val ethereumDerivationPath = listOf(
+            ChildPathNumber(44, true),
+            ChildPathNumber(60, true),
+            ChildPathNumber(0, true),
+            ChildPathNumber(0, false)
+        )
+
         fun getECPrivateKey(privateKeyBytes: ByteArray): ECPrivateKey {
             return factory.generatePrivate(ECPrivateKeySpec(BigInteger(1, privateKeyBytes), spec)) as ECPrivateKey
         }
@@ -333,6 +340,11 @@ class Secp256k1HierarchicalKey(
 
     fun getBase58ExtendedPrivateKey(isMainNet: Boolean = true): String {
         return serializeToBase58ExtendedKey(true, isMainNet)
+    }
+
+    fun getBase58UncompressedPublicKey(): String {
+        return privateKey?.let { Base58.encode(getECPublicKeyFromPrivate(it).q.getEncoded(false)) }
+            ?: throw Exception("No private key to derive public key ")
     }
 
     override fun toString(): String {

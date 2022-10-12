@@ -12,6 +12,7 @@ import com.strikeprotocols.mobile.common.*
 import com.strikeprotocols.mobile.data.*
 import com.strikeprotocols.mobile.data.EncryptionManagerImpl.Companion.SENTINEL_KEY_NAME
 import com.strikeprotocols.mobile.data.NoInternetException.Companion.NO_INTERNET_ERROR
+import com.strikeprotocols.mobile.data.models.CipherRepository
 import com.strikeprotocols.mobile.data.models.LoginResponse
 import com.strikeprotocols.mobile.data.models.PushBody
 import kotlinx.coroutines.*
@@ -21,6 +22,7 @@ import javax.crypto.Cipher
 class SignInViewModel @Inject constructor(
     private val userRepository: UserRepository,
     private val pushRepository: PushRepository,
+    private val cipherRepository: CipherRepository,
     private val keyRepository: KeyRepository,
     private val strikeUserData: StrikeUserData
 ) : ViewModel() {
@@ -81,8 +83,8 @@ class SignInViewModel @Inject constructor(
 
     fun kickOffBiometryLoginOrMoveToPasswordEntry() {
         viewModelScope.launch {
-            if (keyRepository.havePrivateKey()) {
-                val cipher = keyRepository.getCipherForPrivateKeyDecryption()
+            if (keyRepository.havePrivateKeys()) {
+                val cipher = cipherRepository.getCipherForV3PrivateKeysDecryption()
                 if (cipher != null) {
                     state = state.copy(
                         triggerBioPrompt = Resource.Success(cipher),
@@ -226,7 +228,7 @@ class SignInViewModel @Inject constructor(
     }
 
     private suspend fun saveSentinelDataToDevice() {
-        val cipher = keyRepository.getCipherForEncryption(SENTINEL_KEY_NAME)
+        val cipher = cipherRepository.getCipherForEncryption(SENTINEL_KEY_NAME)
         state = state.copy(
             triggerBioPrompt = Resource.Success(cipher),
             bioPromptReason = BioPromptReason.SAVE_SENTINEL
