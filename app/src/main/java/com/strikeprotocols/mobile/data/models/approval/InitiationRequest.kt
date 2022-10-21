@@ -376,7 +376,7 @@ data class InitiationRequest(
             AccountMeta(publicKey = SYSVAR_CLOCK_PUBKEY, isSigner = false, isWritable = false),
             AccountMeta(publicKey = PublicKey(signingData.feePayer), isSigner = true, isWritable = true),
             AccountMeta(publicKey = tokenMintPublicKey, isSigner = false, isWritable = false),
-            AccountMeta(publicKey = destinationTokenAddress, isSigner = false, isWritable = true),
+            AccountMeta(publicKey = destinationTokenAddress, isSigner = false, isWritable = tokenMintPublicKey != EMPTY_KEY),
             AccountMeta(publicKey = SYS_PROGRAM_ID, isSigner= false, isWritable = false),
             AccountMeta(publicKey = TOKEN_PROGRAM_ID, isSigner = false, isWritable = false),
             AccountMeta(publicKey = SYSVAR_RENT_PUBKEY, isSigner = false, isWritable = false),
