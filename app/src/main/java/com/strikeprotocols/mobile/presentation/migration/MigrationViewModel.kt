@@ -8,7 +8,6 @@ import androidx.lifecycle.viewModelScope
 import com.strikeprotocols.mobile.common.BioCryptoUtil.FAIL_ERROR
 import com.strikeprotocols.mobile.common.BioPromptReason
 import com.strikeprotocols.mobile.common.Resource
-import com.strikeprotocols.mobile.common.StrikeError
 import com.strikeprotocols.mobile.data.BioPromptData
 import com.strikeprotocols.mobile.data.EncryptionManagerImpl.Companion.PRIVATE_KEYS_KEY_NAME
 import com.strikeprotocols.mobile.data.EncryptionManagerImpl.Companion.ROOT_SEED_KEY_NAME
@@ -55,7 +54,7 @@ class MigrationViewModel @Inject constructor(
         if (state.initialData == null) {
             state = state.copy(
                 initialData = initialData,
-                verifyUser = state.verifyUser,
+                verifyUser = initialData.verifyUserDetails,
                 addWalletSigner = Resource.Loading()
             )
             viewModelScope.launch {
@@ -157,19 +156,26 @@ class MigrationViewModel @Inject constructor(
         if (privateKeysCipher != null) {
             state = state.copy(
                 triggerBioPrompt = Resource.Success(privateKeysCipher),
-                bioPromptData = BioPromptData(BioPromptReason.SAVE_V3_ROOT_SEED, true)
+                bioPromptData = BioPromptData(BioPromptReason.SAVE_V3_KEYS, true)
             )
         }
     }
 
     private suspend fun savePrivateAndPublicKeys(cipher: Cipher) {
+        val rootSeed = state.rootSeed
+
+        if (rootSeed == null) {
+            state = state.copy(addWalletSigner = Resource.Error())
+            return
+        }
+
         migrationRepository.saveV3PrivateKeys(
-            rootSeed = state.rootSeed?.toByteArray() ?: byteArrayOf(),
+            rootSeed = rootSeed.toByteArray(),
             cipher = cipher
         )
 
         migrationRepository.saveV3PublicKeys(
-            rootSeed = state.rootSeed?.toByteArray() ?: byteArrayOf()
+            rootSeed = rootSeed.toByteArray()
         )
 
         migrationRepository.clearOldData()
