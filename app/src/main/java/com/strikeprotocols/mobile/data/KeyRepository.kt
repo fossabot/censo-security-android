@@ -45,8 +45,6 @@ interface KeyRepository {
 
     suspend fun removeSentinelDataAndKickUserToAppEntrance()
 
-    //suspend fun userHasLocalKeyThatBackendDoesNot(backendKeys : List<WalletPublicKey?>) : Boolean
-
     suspend fun signKeysThatBackendIsMissing(
         keysToBeAdded: List<WalletSigner>,
         mnemonic: Mnemonics.MnemonicCode
@@ -95,14 +93,6 @@ class KeyRepositoryImpl(
         userRepository.logOut()
         userRepository.setInvalidSentinelData()
     }
-
-//    override suspend fun userHasLocalKeyThatBackendDoesNot(backendKeys: List<WalletPublicKey?>): Boolean {
-//        val userEmail = userRepository.retrieveUserEmail()
-//
-//        val localPublicKeys = securePreferences.retrieveV3PublicKeys(email = userEmail)
-//
-//        return localPublicKeys.keys.size > backendKeys.size
-//    }
 
     override suspend fun signTimestamp(
         timestamp: String,
@@ -185,6 +175,7 @@ class KeyRepositoryImpl(
 
         return signedKeysToAdd
     }
+
 
     override suspend fun havePrivateKeys(): Boolean {
         val userEmail = userRepository.retrieveUserEmail()

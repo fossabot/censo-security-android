@@ -8,6 +8,7 @@ import androidx.lifecycle.viewModelScope
 import com.strikeprotocols.mobile.common.BioCryptoUtil.FAIL_ERROR
 import com.strikeprotocols.mobile.common.BioPromptReason
 import com.strikeprotocols.mobile.common.Resource
+import com.strikeprotocols.mobile.common.strikeLog
 import com.strikeprotocols.mobile.data.BioPromptData
 import com.strikeprotocols.mobile.data.EncryptionManagerImpl.Companion.PRIVATE_KEYS_KEY_NAME
 import com.strikeprotocols.mobile.data.EncryptionManagerImpl.Companion.ROOT_SEED_KEY_NAME
@@ -122,7 +123,13 @@ class MigrationViewModel @Inject constructor(
 
     private suspend fun retrieveV3RootSeedAndKickOffKeyStorage(cipher: Cipher) {
         val rootSeed = migrationRepository.retrieveV3RootSeed(cipher)
-        state = state.copy(rootSeed = rootSeed?.toList())
+
+        if (rootSeed == null) {
+            state = state.copy(addWalletSigner = Resource.Error())
+            return
+        }
+
+        state = state.copy(rootSeed = rootSeed.toList())
         generateAllNecessaryData()
     }
     //endregion
@@ -147,8 +154,15 @@ class MigrationViewModel @Inject constructor(
     }
 
     private suspend fun saveRootSeed(rootSeedCipher: Cipher) {
+        val rootSeed = state.rootSeed
+
+        if (rootSeed == null) {
+            state = state.copy(addWalletSigner = Resource.Error())
+            return
+        }
+
         migrationRepository.saveV3RootSeed(
-            rootSeed = state.rootSeed?.toByteArray() ?: byteArrayOf(),
+            rootSeed = rootSeed.toByteArray(),
             cipher = rootSeedCipher
         )
 
