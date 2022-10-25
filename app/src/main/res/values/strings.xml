@@ -229,4 +229,9 @@
     <string name="biometry_unavailable">Unable to show biometry to gain access to the app.\n\nPlease authenticate device from lock screen.</string>
     <string name="need_complete_migration">Migration restarted. Please complete migration to enter app.</string>
     <string name="initial_migration_message">As we migrate your data behind biometry, you will see several biometry dialogs. Please complete all to gain access to the Strike Security app.</string>
+
+    <string name="reset_password">Reset Password</string>
+    <string name="retry_recover_password">Retry</string>
+    <string name="reset_pswd_email_sent">Reset password email sent!</string>
+    <string name="reset_email_error">Unable to send reset email. Please try again or reset your password from our website.</string>
 </resources>

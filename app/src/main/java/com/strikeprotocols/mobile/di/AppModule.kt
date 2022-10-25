@@ -51,6 +51,7 @@ object AppModule {
     fun provideUserRepository(
         authProvider: AuthProvider,
         api: BrooklynApiService,
+        anchorApiService: AnchorApiService,
         securePreferences: SecurePreferences,
         semVersionApiService: SemVersionApiService,
         @ApplicationContext applicationContext: Context
@@ -58,6 +59,7 @@ object AppModule {
         return UserRepositoryImpl(
             authProvider = authProvider,
             api = api,
+            anchorApiService = anchorApiService,
             securePreferences = securePreferences,
             versionApiService = semVersionApiService,
             applicationContext = applicationContext
@@ -150,6 +152,12 @@ object AppModule {
             userRepository = userRepository,
             api = api
         )
+    }
+
+    @Provides
+    @Singleton
+    fun provideAnchorService(): AnchorApiService {
+        return AnchorApiService.create()
     }
 
 }

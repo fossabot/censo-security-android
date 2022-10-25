@@ -203,6 +203,19 @@ fun SignInScreen(
                                 isPassword = true,
                                 showDoneAction = true
                             )
+                            Spacer(modifier = Modifier.size(12.dp))
+                            Box(modifier = Modifier.fillMaxWidth()) {
+                                Text(
+                                    modifier = Modifier
+                                        .align(Alignment.CenterEnd)
+                                        .clickable { navController.navigate(Screen.ResetPasswordRoute.route) }
+                                        .padding(top = 12.dp, end = 16.dp),
+                                    text = stringResource(R.string.reset_password),
+                                    color = StrikePurple,
+                                    textAlign = TextAlign.End,
+                                    fontWeight = FontWeight.W400
+                                )
+                            }
                         }
                         Spacer(modifier = Modifier.size(32.dp))
                     }

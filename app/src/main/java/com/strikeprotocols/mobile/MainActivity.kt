@@ -41,6 +41,7 @@ import com.strikeprotocols.mobile.presentation.key_management.KeyManagementScree
 import com.strikeprotocols.mobile.presentation.migration.VerifyUserInitialData
 import com.strikeprotocols.mobile.presentation.migration.MigrationScreen
 import com.strikeprotocols.mobile.presentation.regeneration.RegenerationScreen
+import com.strikeprotocols.mobile.presentation.reset_password.ResetPasswordScreen
 import com.strikeprotocols.mobile.presentation.sign_in.SignInScreen
 import com.strikeprotocols.mobile.service.MessagingService.Companion.NOTIFICATION_DISPLAYED_KEY
 import com.strikeprotocols.mobile.ui.theme.BackgroundBlack
@@ -237,6 +238,11 @@ class MainActivity : FragmentActivity() {
                 route = Screen.EnforceUpdateRoute.route
             ) {
               EnforceUpdateScreen()
+            }
+            composable(
+                route = Screen.ResetPasswordRoute.route
+            ) {
+                ResetPasswordScreen(navController = navController)
             }
         }
     }

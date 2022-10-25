@@ -13,12 +13,11 @@ sealed class Screen(val route: String) {
     object KeyManagementRoute : Screen("key_management_screen") {
         const val KEY_MGMT_ARG = "key_mgmt_arg"
     }
+    object ResetPasswordRoute : Screen("reset_password_screen")
     object MigrationRoute : Screen("migration_screen") {
         const val MIGRATION_ARG = "migration_arg"
     }
-    object RegenerationRoute : Screen("regeneration_screen") {
-        const val REGENERATION_ARG = "regeneration_arg"
-    }
+    object RegenerationRoute : Screen("regeneration_screen")
 
     fun buildScreenDeepLinkUri() = "$STRIKE_PROTOCOLS_URI${this.route}"
 

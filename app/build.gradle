@@ -77,6 +77,7 @@ android {
             buildConfigField "String", "BASE_URL", "\"https://brooklyn.strikeprotocols.com/\""
             buildConfigField "String", "SOLANA_URL", "\"https://api.mainnet-beta.solana.com\""
             buildConfigField "String", "MIN_VERSION_ENDPOINT", "\"strike-security-app-version.json\""
+            buildConfigField "String", "ANCHOR_URL", "\"https://wallet.strikeprotocols.com/\""
             buildConfigField "String", "SOLANA_COMMITMENT", "\"finalized\""
             resValue "string", "RAYGUN_APP_ID", "\"vuxX53AURVfZS87D1WPqeg\""
             debuggable false
@@ -88,6 +89,7 @@ android {
             buildConfigField "String", "BASE_URL", "\"https://brooklyn-preprod.strikeprotocols.com/\""
             buildConfigField "String", "SOLANA_URL", "\"https://api.mainnet-beta.solana.com\""
             buildConfigField "String", "MIN_VERSION_ENDPOINT", "\"strike-security-app-version.json\""
+            buildConfigField "String", "ANCHOR_URL", "\"https://preprod.strikeprotocols.com/\""
             buildConfigField "String", "SOLANA_COMMITMENT", "\"finalized\""
             resValue "string", "RAYGUN_APP_ID", "\"CtOnGQjIo1U8dELkoUf0iw\""
             debuggable false
@@ -99,6 +101,7 @@ android {
             buildConfigField "String", "BASE_URL", "\"https://brooklyn-demo2.strikeprotocols.com/\""
             buildConfigField "String", "SOLANA_URL", "\"https://solana-validator-demo2.strikeprotocols.com\""
             buildConfigField "String", "MIN_VERSION_ENDPOINT", "\"strike-security-app-version-dev.json\""
+            buildConfigField "String", "ANCHOR_URL", "\"https://demo2.strikeprotocols.com/\""
             buildConfigField "String", "SOLANA_COMMITMENT", "\"confirmed\""
             resValue "string", "RAYGUN_APP_ID", "\"CtOnGQjIo1U8dELkoUf0iw\""
             debuggable false
@@ -110,6 +113,7 @@ android {
             buildConfigField "String", "BASE_URL", "\"https://brooklyn-prerelease.strikeprotocols.com/\""
             buildConfigField "String", "SOLANA_URL", "\"https://solana-validator-prerelease.strikeprotocols.com\""
             buildConfigField "String", "MIN_VERSION_ENDPOINT", "\"strike-security-app-version-dev.json\""
+            buildConfigField "String", "ANCHOR_URL", "\"https://prerelease.strikeprotocols.com/\""
             buildConfigField "String", "SOLANA_COMMITMENT", "\"confirmed\""
             resValue "string", "RAYGUN_APP_ID", "\"L9T2bPaEjr3Lede3SNpFJw\""
             debuggable false

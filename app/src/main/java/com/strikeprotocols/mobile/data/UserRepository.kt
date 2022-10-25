@@ -8,6 +8,7 @@ import com.strikeprotocols.mobile.common.*
 import com.strikeprotocols.mobile.data.models.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.tasks.await
+import okhttp3.ResponseBody
 
 interface UserRepository {
     suspend fun loginWithPassword(email: String, password: String): Resource<LoginResponse>
@@ -19,6 +20,7 @@ interface UserRepository {
     suspend fun userLoggedIn(): Boolean
     suspend fun setUserLoggedIn()
     suspend fun logOut(): Boolean
+    suspend fun resetPassword(email: String) : ResponseBody
     suspend fun retrieveUserEmail(): String
     fun retrieveCachedUserEmail(): String
     suspend fun saveUserEmail(email: String)
@@ -31,9 +33,12 @@ class UserRepositoryImpl(
     private val authProvider: AuthProvider,
     private val api: BrooklynApiService,
     private val securePreferences: SecurePreferences,
+    private val anchorApiService: AnchorApiService,
     private val versionApiService: SemVersionApiService,
     private val applicationContext: Context
 ) : UserRepository, BaseRepository() {
+
+    override suspend fun resetPassword(email: String) = anchorApiService.recoverPassword(email)
 
     @SuppressLint("HardwareIds")
     override suspend fun loginWithPassword(
