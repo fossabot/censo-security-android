@@ -5,7 +5,7 @@ import com.strikeprotocols.mobile.common.Resource
 import com.strikeprotocols.mobile.common.StrikeCountDownTimer
 import com.strikeprotocols.mobile.data.ApprovalsRepository
 import com.strikeprotocols.mobile.data.KeyRepository
-import com.strikeprotocols.mobile.data.models.approval.WalletApproval
+import com.strikeprotocols.mobile.data.models.approval.ApprovalRequest
 import com.strikeprotocols.mobile.presentation.common_approvals.CommonApprovalsViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
@@ -24,7 +24,7 @@ class ApprovalsViewModel @Inject constructor(
 ) {
     //region Method Overrides
     override fun setShouldDisplayConfirmDispositionDialog(
-        approval: WalletApproval?,
+        approval: ApprovalRequest?,
         isInitiationRequest: Boolean,
         isApproving: Boolean,
         dialogMessages: Pair<String, String>,
@@ -57,14 +57,14 @@ class ApprovalsViewModel @Inject constructor(
     fun resetApprovalsData() {
         state = state.copy(
             approvals = emptyList(),
-            walletApprovalsResult = Resource.Uninitialized,
+            approvalsResultRequest = Resource.Uninitialized,
             selectedApproval = null,
             multipleAccounts = null
         )
     }
 
     fun resetWalletApprovalsResult() {
-        state = state.copy(walletApprovalsResult = Resource.Uninitialized)
+        state = state.copy(approvalsResultRequest = Resource.Uninitialized)
     }
 
     fun wipeDataAfterDispositionSuccess() {
@@ -79,10 +79,10 @@ class ApprovalsViewModel @Inject constructor(
         viewModelScope.launch {
             val cachedApprovals = state.approvals.toList()
 
-            state = state.copy(walletApprovalsResult = Resource.Loading())
+            state = state.copy(approvalsResultRequest = Resource.Loading())
             delay(250)
 
-            val walletApprovalsResource = approvalsRepository.getWalletApprovals()
+            val walletApprovalsResource = approvalsRepository.getApprovalRequests()
 
             val approvals =
                 when (walletApprovalsResource) {
@@ -98,7 +98,7 @@ class ApprovalsViewModel @Inject constructor(
                 }
 
             state = state.copy(
-                walletApprovalsResult = walletApprovalsResource,
+                approvalsResultRequest = walletApprovalsResource,
                 approvals = approvals
             )
         }

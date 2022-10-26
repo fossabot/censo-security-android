@@ -14,9 +14,9 @@ import com.strikeprotocols.mobile.data.models.ApprovalDisposition
 import com.strikeprotocols.mobile.data.models.approval.*
 import com.strikeprotocols.mobile.data.models.approval.AccountType.*
 import com.strikeprotocols.mobile.ui.theme.GreyText
-import com.strikeprotocols.mobile.data.models.approval.SolanaApprovalRequestType.*
+import com.strikeprotocols.mobile.data.models.approval.ApprovalRequestDetails.*
 
-fun SolanaApprovalRequestType.getHeader(context: Context): String {
+fun ApprovalRequestDetails.getHeader(context: Context): String {
     return when (this) {
         is AddressBookUpdate -> {
             val entryMetaData: Pair<AddRemoveChange, SlotDestinationInfo>? = this.getEntryMetaData()
@@ -31,7 +31,7 @@ fun SolanaApprovalRequestType.getHeader(context: Context): String {
         }
         is BalanceAccountAddressWhitelistUpdate ->
             context.getString(R.string.balance_account_address_whitelist_update_approval_header)
-        is BalanceAccountCreation ->
+        is WalletCreation ->
             if (accountInfo.accountType == BalanceAccount) {
                 "${context.getString(R.string.add)} ${accountInfo.chainName ?: context.getString(R.string.solana)} ${context.getString(R.string.wallet_title)}"
             } else {
@@ -83,7 +83,7 @@ fun SolanaApprovalRequestType.getHeader(context: Context): String {
     }
 }
 
-fun SolanaApprovalRequestType.getDialogMessages(
+fun ApprovalRequestDetails.getDialogMessages(
     context: Context,
     approvalDisposition: ApprovalDisposition,
     isInitiationRequest: Boolean
@@ -94,7 +94,7 @@ fun SolanaApprovalRequestType.getDialogMessages(
     return Pair(mainText, secondaryText)
 }
 
-fun SolanaApprovalRequestType.getApprovalRowMetaData(vaultName: String?): ApprovalRowMetaData {
+fun ApprovalRequestDetails.getApprovalRowMetaData(vaultName: String?): ApprovalRowMetaData {
     if (this.isUnknownTypeOrUIUnimplemented()) {
         return ApprovalRowMetaData(
             vaultName = null
@@ -106,10 +106,10 @@ fun SolanaApprovalRequestType.getApprovalRowMetaData(vaultName: String?): Approv
     )
 }
 
-fun SolanaApprovalRequestType.isUnknownTypeOrUIUnimplemented() =
+fun ApprovalRequestDetails.isUnknownTypeOrUIUnimplemented() =
     this is UnknownApprovalType || this is DAppBookUpdate
 
-fun SolanaApprovalRequestType.getRowTitle(vaultName: String?): String? =
+fun ApprovalRequestDetails.getRowTitle(vaultName: String?): String? =
     when (this) {
         is AcceptVaultInvitation -> null
         else -> vaultName

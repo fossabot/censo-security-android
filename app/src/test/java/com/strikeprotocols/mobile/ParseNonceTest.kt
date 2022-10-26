@@ -1,17 +1,11 @@
 package com.strikeprotocols.mobile
 
 import com.google.gson.JsonParser
-import com.strikeprotocols.mobile.data.EncryptionManager
 import com.strikeprotocols.mobile.data.MultipleAccountsDeserializer
-import com.strikeprotocols.mobile.data.SecurePreferences
-import com.strikeprotocols.mobile.data.StrikeKeyPair
 import com.strikeprotocols.mobile.data.models.Nonce
-import com.strikeprotocols.mobile.data.models.approval.WalletApprovalDeserializer
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
-import org.mockito.Mock
-import org.mockito.MockitoAnnotations
 
 class ParseNonceTest {
 

@@ -4,7 +4,7 @@ import com.strikeprotocols.mobile.common.Resource
 import com.strikeprotocols.mobile.common.StrikeCountDownTimer
 import com.strikeprotocols.mobile.data.ApprovalsRepository
 import com.strikeprotocols.mobile.data.KeyRepository
-import com.strikeprotocols.mobile.data.models.approval.WalletApproval
+import com.strikeprotocols.mobile.data.models.approval.ApprovalRequest
 import com.strikeprotocols.mobile.presentation.common_approvals.CommonApprovalsViewModel
 import com.strikeprotocols.mobile.presentation.approval_disposition.ApprovalRetryData
 import com.strikeprotocols.mobile.presentation.common_approvals.ApprovalsState
@@ -22,7 +22,7 @@ class ApprovalDetailsViewModel @Inject constructor(
     timer = timer
 ) {
     //region Method Overrides
-    override fun handleInitialData(approval: WalletApproval) {
+    override fun handleInitialData(approval: ApprovalRequest) {
         state = state.copy(selectedApproval = approval)
     }
 
@@ -31,7 +31,7 @@ class ApprovalDetailsViewModel @Inject constructor(
     }
 
     override fun setShouldDisplayConfirmDispositionDialog(
-        approval: WalletApproval?,
+        approval: ApprovalRequest?,
         isInitiationRequest: Boolean,
         isApproving: Boolean,
         dialogMessages: Pair<String, String>

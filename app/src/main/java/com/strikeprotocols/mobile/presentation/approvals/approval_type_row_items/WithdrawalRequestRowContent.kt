@@ -6,10 +6,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import com.strikeprotocols.mobile.data.models.approval.SolanaApprovalRequestType
+import com.strikeprotocols.mobile.data.models.approval.ApprovalRequestDetails
 
 @Composable
-fun WithdrawalRequestRowContent(withdrawalRequest: SolanaApprovalRequestType.WithdrawalRequest) {
+fun WithdrawalRequestRowContent(withdrawalRequest: ApprovalRequestDetails.WithdrawalRequest) {
     val header = withdrawalRequest.getHeader(LocalContext.current)
     val usdEquivalent = withdrawalRequest.symbolAndAmountInfo.getUSDEquivalentText(context = LocalContext.current, hideSymbol = true)
     val fromAccount = withdrawalRequest.account.name

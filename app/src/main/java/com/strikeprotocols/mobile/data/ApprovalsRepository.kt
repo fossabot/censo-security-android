@@ -6,12 +6,12 @@ import com.strikeprotocols.mobile.data.models.InitiationDisposition
 import com.strikeprotocols.mobile.data.models.RegisterApprovalDisposition
 import com.strikeprotocols.mobile.data.models.approval.ApprovalDispositionRequest
 import com.strikeprotocols.mobile.data.models.approval.InitiationRequest
-import com.strikeprotocols.mobile.data.models.approval.WalletApproval
+import com.strikeprotocols.mobile.data.models.approval.ApprovalRequest
 import javax.crypto.Cipher
 import javax.inject.Inject
 
 interface ApprovalsRepository {
-    suspend fun getWalletApprovals(): Resource<List<WalletApproval?>>
+    suspend fun getApprovalRequests(): Resource<List<ApprovalRequest?>>
     suspend fun approveOrDenyDisposition(
         requestId: String,
         registerApprovalDisposition: RegisterApprovalDisposition,
@@ -30,8 +30,8 @@ class ApprovalsRepositoryImpl @Inject constructor(
     private val userRepository: UserRepository
 ) : ApprovalsRepository, BaseRepository() {
 
-    override suspend fun getWalletApprovals(): Resource<List<WalletApproval?>> =
-        retrieveApiResource { api.getWalletApprovals() }
+    override suspend fun getApprovalRequests(): Resource<List<ApprovalRequest?>> =
+        retrieveApiResource { api.getApprovalRequests() }
 
     override suspend fun approveOrDenyDisposition(
         requestId: String,
@@ -55,7 +55,7 @@ class ApprovalsRepositoryImpl @Inject constructor(
             approvalDisposition = registerApprovalDisposition.approvalDisposition!!,
             nonces = registerApprovalDisposition.nonces!!,
             email = userEmail,
-            requestType = registerApprovalDisposition.solanaApprovalRequestType!!
+            requestType = registerApprovalDisposition.approvalRequestType!!
         )
 
         val registerApprovalDispositionBody = try {

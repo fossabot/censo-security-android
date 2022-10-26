@@ -11,7 +11,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.strikeprotocols.mobile.R
-import com.strikeprotocols.mobile.data.models.approval.SolanaApprovalRequestType
+import com.strikeprotocols.mobile.data.models.approval.ApprovalRequestDetails
 import com.strikeprotocols.mobile.presentation.approvals.ApprovalContentHeader
 import com.strikeprotocols.mobile.presentation.approvals.approval_type_row_items.getHeader
 import com.strikeprotocols.mobile.presentation.components.FactRow
@@ -19,7 +19,7 @@ import com.strikeprotocols.mobile.presentation.components.FactsData
 import com.strikeprotocols.mobile.ui.theme.GreyText
 
 @Composable
-fun LoginApprovalDetailContent(loginApproval: SolanaApprovalRequestType.LoginApprovalRequest) {
+fun LoginApprovalDetailContent(loginApproval: ApprovalRequestDetails.LoginApprovalRequest) {
     ApprovalContentHeader(header = loginApproval.getHeader(LocalContext.current), topSpacing = 24, bottomSpacing = 8)
     Text(
         "",

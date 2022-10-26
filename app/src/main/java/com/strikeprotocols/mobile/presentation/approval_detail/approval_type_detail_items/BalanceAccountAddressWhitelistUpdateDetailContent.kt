@@ -10,7 +10,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.strikeprotocols.mobile.R
 import com.strikeprotocols.mobile.common.toWalletName
-import com.strikeprotocols.mobile.data.models.approval.SolanaApprovalRequestType
+import com.strikeprotocols.mobile.data.models.approval.ApprovalRequestDetails
 import com.strikeprotocols.mobile.presentation.approvals.ApprovalRowContentHeader
 import com.strikeprotocols.mobile.presentation.approvals.approval_type_row_items.*
 import com.strikeprotocols.mobile.presentation.components.FactRow
@@ -18,7 +18,7 @@ import com.strikeprotocols.mobile.presentation.components.FactsData
 
 @Composable
 fun BalanceAccountAddressWhitelistUpdateDetailContent(
-    addressWhitelistUpdate: SolanaApprovalRequestType.BalanceAccountAddressWhitelistUpdate
+    addressWhitelistUpdate: ApprovalRequestDetails.BalanceAccountAddressWhitelistUpdate
 ) {
     val header = addressWhitelistUpdate.getHeader(LocalContext.current)
 
@@ -38,7 +38,7 @@ fun BalanceAccountAddressWhitelistUpdateDetailContent(
     Spacer(modifier = Modifier.height(28.dp))
 }
 
-fun generateBalanceAccountAddressWhitelistUpdateDetailRows(addressWhitelistUpdate: SolanaApprovalRequestType.BalanceAccountAddressWhitelistUpdate, context: Context) : List<FactsData> {
+fun generateBalanceAccountAddressWhitelistUpdateDetailRows(addressWhitelistUpdate: ApprovalRequestDetails.BalanceAccountAddressWhitelistUpdate, context: Context) : List<FactsData> {
     val destinationsRowInfoData = mutableListOf<FactsData>()
 
     val destinationsList = addressWhitelistUpdate.destinations.retrieveDestinationsRowData()

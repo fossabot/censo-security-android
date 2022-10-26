@@ -1,22 +1,25 @@
 package com.strikeprotocols.mobile.data.models.approval
 
+import com.google.gson.GsonBuilder
 import com.google.gson.JsonElement
 import com.google.gson.JsonObject
 import com.google.gson.JsonPrimitive
 import com.google.gson.annotations.SerializedName
 import java.io.ByteArrayOutputStream
+import java.lang.reflect.Modifier
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
 import java.text.NumberFormat
 import java.util.*
 
 sealed class SolanaApprovalRequestDetails {
-    data class ApprovalRequestDetails(val requestType: SolanaApprovalRequestType) :
+
+    data class ApprovalRequestDetails(val requestType: com.strikeprotocols.mobile.data.models.approval.ApprovalRequestDetails) :
         SolanaApprovalRequestDetails()
 
     data class MultiSignOpInitiationDetails(
         val multisigOpInitiation: MultiSigOpInitiation,
-        val requestType: SolanaApprovalRequestType
+        val requestType: com.strikeprotocols.mobile.data.models.approval.ApprovalRequestDetails
     ) : SolanaApprovalRequestDetails()
 
     companion object {
@@ -73,14 +76,22 @@ data class MultiSigOpInitiation(
     }
 }
 
-sealed class SolanaApprovalRequestType {
+sealed class ApprovalRequestDetails {
+    fun toJson(): String =
+        GsonBuilder()
+            .excludeFieldsWithModifiers(Modifier.STATIC)
+            .registerTypeAdapterFactory(TypeFactorySettings.signingDataAdapterFactory)
+            .registerTypeAdapterFactory(TypeFactorySettings.approvalSignatureAdapterFactory)
+            .create()
+            .toJson(this)
+
     data class WithdrawalRequest(
         val type: String,
         val account: AccountInfo,
         val symbolAndAmountInfo: SymbolAndAmountInfo,
         val destination: DestinationAddress,
         val signingData: SigningData
-    ) : SolanaApprovalRequestType()
+    ) : ApprovalRequestDetails()
 
     data class ConversionRequest(
         val type: String,
@@ -89,16 +100,16 @@ sealed class SolanaApprovalRequestType {
         val destination: DestinationAddress,
         val destinationSymbolInfo: SymbolInfo,
         val signingData: SigningData.SolanaSigningData
-    ) : SolanaApprovalRequestType()
+    ) : ApprovalRequestDetails()
 
     data class SignersUpdate(
         val type: String,
         val slotUpdateType: SlotUpdateType,
         val signer: SlotSignerInfo,
         val signingData: SigningData.SolanaSigningData
-    ) : SolanaApprovalRequestType()
+    ) : ApprovalRequestDetails()
 
-    data class BalanceAccountCreation(
+    data class WalletCreation(
         val type: String,
         var accountSlot: Byte,
         var accountInfo: AccountInfo,
@@ -106,8 +117,8 @@ sealed class SolanaApprovalRequestType {
         var whitelistEnabled: BooleanSetting,
         var dappsEnabled: BooleanSetting,
         var addressBookSlot: Byte,
-        var signingData: SigningData.SolanaSigningData
-    ) : SolanaApprovalRequestType() {
+        var signingData: SigningData.SolanaSigningData?
+    ) : ApprovalRequestDetails() {
 
         fun combinedBytes() : ByteArray {
             val buffer = ByteArrayOutputStream()
@@ -131,7 +142,7 @@ sealed class SolanaApprovalRequestType {
         var balanceChanges: List<SymbolAndAmountInfo>,
         var instructions: List<SolanaInstructionChunk>,
         var signingData: SigningData.SolanaSigningData
-    ) : SolanaApprovalRequestType()
+    ) : ApprovalRequestDetails()
 
     data class WrapConversionRequest(
         val type: String,
@@ -139,13 +150,13 @@ sealed class SolanaApprovalRequestType {
         val symbolAndAmountInfo: SymbolAndAmountInfo,
         val destinationSymbolInfo: SymbolInfo,
         var signingData: SigningData.SolanaSigningData
-    ) : SolanaApprovalRequestType()
+    ) : ApprovalRequestDetails()
 
     data class WalletConfigPolicyUpdate(
         val type: String,
         val approvalPolicy: ApprovalPolicy,
         var signingData: SigningData.SolanaSigningData
-    ) : SolanaApprovalRequestType()
+    ) : ApprovalRequestDetails()
 
     data class BalanceAccountSettingsUpdate(
         val type: String,
@@ -153,7 +164,7 @@ sealed class SolanaApprovalRequestType {
         val whitelistEnabled: BooleanSetting?,
         val dappsEnabled: BooleanSetting?,
         var signingData: SigningData.SolanaSigningData
-    ) : SolanaApprovalRequestType() {
+    ) : ApprovalRequestDetails() {
 
         fun changeValue() : SettingsChange? {
             return if (whitelistEnabled != null && dappsEnabled == null) {
@@ -199,7 +210,7 @@ sealed class SolanaApprovalRequestType {
         val entriesToAdd: List<SlotDAppInfo>,
         val entriesToRemove: List<SlotDAppInfo>,
         var signingData: SigningData.SolanaSigningData
-    ) : SolanaApprovalRequestType() {
+    ) : ApprovalRequestDetails() {
 
         fun combinedBytes() : ByteArray {
             val buffer = ByteArrayOutputStream()
@@ -218,7 +229,7 @@ sealed class SolanaApprovalRequestType {
         val entriesToAdd: List<SlotDestinationInfo>,
         val entriesToRemove: List<SlotDestinationInfo>,
         var signingData: SigningData.SolanaSigningData
-    ) : SolanaApprovalRequestType() {
+    ) : ApprovalRequestDetails() {
 
 
         fun getEntryMetaData(): Pair<AddRemoveChange, SlotDestinationInfo>? =
@@ -269,7 +280,7 @@ sealed class SolanaApprovalRequestType {
         val accountInfo: AccountInfo,
         val newAccountName: String,
         var signingData: SigningData.SolanaSigningData
-    ) : SolanaApprovalRequestType() {
+    ) : ApprovalRequestDetails() {
 
         fun combinedBytes() : ByteArray {
             val buffer = ByteArrayOutputStream()
@@ -286,7 +297,7 @@ sealed class SolanaApprovalRequestType {
         val accountInfo: AccountInfo,
         val approvalPolicy: ApprovalPolicy,
         var signingData: SigningData.SolanaSigningData
-    ) : SolanaApprovalRequestType() {
+    ) : ApprovalRequestDetails() {
 
         fun combinedBytes() : ByteArray {
             val buffer = ByteArrayOutputStream()
@@ -304,7 +315,7 @@ sealed class SolanaApprovalRequestType {
         val accountInfo: AccountInfo,
         val destinations: List<SlotDestinationInfo>,
         val signingData: SigningData.SolanaSigningData
-    ) : SolanaApprovalRequestType() {
+    ) : ApprovalRequestDetails() {
 
         fun combinedBytes() : ByteArray {
             val buffer = ByteArrayOutputStream()
@@ -331,24 +342,24 @@ sealed class SolanaApprovalRequestType {
         val jwtToken: String,
         val email: String?,
         val name: String?
-    ) : SolanaApprovalRequestType()
+    ) : ApprovalRequestDetails()
 
     data class AcceptVaultInvitation(
         val type: String,
         val vaultGuid: String,
         val vaultName: String
-    ) : SolanaApprovalRequestType()
+    ) : ApprovalRequestDetails()
 
     data class PasswordReset(
         val type: String
-    ) : SolanaApprovalRequestType()
+    ) : ApprovalRequestDetails()
 
     data class SignData(
         val base64Data: String,
         val signingData: SigningData.SolanaSigningData,
-    ) : SolanaApprovalRequestType()
+    ) : ApprovalRequestDetails()
 
-    object UnknownApprovalType : SolanaApprovalRequestType()
+    object UnknownApprovalType : ApprovalRequestDetails()
 
     companion object {
         const val INVALID_REQUEST_APPROVAL = "Invalid request for Approval"
@@ -364,7 +375,7 @@ sealed class SolanaApprovalRequestType {
             }
             is ConversionRequest -> signingData.nonceAccountAddresses
             is SignersUpdate -> signingData.nonceAccountAddresses
-            is BalanceAccountCreation -> signingData.nonceAccountAddresses
+            is WalletCreation -> signingData?.nonceAccountAddresses ?: emptyList()
             is DAppTransactionRequest -> signingData.nonceAccountAddresses
             is WrapConversionRequest -> signingData.nonceAccountAddresses
             is WalletConfigPolicyUpdate -> signingData.nonceAccountAddresses
@@ -382,7 +393,7 @@ sealed class SolanaApprovalRequestType {
     fun nonceAccountAddressesSlot() : Int {
         return when(this) {
             is WithdrawalRequest, is ConversionRequest, is SignersUpdate,
-            is BalanceAccountCreation, is DAppTransactionRequest, is WrapConversionRequest,
+            is WalletCreation, is DAppTransactionRequest, is WrapConversionRequest,
             is WalletConfigPolicyUpdate, is BalanceAccountSettingsUpdate, is DAppBookUpdate,
             is AddressBookUpdate, is BalanceAccountNameUpdate, is BalanceAccountPolicyUpdate,
             is BalanceAccountAddressWhitelistUpdate, is SignData -> {
@@ -401,7 +412,7 @@ sealed class SolanaApprovalRequestType {
             is WithdrawalRequest -> signingData
             is ConversionRequest -> signingData
             is SignersUpdate -> signingData
-            is BalanceAccountCreation -> signingData
+            is WalletCreation -> signingData
             is DAppTransactionRequest -> signingData
             is WrapConversionRequest -> signingData
             is WalletConfigPolicyUpdate -> signingData
@@ -422,7 +433,7 @@ enum class ApprovalType(val value: String) {
     WITHDRAWAL_TYPE("WithdrawalRequest"),
     CONVERSION_REQUEST_TYPE("ConversionRequest"),
     SIGNERS_UPDATE_TYPE("SignersUpdate"),
-    BALANCE_ACCOUNT_CREATION_TYPE("BalanceAccountCreation"),
+    WALLET_CREATION_TYPE("WalletCreation"),
     DAPP_TRANSACTION_REQUEST_TYPE("DAppTransactionRequest"),
     LOGIN_TYPE("LoginApproval"),
     WRAP_CONVERSION_REQUEST_TYPE("WrapConversionRequest"),
@@ -445,7 +456,7 @@ enum class ApprovalType(val value: String) {
                 WITHDRAWAL_TYPE.value -> WITHDRAWAL_TYPE
                 CONVERSION_REQUEST_TYPE.value -> CONVERSION_REQUEST_TYPE
                 SIGNERS_UPDATE_TYPE.value -> SIGNERS_UPDATE_TYPE
-                BALANCE_ACCOUNT_CREATION_TYPE.value -> BALANCE_ACCOUNT_CREATION_TYPE
+                WALLET_CREATION_TYPE.value -> WALLET_CREATION_TYPE
                 DAPP_TRANSACTION_REQUEST_TYPE.value -> DAPP_TRANSACTION_REQUEST_TYPE
                 LOGIN_TYPE.value -> LOGIN_TYPE
                 WRAP_CONVERSION_REQUEST_TYPE.value -> WRAP_CONVERSION_REQUEST_TYPE

@@ -6,10 +6,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import com.strikeprotocols.mobile.data.models.approval.SolanaApprovalRequestType
+import com.strikeprotocols.mobile.data.models.approval.ApprovalRequestDetails
 
 @Composable
-fun ConversionRequestRowContent(conversionRequest: SolanaApprovalRequestType.ConversionRequest) {
+fun ConversionRequestRowContent(conversionRequest: ApprovalRequestDetails.ConversionRequest) {
     val header = conversionRequest.getHeader(LocalContext.current)
     val usdEquivalent = conversionRequest.symbolAndAmountInfo.getUSDEquivalentText(context = LocalContext.current, hideSymbol = true)
     val fromAccount = conversionRequest.account.name

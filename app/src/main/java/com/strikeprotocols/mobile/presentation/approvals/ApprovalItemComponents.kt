@@ -6,7 +6,6 @@ import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -15,8 +14,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.strikeprotocols.mobile.R
 import com.strikeprotocols.mobile.common.convertSecondsIntoCountdownText
-import com.strikeprotocols.mobile.data.models.approval.SolanaApprovalRequestType
-import com.strikeprotocols.mobile.data.models.approval.WalletApproval
+import com.strikeprotocols.mobile.data.models.approval.ApprovalRequestDetails
+import com.strikeprotocols.mobile.data.models.approval.ApprovalRequest
 import com.strikeprotocols.mobile.presentation.approval_detail.approval_type_detail_items.*
 import com.strikeprotocols.mobile.presentation.approvals.approval_type_row_items.*
 import com.strikeprotocols.mobile.ui.theme.*
@@ -143,40 +142,40 @@ fun VaultTitle(
 
 @Composable
 fun ApprovalRowContent(
-    type: SolanaApprovalRequestType,
-    approval: WalletApproval,
+    type: ApprovalRequestDetails,
+    approval: ApprovalRequest,
 ) {
     when (type) {
-        is SolanaApprovalRequestType.WithdrawalRequest ->
+        is ApprovalRequestDetails.WithdrawalRequest ->
             WithdrawalRequestRowContent(withdrawalRequest = type)
-        is SolanaApprovalRequestType.ConversionRequest ->
+        is ApprovalRequestDetails.ConversionRequest ->
             ConversionRequestRowContent(conversionRequest = type)
-        is SolanaApprovalRequestType.SignersUpdate ->
+        is ApprovalRequestDetails.SignersUpdate ->
             SignersUpdateRowContent(signersUpdate = type)
-        is SolanaApprovalRequestType.BalanceAccountCreation ->
-            BalanceAccountCreationRowContent(balanceAccountCreation = type)
-        is SolanaApprovalRequestType.DAppTransactionRequest ->
+        is ApprovalRequestDetails.WalletCreation ->
+            WalletCreationRowContent(walletCreation = type)
+        is ApprovalRequestDetails.DAppTransactionRequest ->
             DAppTransactionRowContent(dAppTransactionRequest = type)
-        is SolanaApprovalRequestType.LoginApprovalRequest ->
+        is ApprovalRequestDetails.LoginApprovalRequest ->
             LoginApprovalRowContent(loginApproval = type)
-        is SolanaApprovalRequestType.AddressBookUpdate -> 
+        is ApprovalRequestDetails.AddressBookUpdate ->
             AddressBookUpdateRowContent(addressBookUpdate = type)
-        is SolanaApprovalRequestType.BalanceAccountAddressWhitelistUpdate -> 
+        is ApprovalRequestDetails.BalanceAccountAddressWhitelistUpdate ->
             BalanceAccountAddressWhitelistUpdateRowContent(accountAddressWhitelistUpdate = type)
-        is SolanaApprovalRequestType.BalanceAccountNameUpdate -> 
+        is ApprovalRequestDetails.BalanceAccountNameUpdate ->
             BalanceAccountNameUpdateRowContent(accountNameUpdate = type)
-        is SolanaApprovalRequestType.BalanceAccountPolicyUpdate -> 
+        is ApprovalRequestDetails.BalanceAccountPolicyUpdate ->
             BalanceAccountPolicyUpdateRowContent(accountPolicyUpdate = type)
-        is SolanaApprovalRequestType.BalanceAccountSettingsUpdate -> 
+        is ApprovalRequestDetails.BalanceAccountSettingsUpdate ->
             BalanceAccountSettingsUpdateRowContent(accountSettingsUpdate = type)
-        is SolanaApprovalRequestType.DAppBookUpdate -> DAppBookUpdateRowContent()
-        is SolanaApprovalRequestType.WalletConfigPolicyUpdate -> 
+        is ApprovalRequestDetails.DAppBookUpdate -> DAppBookUpdateRowContent()
+        is ApprovalRequestDetails.WalletConfigPolicyUpdate ->
             WalletConfigPolicyUpdateRowContent(walletConfigPolicyUpdate = type)
-        is SolanaApprovalRequestType.WrapConversionRequest -> 
+        is ApprovalRequestDetails.WrapConversionRequest ->
             WrapConversionRequestRowContent(wrapConversionRequest = type)
-        is SolanaApprovalRequestType.AcceptVaultInvitation ->
+        is ApprovalRequestDetails.AcceptVaultInvitation ->
             AcceptVaultInvitationRowContent(acceptVaultInvitation = type)
-        is SolanaApprovalRequestType.PasswordReset ->
+        is ApprovalRequestDetails.PasswordReset ->
             PasswordResetRowContent(passwordReset = type, email = approval.submitterEmail ?: "")
         else -> {
             val header = type.getHeader(LocalContext.current)
@@ -186,39 +185,39 @@ fun ApprovalRowContent(
 }
 
 @Composable
-fun ApprovalDetailContent(approval: WalletApproval, type: SolanaApprovalRequestType) {
+fun ApprovalDetailContent(approval: ApprovalRequest, type: ApprovalRequestDetails) {
     when (type) {
-        is SolanaApprovalRequestType.BalanceAccountCreation ->
-            BalanceAccountDetailContent(balanceAccountCreation = type, approvalsReceived = approval.numberOfApprovalsReceived.toString())
-        is SolanaApprovalRequestType.ConversionRequest ->
+        is ApprovalRequestDetails.WalletCreation ->
+            BalanceAccountDetailContent(walletCreation = type, approvalsReceived = approval.numberOfApprovalsReceived.toString())
+        is ApprovalRequestDetails.ConversionRequest ->
             ConversionDetailContent(conversionRequest = type)
-        is SolanaApprovalRequestType.DAppTransactionRequest ->
+        is ApprovalRequestDetails.DAppTransactionRequest ->
             DAppTransactionDetailContent(dAppTransactionRequest = type)
-        is SolanaApprovalRequestType.LoginApprovalRequest -> {
+        is ApprovalRequestDetails.LoginApprovalRequest -> {
             LoginApprovalDetailContent(loginApproval = type)
         }
-        is SolanaApprovalRequestType.SignersUpdate ->
+        is ApprovalRequestDetails.SignersUpdate ->
             SignersUpdateDetailContent(signersUpdate = type)
-        is SolanaApprovalRequestType.WithdrawalRequest ->
+        is ApprovalRequestDetails.WithdrawalRequest ->
             WithdrawalRequestDetailContent(withdrawalRequest = type)
-        is SolanaApprovalRequestType.AddressBookUpdate ->
+        is ApprovalRequestDetails.AddressBookUpdate ->
             AddressBookUpdateDetailContent(addressBookUpdate = type)
-        is SolanaApprovalRequestType.BalanceAccountAddressWhitelistUpdate ->
+        is ApprovalRequestDetails.BalanceAccountAddressWhitelistUpdate ->
             BalanceAccountAddressWhitelistUpdateDetailContent(addressWhitelistUpdate = type)
-        is SolanaApprovalRequestType.BalanceAccountNameUpdate ->
+        is ApprovalRequestDetails.BalanceAccountNameUpdate ->
             BalanceAccountNameUpdateDetailContent(accountNameUpdate = type)
-        is SolanaApprovalRequestType.BalanceAccountPolicyUpdate ->
+        is ApprovalRequestDetails.BalanceAccountPolicyUpdate ->
             BalanceAccountPolicyUpdateDetailContent(accountPolicyUpdate = type)
-        is SolanaApprovalRequestType.BalanceAccountSettingsUpdate ->
+        is ApprovalRequestDetails.BalanceAccountSettingsUpdate ->
             BalanceAccountSettingsUpdateDetailContent(accountSettingsUpdate = type)
-        is SolanaApprovalRequestType.DAppBookUpdate -> DAppBookUpdateDetailContent()
-        is SolanaApprovalRequestType.WalletConfigPolicyUpdate ->
+        is ApprovalRequestDetails.DAppBookUpdate -> DAppBookUpdateDetailContent()
+        is ApprovalRequestDetails.WalletConfigPolicyUpdate ->
             WalletConfigPolicyUpdateDetailContent(walletConfigPolicyUpdate = type)
-        is SolanaApprovalRequestType.WrapConversionRequest ->
+        is ApprovalRequestDetails.WrapConversionRequest ->
             WrapConversionRequestDetailContent(wrapConversionRequest = type)
-        is SolanaApprovalRequestType.AcceptVaultInvitation ->
+        is ApprovalRequestDetails.AcceptVaultInvitation ->
             AcceptVaultInvitationDetailContent(acceptVaultInvitation = type)
-        is SolanaApprovalRequestType.PasswordReset ->
+        is ApprovalRequestDetails.PasswordReset ->
             PasswordResetDetailContent(passwordReset = type)
         else -> Text(text = stringResource(R.string.unknown_approval_item))
     }

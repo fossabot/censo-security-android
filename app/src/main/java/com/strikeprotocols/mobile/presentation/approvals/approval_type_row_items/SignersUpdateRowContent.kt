@@ -11,13 +11,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.strikeprotocols.mobile.data.models.approval.SolanaApprovalRequestType
+import com.strikeprotocols.mobile.data.models.approval.ApprovalRequestDetails
 import com.strikeprotocols.mobile.presentation.approval_detail.approval_type_detail_items.ApprovalSubtitle
 import com.strikeprotocols.mobile.presentation.approvals.ApprovalRowContentHeader
 import com.strikeprotocols.mobile.ui.theme.DetailInfoLightBackground
 
 @Composable
-fun SignersUpdateRowContent(signersUpdate: SolanaApprovalRequestType.SignersUpdate) {
+fun SignersUpdateRowContent(signersUpdate: ApprovalRequestDetails.SignersUpdate) {
     val header = signersUpdate.getHeader(LocalContext.current)
     val value = signersUpdate.signer.value
 

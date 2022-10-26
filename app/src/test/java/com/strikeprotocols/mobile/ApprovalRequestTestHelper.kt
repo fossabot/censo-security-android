@@ -1,15 +1,13 @@
 package com.strikeprotocols.mobile
 
-import com.strikeprotocols.mobile.data.models.WalletSigner
 import com.strikeprotocols.mobile.data.models.approval.*
-import com.strikeprotocols.mobile.data.models.approval.SolanaApprovalRequestType.*
+import com.strikeprotocols.mobile.data.models.approval.ApprovalRequestDetails.*
 import java.util.*
 
 
-fun getWalletApprovalRequest(solanaApprovalRequestType: SolanaApprovalRequestType) : WalletApproval {
-    return WalletApproval(
+fun getWalletApprovalRequest(approvalRequestType: ApprovalRequestDetails) : ApprovalRequest {
+    return ApprovalRequest(
         id = "1",
-        walletType = WalletSigner.WALLET_TYPE_SOLANA,
         submitterName = "",
         submitterEmail = "",
         submitDate = Date().toString(),
@@ -18,11 +16,11 @@ fun getWalletApprovalRequest(solanaApprovalRequestType: SolanaApprovalRequestTyp
         numberOfApprovalsReceived = 1,
         numberOfDeniesReceived = 1,
         vaultName = "Test Vault",
-        details = SolanaApprovalRequestDetails.ApprovalRequestDetails(solanaApprovalRequestType)
+        details = SolanaApprovalRequestDetails.ApprovalRequestDetails(approvalRequestType)
     )
 }
 
-fun getSignersUpdateRequestForApproval(nonceAccountAddresses: List<String>): SolanaApprovalRequestType {
+fun getSignersUpdateRequestForApproval(nonceAccountAddresses: List<String>): ApprovalRequestDetails {
     return SignersUpdate(
         type = ApprovalType.SIGNERS_UPDATE_TYPE.value,
         slotUpdateType = SlotUpdateType.SetIfEmpty,
@@ -76,20 +74,21 @@ fun getSignersUpdateRequest(nonceAccountAddresses: List<String>) = SignersUpdate
         )
     )
 
-fun getSignersUpdateWalletRequest(nonceAccountAddresses: List<String>) : WalletApproval {
+fun getSignersUpdateWalletRequest(nonceAccountAddresses: List<String>) : ApprovalRequest {
     return getWalletApprovalRequest(
         getSignersUpdateRequest(nonceAccountAddresses)
     )
 }
 
-fun getBalanceAccountCreationRequest(nonceAccountAddresses: List<String>) : BalanceAccountCreation {
-    return BalanceAccountCreation(
-        type = ApprovalType.BALANCE_ACCOUNT_CREATION_TYPE.value,
+fun getSolanaWalletCreationRequest(nonceAccountAddresses: List<String>) : WalletCreation {
+    return WalletCreation(
+        type = ApprovalType.WALLET_CREATION_TYPE.value,
         accountSlot = 0,
         accountInfo = AccountInfo(
             name = "Account 1",
             identifier = "c6055be1-a895-45a6-b0f3-fce261760b89",
             accountType = AccountType.BalanceAccount,
+            chainName = "Solana",
             address = null
         ),
         approvalPolicy = ApprovalPolicy(
@@ -122,6 +121,72 @@ fun getBalanceAccountCreationRequest(nonceAccountAddresses: List<String>) : Bala
             walletGuidHash = emptyHash,
             nonceAccountAddressesSlot = 2272
         )
+    )
+}
+
+fun getBitcoinWalletCreationRequest() : WalletCreation {
+    return WalletCreation(
+        type = ApprovalType.WALLET_CREATION_TYPE.value,
+        accountSlot = 0,
+        accountInfo = AccountInfo(
+            name = "Account 1",
+            identifier = "c6055be1-a895-45a6-b0f3-fce261760b89",
+            accountType = AccountType.BalanceAccount,
+            chainName = "Bitcoin",
+            address = null
+        ),
+        approvalPolicy = ApprovalPolicy(
+            approvalsRequired = 1,
+            approvalTimeout = 3600000,
+            approvers = listOf(
+                SlotSignerInfo(
+                    slotId = 0,
+                    value = SignerInfo(
+                        name = "User 1",
+                        email = "authorized1@org1",
+                        publicKey = "3wKxhgiogoCaA2uxPYeH7cy3cG4hxRPogrPmDPLS54iZ",
+                        nameHashIsEmpty = false,
+                    )
+                )
+            )
+        ),
+        whitelistEnabled = BooleanSetting.Off,
+        dappsEnabled = BooleanSetting.Off,
+        addressBookSlot = 0,
+        signingData = null
+    )
+}
+
+fun getEthereumWalletCreationRequest() : WalletCreation {
+    return WalletCreation(
+        type = ApprovalType.WALLET_CREATION_TYPE.value,
+        accountSlot = 0,
+        accountInfo = AccountInfo(
+            name = "Account 1",
+            identifier = "c6055be1-a895-45a6-b0f3-fce261760b89",
+            accountType = AccountType.BalanceAccount,
+            chainName = "Ethereum",
+            address = null
+        ),
+        approvalPolicy = ApprovalPolicy(
+            approvalsRequired = 1,
+            approvalTimeout = 3600000,
+            approvers = listOf(
+                SlotSignerInfo(
+                    slotId = 0,
+                    value = SignerInfo(
+                        name = "User 1",
+                        email = "authorized1@org1",
+                        publicKey = "3wKxhgiogoCaA2uxPYeH7cy3cG4hxRPogrPmDPLS54iZ",
+                        nameHashIsEmpty = false,
+                    )
+                )
+            )
+        ),
+        whitelistEnabled = BooleanSetting.Off,
+        dappsEnabled = BooleanSetting.Off,
+        addressBookSlot = 0,
+        signingData = null
     )
 }
 
@@ -285,7 +350,7 @@ fun getWrapConversionRequest(nonceAccountAddresses: List<String>): WrapConversio
     )
 }
 
-fun getUnwrapConversionRequest(nonceAccountAddresses: List<String>) : SolanaApprovalRequestType {
+fun getUnwrapConversionRequest(nonceAccountAddresses: List<String>) : ApprovalRequestDetails {
     return  WrapConversionRequest(
         type = ApprovalType.WRAP_CONVERSION_REQUEST_TYPE.value,
         account= AccountInfo(
@@ -323,7 +388,7 @@ fun getUnwrapConversionRequest(nonceAccountAddresses: List<String>) : SolanaAppr
     )
 }
 
-fun getAddAddressBookEntry(nonceAccountAddresses: List<String>): SolanaApprovalRequestType {
+fun getAddAddressBookEntry(nonceAccountAddresses: List<String>): ApprovalRequestDetails {
     return AddressBookUpdate(
         type = ApprovalType.ADDRESS_BOOK_TYPE.value,
         entriesToRemove = emptyList(),
@@ -354,7 +419,7 @@ fun getAddAddressBookEntry(nonceAccountAddresses: List<String>): SolanaApprovalR
 }
 
 
-fun getAddDAppBookEntry(nonceAccountAddresses: List<String>) : SolanaApprovalRequestType {
+fun getAddDAppBookEntry(nonceAccountAddresses: List<String>) : ApprovalRequestDetails {
     return  DAppBookUpdate(
         type = ApprovalType.DAPP_BOOK_UPDATE_TYPE.value,
         entriesToAdd= listOf(
@@ -379,7 +444,7 @@ fun getAddDAppBookEntry(nonceAccountAddresses: List<String>) : SolanaApprovalReq
     )
 }
 
-fun getWalletConfigPolicyUpdate(nonceAccountAddresses: List<String>): SolanaApprovalRequestType {
+fun getWalletConfigPolicyUpdate(nonceAccountAddresses: List<String>): ApprovalRequestDetails {
     return WalletConfigPolicyUpdate(
         type = ApprovalType.WALLET_CONFIG_POLICY_UPDATE_TYPE.value,
         approvalPolicy = ApprovalPolicy(
@@ -421,7 +486,7 @@ fun getWalletConfigPolicyUpdate(nonceAccountAddresses: List<String>): SolanaAppr
     )
 }
 
-fun getBalanceAccountPolicyUpdate(nonceAccountAddresses: List<String>) : SolanaApprovalRequestType {
+fun getBalanceAccountPolicyUpdate(nonceAccountAddresses: List<String>) : ApprovalRequestDetails {
     return BalanceAccountPolicyUpdate(
         type = ApprovalType.BALANCE_ACCOUNT_POLICY_UPDATE_TYPE.value,
         accountInfo= AccountInfo(
@@ -459,7 +524,7 @@ fun getBalanceAccountPolicyUpdate(nonceAccountAddresses: List<String>) : SolanaA
     )
 }
 
-fun getBalanceAccountNameUpdate(nonceAccountAddresses: List<String>): SolanaApprovalRequestType {
+fun getBalanceAccountNameUpdate(nonceAccountAddresses: List<String>): ApprovalRequestDetails {
     return BalanceAccountNameUpdate(
         type = ApprovalType.BALANCE_ACCOUNT_NAME_UPDATE_TYPE.value,
         accountInfo = AccountInfo(
@@ -484,7 +549,7 @@ fun getBalanceAccountNameUpdate(nonceAccountAddresses: List<String>): SolanaAppr
     )
 }
 
-fun getDAppTransactionRequest(nonceAccountAddresses: List<String>): SolanaApprovalRequestType {
+fun getDAppTransactionRequest(nonceAccountAddresses: List<String>): ApprovalRequestDetails {
     return DAppTransactionRequest(
         type = ApprovalType.DAPP_TRANSACTION_REQUEST_TYPE.value,
         account = AccountInfo(
@@ -524,7 +589,7 @@ fun getDAppTransactionRequest(nonceAccountAddresses: List<String>): SolanaApprov
     )
 }
 
-fun getLoginApproval( jwtToken : String) : SolanaApprovalRequestType {
+fun getLoginApproval( jwtToken : String) : ApprovalRequestDetails {
     return LoginApprovalRequest(
         type = ApprovalType.LOGIN_TYPE.value,
         jwtToken= jwtToken,
@@ -533,10 +598,9 @@ fun getLoginApproval( jwtToken : String) : SolanaApprovalRequestType {
     )
 }
 
-fun getWalletInitiationRequest( requestType: SolanaApprovalRequestType, initiation: MultiSigOpInitiation) : WalletApproval {
-    return WalletApproval(
+fun getWalletInitiationRequest(requestType: ApprovalRequestDetails, initiation: MultiSigOpInitiation) : ApprovalRequest {
+    return ApprovalRequest(
         id= "1",
-        walletType = WalletSigner.WALLET_TYPE_SOLANA,
         submitterName= "",
         submitterEmail= "",
         submitDate= Date().toString(),
@@ -556,7 +620,7 @@ fun getOpAccountCreationInfo(accountSize: Long = 952, minBalanceForRentExemption
     )
 }
 
-fun getBalanceAccountAddressWhitelistUpdate(nonceAccountAddresses: List<String>): SolanaApprovalRequestType {
+fun getBalanceAccountAddressWhitelistUpdate(nonceAccountAddresses: List<String>): ApprovalRequestDetails {
     return BalanceAccountAddressWhitelistUpdate(
         type = ApprovalType.BALANCE_ACCOUNT_ADDRESS_WHITE_LIST_UPDATE_TYPE.value,
         accountInfo = AccountInfo(
@@ -600,7 +664,7 @@ fun getBalanceAccountAddressWhitelistUpdate(nonceAccountAddresses: List<String>)
     )
 }
 
-fun getBalanceAccountSettingsUpdate(nonceAccountAddresses: List<String>): SolanaApprovalRequestType {
+fun getBalanceAccountSettingsUpdate(nonceAccountAddresses: List<String>): ApprovalRequestDetails {
     return BalanceAccountSettingsUpdate(
         type = ApprovalType.BALANCE_ACCOUNT_SETTINGS_UPDATE_TYPE.value,
         account = AccountInfo(
@@ -626,7 +690,7 @@ fun getBalanceAccountSettingsUpdate(nonceAccountAddresses: List<String>): Solana
     )
 }
 
-fun getRemoveDAppBookEntry(nonceAccountAddresses: List<String>): SolanaApprovalRequestType {
+fun getRemoveDAppBookEntry(nonceAccountAddresses: List<String>): ApprovalRequestDetails {
     return DAppBookUpdate(
         type = ApprovalType.DAPP_BOOK_UPDATE_TYPE.value,
         entriesToAdd = emptyList(),

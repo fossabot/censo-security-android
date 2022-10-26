@@ -14,7 +14,7 @@ import com.strikeprotocols.mobile.data.models.ApprovalDisposition
 import com.strikeprotocols.mobile.data.models.InitiationDisposition
 import com.strikeprotocols.mobile.data.models.RegisterApprovalDisposition
 import com.strikeprotocols.mobile.data.models.approval.SolanaApprovalRequestDetails
-import com.strikeprotocols.mobile.data.models.approval.WalletApproval
+import com.strikeprotocols.mobile.data.models.approval.ApprovalRequest
 import com.strikeprotocols.mobile.presentation.approval_disposition.ApprovalDispositionState
 import com.strikeprotocols.mobile.presentation.durable_nonce.DurableNonceViewModel
 import kotlinx.coroutines.launch
@@ -28,13 +28,13 @@ abstract class CommonApprovalsViewModel(
 
     //region abstract methods
     abstract fun setShouldDisplayConfirmDispositionDialog(
-        approval: WalletApproval? = null,
+        approval: ApprovalRequest? = null,
         isInitiationRequest: Boolean = false,
         isApproving: Boolean,
         dialogMessages: Pair<String, String>
     )
 
-    open fun handleInitialData(approval: WalletApproval) {}
+    open fun handleInitialData(approval: ApprovalRequest) {}
     open fun handleEmptyInitialData() {}
 
     open fun handleScreenBackgrounded() {}
@@ -44,7 +44,7 @@ abstract class CommonApprovalsViewModel(
     var state by mutableStateOf(ApprovalsState())
         protected set
 
-    fun onStart(approval: WalletApproval? = null) {
+    fun onStart(approval: ApprovalRequest? = null) {
         if (state.selectedApproval == null) {
             approval?.let { handleInitialData(it) } ?: handleEmptyInitialData()
         }
@@ -102,7 +102,7 @@ abstract class CommonApprovalsViewModel(
 
     private suspend fun retrieveApprovalDispositionFromAPI(
         approvalDispositionState: ApprovalDispositionState?,
-        approval: WalletApproval?,
+        approval: ApprovalRequest?,
         multipleAccounts: DurableNonceViewModel.MultipleAccounts?,
         approvalsRepository: ApprovalsRepository,
         cipher: Cipher
@@ -170,7 +170,7 @@ abstract class CommonApprovalsViewModel(
         } else {
             val registerApprovalDisposition = RegisterApprovalDisposition(
                 approvalDisposition = approvalDisposition,
-                solanaApprovalRequestType = solanaApprovalRequestType,
+                approvalRequestType = solanaApprovalRequestType,
                 nonces = nonces,
             )
 

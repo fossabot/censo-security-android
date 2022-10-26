@@ -12,7 +12,7 @@ import com.strikeprotocols.mobile.data.models.StoredKeyData
 import com.strikeprotocols.mobile.data.models.StoredKeyData.Companion.SOLANA_KEY
 import com.strikeprotocols.mobile.data.models.approval.InitiationRequest
 import com.strikeprotocols.mobile.data.models.approval.SolanaApprovalRequestDetails
-import com.strikeprotocols.mobile.data.models.approval.WalletApprovalDeserializer
+import com.strikeprotocols.mobile.data.models.approval.ApprovalRequestDeserializer
 import org.junit.Assert.assertNotNull
 import org.junit.Before
 import org.junit.Test
@@ -23,7 +23,7 @@ import javax.crypto.Cipher
 
 class InitiationRequestSigningTest {
 
-    private val deserializer = WalletApprovalDeserializer()
+    private val deserializer = ApprovalRequestDeserializer()
 
     @Mock
     lateinit var securePreferences: SecurePreferences
@@ -80,7 +80,7 @@ class InitiationRequestSigningTest {
     //region Test creating api body from initiation request
     @Test
     fun fullBalanceAccountIntitiationApiBody() {
-        val initiationRequest = generateBalanceAccountInitiationSignableData()
+        val initiationRequest = generateWalletCreationInitiationSignableData()
 
         val apiBody = initiationRequest.convertToApiBody(encryptionManager, cipher)
 
@@ -150,7 +150,7 @@ class InitiationRequestSigningTest {
     //region Testing Signable data
     @Test
     fun testGenerateBalanceAccountInitiationSignableData() {
-        val initiationRequest = generateBalanceAccountInitiationSignableData()
+        val initiationRequest = generateWalletCreationInitiationSignableData()
 
         val simpleSignableData =
             initiationRequest.retrieveSignableData(approverPublicKey)
@@ -190,18 +190,18 @@ class InitiationRequestSigningTest {
     //endregion
 
     //region create initiation requests
-    private fun generateBalanceAccountInitiationSignableData(): InitiationRequest {
-        val multiSigBalanceAccountCreationWalletApproval =
-            deserializer.parseData(JsonParser.parseString(multiSigWithBalanceAccountCreationJson.trim()))
+    private fun generateWalletCreationInitiationSignableData(): InitiationRequest {
+        val multiSigWalletCreationWalletApproval =
+            deserializer.parseData(JsonParser.parseString(multiSigWithWalletCreationJson.trim()))
 
         val initiation =
-            (multiSigBalanceAccountCreationWalletApproval.details as SolanaApprovalRequestDetails.MultiSignOpInitiationDetails).multisigOpInitiation
+            (multiSigWalletCreationWalletApproval.details as SolanaApprovalRequestDetails.MultiSignOpInitiationDetails).multisigOpInitiation
 
         return InitiationRequest(
-            requestId = multiSigBalanceAccountCreationWalletApproval.id!!,
+            requestId = multiSigWalletCreationWalletApproval.id!!,
             approvalDisposition = if (Random().nextBoolean()) ApprovalDisposition.APPROVE else ApprovalDisposition.DENY,
             initiation = initiation,
-            requestType = multiSigBalanceAccountCreationWalletApproval.getApprovalRequestType(),
+            requestType = multiSigWalletCreationWalletApproval.getApprovalRequestType(),
             nonces = exampleNonces,
             email = userEmail
         )

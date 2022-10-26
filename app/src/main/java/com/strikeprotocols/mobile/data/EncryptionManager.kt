@@ -29,18 +29,33 @@ fun generateEphemeralPrivateKey(): Ed25519PrivateKeyParameters {
     return keyPair.private as Ed25519PrivateKeyParameters
 }
 
+data class SignedPayload(
+    val signature: String,
+    val payload: String
+)
+
 interface EncryptionManager {
     fun createKeyPair(mnenomic: Mnemonics.MnemonicCode): StrikeKeyPair
     fun signApprovalDispositionMessage(
         signable: Signable,
         solanaKey: String
-    ): String
+    ): SignedPayload
 
     fun signBitcoinApprovalDispositionMessage(
         signable: Signable,
         bitcoinKey: String,
         childKeyIndex: Int
-    ): List<String>
+    ): List<SignedPayload>
+
+    fun signBitcoinApprovalDispositionMessage(
+        signable: Signable,
+        bitcoinKey: String
+    ): List<SignedPayload>
+
+    fun signEthereumApprovalDispositionMessage(
+        signable: Signable,
+        ethereumKey: String
+    ): SignedPayload
 
     fun signApprovalInitiationMessage(
         ephemeralPrivateKey: ByteArray,
@@ -152,7 +167,7 @@ class EncryptionManagerImpl @Inject constructor(
 
     override fun signApprovalDispositionMessage(
         signable: Signable, solanaKey: String
-    ): String {
+    ): SignedPayload {
         if (solanaKey.isEmpty()) {
             throw NoKeyDataException
         }
@@ -165,14 +180,17 @@ class EncryptionManagerImpl @Inject constructor(
             data = messageToSign, privateKey = BaseWrapper.decode(solanaKey)
         )
 
-        return BaseWrapper.encodeToBase64(signedData)
+        return SignedPayload(
+            signature = BaseWrapper.encodeToBase64(signedData),
+            payload = BaseWrapper.encodeToBase64(messageToSign)
+        )
     }
 
     override fun signBitcoinApprovalDispositionMessage(
         signable: Signable,
         bitcoinKey: String,
         childKeyIndex: Int
-    ): List<String> {
+    ): List<SignedPayload> {
         if (bitcoinKey.isEmpty()) {
             throw NoKeyDataException
         }
@@ -180,8 +198,46 @@ class EncryptionManagerImpl @Inject constructor(
         val btcKey = Secp256k1HierarchicalKey.fromExtendedKey(bitcoinKey).derive(ChildPathNumber(childKeyIndex, false))
 
         return signable.retrieveSignableData(approverPublicKey = btcKey.getPublicKeyBytes().toHexString()).map {
-            BaseWrapper.encodeToBase64(btcKey.signData(it))
+            SignedPayload(
+                signature = BaseWrapper.encodeToBase64(btcKey.signData(it)),
+                payload = BaseWrapper.encodeToBase64(it)
+            )
         }
+    }
+
+    override fun signBitcoinApprovalDispositionMessage(
+        signable: Signable,
+        bitcoinKey: String
+    ): List<SignedPayload> {
+        if (bitcoinKey.isEmpty()) {
+            throw NoKeyDataException
+        }
+
+        val btcKey = Secp256k1HierarchicalKey.fromExtendedKey(bitcoinKey)
+
+        return signable.retrieveSignableData(approverPublicKey = btcKey.getPublicKeyBytes().toHexString()).map {
+            SignedPayload(
+                signature = BaseWrapper.encodeToBase64(btcKey.signData(it)),
+                payload = BaseWrapper.encodeToBase64(it)
+            )
+        }
+    }
+
+    override fun signEthereumApprovalDispositionMessage(
+        signable: Signable,
+        ethereumKey: String
+    ): SignedPayload {
+        if (ethereumKey.isEmpty()) {
+            throw NoKeyDataException
+        }
+
+        val ethKey = Secp256k1HierarchicalKey.fromExtendedKey(ethereumKey)
+        val payload = signable.retrieveSignableData(approverPublicKey = ethKey.getPublicKeyBytes().toHexString()).first()
+
+        return SignedPayload(
+            signature = BaseWrapper.encodeToBase64(ethKey.signData(payload)),
+            payload = BaseWrapper.encodeToBase64(payload)
+        )
     }
 
     override fun signApprovalInitiationMessage(

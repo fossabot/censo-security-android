@@ -7,14 +7,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.strikeprotocols.mobile.data.models.approval.SolanaApprovalRequestType
+import com.strikeprotocols.mobile.data.models.approval.ApprovalRequestDetails
 import com.strikeprotocols.mobile.presentation.approvals.ApprovalContentHeader
 import com.strikeprotocols.mobile.presentation.approvals.approval_type_row_items.buildFromToDisplayText
 import com.strikeprotocols.mobile.presentation.approvals.approval_type_row_items.getHeader
 
 @Composable
 fun BalanceAccountNameUpdateDetailContent(
-    accountNameUpdate: SolanaApprovalRequestType.BalanceAccountNameUpdate
+    accountNameUpdate: ApprovalRequestDetails.BalanceAccountNameUpdate
 ) {
     val header = accountNameUpdate.getHeader(LocalContext.current)
     val fromAccount = accountNameUpdate.accountInfo.name

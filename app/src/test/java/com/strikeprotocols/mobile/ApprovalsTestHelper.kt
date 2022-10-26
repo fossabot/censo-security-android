@@ -5,13 +5,13 @@ import com.strikeprotocols.mobile.common.GeneralDummyData
 import com.strikeprotocols.mobile.data.models.Organization
 import com.strikeprotocols.mobile.data.models.VerifyUser
 import com.strikeprotocols.mobile.data.models.WalletPublicKey
-import com.strikeprotocols.mobile.data.models.approval.WalletApproval
-import com.strikeprotocols.mobile.data.models.approval.WalletApprovalDeserializer
+import com.strikeprotocols.mobile.data.models.approval.ApprovalRequest
+import com.strikeprotocols.mobile.data.models.approval.ApprovalRequestDeserializer
 
-private val deserializer = WalletApprovalDeserializer()
+private val deserializer = ApprovalRequestDeserializer()
 
-fun getWalletApprovals() : List<WalletApproval> {
-    val approvals = mutableListOf<WalletApproval>()
+fun getWalletApprovals() : List<ApprovalRequest> {
+    val approvals = mutableListOf<ApprovalRequest>()
 
     val nonceAccountAddresses = listOf(getNonce())
 
@@ -102,14 +102,14 @@ fun getWalletApprovals() : List<WalletApproval> {
     return approvals
 }
 
-fun getLoginApproval() : WalletApproval {
+fun getLoginApproval() : ApprovalRequest {
     val loginApprovalRequestType =
         getLoginApproval("jwttoken")
 
     return getWalletApprovalRequest(loginApprovalRequestType)
 }
 
-fun getSignersUpdateWalletApproval() : WalletApproval {
+fun getSignersUpdateWalletApproval() : ApprovalRequest {
     val nonceAccountAddresses = listOf(getNonce())
 
     val signersUpdateRequestType =
@@ -118,7 +118,7 @@ fun getSignersUpdateWalletApproval() : WalletApproval {
     return getWalletApprovalRequest(signersUpdateRequestType)
 }
 
-fun getRemoveDAppBookEntryApproval() : WalletApproval {
+fun getRemoveDAppBookEntryApproval() : ApprovalRequest {
     val nonceAccountAddresses = listOf(getNonce())
 
     val removeDAppBookEntryRequestType =
@@ -127,8 +127,8 @@ fun getRemoveDAppBookEntryApproval() : WalletApproval {
     return getWalletApprovalRequest(removeDAppBookEntryRequestType)
 }
 
-fun getMultiSigBalanceAccountCreationWalletApproval(): WalletApproval =
-    deserializer.parseData(JsonParser.parseString(multiSigWithBalanceAccountCreationJson.trim()))
+fun getMultiSigWalletCreationApprovalRequest(): ApprovalRequest =
+    deserializer.parseData(JsonParser.parseString(multiSigWithWalletCreationJson.trim()))
 
 fun getUserEmail() = "jdoe@crypto.org"
 

@@ -1,6 +1,5 @@
 package com.strikeprotocols.mobile.data.models.approval
 
-import androidx.biometric.BiometricPrompt
 import com.strikeprotocols.mobile.common.BaseWrapper
 import com.strikeprotocols.mobile.data.EncryptionManager
 import com.strikeprotocols.mobile.data.Signable
@@ -15,8 +14,8 @@ import com.strikeprotocols.mobile.data.models.approval.PublicKey.Companion.SYSVA
 import com.strikeprotocols.mobile.data.models.approval.PublicKey.Companion.SYS_PROGRAM_ID
 import com.strikeprotocols.mobile.data.models.approval.PublicKey.Companion.TOKEN_PROGRAM_ID
 import com.strikeprotocols.mobile.data.models.approval.PublicKey.Companion.WRAPPED_SOL_MINT
-import com.strikeprotocols.mobile.data.models.approval.SolanaApprovalRequestType.*
-import com.strikeprotocols.mobile.data.models.approval.SolanaApprovalRequestType.Companion.UNKNOWN_INITIATION
+import com.strikeprotocols.mobile.data.models.approval.ApprovalRequestDetails.*
+import com.strikeprotocols.mobile.data.models.approval.ApprovalRequestDetails.Companion.UNKNOWN_INITIATION
 import com.strikeprotocols.mobile.data.models.approval.TransactionInstruction.Companion.createAdvanceNonceInstruction
 import org.bouncycastle.crypto.params.Ed25519PrivateKeyParameters
 import java.io.ByteArrayOutputStream
@@ -26,7 +25,7 @@ data class InitiationRequest(
     val requestId: String,
     val approvalDisposition: ApprovalDisposition,
     val initiation: MultiSigOpInitiation,
-    val requestType: SolanaApprovalRequestType,
+    val requestType: ApprovalRequestDetails,
     val nonces: List<Nonce>,
     val email: String,
     val opAccountPrivateKey: Ed25519PrivateKeyParameters = generateEphemeralPrivateKey()
@@ -34,7 +33,7 @@ data class InitiationRequest(
 
     private val signingData : SigningData.SolanaSigningData =
         when (requestType) {
-            is BalanceAccountCreation -> requestType.signingData
+            is WalletCreation -> requestType.signingData!!
             is WithdrawalRequest -> requestType.signingData as SigningData.SolanaSigningData
             is ConversionRequest -> requestType.signingData
             is SignersUpdate -> requestType.signingData
@@ -56,7 +55,7 @@ data class InitiationRequest(
         }
 
     private val opCode : Byte = when(requestType) {
-        is BalanceAccountCreation -> 3
+        is WalletCreation -> 3
         is WithdrawalRequest -> 7
         is ConversionRequest -> 7
         is WrapConversionRequest -> 10
@@ -126,7 +125,7 @@ data class InitiationRequest(
         }
 
         when(requestType) {
-            is BalanceAccountCreation -> {
+            is WalletCreation -> {
                 val buffer = ByteArrayOutputStream()
                 buffer.write(byteArrayOf(opCode))
                 buffer.write(commonBytes)
@@ -399,7 +398,7 @@ data class InitiationRequest(
             encryptionManager.signApprovalDispositionMessage(
                 signable = this,
                 solanaKey = privateKey,
-            )
+            ).signature
         } catch (e: Exception) {
             throw Exception("SIGNING_DATA_FAILURE")
         }
@@ -425,10 +424,9 @@ data class InitiationRequest(
                     SupplyDappInstructionsTxSignature(
                         nonce = instruction.nonce.value,
                         nonceAccountAddress = instruction.nonceAccountAddress,
-                        signature =
-                        encryptionManager.signApprovalDispositionMessage(
+                        signature = encryptionManager.signApprovalDispositionMessage(
                             signable = instruction, solanaKey = privateKey
-                        )
+                        ).signature
                     )
                 }
 

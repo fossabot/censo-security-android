@@ -12,7 +12,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.strikeprotocols.mobile.R
-import com.strikeprotocols.mobile.data.models.approval.SolanaApprovalRequestType
+import com.strikeprotocols.mobile.data.models.approval.ApprovalRequestDetails
 import com.strikeprotocols.mobile.presentation.approvals.ApprovalContentHeader
 import com.strikeprotocols.mobile.presentation.approvals.approval_type_row_items.getHeader
 import com.strikeprotocols.mobile.presentation.components.FactRow
@@ -20,7 +20,7 @@ import com.strikeprotocols.mobile.presentation.components.FactsData
 import com.strikeprotocols.mobile.ui.theme.BackgroundBlack
 
 @Composable
-fun SignersUpdateDetailContent(signersUpdate: SolanaApprovalRequestType.SignersUpdate) {
+fun SignersUpdateDetailContent(signersUpdate: ApprovalRequestDetails.SignersUpdate) {
     val header = signersUpdate.getHeader(LocalContext.current)
     val value = signersUpdate.signer.value
     val name = value.name

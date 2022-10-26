@@ -8,13 +8,13 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.strikeprotocols.mobile.common.toVaultName
-import com.strikeprotocols.mobile.data.models.approval.SolanaApprovalRequestType
+import com.strikeprotocols.mobile.data.models.approval.ApprovalRequestDetails
 import com.strikeprotocols.mobile.presentation.approval_detail.approval_type_detail_items.ApprovalSubtitle
 import com.strikeprotocols.mobile.presentation.approvals.ApprovalRowContentHeader
 
 @Composable
 fun AcceptVaultInvitationRowContent(
-    acceptVaultInvitation: SolanaApprovalRequestType.AcceptVaultInvitation
+    acceptVaultInvitation: ApprovalRequestDetails.AcceptVaultInvitation
 ) {
     val header = acceptVaultInvitation.getHeader(LocalContext.current)
     ApprovalRowContentHeader(header = header, bottomSpacing = 8)

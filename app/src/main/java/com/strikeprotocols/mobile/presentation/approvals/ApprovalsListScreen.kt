@@ -35,8 +35,8 @@ import com.strikeprotocols.mobile.common.BioCryptoUtil.NO_CIPHER_CODE
 import com.strikeprotocols.mobile.data.models.ApprovalDisposition
 import com.strikeprotocols.mobile.data.models.approval.ApprovalDispositionRequest
 import com.strikeprotocols.mobile.data.models.approval.InitiationRequest
-import com.strikeprotocols.mobile.data.models.approval.SolanaApprovalRequestType.*
-import com.strikeprotocols.mobile.data.models.approval.WalletApproval
+import com.strikeprotocols.mobile.data.models.approval.ApprovalRequestDetails.*
+import com.strikeprotocols.mobile.data.models.approval.ApprovalRequest
 import com.strikeprotocols.mobile.presentation.Screen
 import com.strikeprotocols.mobile.presentation.approvals.approval_type_row_items.*
 import com.strikeprotocols.mobile.presentation.components.*
@@ -189,10 +189,10 @@ fun ApprovalsListScreen(
                 },
                 onMoreInfoClicked = { approval ->
                     approval?.let { safeApproval ->
-                        navController.navigate("${Screen.ApprovalDetailRoute.route}/${WalletApproval.toJson(safeApproval, AndroidUriWrapper())}" )
+                        navController.navigate("${Screen.ApprovalDetailRoute.route}/${ApprovalRequest.toJson(safeApproval, AndroidUriWrapper())}" )
                     }
                 },
-                walletApprovals = approvalsState.approvals,
+                approvalRequests = approvalsState.approvals,
                 shouldRefreshTimers = approvalsState.shouldRefreshTimers,
                 getSecondsLeftUntilCountdownIsOver = { submitDate: String?, totalTimeInSeconds: Int? ->
                     calculateSecondsLeftUntilCountdownIsOver(
@@ -231,9 +231,9 @@ fun ApprovalsListScreen(
                 }
             }
 
-            if (approvalsState.walletApprovalsResult is Resource.Error) {
+            if (approvalsState.approvalsResultRequest is Resource.Error) {
                 StrikeErrorScreen(
-                    errorResource = approvalsState.walletApprovalsResult,
+                    errorResource = approvalsState.approvalsResultRequest,
                     onDismiss = {
                         approvalsViewModel.resetWalletApprovalsResult()
                     },
@@ -298,9 +298,9 @@ fun ApprovalsListTopAppBar(
 fun ApprovalsList(
     isRefreshing: Boolean,
     onRefresh: () -> Unit,
-    onApproveClicked: (WalletApproval?) -> Unit,
-    onMoreInfoClicked: (WalletApproval?) -> Unit,
-    walletApprovals: List<WalletApproval?>,
+    onApproveClicked: (ApprovalRequest?) -> Unit,
+    onMoreInfoClicked: (ApprovalRequest?) -> Unit,
+    approvalRequests: List<ApprovalRequest?>,
     shouldRefreshTimers: Boolean,
     getSecondsLeftUntilCountdownIsOver: (String?, Int?) -> Long?
 ) {
@@ -326,7 +326,7 @@ fun ApprovalsList(
         }
     ) {
         //region Approvals List
-        if (walletApprovals.isNullOrEmpty() && !isRefreshing) {
+        if (approvalRequests.isNullOrEmpty() && !isRefreshing) {
             ListDataEmptyState()
         } else {
             LazyColumn(
@@ -335,8 +335,8 @@ fun ApprovalsList(
                     .background(BackgroundBlack),
                 contentPadding = PaddingValues(start = 16.dp, end = 16.dp)
             ) {
-                items(walletApprovals.size) { index ->
-                    val walletApproval = walletApprovals[index]
+                items(approvalRequests.size) { index ->
+                    val walletApproval = approvalRequests[index]
                     Spacer(modifier = Modifier.height(12.dp))
 
                     walletApproval?.let { safeApproval ->
@@ -365,8 +365,8 @@ fun ApprovalsList(
                         } else {
                             ApprovalRowItem(
                                 timeRemainingInSeconds = timeRemainingInSeconds,
-                                onApproveClicked = { onApproveClicked(walletApprovals[index]) },
-                                onMoreInfoClicked = { onMoreInfoClicked(walletApprovals[index]) },
+                                onApproveClicked = { onApproveClicked(approvalRequests[index]) },
+                                onMoreInfoClicked = { onMoreInfoClicked(approvalRequests[index]) },
                                 rowMetaData = rowMetaData,
                                 positiveButtonText = safeApproval.approveButtonCaption(context)
                             ) {

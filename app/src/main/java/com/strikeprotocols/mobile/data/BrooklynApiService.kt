@@ -34,7 +34,7 @@ interface BrooklynApiService {
             }
 
             val customGson = GsonBuilder()
-                .registerTypeAdapter(WalletApproval::class.java, WalletApprovalDeserializer())
+                .registerTypeAdapter(ApprovalRequest::class.java, ApprovalRequestDeserializer())
                 .registerTypeAdapterFactory(TypeFactorySettings.approvalSignatureAdapterFactory)
                 .create()
 
@@ -62,9 +62,9 @@ interface BrooklynApiService {
     @Headers(AUTH_REQUIRED)
     suspend fun addWalletSigner(@Body walletSignerBody: WalletSigner): RetrofitResponse<WalletSigner>
 
-    @GET("v1/wallet-approvals")
+    @GET("v1/approval-requests")
     @Headers(AUTH_REQUIRED)
-    suspend fun getWalletApprovals(): RetrofitResponse<List<WalletApproval?>>
+    suspend fun getApprovalRequests(): RetrofitResponse<List<ApprovalRequest?>>
 
     @POST("v1/notification-tokens")
     @Headers(AUTH_REQUIRED)
@@ -77,14 +77,14 @@ interface BrooklynApiService {
         @Path("deviceType") deviceType: String
     ) : RetrofitResponse<Unit>
 
-    @POST("v1/wallet-approvals/{request_id}/dispositions")
+    @POST("v1/approval-requests/{request_id}/dispositions")
     @Headers(AUTH_REQUIRED)
     suspend fun approveOrDenyDisposition(
         @Path("request_id") requestId: String,
         @Body registerApprovalDispositionBody: ApprovalDispositionRequest.RegisterApprovalDispositionBody
     ): RetrofitResponse<ApprovalDispositionRequest.RegisterApprovalDispositionBody>
 
-    @POST("v1/wallet-approvals/{request_id}/initiations")
+    @POST("v1/approval-requests/{request_id}/initiations")
     @Headers(AUTH_REQUIRED)
     suspend fun approveOrDenyInitiation(
         @Path("request_id") requestId: String,

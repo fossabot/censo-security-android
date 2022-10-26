@@ -34,7 +34,7 @@ class GeneralDummyData {
             useStaticKey = false
         )
 
-    fun generateWalletApprovalsDummyData() = WalletApproval(
+    fun generateWalletApprovalsDummyData() = ApprovalRequest(
         approvalTimeoutInSeconds = 18000,
         id = "03df25c845d460bcdad7802d2vf6fc1dfde97283bf75cc993eb6dca835ea2e2f",
         numberOfApprovalsReceived = 0,
@@ -43,9 +43,8 @@ class GeneralDummyData {
         submitDate = "2022-03-12T21:00:04.260+00:00",
         submitterEmail = "some_submitter@org.com",
         submitterName = "Some Submitter",
-        walletType = "Solana",
         vaultName = "Test Vault",
-        details = SolanaApprovalRequestDetails.ApprovalRequestDetails(SolanaApprovalRequestType.UnknownApprovalType)
+        details = SolanaApprovalRequestDetails.ApprovalRequestDetails(ApprovalRequestDetails.UnknownApprovalType)
     )
 
     fun generateRecentBlockhashDummyData() =
@@ -100,72 +99,72 @@ class MockedApprovals {
     }
 
     val signersUpdateJson = """
-    {"id": "13cd643e-393e-4b38-91cb-5f1ab2655223", "walletType": "Solana", "submitDate": "2022-05-05T14:42:53.015+00:00", "submitterName": "User 2", "submitterEmail": "user2@org1", "approvalTimeoutInSeconds": 180000, "numberOfDispositionsRequired": 1, "numberOfApprovalsReceived": 0, "numberOfDeniesReceived": 0, "details": {"type": "SignersUpdate", "slotUpdateType": "SetIfEmpty", "signer": {"slotId": 1, "value": {"publicKey": "HhNwcVMrJX8newbDVderrnsmvG6uGYuxUUvzm6BqdjzH", "name": "User 2", "email": "user2@org1"}}, "signingData": {"feePayer": "FM36ah2bH8nQWJNPCRzu7R69gE5o6UhujqJFtDpWN5as", "walletProgramId": "GN694sm2Ex1GcnamYwqfjSs6XJ7xadTXiZqBwvGvQyT8", "multisigOpAccountAddress": "DHgNPbMHz66DQacFdo4rN8pks9Lw1zpfqqqAymHUgQkg", "walletAddress": "6JmmkmowSLQ3jFQacREDNwbrD3Hj7Eyj9MvK8eBTzV5q"}}}
+    {"id": "13cd643e-393e-4b38-91cb-5f1ab2655223", "submitDate": "2022-05-05T14:42:53.015+00:00", "submitterName": "User 2", "submitterEmail": "user2@org1", "approvalTimeoutInSeconds": 180000, "numberOfDispositionsRequired": 1, "numberOfApprovalsReceived": 0, "numberOfDeniesReceived": 0, "details": {"type": "SignersUpdate", "slotUpdateType": "SetIfEmpty", "signer": {"slotId": 1, "value": {"publicKey": "HhNwcVMrJX8newbDVderrnsmvG6uGYuxUUvzm6BqdjzH", "name": "User 2", "email": "user2@org1"}}, "signingData": {"feePayer": "FM36ah2bH8nQWJNPCRzu7R69gE5o6UhujqJFtDpWN5as", "walletProgramId": "GN694sm2Ex1GcnamYwqfjSs6XJ7xadTXiZqBwvGvQyT8", "multisigOpAccountAddress": "DHgNPbMHz66DQacFdo4rN8pks9Lw1zpfqqqAymHUgQkg", "walletAddress": "6JmmkmowSLQ3jFQacREDNwbrD3Hj7Eyj9MvK8eBTzV5q"}}}
 """.trim()
 
-    // Approval for balance account creation:
-    val balanceAccountCreationJson = """
-    {"id": "922b51bd-cd83-4a11-a7ce-156bf7573923", "walletType": "Solana", "submitDate": "2022-04-05T14:42:58.170+00:00", "submitterName": "User 1", "submitterEmail": "authorized1@org1", "approvalTimeoutInSeconds": 18000, "numberOfDispositionsRequired": 2, "numberOfApprovalsReceived": 1, "numberOfDeniesReceived": 0, "details": {"type": "BalanceAccountCreation", "accountSlot": 0, "accountInfo": {"identifier": "00a56503-e4cf-40a8-9eca-508093cf225e", "name": "Account 1", "accountType": "BalanceAccount"}, "approvalsRequired": 1, "approvalTimeout": 3600000, "approvers": [{"slotId": 0, "value": {"publicKey": "Ffs2XpnxtSBH5xTHQtece1jrmdVjT2syTceQHkjKXK1e", "name": "User 1", "email": "authorized1@org1"}}, {"slotId": 0, "value": {"publicKey": "Ffs2XpnxtSBH5xTHQtece1jrmdVjT2syTceQHkjKXK1e", "name": "User 2", "email": "authorized2@org1"}}, {"slotId": 0, "value": {"publicKey": "Ffs2XpnxtSBH5xTHQtece1jrmdVjT2syTceQHkjKXK1e", "name": "User 3", "email": "authorized3@org1"}}], "whitelistEnabled": "Off", "dappsEnabled": "Off", "addressBookSlot": 0, "stakingValidator": null, "signingData": {"feePayer": "FM36ah2bH8nQWJNPCRzu7R69gE5o6UhujqJFtDpWN5as", "walletProgramId": "GN694sm2Ex1GcnamYwqfjSs6XJ7xadTXiZqBwvGvQyT8", "multisigOpAccountAddress": "Dv4oUQtQzz9ew11qb27XCQW95xocvnQgd5j2Xs451TAR", "walletAddress": "6JmmkmowSLQ3jFQacREDNwbrD3Hj7Eyj9MvK8eBTzV5q"}}}
+    // Approval for wallet creation:
+    val walletCreationJson = """
+    {"id": "922b51bd-cd83-4a11-a7ce-156bf7573923", "submitDate": "2022-04-05T14:42:58.170+00:00", "submitterName": "User 1", "submitterEmail": "authorized1@org1", "approvalTimeoutInSeconds": 18000, "numberOfDispositionsRequired": 2, "numberOfApprovalsReceived": 1, "numberOfDeniesReceived": 0, "details": {"type": "WalletCreation", "accountSlot": 0, "accountInfo": {"identifier": "00a56503-e4cf-40a8-9eca-508093cf225e", "name": "Account 1", "accountType": "BalanceAccount"}, "approvalsRequired": 1, "approvalTimeout": 3600000, "approvers": [{"slotId": 0, "value": {"publicKey": "Ffs2XpnxtSBH5xTHQtece1jrmdVjT2syTceQHkjKXK1e", "name": "User 1", "email": "authorized1@org1"}}, {"slotId": 0, "value": {"publicKey": "Ffs2XpnxtSBH5xTHQtece1jrmdVjT2syTceQHkjKXK1e", "name": "User 2", "email": "authorized2@org1"}}, {"slotId": 0, "value": {"publicKey": "Ffs2XpnxtSBH5xTHQtece1jrmdVjT2syTceQHkjKXK1e", "name": "User 3", "email": "authorized3@org1"}}], "whitelistEnabled": "Off", "dappsEnabled": "Off", "addressBookSlot": 0, "stakingValidator": null, "signingData": {"feePayer": "FM36ah2bH8nQWJNPCRzu7R69gE5o6UhujqJFtDpWN5as", "walletProgramId": "GN694sm2Ex1GcnamYwqfjSs6XJ7xadTXiZqBwvGvQyT8", "multisigOpAccountAddress": "Dv4oUQtQzz9ew11qb27XCQW95xocvnQgd5j2Xs451TAR", "walletAddress": "6JmmkmowSLQ3jFQacREDNwbrD3Hj7Eyj9MvK8eBTzV5q"}}}
 """.trim()
 
     // Approval for removing a signer
     val signersUpdateRemovalJson = """
-    {"id": "40a7fb51-a39c-4afa-aa3b-5c4f77939026", "walletType": "Solana", "submitDate": "2022-04-05T14:43:19.120+00:00", "submitterName": "User 1", "submitterEmail": "authorized1@org1", "approvalTimeoutInSeconds": 18000, "numberOfDispositionsRequired": 2, "numberOfApprovalsReceived": 1, "numberOfDeniesReceived": 0, "details": {"type": "SignersUpdate", "slotUpdateType": "Clear", "signer": {"slotId": 2, "value": {"publicKey": "HwW3iudK4dcqcMm76iy7iBziJU4htaYZGTjzCBnYA6rH", "name": "User 3", "email": "user3@org1"}}, "signingData": {"feePayer": "FM36ah2bH8nQWJNPCRzu7R69gE5o6UhujqJFtDpWN5as", "walletProgramId": "GN694sm2Ex1GcnamYwqfjSs6XJ7xadTXiZqBwvGvQyT8", "multisigOpAccountAddress": "CngursCC8PNA7x3tP2jVXXrvgSWu1NtNCYMnzT5v4jnp", "walletAddress": "6JmmkmowSLQ3jFQacREDNwbrD3Hj7Eyj9MvK8eBTzV5q"}}}
+    {"id": "40a7fb51-a39c-4afa-aa3b-5c4f77939026", "submitDate": "2022-04-05T14:43:19.120+00:00", "submitterName": "User 1", "submitterEmail": "authorized1@org1", "approvalTimeoutInSeconds": 18000, "numberOfDispositionsRequired": 2, "numberOfApprovalsReceived": 1, "numberOfDeniesReceived": 0, "details": {"type": "SignersUpdate", "slotUpdateType": "Clear", "signer": {"slotId": 2, "value": {"publicKey": "HwW3iudK4dcqcMm76iy7iBziJU4htaYZGTjzCBnYA6rH", "name": "User 3", "email": "user3@org1"}}, "signingData": {"feePayer": "FM36ah2bH8nQWJNPCRzu7R69gE5o6UhujqJFtDpWN5as", "walletProgramId": "GN694sm2Ex1GcnamYwqfjSs6XJ7xadTXiZqBwvGvQyT8", "multisigOpAccountAddress": "CngursCC8PNA7x3tP2jVXXrvgSWu1NtNCYMnzT5v4jnp", "walletAddress": "6JmmkmowSLQ3jFQacREDNwbrD3Hj7Eyj9MvK8eBTzV5q"}}}
 """.trim()
 
     // Transfer approval
     val withdrawalRequestJson = """
-    {"id": "0c949b8b-b190-43b3-8e35-8236206ff864", "walletType": "Solana", "submitDate": "2022-04-05T15:24:14.065+00:00", "submitterName": "User 1", "submitterEmail": "authorized1@org1", "approvalTimeoutInSeconds": 3600, "numberOfDispositionsRequired": 2, "numberOfApprovalsReceived": 1, "numberOfDeniesReceived": 0, "details": {"type": "WithdrawalRequest", "account": {"identifier": "caa3a0ee-dd90-43b7-9204-b5c87105ebb6", "name": "Account 1", "accountType": "BalanceAccount", "address": "3uCYEp6SRZ9YBMCSZ56492yiXE52nE5D4gPPap75FAha"}, "symbolAndAmountInfo": {"symbolInfo": {"symbol": "SOL", "symbolDescription": "Solana", "tokenMintAddress": "11111111111111111111111111111111"}, "amount": "0.500000000", "nativeAmount": "0.500000000", "usdEquivalent": "44.39"}, "destination": {"name": "My External Sol address", "address": "ApDG986BAFH3DDQmcHKHg3cDvYNhqxpbrJqCHH2cVmkE", "subName": "Sub"}, "signingData": {"feePayer": "FM36ah2bH8nQWJNPCRzu7R69gE5o6UhujqJFtDpWN5as", "walletProgramId": "CpikHpeN5zVCSvGj8riDCz6iqz4CZ3FNqNq5qwjBHm3x", "multisigOpAccountAddress": "FbvmXsLJWwC9ww6X9aENTwnyFNBMQptZyZmvry3GNqDq", "walletAddress": "BcHw51RmaSLCAzd3Jy1UfQZHKdv4E993uGoqtrsreu1t"}}}
+    {"id": "0c949b8b-b190-43b3-8e35-8236206ff864", "submitDate": "2022-04-05T15:24:14.065+00:00", "submitterName": "User 1", "submitterEmail": "authorized1@org1", "approvalTimeoutInSeconds": 3600, "numberOfDispositionsRequired": 2, "numberOfApprovalsReceived": 1, "numberOfDeniesReceived": 0, "details": {"type": "WithdrawalRequest", "account": {"identifier": "caa3a0ee-dd90-43b7-9204-b5c87105ebb6", "name": "Account 1", "accountType": "BalanceAccount", "address": "3uCYEp6SRZ9YBMCSZ56492yiXE52nE5D4gPPap75FAha"}, "symbolAndAmountInfo": {"symbolInfo": {"symbol": "SOL", "symbolDescription": "Solana", "tokenMintAddress": "11111111111111111111111111111111"}, "amount": "0.500000000", "nativeAmount": "0.500000000", "usdEquivalent": "44.39"}, "destination": {"name": "My External Sol address", "address": "ApDG986BAFH3DDQmcHKHg3cDvYNhqxpbrJqCHH2cVmkE", "subName": "Sub"}, "signingData": {"feePayer": "FM36ah2bH8nQWJNPCRzu7R69gE5o6UhujqJFtDpWN5as", "walletProgramId": "CpikHpeN5zVCSvGj8riDCz6iqz4CZ3FNqNq5qwjBHm3x", "multisigOpAccountAddress": "FbvmXsLJWwC9ww6X9aENTwnyFNBMQptZyZmvry3GNqDq", "walletAddress": "BcHw51RmaSLCAzd3Jy1UfQZHKdv4E993uGoqtrsreu1t"}}}
 """.trim()
 
     // Conversion approval:
     val conversionRequestJson = """
-    {"id": "ffc2b7de-ad6a-4a89-b57c-513d2cfb42a3", "walletType": "Solana", "submitDate": "2022-04-06T09:45:38.678+00:00", "submitterName": "User 1", "submitterEmail": "authorized1@org1", "approvalTimeoutInSeconds": 3600, "numberOfDispositionsRequired": 2, "numberOfApprovalsReceived": 1, "numberOfDeniesReceived": 0, "details": {"type": "ConversionRequest", "account": {"identifier": "22b5c380-9049-4905-af4d-cce44284cce6", "name": "Account 1", "accountType": "BalanceAccount", "address": "s4HnJVY6B4yBPY57csiYinGEeJsrHFZZScLxMNJr6Kk"}, "symbolAndAmountInfo": {"symbolInfo": {"symbol": "USDC", "symbolDescription": "USD Coin", "tokenMintAddress": "ALmJ9wWY2o1FiLcSDuvHN3xH5UHLkYsVbz2JWD37MuUY"}, "amount": "50000.000000", "nativeAmount": "500.000000", "usdEquivalent": "50000.00"}, "destination": {"name": "USDC Redemption Address", "address": "Emfuy1FWbVtNLgTum38rrK3EbkXonwxtNyPztwFi3r8a"}, "destinationSymbolInfo": {"symbol": "USD", "symbolDescription": "US Dollar", "tokenMintAddress": "11111111111111111111111111111111"}, "signingData": {"feePayer": "FM36ah2bH8nQWJNPCRzu7R69gE5o6UhujqJFtDpWN5as", "walletProgramId": "ALKWER79Nt7AzhHwS99wWjXNtLvBCAHJYyAhEDYDVEpF", "multisigOpAccountAddress": "DpBrGAFpqspN2Fe46NJUPBxV6AnWKenuTpj4doK6Gt4p", "walletAddress": "AYsBiTxSFnqRooYiH2B6rrMRtVXRCrUTTXa3L121fUMB"}}}
+    {"id": "ffc2b7de-ad6a-4a89-b57c-513d2cfb42a3", "submitDate": "2022-04-06T09:45:38.678+00:00", "submitterName": "User 1", "submitterEmail": "authorized1@org1", "approvalTimeoutInSeconds": 3600, "numberOfDispositionsRequired": 2, "numberOfApprovalsReceived": 1, "numberOfDeniesReceived": 0, "details": {"type": "ConversionRequest", "account": {"identifier": "22b5c380-9049-4905-af4d-cce44284cce6", "name": "Account 1", "accountType": "BalanceAccount", "address": "s4HnJVY6B4yBPY57csiYinGEeJsrHFZZScLxMNJr6Kk"}, "symbolAndAmountInfo": {"symbolInfo": {"symbol": "USDC", "symbolDescription": "USD Coin", "tokenMintAddress": "ALmJ9wWY2o1FiLcSDuvHN3xH5UHLkYsVbz2JWD37MuUY"}, "amount": "50000.000000", "nativeAmount": "500.000000", "usdEquivalent": "50000.00"}, "destination": {"name": "USDC Redemption Address", "address": "Emfuy1FWbVtNLgTum38rrK3EbkXonwxtNyPztwFi3r8a"}, "destinationSymbolInfo": {"symbol": "USD", "symbolDescription": "US Dollar", "tokenMintAddress": "11111111111111111111111111111111"}, "signingData": {"feePayer": "FM36ah2bH8nQWJNPCRzu7R69gE5o6UhujqJFtDpWN5as", "walletProgramId": "ALKWER79Nt7AzhHwS99wWjXNtLvBCAHJYyAhEDYDVEpF", "multisigOpAccountAddress": "DpBrGAFpqspN2Fe46NJUPBxV6AnWKenuTpj4doK6Gt4p", "walletAddress": "AYsBiTxSFnqRooYiH2B6rrMRtVXRCrUTTXa3L121fUMB"}}}
 """.trim()
 
     // Login Approval
     val EXAMPLE_JWT_TOKEN =
         "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsImF1ZCI6IlNvbHIifQ.SWCJDd6B_m7xr_puQH-wgbxvXyJYXH9lTpldOU0eQKc"
     val loginApprovalJson = """
-    {"id": "13cd643e-393e-4b38-91cb-5f1ab2655223", "walletType": "Solana", "submitDate": "2022-04-05T14:42:53.015+00:00", "submitterName": "User 2", "submitterEmail": "user2@org1", "approvalTimeoutInSeconds": 18000, "numberOfDispositionsRequired": 1, "numberOfApprovalsReceived": 0, "numberOfDeniesReceived": 0, "details": { "type": "LoginApproval", "jwtToken": "$EXAMPLE_JWT_TOKEN"}}
+    {"id": "13cd643e-393e-4b38-91cb-5f1ab2655223", "submitDate": "2022-04-05T14:42:53.015+00:00", "submitterName": "User 2", "submitterEmail": "user2@org1", "approvalTimeoutInSeconds": 18000, "numberOfDispositionsRequired": 1, "numberOfApprovalsReceived": 0, "numberOfDeniesReceived": 0, "details": { "type": "LoginApproval", "jwtToken": "$EXAMPLE_JWT_TOKEN"}}
 """.trim()
 
     val dAppJson = """
-    {"id":"8ab353ee-7c91-4d39-b041-042352455c63","walletType":"Solana","submitDate":"2022-04-05T19:39:50.166+00:00","submitterName":"Ben Holzman","submitterEmail":"bholzman2@blue.rock","approvalTimeoutInSeconds":1800,"numberOfDispositionsRequired":1,"numberOfApprovalsReceived":0,"numberOfDeniesReceived":0,"details":{"type":"DAppTransactionRequest","account":{"identifier":"5096c2f1-74de-4c2e-8a61-0024a83f14b3","name":"Trading","accountType":"BalanceAccount","address":"CpWpnyS9equ4dALyAHpVPGEhZkAgxD1RYuxZncMLYuSD"},"balanceChanges":[{"symbolInfo":{"symbol":"SOL","symbolDescription":"Solana"},"amount":"0.023981600","nativeAmount":"0.023981600","usdEquivalent":"3.13"},{"symbolInfo":{"symbol":"SRM","symbolDescription":"Serum","tokenMintAddress":"SRMuApVNdxXokk5GT7XD5cUUgXMBCoAz2LHeuAoKWRt"},"amount":"-2.000000","nativeAmount":"2.000000","usdEquivalent":"5.94"}],"instructions":[{"from":0,"instructions":[{"programId":"11111111111111111111111111111111","accountMetas":[{"address":"CpWpnyS9equ4dALyAHpVPGEhZkAgxD1RYuxZncMLYuSD","signer":true,"writable":true},{"address":"5AtDseqdHrq8X62QHwqr3gfZRLhDk7XDP6wVTUgMJXWN","signer":true,"writable":true}],"data":"AAAAAPAdHwAAAAAApQAAAAAAAAAG3fbh12Whk9nL4UbO63msHLSF7V9bN5E6jPWFfv8AqQ=="},{"programId":"TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA","accountMetas":[{"address":"5AtDseqdHrq8X62QHwqr3gfZRLhDk7XDP6wVTUgMJXWN","signer":true,"writable":true},{"address":"So11111111111111111111111111111111111111112","signer":false,"writable":false},{"address":"CpWpnyS9equ4dALyAHpVPGEhZkAgxD1RYuxZncMLYuSD","signer":true,"writable":true},{"address":"SysvarRent111111111111111111111111111111111","signer":false,"writable":false}],"data":"AQ=="},{"programId":"9xQeWvG816bUx9EPjHmaT23yvVM2ZWbrrpZb9PusVFin","accountMetas":[{"address":"jyei9Fpj2GtHLDDGgcuhDacxYLLiSyxU4TY7KxB2xai","signer":false,"writable":true},{"address":"5KrN1vytDRuRxRDZc5EoTKGhXFqZiR7evy1zTR8irhwZ","signer":false,"writable":true},{"address":"CpWpnyS9equ4dALyAHpVPGEhZkAgxD1RYuxZncMLYuSD","signer":true,"writable":true},{"address":"EhAJTsW745jiWjViB7Q4xXcgKf6tMF7RcMX9cbTuXVBk","signer":false,"writable":true},{"address":"HFSNnAxfhDt4DnmY9yVs2HNFnEMaDJ7RxMVNB9Y5Hgjr","signer":false,"writable":true},{"address":"FUH3FvpU6M7zNpaJ7fSyVD8UiaTWGxmbciwHxJACcEbA","signer":false,"writable":true},{"address":"5AtDseqdHrq8X62QHwqr3gfZRLhDk7XDP6wVTUgMJXWN","signer":true,"writable":true},{"address":"6vBhv2L33KVJvAQeiaW3JEZLrJU7TtGaqcwPdrhytYWG","signer":false,"writable":false},{"address":"TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA","signer":false,"writable":false}],"data":"AAUAAAA="},{"programId":"TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA","accountMetas":[{"address":"5AtDseqdHrq8X62QHwqr3gfZRLhDk7XDP6wVTUgMJXWN","signer":true,"writable":true},{"address":"CpWpnyS9equ4dALyAHpVPGEhZkAgxD1RYuxZncMLYuSD","signer":true,"writable":true},{"address":"CpWpnyS9equ4dALyAHpVPGEhZkAgxD1RYuxZncMLYuSD","signer":true,"writable":true}],"data":"CQ=="}]}],"signingData":{"feePayer":"59CH4KuZWQpyGbkEtUhzM9KbYEsssJ7NgM89db5GehLj","walletProgramId":"6m1icfABEiCG3vm4w9YL9QBTc7AN4ApU9VY38XmQH9VC","multisigOpAccountAddress":"11111111111111111111111111111111","walletAddress":"HNNg5RDk1o35APqnrDUJniT6ngyZbisEcsAPTjzcPuPK"},"dappInfo":{"address":"9xQeWvG816bUx9EPjHmaT23yvVM2ZWbrrpZb9PusVFin","name":"Serum dApp","logo":"https://raw.githubusercontent.com/project-serum/awesome-serum/master/logo-serum.png","url":"https://serum-demo2.strikeprotocols.com"}}}
+    {"id":"8ab353ee-7c91-4d39-b041-042352455c63","submitDate":"2022-04-05T19:39:50.166+00:00","submitterName":"Ben Holzman","submitterEmail":"bholzman2@blue.rock","approvalTimeoutInSeconds":1800,"numberOfDispositionsRequired":1,"numberOfApprovalsReceived":0,"numberOfDeniesReceived":0,"details":{"type":"DAppTransactionRequest","account":{"identifier":"5096c2f1-74de-4c2e-8a61-0024a83f14b3","name":"Trading","accountType":"BalanceAccount","address":"CpWpnyS9equ4dALyAHpVPGEhZkAgxD1RYuxZncMLYuSD"},"balanceChanges":[{"symbolInfo":{"symbol":"SOL","symbolDescription":"Solana"},"amount":"0.023981600","nativeAmount":"0.023981600","usdEquivalent":"3.13"},{"symbolInfo":{"symbol":"SRM","symbolDescription":"Serum","tokenMintAddress":"SRMuApVNdxXokk5GT7XD5cUUgXMBCoAz2LHeuAoKWRt"},"amount":"-2.000000","nativeAmount":"2.000000","usdEquivalent":"5.94"}],"instructions":[{"from":0,"instructions":[{"programId":"11111111111111111111111111111111","accountMetas":[{"address":"CpWpnyS9equ4dALyAHpVPGEhZkAgxD1RYuxZncMLYuSD","signer":true,"writable":true},{"address":"5AtDseqdHrq8X62QHwqr3gfZRLhDk7XDP6wVTUgMJXWN","signer":true,"writable":true}],"data":"AAAAAPAdHwAAAAAApQAAAAAAAAAG3fbh12Whk9nL4UbO63msHLSF7V9bN5E6jPWFfv8AqQ=="},{"programId":"TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA","accountMetas":[{"address":"5AtDseqdHrq8X62QHwqr3gfZRLhDk7XDP6wVTUgMJXWN","signer":true,"writable":true},{"address":"So11111111111111111111111111111111111111112","signer":false,"writable":false},{"address":"CpWpnyS9equ4dALyAHpVPGEhZkAgxD1RYuxZncMLYuSD","signer":true,"writable":true},{"address":"SysvarRent111111111111111111111111111111111","signer":false,"writable":false}],"data":"AQ=="},{"programId":"9xQeWvG816bUx9EPjHmaT23yvVM2ZWbrrpZb9PusVFin","accountMetas":[{"address":"jyei9Fpj2GtHLDDGgcuhDacxYLLiSyxU4TY7KxB2xai","signer":false,"writable":true},{"address":"5KrN1vytDRuRxRDZc5EoTKGhXFqZiR7evy1zTR8irhwZ","signer":false,"writable":true},{"address":"CpWpnyS9equ4dALyAHpVPGEhZkAgxD1RYuxZncMLYuSD","signer":true,"writable":true},{"address":"EhAJTsW745jiWjViB7Q4xXcgKf6tMF7RcMX9cbTuXVBk","signer":false,"writable":true},{"address":"HFSNnAxfhDt4DnmY9yVs2HNFnEMaDJ7RxMVNB9Y5Hgjr","signer":false,"writable":true},{"address":"FUH3FvpU6M7zNpaJ7fSyVD8UiaTWGxmbciwHxJACcEbA","signer":false,"writable":true},{"address":"5AtDseqdHrq8X62QHwqr3gfZRLhDk7XDP6wVTUgMJXWN","signer":true,"writable":true},{"address":"6vBhv2L33KVJvAQeiaW3JEZLrJU7TtGaqcwPdrhytYWG","signer":false,"writable":false},{"address":"TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA","signer":false,"writable":false}],"data":"AAUAAAA="},{"programId":"TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA","accountMetas":[{"address":"5AtDseqdHrq8X62QHwqr3gfZRLhDk7XDP6wVTUgMJXWN","signer":true,"writable":true},{"address":"CpWpnyS9equ4dALyAHpVPGEhZkAgxD1RYuxZncMLYuSD","signer":true,"writable":true},{"address":"CpWpnyS9equ4dALyAHpVPGEhZkAgxD1RYuxZncMLYuSD","signer":true,"writable":true}],"data":"CQ=="}]}],"signingData":{"feePayer":"59CH4KuZWQpyGbkEtUhzM9KbYEsssJ7NgM89db5GehLj","walletProgramId":"6m1icfABEiCG3vm4w9YL9QBTc7AN4ApU9VY38XmQH9VC","multisigOpAccountAddress":"11111111111111111111111111111111","walletAddress":"HNNg5RDk1o35APqnrDUJniT6ngyZbisEcsAPTjzcPuPK"},"dappInfo":{"address":"9xQeWvG816bUx9EPjHmaT23yvVM2ZWbrrpZb9PusVFin","name":"Serum dApp","logo":"https://raw.githubusercontent.com/project-serum/awesome-serum/master/logo-serum.png","url":"https://serum-demo2.strikeprotocols.com"}}}
     """.trim()
 
-    val acceptVaultInvitationJson = """{"id": "422e3504-4eea-493a-a0dd-64a001115540", "walletType": "Solana", "submitDate": "2022-06-21T14:20:38.145+00:00", "submitterName": "User 1", "submitterEmail": "authorized1@org1", "approvalTimeoutInSeconds": 9223372036854775807, "numberOfDispositionsRequired": 1, "numberOfApprovalsReceived": 0, "numberOfDeniesReceived": 0, "programVersion": null, "details": {"type": "AcceptVaultInvitation", "vaultGuid": "58e03f93-b9bc-4f22-b485-8e7a0abd8440", "vaultName": "Test Organization 1"}, "vaultName": "Test Organization 1"}"""
+    val acceptVaultInvitationJson = """{"id": "422e3504-4eea-493a-a0dd-64a001115540", "submitDate": "2022-06-21T14:20:38.145+00:00", "submitterName": "User 1", "submitterEmail": "authorized1@org1", "approvalTimeoutInSeconds": 9223372036854775807, "numberOfDispositionsRequired": 1, "numberOfApprovalsReceived": 0, "numberOfDeniesReceived": 0, "details": {"type": "AcceptVaultInvitation", "vaultGuid": "58e03f93-b9bc-4f22-b485-8e7a0abd8440", "vaultName": "Test Organization 1"}, "vaultName": "Test Organization 1"}"""
 
-    val passwordResetJson = """{"id": "422e3504-4eea-493a-a0dd-64a001115540", "walletType": "Solana", "submitDate": "2022-06-21T14:20:38.145+00:00", "submitterName": "User 1", "submitterEmail": "authorized1@org1", "approvalTimeoutInSeconds": 9223372036854775807, "numberOfDispositionsRequired": 1, "numberOfApprovalsReceived": 0, "numberOfDeniesReceived": 0, "programVersion": null, "details": {"type": "PasswordReset"}, "vaultName": null}"""
+    val passwordResetJson = """{"id": "422e3504-4eea-493a-a0dd-64a001115540", "submitDate": "2022-06-21T14:20:38.145+00:00", "submitterName": "User 1", "submitterEmail": "authorized1@org1", "approvalTimeoutInSeconds": 9223372036854775807, "numberOfDispositionsRequired": 1, "numberOfApprovalsReceived": 0, "numberOfDeniesReceived": 0, "details": {"type": "PasswordReset"}, "vaultName": null}"""
 
-    // Initiation for a balance account creation:
-    val multiSigWithBalanceAccountCreationJson = """
-    {"id": "922b51bd-cd83-4a11-a7ce-156bf7573923", "walletType": "Solana", "submitDate": "2022-04-05T14:42:58.170+00:00", "submitterName": "User 1", "submitterEmail": "authorized1@org1", "approvalTimeoutInSeconds": 1800, "numberOfDispositionsRequired": 1, "numberOfApprovalsReceived": 0, "numberOfDeniesReceived": 0, "details": {"type": "MultisigOpInitiation", "details": {"type": "BalanceAccountCreation", "accountSlot": 0, "accountInfo": {"identifier": "00a56503-e4cf-40a8-9eca-508093cf225e", "name": "Account 1", "accountType": "BalanceAccount"}, "approvalsRequired": 1, "approvalTimeout": 3600000, "approvers": [{"slotId": 0, "value": {"publicKey": "Ffs2XpnxtSBH5xTHQtece1jrmdVjT2syTceQHkjKXK1e", "name": "User 1", "email": "authorized1@org1"}}], "whitelistEnabled": "Off", "dappsEnabled": "Off", "addressBookSlot": 0, "stakingValidator": null, "signingData": {"feePayer": "FM36ah2bH8nQWJNPCRzu7R69gE5o6UhujqJFtDpWN5as", "walletProgramId": "GN694sm2Ex1GcnamYwqfjSs6XJ7xadTXiZqBwvGvQyT8", "multisigOpAccountAddress": "11111111111111111111111111111111", "walletAddress": "6JmmkmowSLQ3jFQacREDNwbrD3Hj7Eyj9MvK8eBTzV5q"}}, "opAccountCreationInfo": {"accountSize": 848, "minBalanceForRentExemption": 6792960}}}
+    // Initiation for a wallet creation:
+    val multiSigWithWalletCreationJson = """
+    {"id": "922b51bd-cd83-4a11-a7ce-156bf7573923", "submitDate": "2022-04-05T14:42:58.170+00:00", "submitterName": "User 1", "submitterEmail": "authorized1@org1", "approvalTimeoutInSeconds": 1800, "numberOfDispositionsRequired": 1, "numberOfApprovalsReceived": 0, "numberOfDeniesReceived": 0, "details": {"type": "MultisigOpInitiation", "details": {"type": "WalletCreation", "accountSlot": 0, "accountInfo": {"identifier": "00a56503-e4cf-40a8-9eca-508093cf225e", "name": "Account 1", "accountType": "BalanceAccount"}, "approvalsRequired": 1, "approvalTimeout": 3600000, "approvers": [{"slotId": 0, "value": {"publicKey": "Ffs2XpnxtSBH5xTHQtece1jrmdVjT2syTceQHkjKXK1e", "name": "User 1", "email": "authorized1@org1"}}], "whitelistEnabled": "Off", "dappsEnabled": "Off", "addressBookSlot": 0, "stakingValidator": null, "signingData": {"feePayer": "FM36ah2bH8nQWJNPCRzu7R69gE5o6UhujqJFtDpWN5as", "walletProgramId": "GN694sm2Ex1GcnamYwqfjSs6XJ7xadTXiZqBwvGvQyT8", "multisigOpAccountAddress": "11111111111111111111111111111111", "walletAddress": "6JmmkmowSLQ3jFQacREDNwbrD3Hj7Eyj9MvK8eBTzV5q"}}, "opAccountCreationInfo": {"accountSize": 848, "minBalanceForRentExemption": 6792960}}}
 """.trim()
 
     // Initiation for removing an signer
     val multiSigWithSignersUpdateJson = """
-{"id": "40a7fb51-a39c-4afa-aa3b-5c4f77939026", "walletType": "Solana", "submitDate": "2022-04-05T14:43:19.120+00:00", "submitterName": "User 1", "submitterEmail": "authorized1@org1", "approvalTimeoutInSeconds": 1800, "numberOfDispositionsRequired": 1, "numberOfApprovalsReceived": 0, "numberOfDeniesReceived": 0, "details": {"type": "MultisigOpInitiation", "details": {"type": "SignersUpdate", "slotUpdateType": "Clear", "signer": {"slotId": 2, "value": {"publicKey": "HwW3iudK4dcqcMm76iy7iBziJU4htaYZGTjzCBnYA6rH", "name": "User 3", "email": "user3@org1"}}, "signingData": {"feePayer": "FM36ah2bH8nQWJNPCRzu7R69gE5o6UhujqJFtDpWN5as", "walletProgramId": "GN694sm2Ex1GcnamYwqfjSs6XJ7xadTXiZqBwvGvQyT8", "multisigOpAccountAddress": "11111111111111111111111111111111", "walletAddress": "6JmmkmowSLQ3jFQacREDNwbrD3Hj7Eyj9MvK8eBTzV5q"}}, "opAccountCreationInfo": {"accountSize": 848, "minBalanceForRentExemption": 6792960}}}
+{"id": "40a7fb51-a39c-4afa-aa3b-5c4f77939026", "submitDate": "2022-04-05T14:43:19.120+00:00", "submitterName": "User 1", "submitterEmail": "authorized1@org1", "approvalTimeoutInSeconds": 1800, "numberOfDispositionsRequired": 1, "numberOfApprovalsReceived": 0, "numberOfDeniesReceived": 0, "details": {"type": "MultisigOpInitiation", "details": {"type": "SignersUpdate", "slotUpdateType": "Clear", "signer": {"slotId": 2, "value": {"publicKey": "HwW3iudK4dcqcMm76iy7iBziJU4htaYZGTjzCBnYA6rH", "name": "User 3", "email": "user3@org1"}}, "signingData": {"feePayer": "FM36ah2bH8nQWJNPCRzu7R69gE5o6UhujqJFtDpWN5as", "walletProgramId": "GN694sm2Ex1GcnamYwqfjSs6XJ7xadTXiZqBwvGvQyT8", "multisigOpAccountAddress": "11111111111111111111111111111111", "walletAddress": "6JmmkmowSLQ3jFQacREDNwbrD3Hj7Eyj9MvK8eBTzV5q"}}, "opAccountCreationInfo": {"accountSize": 848, "minBalanceForRentExemption": 6792960}}}
 """.trim()
 
     // Transfer initiation:
     val multiSigWithWithdrawalRequestJson = """
-{"id": "0c949b8b-b190-43b3-8e35-8236206ff864", "walletType": "Solana", "submitDate": "2022-04-05T15:24:14.065+00:00", "submitterName": "User 1", "submitterEmail": "authorized1@org1", "approvalTimeoutInSeconds": 1800, "numberOfDispositionsRequired": 2, "numberOfApprovalsReceived": 0, "numberOfDeniesReceived": 0, "details": {"type": "MultisigOpInitiation", "details": {"type": "WithdrawalRequest", "account": {"identifier": "caa3a0ee-dd90-43b7-9204-b5c87105ebb6", "name": "Account 1", "accountType": "BalanceAccount", "address": "3uCYEp6SRZ9YBMCSZ56492yiXE52nE5D4gPPap75FAha"}, "symbolAndAmountInfo": {"symbolInfo": {"symbol": "SOL", "symbolDescription": "Solana", "tokenMintAddress": "11111111111111111111111111111111"}, "amount": "0.500000000", "nativeAmount": "0.500000000", "usdEquivalent": "44.39"}, "destination": {"name": "My External Sol address", "address": "ApDG986BAFH3DDQmcHKHg3cDvYNhqxpbrJqCHH2cVmkE"}, "signingData": {"feePayer": "FM36ah2bH8nQWJNPCRzu7R69gE5o6UhujqJFtDpWN5as", "walletProgramId": "CpikHpeN5zVCSvGj8riDCz6iqz4CZ3FNqNq5qwjBHm3x", "multisigOpAccountAddress": "11111111111111111111111111111111", "walletAddress": "BcHw51RmaSLCAzd3Jy1UfQZHKdv4E993uGoqtrsreu1t"}}, "opAccountCreationInfo": {"accountSize": 848, "minBalanceForRentExemption": 6792960}}}
+{"id": "0c949b8b-b190-43b3-8e35-8236206ff864", "submitDate": "2022-04-05T15:24:14.065+00:00", "submitterName": "User 1", "submitterEmail": "authorized1@org1", "approvalTimeoutInSeconds": 1800, "numberOfDispositionsRequired": 2, "numberOfApprovalsReceived": 0, "numberOfDeniesReceived": 0, "details": {"type": "MultisigOpInitiation", "details": {"type": "WithdrawalRequest", "account": {"identifier": "caa3a0ee-dd90-43b7-9204-b5c87105ebb6", "name": "Account 1", "accountType": "BalanceAccount", "address": "3uCYEp6SRZ9YBMCSZ56492yiXE52nE5D4gPPap75FAha"}, "symbolAndAmountInfo": {"symbolInfo": {"symbol": "SOL", "symbolDescription": "Solana", "tokenMintAddress": "11111111111111111111111111111111"}, "amount": "0.500000000", "nativeAmount": "0.500000000", "usdEquivalent": "44.39"}, "destination": {"name": "My External Sol address", "address": "ApDG986BAFH3DDQmcHKHg3cDvYNhqxpbrJqCHH2cVmkE"}, "signingData": {"feePayer": "FM36ah2bH8nQWJNPCRzu7R69gE5o6UhujqJFtDpWN5as", "walletProgramId": "CpikHpeN5zVCSvGj8riDCz6iqz4CZ3FNqNq5qwjBHm3x", "multisigOpAccountAddress": "11111111111111111111111111111111", "walletAddress": "BcHw51RmaSLCAzd3Jy1UfQZHKdv4E993uGoqtrsreu1t"}}, "opAccountCreationInfo": {"accountSize": 848, "minBalanceForRentExemption": 6792960}}}
 """.trim()
 
 
     // DApp initiation
     val multiSignWithDAppRequestJson = """
-{"id":"8ab353ee-7c91-4d39-b041-042352455c63","walletType":"Solana","submitDate":"2022-04-05T19:39:50.166+00:00","submitterName":"Ben Holzman","submitterEmail":"bholzman2@blue.rock","approvalTimeoutInSeconds":1800,"numberOfDispositionsRequired":1,"numberOfApprovalsReceived":0,"numberOfDeniesReceived":0,"details":{"type":"MultisigOpInitiation","details":{"type":"DAppTransactionRequest","account":{"identifier":"5096c2f1-74de-4c2e-8a61-0024a83f14b3","name":"Trading","accountType":"BalanceAccount","address":"CpWpnyS9equ4dALyAHpVPGEhZkAgxD1RYuxZncMLYuSD"},"balanceChanges":[{"symbolInfo":{"symbol":"SOL","symbolDescription":"Solana"},"amount":"0.023981600","nativeAmount":"0.023981600","usdEquivalent":"3.13"},{"symbolInfo":{"symbol":"SRM","symbolDescription":"Serum","tokenMintAddress":"SRMuApVNdxXokk5GT7XD5cUUgXMBCoAz2LHeuAoKWRt"},"amount":"2.000000","nativeAmount":"2.000000","usdEquivalent":"5.94"}],"instructions":[{"from":0,"instructions":[{"programId":"11111111111111111111111111111111","accountMetas":[{"address":"CpWpnyS9equ4dALyAHpVPGEhZkAgxD1RYuxZncMLYuSD","signer":true,"writable":true},{"address":"5AtDseqdHrq8X62QHwqr3gfZRLhDk7XDP6wVTUgMJXWN","signer":true,"writable":true}],"data":"AAAAAPAdHwAAAAAApQAAAAAAAAAG3fbh12Whk9nL4UbO63msHLSF7V9bN5E6jPWFfv8AqQ=="},{"programId":"TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA","accountMetas":[{"address":"5AtDseqdHrq8X62QHwqr3gfZRLhDk7XDP6wVTUgMJXWN","signer":true,"writable":true},{"address":"So11111111111111111111111111111111111111112","signer":false,"writable":false},{"address":"CpWpnyS9equ4dALyAHpVPGEhZkAgxD1RYuxZncMLYuSD","signer":true,"writable":true},{"address":"SysvarRent111111111111111111111111111111111","signer":false,"writable":false}],"data":"AQ=="},{"programId":"9xQeWvG816bUx9EPjHmaT23yvVM2ZWbrrpZb9PusVFin","accountMetas":[{"address":"jyei9Fpj2GtHLDDGgcuhDacxYLLiSyxU4TY7KxB2xai","signer":false,"writable":true},{"address":"5KrN1vytDRuRxRDZc5EoTKGhXFqZiR7evy1zTR8irhwZ","signer":false,"writable":true},{"address":"CpWpnyS9equ4dALyAHpVPGEhZkAgxD1RYuxZncMLYuSD","signer":true,"writable":true},{"address":"EhAJTsW745jiWjViB7Q4xXcgKf6tMF7RcMX9cbTuXVBk","signer":false,"writable":true},{"address":"HFSNnAxfhDt4DnmY9yVs2HNFnEMaDJ7RxMVNB9Y5Hgjr","signer":false,"writable":true},{"address":"FUH3FvpU6M7zNpaJ7fSyVD8UiaTWGxmbciwHxJACcEbA","signer":false,"writable":true},{"address":"5AtDseqdHrq8X62QHwqr3gfZRLhDk7XDP6wVTUgMJXWN","signer":true,"writable":true},{"address":"6vBhv2L33KVJvAQeiaW3JEZLrJU7TtGaqcwPdrhytYWG","signer":false,"writable":false},{"address":"TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA","signer":false,"writable":false}],"data":"AAUAAAA="},{"programId":"TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA","accountMetas":[{"address":"5AtDseqdHrq8X62QHwqr3gfZRLhDk7XDP6wVTUgMJXWN","signer":true,"writable":true},{"address":"CpWpnyS9equ4dALyAHpVPGEhZkAgxD1RYuxZncMLYuSD","signer":true,"writable":true},{"address":"CpWpnyS9equ4dALyAHpVPGEhZkAgxD1RYuxZncMLYuSD","signer":true,"writable":true}],"data":"CQ=="}]}],"signingData":{"feePayer":"59CH4KuZWQpyGbkEtUhzM9KbYEsssJ7NgM89db5GehLj","walletProgramId":"6m1icfABEiCG3vm4w9YL9QBTc7AN4ApU9VY38XmQH9VC","multisigOpAccountAddress":"11111111111111111111111111111111","walletAddress":"HNNg5RDk1o35APqnrDUJniT6ngyZbisEcsAPTjzcPuPK"},"dappInfo":{"address":"9xQeWvG816bUx9EPjHmaT23yvVM2ZWbrrpZb9PusVFin","name":"Serum dApp","logo":"https://raw.githubusercontent.com/project-serum/awesome-serum/master/logo-serum.png","url":"https://serum-demo2.strikeprotocols.com"}},"opAccountCreationInfo":{"accountSize":848,"minBalanceForRentExemption":6792960}}}
+{"id":"8ab353ee-7c91-4d39-b041-042352455c63","submitDate":"2022-04-05T19:39:50.166+00:00","submitterName":"Ben Holzman","submitterEmail":"bholzman2@blue.rock","approvalTimeoutInSeconds":1800,"numberOfDispositionsRequired":1,"numberOfApprovalsReceived":0,"numberOfDeniesReceived":0,"details":{"type":"MultisigOpInitiation","details":{"type":"DAppTransactionRequest","account":{"identifier":"5096c2f1-74de-4c2e-8a61-0024a83f14b3","name":"Trading","accountType":"BalanceAccount","address":"CpWpnyS9equ4dALyAHpVPGEhZkAgxD1RYuxZncMLYuSD"},"balanceChanges":[{"symbolInfo":{"symbol":"SOL","symbolDescription":"Solana"},"amount":"0.023981600","nativeAmount":"0.023981600","usdEquivalent":"3.13"},{"symbolInfo":{"symbol":"SRM","symbolDescription":"Serum","tokenMintAddress":"SRMuApVNdxXokk5GT7XD5cUUgXMBCoAz2LHeuAoKWRt"},"amount":"2.000000","nativeAmount":"2.000000","usdEquivalent":"5.94"}],"instructions":[{"from":0,"instructions":[{"programId":"11111111111111111111111111111111","accountMetas":[{"address":"CpWpnyS9equ4dALyAHpVPGEhZkAgxD1RYuxZncMLYuSD","signer":true,"writable":true},{"address":"5AtDseqdHrq8X62QHwqr3gfZRLhDk7XDP6wVTUgMJXWN","signer":true,"writable":true}],"data":"AAAAAPAdHwAAAAAApQAAAAAAAAAG3fbh12Whk9nL4UbO63msHLSF7V9bN5E6jPWFfv8AqQ=="},{"programId":"TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA","accountMetas":[{"address":"5AtDseqdHrq8X62QHwqr3gfZRLhDk7XDP6wVTUgMJXWN","signer":true,"writable":true},{"address":"So11111111111111111111111111111111111111112","signer":false,"writable":false},{"address":"CpWpnyS9equ4dALyAHpVPGEhZkAgxD1RYuxZncMLYuSD","signer":true,"writable":true},{"address":"SysvarRent111111111111111111111111111111111","signer":false,"writable":false}],"data":"AQ=="},{"programId":"9xQeWvG816bUx9EPjHmaT23yvVM2ZWbrrpZb9PusVFin","accountMetas":[{"address":"jyei9Fpj2GtHLDDGgcuhDacxYLLiSyxU4TY7KxB2xai","signer":false,"writable":true},{"address":"5KrN1vytDRuRxRDZc5EoTKGhXFqZiR7evy1zTR8irhwZ","signer":false,"writable":true},{"address":"CpWpnyS9equ4dALyAHpVPGEhZkAgxD1RYuxZncMLYuSD","signer":true,"writable":true},{"address":"EhAJTsW745jiWjViB7Q4xXcgKf6tMF7RcMX9cbTuXVBk","signer":false,"writable":true},{"address":"HFSNnAxfhDt4DnmY9yVs2HNFnEMaDJ7RxMVNB9Y5Hgjr","signer":false,"writable":true},{"address":"FUH3FvpU6M7zNpaJ7fSyVD8UiaTWGxmbciwHxJACcEbA","signer":false,"writable":true},{"address":"5AtDseqdHrq8X62QHwqr3gfZRLhDk7XDP6wVTUgMJXWN","signer":true,"writable":true},{"address":"6vBhv2L33KVJvAQeiaW3JEZLrJU7TtGaqcwPdrhytYWG","signer":false,"writable":false},{"address":"TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA","signer":false,"writable":false}],"data":"AAUAAAA="},{"programId":"TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA","accountMetas":[{"address":"5AtDseqdHrq8X62QHwqr3gfZRLhDk7XDP6wVTUgMJXWN","signer":true,"writable":true},{"address":"CpWpnyS9equ4dALyAHpVPGEhZkAgxD1RYuxZncMLYuSD","signer":true,"writable":true},{"address":"CpWpnyS9equ4dALyAHpVPGEhZkAgxD1RYuxZncMLYuSD","signer":true,"writable":true}],"data":"CQ=="}]}],"signingData":{"feePayer":"59CH4KuZWQpyGbkEtUhzM9KbYEsssJ7NgM89db5GehLj","walletProgramId":"6m1icfABEiCG3vm4w9YL9QBTc7AN4ApU9VY38XmQH9VC","multisigOpAccountAddress":"11111111111111111111111111111111","walletAddress":"HNNg5RDk1o35APqnrDUJniT6ngyZbisEcsAPTjzcPuPK"},"dappInfo":{"address":"9xQeWvG816bUx9EPjHmaT23yvVM2ZWbrrpZb9PusVFin","name":"Serum dApp","logo":"https://raw.githubusercontent.com/project-serum/awesome-serum/master/logo-serum.png","url":"https://serum-demo2.strikeprotocols.com"}},"opAccountCreationInfo":{"accountSize":848,"minBalanceForRentExemption":6792960}}}
 """.trim()
 
     // Conversion initiation
     val multiSigWithConversionRequestJson = """
-    {"id": "ffc2b7de-ad6a-4a89-b57c-513d2cfb42a3", "walletType": "Solana", "submitDate": "2022-04-06T09:45:38.678+00:00", "submitterName": "User 1", "submitterEmail": "authorized1@org1", "approvalTimeoutInSeconds": 1800, "numberOfDispositionsRequired": 2, "numberOfApprovalsReceived": 0, "numberOfDeniesReceived": 0, "details": {"type": "MultisigOpInitiation", "details": {"type": "ConversionRequest", "account": {"identifier": "22b5c380-9049-4905-af4d-cce44284cce6", "name": "Account 1", "accountType": "BalanceAccount", "address": "s4HnJVY6B4yBPY57csiYinGEeJsrHFZZScLxMNJr6Kk"}, "symbolAndAmountInfo": {"symbolInfo": {"symbol": "USDC", "symbolDescription": "USD Coin", "tokenMintAddress": "ALmJ9wWY2o1FiLcSDuvHN3xH5UHLkYsVbz2JWD37MuUY"}, "amount": "500.000000", "nativeAmount": "500.000000", "usdEquivalent": "500.00"}, "destination": {"name": "USDC Redemption Address", "address": "Emfuy1FWbVtNLgTum38rrK3EbkXonwxtNyPztwFi3r8a"}, "destinationSymbolInfo": {"symbol": "USD", "symbolDescription": "US Dollar", "tokenMintAddress": "11111111111111111111111111111111"}, "signingData": {"feePayer": "FM36ah2bH8nQWJNPCRzu7R69gE5o6UhujqJFtDpWN5as", "walletProgramId": "ALKWER79Nt7AzhHwS99wWjXNtLvBCAHJYyAhEDYDVEpF", "multisigOpAccountAddress": "11111111111111111111111111111111", "walletAddress": "AYsBiTxSFnqRooYiH2B6rrMRtVXRCrUTTXa3L121fUMB"}}, "opAccountCreationInfo": {"accountSize": 848, "minBalanceForRentExemption": 6792960}}}
+    {"id": "ffc2b7de-ad6a-4a89-b57c-513d2cfb42a3", "submitDate": "2022-04-06T09:45:38.678+00:00", "submitterName": "User 1", "submitterEmail": "authorized1@org1", "approvalTimeoutInSeconds": 1800, "numberOfDispositionsRequired": 2, "numberOfApprovalsReceived": 0, "numberOfDeniesReceived": 0, "details": {"type": "MultisigOpInitiation", "details": {"type": "ConversionRequest", "account": {"identifier": "22b5c380-9049-4905-af4d-cce44284cce6", "name": "Account 1", "accountType": "BalanceAccount", "address": "s4HnJVY6B4yBPY57csiYinGEeJsrHFZZScLxMNJr6Kk"}, "symbolAndAmountInfo": {"symbolInfo": {"symbol": "USDC", "symbolDescription": "USD Coin", "tokenMintAddress": "ALmJ9wWY2o1FiLcSDuvHN3xH5UHLkYsVbz2JWD37MuUY"}, "amount": "500.000000", "nativeAmount": "500.000000", "usdEquivalent": "500.00"}, "destination": {"name": "USDC Redemption Address", "address": "Emfuy1FWbVtNLgTum38rrK3EbkXonwxtNyPztwFi3r8a"}, "destinationSymbolInfo": {"symbol": "USD", "symbolDescription": "US Dollar", "tokenMintAddress": "11111111111111111111111111111111"}, "signingData": {"feePayer": "FM36ah2bH8nQWJNPCRzu7R69gE5o6UhujqJFtDpWN5as", "walletProgramId": "ALKWER79Nt7AzhHwS99wWjXNtLvBCAHJYyAhEDYDVEpF", "multisigOpAccountAddress": "11111111111111111111111111111111", "walletAddress": "AYsBiTxSFnqRooYiH2B6rrMRtVXRCrUTTXa3L121fUMB"}}, "opAccountCreationInfo": {"accountSize": 848, "minBalanceForRentExemption": 6792960}}}
 """.trim()
 //endregion
 
-    fun get17StandardApprovals(): List<WalletApproval> {
+    fun get17StandardApprovals(): List<ApprovalRequest> {
         val withdrawalRequest =
             getWalletApprovalRequest(
                 getSolWithdrawalRequest(
@@ -229,9 +228,9 @@ class MockedApprovals {
                 )
             )
 
-        val balanceAccountCreationRequest =
+        val walletCreationRequest =
             getWalletApprovalRequest(
-                getBalanceAccountCreationRequest(
+                getWalletCreationRequest(
                     nonceAccountAddresses = listOf("AaFj4THN8CJmDPyJjPuDpsfC5FZys2Wmczust5UfmqeN")
                 )
             )
@@ -267,16 +266,16 @@ class MockedApprovals {
         val acceptVaultRequest: JsonElement =
             JsonParser.parseString(acceptVaultInvitationJson.trim())
         val acceptVaultInvitationApproval =
-            WalletApprovalDeserializer().parseData(acceptVaultRequest)
+            ApprovalRequestDeserializer().parseData(acceptVaultRequest)
 
         val passwordResetRequest: JsonElement =
             JsonParser.parseString(passwordResetJson.trim())
         val passwordResetApproval =
-            WalletApprovalDeserializer().parseData(passwordResetRequest)
+            ApprovalRequestDeserializer().parseData(passwordResetRequest)
 
         val unknownRequest =
             getWalletApprovalRequest(
-                SolanaApprovalRequestType.UnknownApprovalType
+                ApprovalRequestDetails.UnknownApprovalType
             )
 
         return listOf(
@@ -289,7 +288,7 @@ class MockedApprovals {
             addressBookUpdateRequest,
             signersUpdateRequest,
             dAppTransactionRequest,
-            balanceAccountCreationRequest,
+            walletCreationRequest,
             balanceAccountAddressWhitelistUpdateRequest,
             balanceAccountNameUpdateRequest,
             balanceAccountPolicyUpdateRequest,
@@ -300,20 +299,20 @@ class MockedApprovals {
         )
     }
 
-    fun getFullListOfApprovalItems(): List<WalletApproval> {
-        val deserializer = WalletApprovalDeserializer()
+    fun getFullListOfApprovalItems(): List<ApprovalRequest> {
+        val deserializer = ApprovalRequestDeserializer()
 
-        val allApprovalRequests = mutableListOf<WalletApproval>()
+        val allApprovalRequests = mutableListOf<ApprovalRequest>()
 
         val signersAsJsonElement: JsonElement = JsonParser.parseString(signersUpdateJson.trim())
         val signersUpdateWalletApproval = deserializer.parseData(signersAsJsonElement)
         allApprovalRequests.add(signersUpdateWalletApproval)
 
-        val balanceAccountCreationJson: JsonElement =
-            JsonParser.parseString(balanceAccountCreationJson.trim())
-        val balanceAccountCreationWalletApproval =
-            deserializer.parseData(balanceAccountCreationJson)
-        allApprovalRequests.add(balanceAccountCreationWalletApproval)
+        val walletCreationJson: JsonElement =
+            JsonParser.parseString(walletCreationJson.trim())
+        val walletCreationWalletApproval =
+            deserializer.parseData(walletCreationJson)
+        allApprovalRequests.add(walletCreationWalletApproval)
 
         val withdrawalRequestJson: JsonElement =
             JsonParser.parseString(withdrawalRequestJson.trim())
@@ -340,14 +339,14 @@ class MockedApprovals {
         allApprovalRequests.add(loginApproval)
 
         val unknownApproval = conversionRequestWalletApproval.copy(
-            details = SolanaApprovalRequestDetails.ApprovalRequestDetails(SolanaApprovalRequestType.UnknownApprovalType))
+            details = SolanaApprovalRequestDetails.ApprovalRequestDetails(ApprovalRequestDetails.UnknownApprovalType))
         allApprovalRequests.add(unknownApproval)
 
-        val multiSigWithBalanceAccountCreationJson: JsonElement =
-            JsonParser.parseString(multiSigWithBalanceAccountCreationJson.trim())
-        val multiSigWithBalanceAccountCreationWalletApproval =
-            deserializer.parseData(multiSigWithBalanceAccountCreationJson)
-        allApprovalRequests.add(multiSigWithBalanceAccountCreationWalletApproval)
+        val multiSigWithWalletCreationJson: JsonElement =
+            JsonParser.parseString(multiSigWithWalletCreationJson.trim())
+        val multiSigWithWalletCreationWalletApproval =
+            deserializer.parseData(multiSigWithWalletCreationJson)
+        allApprovalRequests.add(multiSigWithWalletCreationWalletApproval)
 
         val multiSigWithSignersUpdateJson: JsonElement =
             JsonParser.parseString(multiSigWithSignersUpdateJson.trim())
@@ -377,10 +376,9 @@ class MockedApprovals {
         return allApprovalRequests
     }
 
-    fun getWalletApprovalRequest(solanaApprovalRequestType: SolanaApprovalRequestType) : WalletApproval {
-        return WalletApproval(
+    fun getWalletApprovalRequest(approvalRequestType: ApprovalRequestDetails) : ApprovalRequest {
+        return ApprovalRequest(
             id = "1",
-            walletType = WalletSigner.WALLET_TYPE_SOLANA,
             submitterName = "",
             submitterEmail = "",
             submitDate = Date().toString(),
@@ -389,12 +387,12 @@ class MockedApprovals {
             numberOfApprovalsReceived = 1,
             numberOfDeniesReceived = 1,
             vaultName = "Test Vault",
-            details = SolanaApprovalRequestDetails.ApprovalRequestDetails(solanaApprovalRequestType)
+            details = SolanaApprovalRequestDetails.ApprovalRequestDetails(approvalRequestType)
         )
     }
 
-    fun getSignersUpdateRequest(nonceAccountAddresses: List<String>): SolanaApprovalRequestType {
-        return SolanaApprovalRequestType.SignersUpdate(
+    fun getSignersUpdateRequest(nonceAccountAddresses: List<String>): ApprovalRequestDetails {
+        return ApprovalRequestDetails.SignersUpdate(
             type = ApprovalType.SIGNERS_UPDATE_TYPE.value,
             slotUpdateType = SlotUpdateType.Clear,
             signer = SlotSignerInfo(
@@ -421,9 +419,9 @@ class MockedApprovals {
         )
     }
 
-    fun getSignersUpdateWalletRequest(nonceAccountAddresses: List<String>) : WalletApproval {
+    fun getSignersUpdateWalletRequest(nonceAccountAddresses: List<String>) : ApprovalRequest {
         return getWalletApprovalRequest(
-            SolanaApprovalRequestType.SignersUpdate(
+            ApprovalRequestDetails.SignersUpdate(
                 type = ApprovalType.SIGNERS_UPDATE_TYPE.value,
                 slotUpdateType = SlotUpdateType.SetIfEmpty,
                 signer = SlotSignerInfo(
@@ -451,15 +449,16 @@ class MockedApprovals {
         )
     }
 
-    fun getBalanceAccountCreationRequest(nonceAccountAddresses: List<String>) : SolanaApprovalRequestType.BalanceAccountCreation {
-        return SolanaApprovalRequestType.BalanceAccountCreation(
-            type = ApprovalType.BALANCE_ACCOUNT_CREATION_TYPE.value,
+    fun getWalletCreationRequest(nonceAccountAddresses: List<String>) : ApprovalRequestDetails.WalletCreation {
+        return ApprovalRequestDetails.WalletCreation(
+            type = ApprovalType.WALLET_CREATION_TYPE.value,
             accountSlot = 0,
             accountInfo = AccountInfo(
                 name = "Account 1",
                 identifier = "1ac4a7fc-d2f8-4c32-8707-7496ee958933",
                 accountType = AccountType.BalanceAccount,
-                address = null
+                address = null,
+                chainName = "Solana"
             ),
             approvalPolicy = ApprovalPolicy(
                 approvalsRequired = 1,
@@ -494,8 +493,8 @@ class MockedApprovals {
         )
     }
 
-    fun getSolWithdrawalRequest(nonceAccountAddresses: List<String>) : SolanaApprovalRequestType.WithdrawalRequest {
-        return SolanaApprovalRequestType.WithdrawalRequest(
+    fun getSolWithdrawalRequest(nonceAccountAddresses: List<String>) : ApprovalRequestDetails.WithdrawalRequest {
+        return ApprovalRequestDetails.WithdrawalRequest(
             type = ApprovalType.WITHDRAWAL_TYPE.value,
             account = AccountInfo(
                 name = "Account 1",
@@ -533,8 +532,8 @@ class MockedApprovals {
         )
     }
 
-    fun getSplWithdrawalRequest(nonceAccountAddresses: List<String>) : SolanaApprovalRequestType.WithdrawalRequest {
-        return SolanaApprovalRequestType.WithdrawalRequest(
+    fun getSplWithdrawalRequest(nonceAccountAddresses: List<String>) : ApprovalRequestDetails.WithdrawalRequest {
+        return ApprovalRequestDetails.WithdrawalRequest(
             type = ApprovalType.WITHDRAWAL_TYPE.value,
             account = AccountInfo(
                 name = "Account 1",
@@ -572,8 +571,8 @@ class MockedApprovals {
         )
     }
 
-    fun getConversionRequest(nonceAccountAddresses: List<String>): SolanaApprovalRequestType.ConversionRequest {
-        return SolanaApprovalRequestType.ConversionRequest(
+    fun getConversionRequest(nonceAccountAddresses: List<String>): ApprovalRequestDetails.ConversionRequest {
+        return ApprovalRequestDetails.ConversionRequest(
             type = ApprovalType.CONVERSION_REQUEST_TYPE.value,
             account = AccountInfo(
                 name = "Account 1",
@@ -616,8 +615,8 @@ class MockedApprovals {
         )
     }
 
-    fun getWrapConversionRequest(nonceAccountAddresses: List<String>): SolanaApprovalRequestType.WrapConversionRequest {
-        return SolanaApprovalRequestType.WrapConversionRequest(
+    fun getWrapConversionRequest(nonceAccountAddresses: List<String>): ApprovalRequestDetails.WrapConversionRequest {
+        return ApprovalRequestDetails.WrapConversionRequest(
             type = ApprovalType.WRAP_CONVERSION_REQUEST_TYPE.value,
             account = AccountInfo(
                 name = "Account 1",
@@ -654,8 +653,8 @@ class MockedApprovals {
         )
     }
 
-    fun getUnwrapConversionRequest(nonceAccountAddresses: List<String>) : SolanaApprovalRequestType {
-        return SolanaApprovalRequestType.WrapConversionRequest(
+    fun getUnwrapConversionRequest(nonceAccountAddresses: List<String>) : ApprovalRequestDetails {
+        return ApprovalRequestDetails.WrapConversionRequest(
             type = ApprovalType.WRAP_CONVERSION_REQUEST_TYPE.value,
             account = AccountInfo(
                 name = "Account 1",
@@ -692,8 +691,8 @@ class MockedApprovals {
         )
     }
 
-    fun getAddDAppBookEntry(nonceAccountAddresses: List<String>) : SolanaApprovalRequestType {
-        return SolanaApprovalRequestType.DAppBookUpdate(
+    fun getAddDAppBookEntry(nonceAccountAddresses: List<String>) : ApprovalRequestDetails {
+        return ApprovalRequestDetails.DAppBookUpdate(
             type = ApprovalType.DAPP_BOOK_UPDATE_TYPE.value,
             entriesToAdd = listOf(
                 SlotDAppInfo(
@@ -721,8 +720,8 @@ class MockedApprovals {
         )
     }
 
-    fun getWalletConfigPolicyUpdate(nonceAccountAddresses: List<String>): SolanaApprovalRequestType {
-        return SolanaApprovalRequestType.WalletConfigPolicyUpdate(
+    fun getWalletConfigPolicyUpdate(nonceAccountAddresses: List<String>): ApprovalRequestDetails {
+        return ApprovalRequestDetails.WalletConfigPolicyUpdate(
             type = ApprovalType.WALLET_CONFIG_POLICY_UPDATE_TYPE.value,
             approvalPolicy = ApprovalPolicy(
                 approvalsRequired = 3,
@@ -772,8 +771,8 @@ class MockedApprovals {
         )
     }
 
-    fun getBalanceAccountPolicyUpdate(nonceAccountAddresses: List<String>) : SolanaApprovalRequestType {
-        return SolanaApprovalRequestType.BalanceAccountPolicyUpdate(
+    fun getBalanceAccountPolicyUpdate(nonceAccountAddresses: List<String>) : ApprovalRequestDetails {
+        return ApprovalRequestDetails.BalanceAccountPolicyUpdate(
             type = ApprovalType.BALANCE_ACCOUNT_POLICY_UPDATE_TYPE.value,
             accountInfo = AccountInfo(
                 name = "Account 1",
@@ -820,8 +819,8 @@ class MockedApprovals {
         )
     }
 
-    fun getBalanceAccountNameUpdate(nonceAccountAddresses: List<String>): SolanaApprovalRequestType {
-        return SolanaApprovalRequestType.BalanceAccountNameUpdate(
+    fun getBalanceAccountNameUpdate(nonceAccountAddresses: List<String>): ApprovalRequestDetails {
+        return ApprovalRequestDetails.BalanceAccountNameUpdate(
             type = ApprovalType.BALANCE_ACCOUNT_NAME_UPDATE_TYPE.value,
             accountInfo = AccountInfo(
                 name = "Account 1",
@@ -845,8 +844,8 @@ class MockedApprovals {
         )
     }
 
-    fun getDAppTransactionRequest(nonceAccountAddresses: List<String>): SolanaApprovalRequestType {
-        return SolanaApprovalRequestType.DAppTransactionRequest(
+    fun getDAppTransactionRequest(nonceAccountAddresses: List<String>): ApprovalRequestDetails {
+        return ApprovalRequestDetails.DAppTransactionRequest(
             type = ApprovalType.DAPP_TRANSACTION_REQUEST_TYPE.value,
             account = AccountInfo(
                 name = "Account 1",
@@ -885,8 +884,8 @@ class MockedApprovals {
         )
     }
 
-    fun getLoginApproval( jwtToken : String) : SolanaApprovalRequestType {
-        return SolanaApprovalRequestType.LoginApprovalRequest(
+    fun getLoginApproval( jwtToken : String) : ApprovalRequestDetails {
+        return ApprovalRequestDetails.LoginApprovalRequest(
             type = ApprovalType.LOGIN_TYPE.value,
             jwtToken = jwtToken,
             email = "sharris@blue.rock",
@@ -894,10 +893,9 @@ class MockedApprovals {
         )
     }
 
-    fun getWalletInitiationRequest( requestType: SolanaApprovalRequestType, initiation: MultiSigOpInitiation) : WalletApproval {
-        return WalletApproval(
+    fun getWalletInitiationRequest(requestType: ApprovalRequestDetails, initiation: MultiSigOpInitiation) : ApprovalRequest {
+        return ApprovalRequest(
             id= "1",
-            walletType = WalletSigner.WALLET_TYPE_SOLANA,
             submitterName= "",
             submitterEmail= "",
             submitDate= Date().toString(),
@@ -917,8 +915,8 @@ class MockedApprovals {
         )
     }
 
-    fun getBalanceAccountAddressWhitelistUpdate(nonceAccountAddresses: List<String>): SolanaApprovalRequestType {
-        return SolanaApprovalRequestType.BalanceAccountAddressWhitelistUpdate(
+    fun getBalanceAccountAddressWhitelistUpdate(nonceAccountAddresses: List<String>): ApprovalRequestDetails {
+        return ApprovalRequestDetails.BalanceAccountAddressWhitelistUpdate(
             type = ApprovalType.BALANCE_ACCOUNT_ADDRESS_WHITE_LIST_UPDATE_TYPE.value,
             accountInfo = AccountInfo(
                 name = "Account 1",
@@ -961,8 +959,8 @@ class MockedApprovals {
         )
     }
 
-    fun getBalanceAccountSettingsUpdate(nonceAccountAddresses: List<String>): SolanaApprovalRequestType {
-        return SolanaApprovalRequestType.BalanceAccountSettingsUpdate(
+    fun getBalanceAccountSettingsUpdate(nonceAccountAddresses: List<String>): ApprovalRequestDetails {
+        return ApprovalRequestDetails.BalanceAccountSettingsUpdate(
             type = ApprovalType.BALANCE_ACCOUNT_SETTINGS_UPDATE_TYPE.value,
             account = AccountInfo(
                 name = "Account 1",
@@ -988,8 +986,8 @@ class MockedApprovals {
     }
 
 
-    fun getAddAddressBookEntry(nonceAccountAddresses: List<String>): SolanaApprovalRequestType {
-        return SolanaApprovalRequestType.AddressBookUpdate(
+    fun getAddAddressBookEntry(nonceAccountAddresses: List<String>): ApprovalRequestDetails {
+        return ApprovalRequestDetails.AddressBookUpdate(
             type = ApprovalType.ADDRESS_BOOK_TYPE.value,
             entriesToRemove = emptyList(),
             entriesToAdd = listOf(
@@ -1018,8 +1016,8 @@ class MockedApprovals {
         )
     }
 
-    fun getRemoveDAppBookEntry(nonceAccountAddresses: List<String>): SolanaApprovalRequestType {
-        return SolanaApprovalRequestType.DAppBookUpdate(
+    fun getRemoveDAppBookEntry(nonceAccountAddresses: List<String>): ApprovalRequestDetails {
+        return ApprovalRequestDetails.DAppBookUpdate(
             type = ApprovalType.DAPP_BOOK_UPDATE_TYPE.value,
             entriesToAdd = emptyList(),
             entriesToRemove = listOf(

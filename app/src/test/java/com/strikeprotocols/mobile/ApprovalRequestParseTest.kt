@@ -2,7 +2,6 @@ package com.strikeprotocols.mobile
 
 import com.google.gson.JsonElement
 import com.google.gson.JsonParser
-import com.strikeprotocols.mobile.common.MockedApprovals
 import com.strikeprotocols.mobile.data.models.approval.*
 import org.junit.Assert.*
 import org.junit.Test
@@ -15,7 +14,7 @@ class ParseApprovalRequestTypes {
     fun parseAllApprovalRequestTypes() {
         val allApprovalRequests = getFullListOfApprovalItems()
 
-        assertEquals(14, allApprovalRequests.size)
+        assertEquals(16, allApprovalRequests.size)
 
         allApprovalRequests.forEach { approvalRequest ->
             assertNotNull(approvalRequest)
@@ -24,9 +23,9 @@ class ParseApprovalRequestTypes {
             val details = approvalRequest.details
 
             if (details is SolanaApprovalRequestDetails.MultiSignOpInitiationDetails) {
-                assertNotEquals(details.requestType, SolanaApprovalRequestType.UnknownApprovalType)
+                assertNotEquals(details.requestType, ApprovalRequestDetails.UnknownApprovalType)
             } else if (details is SolanaApprovalRequestDetails.ApprovalRequestDetails) {
-                assertNotEquals(details.requestType, SolanaApprovalRequestType.UnknownApprovalType)
+                assertNotEquals(details.requestType, ApprovalRequestDetails.UnknownApprovalType)
             }
         }
     }
@@ -39,32 +38,32 @@ class ParseApprovalRequestTypes {
             val details = walletApproval.details
 
             if (details is SolanaApprovalRequestDetails.MultiSignOpInitiationDetails) {
-                assertNotEquals(details.requestType, SolanaApprovalRequestType.UnknownApprovalType)
+                assertNotEquals(details.requestType, ApprovalRequestDetails.UnknownApprovalType)
 
-                val asString = WalletApproval.toJson(walletApproval, mockUriWrapper)
+                val asString = ApprovalRequest.toJson(walletApproval, mockUriWrapper)
                 assertNotNull(asString)
 
-                val parsedWalletApproval = WalletApproval.fromJson(asString)
-                assertEquals(walletApproval, parsedWalletApproval)
+                val parsedApprovalRequest = ApprovalRequest.fromJson(asString)
+                assertEquals(walletApproval, parsedApprovalRequest)
 
                 val parsedDetails =
-                    parsedWalletApproval.details as SolanaApprovalRequestDetails.MultiSignOpInitiationDetails
+                    parsedApprovalRequest.details as SolanaApprovalRequestDetails.MultiSignOpInitiationDetails
                 assertNotNull(parsedDetails.multisigOpInitiation)
-                assert(parsedDetails.requestType !is SolanaApprovalRequestType.UnknownApprovalType)
+                assert(parsedDetails.requestType !is ApprovalRequestDetails.UnknownApprovalType)
             } else if (details is SolanaApprovalRequestDetails.ApprovalRequestDetails) {
-                assertNotEquals(details.requestType, SolanaApprovalRequestType.UnknownApprovalType)
+                assertNotEquals(details.requestType, ApprovalRequestDetails.UnknownApprovalType)
 
-                val asString = WalletApproval.toJson(walletApproval, mockUriWrapper)
+                val asString = ApprovalRequest.toJson(walletApproval, mockUriWrapper)
                 assertNotNull(asString)
 
-                val parsedWalletApproval = WalletApproval.fromJson(asString)
-                assertEquals(walletApproval, parsedWalletApproval)
+                val parsedApprovalRequest = ApprovalRequest.fromJson(asString)
+                assertEquals(walletApproval, parsedApprovalRequest)
 
                 val parsedDetails =
-                    parsedWalletApproval.details as SolanaApprovalRequestDetails.ApprovalRequestDetails
-                assert(parsedDetails.requestType !is SolanaApprovalRequestType.UnknownApprovalType)
+                    parsedApprovalRequest.details as SolanaApprovalRequestDetails.ApprovalRequestDetails
+                assert(parsedDetails.requestType !is ApprovalRequestDetails.UnknownApprovalType)
 
-                if(details.requestType is SolanaApprovalRequestType.DAppTransactionRequest) {
+                if(details.requestType is ApprovalRequestDetails.DAppTransactionRequest) {
                     println(details.requestType)
                 }
             }
@@ -72,27 +71,8 @@ class ParseApprovalRequestTypes {
     }
 
     @Test
-    fun testSignDataWithBalanceAccountCreationApprovalParsing() {
-        val deserializer = WalletApprovalDeserializer()
-        val signeDataAsJsonElement: JsonElement = JsonParser.parseString(
-            signDataWithBalanceAccountCreationInitiationJson.trim())
-        val balanceAccountCreationApproval = deserializer.parseData(signeDataAsJsonElement)
-
-        assertNotNull(balanceAccountCreationApproval)
-        assertNotNull(balanceAccountCreationApproval.details)
-
-        val details = balanceAccountCreationApproval.details as SolanaApprovalRequestDetails.MultiSignOpInitiationDetails
-        assertNotEquals(details.requestType, SolanaApprovalRequestType.UnknownApprovalType)
-        assertEquals(
-            details.requestType::class.java,
-            SolanaApprovalRequestType.BalanceAccountCreation::class.java
-        )
-        assertNotNull((details.requestType as SolanaApprovalRequestType.BalanceAccountCreation).signingData.base64DataToSign)
-    }
-
-    @Test
     fun testSignDataWithPlainStringApprovalParsing() {
-        val deserializer = WalletApprovalDeserializer()
+        val deserializer = ApprovalRequestDeserializer()
         val signDataAsJsonElement: JsonElement = JsonParser.parseString(
             signDataWithPlainStringInitiationJson.trim())
         val signDataApproval = deserializer.parseData(signDataAsJsonElement)
@@ -101,17 +81,17 @@ class ParseApprovalRequestTypes {
         assertNotNull(signDataApproval.details)
 
         val details = signDataApproval.details as SolanaApprovalRequestDetails.MultiSignOpInitiationDetails
-        assertNotEquals(details.requestType, SolanaApprovalRequestType.UnknownApprovalType)
+        assertNotEquals(details.requestType, ApprovalRequestDetails.UnknownApprovalType)
         assertEquals(
             details.requestType::class.java,
-            SolanaApprovalRequestType.SignData::class.java
+            ApprovalRequestDetails.SignData::class.java
         )
-        assertNull((details.requestType as SolanaApprovalRequestType.SignData).signingData.base64DataToSign)
+        assertNull((details.requestType as ApprovalRequestDetails.SignData).signingData.base64DataToSign)
     }
 
     @Test
     fun testLoginApprovalParsing() {
-        val deserializer = WalletApprovalDeserializer()
+        val deserializer = ApprovalRequestDeserializer()
         val signersAsJsonElement: JsonElement = JsonParser.parseString(loginApprovalJson.trim())
         val loginApprovalWalletApproval = deserializer.parseData(signersAsJsonElement)
 
@@ -120,13 +100,13 @@ class ParseApprovalRequestTypes {
 
         val details =
             loginApprovalWalletApproval.details as SolanaApprovalRequestDetails.ApprovalRequestDetails
-        assertNotEquals(details.requestType, SolanaApprovalRequestType.UnknownApprovalType)
+        assertNotEquals(details.requestType, ApprovalRequestDetails.UnknownApprovalType)
         assertEquals(
             details.requestType::class.java,
-            SolanaApprovalRequestType.LoginApprovalRequest::class.java
+            ApprovalRequestDetails.LoginApprovalRequest::class.java
         )
 
-        val type = details.requestType as SolanaApprovalRequestType.LoginApprovalRequest
+        val type = details.requestType as ApprovalRequestDetails.LoginApprovalRequest
 
         assertNotNull(type.jwtToken)
         assertEquals(type.type, ApprovalType.LOGIN_TYPE.value)
@@ -134,52 +114,64 @@ class ParseApprovalRequestTypes {
 
     @Test
     fun testSerializingAndDeserializingLoginApproval() {
-        val deserializer = WalletApprovalDeserializer()
+        val deserializer = ApprovalRequestDeserializer()
         val signersAsJsonElement: JsonElement = JsonParser.parseString(loginApprovalJson.trim())
         val loginApprovalWalletApproval = deserializer.parseData(signersAsJsonElement)
 
         val details =
             loginApprovalWalletApproval.details as SolanaApprovalRequestDetails.ApprovalRequestDetails
 
-        assertNotEquals(details.requestType, SolanaApprovalRequestType.UnknownApprovalType)
+        assertNotEquals(details.requestType, ApprovalRequestDetails.UnknownApprovalType)
 
-        val asString = WalletApproval.toJson(loginApprovalWalletApproval, mockUriWrapper)
+        val asString = ApprovalRequest.toJson(loginApprovalWalletApproval, mockUriWrapper)
         assertNotNull(asString)
 
-        val parsedWalletApproval = WalletApproval.fromJson(asString)
-        assertEquals(loginApprovalWalletApproval, parsedWalletApproval)
+        val parsedApprovalRequest = ApprovalRequest.fromJson(asString)
+        assertEquals(loginApprovalWalletApproval, parsedApprovalRequest)
 
         val parsedDetails =
-            parsedWalletApproval.details as SolanaApprovalRequestDetails.ApprovalRequestDetails
-        assert(parsedDetails.requestType !is SolanaApprovalRequestType.UnknownApprovalType)
-        assert(parsedDetails.requestType is SolanaApprovalRequestType.LoginApprovalRequest)
+            parsedApprovalRequest.details as SolanaApprovalRequestDetails.ApprovalRequestDetails
+        assert(parsedDetails.requestType !is ApprovalRequestDetails.UnknownApprovalType)
+        assert(parsedDetails.requestType is ApprovalRequestDetails.LoginApprovalRequest)
 
-        val type = parsedDetails.requestType as SolanaApprovalRequestType.LoginApprovalRequest
+        val type = parsedDetails.requestType as ApprovalRequestDetails.LoginApprovalRequest
 
         assertNotNull(type.jwtToken)
         assertEquals(type.type, ApprovalType.LOGIN_TYPE.value)
     }
 
-    private fun getFullListOfApprovalItems(): List<WalletApproval> {
-        val deserializer = WalletApprovalDeserializer()
+    private fun getFullListOfApprovalItems(): List<ApprovalRequest> {
+        val deserializer = ApprovalRequestDeserializer()
 
-        val allApprovalRequests = mutableListOf<WalletApproval>()
+        val allApprovalRequests = mutableListOf<ApprovalRequest>()
 
         val signersAsJsonElement: JsonElement = JsonParser.parseString(signersUpdateJson.trim())
         val signersUpdateWalletApproval = deserializer.parseData(signersAsJsonElement)
         allApprovalRequests.add(signersUpdateWalletApproval)
 
-        val multiSigWithBalanceAccountCreationJson: JsonElement =
-            JsonParser.parseString(multiSigWithBalanceAccountCreationJson.trim())
-        val multiSigWithBalanceAccountCreationWalletApproval =
-            deserializer.parseData(multiSigWithBalanceAccountCreationJson)
-        allApprovalRequests.add(multiSigWithBalanceAccountCreationWalletApproval)
+        val multiSigWithWalletCreationJson: JsonElement =
+            JsonParser.parseString(multiSigWithWalletCreationJson.trim())
+        val multiSigWithWalletCreationApprovalRequest =
+            deserializer.parseData(multiSigWithWalletCreationJson)
+        allApprovalRequests.add(multiSigWithWalletCreationApprovalRequest)
 
-        val balanceAccountCreationJson: JsonElement =
-            JsonParser.parseString(balanceAccountCreationJson.trim())
-        val balanceAccountCreationWalletApproval =
-            deserializer.parseData(balanceAccountCreationJson)
-        allApprovalRequests.add(balanceAccountCreationWalletApproval)
+        val solanaWalletCreationJson: JsonElement =
+            JsonParser.parseString(solanaWalletCreationJson.trim())
+        val solanaWalletCreationApprovalRequest =
+            deserializer.parseData(solanaWalletCreationJson)
+        allApprovalRequests.add(solanaWalletCreationApprovalRequest)
+
+        val bitcoinWalletCreationJson: JsonElement =
+            JsonParser.parseString(bitcoinWalletCreationJson.trim())
+        val bitcoinWalletCreationApprovalRequest =
+            deserializer.parseData(bitcoinWalletCreationJson)
+        allApprovalRequests.add(bitcoinWalletCreationApprovalRequest)
+
+        val ethereumWalletCreationJson: JsonElement =
+            JsonParser.parseString(ethereumWalletCreationJson.trim())
+        val ethereumWalletCreationApprovalRequest =
+            deserializer.parseData(ethereumWalletCreationJson)
+        allApprovalRequests.add(ethereumWalletCreationApprovalRequest)
 
         val multiSigWithSignersUpdateJson: JsonElement =
             JsonParser.parseString(multiSigWithSignersUpdateJson.trim())

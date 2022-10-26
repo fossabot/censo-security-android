@@ -27,6 +27,7 @@ data class StoredKeyData(
         }
 
         const val BITCOIN_KEY = "bitcoin_key"
+        const val ETHEREUM_KEY = "ethereum_key"
         const val SOLANA_KEY = "solana_key"
         const val ROOT_SEED = "root_seed"
     }

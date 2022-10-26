@@ -9,7 +9,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.strikeprotocols.mobile.R
 import com.strikeprotocols.mobile.common.convertSecondsIntoReadableText
-import com.strikeprotocols.mobile.data.models.approval.SolanaApprovalRequestType
+import com.strikeprotocols.mobile.data.models.approval.ApprovalRequestDetails
 import com.strikeprotocols.mobile.presentation.approvals.ApprovalContentHeader
 import com.strikeprotocols.mobile.presentation.approvals.approval_type_row_items.getHeader
 import com.strikeprotocols.mobile.presentation.approvals.approval_type_row_items.retrieveSlotRowData
@@ -18,7 +18,7 @@ import com.strikeprotocols.mobile.presentation.components.FactsData
 
 @Composable
 fun WalletConfigPolicyUpdateDetailContent(
-    walletConfigPolicyUpdate: SolanaApprovalRequestType.WalletConfigPolicyUpdate
+    walletConfigPolicyUpdate: ApprovalRequestDetails.WalletConfigPolicyUpdate
 ) {
     val header = walletConfigPolicyUpdate.getHeader(LocalContext.current)
     ApprovalContentHeader(header = header, topSpacing = 24, bottomSpacing = 36)
@@ -41,7 +41,7 @@ fun WalletConfigPolicyUpdateDetailContent(
 }
 
 fun generateWalletConfigPolicyRows(
-    walletConfigPolicyUpdate: SolanaApprovalRequestType.WalletConfigPolicyUpdate,
+    walletConfigPolicyUpdate: ApprovalRequestDetails.WalletConfigPolicyUpdate,
     context: Context
 ): List<FactsData> {
     val approvalsRequired = walletConfigPolicyUpdate.approvalPolicy.approvalsRequired.toInt().toString()

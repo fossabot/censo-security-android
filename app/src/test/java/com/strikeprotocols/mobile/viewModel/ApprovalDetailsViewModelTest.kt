@@ -1,6 +1,5 @@
 package com.strikeprotocols.mobile.viewModel
 
-import androidx.biometric.BiometricPrompt
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.whenever
 import com.strikeprotocols.mobile.*
@@ -12,11 +11,10 @@ import com.strikeprotocols.mobile.data.SolanaRepository
 import com.strikeprotocols.mobile.data.models.ApprovalDisposition
 import com.strikeprotocols.mobile.data.models.Nonce
 import com.strikeprotocols.mobile.data.models.approval.SolanaApprovalRequestDetails
-import com.strikeprotocols.mobile.data.models.approval.WalletApproval
+import com.strikeprotocols.mobile.data.models.approval.ApprovalRequest
 import com.strikeprotocols.mobile.presentation.approval_detail.ApprovalDetailsViewModel
 import com.strikeprotocols.mobile.presentation.approval_disposition.ApprovalDispositionState
 import com.strikeprotocols.mobile.presentation.durable_nonce.DurableNonceViewModel
-import junit.framework.TestCase
 import junit.framework.TestCase.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -58,8 +56,8 @@ class ApprovalDetailsViewModelTest : BaseViewModelTest() {
     //region Testing data
     private val testLoginApproval = getLoginApproval()
     private val testRemoveDAppBookEntryApproval = getRemoveDAppBookEntryApproval()
-    private val testMultiSigBalanceAccountCreationWalletApproval =
-        getMultiSigBalanceAccountCreationWalletApproval()
+    private val testMultiSigWalletCreationApprovalRequest =
+        getMultiSigWalletCreationApprovalRequest()
 
     private lateinit var testMultipleAccounts: DurableNonceViewModel.MultipleAccounts
 
@@ -202,13 +200,13 @@ class ApprovalDetailsViewModelTest : BaseViewModelTest() {
         assertApprovalInStateIsNull()
 
         //Set approval in state
-        approvalDetailsViewModel.handleInitialData(testMultiSigBalanceAccountCreationWalletApproval)
+        approvalDetailsViewModel.handleInitialData(testMultiSigWalletCreationApprovalRequest)
 
-        assertExpectedApprovalInState(expectedApproval = testMultiSigBalanceAccountCreationWalletApproval)
+        assertExpectedApprovalInState(expectedApproval = testMultiSigWalletCreationApprovalRequest)
 
         //Grab data to know if approval is initiation or regular
         val isInitiationRequest =
-            testMultiSigBalanceAccountCreationWalletApproval.details is SolanaApprovalRequestDetails.MultiSignOpInitiationDetails
+            testMultiSigWalletCreationApprovalRequest.details is SolanaApprovalRequestDetails.MultiSignOpInitiationDetails
 
         //Set isApproving in state
         approvalDetailsViewModel.setShouldDisplayConfirmDispositionDialog(
@@ -246,13 +244,13 @@ class ApprovalDetailsViewModelTest : BaseViewModelTest() {
         assertApprovalInStateIsNull()
 
         //Set approval in state
-        approvalDetailsViewModel.handleInitialData(testMultiSigBalanceAccountCreationWalletApproval)
+        approvalDetailsViewModel.handleInitialData(testMultiSigWalletCreationApprovalRequest)
 
-        assertExpectedApprovalInState(expectedApproval = testMultiSigBalanceAccountCreationWalletApproval)
+        assertExpectedApprovalInState(expectedApproval = testMultiSigWalletCreationApprovalRequest)
 
         //Grab data to know if approval is initiation or regular
         val isInitiationRequest =
-            testMultiSigBalanceAccountCreationWalletApproval.details is SolanaApprovalRequestDetails.MultiSignOpInitiationDetails
+            testMultiSigWalletCreationApprovalRequest.details is SolanaApprovalRequestDetails.MultiSignOpInitiationDetails
 
         //Set isApproving in state
         approvalDetailsViewModel.setShouldDisplayConfirmDispositionDialog(
@@ -337,13 +335,13 @@ class ApprovalDetailsViewModelTest : BaseViewModelTest() {
         assertApprovalInStateIsNull()
 
         //Set approval in state
-        approvalDetailsViewModel.handleInitialData(testMultiSigBalanceAccountCreationWalletApproval)
+        approvalDetailsViewModel.handleInitialData(testMultiSigWalletCreationApprovalRequest)
 
-        assertExpectedApprovalInState(expectedApproval = testMultiSigBalanceAccountCreationWalletApproval)
+        assertExpectedApprovalInState(expectedApproval = testMultiSigWalletCreationApprovalRequest)
 
         //Grab data to know if approval is initiation or regular
         val isInitiationRequest =
-            testMultiSigBalanceAccountCreationWalletApproval.details is SolanaApprovalRequestDetails.MultiSignOpInitiationDetails
+            testMultiSigWalletCreationApprovalRequest.details is SolanaApprovalRequestDetails.MultiSignOpInitiationDetails
 
         //Set isApproving in state
         approvalDetailsViewModel.setShouldDisplayConfirmDispositionDialog(
@@ -512,7 +510,7 @@ class ApprovalDetailsViewModelTest : BaseViewModelTest() {
         assertEquals(null, approvalDetailsViewModel.state.selectedApproval)
     }
 
-    private fun assertExpectedApprovalInState(expectedApproval: WalletApproval) {
+    private fun assertExpectedApprovalInState(expectedApproval: ApprovalRequest) {
         assertEquals(expectedApproval, approvalDetailsViewModel.state.selectedApproval)
     }
 

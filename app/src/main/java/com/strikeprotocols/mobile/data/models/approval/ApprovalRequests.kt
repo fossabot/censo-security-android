@@ -4,10 +4,10 @@ import android.content.Context
 import com.google.gson.*
 import com.strikeprotocols.mobile.R
 import com.strikeprotocols.mobile.common.UriWrapper
-import com.strikeprotocols.mobile.data.models.approval.SolanaApprovalRequestType.Companion.UNKNOWN_REQUEST_APPROVAL
+import com.strikeprotocols.mobile.data.models.approval.ApprovalRequestDetails.Companion.UNKNOWN_REQUEST_APPROVAL
 import java.lang.reflect.Modifier
 
-data class WalletApproval(
+data class ApprovalRequest(
     val approvalTimeoutInSeconds: Int?,
     val id: String?,
     val numberOfApprovalsReceived: Int?,
@@ -16,7 +16,6 @@ data class WalletApproval(
     val submitDate: String?,
     val submitterEmail: String?,
     val submitterName: String?,
-    val walletType: String?,
     val vaultName: String?,
     @Transient val details: SolanaApprovalRequestDetails?
 ) {
@@ -56,16 +55,16 @@ data class WalletApproval(
             else -> false
         }
 
-    fun unknownApprovalType() : WalletApproval {
+    fun unknownApprovalType() : ApprovalRequest {
         return copy(
             details = SolanaApprovalRequestDetails.ApprovalRequestDetails(
-                requestType = SolanaApprovalRequestType.UnknownApprovalType
+                requestType = ApprovalRequestDetails.UnknownApprovalType
             )
         )
     }
 
     companion object {
-        fun toJson(approval: WalletApproval, uriWrapper: UriWrapper): String {
+        fun toJson(approval: ApprovalRequest, uriWrapper: UriWrapper): String {
             val jsonString = GsonBuilder()
                 .excludeFieldsWithModifiers(Modifier.STATIC)
                 .registerTypeAdapterFactory(TypeFactorySettings.signingDataAdapterFactory)
@@ -75,9 +74,9 @@ data class WalletApproval(
             return uriWrapper.encode(jsonString)
         }
 
-        fun fromJson(json: String): WalletApproval {
-            val walletApprovalDeserializer = WalletApprovalDeserializer()
-            return walletApprovalDeserializer.toObjectWithParsedDetails(json)
+        fun fromJson(json: String): ApprovalRequest {
+            val approvalRequestDeserializer = ApprovalRequestDeserializer()
+            return approvalRequestDeserializer.toObjectWithParsedDetails(json)
         }
     }
 }

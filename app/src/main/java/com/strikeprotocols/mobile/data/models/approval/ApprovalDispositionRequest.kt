@@ -1,11 +1,10 @@
 package com.strikeprotocols.mobile.data.models.approval
 
-import androidx.biometric.BiometricPrompt
 import com.strikeprotocols.mobile.common.BaseWrapper
 import com.strikeprotocols.mobile.common.BaseWrapper.decodeFromBase64
-import com.strikeprotocols.mobile.common.toHexString
 import com.strikeprotocols.mobile.data.EncryptionManager
 import com.strikeprotocols.mobile.data.Signable
+import com.strikeprotocols.mobile.data.SignedPayload
 import com.strikeprotocols.mobile.data.models.ApprovalDisposition
 import com.strikeprotocols.mobile.data.models.Nonce
 import com.strikeprotocols.mobile.data.models.StoredKeyData
@@ -14,15 +13,15 @@ import com.strikeprotocols.mobile.data.models.approval.TransactionInstruction.Co
 import org.web3j.crypto.Hash
 import java.io.ByteArrayOutputStream
 import kotlin.Exception
-import com.strikeprotocols.mobile.data.models.approval.SolanaApprovalRequestType.Companion.INVALID_REQUEST_APPROVAL
-import com.strikeprotocols.mobile.data.models.approval.SolanaApprovalRequestType.Companion.UNKNOWN_REQUEST_APPROVAL
-import com.strikeprotocols.mobile.data.models.approval.SolanaApprovalRequestType.*
+import com.strikeprotocols.mobile.data.models.approval.ApprovalRequestDetails.Companion.INVALID_REQUEST_APPROVAL
+import com.strikeprotocols.mobile.data.models.approval.ApprovalRequestDetails.Companion.UNKNOWN_REQUEST_APPROVAL
+import com.strikeprotocols.mobile.data.models.approval.ApprovalRequestDetails.*
 import javax.crypto.Cipher
 
 data class ApprovalDispositionRequest(
     val requestId: String,
     val approvalDisposition: ApprovalDisposition,
-    val requestType: SolanaApprovalRequestType,
+    val requestType: ApprovalRequestDetails,
     val nonces: List<Nonce>,
     val email: String
 ) : Signable {
@@ -34,7 +33,7 @@ data class ApprovalDispositionRequest(
 
     private fun retrieveOpCode(): Byte {
         return when (requestType) {
-            is BalanceAccountCreation -> 1
+            is WalletCreation -> 1
             is WithdrawalRequest, is ConversionRequest -> 3
             is SignersUpdate -> 5
             is WrapConversionRequest -> 4
@@ -68,7 +67,7 @@ data class ApprovalDispositionRequest(
         }
 
         return when (requestType) {
-            is BalanceAccountCreation -> {
+            is WalletCreation -> {
                 val buffer = ByteArrayOutputStream()
 
                 buffer.write(byteArrayOf(retrieveOpCode()))
@@ -216,7 +215,7 @@ data class ApprovalDispositionRequest(
 
     private fun signingData(): SigningData =
         when (requestType) {
-            is BalanceAccountCreation -> requestType.signingData
+            is WalletCreation -> requestType.signingData ?: throw Exception(INVALID_REQUEST_APPROVAL)
             is WithdrawalRequest -> requestType.signingData
             is ConversionRequest -> requestType.signingData
             is SignersUpdate -> requestType.signingData
@@ -255,6 +254,11 @@ data class ApprovalDispositionRequest(
                 listOf(requestType.vaultName.toByteArray(charset = Charsets.UTF_8))
             is PasswordReset ->
                 listOf(requestId.toByteArray(charset = Charsets.UTF_8))
+            is WalletCreation ->
+                when (requestType.accountInfo.chainName) {
+                    "Bitcoin", "Ethereum" -> listOf(requestType.toJson().toByteArray())
+                    else -> listOf(serializeSolanaRequest(approverPublicKey))
+                }
             is WithdrawalRequest -> {
                 when (requestType.signingData) {
                     is SigningData.SolanaSigningData -> listOf(serializeSolanaRequest(approverPublicKey))
@@ -323,25 +327,39 @@ data class ApprovalDispositionRequest(
         val signatureInfo: ApprovalSignature = when (requestType) {
             is LoginApprovalRequest, is PasswordReset, is AcceptVaultInvitation ->
                 ApprovalSignature.NoChainSignature(
-                    signature = signRequestWithSolanaKey(encryptionManager, cipher)
+                    signRequestWithSolanaKey(encryptionManager, cipher)
                 )
+            is WalletCreation -> {
+                when (requestType.accountInfo.chainName) {
+                    "Bitcoin" -> ApprovalSignature.NoChainSignature(
+                        signRequestWithBitcoinKey(encryptionManager, cipher).first()
+                    )
+                    "Ethereum" -> ApprovalSignature.NoChainSignature(
+                        signRequestWithEthereumKey(encryptionManager, cipher)
+                    )
+                    else -> ApprovalSignature.SolanaSignature(
+                        signature = signRequestWithSolanaKey(encryptionManager, cipher).signature,
+                        nonce = nonces.first().value,
+                        nonceAccountAddress = requestType.nonceAccountAddresses().first()
+                    )
+                }
+            }
             is WithdrawalRequest -> {
                 when (requestType.signingData) {
                     is SigningData.BitcoinSigningData ->
                         ApprovalSignature.BitcoinSignatures(
-                            signatures = signRequestWithBitcoinKey(encryptionManager, cipher, requestType.signingData.childKeyIndex
-                            )
+                            signatures = signRequestWithBitcoinKey(encryptionManager, cipher, requestType.signingData.childKeyIndex).map { it.signature }
                         )
                     is SigningData.SolanaSigningData ->
                         ApprovalSignature.SolanaSignature(
-                            signature = signRequestWithSolanaKey(encryptionManager, cipher),
+                            signature = signRequestWithSolanaKey(encryptionManager, cipher).signature,
                             nonce = nonces.first().value,
                             nonceAccountAddress = requestType.nonceAccountAddresses().first()
                         )
                 }
             }
             else -> ApprovalSignature.SolanaSignature(
-                signature = signRequestWithSolanaKey(encryptionManager, cipher),
+                signature = signRequestWithSolanaKey(encryptionManager, cipher).signature,
                 nonce = nonces.first().value,
                 nonceAccountAddress = requestType.nonceAccountAddresses().first()
             )
@@ -355,7 +373,7 @@ data class ApprovalDispositionRequest(
 
     private fun signRequestWithSolanaKey(
         encryptionManager: EncryptionManager,
-        cipher: Cipher): String {
+        cipher: Cipher): SignedPayload {
         val privateKeyByteArray = encryptionManager.retrieveSavedKey(
             email = email, cipher = cipher
         )
@@ -375,7 +393,7 @@ data class ApprovalDispositionRequest(
     private fun signRequestWithBitcoinKey(
         encryptionManager: EncryptionManager,
         cipher: Cipher,
-        childKeyIndex: Int): List<String> {
+        childKeyIndex: Int): List<SignedPayload> {
 
         val privateKeyByteArray = encryptionManager.retrieveSavedKey(
             email = email, cipher = cipher, keyType = StoredKeyData.BITCOIN_KEY
@@ -386,6 +404,42 @@ data class ApprovalDispositionRequest(
                 signable = this,
                 bitcoinKey = BaseWrapper.encode(privateKeyByteArray),
                 childKeyIndex = childKeyIndex
+            )
+        } catch (e: Exception) {
+            throw Exception("Signing data failure")
+        }
+    }
+
+    private fun signRequestWithBitcoinKey(
+        encryptionManager: EncryptionManager,
+        cipher: Cipher): List<SignedPayload> {
+
+        val privateKeyByteArray = encryptionManager.retrieveSavedKey(
+            email = email, cipher = cipher, keyType = StoredKeyData.BITCOIN_KEY
+        )
+
+        return try {
+            encryptionManager.signBitcoinApprovalDispositionMessage(
+                signable = this,
+                bitcoinKey = BaseWrapper.encode(privateKeyByteArray)
+            )
+        } catch (e: Exception) {
+            throw Exception("Signing data failure")
+        }
+    }
+
+    private fun signRequestWithEthereumKey(
+        encryptionManager: EncryptionManager,
+        cipher: Cipher): SignedPayload {
+
+        val privateKeyByteArray = encryptionManager.retrieveSavedKey(
+            email = email, cipher = cipher, keyType = StoredKeyData.ETHEREUM_KEY
+        )
+
+        return try {
+            encryptionManager.signEthereumApprovalDispositionMessage(
+                signable = this,
+                ethereumKey = BaseWrapper.encode(privateKeyByteArray)
             )
         } catch (e: Exception) {
             throw Exception("Signing data failure")

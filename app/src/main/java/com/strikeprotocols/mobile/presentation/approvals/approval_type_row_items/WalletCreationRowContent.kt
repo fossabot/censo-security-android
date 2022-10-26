@@ -8,16 +8,16 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.strikeprotocols.mobile.common.toWalletName
-import com.strikeprotocols.mobile.data.models.approval.SolanaApprovalRequestType
+import com.strikeprotocols.mobile.data.models.approval.ApprovalRequestDetails
 import com.strikeprotocols.mobile.presentation.approval_detail.approval_type_detail_items.ApprovalSubtitle
 import com.strikeprotocols.mobile.presentation.approvals.ApprovalContentHeader
 
 @Composable
-fun BalanceAccountCreationRowContent(
-    balanceAccountCreation: SolanaApprovalRequestType.BalanceAccountCreation
+fun WalletCreationRowContent(
+    walletCreation: ApprovalRequestDetails.WalletCreation
 ) {
-    val header = balanceAccountCreation.getHeader(LocalContext.current)
-    val accountName = balanceAccountCreation.accountInfo.name
+    val header = walletCreation.getHeader(LocalContext.current)
+    val accountName = walletCreation.accountInfo.name
 
     ApprovalContentHeader(header = header, topSpacing = 16, bottomSpacing = 8)
     ApprovalSubtitle(text = accountName.toWalletName(), fontSize = 20.sp)

@@ -1,6 +1,5 @@
 package com.strikeprotocols.mobile.viewModel
 
-import androidx.biometric.BiometricPrompt
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.times
 import com.nhaarman.mockitokotlin2.verify
@@ -10,14 +9,13 @@ import com.strikeprotocols.mobile.common.Resource
 import com.strikeprotocols.mobile.data.*
 import com.strikeprotocols.mobile.data.models.ApprovalDisposition
 import com.strikeprotocols.mobile.data.models.Nonce
-import com.strikeprotocols.mobile.data.models.approval.WalletApproval
+import com.strikeprotocols.mobile.data.models.approval.ApprovalRequest
 import com.strikeprotocols.mobile.presentation.approvals.ApprovalsViewModel
 import com.strikeprotocols.mobile.presentation.durable_nonce.DurableNonceViewModel
 import com.strikeprotocols.mobile.ResourceState.ERROR
 import com.strikeprotocols.mobile.ResourceState.SUCCESS
 import com.strikeprotocols.mobile.common.StrikeCountDownTimer
 import com.strikeprotocols.mobile.presentation.approval_disposition.ApprovalDispositionState
-import com.strikeprotocols.mobile.presentation.common_approvals.CommonApprovalsViewModel
 import junit.framework.TestCase.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.test.*
@@ -57,8 +55,8 @@ class ApprovalsViewModelTest : BaseViewModelTest() {
     //region Testing data
     private val testApprovals = getWalletApprovals()
 
-    private val testMultiSigBalanceAccountCreationWalletApproval =
-        getMultiSigBalanceAccountCreationWalletApproval()
+    private val testMultiSigWalletCreationApprovalRequest =
+        getMultiSigWalletCreationApprovalRequest()
 
     private val testApprovalsSize = testApprovals.size
     private val testApprovalsFirstIndex = 0
@@ -125,7 +123,7 @@ class ApprovalsViewModelTest : BaseViewModelTest() {
         approvalsViewModel.refreshData()
         advanceUntilIdle()
 
-        verify(approvalsRepository, times(1)).getWalletApprovals()
+        verify(approvalsRepository, times(1)).getApprovalRequests()
 
         assertExpectedWalletApprovalsResultAndExpectedApprovalsSize(expectedResourceState = SUCCESS, expectedSize = testApprovalsSize)
     }
@@ -146,7 +144,7 @@ class ApprovalsViewModelTest : BaseViewModelTest() {
         approvalsViewModel.refreshData()
         advanceUntilIdle()
 
-        verify(approvalsRepository, times(1)).getWalletApprovals()
+        verify(approvalsRepository, times(1)).getApprovalRequests()
 
         assertExpectedWalletApprovalsResultAndExpectedApprovalsSize(
             expectedResourceState = ERROR,
@@ -184,7 +182,7 @@ class ApprovalsViewModelTest : BaseViewModelTest() {
         approvalsViewModel.refreshData()
         advanceUntilIdle()
 
-        verify(approvalsRepository, times(2)).getWalletApprovals()
+        verify(approvalsRepository, times(2)).getApprovalRequests()
 
         assertExpectedWalletApprovalsResultAndExpectedApprovalsSize(
             expectedResourceState = ERROR,
@@ -224,12 +222,12 @@ class ApprovalsViewModelTest : BaseViewModelTest() {
         approvalsViewModel.wipeDataAfterDispositionSuccess()
 
         assertEquals(true, approvalsViewModel.state.approvals.isEmpty())
-        assertEquals(true, approvalsViewModel.state.walletApprovalsResult is Resource.Uninitialized)
+        assertEquals(true, approvalsViewModel.state.approvalsResultRequest is Resource.Uninitialized)
 
         //We want to wait for the refresh call to finish
         advanceUntilIdle()
 
-        verify(approvalsRepository, times(2)).getWalletApprovals()
+        verify(approvalsRepository, times(2)).getApprovalRequests()
 
         assertExpectedWalletApprovalsResultAndExpectedApprovalsSize(
             expectedResourceState = SUCCESS,
@@ -259,7 +257,7 @@ class ApprovalsViewModelTest : BaseViewModelTest() {
         approvalsViewModel.refreshData()
         advanceUntilIdle()
 
-        verify(approvalsRepository, times(1)).getWalletApprovals()
+        verify(approvalsRepository, times(1)).getApprovalRequests()
 
         assertExpectedWalletApprovalsResultAndExpectedApprovalsSize(
             expectedResourceState = SUCCESS,
@@ -312,8 +310,8 @@ class ApprovalsViewModelTest : BaseViewModelTest() {
     fun `register approval disposition successfully then view model should reflect the success in state`() = runTest {
         val firstApproval = testApprovals[testApprovalsFirstIndex]
         //region Get 1 approval in state
-        whenever(approvalsRepository.getWalletApprovals()).thenAnswer {
-            Resource.Success<List<WalletApproval?>>(
+        whenever(approvalsRepository.getApprovalRequests()).thenAnswer {
+            Resource.Success<List<ApprovalRequest?>>(
                 data = listOf(firstApproval)
             )
         }
@@ -323,7 +321,7 @@ class ApprovalsViewModelTest : BaseViewModelTest() {
         approvalsViewModel.refreshData()
         advanceUntilIdle()
 
-        verify(approvalsRepository, times(1)).getWalletApprovals()
+        verify(approvalsRepository, times(1)).getApprovalRequests()
 
         assertExpectedWalletApprovalsResultAndExpectedApprovalsSize(
             expectedResourceState = SUCCESS,
@@ -358,11 +356,11 @@ class ApprovalsViewModelTest : BaseViewModelTest() {
 
     @Test
     fun `register approval initiation disposition successfully then view model should reflect the success in state`() = runTest {
-        val initiationApproval = testMultiSigBalanceAccountCreationWalletApproval
+        val initiationApproval = testMultiSigWalletCreationApprovalRequest
 
         //region Get 1 approval in state
-        whenever(approvalsRepository.getWalletApprovals()).thenAnswer {
-            Resource.Success<List<WalletApproval?>>(
+        whenever(approvalsRepository.getApprovalRequests()).thenAnswer {
+            Resource.Success<List<ApprovalRequest?>>(
                 data = listOf(initiationApproval)
             )
         }
@@ -372,7 +370,7 @@ class ApprovalsViewModelTest : BaseViewModelTest() {
         approvalsViewModel.refreshData()
         advanceUntilIdle()
 
-        verify(approvalsRepository, times(1)).getWalletApprovals()
+        verify(approvalsRepository, times(1)).getApprovalRequests()
 
         assertExpectedWalletApprovalsResultAndExpectedApprovalsSize(
             expectedResourceState = SUCCESS,
@@ -415,7 +413,7 @@ class ApprovalsViewModelTest : BaseViewModelTest() {
 
         advanceUntilIdle()
 
-        verify(approvalsRepository, times(1)).getWalletApprovals()
+        verify(approvalsRepository, times(1)).getApprovalRequests()
     }
 
     @Test
@@ -433,18 +431,18 @@ class ApprovalsViewModelTest : BaseViewModelTest() {
     fun `call resetWalletApprovalsResult then view model should reflect uninitialized in state`() = runTest {
         setupApprovalsRepositoryToReturnApprovalsOnGetApprovals()
 
-        assertTrue(approvalsViewModel.state.walletApprovalsResult is Resource.Uninitialized)
+        assertTrue(approvalsViewModel.state.approvalsResultRequest is Resource.Uninitialized)
 
         approvalsViewModel.refreshData()
 
         advanceUntilIdle()
 
-        verify(approvalsRepository, times(1)).getWalletApprovals()
+        verify(approvalsRepository, times(1)).getApprovalRequests()
         assertExpectedWalletApprovalsResultAndExpectedApprovalsSize(SUCCESS, testApprovalsSize)
 
         approvalsViewModel.resetWalletApprovalsResult()
 
-        assertTrue(approvalsViewModel.state.walletApprovalsResult is Resource.Uninitialized)
+        assertTrue(approvalsViewModel.state.approvalsResultRequest is Resource.Uninitialized)
     }
 
     @Test
@@ -480,15 +478,15 @@ class ApprovalsViewModelTest : BaseViewModelTest() {
     //region Helper methods & Custom Asserts
 
     private suspend fun setupApprovalsRepositoryToReturnApprovalsOnGetApprovals() {
-        whenever(approvalsRepository.getWalletApprovals()).thenAnswer {
-            Resource.Success<List<WalletApproval?>>(
+        whenever(approvalsRepository.getApprovalRequests()).thenAnswer {
+            Resource.Success<List<ApprovalRequest?>>(
                 data = testApprovals
             )
         }
     }
 
     private suspend fun setupApprovalsRepositoryToReturnErrorOnGetApprovals() {
-        whenever(approvalsRepository.getWalletApprovals()).thenAnswer {
+        whenever(approvalsRepository.getApprovalRequests()).thenAnswer {
             Resource.Error<Any?>(exception = Exception())
         }
     }
@@ -545,15 +543,15 @@ class ApprovalsViewModelTest : BaseViewModelTest() {
 
     private fun assertExpectedWalletApprovalsResultAndExpectedApprovalsSize(expectedResourceState: ResourceState, expectedSize: Int) {
         if (expectedResourceState == SUCCESS) {
-            assertEquals(true, approvalsViewModel.state.walletApprovalsResult is Resource.Success)
+            assertEquals(true, approvalsViewModel.state.approvalsResultRequest is Resource.Success)
         } else {
-            assertEquals(true, approvalsViewModel.state.walletApprovalsResult is Resource.Error)
+            assertEquals(true, approvalsViewModel.state.approvalsResultRequest is Resource.Error)
         }
 
         assertEquals(expectedSize, approvalsViewModel.state.approvals.size)
     }
 
-    private fun assertExpectedDispositionAndExpectedSelectedApproval(expectedDisposition: ApprovalDisposition, expectedSelectedApproval: WalletApproval?) {
+    private fun assertExpectedDispositionAndExpectedSelectedApproval(expectedDisposition: ApprovalDisposition, expectedSelectedApproval: ApprovalRequest?) {
         assertEquals(expectedSelectedApproval, approvalsViewModel.state.selectedApproval)
         assertEquals(expectedDisposition, approvalsViewModel.state.approvalDispositionState?.approvalDisposition?.data)
 
@@ -566,7 +564,7 @@ class ApprovalsViewModelTest : BaseViewModelTest() {
 
     private fun assertExpectedDefaultStateForApprovalsData() {
         assertTrue(approvalsViewModel.state.approvals.isEmpty())
-        assertTrue(approvalsViewModel.state.walletApprovalsResult is Resource.Uninitialized)
+        assertTrue(approvalsViewModel.state.approvalsResultRequest is Resource.Uninitialized)
         assertNull(approvalsViewModel.state.selectedApproval)
         assertNull(approvalsViewModel.state.multipleAccounts)
     }

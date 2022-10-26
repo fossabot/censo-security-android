@@ -30,11 +30,11 @@ import com.strikeprotocols.mobile.common.*
 import com.strikeprotocols.mobile.data.models.ApprovalDisposition
 import com.strikeprotocols.mobile.data.models.approval.ApprovalDispositionRequest
 import com.strikeprotocols.mobile.data.models.approval.InitiationRequest
-import com.strikeprotocols.mobile.data.models.approval.SolanaApprovalRequestType
-import com.strikeprotocols.mobile.data.models.approval.WalletApproval
+import com.strikeprotocols.mobile.data.models.approval.ApprovalRequestDetails
+import com.strikeprotocols.mobile.data.models.approval.ApprovalRequest
 import com.strikeprotocols.mobile.presentation.approvals.ApprovalsViewModel
 import com.strikeprotocols.mobile.ui.theme.*
-import com.strikeprotocols.mobile.data.models.approval.SolanaApprovalRequestType.*
+import com.strikeprotocols.mobile.data.models.approval.ApprovalRequestDetails.*
 import com.strikeprotocols.mobile.presentation.approvals.ApprovalDetailContent
 import com.strikeprotocols.mobile.presentation.approvals.approval_type_row_items.getApprovalTimerText
 import com.strikeprotocols.mobile.presentation.approvals.approval_type_row_items.getDialogMessages
@@ -47,7 +47,7 @@ fun ApprovalDetailsScreen(
     navController: NavController,
     approvalDetailsViewModel: ApprovalDetailsViewModel = hiltViewModel(),
     durableNonceViewModel: DurableNonceViewModel = hiltViewModel(),
-    approval: WalletApproval?
+    approval: ApprovalRequest?
 ) {
     val approvalDetailsState = approvalDetailsViewModel.state
     val durableNonceState = durableNonceViewModel.state
@@ -320,7 +320,7 @@ fun ApprovalDetails(
     shouldRefreshTimer: Boolean,
     getSecondsLeftUntilCountdownIsOver: (String?, Int?) -> Long?,
     isLoading: Boolean,
-    approval: WalletApproval?,
+    approval: ApprovalRequest?,
     initiationRequest: Boolean
 ) {
     Column(
@@ -404,7 +404,7 @@ fun ApprovalStatus(
     denialsReceived: Int,
     expiresIn: String?,
     vaultName: String?,
-    requestType: SolanaApprovalRequestType?
+    requestType: ApprovalRequestDetails?
 ) {
 
     val facts = mutableListOf<Pair<String, String>>()

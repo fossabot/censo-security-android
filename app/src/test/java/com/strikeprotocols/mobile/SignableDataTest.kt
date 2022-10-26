@@ -1,5 +1,6 @@
 package com.strikeprotocols.mobile
 
+import com.google.gson.GsonBuilder
 import com.google.gson.JsonParser
 import com.strikeprotocols.mobile.common.BaseWrapper
 import com.strikeprotocols.mobile.common.toHexString
@@ -11,6 +12,10 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class SignableDataTest {
+    private val gson = GsonBuilder()
+        .registerTypeAdapterFactory(TypeFactorySettings.signingDataAdapterFactory)
+        .registerTypeAdapterFactory(TypeFactorySettings.approvalSignatureAdapterFactory)
+        .create()
 
     @Test
     fun testSignersUpdateSerializedOp() {
@@ -31,7 +36,7 @@ class SignableDataTest {
     @Test
     fun testSignersUpdateApprovalDisposition() {
         val walletApproval = getWalletApprovalRequest(
-            solanaApprovalRequestType = getSignersUpdateRequestForApproval(
+            approvalRequestType = getSignersUpdateRequestForApproval(
                 listOf("Deuspj2g5crN81b6GocKANAhB3Y5D6XseXjiT1bery7Z")
             )
         )
@@ -63,7 +68,7 @@ class SignableDataTest {
             initiatorIsApprover = true
         )
 
-        val requestType: SolanaApprovalRequestType =
+        val requestType: ApprovalRequestDetails =
             getSignersUpdateRequest(nonceAccountAddresses = listOf("BEhPWZKJoFDHaaJ7qTqZ6cfkR1YKDssHwttBYnp9kZir"))
         val request = getWalletInitiationRequest(requestType, initiation = initiation)
 
@@ -89,9 +94,9 @@ class SignableDataTest {
     }
 
     @Test
-    fun testBalanceAccountCreationApprovalDisposition() {
+    fun testWalletCreationApprovalDisposition() {
         val request = getWalletApprovalRequest(
-            getBalanceAccountCreationRequest(
+            getSolanaWalletCreationRequest(
                 nonceAccountAddresses = listOf("Hy4Ztych4X12wWieCaFbSEbwZRxmjRTMgbm7RDybYTpD")
             )
         )
@@ -111,7 +116,7 @@ class SignableDataTest {
     }
 
     @Test
-    fun testBalanceAccountCreationInitiationRequest() {
+    fun testWalletCreationInitiationRequest() {
         val initiation = MultiSigOpInitiation(
             opAccountCreationInfo = getOpAccountCreationInfo(),
             initiatorIsApprover = true
@@ -121,8 +126,8 @@ class SignableDataTest {
             keyValueAsHex = "2d7db52f8ff35aec03cd7be8d26c45d798774a4d5dfa9a9c559778752fb87d11"
         )
 
-        val requestType: SolanaApprovalRequestType =
-            getBalanceAccountCreationRequest(nonceAccountAddresses = listOf("CL8fZq5BzjCBXmixSMKqBsFoCLSFxqN6GvheDQ68HP44"))
+        val requestType: ApprovalRequestDetails =
+            getSolanaWalletCreationRequest(nonceAccountAddresses = listOf("CL8fZq5BzjCBXmixSMKqBsFoCLSFxqN6GvheDQ68HP44"))
         val request = getWalletInitiationRequest(requestType, initiation = initiation)
         val initiationRequest = InitiationRequest(
             requestId = request.id!!,
@@ -138,6 +143,50 @@ class SignableDataTest {
             "0301040969ab8cb05413af9614f898a1f1fdfbc07e7ad5eb2eb1d0f1c49f448bd179c71511fa69aa5bb02ddd4a80e4673e541767116f2034406d2f917725045d215bdd3f2ba22d14fd3198775d3b9d1b22d6b48743f502ac2129cdf0094af144febf0666a8574221c4298fd6dd12f8d67ac57a7e3586087ff177defef319a8f2b7ae8a99ff90e321f14ded704cbb267d1cbd7c0e9ae8c5e3ccbb6f47c95bbf75d5a924a606a7d517192c568ee08a845f73d29788cf035c3145b21ab344d8062ea940000006a7d51718c774c928566398691d5eb68b5eb8a39b4b6d5c73555b21000000000000000000000000000000000000000000000000000000000000000000000000095f6d73715ba2affc6e25f8845e8f18908d92a129f233413b34d675d6fbd03d05ffdcd59d8f12aab0f8644eb0a57db2187baf6cc1e0115a977082f2ecd54120030703030500040400000007020001340000000080b2720000000000b803000000000000095f6d73715ba2affc6e25f8845e8f18908d92a129f233413b34d675d6fbd03d080501040206009901030000000000000000000000000000000000000000000000000000000000000000000000000000000000b59460e652df36f1ffb509cdf44bb3469f9054f93f8f707fe56685cdc6fc9c3300b94e0c79c1fb7db6ff3380f8bd8f09376fb8f87c488f98ec920164e1e3a7417101100e0000000000000100b33db8d45a74ca5c0593ea113efc73528320af0a70713d08f1ec3fa085c9c74c000001",
             initiationRequest.retrieveSignableData(approverPublicKey = "3wKxhgiogoCaA2uxPYeH7cy3cG4hxRPogrPmDPLS54iZ").first()
                 .toHexString()
+        )
+    }
+
+    @Test
+    fun testBitcoinWalletCreationApprovalDisposition() {
+        val request = getWalletApprovalRequest(
+            getBitcoinWalletCreationRequest()
+        )
+
+        val approvalRequest = ApprovalDispositionRequest(
+            approvalDisposition = ApprovalDisposition.APPROVE,
+            requestId = request.id!!,
+            requestType = request.getApprovalRequestType(),
+            nonces =  emptyList(),
+            email = "dont care"
+        )
+
+        val signableData = approvalRequest.retrieveSignableData(approverPublicKey = "7AH35qStXtrUgRkmqDmhjufNHjF74R1A9cCKT3C3HaAR").first()
+
+        assertEquals(
+            approvalRequest.requestType,
+            gson.fromJson(String(signableData), ApprovalRequestDetails.WalletCreation::class.java)
+        )
+    }
+
+    @Test
+    fun testEthereumWalletCreationApprovalDisposition() {
+        val request = getWalletApprovalRequest(
+            getEthereumWalletCreationRequest()
+        )
+
+        val approvalRequest = ApprovalDispositionRequest(
+            approvalDisposition = ApprovalDisposition.APPROVE,
+            requestId = request.id!!,
+            requestType = request.getApprovalRequestType(),
+            nonces =  emptyList(),
+            email = "dont care"
+        )
+
+        val signableData = approvalRequest.retrieveSignableData(approverPublicKey = "7AH35qStXtrUgRkmqDmhjufNHjF74R1A9cCKT3C3HaAR").first()
+
+        assertEquals(
+            approvalRequest.requestType,
+            gson.fromJson(String(signableData), ApprovalRequestDetails.WalletCreation::class.java)
         )
     }
 
@@ -827,7 +876,7 @@ class SignableDataTest {
         )
 
         when (approvalDispositionRequest.requestType) {
-            is SolanaApprovalRequestType.AcceptVaultInvitation -> {
+            is ApprovalRequestDetails.AcceptVaultInvitation -> {
                 val signableData =
                     approvalDispositionRequest.retrieveSignableData(approverPublicKey = "GYFxPGjuBXYKg1S91zgpVZCLP4guLGRho27bTAkAzjVL").first()
                 assertEquals(
@@ -853,7 +902,7 @@ class SignableDataTest {
         )
 
         when (approvalDispositionRequest.requestType) {
-            is SolanaApprovalRequestType.PasswordReset -> {
+            is ApprovalRequestDetails.PasswordReset -> {
                 val signableData =
                     approvalDispositionRequest.retrieveSignableData(approverPublicKey = "GYFxPGjuBXYKg1S91zgpVZCLP4guLGRho27bTAkAzjVL").first()
                 assertEquals(
@@ -864,48 +913,6 @@ class SignableDataTest {
             else ->
                 assertTrue("should not get here", false)
         }
-    }
-
-    @Test
-    fun testSignDataForBitcoinBalanceAccountCreationInitiationRequest() {
-        val signDataInitiation = getParsedApproval(signDataWithBalanceAccountCreationInitiationJson)
-
-        val pk = generateEphemeralPrivateKeyFromText(
-            keyValueAsHex = ("5647f96596cf1d7e5b3e8f79401840dee7125aded4b185e66963f0d56c1466bb")
-        )
-        val initiationRequest = InitiationRequest(
-            requestId = signDataInitiation.id!!,
-            approvalDisposition = ApprovalDisposition.APPROVE,
-            initiation = (signDataInitiation.details as SolanaApprovalRequestDetails.MultiSignOpInitiationDetails).multisigOpInitiation,
-            requestType = signDataInitiation.getApprovalRequestType(),
-            nonces = listOf(Nonce("6ZY5GcyceDoL9ezZcT2znhnCSacePMtZYUhcXETyrRcb")),
-            email = "dont care",
-            opAccountPrivateKey = pk
-        )
-
-        assertEquals(
-            "0301040969ab8cb05413af9614f898a1f1fdfbc07e7ad5eb2eb1d0f1c49f448bd179c715eaed3fd176bbffdb0f461ecd630cda4222a93ebc95765d0355dc0b30379d438c30aae8a6182fd1294d717eacf294e2ed515bfe980cba907006a100928bddfb27eaa0dd6522a309e59454de9c2f37e8cef9bd8d10683b6f035faa9f9504fa88fe1f70fbf53c47a529b7275ea23a1d4c811cd0210f748bd1b70fcf05b6f53baa6006a7d517192c568ee08a845f73d29788cf035c3145b21ab344d8062ea940000006a7d51718c774c928566398691d5eb68b5eb8a39b4b6d5c73555b2100000000000000000000000000000000000000000000000000000000000000000000000031679052f04f2d670da777f48a043ebadc013c519b3a60fe9be19546844002da52a027d3066f2028195e3a2a3b00fb521729f6bbd885c3e941600ef9af8b76180307030305000404000000070200013400000000301f910100000000410e00000000000031679052f04f2d670da777f48a043ebadc013c519b3a60fe9be19546844002da080501040206004c2300000000000000000000000000000000000000000000000000000000000000000000000000000000002000e20ac1082fd5ef74246e6fe2cde37d41a449aee5ee9ba84936db99b37aec714e",
-            initiationRequest.retrieveSignableData(approverPublicKey = "4Gyit71SY3zUUmDMvAT3Lqbex8wBhWJRx8xpEXd5qq66").first()
-                .toHexString()
-        )
-    }
-
-    @Test
-    fun testSignDataForBitcoinBalanceAccountCreationApprovalRequest() {
-        val signDataApproval = getParsedApproval(signDataWithBalanceAccountCreationApprovalJson)
-
-        val approvalRequest = ApprovalDispositionRequest(
-            approvalDisposition = ApprovalDisposition.APPROVE,
-            requestId = signDataApproval.id!!,
-            requestType = signDataApproval.getApprovalRequestType(),
-            nonces = listOf(Nonce("9dNtUVv25bMpyrFyRgrgdmygymYxeCiw8geHfKLVYnyu")),
-            email = "dont care"
-        )
-        assertEquals(
-            "0201040869ab8cb05413af9614f898a1f1fdfbc07e7ad5eb2eb1d0f1c49f448bd179c7156757974e9d4a7a1f6367333182c168c8abaa4616428d182e6e7d77b675458aa2cba3838600fb16cdfe56197da6ebc0e943ed59c03ea18539c79049d5e802a0cc0ecea9219bc5d14e3119b89bdece9afaf3a91e6db985961c16181349c49d094906a7d517192c568ee08a845f73d29788cf035c3145b21ab344d8062ea940000006a7d51718c774c928566398691d5eb68b5eb8a39b4b6d5c73555b21000000000000000000000000000000000000000000000000000000000000000000000000e6f9d82d908d2e9a64f43557fbaefd85806a4b1fcb08454bcb5bab5f2ab8d014802f271d98da48f43a3cbdbfb5623a006de53b3f24771acba31f2f265b789530020603020400040400000007030301052209016e60d6be52226fc9f59faff76a8258b86c5b34eefaaf1fb21b5d1e918d515cd6",
-            approvalRequest.retrieveSignableData(approverPublicKey = "7xQTcWf8hWnYb2DfNHX43qGSmME8TAcvPY6DJ9KPUnTK").first()
-                .toHexString()
-        )
     }
 
     @Test
@@ -950,8 +957,8 @@ class SignableDataTest {
         )
     }
 
-    private fun getParsedApproval(json: String): WalletApproval {
-        return WalletApprovalDeserializer().parseData(JsonParser.parseString(json.trim()))
+    private fun getParsedApproval(json: String): ApprovalRequest {
+        return ApprovalRequestDeserializer().parseData(JsonParser.parseString(json.trim()))
     }
 
 }

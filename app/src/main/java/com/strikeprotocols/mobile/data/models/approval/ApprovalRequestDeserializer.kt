@@ -1,7 +1,6 @@
 package com.strikeprotocols.mobile.data.models.approval
 
 import com.google.gson.*
-import com.google.gson.typeadapters.RuntimeTypeAdapterFactory
 import com.strikeprotocols.mobile.common.BaseWrapper
 import com.strikeprotocols.mobile.data.models.approval.ApprovalTypeMetaData.Companion.DATA_JSON_KEY
 import com.strikeprotocols.mobile.data.models.approval.ApprovalTypeMetaData.Companion.DETAILS_JSON_KEY
@@ -11,8 +10,7 @@ import com.strikeprotocols.mobile.data.models.approval.ApprovalTypeMetaData.Comp
 import com.strikeprotocols.mobile.data.models.approval.MultiSigOpInitiation.Companion.MULTI_SIG_TYPE
 import java.lang.reflect.Type
 
-class WalletApprovalDeserializer : JsonDeserializer<WalletApproval> {
-
+class ApprovalRequestDeserializer : JsonDeserializer<ApprovalRequest> {
     private fun getGson() = GsonBuilder()
         .registerTypeAdapterFactory(TypeFactorySettings.signingDataAdapterFactory)
         .registerTypeAdapterFactory(TypeFactorySettings.approvalSignatureAdapterFactory)
@@ -22,29 +20,29 @@ class WalletApprovalDeserializer : JsonDeserializer<WalletApproval> {
         json: JsonElement?,
         typeOfT: Type?,
         context: JsonDeserializationContext?
-    ): WalletApproval {
+    ): ApprovalRequest {
         return parseData(json = json)
     }
 
-    fun toObjectWithParsedDetails(json: String?) : WalletApproval {
+    fun toObjectWithParsedDetails(json: String?) : ApprovalRequest {
         val jsonElement = JsonParser.parseString(json)
-        var walletApproval = getGson().fromJson(json, WalletApproval::class.java)
+        var approvalRequest = getGson().fromJson(json, ApprovalRequest::class.java)
 
         if(jsonElement !is JsonObject) {
-            return walletApproval.unknownApprovalType()
+            return approvalRequest.unknownApprovalType()
         }
 
         val jsonObject = jsonElement.asJsonObject.get(DETAILS_JSON_KEY)
 
         if(jsonObject !is JsonObject) {
-            return walletApproval.unknownApprovalType()
+            return approvalRequest.unknownApprovalType()
         }
 
         if(jsonObject.has(MULTI_SIG_JSON_KEY)) {
             val multiSigOpJson = jsonObject.get(MULTI_SIG_JSON_KEY)
 
             if(multiSigOpJson !is JsonObject) {
-                return walletApproval.unknownApprovalType()
+                return approvalRequest.unknownApprovalType()
             }
             val multiSigInitiation =
                 getGson().fromJson(multiSigOpJson, MultiSigOpInitiation::class.java)
@@ -56,32 +54,32 @@ class WalletApprovalDeserializer : JsonDeserializer<WalletApproval> {
                     requestType = requestType,
                     multisigOpInitiation = multiSigInitiation
                 )
-            walletApproval = walletApproval.copy(details = multiSignOpInitiationDetails)
+            approvalRequest = approvalRequest.copy(details = multiSignOpInitiationDetails)
         } else {
             val requestType = getRequestTypeFromParsedDetails(jsonObject)
 
             val approvalRequestDetails =
                 SolanaApprovalRequestDetails.ApprovalRequestDetails(requestType = requestType)
-            walletApproval = walletApproval.copy(details = approvalRequestDetails)
+            approvalRequest = approvalRequest.copy(details = approvalRequestDetails)
         }
 
-        return walletApproval
+        return approvalRequest
     }
 
-    private fun getRequestTypeFromParsedDetails(jsonObject: JsonObject) : SolanaApprovalRequestType {
+    private fun getRequestTypeFromParsedDetails(jsonObject: JsonObject) : ApprovalRequestDetails {
         if (!jsonObject.has(REQUEST_TYPE_JSON_KEY)) {
-            return SolanaApprovalRequestType.UnknownApprovalType
+            return ApprovalRequestDetails.UnknownApprovalType
         }
         val requestTypeJson = jsonObject.get(REQUEST_TYPE_JSON_KEY)
 
         if (requestTypeJson !is JsonObject) {
-            return SolanaApprovalRequestType.UnknownApprovalType
+            return ApprovalRequestDetails.UnknownApprovalType
         }
 
         val requestString = requestTypeJson.get(TYPE_JSON_KEY)
 
         if(requestString !is JsonPrimitive) {
-            return SolanaApprovalRequestType.UnknownApprovalType
+            return ApprovalRequestDetails.UnknownApprovalType
         }
 
         val approvalType =
@@ -90,20 +88,20 @@ class WalletApprovalDeserializer : JsonDeserializer<WalletApproval> {
         return getStandardApprovalType(approvalType, requestTypeJson)
     }
 
-    private fun getRequestTypeFromSignDataJson(jsonObject: JsonObject) : SolanaApprovalRequestType {
+    private fun getRequestTypeFromSignDataJson(jsonObject: JsonObject) : ApprovalRequestDetails {
         if (!jsonObject.has(DATA_JSON_KEY)) {
-            return SolanaApprovalRequestType.UnknownApprovalType
+            return ApprovalRequestDetails.UnknownApprovalType
         }
         val dataJson = jsonObject.get(DATA_JSON_KEY)
 
         if (dataJson !is JsonObject) {
-            return SolanaApprovalRequestType.UnknownApprovalType
+            return ApprovalRequestDetails.UnknownApprovalType
         }
 
         val requestString = dataJson.get(TYPE_JSON_KEY)
 
         if(requestString !is JsonPrimitive) {
-            return SolanaApprovalRequestType.UnknownApprovalType
+            return ApprovalRequestDetails.UnknownApprovalType
         }
 
         val approvalType =
@@ -112,7 +110,7 @@ class WalletApprovalDeserializer : JsonDeserializer<WalletApproval> {
         return getStandardApprovalType(approvalType, dataJson)
     }
 
-    fun parseData(json: JsonElement?): WalletApproval {
+    fun parseData(json: JsonElement?): ApprovalRequest {
         try {
             val approvalTypeAndDetails =
                 SolanaApprovalRequestDetails.getTypeAndDetailsFromJson(json)
@@ -150,110 +148,110 @@ class WalletApprovalDeserializer : JsonDeserializer<WalletApproval> {
                     )
                 }
 
-            val walletApproval = getGson().fromJson(json, WalletApproval::class.java)
-            return walletApproval.copy(details = solanaApprovalRequestDetails)
+            val approvalRequest = getGson().fromJson(json, ApprovalRequest::class.java)
+            return approvalRequest.copy(details = solanaApprovalRequestDetails)
         } catch (e: Exception) {
-            val walletApproval = getGson().fromJson(json, WalletApproval::class.java)
-            return walletApproval.copy(
+            val approvalRequest = getGson().fromJson(json, ApprovalRequest::class.java)
+            return approvalRequest.copy(
                 details = SolanaApprovalRequestDetails.ApprovalRequestDetails(
-                    SolanaApprovalRequestType.UnknownApprovalType
+                    ApprovalRequestDetails.UnknownApprovalType
                 )
             )
         }
     }
 
-    private fun getStandardApprovalType(approvalType: ApprovalType, details: JsonElement?) : SolanaApprovalRequestType {
+    private fun getStandardApprovalType(approvalType: ApprovalType, details: JsonElement?) : ApprovalRequestDetails {
         if (details == null) {
-            return SolanaApprovalRequestType.UnknownApprovalType
+            return ApprovalRequestDetails.UnknownApprovalType
         }
 
         return when (approvalType) {
             ApprovalType.WITHDRAWAL_TYPE ->
-                getGson().fromJson(details, SolanaApprovalRequestType.WithdrawalRequest::class.java)
+                getGson().fromJson(details, ApprovalRequestDetails.WithdrawalRequest::class.java)
             ApprovalType.CONVERSION_REQUEST_TYPE ->
-                getGson().fromJson(details, SolanaApprovalRequestType.ConversionRequest::class.java)
+                getGson().fromJson(details, ApprovalRequestDetails.ConversionRequest::class.java)
             ApprovalType.SIGNERS_UPDATE_TYPE ->
-                getGson().fromJson(details, SolanaApprovalRequestType.SignersUpdate::class.java)
-            ApprovalType.BALANCE_ACCOUNT_CREATION_TYPE ->
+                getGson().fromJson(details, ApprovalRequestDetails.SignersUpdate::class.java)
+            ApprovalType.WALLET_CREATION_TYPE ->
                 getGson().fromJson(
                     details,
-                    SolanaApprovalRequestType.BalanceAccountCreation::class.java
+                    ApprovalRequestDetails.WalletCreation::class.java
                 )
             ApprovalType.DAPP_TRANSACTION_REQUEST_TYPE ->
                 getGson().fromJson(
                     details,
-                    SolanaApprovalRequestType.DAppTransactionRequest::class.java
+                    ApprovalRequestDetails.DAppTransactionRequest::class.java
                 )
             ApprovalType.LOGIN_TYPE -> {
                 getGson().fromJson(
                     details,
-                    SolanaApprovalRequestType.LoginApprovalRequest::class.java
+                    ApprovalRequestDetails.LoginApprovalRequest::class.java
                 )
             }
             ApprovalType.WRAP_CONVERSION_REQUEST_TYPE -> {
                 getGson().fromJson(
                     details,
-                    SolanaApprovalRequestType.WrapConversionRequest::class.java
+                    ApprovalRequestDetails.WrapConversionRequest::class.java
                 )
             }
             ApprovalType.BALANCE_ACCOUNT_NAME_UPDATE_TYPE -> {
                 getGson().fromJson(
                     details,
-                    SolanaApprovalRequestType.BalanceAccountNameUpdate::class.java
+                    ApprovalRequestDetails.BalanceAccountNameUpdate::class.java
                 )
             }
             ApprovalType.BALANCE_ACCOUNT_SETTINGS_UPDATE_TYPE -> {
                 getGson().fromJson(
                     details,
-                    SolanaApprovalRequestType.BalanceAccountSettingsUpdate::class.java
+                    ApprovalRequestDetails.BalanceAccountSettingsUpdate::class.java
                 )
             }
             ApprovalType.ADDRESS_BOOK_TYPE -> {
                 getGson().fromJson(
                     details,
-                    SolanaApprovalRequestType.AddressBookUpdate::class.java
+                    ApprovalRequestDetails.AddressBookUpdate::class.java
                 )
             }
             ApprovalType.DAPP_BOOK_UPDATE_TYPE -> {
                 getGson().fromJson(
                     details,
-                    SolanaApprovalRequestType.DAppBookUpdate::class.java
+                    ApprovalRequestDetails.DAppBookUpdate::class.java
                 )
             }
             ApprovalType.WALLET_CONFIG_POLICY_UPDATE_TYPE -> {
                 getGson().fromJson(
                     details,
-                    SolanaApprovalRequestType.WalletConfigPolicyUpdate::class.java
+                    ApprovalRequestDetails.WalletConfigPolicyUpdate::class.java
                 )
             }
             ApprovalType.BALANCE_ACCOUNT_POLICY_UPDATE_TYPE -> {
                 getGson().fromJson(
                     details,
-                    SolanaApprovalRequestType.BalanceAccountPolicyUpdate::class.java
+                    ApprovalRequestDetails.BalanceAccountPolicyUpdate::class.java
                 )
             }
             ApprovalType.BALANCE_ACCOUNT_ADDRESS_WHITE_LIST_UPDATE_TYPE -> {
                 getGson().fromJson(
                     details,
-                    SolanaApprovalRequestType.BalanceAccountAddressWhitelistUpdate::class.java
+                    ApprovalRequestDetails.BalanceAccountAddressWhitelistUpdate::class.java
                 )
             }
             ApprovalType.ACCEPT_VAULT_INVITATION_TYPE -> {
                 getGson().fromJson(
                     details,
-                    SolanaApprovalRequestType.AcceptVaultInvitation::class.java
+                    ApprovalRequestDetails.AcceptVaultInvitation::class.java
                 )
             }
             ApprovalType.PASSWORD_RESET_TYPE -> {
                 getGson().fromJson(
                     details,
-                    SolanaApprovalRequestType.PasswordReset::class.java
+                    ApprovalRequestDetails.PasswordReset::class.java
                 )
             }
             ApprovalType.SIGN_DATA_TYPE -> {
                 val signDataRequest = getGson().fromJson(
                     details,
-                    SolanaApprovalRequestType.SignData::class.java
+                    ApprovalRequestDetails.SignData::class.java
                 )
                 //
                 // if the base64 data is an approval type json string, we will return that
@@ -270,7 +268,7 @@ class WalletApprovalDeserializer : JsonDeserializer<WalletApproval> {
                 }
                 if(jsonElement is JsonObject) {
                     when (val signDataType = getRequestTypeFromSignDataJson(jsonElement)) {
-                        is SolanaApprovalRequestType.BalanceAccountCreation -> {
+                        is ApprovalRequestDetails.WalletCreation -> {
                             signDataType.copy(
                                 signingData = signDataRequest.signingData.copy(
                                     base64DataToSign = signDataRequest.base64Data
@@ -281,7 +279,7 @@ class WalletApprovalDeserializer : JsonDeserializer<WalletApproval> {
                     }
                 } else signDataRequest
             }
-            else -> SolanaApprovalRequestType.UnknownApprovalType
+            else -> ApprovalRequestDetails.UnknownApprovalType
         }
     }
 }

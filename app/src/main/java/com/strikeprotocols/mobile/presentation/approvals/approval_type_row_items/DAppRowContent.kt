@@ -9,12 +9,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import com.strikeprotocols.mobile.data.models.approval.SolanaApprovalRequestType
+import com.strikeprotocols.mobile.data.models.approval.ApprovalRequestDetails
 import com.strikeprotocols.mobile.presentation.approvals.ApprovalRowContentHeader
 import com.strikeprotocols.mobile.ui.theme.*
 
 @Composable
-fun DAppTransactionRowContent(dAppTransactionRequest: SolanaApprovalRequestType.DAppTransactionRequest) {
+fun DAppTransactionRowContent(dAppTransactionRequest: ApprovalRequestDetails.DAppTransactionRequest) {
     Column(
         modifier = Modifier.background(DetailInfoLightBackground),
         horizontalAlignment = Alignment.CenterHorizontally

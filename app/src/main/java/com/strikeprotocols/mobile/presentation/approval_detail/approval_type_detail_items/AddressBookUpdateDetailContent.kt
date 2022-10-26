@@ -10,7 +10,7 @@ import androidx.compose.ui.unit.dp
 import com.strikeprotocols.mobile.R
 import com.strikeprotocols.mobile.common.maskAddress
 import com.strikeprotocols.mobile.data.models.approval.SlotDestinationInfo
-import com.strikeprotocols.mobile.data.models.approval.SolanaApprovalRequestType
+import com.strikeprotocols.mobile.data.models.approval.ApprovalRequestDetails
 import com.strikeprotocols.mobile.presentation.approvals.ApprovalContentHeader
 import com.strikeprotocols.mobile.presentation.approvals.approval_type_row_items.getHeader
 import com.strikeprotocols.mobile.presentation.components.FactRow
@@ -18,10 +18,10 @@ import com.strikeprotocols.mobile.presentation.components.FactsData
 
 @Composable
 fun AddressBookUpdateDetailContent(
-    addressBookUpdate: SolanaApprovalRequestType.AddressBookUpdate
+    addressBookUpdate: ApprovalRequestDetails.AddressBookUpdate
 ) {
     val header = addressBookUpdate.getHeader(LocalContext.current)
-    val entryMetaData : Pair<SolanaApprovalRequestType.AddRemoveChange, SlotDestinationInfo>? = addressBookUpdate.getEntryMetaData()
+    val entryMetaData : Pair<ApprovalRequestDetails.AddRemoveChange, SlotDestinationInfo>? = addressBookUpdate.getEntryMetaData()
 
     val name = entryMetaData?.second?.value?.name ?: stringResource(id = R.string.not_applicable)
     val address = entryMetaData?.second?.value?.address?.maskAddress() ?: stringResource(id = R.string.not_applicable)

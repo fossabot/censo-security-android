@@ -11,7 +11,7 @@ import androidx.compose.ui.unit.sp
 import com.strikeprotocols.mobile.R
 import com.strikeprotocols.mobile.common.convertSecondsIntoReadableText
 import com.strikeprotocols.mobile.common.toWalletName
-import com.strikeprotocols.mobile.data.models.approval.SolanaApprovalRequestType
+import com.strikeprotocols.mobile.data.models.approval.ApprovalRequestDetails
 import com.strikeprotocols.mobile.presentation.approvals.ApprovalContentHeader
 import com.strikeprotocols.mobile.presentation.approvals.approval_type_row_items.getHeader
 import com.strikeprotocols.mobile.presentation.approvals.approval_type_row_items.retrieveSlotRowData
@@ -20,7 +20,7 @@ import com.strikeprotocols.mobile.presentation.components.FactsData
 
 @Composable
 fun BalanceAccountPolicyUpdateDetailContent(
-    accountPolicyUpdate: SolanaApprovalRequestType.BalanceAccountPolicyUpdate
+    accountPolicyUpdate: ApprovalRequestDetails.BalanceAccountPolicyUpdate
 ) {
     val header = accountPolicyUpdate.getHeader(LocalContext.current)
 
@@ -48,7 +48,7 @@ fun BalanceAccountPolicyUpdateDetailContent(
 
 fun generateAccountPolicyUpdateRows(
     context: Context,
-    accountPolicyUpdate: SolanaApprovalRequestType.BalanceAccountPolicyUpdate,
+    accountPolicyUpdate: ApprovalRequestDetails.BalanceAccountPolicyUpdate,
 ) : List<FactsData>{
     val approverRowInfoData = mutableListOf<FactsData>()
     //region Approvals Row

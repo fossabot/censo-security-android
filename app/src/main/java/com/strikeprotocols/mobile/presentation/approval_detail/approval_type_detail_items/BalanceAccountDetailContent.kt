@@ -9,7 +9,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.strikeprotocols.mobile.R
 import com.strikeprotocols.mobile.common.convertSecondsIntoReadableText
-import com.strikeprotocols.mobile.data.models.approval.SolanaApprovalRequestType
+import com.strikeprotocols.mobile.data.models.approval.ApprovalRequestDetails
 import com.strikeprotocols.mobile.presentation.approvals.ApprovalContentHeader
 import com.strikeprotocols.mobile.presentation.approvals.approval_type_row_items.getHeader
 import com.strikeprotocols.mobile.presentation.approvals.approval_type_row_items.retrieveSlotRowData
@@ -18,14 +18,14 @@ import com.strikeprotocols.mobile.presentation.components.FactsData
 
 @Composable
 fun BalanceAccountDetailContent(
-    balanceAccountCreation: SolanaApprovalRequestType.BalanceAccountCreation,
+    walletCreation: ApprovalRequestDetails.WalletCreation,
     approvalsReceived: String
 ) {
-    val header = balanceAccountCreation.getHeader(LocalContext.current)
-    val accountName = balanceAccountCreation.accountInfo.name
+    val header = walletCreation.getHeader(LocalContext.current)
+    val accountName = walletCreation.accountInfo.name
 
     val approverRowInfoData = generateBalanceAccountDetailRows(
-        balanceAccountCreation = balanceAccountCreation, approvalsReceived = approvalsReceived, context = LocalContext.current
+        walletCreation = walletCreation, approvalsReceived = approvalsReceived, context = LocalContext.current
     )
 
     ApprovalContentHeader(header = header, topSpacing = 24, bottomSpacing = 8)
@@ -51,7 +51,7 @@ fun BalanceAccountDetailContent(
 }
 
 fun generateBalanceAccountDetailRows(
-    balanceAccountCreation: SolanaApprovalRequestType.BalanceAccountCreation,
+    walletCreation: ApprovalRequestDetails.WalletCreation,
     approvalsReceived: String,
     context: Context
 ): List<FactsData> {
@@ -63,12 +63,12 @@ fun generateBalanceAccountDetailRows(
         facts = listOf(
             Pair(
                 context.getString(R.string.approvals_required_title),
-                "$approvalsReceived ${context.getString(R.string.of)} ${balanceAccountCreation.approvalPolicy.approvalsRequired.toInt()}"
+                "$approvalsReceived ${context.getString(R.string.of)} ${walletCreation.approvalPolicy.approvalsRequired.toInt()}"
             ),
             Pair(
                 context.getString(R.string.approval_expiration),
                 convertSecondsIntoReadableText(
-                    balanceAccountCreation.approvalPolicy.approvalTimeout.toInt(),
+                    walletCreation.approvalPolicy.approvalTimeout.toInt(),
                     context
                 )
             )
@@ -79,7 +79,7 @@ fun generateBalanceAccountDetailRows(
 
 
     //region Approvers Row
-    val approversList = balanceAccountCreation.approvalPolicy.approvers.retrieveSlotRowData()
+    val approversList = walletCreation.approvalPolicy.approvers.retrieveSlotRowData()
     if (approversList.isEmpty()) {
         approversList.add(Pair(context.getString(R.string.no_approvers_text), ""))
     }

@@ -9,7 +9,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import com.strikeprotocols.mobile.data.models.approval.SolanaApprovalRequestType
+import com.strikeprotocols.mobile.data.models.approval.ApprovalRequestDetails
 import com.strikeprotocols.mobile.presentation.approvals.ApprovalContentHeader
 import com.strikeprotocols.mobile.presentation.approvals.approval_type_row_items.BalanceChangeRowItem
 import com.strikeprotocols.mobile.presentation.approvals.approval_type_row_items.getHeader
@@ -17,7 +17,7 @@ import com.strikeprotocols.mobile.ui.theme.BackgroundBlack
 
 @Composable
 fun DAppTransactionDetailContent(
-    dAppTransactionRequest: SolanaApprovalRequestType.DAppTransactionRequest
+    dAppTransactionRequest: ApprovalRequestDetails.DAppTransactionRequest
 ) {
     Column(
         modifier = Modifier.background(BackgroundBlack),

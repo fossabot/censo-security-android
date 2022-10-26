@@ -21,9 +21,8 @@ import com.raygun.raygun4android.RaygunClient
 import com.strikeprotocols.mobile.common.BiometricUtil
 import com.strikeprotocols.mobile.common.CrashReportingUtil
 import com.strikeprotocols.mobile.common.Resource
-import com.strikeprotocols.mobile.common.strikeLog
 import com.strikeprotocols.mobile.data.*
-import com.strikeprotocols.mobile.data.models.approval.WalletApproval
+import com.strikeprotocols.mobile.data.models.approval.ApprovalRequest
 import com.strikeprotocols.mobile.presentation.Screen
 import com.strikeprotocols.mobile.presentation.account.AccountScreen
 import com.strikeprotocols.mobile.presentation.semantic_version_check.EnforceUpdateScreen
@@ -170,7 +169,7 @@ class MainActivity : FragmentActivity() {
                 arguments = listOf(navArgument(Screen.ApprovalDetailRoute.APPROVAL_ARG) { type = NavType.StringType })
             ) { backStackEntry ->
                 val approvalArg = backStackEntry.arguments?.get(Screen.ApprovalDetailRoute.APPROVAL_ARG) as String
-                ApprovalDetailsScreen(navController = navController, approval = WalletApproval.fromJson(approvalArg))
+                ApprovalDetailsScreen(navController = navController, approval = ApprovalRequest.fromJson(approvalArg))
             }
             composable(
                 route = Screen.ContactStrikeRoute.route

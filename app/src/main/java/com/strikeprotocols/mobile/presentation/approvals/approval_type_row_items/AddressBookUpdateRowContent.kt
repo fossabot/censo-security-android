@@ -10,16 +10,16 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.strikeprotocols.mobile.R
 import com.strikeprotocols.mobile.data.models.approval.SlotDestinationInfo
-import com.strikeprotocols.mobile.data.models.approval.SolanaApprovalRequestType
+import com.strikeprotocols.mobile.data.models.approval.ApprovalRequestDetails
 import com.strikeprotocols.mobile.presentation.approval_detail.approval_type_detail_items.ApprovalSubtitle
 import com.strikeprotocols.mobile.presentation.approvals.ApprovalRowContentHeader
 
 @Composable
 fun AddressBookUpdateRowContent(
-    addressBookUpdate: SolanaApprovalRequestType.AddressBookUpdate
+    addressBookUpdate: ApprovalRequestDetails.AddressBookUpdate
 ) {
 
-    val entryMetaData : Pair<SolanaApprovalRequestType.AddRemoveChange, SlotDestinationInfo>?
+    val entryMetaData : Pair<ApprovalRequestDetails.AddRemoveChange, SlotDestinationInfo>?
         = addressBookUpdate.getEntryMetaData()
 
     val name = entryMetaData?.second?.value?.name ?: stringResource(id = R.string.not_applicable)
