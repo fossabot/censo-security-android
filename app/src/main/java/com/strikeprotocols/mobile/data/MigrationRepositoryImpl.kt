@@ -143,12 +143,6 @@ class MigrationRepositoryImpl(
             }
         }
 
-        for (wallet in publicKeysMap.mapToPublicKeysList()) {
-            if (wallet.chain !in keysToAdd.map { it.chain }) {
-                keysToAdd.add(wallet)
-            }
-        }
-
         return keysToAdd
     }
 
