@@ -1,9 +1,7 @@
 package com.strikeprotocols.mobile
 
-import com.strikeprotocols.mobile.data.PhraseValidator.Companion.NOT_ENOUGH_WORDS
-import com.strikeprotocols.mobile.data.PhraseValidator.Companion.TOO_MANY_WORDS
 import com.strikeprotocols.mobile.data.PhraseValidatorImpl
-import junit.framework.TestCase.assertEquals
+import junit.framework.Assert.assertFalse
 import org.junit.Test
 
 class PhraseValidatorTest {
@@ -25,13 +23,8 @@ class PhraseValidatorTest {
         val words = originalPhrase.split(" ").toMutableList()
         words.removeAt(0)
 
-        try {
-            phraseValidator.isPhraseValid(words.joinToString(" "))
-            assert(false)
-        } catch(e: Exception) {
-            assertEquals(e.message, NOT_ENOUGH_WORDS)
-        }
-
+        val validPhrase = phraseValidator.isPhraseValid(words.joinToString(" "))
+        assertFalse(validPhrase)
     }
 
     @Test
@@ -39,12 +32,8 @@ class PhraseValidatorTest {
         val words = originalPhrase.split(" ").toMutableList()
         words.add("hello")
 
-        try {
-            phraseValidator.isPhraseValid(words.joinToString(" "))
-            assert(false)
-        } catch(e: Exception) {
-            assertEquals(e.message, TOO_MANY_WORDS)
-        }
+        val validPhrase = phraseValidator.isPhraseValid(words.joinToString(" "))
+        assertFalse(validPhrase)
     }
 
     @Test
@@ -52,11 +41,7 @@ class PhraseValidatorTest {
         val words = originalPhrase.split(" ").toMutableList()
         words[4] = (invalidWord)
 
-        try {
-            phraseValidator.isPhraseValid(words.joinToString(" "))
-            assert(false)
-        } catch(e: Exception) {
-            assertEquals(e.message, "The 5th word is not a valid word.")
-        }
+        val validPhrase = phraseValidator.isPhraseValid(words.joinToString(" "))
+        assertFalse(validPhrase)
     }
 }

@@ -12,6 +12,7 @@ import com.strikeprotocols.mobile.data.models.StoredKeyData.Companion.SOLANA_KEY
 import com.strikeprotocols.mobile.data.models.VerifyUser
 import com.strikeprotocols.mobile.data.models.WalletPublicKey
 import com.strikeprotocols.mobile.data.models.WalletSigner
+import com.strikeprotocols.mobile.data.models.WalletSigner.Companion.WALLET_TYPE_SOLANA
 import com.strikeprotocols.mobile.data.models.mapToPublicKeysList
 import javax.crypto.Cipher
 
@@ -44,6 +45,8 @@ interface KeyRepository {
     suspend fun retrieveSentinelData(cipher: Cipher) : String
 
     suspend fun removeSentinelDataAndKickUserToAppEntrance()
+
+    fun validateUserEnteredPhraseAgainstBackendKeys(phrase: String, verifyUser: VerifyUser?) : Boolean
 
     suspend fun signKeysThatBackendIsMissing(
         keysToBeAdded: List<WalletSigner>,
@@ -92,6 +95,26 @@ class KeyRepositoryImpl(
         securePreferences.clearSentinelData(email)
         userRepository.logOut()
         userRepository.setInvalidSentinelData()
+    }
+
+    override fun validateUserEnteredPhraseAgainstBackendKeys(
+        phrase: String,
+        verifyUser: VerifyUser?
+    ): Boolean {
+        return try {
+            val rootSeed = Mnemonics.MnemonicCode(phrase = phrase).toSeed()
+
+            val backendSolanaPublicKey =
+                verifyUser?.publicKeys?.first { it?.walletType == WALLET_TYPE_SOLANA }
+
+            val userInputtedPublicKey =
+                encryptionManager.generateSolanaPublicKeyFromRootSeed(rootSeed)
+
+            !backendSolanaPublicKey?.key.isNullOrEmpty() && userInputtedPublicKey.isNotEmpty() &&
+                    backendSolanaPublicKey?.key == userInputtedPublicKey
+        } catch (e: Exception) {
+            false
+        }
     }
 
     override suspend fun signTimestamp(

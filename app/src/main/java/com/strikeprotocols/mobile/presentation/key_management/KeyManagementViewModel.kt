@@ -578,7 +578,6 @@ class KeyManagementViewModel @Inject constructor(
                 state = state.confirmPhraseWordsState
             )
         )
-
         val wordsVerified = state.confirmPhraseWordsState.wordsVerified
         val wordIndex = state.confirmPhraseWordsState.phraseWordToVerifyIndex
 
@@ -684,6 +683,20 @@ class KeyManagementViewModel @Inject constructor(
         phrase: String,
         inputMethod: PhraseInputMethod
     ) {
+        state = state.copy(inputMethod = inputMethod)
+        if (!phraseValidator.isPhraseValid(phrase)) {
+            recoverKeyFailure()
+            return
+        }
+
+        val keyMatchesBackendPublic =
+            keyRepository.validateUserEnteredPhraseAgainstBackendKeys(phrase, state.initialData?.verifyUserDetails)
+
+        if(!keyMatchesBackendPublic) {
+            recoverKeyFailure()
+            return
+        }
+
         state = state.copy(
             keyManagementFlowStep = KeyManagementFlowStep.RecoveryFlow(
                 KeyRecoveryFlowStep.ALL_SET_STEP

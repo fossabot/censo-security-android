@@ -1,6 +1,7 @@
 package com.strikeprotocols.mobile.data
 
 import cash.z.ecc.android.bip39.Mnemonics
+import com.strikeprotocols.mobile.common.strikeLog
 import com.strikeprotocols.mobile.data.PhraseValidator.Companion.EXPECTED_LENGTH
 import com.strikeprotocols.mobile.data.PhraseValidator.Companion.NOT_ENOUGH_WORDS
 import com.strikeprotocols.mobile.data.PhraseValidator.Companion.TOO_MANY_WORDS
@@ -34,14 +35,14 @@ class PhraseValidatorImpl() : PhraseValidator {
         val wordCount = phraseWords.size
 
         if (wordCount < EXPECTED_LENGTH) {
-            throw Exception(NOT_ENOUGH_WORDS)
+            return false
         } else if (wordCount > EXPECTED_LENGTH) {
-            throw Exception(TOO_MANY_WORDS)
+            return false
         }
 
-        for ((index, word) in phraseWords.withIndex()) {
+        for ((_, word) in phraseWords.withIndex()) {
             if (word !in words) {
-                throw Exception("The ${index + 1}${getSuffixForWordIndex(index + 1)} word is not a valid word.")
+                return false
             }
         }
 

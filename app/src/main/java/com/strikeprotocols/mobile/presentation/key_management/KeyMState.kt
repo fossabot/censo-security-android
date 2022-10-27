@@ -37,6 +37,7 @@ data class KeyManagementState(
 ) {
     companion object {
         const val NO_PHRASE_ERROR = "no_phrase_error"
+        const val INVALID_PHRASE_ERROR = "invalid_phrase_error"
 
         const val DEFAULT_WORDS_VERIFIED = 0
 

@@ -318,6 +318,14 @@ class KeyManagementViewModelTest : BaseViewModelTest() {
 
     @Test
     fun `after the user pastes a phrase during recovery flow ensure bioPrompt is triggered`() = runTest {
+        whenever(phraseValidator.isPhraseValid(testValidPhrase)).then { true }
+        whenever(
+            keyRepository.validateUserEnteredPhraseAgainstBackendKeys(
+                testValidPhrase,
+                testRecoveryInitialData.verifyUserDetails
+            )
+        ).then { true }
+
         assertTrue(keyMgmtViewModel.state.triggerBioPrompt is Resource.Uninitialized)
         assertEquals("", keyMgmtViewModel.state.userInputtedPhrase)
 

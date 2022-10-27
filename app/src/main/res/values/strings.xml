@@ -234,4 +234,5 @@
     <string name="retry_recover_password">Retry</string>
     <string name="reset_pswd_email_sent">Reset password email sent!</string>
     <string name="reset_email_error">Unable to send reset email. Please try again or reset your password from our website.</string>
+    <string name="invalid_phrase">Invalid phrase entered. Please re-enter phrase.</string>
 </resources>

@@ -123,6 +123,8 @@ interface EncryptionManager {
     ) : ByteArray
 
     fun saveV3PublicKeys(rootSeed: ByteArray, email: String) : HashMap<String, String>
+
+    fun generateSolanaPublicKeyFromRootSeed(rootSeed: ByteArray): String
     //endregion
 
     //region Work with device keystore
@@ -359,6 +361,12 @@ class EncryptionManagerImpl @Inject constructor(
             BITCOIN_KEY to bitcoinPublicKey,
             ETHEREUM_KEY to ethereumPublicKey
         )
+    }
+
+    override fun generateSolanaPublicKeyFromRootSeed(rootSeed: ByteArray): String {
+        val keys = createAllKeys(rootSeed)
+
+        return BaseWrapper.encode(keys.solanaKey.publicKeyBytes)
     }
 
     override fun saveV3PrivateKeys(rootSeed: ByteArray, email: String, cipher: Cipher) {

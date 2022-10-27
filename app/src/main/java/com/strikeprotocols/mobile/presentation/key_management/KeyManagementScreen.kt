@@ -21,6 +21,7 @@ import com.strikeprotocols.mobile.common.BioCryptoUtil
 import com.strikeprotocols.mobile.common.Resource
 import com.strikeprotocols.mobile.common.popUpToTop
 import com.strikeprotocols.mobile.presentation.Screen
+import com.strikeprotocols.mobile.presentation.key_management.KeyManagementState.Companion.INVALID_PHRASE_ERROR
 import com.strikeprotocols.mobile.presentation.key_management.KeyManagementState.Companion.NO_PHRASE_ERROR
 import com.strikeprotocols.mobile.presentation.key_management.flows.*
 import com.strikeprotocols.mobile.ui.theme.StrikeWhite
@@ -205,10 +206,16 @@ fun KeyManagementScreen(
 
     if (state.showToast is Resource.Success) {
 
-        val message = if (state.showToast.data == NO_PHRASE_ERROR) {
-            stringResource(id = R.string.no_phrase_found)
-        } else {
-            state.showToast.data ?: ""
+        val message = when (state.showToast.data) {
+            NO_PHRASE_ERROR -> {
+                stringResource(id = R.string.no_phrase_found)
+            }
+            INVALID_PHRASE_ERROR -> {
+                stringResource(id = R.string.invalid_phrase)
+            }
+            else -> {
+                state.showToast.data ?: ""
+            }
         }
 
         Toast.makeText(context, message, Toast.LENGTH_LONG).show()
