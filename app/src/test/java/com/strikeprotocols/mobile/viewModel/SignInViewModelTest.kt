@@ -70,7 +70,7 @@ class SignInViewModelTest : BaseViewModelTest() {
         MockitoAnnotations.openMocks(this)
 
         whenever(userRepository.retrieveCachedUserEmail()).then { "" }
-        whenever(cipherRepository.getCipherForV3PrivateKeysDecryption()).then { cipher }
+        whenever(cipherRepository.getCipherForV3RootSeedDecryption()).then { cipher }
         whenever(keyRepository.generateTimestamp()).then { timestamp }
         whenever(keyRepository.signTimestamp(any(), any())).then { signedTimestamp }
 
@@ -262,7 +262,7 @@ class SignInViewModelTest : BaseViewModelTest() {
         runTest {
             whenever(keyRepository.havePrivateKeys()).then { true }
             whenever(userRepository.userLoggedIn()).then { false }
-            whenever(cipherRepository.getCipherForV3PrivateKeysDecryption()).then { null }
+            whenever(cipherRepository.getCipherForV3RootSeedDecryption()).then { null }
 
             initVM()
 

@@ -84,7 +84,7 @@ class SignInViewModel @Inject constructor(
     fun kickOffBiometryLoginOrMoveToPasswordEntry() {
         viewModelScope.launch {
             if (keyRepository.havePrivateKeys()) {
-                val cipher = cipherRepository.getCipherForV3PrivateKeysDecryption()
+                val cipher = cipherRepository.getCipherForV3RootSeedDecryption()
                 if (cipher != null) {
                     state = state.copy(
                         triggerBioPrompt = Resource.Success(cipher),

@@ -12,14 +12,7 @@ data class WalletSigner(
     val publicKey: String?,
     val chain: Chain?,
     val signature: String? = null
-) {
-    companion object {
-        const val WALLET_TYPE_SOLANA = "Solana"
-        const val WALLET_TYPE_BITCOIN = "Bitcoin"
-        const val WALLET_TYPE_ETHEREUM = "Ethereum"
-    }
-}
-
+)
 
 fun HashMap<String, String>.mapToPublicKeysList() =
     map {

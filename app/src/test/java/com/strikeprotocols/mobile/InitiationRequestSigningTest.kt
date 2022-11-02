@@ -46,6 +46,7 @@ class InitiationRequestSigningTest {
 
     private lateinit var phrase: String
     private lateinit var keyPair: TestKeyPair
+    private lateinit var rootSeed: ByteArray
 
     private lateinit var approverPublicKey: String
 
@@ -58,20 +59,19 @@ class InitiationRequestSigningTest {
         encryptionManager = EncryptionManagerImpl(securePreferences, cryptographyManager)
         phrase = encryptionManager.generatePhrase()
         keyPair = createSolanaKeyPairFromMnemonic(Mnemonics.MnemonicCode(phrase = phrase))
+        rootSeed = createRootSeedFromMnemonic(Mnemonics.MnemonicCode(phrase = phrase))
 
         storedKeyData = StoredKeyData(
             initVector = BaseWrapper.encode(byteArrayOf(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)),
             encryptedKeysData = ""
         )
 
-        whenever(securePreferences.retrieveV3PrivateKeys(userEmail)).then {
-            storedKeyData.toJson()
+        whenever(securePreferences.retrieveV3RootSeed(userEmail)).then {
+            EncryptedData(ciphertext = byteArrayOf(), initializationVector = byteArrayOf(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0))
         }
 
         whenever(cryptographyManager.decryptData(any(), any())).then {
-            StoredKeyData.mapToJson(hashMapOf(
-                SOLANA_KEY to BaseWrapper.encode(keyPair.privateKey)
-            )).toByteArray()
+            BaseWrapper.encode(rootSeed).toByteArray()
         }
 
         approverPublicKey = BaseWrapper.encode(keyPair.publicKey)

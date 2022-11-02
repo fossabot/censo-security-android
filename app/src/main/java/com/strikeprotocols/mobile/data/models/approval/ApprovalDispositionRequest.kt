@@ -375,16 +375,12 @@ data class ApprovalDispositionRequest(
     private fun signRequestWithSolanaKey(
         encryptionManager: EncryptionManager,
         cipher: Cipher): SignedPayload {
-        val privateKeyByteArray = encryptionManager.retrieveSavedV3Key(
-            email = email, cipher = cipher
-        )
-
-        val privateKey = BaseWrapper.encode(privateKeyByteArray)
 
         return try {
             encryptionManager.signApprovalDispositionMessage(
                 signable = this,
-                solanaKey = privateKey
+                email = email,
+                cipher = cipher
             )
         } catch (e: Exception) {
             throw Exception("Signing data failure")
@@ -396,14 +392,11 @@ data class ApprovalDispositionRequest(
         cipher: Cipher,
         childKeyIndex: Int): List<SignedPayload> {
 
-        val privateKeyByteArray = encryptionManager.retrieveSavedV3Key(
-            email = email, cipher = cipher, keyType = StoredKeyData.BITCOIN_KEY
-        )
-
         return try {
             encryptionManager.signBitcoinApprovalDispositionMessage(
                 signable = this,
-                bitcoinKey = BaseWrapper.encode(privateKeyByteArray),
+                cipher = cipher,
+                email = email,
                 childKeyIndex = childKeyIndex
             )
         } catch (e: Exception) {
@@ -415,14 +408,11 @@ data class ApprovalDispositionRequest(
         encryptionManager: EncryptionManager,
         cipher: Cipher): List<SignedPayload> {
 
-        val privateKeyByteArray = encryptionManager.retrieveSavedV3Key(
-            email = email, cipher = cipher, keyType = StoredKeyData.BITCOIN_KEY
-        )
-
         return try {
             encryptionManager.signBitcoinApprovalDispositionMessage(
                 signable = this,
-                bitcoinKey = BaseWrapper.encode(privateKeyByteArray)
+                email = email,
+                cipher = cipher,
             )
         } catch (e: Exception) {
             throw Exception("Signing data failure")
@@ -433,14 +423,11 @@ data class ApprovalDispositionRequest(
         encryptionManager: EncryptionManager,
         cipher: Cipher): SignedPayload {
 
-        val privateKeyByteArray = encryptionManager.retrieveSavedV3Key(
-            email = email, cipher = cipher, keyType = StoredKeyData.ETHEREUM_KEY
-        )
-
         return try {
             encryptionManager.signEthereumApprovalDispositionMessage(
                 signable = this,
-                ethereumKey = BaseWrapper.encode(privateKeyByteArray)
+                email = email,
+                cipher = cipher,
             )
         } catch (e: Exception) {
             throw Exception("Signing data failure")

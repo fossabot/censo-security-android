@@ -33,9 +33,7 @@ interface SecurePreferences {
     //v3 storage
     fun clearAllV3KeyData(email: String)
     fun retrieveV3RootSeed(email: String): EncryptedData
-    fun retrieveV3PrivateKeys(email: String): String
     fun saveV3RootSeed(email: String, encryptedData: EncryptedData)
-    fun saveV3PrivateKeys(email: String, keyJson: String)
     fun saveV3PublicKeys(email: String, keyJson: String)
     fun retrieveV3PublicKeys(email: String): HashMap<String, String>
     fun hasV3RootSeed(email: String) : Boolean
@@ -142,9 +140,6 @@ class SecurePreferencesImpl @Inject constructor(applicationContext: Context) :
 
     //region V3 Storage
     override fun clearAllV3KeyData(email: String) {
-        SharedPrefsHelper.clearV3PrivateKeys(
-            encryptedPrefs = secureSharedPreferences, email = email
-        )
         SharedPrefsHelper.clearV3PublicKeys(
             encryptedPrefs = secureSharedPreferences,
             email = email
@@ -171,21 +166,6 @@ class SecurePreferencesImpl @Inject constructor(applicationContext: Context) :
             encryptedPrefs = secureSharedPreferences,
             encryptedData = encryptedData
         )
-    }
-
-    override fun saveV3PrivateKeys(email: String, keyJson: String) {
-        SharedPrefsHelper.saveV3PrivateKeys(
-            encryptedPrefs = secureSharedPreferences,
-            email = email,
-            keyData = keyJson
-        )
-    }
-
-    override fun retrieveV3PrivateKeys(email: String): String {
-        return SharedPrefsHelper.retrieveV3PrivateKeys(
-            encryptedPrefs = secureSharedPreferences,
-            email
-        ) ?: ""
     }
 
     override fun saveV3PublicKeys(email: String, keyJson: String) {

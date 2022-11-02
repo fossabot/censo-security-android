@@ -3,16 +3,12 @@ package com.strikeprotocols.mobile.data
 import cash.z.ecc.android.bip39.Mnemonics
 import cash.z.ecc.android.bip39.toSeed
 import com.strikeprotocols.mobile.common.BaseWrapper
-import com.strikeprotocols.mobile.common.Resource
 import com.strikeprotocols.mobile.common.generateFormattedTimestamp
-import com.strikeprotocols.mobile.data.models.Chain
-import com.strikeprotocols.mobile.common.*
 import com.strikeprotocols.mobile.data.EncryptionManagerImpl.Companion.SENTINEL_KEY_NAME
+import com.strikeprotocols.mobile.data.models.Chain
 import com.strikeprotocols.mobile.data.models.StoredKeyData.Companion.SOLANA_KEY
 import com.strikeprotocols.mobile.data.models.VerifyUser
-import com.strikeprotocols.mobile.data.models.WalletPublicKey
 import com.strikeprotocols.mobile.data.models.WalletSigner
-import com.strikeprotocols.mobile.data.models.WalletSigner.Companion.WALLET_TYPE_SOLANA
 import com.strikeprotocols.mobile.data.models.mapToPublicKeysList
 import javax.crypto.Cipher
 
@@ -30,7 +26,6 @@ interface KeyRepository {
     suspend fun doesUserHaveValidLocalKey(verifyUser: VerifyUser): Boolean
 
     suspend fun saveV3RootKey(mnemonic: Mnemonics.MnemonicCode, cipher: Cipher)
-    suspend fun saveV3PrivateKeys(mnemonic: Mnemonics.MnemonicCode, cipher: Cipher)
     suspend fun saveV3PublicKeys(mnemonic: Mnemonics.MnemonicCode) : List<WalletSigner?>
     suspend fun retrieveV3PublicKeys() : List<WalletSigner?>
 
@@ -48,8 +43,8 @@ interface KeyRepository {
 
     fun validateUserEnteredPhraseAgainstBackendKeys(phrase: String, verifyUser: VerifyUser?) : Boolean
 
-    suspend fun signKeysThatBackendIsMissing(
-        keysToBeAdded: List<WalletSigner>,
+    suspend fun signPublicKeys(
+        publicKeys: List<WalletSigner?>,
         mnemonic: Mnemonics.MnemonicCode
     ): List<WalletSigner>
 }
@@ -105,7 +100,7 @@ class KeyRepositoryImpl(
             val rootSeed = Mnemonics.MnemonicCode(phrase = phrase).toSeed()
 
             val backendSolanaPublicKey =
-                verifyUser?.publicKeys?.first { it?.walletType == WALLET_TYPE_SOLANA }
+                verifyUser?.publicKeys?.first { it?.chain == Chain.solana }
 
             val userInputtedPublicKey =
                 encryptionManager.generateSolanaPublicKeyFromRootSeed(rootSeed)
@@ -126,7 +121,7 @@ class KeyRepositoryImpl(
         val tokenByteArray = timestamp.toByteArray(charset = Charsets.UTF_8)
 
         val signedTimestamp =
-            encryptionManager.signDataWithEncryptedKey(
+            encryptionManager.signDataWithSolanaEncryptedKey(
                 data = tokenByteArray,
                 userEmail = userEmail,
                 cipher = cipher,
@@ -144,18 +139,6 @@ class KeyRepositoryImpl(
         val rootSeed = mnemonic.toSeed()
 
         encryptionManager.saveV3RootSeed(
-            rootSeed = rootSeed,
-            cipher = cipher,
-            email = userEmail
-        )
-    }
-
-    override suspend fun saveV3PrivateKeys(mnemonic: Mnemonics.MnemonicCode, cipher: Cipher) {
-        val userEmail = userRepository.retrieveUserEmail()
-
-        val rootSeed = mnemonic.toSeed()
-
-        encryptionManager.saveV3PrivateKeys(
             rootSeed = rootSeed,
             cipher = cipher,
             email = userEmail
@@ -180,15 +163,15 @@ class KeyRepositoryImpl(
         return securePreferences.retrieveV3PublicKeys(userEmail).mapToPublicKeysList()
     }
 
-    override suspend fun signKeysThatBackendIsMissing(
-        keysToBeAdded: List<WalletSigner>,
+    override suspend fun signPublicKeys(
+        publicKeys: List<WalletSigner?>,
         mnemonic: Mnemonics.MnemonicCode
     ): List<WalletSigner> {
         val rootSeed = mnemonic.toSeed()
 
         val signedKeysToAdd = mutableListOf<WalletSigner>()
 
-        for (key in keysToBeAdded) {
+        for (key in publicKeys.filterNotNull()) {
             val signedKey = encryptionManager.signKeyForMigration(
                 rootSeed = rootSeed,
                 publicKey = key.publicKey ?: ""

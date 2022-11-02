@@ -27,7 +27,6 @@ object SharedPrefsHelper {
     //V3 Key Storage
     private const val V3_ROOT_SEED = "_v3_root_seed"
     private const val V3_ROOT_SEED_INIT_VECTOR = "_v3_root_seed_init_vector"
-    private const val V3_PRIVATE_KEYS = "_v3_private_keys_list"
     private const val V3_PUBLIC_KEYS = "_v3_public_keys_list"
 
     private lateinit var appContext: Context
@@ -140,23 +139,6 @@ object SharedPrefsHelper {
     //endregion
 
     //region V3 Storage
-
-    fun saveV3PrivateKeys(encryptedPrefs: SharedPreferences, email: String, keyData: String) {
-        val editor = encryptedPrefs.edit()
-        editor.putString("${email.lowercase().trim()}$V3_PRIVATE_KEYS", keyData)
-        editor.apply()
-    }
-
-    fun retrieveV3PrivateKeys(encryptedPrefs: SharedPreferences, email: String): String? {
-        return encryptedPrefs.getString("${email.lowercase().trim()}$V3_PRIVATE_KEYS", "")
-    }
-
-    fun clearV3PrivateKeys(encryptedPrefs: SharedPreferences, email: String) {
-        val editor = encryptedPrefs.edit()
-        editor.putString("${email.lowercase().trim()}$V3_PRIVATE_KEYS", "")
-        editor.apply()
-    }
-
     fun saveV3PublicKeys(encryptedPrefs: SharedPreferences, email: String, keyData: String) {
         val editor = encryptedPrefs.edit()
         editor.putString("${email.lowercase().trim()}$V3_PUBLIC_KEYS", keyData)

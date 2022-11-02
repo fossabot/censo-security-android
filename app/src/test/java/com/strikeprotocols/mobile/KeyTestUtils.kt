@@ -12,8 +12,9 @@ fun createSolanaKeyPairFromMnemonic(mnenomic: Mnemonics.MnemonicCode): TestKeyPa
         privateKey = solanaHierarchicalKey.privateKeyBytes,
         publicKey = solanaHierarchicalKey.publicKeyBytes,
     )
-
 }
+
+fun createRootSeedFromMnemonic(mnenomic: Mnemonics.MnemonicCode)  = mnenomic.toSeed()
 
 data class TestKeyPair(
     val privateKey: ByteArray,
