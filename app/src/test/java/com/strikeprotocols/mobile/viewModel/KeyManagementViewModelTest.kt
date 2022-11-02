@@ -1,6 +1,5 @@
 package com.strikeprotocols.mobile.viewModel
 
-import cash.z.ecc.android.bip39.Mnemonics
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.times
 import com.nhaarman.mockitokotlin2.verify
@@ -9,7 +8,6 @@ import com.strikeprotocols.mobile.*
 import com.strikeprotocols.mobile.common.BioPromptReason
 import com.strikeprotocols.mobile.common.PhraseEntryUtil
 import com.strikeprotocols.mobile.common.Resource
-import com.strikeprotocols.mobile.data.EncryptionManagerImpl.Companion.PRIVATE_KEYS_KEY_NAME
 import com.strikeprotocols.mobile.data.EncryptionManagerImpl.Companion.ROOT_SEED_KEY_NAME
 import com.strikeprotocols.mobile.data.KeyRepository
 import com.strikeprotocols.mobile.data.PhraseException
@@ -52,9 +50,6 @@ class KeyManagementViewModelTest : BaseViewModelTest() {
     @Mock
     lateinit var rootSeedEncryptionCipher: Cipher
 
-    @Mock
-    lateinit var privateKeysEncryptionCipher: Cipher
-
     private lateinit var keyMgmtViewModel: KeyManagementViewModel
 
     private val dispatcher = StandardTestDispatcher()
@@ -94,9 +89,6 @@ class KeyManagementViewModelTest : BaseViewModelTest() {
 
         whenever(cipherRepository.getCipherForEncryption(ROOT_SEED_KEY_NAME)).thenAnswer {
             rootSeedEncryptionCipher
-        }
-        whenever(cipherRepository.getCipherForEncryption(PRIVATE_KEYS_KEY_NAME)).thenAnswer {
-            privateKeysEncryptionCipher
         }
 
         keyMgmtViewModel =
@@ -358,7 +350,7 @@ class KeyManagementViewModelTest : BaseViewModelTest() {
         //need to have local keys match test data to avoid logic that uploads key. That will be handled in another test.
         val matchedTestData = testRecoveryInitialData.copy(
             verifyUserDetails = testRecoveryInitialData.verifyUserDetails?.copy(
-                publicKeys = validWalletSigners.map { WalletPublicKey(it.publicKey, chain = it.chain) }
+                publicKeys = validWalletSigners.map { WalletPublicKey(it.publicKey, chain = it.chain!!) }
             )
         )
 
@@ -375,14 +367,10 @@ class KeyManagementViewModelTest : BaseViewModelTest() {
             keyMgmtViewModel.state.keyManagementFlowStep
         )
 
-        keyMgmtViewModel.recoverKey(privateKeysEncryptionCipher)
+        keyMgmtViewModel.recoverKey()
 
         advanceUntilIdle()
 
-        verify(keyRepository, times(1)).saveV3PrivateKeys(
-            mnemonic = any(),
-            cipher = any()
-        )
         assertTrue(keyMgmtViewModel.state.finalizeKeyFlow is Resource.Success)
     }
 
@@ -410,11 +398,10 @@ class KeyManagementViewModelTest : BaseViewModelTest() {
             keyMgmtViewModel.state.keyManagementFlowStep
         )
 
-        keyMgmtViewModel.createAndSaveKey(privateKeysEncryptionCipher)
+        keyMgmtViewModel.createAndSaveKey()
 
         advanceUntilIdle()
 
-        verify(keyRepository, times(1)).saveV3PrivateKeys(any(), any())
         verify(keyRepository, times(1)).saveV3PublicKeys(any())
         verify(userRepository, times(1)).addWalletSigner(any())
 
@@ -824,7 +811,7 @@ class KeyManagementViewModelTest : BaseViewModelTest() {
 
         //This method should fail early because there is no phrase in state.
         // This will trigger the showToast property to be set in state
-        keyMgmtViewModel.createAndSaveKey(privateKeysEncryptionCipher)
+        keyMgmtViewModel.createAndSaveKey()
 
         assertTrue(keyMgmtViewModel.state.showToast is Resource.Success)
         assertEquals(NO_PHRASE_ERROR, keyMgmtViewModel.state.showToast.data)
@@ -837,7 +824,7 @@ class KeyManagementViewModelTest : BaseViewModelTest() {
         keyMgmtViewModel.onStart(testCreationInitialData)
 
         //Initial bio prompt trigger
-        keyMgmtViewModel.triggerBioPrompt(inputMethod = null, true)
+        keyMgmtViewModel.triggerBioPrompt(inputMethod = null)
 
         advanceUntilIdle()
 
@@ -848,7 +835,7 @@ class KeyManagementViewModelTest : BaseViewModelTest() {
         assertTrue(keyMgmtViewModel.state.triggerBioPrompt is Resource.Uninitialized)
 
         //Trigger bio prompt again
-        keyMgmtViewModel.triggerBioPrompt(PhraseInputMethod.MANUAL, true)
+        keyMgmtViewModel.triggerBioPrompt(PhraseInputMethod.MANUAL)
 
         advanceUntilIdle()
 
@@ -866,7 +853,7 @@ class KeyManagementViewModelTest : BaseViewModelTest() {
 
         keyMgmtViewModel.onStart(testRecoveryInitialData)
 
-        keyMgmtViewModel.triggerBioPrompt(inputMethod = PhraseInputMethod.MANUAL, true)
+        keyMgmtViewModel.triggerBioPrompt(inputMethod = PhraseInputMethod.MANUAL)
 
         advanceUntilIdle()
 
@@ -887,7 +874,7 @@ class KeyManagementViewModelTest : BaseViewModelTest() {
     //region Retry methods
     @Test
     fun `after error occurs during key recovery then retrying should trigger bio prompt`() = runTest {
-        whenever(keyRepository.saveV3PrivateKeys(any(), any())).then {
+        whenever(keyRepository.saveV3RootKey(any(), any())).then {
             throw Exception(defaultErrorMessage)
         }
 
@@ -907,7 +894,7 @@ class KeyManagementViewModelTest : BaseViewModelTest() {
         assertTrue(keyMgmtViewModel.state.keyRecoveryManualEntryError is Resource.Uninitialized)
 
         //Attempt to recover the key, an exception will be thrown
-        keyMgmtViewModel.recoverKey(privateKeysEncryptionCipher)
+        keyMgmtViewModel.recoverKey()
 
         advanceUntilIdle()
 
@@ -936,13 +923,13 @@ class KeyManagementViewModelTest : BaseViewModelTest() {
 
     @Test
     fun `after error occurs during key creation then retrying should trigger bio prompt`() = runTest {
-        whenever(keyRepository.saveV3PrivateKeys(any(), any())).thenAnswer {
+        whenever(keyRepository.saveV3RootKey(any(), any())).thenAnswer {
             throw Exception(defaultErrorMessage)
         }
 
         setCreationFlowDataInStateForConfirmWordsProcessAndAssertChangesInState()
 
-        keyMgmtViewModel.createAndSaveKey(privateKeysEncryptionCipher)
+        keyMgmtViewModel.createAndSaveKey()
 
         advanceUntilIdle()
 

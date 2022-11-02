@@ -2,6 +2,7 @@ package com.strikeprotocols.mobile
 
 import com.google.gson.JsonParser
 import com.strikeprotocols.mobile.common.GeneralDummyData
+import com.strikeprotocols.mobile.data.models.Chain
 import com.strikeprotocols.mobile.data.models.Organization
 import com.strikeprotocols.mobile.data.models.VerifyUser
 import com.strikeprotocols.mobile.data.models.WalletPublicKey
@@ -141,7 +142,7 @@ fun getVerifyUser() = VerifyUser(
         id = "crypto",
         name = "cryptology"
     ),
-    publicKeys = listOf(WalletPublicKey(key = GeneralDummyData.PhraseDummyData.PHRASE_PUBLIC_KEY, chain = null)),
+    publicKeys = listOf(WalletPublicKey(key = GeneralDummyData.PhraseDummyData.PHRASE_PUBLIC_KEY, chain = Chain.solana)),
     useStaticKey = false
 )
 

@@ -10,7 +10,6 @@ import com.strikeprotocols.mobile.common.BioPromptReason
 import com.strikeprotocols.mobile.common.Resource
 import com.strikeprotocols.mobile.common.strikeLog
 import com.strikeprotocols.mobile.data.BioPromptData
-import com.strikeprotocols.mobile.data.EncryptionManagerImpl.Companion.PRIVATE_KEYS_KEY_NAME
 import com.strikeprotocols.mobile.data.EncryptionManagerImpl.Companion.ROOT_SEED_KEY_NAME
 import com.strikeprotocols.mobile.data.MigrationRepository
 import com.strikeprotocols.mobile.data.models.CipherRepository
@@ -25,8 +24,8 @@ import javax.inject.Inject
  *
  * Step 1: Get existing root seed
  *  - This involves biometry approval for v2 and v3 cases.
- * Step 2: Save all new data to v3 storage: root seed, private keys, public keys
- *  - Will require 2 biometry approvals
+ * Step 2: Save all new data to v3 storage: root seed and public keys
+ *  - Will require 1 biometry approval
  * Step 3: Send public keys to backend (sign certain ones if needed)
  *  - Depending if backend does not have certain keys, we may need to sign some local keys when sending
  *
@@ -130,7 +129,11 @@ class MigrationViewModel @Inject constructor(
         }
 
         state = state.copy(rootSeed = rootSeed.toList())
-        generateAllNecessaryData()
+
+        migrationRepository.saveV3PublicKeys(rootSeed = rootSeed)
+        migrationRepository.clearOldData()
+
+        makeApiCallToSaveDataWithBackend()
     }
     //endregion
 
@@ -166,28 +169,6 @@ class MigrationViewModel @Inject constructor(
             cipher = rootSeedCipher
         )
 
-        val privateKeysCipher = cipherRepository.getCipherForEncryption(PRIVATE_KEYS_KEY_NAME)
-        if (privateKeysCipher != null) {
-            state = state.copy(
-                triggerBioPrompt = Resource.Success(privateKeysCipher),
-                bioPromptData = BioPromptData(BioPromptReason.SAVE_V3_KEYS, true)
-            )
-        }
-    }
-
-    private suspend fun savePrivateAndPublicKeys(cipher: Cipher) {
-        val rootSeed = state.rootSeed
-
-        if (rootSeed == null) {
-            state = state.copy(addWalletSigner = Resource.Error())
-            return
-        }
-
-        migrationRepository.saveV3PrivateKeys(
-            rootSeed = rootSeed.toByteArray(),
-            cipher = cipher
-        )
-
         migrationRepository.saveV3PublicKeys(
             rootSeed = rootSeed.toByteArray()
         )
@@ -208,12 +189,9 @@ class MigrationViewModel @Inject constructor(
             return
         }
 
-        val walletSignersToAdd = migrationRepository.retrieveWalletSignersToUpload(
-            rootSeed = rootSeed.toByteArray(),
-            verifyUser = verifyUser
-        )
+        val walletSignersToAdd =
+            migrationRepository.retrieveWalletSignersToUpload(rootSeed.toByteArray())
 
-        //send up wallet signers to backend
         //make API call to send up bitcoin signed key
         val walletSigner = migrationRepository.migrateSigner(walletSignersToAdd)
 
@@ -233,7 +211,6 @@ class MigrationViewModel @Inject constructor(
                 BioPromptReason.RETRIEVE_V2_KEYS -> retrieveV2KeyDataAndKickOffKeyStorage(cipher)
                 BioPromptReason.RETRIEVE_V3_ROOT_SEED -> retrieveV3RootSeedAndKickOffKeyStorage(cipher)
                 BioPromptReason.SAVE_V3_ROOT_SEED -> saveRootSeed(cipher)
-                BioPromptReason.SAVE_V3_KEYS -> savePrivateAndPublicKeys(cipher)
                 else -> {}
             }
         }

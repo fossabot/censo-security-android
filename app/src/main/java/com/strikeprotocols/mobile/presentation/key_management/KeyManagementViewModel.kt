@@ -10,7 +10,6 @@ import androidx.lifecycle.viewModelScope
 import cash.z.ecc.android.bip39.Mnemonics
 import com.strikeprotocols.mobile.common.*
 import com.strikeprotocols.mobile.data.*
-import com.strikeprotocols.mobile.data.EncryptionManagerImpl.Companion.PRIVATE_KEYS_KEY_NAME
 import com.strikeprotocols.mobile.data.EncryptionManagerImpl.Companion.ROOT_SEED_KEY_NAME
 import com.strikeprotocols.mobile.data.models.CipherRepository
 import com.strikeprotocols.mobile.data.models.IndexedPhraseWord
@@ -107,24 +106,15 @@ class KeyManagementViewModel @Inject constructor(
             finalizeKeyFlow = Resource.Loading()
         )
 
-        triggerBioPrompt(inputMethod = PhraseInputMethod.PASTED, rootSeedSave = true)
+        triggerBioPrompt(inputMethod = PhraseInputMethod.PASTED)
     }
     //endregion
 
     //region CORE ACTIONS
-    fun triggerBioPrompt(inputMethod: PhraseInputMethod? = null, rootSeedSave: Boolean) {
+    fun triggerBioPrompt(inputMethod: PhraseInputMethod? = null) {
         viewModelScope.launch {
-            val cipher = if (rootSeedSave) {
-                cipherRepository.getCipherForEncryption(ROOT_SEED_KEY_NAME)
-            } else {
-                cipherRepository .getCipherForEncryption(PRIVATE_KEYS_KEY_NAME)
-            }
-
-            val bioPromptData = if (rootSeedSave) {
-                BioPromptData(BioPromptReason.SAVE_V3_ROOT_SEED, false)
-            } else {
-                BioPromptData(BioPromptReason.SAVE_V3_KEYS, true)
-            }
+            val cipher = cipherRepository.getCipherForEncryption(ROOT_SEED_KEY_NAME)
+            val bioPromptData = BioPromptData(BioPromptReason.SAVE_V3_ROOT_SEED, false)
 
             if (cipher != null) {
                 state = when (state.keyManagementFlow) {
@@ -153,13 +143,6 @@ class KeyManagementViewModel @Inject constructor(
         when (state.bioPromptData.bioPromptReason) {
             BioPromptReason.SAVE_V3_ROOT_SEED -> {
                 saveRootSeed(cipher)
-            }
-            BioPromptReason.SAVE_V3_KEYS -> {
-                if(state.keyManagementFlow == KeyManagementFlow.KEY_CREATION) {
-                    createAndSaveKey(cipher)
-                } else if (state.keyManagementFlow == KeyManagementFlow.KEY_RECOVERY) {
-                    recoverKey(cipher)
-                }
             }
             else -> {}
         }
@@ -195,11 +178,15 @@ class KeyManagementViewModel @Inject constructor(
                 cipher = cipher
             )
 
-            triggerBioPrompt(rootSeedSave = false)
+            if(state.keyManagementFlow == KeyManagementFlow.KEY_CREATION) {
+                createAndSaveKey()
+            } else if (state.keyManagementFlow == KeyManagementFlow.KEY_RECOVERY) {
+                recoverKey()
+            }
         }
     }
 
-    fun createAndSaveKey(cipher: Cipher) {
+    fun createAndSaveKey() {
         val phrase = state.keyGeneratedPhrase
 
         if (phrase.isNullOrEmpty()) {
@@ -209,11 +196,6 @@ class KeyManagementViewModel @Inject constructor(
 
         viewModelScope.launch {
             try {
-                keyRepository.saveV3PrivateKeys(
-                    mnemonic = Mnemonics.MnemonicCode(phrase = phrase),
-                    cipher = cipher
-                )
-
                 //need to update wallet signer call
                 val walletSigners =
                     keyRepository.saveV3PublicKeys(mnemonic = Mnemonics.MnemonicCode(phrase = phrase))
@@ -245,18 +227,13 @@ class KeyManagementViewModel @Inject constructor(
         }
     }
 
-    fun recoverKey(cipher: Cipher) {
+    fun recoverKey() {
         viewModelScope.launch {
             val verifyUser = state.initialData?.verifyUserDetails
             val publicKeys = verifyUser?.publicKeys
 
             if (verifyUser != null && !publicKeys.isNullOrEmpty()) {
                 try {
-                    keyRepository.saveV3PrivateKeys(
-                        mnemonic = Mnemonics.MnemonicCode(phrase = state.userInputtedPhrase),
-                        cipher = cipher
-                    )
-
                     //need to update wallet signer call
                     val localKeys = keyRepository.saveV3PublicKeys(
                         mnemonic = Mnemonics.MnemonicCode(phrase = state.userInputtedPhrase)
@@ -266,8 +243,8 @@ class KeyManagementViewModel @Inject constructor(
 
                     if (keysNotSavedOnBackend.isNotEmpty()) {
                         val signedKeys =
-                            keyRepository.signKeysThatBackendIsMissing(
-                                keysToBeAdded = keysNotSavedOnBackend,
+                            keyRepository.signPublicKeys(
+                                publicKeys = localKeys,
                                 mnemonic = Mnemonics.MnemonicCode(phrase = state.userInputtedPhrase)
                             )
 
@@ -657,7 +634,7 @@ class KeyManagementViewModel @Inject constructor(
             finalizeKeyFlow = Resource.Loading(),
         )
 
-        triggerBioPrompt(rootSeedSave = true)
+        triggerBioPrompt()
     }
 
     private fun handleUserFinishedPhraseVerificationDuringKeyCreation() {
@@ -704,7 +681,7 @@ class KeyManagementViewModel @Inject constructor(
             finalizeKeyFlow = Resource.Loading(),
             userInputtedPhrase = phrase
         )
-        triggerBioPrompt(inputMethod = inputMethod, rootSeedSave = true)
+        triggerBioPrompt(inputMethod = inputMethod)
     }
     //endregion
 

@@ -3,6 +3,7 @@ package com.strikeprotocols.mobile.data.models.approval
 import com.strikeprotocols.mobile.common.BaseWrapper
 import com.strikeprotocols.mobile.data.EncryptionManager
 import com.strikeprotocols.mobile.data.Signable
+import com.strikeprotocols.mobile.data.SignedInitiationData
 import com.strikeprotocols.mobile.data.generateEphemeralPrivateKey
 import com.strikeprotocols.mobile.data.models.ApprovalDisposition
 import com.strikeprotocols.mobile.data.models.Nonce
@@ -18,6 +19,7 @@ import com.strikeprotocols.mobile.data.models.approval.ApprovalRequestDetails.*
 import com.strikeprotocols.mobile.data.models.approval.ApprovalRequestDetails.Companion.UNKNOWN_INITIATION
 import com.strikeprotocols.mobile.data.models.approval.TransactionInstruction.Companion.createAdvanceNonceInstruction
 import org.bouncycastle.crypto.params.Ed25519PrivateKeyParameters
+import org.web3j.crypto.Sign
 import java.io.ByteArrayOutputStream
 import javax.crypto.Cipher
 
@@ -387,64 +389,28 @@ data class InitiationRequest(
         encryptionManager: EncryptionManager, cipher: Cipher
     ): InitiateRequestBody {
 
-        //get private key here then we can pass to encryption manager methods
-        val privateKeyByteArray = encryptionManager.retrieveSavedV3Key(
-            email = email, cipher = cipher
-        )
-
-        val privateKey = BaseWrapper.encode(privateKeyByteArray)
-
-        val initiatorSignature = try {
-            encryptionManager.signApprovalDispositionMessage(
+        val initiationSignedData : SignedInitiationData =
+            encryptionManager.signInitiationRequestData(
                 signable = this,
-                solanaKey = privateKey,
-            ).signature
-        } catch (e: Exception) {
-            throw Exception("SIGNING_DATA_FAILURE")
-        }
+                email = email,
+                ephemeralPrivateKey = opAccountPrivateKey.encoded,
+                supplyInstructions = supplyInstructions,
+                cipher = cipher
+            )
 
         val nonce = nonces.firstOrNull()?.value ?: ""
         val nonceAccountAddress = requestType.nonceAccountAddresses().firstOrNull() ?: ""
 
-        val opAccountSignature = try {
-            encryptionManager.signApprovalInitiationMessage(
-                ephemeralPrivateKey = opAccountPrivateKey.encoded,
-                signable = this,
-                solanaKey = privateKey
-            )
-        } catch (e: Exception) {
-            throw Exception("SIGNING_DATA_FAILURE")
-        }
-
         val opAccountAddress = opAccountPublicKey().toBase58()
-
-        val supplyDappInstruction =
-            if (supplyInstructions.isNotEmpty()) {
-                val supplyInstructionInitiatorSignatures = supplyInstructions.map { instruction ->
-                    SupplyDappInstructionsTxSignature(
-                        nonce = instruction.nonce.value,
-                        nonceAccountAddress = instruction.nonceAccountAddress,
-                        signature = encryptionManager.signApprovalDispositionMessage(
-                            signable = instruction, solanaKey = privateKey
-                        ).signature
-                    )
-                }
-
-                SupplyDAppInstructions(
-                    supplyInstructionInitiatorSignatures = supplyInstructionInitiatorSignatures
-                )
-            } else {
-                null
-            }
 
         return InitiateRequestBody(
             approvalDisposition = approvalDisposition,
             nonce = nonce,
             nonceAccountAddress = nonceAccountAddress,
-            initiatorSignature = initiatorSignature,
-            opAccountSignature = opAccountSignature,
+            initiatorSignature = initiationSignedData.initiatorSignature,
+            opAccountSignature = initiationSignedData.opAccountSignature,
             opAccountAddress = opAccountAddress,
-            supplyDappInstructions = supplyDappInstruction
+            supplyDappInstructions = initiationSignedData.supplyDAppInstructions
         )
     }
 
@@ -458,11 +424,11 @@ data class InitiationRequest(
         val supplyDappInstructions: SupplyDAppInstructions?
     )
 
-    inner class SupplyDAppInstructions(
+    class SupplyDAppInstructions(
         val supplyInstructionInitiatorSignatures: List<SupplyDappInstructionsTxSignature>
     )
 
-    inner class SupplyDappInstructionsTxSignature(
+    class SupplyDappInstructionsTxSignature(
         val nonce: String,
         val nonceAccountAddress: String,
         val signature: String

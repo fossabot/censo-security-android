@@ -12,7 +12,6 @@ import javax.crypto.Cipher
 
 interface MigrationRepository {
     suspend fun saveV3RootSeed(rootSeed: ByteArray, cipher: Cipher)
-    suspend fun saveV3PrivateKeys(rootSeed: ByteArray, cipher: Cipher)
     suspend fun saveV3PublicKeys(rootSeed: ByteArray)
 
     suspend fun retrieveV1RootSeed() : ByteArray?
@@ -24,10 +23,7 @@ interface MigrationRepository {
     suspend fun retrieveV2RootSeed(cipher: Cipher): ByteArray?
     suspend fun retrieveV3PublicKeys(): HashMap<String, String>
 
-    suspend fun retrieveWalletSignersToUpload(
-        rootSeed: ByteArray,
-        verifyUser: VerifyUser?,
-    ): List<WalletSigner>
+    suspend fun retrieveWalletSignersToUpload(rootSeed: ByteArray): List<WalletSigner>
 
     suspend fun migrateSigner(walletSigners: List<WalletSigner>): Resource<Signers>
 
@@ -45,16 +41,6 @@ class MigrationRepositoryImpl(
         val userEmail = userRepository.retrieveUserEmail()
 
         encryptionManager.saveV3RootSeed(
-            rootSeed = rootSeed,
-            cipher = cipher,
-            email = userEmail
-        )
-    }
-
-    override suspend fun saveV3PrivateKeys(rootSeed: ByteArray, cipher: Cipher) {
-        val userEmail = userRepository.retrieveUserEmail()
-
-        encryptionManager.saveV3PrivateKeys(
             rootSeed = rootSeed,
             cipher = cipher,
             email = userEmail
@@ -119,28 +105,18 @@ class MigrationRepositoryImpl(
         return securePreferences.retrieveV3PublicKeys(email = userEmail)
     }
 
-    override suspend fun retrieveWalletSignersToUpload(
-        rootSeed: ByteArray,
-        verifyUser: VerifyUser?,
-    ): List<WalletSigner> {
+    override suspend fun retrieveWalletSignersToUpload(rootSeed: ByteArray): List<WalletSigner> {
         val userEmail = userRepository.retrieveUserEmail()
         val publicKeysMap = securePreferences.retrieveV3PublicKeys(userEmail)
 
-        val keysThatNeedToBeUploadedToBackend = verifyUser?.determineKeysUserNeedsToUpload(
-            localKeys = publicKeysMap.mapToPublicKeysList()
-        ) ?: emptyList()
-
         val keysToAdd = mutableListOf<WalletSigner>()
 
-        if (keysThatNeedToBeUploadedToBackend.isNotEmpty()) {
-
-            for (key in keysThatNeedToBeUploadedToBackend) {
-                val signedKey = encryptionManager.signKeyForMigration(
-                    rootSeed = rootSeed,
-                    publicKey = key.publicKey ?: ""
-                )
-                keysToAdd.add(key.copy(signature = BaseWrapper.encodeToBase64(signedKey)))
-            }
+        for (key in publicKeysMap.mapToPublicKeysList()) {
+            val signedKey = encryptionManager.signKeyForMigration(
+                rootSeed = rootSeed,
+                publicKey = key.publicKey ?: ""
+            )
+            keysToAdd.add(key.copy(signature = BaseWrapper.encodeToBase64(signedKey)))
         }
 
         return keysToAdd
