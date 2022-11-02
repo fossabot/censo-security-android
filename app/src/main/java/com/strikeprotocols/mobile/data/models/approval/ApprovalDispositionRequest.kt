@@ -6,6 +6,7 @@ import com.strikeprotocols.mobile.data.EncryptionManager
 import com.strikeprotocols.mobile.data.Signable
 import com.strikeprotocols.mobile.data.SignedPayload
 import com.strikeprotocols.mobile.data.models.ApprovalDisposition
+import com.strikeprotocols.mobile.data.models.Chain
 import com.strikeprotocols.mobile.data.models.Nonce
 import com.strikeprotocols.mobile.data.models.StoredKeyData
 import com.strikeprotocols.mobile.data.models.approval.PublicKey.Companion.SYSVAR_CLOCK_PUBKEY
@@ -256,7 +257,7 @@ data class ApprovalDispositionRequest(
                 listOf(requestId.toByteArray(charset = Charsets.UTF_8))
             is WalletCreation ->
                 when (requestType.accountInfo.chainName) {
-                    "Bitcoin", "Ethereum" -> listOf(requestType.toJson().toByteArray())
+                    Chain.bitcoin, Chain.ethereum -> listOf(requestType.toJson().toByteArray())
                     else -> listOf(serializeSolanaRequest(approverPublicKey))
                 }
             is WithdrawalRequest -> {
@@ -331,10 +332,10 @@ data class ApprovalDispositionRequest(
                 )
             is WalletCreation -> {
                 when (requestType.accountInfo.chainName) {
-                    "Bitcoin" -> ApprovalSignature.NoChainSignature(
+                    Chain.bitcoin -> ApprovalSignature.NoChainSignature(
                         signRequestWithBitcoinKey(encryptionManager, cipher).first()
                     )
-                    "Ethereum" -> ApprovalSignature.NoChainSignature(
+                    Chain.ethereum -> ApprovalSignature.NoChainSignature(
                         signRequestWithEthereumKey(encryptionManager, cipher)
                     )
                     else -> ApprovalSignature.SolanaSignature(

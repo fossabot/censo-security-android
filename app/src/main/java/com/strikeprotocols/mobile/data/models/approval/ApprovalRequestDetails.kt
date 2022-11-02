@@ -5,6 +5,7 @@ import com.google.gson.JsonElement
 import com.google.gson.JsonObject
 import com.google.gson.JsonPrimitive
 import com.google.gson.annotations.SerializedName
+import com.strikeprotocols.mobile.data.models.Chain
 import java.io.ByteArrayOutputStream
 import java.lang.reflect.Modifier
 import java.text.DecimalFormat
@@ -485,7 +486,7 @@ data class AccountInfo(
     val identifier: String,
     val accountType: AccountType,
     val address: String?,
-    val chainName: String? = null
+    val chainName: Chain? = null
 )
 
 data class ApprovalPolicy(

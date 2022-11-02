@@ -37,5 +37,5 @@ fun getInvalidTestingPhrase() =
 
 fun getWalletSigner() = WalletSigner(
     publicKey = GeneralDummyData.PhraseDummyData.PHRASE_PUBLIC_KEY,
-    walletType = ""
+    chain = null
 )

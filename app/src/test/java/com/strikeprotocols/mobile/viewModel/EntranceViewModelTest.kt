@@ -7,11 +7,11 @@ import com.strikeprotocols.mobile.common.Resource
 import com.strikeprotocols.mobile.data.KeyRepository
 import com.strikeprotocols.mobile.data.StrikeUserData
 import com.strikeprotocols.mobile.data.UserRepository
+import com.strikeprotocols.mobile.data.models.Chain
 import com.strikeprotocols.mobile.data.models.Organization
 import com.strikeprotocols.mobile.data.models.VerifyUser
 import com.strikeprotocols.mobile.data.models.WalletPublicKey
 import com.strikeprotocols.mobile.data.models.WalletSigner
-import com.strikeprotocols.mobile.data.models.WalletSigner.Companion.WALLET_TYPE_SOLANA
 import com.strikeprotocols.mobile.presentation.entrance.EntranceViewModel
 import com.strikeprotocols.mobile.presentation.entrance.UserDestination
 import junit.framework.Assert.assertTrue
@@ -54,7 +54,7 @@ class EntranceViewModelTest : BaseViewModelTest() {
     )
 
     private val validPublicKey = WalletPublicKey(
-        walletType = WALLET_TYPE_SOLANA,
+        chain = Chain.solana,
         key = "F7JuLRBbyGAS9nAhDdfNX1LbckBAmCnKMB2xTdZfQS1n"
     )
 
@@ -62,7 +62,7 @@ class EntranceViewModelTest : BaseViewModelTest() {
         basicVerifyUserWithNoPublicKeys.copy(publicKeys = listOf(validPublicKey))
 
     private val validWalletSigners = listOf(
-        WalletSigner(walletType = WALLET_TYPE_SOLANA, publicKey = validPublicKey.key)
+        WalletSigner(chain = Chain.solana, publicKey = validPublicKey.key)
     )
 
     @Before

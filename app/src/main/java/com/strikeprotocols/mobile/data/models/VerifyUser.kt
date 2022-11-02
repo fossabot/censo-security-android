@@ -19,5 +19,5 @@ data class Organization(
 
 data class WalletPublicKey(
     val key: String?,
-    val walletType: String?
+    val chain: Chain?
 )

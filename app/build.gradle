@@ -154,8 +154,6 @@ android {
         checkAllWarnings true
         lintConfig file('lint.xml')
         warningsAsErrors true
-    }
-    lintOptions {
         disable 'GradleDependency'
     }
 }

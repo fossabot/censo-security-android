@@ -17,7 +17,7 @@ class GeneralDummyData {
 
     fun emptyWalletSigner() = WalletSigner(
         publicKey = "",
-        walletType = ""
+        chain = null
     )
 
     fun generateInitialUserDummyData() =
@@ -66,7 +66,7 @@ class GeneralDummyData {
             listOf(
                 WalletSigner(
                     publicKey = PHRASE_PUBLIC_KEY,
-                    walletType = WalletSigner.WALLET_TYPE_SOLANA
+                    chain = Chain.solana
                 )
             )
 
@@ -80,7 +80,7 @@ class GeneralDummyData {
                 publicKeys = listOf(
                     WalletPublicKey(
                         key = PHRASE_PUBLIC_KEY,
-                        walletType = null
+                        chain = null
                     )
                 ),
                 useStaticKey = null
@@ -458,7 +458,7 @@ class MockedApprovals {
                 identifier = "1ac4a7fc-d2f8-4c32-8707-7496ee958933",
                 accountType = AccountType.BalanceAccount,
                 address = null,
-                chainName = "Solana"
+                chainName = Chain.solana
             ),
             approvalPolicy = ApprovalPolicy(
                 approvalsRequired = 1,

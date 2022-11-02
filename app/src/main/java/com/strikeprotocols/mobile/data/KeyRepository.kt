@@ -6,6 +6,7 @@ import cash.z.ecc.android.bip39.toSeed
 import com.strikeprotocols.mobile.common.BaseWrapper
 import com.strikeprotocols.mobile.common.Resource
 import com.strikeprotocols.mobile.common.generateFormattedTimestamp
+import com.strikeprotocols.mobile.data.models.Chain
 import com.strikeprotocols.mobile.data.models.StoredKeyData
 import com.strikeprotocols.mobile.data.models.VerifyUser
 import com.strikeprotocols.mobile.data.models.WalletSigner
@@ -156,7 +157,7 @@ class KeyRepositoryImpl(
 
         return WalletSigner(
             publicKey = BaseWrapper.encode(keyPair.publicKey),
-            walletType = WalletSigner.WALLET_TYPE_SOLANA
+            chain = Chain.solana
         )
     }
 
@@ -168,7 +169,7 @@ class KeyRepositoryImpl(
 
             val walletSigner = WalletSigner(
                 publicKey = publicKey,
-                walletType = WalletSigner.WALLET_TYPE_SOLANA
+                chain = Chain.solana
             )
 
             retrieveApiResource { api.addWalletSigner(walletSigner) }
