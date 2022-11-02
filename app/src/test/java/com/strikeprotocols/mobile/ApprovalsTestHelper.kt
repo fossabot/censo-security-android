@@ -141,7 +141,7 @@ fun getVerifyUser() = VerifyUser(
         id = "crypto",
         name = "cryptology"
     ),
-    publicKeys = listOf(WalletPublicKey(key = GeneralDummyData.PhraseDummyData.PHRASE_PUBLIC_KEY, walletType = null)),
+    publicKeys = listOf(WalletPublicKey(key = GeneralDummyData.PhraseDummyData.PHRASE_PUBLIC_KEY, chain = null)),
     useStaticKey = false
 )
 

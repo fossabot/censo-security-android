@@ -1,5 +1,6 @@
 package com.strikeprotocols.mobile
 
+import com.strikeprotocols.mobile.data.models.Chain
 import com.strikeprotocols.mobile.data.models.approval.*
 import com.strikeprotocols.mobile.data.models.approval.ApprovalRequestDetails.*
 import java.util.*
@@ -88,7 +89,7 @@ fun getSolanaWalletCreationRequest(nonceAccountAddresses: List<String>) : Wallet
             name = "Account 1",
             identifier = "c6055be1-a895-45a6-b0f3-fce261760b89",
             accountType = AccountType.BalanceAccount,
-            chainName = "Solana",
+            chainName = Chain.solana,
             address = null
         ),
         approvalPolicy = ApprovalPolicy(
@@ -132,7 +133,7 @@ fun getBitcoinWalletCreationRequest() : WalletCreation {
             name = "Account 1",
             identifier = "c6055be1-a895-45a6-b0f3-fce261760b89",
             accountType = AccountType.BalanceAccount,
-            chainName = "Bitcoin",
+            chainName = Chain.bitcoin,
             address = null
         ),
         approvalPolicy = ApprovalPolicy(
@@ -165,7 +166,7 @@ fun getEthereumWalletCreationRequest() : WalletCreation {
             name = "Account 1",
             identifier = "c6055be1-a895-45a6-b0f3-fce261760b89",
             accountType = AccountType.BalanceAccount,
-            chainName = "Ethereum",
+            chainName = Chain.ethereum,
             address = null
         ),
         approvalPolicy = ApprovalPolicy(
