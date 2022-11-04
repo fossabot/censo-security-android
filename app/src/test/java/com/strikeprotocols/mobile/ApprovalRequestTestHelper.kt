@@ -89,7 +89,7 @@ fun getSolanaWalletCreationRequest(nonceAccountAddresses: List<String>) : Wallet
             name = "Account 1",
             identifier = "c6055be1-a895-45a6-b0f3-fce261760b89",
             accountType = AccountType.BalanceAccount,
-            chainName = Chain.solana,
+            chain = Chain.solana,
             address = null
         ),
         approvalPolicy = ApprovalPolicy(
@@ -133,7 +133,7 @@ fun getBitcoinWalletCreationRequest() : WalletCreation {
             name = "Account 1",
             identifier = "c6055be1-a895-45a6-b0f3-fce261760b89",
             accountType = AccountType.BalanceAccount,
-            chainName = Chain.bitcoin,
+            chain = Chain.bitcoin,
             address = null
         ),
         approvalPolicy = ApprovalPolicy(
@@ -166,7 +166,7 @@ fun getEthereumWalletCreationRequest() : WalletCreation {
             name = "Account 1",
             identifier = "c6055be1-a895-45a6-b0f3-fce261760b89",
             accountType = AccountType.BalanceAccount,
-            chainName = Chain.ethereum,
+            chain = Chain.ethereum,
             address = null
         ),
         approvalPolicy = ApprovalPolicy(
@@ -389,21 +389,13 @@ fun getUnwrapConversionRequest(nonceAccountAddresses: List<String>) : ApprovalRe
     )
 }
 
-fun getAddAddressBookEntry(nonceAccountAddresses: List<String>): ApprovalRequestDetails {
-    return AddressBookUpdate(
-        type = ApprovalType.ADDRESS_BOOK_TYPE.value,
-        entriesToRemove = emptyList(),
-        entriesToAdd = listOf(
-            SlotDestinationInfo(
-                slotId = 0,
-                value = DestinationAddress(
-                    name = "My External Sol address",
-                    subName = null,
-                    address = "2DQz5vWgs1PKxPDd9YaYKoemgFriRJqoFRniAQ7Wtuva",
-                    tag = null
-                )
-            )
-        ),
+fun getCreateSolanaAddressBookEntry(nonceAccountAddresses: List<String>): ApprovalRequestDetails {
+    return CreateAddressBookEntry(
+        type = ApprovalType.CREATE_ADDRESS_BOOK_ENTRY_TYPE.value,
+        chain = Chain.solana,
+        slotId = 0,
+        name = "My External Sol address",
+        address = "2DQz5vWgs1PKxPDd9YaYKoemgFriRJqoFRniAQ7Wtuva",
         signingData = SigningData.SolanaSigningData(
             feePayer = "87VXbkJsqdDvXYfDBtS4kW4TcFor7ogofZXbXjT7t7AU",
             walletProgramId = "db4pdTHvA3XLBgKfwKzdx8DcNpHuWWn63t6u8kbYiuS",
@@ -419,6 +411,71 @@ fun getAddAddressBookEntry(nonceAccountAddresses: List<String>): ApprovalRequest
     )
 }
 
+fun getCreateBitcoinAddressBookEntry(): ApprovalRequestDetails {
+    return CreateAddressBookEntry(
+        type = ApprovalType.CREATE_ADDRESS_BOOK_ENTRY_TYPE.value,
+        chain = Chain.bitcoin,
+        slotId = 0,
+        name = "My External Bitcoin address",
+        address = "2NG4bukdJgvzptpj3RXzFn7sGZDjBJwygB9",
+        signingData = null
+    )
+}
+
+fun getCreateEthereumAddressBookEntry(): ApprovalRequestDetails {
+    return CreateAddressBookEntry(
+        type = ApprovalType.CREATE_ADDRESS_BOOK_ENTRY_TYPE.value,
+        chain = Chain.ethereum,
+        slotId = 0,
+        name = "My External Ethereum address",
+        address = "0x23118ef009e46887fc5a868e879dc01194baa59e",
+        signingData = null
+    )
+}
+
+fun getDeleteSolanaAddressBookEntry(nonceAccountAddresses: List<String>): ApprovalRequestDetails {
+    return DeleteAddressBookEntry(
+        type = ApprovalType.DELETE_ADDRESS_BOOK_ENTRY_TYPE.value,
+        chain = Chain.solana,
+        slotId = 0,
+        name = "My External Sol address",
+        address = "2DQz5vWgs1PKxPDd9YaYKoemgFriRJqoFRniAQ7Wtuva",
+        signingData = SigningData.SolanaSigningData(
+            feePayer = "87VXbkJsqdDvXYfDBtS4kW4TcFor7ogofZXbXjT7t7AU",
+            walletProgramId = "db4pdTHvA3XLBgKfwKzdx8DcNpHuWWn63t6u8kbYiuS",
+            multisigOpAccountAddress = "Dpt714om7J3B3f1ygptgoEnFvHo3aiXjeLPP7TqjHJhq",
+            walletAddress = "JCd6uutAtgsbxDfM54ss4TyeG6kakvSfdxJwjBTjkPLh",
+            nonceAccountAddresses = nonceAccountAddresses,
+            initiator = "3wKxhgiogoCaA2uxPYeH7cy3cG4hxRPogrPmDPLS54iZ",
+            strikeFeeAmount = 0,
+            feeAccountGuidHash = emptyHash,
+            walletGuidHash = emptyHash,
+            nonceAccountAddressesSlot = 2272
+        )
+    )
+}
+
+fun getDeleteBitcoinAddressBookEntry(): ApprovalRequestDetails {
+    return DeleteAddressBookEntry(
+        type = ApprovalType.DELETE_ADDRESS_BOOK_ENTRY_TYPE.value,
+        chain = Chain.bitcoin,
+        slotId = 0,
+        name = "My External Bitcoin address",
+        address = "2NG4bukdJgvzptpj3RXzFn7sGZDjBJwygB9",
+        signingData = null
+    )
+}
+
+fun getDeleteEthereumAddressBookEntry(): ApprovalRequestDetails {
+    return DeleteAddressBookEntry(
+        type = ApprovalType.DELETE_ADDRESS_BOOK_ENTRY_TYPE.value,
+        chain = Chain.ethereum,
+        slotId = 0,
+        name = "My External Ethereum address",
+        address = "0x23118ef009e46887fc5a868e879dc01194baa59e",
+        signingData = null
+    )
+}
 
 fun getAddDAppBookEntry(nonceAccountAddresses: List<String>) : ApprovalRequestDetails {
     return  DAppBookUpdate(

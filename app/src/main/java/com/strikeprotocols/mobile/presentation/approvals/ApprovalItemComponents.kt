@@ -158,8 +158,16 @@ fun ApprovalRowContent(
             DAppTransactionRowContent(dAppTransactionRequest = type)
         is ApprovalRequestDetails.LoginApprovalRequest ->
             LoginApprovalRowContent(loginApproval = type)
-        is ApprovalRequestDetails.AddressBookUpdate ->
-            AddressBookUpdateRowContent(addressBookUpdate = type)
+        is ApprovalRequestDetails.CreateAddressBookEntry ->
+            CreateOrUpdateAddressBookEntryRowContent(
+                header = type.getHeader(LocalContext.current),
+                entryName = type.name
+            )
+        is ApprovalRequestDetails.DeleteAddressBookEntry ->
+            CreateOrUpdateAddressBookEntryRowContent(
+                header = type.getHeader(LocalContext.current),
+                entryName = type.name
+            )
         is ApprovalRequestDetails.BalanceAccountAddressWhitelistUpdate ->
             BalanceAccountAddressWhitelistUpdateRowContent(accountAddressWhitelistUpdate = type)
         is ApprovalRequestDetails.BalanceAccountNameUpdate ->
@@ -200,8 +208,20 @@ fun ApprovalDetailContent(approval: ApprovalRequest, type: ApprovalRequestDetail
             SignersUpdateDetailContent(signersUpdate = type)
         is ApprovalRequestDetails.WithdrawalRequest ->
             WithdrawalRequestDetailContent(withdrawalRequest = type)
-        is ApprovalRequestDetails.AddressBookUpdate ->
-            AddressBookUpdateDetailContent(addressBookUpdate = type)
+        is ApprovalRequestDetails.CreateAddressBookEntry ->
+            CreateOrDeleteAddressBookEntryDetailContent(
+                header = type.getHeader(LocalContext.current),
+                chain = type.chain,
+                entryName = type.name,
+                entryAddress = type.address
+            )
+        is ApprovalRequestDetails.DeleteAddressBookEntry ->
+            CreateOrDeleteAddressBookEntryDetailContent(
+                header = type.getHeader(LocalContext.current),
+                chain = type.chain,
+                entryName = type.name,
+                entryAddress = type.address
+            )
         is ApprovalRequestDetails.BalanceAccountAddressWhitelistUpdate ->
             BalanceAccountAddressWhitelistUpdateDetailContent(addressWhitelistUpdate = type)
         is ApprovalRequestDetails.BalanceAccountNameUpdate ->

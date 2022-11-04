@@ -15,26 +15,18 @@ import com.strikeprotocols.mobile.data.models.approval.*
 import com.strikeprotocols.mobile.data.models.approval.AccountType.*
 import com.strikeprotocols.mobile.ui.theme.GreyText
 import com.strikeprotocols.mobile.data.models.approval.ApprovalRequestDetails.*
-import java.util.Locale
 
 fun ApprovalRequestDetails.getHeader(context: Context): String {
     return when (this) {
-        is AddressBookUpdate -> {
-            val entryMetaData: Pair<AddRemoveChange, SlotDestinationInfo>? = this.getEntryMetaData()
-
-            if (entryMetaData == null) {
-                context.getString(R.string.not_applicable)
-            } else if (entryMetaData.first == AddRemoveChange.ADD) {
-                context.getString(R.string.add_address_book_update_approval_header)
-            } else {
-                context.getString(R.string.remove_address_book_update_approval_header)
-            }
-        }
+        is CreateAddressBookEntry ->
+            context.getString(R.string.add_address_book_update_approval_header)
+        is DeleteAddressBookEntry ->
+            context.getString(R.string.remove_address_book_update_approval_header)
         is BalanceAccountAddressWhitelistUpdate ->
             context.getString(R.string.balance_account_address_whitelist_update_approval_header)
         is WalletCreation ->
             if (accountInfo.accountType == BalanceAccount) {
-                "${context.getString(R.string.add)} ${accountInfo.chainName?.label() ?: context.getString(R.string.solana)} ${context.getString(R.string.wallet_title)}"
+                "${context.getString(R.string.add)} ${accountInfo.chain?.label() ?: context.getString(R.string.solana)} ${context.getString(R.string.wallet_title)}"
             } else {
                 context.getString(R.string.balance_account_creation_approval_header)
             }

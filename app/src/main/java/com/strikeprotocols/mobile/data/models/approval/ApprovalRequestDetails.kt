@@ -225,50 +225,44 @@ sealed class ApprovalRequestDetails {
         }
     }
 
-    data class AddressBookUpdate(
+    data class CreateAddressBookEntry(
         val type: String,
-        val entriesToAdd: List<SlotDestinationInfo>,
-        val entriesToRemove: List<SlotDestinationInfo>,
-        var signingData: SigningData.SolanaSigningData
+        val chain: Chain,
+        val slotId: Byte,
+        val address: String,
+        val name: String,
+        var signingData: SigningData.SolanaSigningData?
     ) : ApprovalRequestDetails() {
-
-
-        fun getEntryMetaData(): Pair<AddRemoveChange, SlotDestinationInfo>? =
-            if (entriesToAdd.size == 1 && entriesToRemove.isEmpty()) {
-                Pair(AddRemoveChange.ADD, entriesToAdd[0])
-            } else if (entriesToAdd.isEmpty() && entriesToRemove.size == 1) {
-                Pair(AddRemoveChange.REMOVE, entriesToRemove[0])
-            } else {
-                null
-            }
-
         fun combinedBytes() : ByteArray {
             val buffer = ByteArrayOutputStream()
-            val entryMetaData : Pair<AddRemoveChange, SlotDestinationInfo> = getEntryMetaData()
-                ?: throw Exception("Only 1 entry is accepted for either added or removed")
-
-            when (entryMetaData.first) {
-                AddRemoveChange.ADD -> {
-                    buffer.write(byteArrayOf(1.toByte()))
-                    buffer.write(entryMetaData.second.combinedBytes())
-                    buffer.write(byteArrayOf(0.toByte()))
-                    buffer.write(byteArrayOf(0.toByte()))
-
-                }
-                AddRemoveChange.REMOVE -> {
-                    buffer.write(byteArrayOf(0.toByte()))
-                    buffer.write(byteArrayOf(1.toByte()))
-                    buffer.write(entryMetaData.second.combinedBytes())
-                    buffer.write(byteArrayOf(0.toByte()))
-                }
-            }
-
+            buffer.write(byteArrayOf(1.toByte()))
+            buffer.write(byteArrayOf(slotId))
+            buffer.write(address.base58Bytes())
+            buffer.write(name.sha256HashBytes())
+            buffer.write(byteArrayOf(0.toByte()))
+            buffer.write(byteArrayOf(0.toByte()))
             return buffer.toByteArray()
         }
     }
 
-    enum class AddRemoveChange {
-        ADD, REMOVE
+    data class DeleteAddressBookEntry(
+        val type: String,
+        val chain: Chain,
+        val slotId: Byte,
+        val address: String,
+        val name: String,
+        var signingData: SigningData.SolanaSigningData?
+    ) : ApprovalRequestDetails() {
+        fun combinedBytes() : ByteArray {
+            val buffer = ByteArrayOutputStream()
+            buffer.write(byteArrayOf(0.toByte()))
+            buffer.write(byteArrayOf(1.toByte()))
+            buffer.write(byteArrayOf(slotId))
+            buffer.write(address.base58Bytes())
+            buffer.write(name.sha256HashBytes())
+            buffer.write(byteArrayOf(0.toByte()))
+            return buffer.toByteArray()
+        }
     }
 
     open class SettingsChange() {
@@ -382,7 +376,8 @@ sealed class ApprovalRequestDetails {
             is WalletConfigPolicyUpdate -> signingData.nonceAccountAddresses
             is BalanceAccountSettingsUpdate -> signingData.nonceAccountAddresses
             is DAppBookUpdate -> signingData.nonceAccountAddresses
-            is AddressBookUpdate -> signingData.nonceAccountAddresses
+            is CreateAddressBookEntry -> signingData?.nonceAccountAddresses ?: emptyList()
+            is DeleteAddressBookEntry -> signingData?.nonceAccountAddresses ?: emptyList()
             is BalanceAccountNameUpdate -> signingData.nonceAccountAddresses
             is BalanceAccountPolicyUpdate -> signingData.nonceAccountAddresses
             is BalanceAccountAddressWhitelistUpdate -> signingData.nonceAccountAddresses
@@ -396,7 +391,8 @@ sealed class ApprovalRequestDetails {
             is WithdrawalRequest, is ConversionRequest, is SignersUpdate,
             is WalletCreation, is DAppTransactionRequest, is WrapConversionRequest,
             is WalletConfigPolicyUpdate, is BalanceAccountSettingsUpdate, is DAppBookUpdate,
-            is AddressBookUpdate, is BalanceAccountNameUpdate, is BalanceAccountPolicyUpdate,
+            is CreateAddressBookEntry, is DeleteAddressBookEntry,
+            is BalanceAccountNameUpdate, is BalanceAccountPolicyUpdate,
             is BalanceAccountAddressWhitelistUpdate, is SignData -> {
                 when (val signingData = signingData()) {
                     is SigningData.SolanaSigningData -> signingData.nonceAccountAddressesSlot
@@ -419,7 +415,8 @@ sealed class ApprovalRequestDetails {
             is WalletConfigPolicyUpdate -> signingData
             is BalanceAccountSettingsUpdate -> signingData
             is DAppBookUpdate -> signingData
-            is AddressBookUpdate -> signingData
+            is CreateAddressBookEntry -> signingData
+            is DeleteAddressBookEntry -> signingData
             is BalanceAccountNameUpdate -> signingData
             is BalanceAccountPolicyUpdate -> signingData
             is BalanceAccountAddressWhitelistUpdate -> signingData
@@ -441,7 +438,8 @@ enum class ApprovalType(val value: String) {
     BALANCE_ACCOUNT_NAME_UPDATE_TYPE("BalanceAccountNameUpdate"),
     BALANCE_ACCOUNT_POLICY_UPDATE_TYPE("BalanceAccountPolicyUpdate"),
     BALANCE_ACCOUNT_SETTINGS_UPDATE_TYPE("BalanceAccountSettingsUpdate"),
-    ADDRESS_BOOK_TYPE("AddressBookUpdate"),
+    CREATE_ADDRESS_BOOK_ENTRY_TYPE("CreateAddressBookEntry"),
+    DELETE_ADDRESS_BOOK_ENTRY_TYPE("DeleteAddressBookEntry"),
     DAPP_BOOK_UPDATE_TYPE("DAppBookUpdate"),
     WALLET_CONFIG_POLICY_UPDATE_TYPE("WalletConfigPolicyUpdate"),
     BALANCE_ACCOUNT_ADDRESS_WHITE_LIST_UPDATE_TYPE("BalanceAccountAddressWhitelistUpdate"),
@@ -464,7 +462,8 @@ enum class ApprovalType(val value: String) {
                 BALANCE_ACCOUNT_NAME_UPDATE_TYPE.value -> BALANCE_ACCOUNT_NAME_UPDATE_TYPE
                 BALANCE_ACCOUNT_POLICY_UPDATE_TYPE.value -> BALANCE_ACCOUNT_POLICY_UPDATE_TYPE
                 BALANCE_ACCOUNT_SETTINGS_UPDATE_TYPE.value -> BALANCE_ACCOUNT_SETTINGS_UPDATE_TYPE
-                ADDRESS_BOOK_TYPE.value -> ADDRESS_BOOK_TYPE
+                CREATE_ADDRESS_BOOK_ENTRY_TYPE.value -> CREATE_ADDRESS_BOOK_ENTRY_TYPE
+                DELETE_ADDRESS_BOOK_ENTRY_TYPE.value -> DELETE_ADDRESS_BOOK_ENTRY_TYPE
                 DAPP_BOOK_UPDATE_TYPE.value -> DAPP_BOOK_UPDATE_TYPE
                 WALLET_CONFIG_POLICY_UPDATE_TYPE.value -> WALLET_CONFIG_POLICY_UPDATE_TYPE
                 BALANCE_ACCOUNT_ADDRESS_WHITE_LIST_UPDATE_TYPE.value -> BALANCE_ACCOUNT_ADDRESS_WHITE_LIST_UPDATE_TYPE
@@ -486,7 +485,7 @@ data class AccountInfo(
     val identifier: String,
     val accountType: AccountType,
     val address: String?,
-    val chainName: Chain? = null
+    val chain: Chain? = null
 )
 
 data class ApprovalPolicy(

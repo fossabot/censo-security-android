@@ -63,6 +63,7 @@
     <string name="usd_equivalent">USD equivalent</string>
     <string name="unknown_approval_item">Unknown Approval</string>
     <string name="address">Address</string>
+    <string name="chain">Chain</string>
     <string name="to">To</string>
     <string name="approvals_required_title">Approvals Required</string>
     <string name="approval_expiration">Approval Expiration</string>
