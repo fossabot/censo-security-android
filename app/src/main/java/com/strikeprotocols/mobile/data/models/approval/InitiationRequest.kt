@@ -44,7 +44,8 @@ data class InitiationRequest(
             is WalletConfigPolicyUpdate -> requestType.signingData
             is BalanceAccountSettingsUpdate -> requestType.signingData
             is DAppBookUpdate -> requestType.signingData
-            is AddressBookUpdate -> requestType.signingData
+            is CreateAddressBookEntry -> requestType.signingData!!
+            is DeleteAddressBookEntry -> requestType.signingData!!
             is BalanceAccountNameUpdate -> requestType.signingData
             is BalanceAccountPolicyUpdate -> requestType.signingData
             is BalanceAccountAddressWhitelistUpdate -> requestType.signingData
@@ -66,7 +67,7 @@ data class InitiationRequest(
         is DAppTransactionRequest -> 16
         is BalanceAccountSettingsUpdate -> 18
         is DAppBookUpdate -> 20
-        is AddressBookUpdate -> 22
+        is CreateAddressBookEntry, is DeleteAddressBookEntry -> 22
         is BalanceAccountNameUpdate -> 24
         is BalanceAccountPolicyUpdate -> 26
         is BalanceAccountAddressWhitelistUpdate -> 33
@@ -214,7 +215,14 @@ data class InitiationRequest(
                 buffer.write(requestType.approvalPolicy.combinedBytes())
                 return buffer.toByteArray()
             }
-            is AddressBookUpdate -> {
+            is CreateAddressBookEntry -> {
+                val buffer = ByteArrayOutputStream()
+                buffer.write(byteArrayOf(opCode))
+                buffer.write(commonBytes)
+                buffer.write(requestType.combinedBytes())
+                return buffer.toByteArray()
+            }
+            is DeleteAddressBookEntry -> {
                 val buffer = ByteArrayOutputStream()
                 buffer.write(byteArrayOf(opCode))
                 buffer.write(commonBytes)

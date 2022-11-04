@@ -579,13 +579,13 @@ class SignableDataTest {
     }
 
     @Test
-    fun testAddAddressBookEntryInitiationRequest() {
+    fun testCreateSolanaAddressBookEntryInitiationRequest() {
         val initiation = MultiSigOpInitiation(
             opAccountCreationInfo = getOpAccountCreationInfo(),
             initiatorIsApprover = true
         )
         val requestType =
-            getAddAddressBookEntry(nonceAccountAddresses = listOf("8R4EuFv5f31D8HijRXA4eyebKMZ287ho2UyPpbtQ8Gos"))
+            getCreateSolanaAddressBookEntry(nonceAccountAddresses = listOf("8R4EuFv5f31D8HijRXA4eyebKMZ287ho2UyPpbtQ8Gos"))
         val request = getWalletInitiationRequest(requestType, initiation = initiation)
         val pk = generateEphemeralPrivateKeyFromText(
             keyValueAsHex = ("a37195e87d53a831c1947e8afe02aec367e78f62fb912f7a614c3a387cd911fa")
@@ -608,9 +608,9 @@ class SignableDataTest {
     }
 
     @Test
-    fun testAddAddressBookEntryApprovalRequest() {
+    fun testCreateSolanaAddressBookEntryApprovalRequest() {
         val request =
-            getWalletApprovalRequest(getAddAddressBookEntry(nonceAccountAddresses = listOf("Aj8MqPBaM8fSbgJiUtq2PXESGTSQPsgHqJ13JyzQZCRZ")))
+            getWalletApprovalRequest(getCreateSolanaAddressBookEntry(nonceAccountAddresses = listOf("Aj8MqPBaM8fSbgJiUtq2PXESGTSQPsgHqJ13JyzQZCRZ")))
         val approvalRequest = ApprovalDispositionRequest(
             approvalDisposition = ApprovalDisposition.APPROVE,
             requestId = request.id!!,
@@ -622,6 +622,104 @@ class SignableDataTest {
             "0201040869ab8cb05413af9614f898a1f1fdfbc07e7ad5eb2eb1d0f1c49f448bd179c7155b867b0ff902f8bd3503e7a6c3ba5a94b90bd26858f6de78aa0913af0d8be7c69083e5bc3e157aff14eb7d4db4331ce36f0b43c131c269bbe16f79ab36f98eacbe9052f2d7dc89487f3ec139a60d9cdda96f0d21895effdc81fc69069363454406a7d517192c568ee08a845f73d29788cf035c3145b21ab344d8062ea940000006a7d51718c774c928566398691d5eb68b5eb8a39b4b6d5c73555b21000000000000000000000000000000000000000000000000000000000000000000000000095f6d73715ba2affc6e25f8845e8f18908d92a129f233413b34d675d6fbd03d65bc30ccd8e88f4b8d5cf5903523b520f1cf0dea124d428b55038269c03609bc0206030204000404000000070303010522090116aa15d9a45731f7335bdda8a6ffb737d81fa305362c38ff4e9a8495bea126c9",
             approvalRequest.retrieveSignableData(approverPublicKey = "7AH35qStXtrUgRkmqDmhjufNHjF74R1A9cCKT3C3HaAR").first()
                 .toHexString()
+        )
+    }
+
+    @Test
+    fun testCreateBitcoinAddressBookEntryApprovalRequest() {
+        val request = getWalletApprovalRequest(getCreateBitcoinAddressBookEntry())
+
+        val approvalRequest = ApprovalDispositionRequest(
+            approvalDisposition = ApprovalDisposition.APPROVE,
+            requestId = request.id!!,
+            requestType = request.getApprovalRequestType(),
+            nonces = emptyList(),
+            email = "dont care"
+        )
+
+        val signableData = approvalRequest.retrieveSignableData(approverPublicKey = "7AH35qStXtrUgRkmqDmhjufNHjF74R1A9cCKT3C3HaAR").first()
+
+        assertEquals(
+            approvalRequest.requestType,
+            gson.fromJson(String(signableData), ApprovalRequestDetails.CreateAddressBookEntry::class.java)
+        )
+    }
+
+    @Test
+    fun testCreateEthereumAddressBookEntryApprovalRequest() {
+        val request = getWalletApprovalRequest(getCreateEthereumAddressBookEntry())
+
+        val approvalRequest = ApprovalDispositionRequest(
+            approvalDisposition = ApprovalDisposition.APPROVE,
+            requestId = request.id!!,
+            requestType = request.getApprovalRequestType(),
+            nonces = emptyList(),
+            email = "dont care"
+        )
+
+        val signableData = approvalRequest.retrieveSignableData(approverPublicKey = "7AH35qStXtrUgRkmqDmhjufNHjF74R1A9cCKT3C3HaAR").first()
+
+        assertEquals(
+            approvalRequest.requestType,
+            gson.fromJson(String(signableData), ApprovalRequestDetails.CreateAddressBookEntry::class.java)
+        )
+    }
+
+    @Test
+    fun testDeleteSolanaAddressBookEntryApprovalRequest() {
+        val request =
+            getWalletApprovalRequest(getDeleteSolanaAddressBookEntry(nonceAccountAddresses = listOf("Aj8MqPBaM8fSbgJiUtq2PXESGTSQPsgHqJ13JyzQZCRZ")))
+        val approvalRequest = ApprovalDispositionRequest(
+            approvalDisposition = ApprovalDisposition.APPROVE,
+            requestId = request.id!!,
+            requestType = request.getApprovalRequestType(),
+            nonces = listOf(Nonce("7r8cdEASTnapMjhk569Kwq7mtWwaqjMmkxYe75PBCCK5")),
+            email = "dont care"
+        )
+        assertEquals(
+            "0201040869ab8cb05413af9614f898a1f1fdfbc07e7ad5eb2eb1d0f1c49f448bd179c7155b867b0ff902f8bd3503e7a6c3ba5a94b90bd26858f6de78aa0913af0d8be7c69083e5bc3e157aff14eb7d4db4331ce36f0b43c131c269bbe16f79ab36f98eacbe9052f2d7dc89487f3ec139a60d9cdda96f0d21895effdc81fc69069363454406a7d517192c568ee08a845f73d29788cf035c3145b21ab344d8062ea940000006a7d51718c774c928566398691d5eb68b5eb8a39b4b6d5c73555b21000000000000000000000000000000000000000000000000000000000000000000000000095f6d73715ba2affc6e25f8845e8f18908d92a129f233413b34d675d6fbd03d65bc30ccd8e88f4b8d5cf5903523b520f1cf0dea124d428b55038269c03609bc02060302040004040000000703030105220901ba5c2f25598928588971abec5402b642335dc6ce8f1b2524a281fb5c4f6ce55c",
+            approvalRequest.retrieveSignableData(approverPublicKey = "7AH35qStXtrUgRkmqDmhjufNHjF74R1A9cCKT3C3HaAR").first()
+                .toHexString()
+        )
+    }
+
+    @Test
+    fun testDeleteBitcoinAddressBookEntryApprovalRequest() {
+        val request = getWalletApprovalRequest(getDeleteBitcoinAddressBookEntry())
+
+        val approvalRequest = ApprovalDispositionRequest(
+            approvalDisposition = ApprovalDisposition.APPROVE,
+            requestId = request.id!!,
+            requestType = request.getApprovalRequestType(),
+            nonces = emptyList(),
+            email = "dont care"
+        )
+
+        val signableData = approvalRequest.retrieveSignableData(approverPublicKey = "7AH35qStXtrUgRkmqDmhjufNHjF74R1A9cCKT3C3HaAR").first()
+
+        assertEquals(
+            approvalRequest.requestType,
+            gson.fromJson(String(signableData), ApprovalRequestDetails.DeleteAddressBookEntry::class.java)
+        )
+    }
+
+    @Test
+    fun testDeleteEthereumAddressBookEntryApprovalRequest() {
+        val request = getWalletApprovalRequest(getDeleteEthereumAddressBookEntry())
+
+        val approvalRequest = ApprovalDispositionRequest(
+            approvalDisposition = ApprovalDisposition.APPROVE,
+            requestId = request.id!!,
+            requestType = request.getApprovalRequestType(),
+            nonces = emptyList(),
+            email = "dont care"
+        )
+
+        val signableData = approvalRequest.retrieveSignableData(approverPublicKey = "7AH35qStXtrUgRkmqDmhjufNHjF74R1A9cCKT3C3HaAR").first()
+
+        assertEquals(
+            approvalRequest.requestType,
+            gson.fromJson(String(signableData), ApprovalRequestDetails.DeleteAddressBookEntry::class.java)
         )
     }
 

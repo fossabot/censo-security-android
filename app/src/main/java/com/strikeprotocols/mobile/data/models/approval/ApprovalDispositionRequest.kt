@@ -43,7 +43,7 @@ data class ApprovalDispositionRequest(
             is BalanceAccountSettingsUpdate -> 8
 
             is DAppBookUpdate -> 9
-            is AddressBookUpdate -> 10
+            is CreateAddressBookEntry, is DeleteAddressBookEntry -> 10
             is BalanceAccountNameUpdate -> 11
             is BalanceAccountPolicyUpdate -> 12
             is BalanceAccountAddressWhitelistUpdate -> 14
@@ -156,7 +156,16 @@ data class ApprovalDispositionRequest(
 
                 buffer.toByteArray()
             }
-            is AddressBookUpdate -> {
+            is CreateAddressBookEntry -> {
+                val buffer = ByteArrayOutputStream()
+
+                buffer.write(byteArrayOf(retrieveOpCode()))
+                buffer.write(commonBytes)
+                buffer.write(requestType.combinedBytes())
+
+                buffer.toByteArray()
+            }
+            is DeleteAddressBookEntry -> {
                 val buffer = ByteArrayOutputStream()
 
                 buffer.write(byteArrayOf(retrieveOpCode()))
@@ -224,7 +233,8 @@ data class ApprovalDispositionRequest(
             is WalletConfigPolicyUpdate -> requestType.signingData
             is BalanceAccountSettingsUpdate -> requestType.signingData
             is DAppBookUpdate -> requestType.signingData
-            is AddressBookUpdate -> requestType.signingData
+            is CreateAddressBookEntry -> requestType.signingData ?: throw Exception(INVALID_REQUEST_APPROVAL)
+            is DeleteAddressBookEntry -> requestType.signingData ?: throw Exception(INVALID_REQUEST_APPROVAL)
             is BalanceAccountNameUpdate -> requestType.signingData
             is BalanceAccountPolicyUpdate -> requestType.signingData
             is BalanceAccountAddressWhitelistUpdate -> requestType.signingData
@@ -256,7 +266,17 @@ data class ApprovalDispositionRequest(
             is PasswordReset ->
                 listOf(requestId.toByteArray(charset = Charsets.UTF_8))
             is WalletCreation ->
-                when (requestType.accountInfo.chainName) {
+                when (requestType.accountInfo.chain) {
+                    Chain.bitcoin, Chain.ethereum -> listOf(requestType.toJson().toByteArray())
+                    else -> listOf(serializeSolanaRequest(approverPublicKey))
+                }
+            is CreateAddressBookEntry ->
+                when (requestType.chain) {
+                    Chain.bitcoin, Chain.ethereum -> listOf(requestType.toJson().toByteArray())
+                    else -> listOf(serializeSolanaRequest(approverPublicKey))
+                }
+            is DeleteAddressBookEntry ->
+                when (requestType.chain) {
                     Chain.bitcoin, Chain.ethereum -> listOf(requestType.toJson().toByteArray())
                     else -> listOf(serializeSolanaRequest(approverPublicKey))
                 }
@@ -330,21 +350,9 @@ data class ApprovalDispositionRequest(
                 ApprovalSignature.NoChainSignature(
                     signRequestWithSolanaKey(encryptionManager, cipher)
                 )
-            is WalletCreation -> {
-                when (requestType.accountInfo.chainName) {
-                    Chain.bitcoin -> ApprovalSignature.NoChainSignature(
-                        signRequestWithBitcoinKey(encryptionManager, cipher).first()
-                    )
-                    Chain.ethereum -> ApprovalSignature.NoChainSignature(
-                        signRequestWithEthereumKey(encryptionManager, cipher)
-                    )
-                    else -> ApprovalSignature.SolanaSignature(
-                        signature = signRequestWithSolanaKey(encryptionManager, cipher).signature,
-                        nonce = nonces.first().value,
-                        nonceAccountAddress = requestType.nonceAccountAddresses().first()
-                    )
-                }
-            }
+            is WalletCreation -> getSignatureInfo(requestType.accountInfo.chain ?: Chain.solana, encryptionManager, cipher)
+            is CreateAddressBookEntry -> getSignatureInfo(requestType.chain, encryptionManager, cipher)
+            is DeleteAddressBookEntry -> getSignatureInfo(requestType.chain, encryptionManager, cipher)
             is WithdrawalRequest -> {
                 when (requestType.signingData) {
                     is SigningData.BitcoinSigningData ->
@@ -370,6 +378,22 @@ data class ApprovalDispositionRequest(
             approvalDisposition = approvalDisposition,
             signatureInfo = signatureInfo
         )
+    }
+
+    private fun getSignatureInfo(chain: Chain, encryptionManager: EncryptionManager, cipher: Cipher): ApprovalSignature {
+        return when (chain) {
+            Chain.bitcoin -> ApprovalSignature.NoChainSignature(
+                signRequestWithBitcoinKey(encryptionManager, cipher).first()
+            )
+            Chain.ethereum -> ApprovalSignature.NoChainSignature(
+                signRequestWithEthereumKey(encryptionManager, cipher)
+            )
+            else -> ApprovalSignature.SolanaSignature(
+                signature = signRequestWithSolanaKey(encryptionManager, cipher).signature,
+                nonce = nonces.first().value,
+                nonceAccountAddress = requestType.nonceAccountAddresses().first()
+            )
+        }
     }
 
     private fun signRequestWithSolanaKey(

@@ -29,12 +29,19 @@ fun getWalletApprovals() : List<ApprovalRequest> {
 
     approvals.add(unwrapConversionApproval)
 
-    val addAddressBookEntryRequestType =
-        getAddAddressBookEntry(nonceAccountAddresses)
-    val addAddressBookEntryApproval =
-        getWalletApprovalRequest(addAddressBookEntryRequestType)
+    val createAddressBookEntryRequestType =
+        getCreateSolanaAddressBookEntry(nonceAccountAddresses)
+    val addCreateBookEntryApproval =
+        getWalletApprovalRequest(createAddressBookEntryRequestType)
 
-    approvals.add(addAddressBookEntryApproval)
+    approvals.add(addCreateBookEntryApproval)
+
+    val deleteAddressBookEntryRequestType =
+        getDeleteSolanaAddressBookEntry(nonceAccountAddresses)
+    val deleteAddressBookEntryApproval =
+        getWalletApprovalRequest(deleteAddressBookEntryRequestType)
+
+    approvals.add(deleteAddressBookEntryApproval)
 
     val addDAppBookEntryRequestType =
         getAddDAppBookEntry(nonceAccountAddresses)

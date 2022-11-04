@@ -206,10 +206,16 @@ class ApprovalRequestDeserializer : JsonDeserializer<ApprovalRequest> {
                     ApprovalRequestDetails.BalanceAccountSettingsUpdate::class.java
                 )
             }
-            ApprovalType.ADDRESS_BOOK_TYPE -> {
+            ApprovalType.CREATE_ADDRESS_BOOK_ENTRY_TYPE -> {
                 getGson().fromJson(
                     details,
-                    ApprovalRequestDetails.AddressBookUpdate::class.java
+                    ApprovalRequestDetails.CreateAddressBookEntry::class.java
+                )
+            }
+            ApprovalType.DELETE_ADDRESS_BOOK_ENTRY_TYPE -> {
+                getGson().fromJson(
+                    details,
+                    ApprovalRequestDetails.DeleteAddressBookEntry::class.java
                 )
             }
             ApprovalType.DAPP_BOOK_UPDATE_TYPE -> {
