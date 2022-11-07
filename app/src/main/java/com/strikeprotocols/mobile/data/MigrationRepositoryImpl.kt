@@ -58,7 +58,7 @@ class MigrationRepositoryImpl(
     override suspend fun retrieveV1RootSeed(): ByteArray? {
         val userEmail = userRepository.retrieveUserEmail()
 
-        val hasV1Data = securePreferences.userHasV1KeyData(email = userEmail)
+        val hasV1Data = securePreferences.userHasV1RootSeedStored(email = userEmail)
 
         if (!hasV1Data) return null
 
@@ -76,13 +76,13 @@ class MigrationRepositoryImpl(
     override suspend fun haveV2RootSeed(): Boolean {
         val userEmail = userRepository.retrieveUserEmail()
 
-        return securePreferences.userHasV2Storage(userEmail)
+        return securePreferences.userHasV2RootSeedStored(userEmail)
     }
 
     override suspend fun retrieveV2RootSeed(cipher: Cipher): ByteArray? {
         val userEmail = userRepository.retrieveUserEmail()
 
-        val haveV2Data = securePreferences.userHasV2Storage(userEmail)
+        val haveV2Data = securePreferences.userHasV2RootSeedStored(userEmail)
 
         if (!haveV2Data) return null
 

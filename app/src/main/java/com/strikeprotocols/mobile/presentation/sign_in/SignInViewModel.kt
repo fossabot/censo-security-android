@@ -83,7 +83,7 @@ class SignInViewModel @Inject constructor(
 
     fun kickOffBiometryLoginOrMoveToPasswordEntry() {
         viewModelScope.launch {
-            if (keyRepository.havePrivateKeys()) {
+            if (keyRepository.hasV3RootSeedStored()) {
                 val cipher = cipherRepository.getCipherForV3RootSeedDecryption()
                 if (cipher != null) {
                     state = state.copy(

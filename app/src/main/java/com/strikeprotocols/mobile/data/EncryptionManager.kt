@@ -116,7 +116,7 @@ interface EncryptionManager {
     //endregion
 
     //region save/retrieve key data
-    fun havePrivateKeysStored(email: String): Boolean
+    fun haveARootSeedStored(email: String): Boolean
 
     fun saveV3RootSeed(
         rootSeed: ByteArray,
@@ -662,8 +662,9 @@ class EncryptionManagerImpl @Inject constructor(
         )
     }
 
-    override fun havePrivateKeysStored(email: String) =
-        securePreferences.hasV3RootSeed(email = email)
+    override fun haveARootSeedStored(email: String) =
+        securePreferences.userHasV1RootSeedStored(email) || securePreferences.userHasV2RootSeedStored(email)
+                || securePreferences.hasV3RootSeed(email = email)
 
     override fun haveSentinelDataStored(email: String) = securePreferences.hasSentinelData(email)
 
