@@ -25,7 +25,6 @@ data class KeyManagementState(
 
     //API calls
     val finalizeKeyFlow: Resource<Signers> = Resource.Uninitialized,
-    val walletSignerToAdd: Signers? = null,
 
     //Utility state
     val triggerBioPrompt: Resource<Cipher> = Resource.Uninitialized,

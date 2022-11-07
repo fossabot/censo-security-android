@@ -152,125 +152,120 @@ class KeyManagementViewModel @Inject constructor(
         state = state.copy(finalizeKeyFlow = Resource.Error())
     }
 
-    private fun saveRootSeed(cipher: Cipher) {
-        viewModelScope.launch {
-            val phrase = when (state.keyManagementFlow) {
-                KeyManagementFlow.KEY_CREATION -> {
-                    val safePhrase = state.keyGeneratedPhrase
-                    if (safePhrase == null) {
-                        state = retrieveInitialKeyCreationState()
-                        return@launch
-                    } else {
-                        safePhrase
-                    }
-                }
-                KeyManagementFlow.KEY_RECOVERY -> {
-                    state.userInputtedPhrase
-                }
-                else -> {
-                    state = retrieveInitialKeyCreationState()
-                    return@launch
-                }
-            }
-
-            keyRepository.saveV3RootKey(
-                Mnemonics.MnemonicCode(phrase = phrase),
-                cipher = cipher
-            )
-
-            if(state.keyManagementFlow == KeyManagementFlow.KEY_CREATION) {
-                createAndSaveKey()
-            } else if (state.keyManagementFlow == KeyManagementFlow.KEY_RECOVERY) {
-                recoverKey()
-            }
-        }
-    }
-
-    fun createAndSaveKey() {
-        val phrase = state.keyGeneratedPhrase
-
-        if (phrase.isNullOrEmpty()) {
-            state = retrieveInitialKeyCreationState()
-            return
-        }
-
+    fun saveRootSeed(cipher: Cipher) {
         viewModelScope.launch {
             try {
-                //need to update wallet signer call
+                val phrase = when (state.keyManagementFlow) {
+                    KeyManagementFlow.KEY_CREATION -> {
+                        val safePhrase = state.keyGeneratedPhrase
+                        if (safePhrase == null) {
+                            state = retrieveInitialKeyCreationState()
+                            return@launch
+                        } else {
+                            safePhrase
+                        }
+                    }
+                    KeyManagementFlow.KEY_RECOVERY -> {
+                        state.userInputtedPhrase
+                    }
+                    else -> {
+                        state = retrieveInitialKeyCreationState()
+                        return@launch
+                    }
+                }
+
+                keyRepository.saveV3RootKey(
+                    Mnemonics.MnemonicCode(phrase = phrase),
+                    cipher = cipher
+                )
+
                 val walletSigners =
                     keyRepository.saveV3PublicKeys(mnemonic = Mnemonics.MnemonicCode(phrase = phrase))
 
-                state = state.copy(walletSignerToAdd = Signers(walletSigners))
-
-                val addWalletSignerResource =
-                    attemptAddWalletSigner(walletSigners)
-
-                if (addWalletSignerResource is Resource.Success) {
-                    state =
-                        state.copy(
-                            keyManagementFlowStep = KeyManagementFlowStep.CreationFlow(
-                                KeyCreationFlowStep.ALL_SET_STEP
-                            ),
-                            finalizeKeyFlow = Resource.Success(addWalletSignerResource.data),
-                            keyGeneratedPhrase = null
-                        )
-                } else if (addWalletSignerResource is Resource.Error) {
-                    state = state.copy(
-                        finalizeKeyFlow = addWalletSignerResource
-                    )
-                }
+                finalizeKeyCreationOrRecovery(phrase = phrase, walletSigners = walletSigners)
             } catch (e: Exception) {
-                state = state.copy(
-                    finalizeKeyFlow = Resource.Error(exception = e)
-                )
+                when (state.keyManagementFlow) {
+                    KeyManagementFlow.KEY_CREATION -> {
+                        state = state.copy(
+                            finalizeKeyFlow = Resource.Error(exception = e)
+                        )
+                    }
+                    KeyManagementFlow.KEY_RECOVERY -> {
+                        recoverKeyFailure()
+                    }
+                    KeyManagementFlow.UNINITIALIZED -> {}
+                }
             }
         }
     }
 
-    fun recoverKey() {
-        viewModelScope.launch {
-            val verifyUser = state.initialData?.verifyUserDetails
-            val publicKeys = verifyUser?.publicKeys
+    private suspend fun finalizeKeyCreationOrRecovery(
+        phrase: String,
+        walletSigners: List<WalletSigner?>
+    ) {
+        when (state.keyManagementFlow) {
+            KeyManagementFlow.KEY_CREATION -> createAndSaveKey(walletSigners)
+            KeyManagementFlow.KEY_RECOVERY -> recoverKey(phrase, walletSigners)
+            KeyManagementFlow.UNINITIALIZED -> {}
+        }
+    }
 
-            if (verifyUser != null && !publicKeys.isNullOrEmpty()) {
-                try {
-                    //need to update wallet signer call
-                    val localKeys = keyRepository.saveV3PublicKeys(
-                        mnemonic = Mnemonics.MnemonicCode(phrase = state.userInputtedPhrase)
+    suspend fun createAndSaveKey(localKeys: List<WalletSigner?>) {
+        try {
+            val addWalletSignerResource = attemptAddWalletSigner(localKeys)
+
+            if (addWalletSignerResource is Resource.Success) {
+                state =
+                    state.copy(
+                        keyManagementFlowStep = KeyManagementFlowStep.CreationFlow(
+                            KeyCreationFlowStep.ALL_SET_STEP
+                        ),
+                        finalizeKeyFlow = Resource.Success(addWalletSignerResource.data),
+                        keyGeneratedPhrase = null
                     )
+            } else if (addWalletSignerResource is Resource.Error) {
+                state = state.copy(
+                    finalizeKeyFlow = addWalletSignerResource
+                )
+            }
+        } catch (e: Exception) {
+            state = state.copy(
+                finalizeKeyFlow = Resource.Error(exception = e)
+            )
+        }
+    }
 
-                    val keysNotSavedOnBackend = verifyUser.determineKeysUserNeedsToUpload(localKeys)
+    suspend fun recoverKey(phrase: String, localKeys: List<WalletSigner?>) {
+        try {
+            //need to update wallet signer call
+            val keysNotSavedOnBackend =
+                state.initialData?.verifyUserDetails?.determineKeysUserNeedsToUpload(localKeys)
 
-                    if (keysNotSavedOnBackend.isNotEmpty()) {
-                        val signedKeys =
-                            keyRepository.signPublicKeys(
-                                publicKeys = localKeys,
-                                mnemonic = Mnemonics.MnemonicCode(phrase = state.userInputtedPhrase)
-                            )
+            if (keysNotSavedOnBackend?.isNotEmpty() == true) {
+                val signedKeys =
+                    keyRepository.signPublicKeys(
+                        publicKeys = localKeys,
+                        mnemonic = Mnemonics.MnemonicCode(phrase = phrase)
+                    )
+                val walletSignerResource =
+                    userRepository.addWalletSigner(signedKeys)
 
-                        val walletSignerResource =
-                            userRepository.addWalletSigner(signedKeys)
-
-                        if (walletSignerResource is Resource.Success) {
-                            state =
-                                state.copy(
-                                    finalizeKeyFlow = Resource.Success(walletSignerResource.data),
-                                )
-                        } else if (walletSignerResource is Resource.Error) {
-                            state = state.copy(
-                                finalizeKeyFlow = walletSignerResource
-                            )
-                        }
-                    } else {
-                        //no API call needed, move on
-                        state = state.copy(finalizeKeyFlow = Resource.Success(null))
-                    }
-                } catch (e: Exception) {
-                    recoverKeyFailure()
+                if (walletSignerResource is Resource.Success) {
+                    state =
+                        state.copy(
+                            finalizeKeyFlow = Resource.Success(walletSignerResource.data),
+                        )
+                } else if (walletSignerResource is Resource.Error) {
+                    state = state.copy(
+                        finalizeKeyFlow = walletSignerResource
+                    )
                 }
             } else {
-                recoverKeyFailure()
+                //no API call needed, move on
+                state = state.copy(finalizeKeyFlow = Resource.Success(null))
             }
+        } catch (e: Exception) {
+            recoverKeyFailure()
         }
     }
     //endregion
@@ -536,8 +531,6 @@ class KeyManagementViewModel @Inject constructor(
             try {
                 handleWordVerifiedDuringKeyCreation()
             } catch (e: Exception) {
-                //TODO: Test the state resetting and flow handling when this occurs,
-                // we might need to reset more state here
                 retrieveInitialKeyCreationState()
             }
         } else {

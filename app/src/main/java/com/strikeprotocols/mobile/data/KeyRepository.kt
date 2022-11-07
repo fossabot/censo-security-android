@@ -14,9 +14,6 @@ import javax.crypto.Cipher
 
 interface KeyRepository {
 
-    suspend fun doesUserHaveV1KeyData() : Boolean
-    suspend fun doesUserHaveV2KeyData() : Boolean
-
     suspend fun signTimestamp(
         timestamp: String,
         cipher: Cipher,
@@ -29,7 +26,9 @@ interface KeyRepository {
     suspend fun saveV3PublicKeys(mnemonic: Mnemonics.MnemonicCode) : List<WalletSigner?>
     suspend fun retrieveV3PublicKeys() : List<WalletSigner?>
 
-    suspend fun havePrivateKeys(): Boolean
+    suspend fun hasV3RootSeedStored() : Boolean
+    //checks v1, v2, and v3 storage
+    suspend fun haveARootSeedStored(): Boolean
 
     suspend fun haveSentinelData() : Boolean
 
@@ -58,7 +57,7 @@ class KeyRepositoryImpl(
     override suspend fun doesUserHaveValidLocalKey(verifyUser: VerifyUser): Boolean {
         val userEmail = userRepository.retrieveUserEmail()
         val publicKeys = securePreferences.retrieveV3PublicKeys(email = userEmail)
-        val havePrivateKey = encryptionManager.havePrivateKeysStored(email = userEmail)
+        val havePrivateKey = encryptionManager.haveARootSeedStored(email = userEmail)
 
 
         if (publicKeys.isEmpty() || !havePrivateKey) {
@@ -72,16 +71,6 @@ class KeyRepositoryImpl(
         }
 
         return verifyUser.compareAgainstLocalKeys(publicKeys)
-    }
-
-    override suspend fun doesUserHaveV1KeyData(): Boolean {
-        val userEmail = userRepository.retrieveUserEmail()
-        return securePreferences.userHasV1KeyData(email = userEmail)
-    }
-
-    override suspend fun doesUserHaveV2KeyData(): Boolean {
-        val userEmail = userRepository.retrieveUserEmail()
-        return securePreferences.userHasV2Storage(email = userEmail)
     }
 
     override suspend fun removeSentinelDataAndKickUserToAppEntrance() {
@@ -182,10 +171,14 @@ class KeyRepositoryImpl(
         return signedKeysToAdd
     }
 
-
-    override suspend fun havePrivateKeys(): Boolean {
+    override suspend fun hasV3RootSeedStored(): Boolean {
         val userEmail = userRepository.retrieveUserEmail()
-        return encryptionManager.havePrivateKeysStored(userEmail)
+        return securePreferences.hasV3RootSeed(userEmail)
+    }
+
+    override suspend fun haveARootSeedStored(): Boolean {
+        val userEmail = userRepository.retrieveUserEmail()
+        return encryptionManager.haveARootSeedStored(userEmail)
     }
 
     override suspend fun haveSentinelData(): Boolean {

@@ -29,6 +29,23 @@ data class VerifyUser(
         val walletsSavedBackend = publicKeys?.map { it?.chain } ?: emptyList()
         return localKeys.filter { it != null && it.chain !in walletsSavedBackend }.filterNotNull()
     }
+
+    fun userNeedsToUpdateKeyRegistration(localKeys: List<WalletSigner?>): Boolean {
+        //User has no keys saved to public keys. Could also be a v1/v2 storage situation.
+        if (localKeys.isEmpty()) return true
+
+        //which chains has the user saved on the backend?
+        val chainsSavedOnBackend = publicKeys?.mapNotNull { it?.chain } ?: emptyList()
+
+        //loop over all chains a user should have, and make sure backend covers them
+        for (chain in Chain.values()) {
+            if (chain !in chainsSavedOnBackend) {
+                return true
+            }
+        }
+
+        return false
+    }
 }
 
 data class Organization(
