@@ -20,7 +20,7 @@ interface SecurePreferences {
     fun retrieveV1RootSeed(email: String): String
     fun clearV1SolanaKey(email: String)
     fun clearV1RootSeed(email: String)
-    fun userHasV1KeyData(email: String) : Boolean
+    fun userHasV1RootSeedStored(email: String) : Boolean
     fun clearAllV1KeyData(email: String)
 
     //v2 storage
@@ -28,7 +28,7 @@ interface SecurePreferences {
     fun retrieveV2RootSeedAndPrivateKey(email: String): String
     fun retrieveV2SolanaPublicKey(email: String): String
     fun clearV2SolanaPublicKey(email: String)
-    fun userHasV2Storage(email: String) : Boolean
+    fun userHasV2RootSeedStored(email: String) : Boolean
 
     //v3 storage
     fun clearAllV3KeyData(email: String)
@@ -99,8 +99,8 @@ class SecurePreferencesImpl @Inject constructor(applicationContext: Context) :
         SharedPrefsHelper.clearV1RootSeed(secureSharedPreferences, email = email)
     }
 
-    override fun userHasV1KeyData(email: String): Boolean {
-        return SharedPrefsHelper.retrieveV1PrivateKey(secureSharedPreferences, email = email).isNotEmpty()
+    override fun userHasV1RootSeedStored(email: String): Boolean {
+        return SharedPrefsHelper.retrieveV1RootSeed(secureSharedPreferences, email = email).isNotEmpty()
     }
     //endregion
 
@@ -125,7 +125,7 @@ class SecurePreferencesImpl @Inject constructor(applicationContext: Context) :
         )
     }
 
-    override fun userHasV2Storage(email: String): Boolean {
+    override fun userHasV2RootSeedStored(email: String): Boolean {
         return SharedPrefsHelper.retrieveV2RootSeedAndPrivateKey(
             encryptedPrefs = secureSharedPreferences,
             email = email

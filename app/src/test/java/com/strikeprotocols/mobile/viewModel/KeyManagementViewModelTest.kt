@@ -24,11 +24,13 @@ import com.strikeprotocols.mobile.presentation.key_management.flows.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import junit.framework.TestCase.*
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.*
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mock
+import org.mockito.exceptions.base.MockitoException
 import javax.crypto.Cipher
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -367,7 +369,7 @@ class KeyManagementViewModelTest : BaseViewModelTest() {
             keyMgmtViewModel.state.keyManagementFlowStep
         )
 
-        keyMgmtViewModel.recoverKey()
+        keyMgmtViewModel.recoverKey(phrase = testValidPhrase, validWalletSigners)
 
         advanceUntilIdle()
 
@@ -398,14 +400,13 @@ class KeyManagementViewModelTest : BaseViewModelTest() {
             keyMgmtViewModel.state.keyManagementFlowStep
         )
 
-        keyMgmtViewModel.createAndSaveKey()
+        keyMgmtViewModel.createAndSaveKey(validWalletSigners)
 
         advanceUntilIdle()
 
-        verify(keyRepository, times(1)).saveV3PublicKeys(any())
-        verify(userRepository, times(1)).addWalletSigner(any())
+        //todo: this test seems to be showing that we
 
-        assertEquals(Signers(testWalletSigners), keyMgmtViewModel.state.walletSignerToAdd)
+        verify(userRepository, times(1)).addWalletSigner(any())
 
         assertTrue(keyMgmtViewModel.state.finalizeKeyFlow is Resource.Success)
         assertEquals(testWalletSigners, keyMgmtViewModel.state.finalizeKeyFlow.data)
@@ -808,10 +809,16 @@ class KeyManagementViewModelTest : BaseViewModelTest() {
     @Test
     fun `after toast is shown reset show toast state property`() = runTest {
         assertTrue(keyMgmtViewModel.state.showToast is Resource.Uninitialized)
+        whenever(keyRepository.generatePhrase()).thenAnswer {
+            null
+        }
 
-        //This method should fail early because there is no phrase in state.
-        // This will trigger the showToast property to be set in state
-        keyMgmtViewModel.createAndSaveKey()
+        keyMgmtViewModel.onStart(testCreationInitialData)
+
+        //should fail early because null phrase has been set
+        keyMgmtViewModel.saveRootSeed(rootSeedEncryptionCipher)
+
+        advanceUntilIdle()
 
         assertTrue(keyMgmtViewModel.state.showToast is Resource.Success)
         assertEquals(NO_PHRASE_ERROR, keyMgmtViewModel.state.showToast.data)
@@ -894,7 +901,7 @@ class KeyManagementViewModelTest : BaseViewModelTest() {
         assertTrue(keyMgmtViewModel.state.keyRecoveryManualEntryError is Resource.Uninitialized)
 
         //Attempt to recover the key, an exception will be thrown
-        keyMgmtViewModel.recoverKey()
+        keyMgmtViewModel.saveRootSeed(rootSeedEncryptionCipher)
 
         advanceUntilIdle()
 
@@ -929,7 +936,7 @@ class KeyManagementViewModelTest : BaseViewModelTest() {
 
         setCreationFlowDataInStateForConfirmWordsProcessAndAssertChangesInState()
 
-        keyMgmtViewModel.createAndSaveKey()
+        keyMgmtViewModel.createAndSaveKey(validWalletSigners)
 
         advanceUntilIdle()
 

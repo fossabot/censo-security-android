@@ -1,6 +1,5 @@
 package com.strikeprotocols.mobile.viewModel
 
-import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.times
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
@@ -74,17 +73,40 @@ class EntranceViewModelTest : BaseViewModelTest() {
         publicKeys = emptyList()
     )
 
-    private val validPublicKey = WalletPublicKey(
+    private val validSolanaPublicKey = WalletPublicKey(
         chain = Chain.solana,
         key = "F7JuLRBbyGAS9nAhDdfNX1LbckBAmCnKMB2xTdZfQS1n"
     )
 
+    private val validBitcoinPublicKey = WalletPublicKey(
+        chain = Chain.bitcoin,
+        key = ""
+    )
+
+    private val validEthereumPublicKey = WalletPublicKey(
+        chain = Chain.ethereum,
+        key = ""
+    )
+
     private val validWalletSigners = listOf(
-        WalletSigner(chain = Chain.solana, publicKey = validPublicKey.key)
+        WalletSigner(chain = Chain.solana, publicKey = validSolanaPublicKey.key)
     )
 
     private val basicVerifyUserWithValidPublicKey =
-        basicVerifyUserWithNoPublicKeys.copy(publicKeys = listOf(validPublicKey))
+        basicVerifyUserWithNoPublicKeys.copy(
+            publicKeys = listOf(
+                validSolanaPublicKey,
+                validBitcoinPublicKey,
+                validEthereumPublicKey
+            )
+        )
+
+    private val basicVerifyUserWithOnlySolanaPublicKey =
+        basicVerifyUserWithNoPublicKeys.copy(
+            publicKeys = listOf(
+                validSolanaPublicKey,
+            )
+        )
 
     @Before
     fun setup() = runTest {
@@ -99,6 +121,7 @@ class EntranceViewModelTest : BaseViewModelTest() {
             )
         }
         whenever(keyRepository.retrieveV3PublicKeys()).then { validWalletSigners }
+        whenever(keyRepository.haveARootSeedStored()).then { true }
 
         entranceViewModel = EntranceViewModel(
             userRepository = userRepository,
@@ -133,18 +156,18 @@ class EntranceViewModelTest : BaseViewModelTest() {
         setupLoggedInUserWithValidEmail()
 
         whenever(userRepository.verifyUser()).then {
-            Resource.Success(basicVerifyUserWithValidPublicKey)
+            Resource.Success(basicVerifyUserWithOnlySolanaPublicKey)
         }
 
-        whenever(keyRepository.havePrivateKeys()).then { false }
-        whenever(keyRepository.doesUserHaveV1KeyData()).then { false }
-        whenever(keyRepository.doesUserHaveV2KeyData()).then { true }
+        whenever(keyRepository.hasV3RootSeedStored()).then { false }
+
+        whenever(keyRepository.haveARootSeedStored()).then { true }
 
         entranceViewModel.onStart()
         advanceUntilIdle()
 
         verify(strikeUserData, times(1))
-            .setStrikeUser(basicVerifyUserWithValidPublicKey)
+            .setStrikeUser(basicVerifyUserWithOnlySolanaPublicKey)
 
         assertTrue(entranceViewModel.state.userDestinationResult is Resource.Success)
         assertTrue(entranceViewModel.state.userDestinationResult.data == UserDestination.KEY_MIGRATION)
@@ -154,14 +177,13 @@ class EntranceViewModelTest : BaseViewModelTest() {
     fun `if user does not have sentinel data send them to sign in`() = runTest {
         setupLoggedInUserWithValidEmail()
         whenever(keyRepository.haveSentinelData()).then { false }
+        whenever(keyRepository.hasV3RootSeedStored()).then { true }
 
         whenever(userRepository.verifyUser()).then {
             Resource.Success(basicVerifyUserWithValidPublicKey)
         }
 
-        whenever(keyRepository.havePrivateKeys()).then { false }
-        whenever(keyRepository.doesUserHaveV1KeyData()).then { true }
-        whenever(keyRepository.doesUserHaveV2KeyData()).then { true }
+        whenever(keyRepository.haveARootSeedStored()).then { true }
 
         entranceViewModel.onStart()
         advanceUntilIdle()
@@ -182,9 +204,7 @@ class EntranceViewModelTest : BaseViewModelTest() {
                 Resource.Success(basicVerifyUserWithNoPublicKeys)
             }
 
-            whenever(keyRepository.havePrivateKeys()).then { false }
-            whenever(keyRepository.doesUserHaveV1KeyData()).then { false }
-            whenever(keyRepository.doesUserHaveV2KeyData()).then { false }
+            whenever(keyRepository.hasV3RootSeedStored()).then { false }
 
             entranceViewModel.onStart()
             advanceUntilIdle()
@@ -205,9 +225,7 @@ class EntranceViewModelTest : BaseViewModelTest() {
                 Resource.Success(basicVerifyUserWithNoPublicKeys)
             }
 
-            whenever(keyRepository.havePrivateKeys()).then { true }
-            whenever(keyRepository.doesUserHaveV1KeyData()).then { false }
-            whenever(keyRepository.doesUserHaveV2KeyData()).then { false }
+            whenever(keyRepository.hasV3RootSeedStored()).then { true }
 
             entranceViewModel.onStart()
             advanceUntilIdle()
@@ -228,9 +246,7 @@ class EntranceViewModelTest : BaseViewModelTest() {
                 Resource.Success(basicVerifyUserWithValidPublicKey)
             }
 
-            whenever(keyRepository.havePrivateKeys()).then { false }
-            whenever(keyRepository.doesUserHaveV1KeyData()).then { false }
-            whenever(keyRepository.doesUserHaveV2KeyData()).then { false }
+            whenever(keyRepository.hasV3RootSeedStored()).then { false }
 
             entranceViewModel.onStart()
             advanceUntilIdle()
@@ -251,9 +267,7 @@ class EntranceViewModelTest : BaseViewModelTest() {
                 Resource.Success(basicVerifyUserWithValidPublicKey)
             }
 
-            whenever(keyRepository.havePrivateKeys()).then { true }
-            whenever(keyRepository.doesUserHaveV1KeyData()).then { false }
-            whenever(keyRepository.doesUserHaveV2KeyData()).then { false }
+            whenever(keyRepository.hasV3RootSeedStored()).then { true }
             whenever(
                 keyRepository.doesUserHaveValidLocalKey(basicVerifyUserWithValidPublicKey)
             ).then { true }
@@ -277,9 +291,7 @@ class EntranceViewModelTest : BaseViewModelTest() {
                 Resource.Success(basicVerifyUserWithValidPublicKey)
             }
 
-            whenever(keyRepository.havePrivateKeys()).then { true }
-            whenever(keyRepository.doesUserHaveV1KeyData()).then { false }
-            whenever(keyRepository.doesUserHaveV2KeyData()).then { false }
+            whenever(keyRepository.hasV3RootSeedStored()).then { true }
             whenever(
                 keyRepository.doesUserHaveValidLocalKey(basicVerifyUserWithValidPublicKey)
             ).then { false }
@@ -321,9 +333,7 @@ class EntranceViewModelTest : BaseViewModelTest() {
                 Resource.Error<VerifyUser>()
             }
 
-            whenever(keyRepository.havePrivateKeys()).then { true }
-            whenever(keyRepository.doesUserHaveV1KeyData()).then { false }
-            whenever(keyRepository.doesUserHaveV2KeyData()).then { false }
+            whenever(keyRepository.hasV3RootSeedStored()).then { true }
             whenever(keyRepository.doesUserHaveValidLocalKey(basicVerifyUserWithValidPublicKey)).then { true }
 
             entranceViewModel.onStart()
