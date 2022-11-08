@@ -1,11 +1,13 @@
 package com.strikeprotocols.mobile.common
 
-import cash.z.ecc.android.bip39.Mnemonics
-import cash.z.ecc.android.bip39.toSeed
+import com.strikeprotocols.mobile.data.EncryptionManagerImpl
+import com.strikeprotocols.mobile.data.StrikePrivateKey
 import org.bouncycastle.crypto.digests.SHA512Digest
 import org.bouncycastle.crypto.macs.HMac
 import org.bouncycastle.crypto.params.Ed25519PrivateKeyParameters
+import org.bouncycastle.crypto.params.Ed25519PublicKeyParameters
 import org.bouncycastle.crypto.params.KeyParameter
+import org.bouncycastle.crypto.signers.Ed25519Signer
 import org.bouncycastle.math.ec.rfc8032.Ed25519
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
@@ -15,7 +17,7 @@ import kotlin.experimental.or
 
 class Ed25519HierarchicalPrivateKey(
     val data: ByteArray,
-) {
+) : StrikePrivateKey {
     private val privateKeyParams: Ed25519PrivateKeyParameters = Ed25519PrivateKeyParameters(data, 0)
     private val chainCode: KeyParameter = KeyParameter(data, 32, 32)
 
@@ -36,10 +38,25 @@ class Ed25519HierarchicalPrivateKey(
             }
             return derivedKey
         }
+
+        fun signDataWithParams(data: ByteArray, privateKeyParams: Ed25519PrivateKeyParameters) : ByteArray {
+            //create signature
+            val signer = Ed25519Signer()
+            signer.init(true, privateKeyParams)
+            signer.update(data, EncryptionManagerImpl.Companion.NO_OFFSET_INDEX, data.size)
+
+            return signer.generateSignature()
+        }
+
+        fun signDataWithKeyProvided(data: ByteArray, privateKey: ByteArray) =
+            signDataWithParams(
+                data = data,
+                privateKeyParams = Ed25519PrivateKeyParameters(privateKey.inputStream())
+            )
     }
 
     val privateKeyBytes: ByteArray = privateKeyParams.encoded
-    val publicKeyBytes: ByteArray = privateKeyParams.generatePublicKey().encoded
+    override fun getPublicKeyBytes(): ByteArray = privateKeyParams.generatePublicKey().encoded
 
     fun derive(index: Int): Ed25519HierarchicalPrivateKey {
         // SLIP-10 child key derivation
@@ -56,5 +73,19 @@ class Ed25519HierarchicalPrivateKey(
             hmacSha512.update(indexBytes, 0, indexBytes.size)
             ByteArray(64).also { hmacSha512.doFinal(it, 0) }
         })
+    }
+
+    override fun signData(data: ByteArray) = signDataWithParams(
+        data = data, privateKeyParams = privateKeyParams
+    )
+
+    override fun verifySignature(data: ByteArray, signature: ByteArray): Boolean {
+        val publicKeyParameter = Ed25519PublicKeyParameters(getPublicKeyBytes().inputStream())
+
+        val verifier = Ed25519Signer()
+        verifier.init(false, publicKeyParameter)
+        verifier.update(data, EncryptionManagerImpl.Companion.NO_OFFSET_INDEX, data.size)
+
+        return verifier.verifySignature(signature)
     }
 }
