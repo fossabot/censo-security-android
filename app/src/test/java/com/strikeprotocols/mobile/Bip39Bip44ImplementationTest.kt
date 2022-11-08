@@ -28,8 +28,8 @@ class Bip39Bip44ImplementationTest {
         for (testItem in testItems) {
             val ed25519PrivateKey = Ed25519HierarchicalPrivateKey.fromRootSeed(Mnemonics.MnemonicCode(testItem.mnemonic).toSeed())
             // @solana/web3j code which generated this data set represents the private key as the actual private key(32 bytes) appended with public key (another 32 bytes)
-            assertEquals(testItem.privateKey, (ed25519PrivateKey.privateKeyBytes + ed25519PrivateKey.publicKeyBytes).toHexString().lowercase())
-            assertEquals(testItem.publicKey, ed25519PrivateKey.publicKeyBytes.toBase58())
+            assertEquals(testItem.privateKey, (ed25519PrivateKey.privateKeyBytes + ed25519PrivateKey.getPublicKeyBytes()).toHexString().lowercase())
+            assertEquals(testItem.publicKey, ed25519PrivateKey.getPublicKeyBytes().toBase58())
         }
     }
 
@@ -54,7 +54,7 @@ class Bip39Bip44ImplementationTest {
             assertEquals(phrase, phraseWords.joinToString(" "))
             val keyFromPhraseWords = Ed25519HierarchicalPrivateKey.fromRootSeed(Mnemonics.MnemonicCode(phraseWords.joinToString(" ")).toSeed())
             assertEquals(keyFromPhrase.privateKeyBytes.toHexString(), keyFromPhraseWords.privateKeyBytes.toHexString())
-            assertEquals(keyFromPhrase.publicKeyBytes.toBase58(), keyFromPhraseWords.publicKeyBytes.toBase58())
+            assertEquals(keyFromPhrase.getPublicKeyBytes().toBase58(), keyFromPhraseWords.getPublicKeyBytes().toBase58())
         }
     }
 

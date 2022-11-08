@@ -1,6 +1,5 @@
 package com.strikeprotocols.mobile.data.models.approval
 
-import com.strikeprotocols.mobile.common.BaseWrapper
 import com.strikeprotocols.mobile.common.BaseWrapper.decodeFromBase64
 import com.strikeprotocols.mobile.data.EncryptionManager
 import com.strikeprotocols.mobile.data.Signable
@@ -8,7 +7,6 @@ import com.strikeprotocols.mobile.data.SignedPayload
 import com.strikeprotocols.mobile.data.models.ApprovalDisposition
 import com.strikeprotocols.mobile.data.models.Chain
 import com.strikeprotocols.mobile.data.models.Nonce
-import com.strikeprotocols.mobile.data.models.StoredKeyData
 import com.strikeprotocols.mobile.data.models.approval.PublicKey.Companion.SYSVAR_CLOCK_PUBKEY
 import com.strikeprotocols.mobile.data.models.approval.TransactionInstruction.Companion.createAdvanceNonceInstruction
 import org.web3j.crypto.Hash
@@ -401,7 +399,7 @@ data class ApprovalDispositionRequest(
         cipher: Cipher): SignedPayload {
 
         return try {
-            encryptionManager.signApprovalDispositionMessage(
+            encryptionManager.signSolanaApprovalDispositionMessage(
                 signable = this,
                 email = email,
                 cipher = cipher

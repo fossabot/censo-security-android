@@ -10,7 +10,7 @@ fun createSolanaKeyPairFromMnemonic(mnenomic: Mnemonics.MnemonicCode): TestKeyPa
 
     return TestKeyPair(
         privateKey = solanaHierarchicalKey.privateKeyBytes,
-        publicKey = solanaHierarchicalKey.publicKeyBytes,
+        publicKey = solanaHierarchicalKey.getPublicKeyBytes(),
     )
 }
 
