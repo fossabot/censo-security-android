@@ -113,8 +113,7 @@ class KeyRepositoryImpl(
             encryptionManager.signDataWithSolanaEncryptedKey(
                 data = tokenByteArray,
                 userEmail = userEmail,
-                cipher = cipher,
-                keyType = SOLANA_KEY
+                cipher = cipher
             )
 
         return BaseWrapper.encodeToBase64(signedTimestamp)

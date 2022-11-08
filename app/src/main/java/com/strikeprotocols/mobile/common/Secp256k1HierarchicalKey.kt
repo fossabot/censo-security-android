@@ -2,6 +2,7 @@ package com.strikeprotocols.mobile.common
 
 import cash.z.ecc.android.bip39.Mnemonics
 import cash.z.ecc.android.bip39.toSeed
+import com.strikeprotocols.mobile.data.StrikePrivateKey
 import org.bitcoinj.core.Base58
 import org.bitcoinj.core.ECKey
 import org.bouncycastle.asn1.ASN1InputStream
@@ -66,7 +67,7 @@ class Secp256k1HierarchicalKey(
     private val childPathNumber: ChildPathNumber? = null,
     private val parentFingerprint: Int = 0,
     private val publicKey: ByteArray? = null
-) {
+) : StrikePrivateKey {
     companion object {
         private const val curveName = "secp256k1"
         private val bcProvider = BouncyCastleProvider()
@@ -214,7 +215,7 @@ class Secp256k1HierarchicalKey(
         return getECPublicKeyFromPrivate(privateKey).q.getEncoded(true)
     }
 
-    fun getPublicKeyBytes(): ByteArray {
+    override fun getPublicKeyBytes(): ByteArray {
         return publicKey ?: getPublicKeyFromPrivate() ?: throw Exception("Cannot calculate public key")
     }
 
@@ -230,7 +231,7 @@ class Secp256k1HierarchicalKey(
         return (privateKey as BCECPrivateKey).d.toByteArrayNoSign(32)
     }
 
-    fun signData(data: ByteArray): ByteArray {
+    override fun signData(data: ByteArray): ByteArray {
         val ecdsaSigner = ECDSASigner(HMacDSAKCalculator(SHA256Digest()))
         val privKey = ECPrivateKeyParameters(privateKey!!.d, ECKey.CURVE)
         ecdsaSigner.init(true, privKey)
@@ -238,7 +239,7 @@ class Secp256k1HierarchicalKey(
         return toDERBytes(r, if (s > ECKey.HALF_CURVE_ORDER) ECKey.CURVE.n - s else s)
     }
 
-    fun verifySignature(data: ByteArray, signature: ByteArray): Boolean {
+    override fun verifySignature(data: ByteArray, signature: ByteArray): Boolean {
         val (r, s) = decodeFromDER(signature)
         val ecdsaSigner = ECDSASigner(HMacDSAKCalculator(SHA256Digest()))
         val pubKey = ECPublicKeyParameters(getECPublicKey().q, ECKey.CURVE)
