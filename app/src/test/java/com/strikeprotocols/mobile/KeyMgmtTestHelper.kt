@@ -1,6 +1,5 @@
 package com.strikeprotocols.mobile
 
-import com.strikeprotocols.mobile.common.GeneralDummyData
 import com.strikeprotocols.mobile.data.models.WalletSigner
 import com.strikeprotocols.mobile.presentation.key_management.KeyManagementFlow
 import com.strikeprotocols.mobile.presentation.key_management.KeyManagementInitialData
@@ -15,13 +14,11 @@ fun getRecoveryFlowInitialData() = KeyManagementInitialData(
     flow = KeyManagementFlow.KEY_RECOVERY
 )
 
-fun getValidTestingPhrase() =
-    "clerk wolf hover poverty salmon rough write any rigid horror sing air super misery critic grain dolphin again milk ocean fragile unveil boss random"
+fun getValidTestingPhrase() = ExampleMnemonicAndKeys.MNEMONIC
 
-fun getInvalidTestingPhrase() =
-    "clerk wolf jenkins poverty salmon rough write any rigid horror sing air parser misery critic grain dolphin again milk ocean fragile unveil boss random"
+fun getInvalidTestingPhrase() = ExampleMnemonicAndKeys.BAD_MNEMONIC
 
 fun getWalletSigner() = WalletSigner(
-    publicKey = GeneralDummyData.PhraseDummyData.PHRASE_PUBLIC_KEY,
+    publicKey = ExampleMnemonicAndKeys.PUBLIC_KEY,
     chain = null
 )

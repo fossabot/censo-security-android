@@ -1,7 +1,6 @@
 package com.strikeprotocols.mobile
 
 import com.google.gson.JsonParser
-import com.strikeprotocols.mobile.common.GeneralDummyData
 import com.strikeprotocols.mobile.data.models.Chain
 import com.strikeprotocols.mobile.data.models.Organization
 import com.strikeprotocols.mobile.data.models.VerifyUser
@@ -110,15 +109,6 @@ fun getLoginApproval() : ApprovalRequest {
     return getWalletApprovalRequest(loginApprovalRequestType)
 }
 
-fun getSignersUpdateWalletApproval() : ApprovalRequest {
-    val nonceAccountAddresses = listOf(getNonce())
-
-    val signersUpdateRequestType =
-        getSignersUpdateRequest(nonceAccountAddresses)
-
-    return getWalletApprovalRequest(signersUpdateRequestType)
-}
-
 fun getRemoveDAppBookEntryApproval() : ApprovalRequest {
     val nonceAccountAddresses = listOf(getNonce())
 
@@ -131,8 +121,6 @@ fun getRemoveDAppBookEntryApproval() : ApprovalRequest {
 fun getMultiSigWalletCreationApprovalRequest(): ApprovalRequest =
     deserializer.parseData(JsonParser.parseString(multiSigWithWalletCreationJson.trim()))
 
-fun getUserEmail() = "jdoe@crypto.org"
-
 fun getVerifyUser() = VerifyUser(
     fullName = "John Doe",
     hasApprovalPermission = false,
@@ -142,9 +130,18 @@ fun getVerifyUser() = VerifyUser(
         id = "crypto",
         name = "cryptology"
     ),
-    publicKeys = listOf(WalletPublicKey(key = GeneralDummyData.PhraseDummyData.PHRASE_PUBLIC_KEY, chain = Chain.solana)),
+    publicKeys = listOf(WalletPublicKey(key = ExampleMnemonicAndKeys.PUBLIC_KEY, chain = Chain.solana)),
     useStaticKey = false
 )
+
+class ExampleMnemonicAndKeys {
+    companion object {
+        val MNEMONIC = "lizard size puppy joke venue census need net produce age all proof opinion promote setup flight tortoise multiply blanket problem defy arrest switch also"
+        val BAD_MNEMONIC = "lizard trigger puppy joke venue census need net produce age all proof opinion promote setup flight tortoise multiply blanket problem defy arrest switch also"
+        val PRIVATE_KEY = "xprvA2mmuoFKSeeWa7CaZwqLBL6Xuvz9q5XwGh3imXraW2XUeDhy4GA7SJkbgtWZV2vz3ctDzR4dMAs4um1Yj2Ad7iEaonyUzd5JicxR1gprJuY"
+        val PUBLIC_KEY = "xpub6Fm8KJnDH2ConbH3fyNLYU3GTxpeEYFnduyKZvGC4N4TX237boUMz755YB3T18k1KdYrboxCRtiBppA3DmWXqmxebjyzoyyWrzXRTDeVoax"
+    }
+}
 
 fun getNonce() = "7Zpss7rbtz6qU71ywcjcuANnVyQWJrqsZ3oekkR9Hknn"
 

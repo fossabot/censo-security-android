@@ -594,7 +594,7 @@ fun getLoginApproval( jwtToken : String) : ApprovalRequestDetails {
     return LoginApprovalRequest(
         type = ApprovalType.LOGIN_TYPE.value,
         jwtToken= jwtToken,
-        email = "sharris@blue.rock",
+        email = "tony@google.com",
         name = "Sam Ortiz"
     )
 }

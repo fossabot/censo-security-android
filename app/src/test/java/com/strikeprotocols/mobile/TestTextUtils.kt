@@ -1,6 +1,5 @@
 package com.strikeprotocols.mobile
 
-import com.strikeprotocols.mobile.common.BaseWrapper
 import org.bouncycastle.crypto.params.Ed25519PrivateKeyParameters
 
 fun String.decodeHex(): ByteArray {
