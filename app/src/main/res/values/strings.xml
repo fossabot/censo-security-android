@@ -58,8 +58,6 @@
     <string name="arrow_forward_content_des">Arrow Forward Icon</string>
     <string name="arrow_back_content_des">Arrow Back Icon</string>
 
-    <string name="not_applicable">N/A</string>
-
     <string name="usd_equivalent">USD equivalent</string>
     <string name="unknown_approval_item">Unknown Approval</string>
     <string name="address">Address</string>
