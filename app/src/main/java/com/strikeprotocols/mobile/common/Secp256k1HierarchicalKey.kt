@@ -2,6 +2,7 @@ package com.strikeprotocols.mobile.common
 
 import cash.z.ecc.android.bip39.Mnemonics
 import cash.z.ecc.android.bip39.toSeed
+import com.strikeprotocols.mobile.data.EncryptionManagerImpl.Companion.DATA_CHECK
 import com.strikeprotocols.mobile.data.StrikePrivateKey
 import org.bitcoinj.core.Base58
 import org.bitcoinj.core.ECKey
@@ -105,7 +106,7 @@ class Secp256k1HierarchicalKey(
             )
         }
 
-        fun fromExtendedKey(base58ExtendedKey: String): Secp256k1HierarchicalKey {
+        fun fromExtendedKey(base58ExtendedKey: String) : Secp256k1HierarchicalKey {
             return deserialize(BitcoinUtils.verifyChecksum(Base58.decode(base58ExtendedKey)))
         }
 
@@ -156,6 +157,7 @@ class Secp256k1HierarchicalKey(
             pathList.forEach { path ->
                 derivedKey = derivedKey.derive(path)
             }
+            derivedKey.signData(DATA_CHECK)
             return derivedKey
         }
 
@@ -236,7 +238,15 @@ class Secp256k1HierarchicalKey(
         val privKey = ECPrivateKeyParameters(privateKey!!.d, ECKey.CURVE)
         ecdsaSigner.init(true, privKey)
         val (r, s) = ecdsaSigner.generateSignature(data)
-        return toDERBytes(r, if (s > ECKey.HALF_CURVE_ORDER) ECKey.CURVE.n - s else s)
+        val signature = toDERBytes(r, if (s > ECKey.HALF_CURVE_ORDER) ECKey.CURVE.n - s else s)
+
+        val verifiedSignature = verifySignature(data = data, signature = signature)
+
+        if (!verifiedSignature) {
+            throw Exception("Invalid Signature")
+        }
+
+        return signature
     }
 
     override fun verifySignature(data: ByteArray, signature: ByteArray): Boolean {
