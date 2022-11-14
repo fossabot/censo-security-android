@@ -1,7 +1,6 @@
 package com.strikeprotocols.mobile.data
 
 import cash.z.ecc.android.bip39.Mnemonics
-import com.strikeprotocols.mobile.common.strikeLog
 import com.strikeprotocols.mobile.data.PhraseValidator.Companion.EXPECTED_LENGTH
 import com.strikeprotocols.mobile.data.PhraseValidator.Companion.NOT_ENOUGH_WORDS
 import com.strikeprotocols.mobile.data.PhraseValidator.Companion.TOO_MANY_WORDS

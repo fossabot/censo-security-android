@@ -8,7 +8,6 @@ import androidx.lifecycle.viewModelScope
 import com.strikeprotocols.mobile.common.BioCryptoUtil.FAIL_ERROR
 import com.strikeprotocols.mobile.common.BioPromptReason
 import com.strikeprotocols.mobile.common.Resource
-import com.strikeprotocols.mobile.common.strikeLog
 import com.strikeprotocols.mobile.data.BioPromptData
 import com.strikeprotocols.mobile.data.EncryptionManagerImpl.Companion.ROOT_SEED_KEY_NAME
 import com.strikeprotocols.mobile.data.MigrationRepository
