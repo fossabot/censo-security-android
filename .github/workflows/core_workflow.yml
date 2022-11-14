@@ -51,8 +51,7 @@ jobs:
         env:
           DATA: ${{ secrets.googleServices }}
         run: |
-          touch /home/runner/work/strike-mobile-android/strike-mobile-android/app/google-services.json
-          cat /home/runner/work/strike-mobile-android/strike-mobile-android/app/google-services.json | base64
+          touch /home/runner/work/strike-mobile-android/strike-mobile-android/app/google-services.json | base64
           echo $DATA > /home/runner/work/strike-mobile-android/strike-mobile-android/app/google-services.json
 
       - name: Run lint
