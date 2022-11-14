@@ -4,6 +4,7 @@ import cash.z.ecc.android.bip39.Mnemonics
 import com.strikeprotocols.mobile.common.*
 import com.strikeprotocols.mobile.common.BaseWrapper
 import com.strikeprotocols.mobile.common.Ed25519HierarchicalPrivateKey
+import com.strikeprotocols.mobile.data.EncryptionManagerImpl.Companion.DATA_CHECK
 import com.strikeprotocols.mobile.data.EncryptionManagerImpl.Companion.NoKeyDataException
 import org.bouncycastle.crypto.AsymmetricCipherKeyPairGenerator
 import org.bouncycastle.crypto.generators.Ed25519KeyPairGenerator
@@ -429,6 +430,14 @@ class EncryptionManagerImpl @Inject constructor(
         val ethereumHierarchicalKey = Secp256k1HierarchicalKey.fromRootSeed(
             rootSeed, Secp256k1HierarchicalKey.ethereumDerivationPath
         )
+
+        listOf(
+            solanaHierarchicalKey,
+            bitcoinHierarchicalKey,
+            ethereumHierarchicalKey
+        ).forEach {
+            it.signData(DATA_CHECK)
+        }
 
         return AllKeys(
             solanaKey = solanaHierarchicalKey,

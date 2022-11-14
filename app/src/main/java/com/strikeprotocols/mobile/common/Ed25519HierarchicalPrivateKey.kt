@@ -1,6 +1,7 @@
 package com.strikeprotocols.mobile.common
 
 import com.strikeprotocols.mobile.data.EncryptionManagerImpl
+import com.strikeprotocols.mobile.data.EncryptionManagerImpl.Companion.DATA_CHECK
 import com.strikeprotocols.mobile.data.StrikePrivateKey
 import org.bouncycastle.crypto.digests.SHA512Digest
 import org.bouncycastle.crypto.macs.HMac
@@ -36,16 +37,40 @@ class Ed25519HierarchicalPrivateKey(
             for (index in intArrayOf(44, 501, 0, 0)) {
                 derivedKey = derivedKey.derive(index)
             }
+            derivedKey.signData(DATA_CHECK)
             return derivedKey
         }
 
-        fun signDataWithParams(data: ByteArray, privateKeyParams: Ed25519PrivateKeyParameters) : ByteArray {
+        fun signDataWithParams(
+            data: ByteArray,
+            privateKeyParams: Ed25519PrivateKeyParameters
+        ): ByteArray {
             //create signature
             val signer = Ed25519Signer()
             signer.init(true, privateKeyParams)
             signer.update(data, EncryptionManagerImpl.Companion.NO_OFFSET_INDEX, data.size)
 
-            return signer.generateSignature()
+            val signature = signer.generateSignature()
+
+            val verifiedSignature = verifySignatureWithParams(
+                data = data,
+                signature = signature,
+                publicKeyParameter = privateKeyParams.generatePublicKey()
+            )
+
+            if (!verifiedSignature) {
+                throw Exception("Invalid Signature")
+            }
+
+            return signature
+        }
+
+        fun verifySignatureWithParams(publicKeyParameter: Ed25519PublicKeyParameters,data: ByteArray, signature: ByteArray): Boolean {
+            val verifier = Ed25519Signer()
+            verifier.init(false, publicKeyParameter)
+            verifier.update(data, EncryptionManagerImpl.Companion.NO_OFFSET_INDEX, data.size)
+
+            return verifier.verifySignature(signature)
         }
 
         fun signDataWithKeyProvided(data: ByteArray, privateKey: ByteArray) =
@@ -75,17 +100,15 @@ class Ed25519HierarchicalPrivateKey(
         })
     }
 
-    override fun signData(data: ByteArray) = signDataWithParams(
-        data = data, privateKeyParams = privateKeyParams
-    )
+    override fun signData(data: ByteArray) =
+        signDataWithParams(data = data, privateKeyParams = privateKeyParams)
 
     override fun verifySignature(data: ByteArray, signature: ByteArray): Boolean {
         val publicKeyParameter = Ed25519PublicKeyParameters(getPublicKeyBytes().inputStream())
 
-        val verifier = Ed25519Signer()
-        verifier.init(false, publicKeyParameter)
-        verifier.update(data, EncryptionManagerImpl.Companion.NO_OFFSET_INDEX, data.size)
-
-        return verifier.verifySignature(signature)
+        return verifySignatureWithParams(
+            publicKeyParameter = publicKeyParameter,
+            data = data, signature = signature
+        )
     }
 }
