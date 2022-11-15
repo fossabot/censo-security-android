@@ -21,7 +21,11 @@ import com.strikeprotocols.mobile.data.models.VerifyUser
 import com.strikeprotocols.mobile.presentation.semantic_version_check.MainViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
+import java.security.KeyPair
+import java.security.KeyPairGenerator
 import java.security.KeyStore
+import java.security.PrivateKey
+import java.util.UUID
 import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
 import javax.crypto.SecretKeyFactory
@@ -46,21 +50,22 @@ class EntranceViewModel @Inject constructor(
 
     private fun checkIfHardwareBackedStorage() {
         try {
-            val secretKey = getOrCreateSecretKey("TESTER_KEY")
-            val factory = SecretKeyFactory.getInstance(secretKey.algorithm, "AndroidKeyStore")
-            val keyInfo: KeyInfo = factory.getKeySpec(secretKey, KeyInfo::class.java) as KeyInfo
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                state =
-                    if (keyInfo.securityLevel == KeyProperties.SECURITY_LEVEL_TRUSTED_ENVIRONMENT || keyInfo.securityLevel == KeyProperties.SECURITY_LEVEL_STRONGBOX) {
-                        state.copy(isKeyHardwareBacked = Resource.Success(true))
-                    } else {
-                        state.copy(isKeyHardwareBacked = Resource.Success(false))
-                    }
-            } else {
-                @Suppress("DEPRECATION")
-                state =
-                    state.copy(isKeyHardwareBacked = Resource.Success(keyInfo.isInsideSecureHardware))
-            }
+            val secretKey = getOrCreateSecretKey("Checkergiino")
+            strikeLog(message = "Key is: $secretKey")
+//            val factory = SecretKeyFactory.getInstance(secretKey.algorithm, "AndroidKeyStore")
+//            val keyInfo: KeyInfo = factory.getKeySpec(secretKey, KeyInfo::class.java) as KeyInfo
+//            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+//                state =
+//                    if (keyInfo.securityLevel == KeyProperties.SECURITY_LEVEL_TRUSTED_ENVIRONMENT || keyInfo.securityLevel == KeyProperties.SECURITY_LEVEL_STRONGBOX) {
+//                        state.copy(isKeyHardwareBacked = Resource.Success(true))
+//                    } else {
+//                        state.copy(isKeyHardwareBacked = Resource.Success(false))
+//                    }
+//            } else {
+//                @Suppress("DEPRECATION")
+//                state =
+//                    state.copy(isKeyHardwareBacked = Resource.Success(keyInfo.isInsideSecureHardware))
+//            }
 
         } catch (e: Exception) {
             RaygunClient.send(e, listOf(HARDWARE_BACKED_TAG))
@@ -69,36 +74,36 @@ class EntranceViewModel @Inject constructor(
         }
     }
 
-    private fun getOrCreateSecretKey(keyName: String): SecretKey {
+    private fun getOrCreateSecretKey(keyName: String): PrivateKey {
         // If Secretkey was previously created for that keyName, then grab and return it.
         val keyStore = KeyStore.getInstance("AndroidKeyStore")
         keyStore.load(null) // Keystore must be loaded before it can be accessed
         val key = keyStore.getKey(keyName, null)
 
-        if (key != null) return key as SecretKey
-
-        // if you reach here, then a new SecretKey must be generated for that keyName
-        val paramsBuilder = KeyGenParameterSpec.Builder(
-            keyName,
-            KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT
-        )
-        val ENCRYPTION_BLOCK_MODE = KeyProperties.BLOCK_MODE_GCM
-        val ENCRYPTION_PADDING = KeyProperties.ENCRYPTION_PADDING_NONE
-
-        paramsBuilder.apply {
-            setBlockModes(ENCRYPTION_BLOCK_MODE)
-            setEncryptionPaddings(ENCRYPTION_PADDING)
-            setKeySize(256)
-            setUserAuthenticationRequired(true)
+        if (key != null) {
+            val cert = keyStore.getCertificate(keyName)
+            val publicKey = cert.publicKey
+            strikeLog(message = "Public key: $publicKey")
+            return key as PrivateKey
         }
 
-        val keyGenParams = paramsBuilder.build()
-        val keyGenerator = KeyGenerator.getInstance(
-            KeyProperties.KEY_ALGORITHM_AES,
+        val kpg: KeyPairGenerator = KeyPairGenerator.getInstance(
+            KeyProperties.KEY_ALGORITHM_EC,
             "AndroidKeyStore"
         )
-        keyGenerator.init(keyGenParams)
-        return keyGenerator.generateKey()
+        val parameterSpec: KeyGenParameterSpec = KeyGenParameterSpec.Builder(
+            keyName,
+            KeyProperties.PURPOSE_SIGN or KeyProperties.PURPOSE_VERIFY
+        ).run {
+            setDigests(KeyProperties.DIGEST_SHA256, KeyProperties.DIGEST_SHA512)
+            build()
+        }
+
+        kpg.initialize(parameterSpec)
+
+        val keyPair = kpg.generateKeyPair()
+
+        return keyPair.private
     }
 
     private suspend fun checkMinimumVersion() {
