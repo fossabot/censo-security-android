@@ -12,9 +12,9 @@ plugins {
 def final appName = 'Strike Mobile'
 def final coreAppId = "com.strikeprotocols.mobile"
 
-String versionNameMajor = 2
-String versionNameMinor = 2
-String versionNamePatch = 1
+String versionNameMajor = 0
+String versionNameMinor = 0
+String versionNamePatch = 0
 
 android {
     Boolean signBuild = false
