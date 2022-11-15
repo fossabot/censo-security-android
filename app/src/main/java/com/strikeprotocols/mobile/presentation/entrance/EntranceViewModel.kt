@@ -1,5 +1,9 @@
 package com.strikeprotocols.mobile.presentation.entrance
 
+import android.os.Build
+import android.security.keystore.KeyGenParameterSpec
+import android.security.keystore.KeyInfo
+import android.security.keystore.KeyProperties
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -8,13 +12,19 @@ import androidx.lifecycle.viewModelScope
 import com.raygun.raygun4android.RaygunClient
 import com.strikeprotocols.mobile.BuildConfig
 import com.strikeprotocols.mobile.common.CrashReportingUtil
+import com.strikeprotocols.mobile.common.CrashReportingUtil.HARDWARE_BACKED_TAG
 import com.strikeprotocols.mobile.common.Resource
+import com.strikeprotocols.mobile.common.strikeLog
 import com.strikeprotocols.mobile.data.*
 import com.strikeprotocols.mobile.data.models.SemanticVersion
 import com.strikeprotocols.mobile.data.models.VerifyUser
 import com.strikeprotocols.mobile.presentation.semantic_version_check.MainViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
+import java.security.KeyStore
+import javax.crypto.KeyGenerator
+import javax.crypto.SecretKey
+import javax.crypto.SecretKeyFactory
 import javax.inject.Inject
 
 @HiltViewModel
@@ -30,8 +40,65 @@ class EntranceViewModel @Inject constructor(
 
     fun onStart() {
         viewModelScope.launch {
-            checkMinimumVersion()
+            checkIfHardwareBackedStorage()
         }
+    }
+
+    private fun checkIfHardwareBackedStorage() {
+        try {
+            val secretKey = getOrCreateSecretKey("TESTER_KEY")
+            val factory = SecretKeyFactory.getInstance(secretKey.algorithm, "AndroidKeyStore")
+            val keyInfo: KeyInfo = factory.getKeySpec(secretKey, KeyInfo::class.java) as KeyInfo
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                state =
+                    if (keyInfo.securityLevel == KeyProperties.SECURITY_LEVEL_TRUSTED_ENVIRONMENT || keyInfo.securityLevel == KeyProperties.SECURITY_LEVEL_STRONGBOX) {
+                        state.copy(isKeyHardwareBacked = Resource.Success(true))
+                    } else {
+                        state.copy(isKeyHardwareBacked = Resource.Success(false))
+                    }
+            } else {
+                @Suppress("DEPRECATION")
+                state =
+                    state.copy(isKeyHardwareBacked = Resource.Success(keyInfo.isInsideSecureHardware))
+            }
+
+        } catch (e: Exception) {
+            RaygunClient.send(e, listOf(HARDWARE_BACKED_TAG))
+            state = state.copy(isKeyHardwareBacked = Resource.Error(exception = e))
+            strikeLog(message = e.stackTraceToString())
+        }
+    }
+
+    private fun getOrCreateSecretKey(keyName: String): SecretKey {
+        // If Secretkey was previously created for that keyName, then grab and return it.
+        val keyStore = KeyStore.getInstance("AndroidKeyStore")
+        keyStore.load(null) // Keystore must be loaded before it can be accessed
+        val key = keyStore.getKey(keyName, null)
+
+        if (key != null) return key as SecretKey
+
+        // if you reach here, then a new SecretKey must be generated for that keyName
+        val paramsBuilder = KeyGenParameterSpec.Builder(
+            keyName,
+            KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT
+        )
+        val ENCRYPTION_BLOCK_MODE = KeyProperties.BLOCK_MODE_GCM
+        val ENCRYPTION_PADDING = KeyProperties.ENCRYPTION_PADDING_NONE
+
+        paramsBuilder.apply {
+            setBlockModes(ENCRYPTION_BLOCK_MODE)
+            setEncryptionPaddings(ENCRYPTION_PADDING)
+            setKeySize(256)
+            setUserAuthenticationRequired(true)
+        }
+
+        val keyGenParams = paramsBuilder.build()
+        val keyGenerator = KeyGenerator.getInstance(
+            KeyProperties.KEY_ALGORITHM_AES,
+            "AndroidKeyStore"
+        )
+        keyGenerator.init(keyGenParams)
+        return keyGenerator.generateKey()
     }
 
     private suspend fun checkMinimumVersion() {

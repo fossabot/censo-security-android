@@ -6,4 +6,5 @@ object CrashReportingUtil {
     const val MANUALLY_REPORTED_TAG = "ManualReport"
     const val FORCE_UPGRADE_TAG = "ForceUpgrade"
     const val JWT_TAG = "JWT"
+    const val HARDWARE_BACKED_TAG = "HardwareBacked"
 }

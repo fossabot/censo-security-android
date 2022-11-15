@@ -4,6 +4,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -11,7 +12,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.strikeprotocols.mobile.R
@@ -95,20 +98,30 @@ fun EntranceScreen(
             .fillMaxSize()
             .background(color = BackgroundBlack)
     ) {
-        Image(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 172.dp, start = 44.dp, end = 44.dp),
-            painter = painterResource(R.drawable.strike_main_logo),
-            contentDescription = "",
-            contentScale = ContentScale.FillWidth,
-        )
-        CircularProgressIndicator(
-            modifier = Modifier
-                .align(Alignment.Center)
-                .size(60.dp),
-            color = StrikeWhite
-        )
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                "Does the user have hardware backed key?",
+                fontSize = 24.sp,
+                color = StrikeWhite,
+                textAlign = TextAlign.Center
+            )
+            Spacer(modifier = Modifier.size(24.dp))
+            val hardwareBackedKey = when (state.isKeyHardwareBacked) {
+                is Resource.Error -> "Error checking if key is hardware backed, error sent to crash reporting tool."
+                is Resource.Success -> if (state.isKeyHardwareBacked.data == true) "Key IS hardware backed" else "Key IS NOT hardware backed."
+                is Resource.Loading, is Resource.Uninitialized -> "Loading..."
+            }
+            Text(
+                text = hardwareBackedKey,
+                fontSize = 24.sp,
+                color = StrikeWhite,
+                textAlign = TextAlign.Center
+            )
+        }
     }
 
     if (state.verifyUserResult is Resource.Error) {

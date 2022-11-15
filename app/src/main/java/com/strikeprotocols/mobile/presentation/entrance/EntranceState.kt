@@ -6,6 +6,7 @@ import com.strikeprotocols.mobile.data.models.VerifyUser
 data class EntranceState(
     val userDestinationResult: Resource<UserDestination> = Resource.Uninitialized,
     val verifyUserResult: Resource<VerifyUser> = Resource.Uninitialized,
+    val isKeyHardwareBacked: Resource<Boolean> = Resource.Uninitialized,
 )
 
 /**
