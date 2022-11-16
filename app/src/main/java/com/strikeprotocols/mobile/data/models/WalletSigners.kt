@@ -11,6 +11,7 @@ data class Signers(
 data class WalletSigner(
     val publicKey: String?,
     val chain: Chain?,
+    val userImage: UserImage? = null,
     val signature: String? = null
 )
 

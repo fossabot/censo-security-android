@@ -20,7 +20,8 @@ fun moveUserToNextCreationScreen(flowStep: KeyCreationFlowStep) =
             KeyCreationFlowStep.PHRASE_COPIED_STEP
         KeyCreationFlowStep.PHRASE_SAVED_STEP -> KeyCreationFlowStep.CONFIRM_KEY_ENTRY_STEP
         KeyCreationFlowStep.CONFIRM_KEY_ENTRY_STEP, KeyCreationFlowStep.CONFIRM_KEY_ERROR_STEP ->
-            KeyCreationFlowStep.ALL_SET_STEP
+            KeyCreationFlowStep.CAPTURE_USER_PHOTO_STEP
+        KeyCreationFlowStep.CAPTURE_USER_PHOTO_STEP -> KeyCreationFlowStep.ALL_SET_STEP
         KeyCreationFlowStep.WRITE_WORD_STEP -> KeyCreationFlowStep.WRITE_WORD_STEP
         KeyCreationFlowStep.VERIFY_WORDS_STEP -> KeyCreationFlowStep.VERIFY_WORDS_STEP
         KeyCreationFlowStep.ALL_SET_STEP -> KeyCreationFlowStep.FINISHED
@@ -30,14 +31,15 @@ fun moveUserToNextCreationScreen(flowStep: KeyCreationFlowStep) =
 
 fun moveUserToPreviousCreationScreen(
     flowStep: KeyCreationFlowStep,
-    addWalletSignerResult: Resource<Signers>) =
+    addWalletSignerResult: Resource<Signers?>) =
     when (flowStep) {
         KeyCreationFlowStep.ENTRY_STEP -> KeyCreationFlowStep.UNINITIALIZED
         KeyCreationFlowStep.COPY_PHRASE_STEP,
         KeyCreationFlowStep.PHRASE_SAVED_STEP,
         KeyCreationFlowStep.PHRASE_COPIED_STEP -> KeyCreationFlowStep.ENTRY_STEP
         KeyCreationFlowStep.CONFIRM_KEY_ENTRY_STEP,
-        KeyCreationFlowStep.CONFIRM_KEY_ERROR_STEP -> KeyCreationFlowStep.COPY_PHRASE_STEP
+        KeyCreationFlowStep.CONFIRM_KEY_ERROR_STEP,
+        KeyCreationFlowStep.CAPTURE_USER_PHOTO_STEP -> KeyCreationFlowStep.COPY_PHRASE_STEP
         KeyCreationFlowStep.ALL_SET_STEP ->
             if (addWalletSignerResult is Resource.Success) {
                 KeyCreationFlowStep.FINISHED
@@ -75,6 +77,7 @@ fun KeyCreationFlowUI(
         KeyCreationFlowStep.COPY_PHRASE_STEP,
         KeyCreationFlowStep.WRITE_WORD_STEP,
         KeyCreationFlowStep.PHRASE_COPIED_STEP,
+        KeyCreationFlowStep.CAPTURE_USER_PHOTO_STEP,
         KeyCreationFlowStep.PHRASE_SAVED_STEP -> stringResource(R.string.start_over)
         KeyCreationFlowStep.VERIFY_WORDS_STEP -> stringResource(R.string.verify_phrase)
         KeyCreationFlowStep.CONFIRM_KEY_ENTRY_STEP,

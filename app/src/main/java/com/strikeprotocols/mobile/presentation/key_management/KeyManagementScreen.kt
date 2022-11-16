@@ -1,15 +1,33 @@
 package com.strikeprotocols.mobile.presentation.key_management
 
+import android.app.Activity
+import android.content.Context
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.graphics.Bitmap
+import android.provider.MediaStore
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.biometric.BiometricPrompt
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.zIndex
 import androidx.fragment.app.FragmentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
@@ -18,19 +36,16 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.navigation.NavController
 import com.strikeprotocols.mobile.R
 import com.strikeprotocols.mobile.common.BioCryptoUtil
+import com.strikeprotocols.mobile.common.ImageCaptureError
 import com.strikeprotocols.mobile.common.Resource
 import com.strikeprotocols.mobile.common.popUpToTop
 import com.strikeprotocols.mobile.presentation.Screen
 import com.strikeprotocols.mobile.presentation.key_management.KeyManagementState.Companion.INVALID_PHRASE_ERROR
 import com.strikeprotocols.mobile.presentation.key_management.KeyManagementState.Companion.NO_PHRASE_ERROR
+import com.strikeprotocols.mobile.presentation.key_management.KeyManagementViewModel.Companion.THUMBNAIL_DATA_KEY
 import com.strikeprotocols.mobile.presentation.key_management.flows.*
 import com.strikeprotocols.mobile.ui.theme.StrikeWhite
 import com.strikeprotocols.mobile.ui.theme.UnfocusedGrey
-
-@OptIn(
-    ExperimentalComposeUiApi::class,
-    androidx.compose.foundation.ExperimentalFoundationApi::class
-)
 
 @Composable
 fun KeyManagementScreen(
@@ -42,6 +57,39 @@ fun KeyManagementScreen(
     val context = LocalContext.current as FragmentActivity
 
     val lifecycleOwner: LifecycleOwner = LocalLifecycleOwner.current
+
+    val packageManager = context.packageManager
+
+    val cameraResultLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            val imageThumbnailBitmap =
+                result.data?.extras?.get(THUMBNAIL_DATA_KEY) as Bitmap?
+
+            if (imageThumbnailBitmap != null) {
+                viewModel.handleCapturedUserPhoto(userPhoto = imageThumbnailBitmap)
+            } else {
+                viewModel.handleImageCaptureError(ImageCaptureError.BAD_RESULT)
+            }
+        } else {
+            viewModel.handleImageCaptureError(ImageCaptureError.ACTION_CANCELLED)
+        }
+    }
+
+    fun getImageCaptureErrorMessage(context: Context, state: KeyManagementState) =
+        when (state.imageCaptureFailedError.data) {
+            ImageCaptureError.NO_HARDWARE_CAMERA ->
+                context.getString(R.string.image_capture_failed_no_camera_message)
+            ImageCaptureError.BAD_RESULT ->
+                context.getString(R.string.image_capture_failed_default_message)
+            ImageCaptureError.ACTION_CANCELLED ->
+                context.getString(R.string.image_capture_failed_action_cancelled_message)
+            null -> {
+                context.getString(R.string.image_capture_failed_default_message)
+            }
+        }
+
 
     //region DisposableEffect
     DisposableEffect(lifecycleOwner) {
@@ -67,6 +115,17 @@ fun KeyManagementScreen(
 
     //region LaunchedEffect
     LaunchedEffect(key1 = state) {
+        if (state.triggerImageCapture is Resource.Success) {
+            val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+
+            if (intent.resolveActivity(packageManager) == null) {
+                viewModel.handleImageCaptureError(ImageCaptureError.NO_HARDWARE_CAMERA)
+            } else {
+                cameraResultLauncher.launch(intent)
+            }
+            viewModel.resetTriggerImageCapture()
+        }
+
         val flowStepIsFinished = state.keyManagementFlowStep.isStepFinished()
 
         if (flowStepIsFinished) {
@@ -174,6 +233,14 @@ fun KeyManagementScreen(
     }
     //endregion
 
+    if (state.imageCaptureFailedError is Resource.Error) {
+        val message = getImageCaptureErrorMessage(context = context, state = state)
+
+        ImageCaptureErrorDialog(mainText = message) {
+            viewModel.resetImageCaptureFailedError()
+        }
+    }
+
     if (state.keyRecoveryManualEntryError is Resource.Error) {
         AlertDialog(
             backgroundColor = UnfocusedGrey,
@@ -222,4 +289,50 @@ fun KeyManagementScreen(
         viewModel.resetShowToast()
     }
     //endregion
+}
+
+@Composable
+fun ImageCaptureErrorDialog(
+    mainText: String,
+    onAccept: () -> Unit,
+) {
+    Column(
+        Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp)
+                .border(width = 1.5.dp, color = UnfocusedGrey.copy(alpha = 0.50f))
+                .background(color = Color.Black)
+                .zIndex(2.5f),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Spacer(modifier = Modifier.height(36.dp))
+            Text(
+                modifier = Modifier.padding(horizontal = 16.dp),
+                text = mainText,
+                textAlign = TextAlign.Center,
+                color = StrikeWhite,
+                fontSize = 20.sp
+            )
+            Spacer(modifier = Modifier.height(36.dp))
+            Button(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(8.dp)),
+                onClick = onAccept,
+            ) {
+                Text(
+                    text = stringResource(id = R.string.ok),
+                    fontSize = 18.sp,
+                    color = StrikeWhite,
+                    textAlign = TextAlign.Center
+                )
+            }
+            Spacer(modifier = Modifier.height(36.dp))
+        }
+    }
 }

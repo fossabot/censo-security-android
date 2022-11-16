@@ -1,6 +1,8 @@
 package com.strikeprotocols.mobile.presentation.key_management
 
+import android.graphics.Bitmap
 import com.strikeprotocols.mobile.common.BioPromptReason
+import com.strikeprotocols.mobile.common.ImageCaptureError
 import com.strikeprotocols.mobile.common.Resource
 import com.strikeprotocols.mobile.data.BioPromptData
 import com.strikeprotocols.mobile.data.models.Signers
@@ -22,6 +24,11 @@ data class KeyManagementState(
     val userInputtedPhrase: String = "",
     val wordIndexForDisplay: Int = FIRST_WORD_INDEX,
     val confirmPhraseWordsState: ConfirmPhraseWordsState = ConfirmPhraseWordsState(),
+
+    //User Photo
+    val triggerImageCapture: Resource<Unit> = Resource.Uninitialized,
+    val capturedUserPhoto: Bitmap? = null,
+    val imageCaptureFailedError: Resource<ImageCaptureError> = Resource.Uninitialized,
 
     //API calls
     val finalizeKeyFlow: Resource<Signers> = Resource.Uninitialized,

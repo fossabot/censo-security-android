@@ -1,5 +1,6 @@
 package com.strikeprotocols.mobile.presentation.key_management
 
+import android.graphics.Bitmap
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -11,10 +12,8 @@ import cash.z.ecc.android.bip39.Mnemonics
 import com.strikeprotocols.mobile.common.*
 import com.strikeprotocols.mobile.data.*
 import com.strikeprotocols.mobile.data.EncryptionManagerImpl.Companion.ROOT_SEED_KEY_NAME
-import com.strikeprotocols.mobile.data.models.CipherRepository
-import com.strikeprotocols.mobile.data.models.IndexedPhraseWord
-import com.strikeprotocols.mobile.data.models.Signers
-import com.strikeprotocols.mobile.data.models.WalletSigner
+import com.strikeprotocols.mobile.data.models.*
+import com.strikeprotocols.mobile.presentation.entrance.UserDestination
 import com.strikeprotocols.mobile.presentation.key_management.KeyManagementState.Companion.NO_PHRASE_ERROR
 import com.strikeprotocols.mobile.presentation.key_management.KeyManagementState.Companion.FIRST_WORD_INDEX
 import com.strikeprotocols.mobile.presentation.key_management.flows.*
@@ -31,6 +30,7 @@ class KeyManagementViewModel @Inject constructor(
 
     companion object {
         const val CLIPBOARD_LABEL_PHRASE = "Phrase"
+        const val THUMBNAIL_DATA_KEY = "data"
     }
 
     var state by mutableStateOf(KeyManagementState())
@@ -724,6 +724,63 @@ class KeyManagementViewModel @Inject constructor(
                 confirmPhraseWordsState = ConfirmPhraseWordsState()
             )
         }
+    }
+    //endregion
+
+    //region Image
+
+    suspend fun createUserImage(
+        capturedUserPhoto: Bitmap,
+        cipher: Cipher,
+        keyRepository: KeyRepository
+    ): UserImage {
+        return generateUserImageObject(
+            userPhoto = capturedUserPhoto,
+            cipher = cipher,
+            keyRepository = keyRepository
+        )
+    }
+
+
+    private fun triggerImageCapture() {
+        state = state.copy(triggerImageCapture = Resource.Success(Unit))
+    }
+
+    fun handleCapturedUserPhoto(userPhoto: Bitmap) {
+        state = state.copy(capturedUserPhoto = userPhoto)
+        state = userCompletedImageCaptureDuringKeyCreation(state)
+        triggerBioPrompt()
+    }
+
+    private fun userCompletedImageCaptureDuringKeyCreation(state: KeyManagementState): KeyManagementState {
+        return state.copy(
+            keyManagementFlowStep =
+            KeyManagementFlowStep.CreationFlow(KeyCreationFlowStep.ALL_SET_STEP),
+            finalizeKeyFlow = Resource.Loading(),
+        )
+    }
+
+    fun handleImageCaptureError(imageCaptureError: ImageCaptureError) {
+        if (state.keyManagementFlow == KeyManagementFlow.KEY_CREATION) {
+            resetConfirmPhraseWordsState()
+            state = retrieveInitialKeyCreationState()
+            state = setImageCaptureError(error = imageCaptureError)
+        }
+    }
+
+    private fun setImageCaptureError(error: ImageCaptureError): KeyManagementState =
+        state.copy(imageCaptureFailedError = Resource.Error(data = error))
+
+    fun resetTriggerImageCapture() {
+        state = state.copy(triggerImageCapture = Resource.Uninitialized)
+    }
+
+    fun resetCapturedUserPhoto() {
+        state = state.copy(capturedUserPhoto = null)
+    }
+
+    fun resetImageCaptureFailedError() {
+        state = state.copy(imageCaptureFailedError = Resource.Uninitialized)
     }
     //endregion
 

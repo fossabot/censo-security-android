@@ -46,6 +46,11 @@ interface KeyRepository {
         publicKeys: List<WalletSigner?>,
         mnemonic: Mnemonics.MnemonicCode
     ): List<WalletSigner>
+
+    suspend fun signImageData(
+        imageByteArray: ByteArray,
+        cipher: Cipher
+    ): String
 }
 
 class KeyRepositoryImpl(
@@ -53,6 +58,19 @@ class KeyRepositoryImpl(
     private val securePreferences: SecurePreferences,
     private val userRepository: UserRepository
 ) : KeyRepository, BaseRepository() {
+
+    override suspend fun signImageData(imageByteArray: ByteArray, cipher: Cipher): String {
+        val userEmail = userRepository.retrieveUserEmail()
+
+        val signedImageData =
+            encryptionManager.signDataWithSolanaEncryptedKey(
+                data = imageByteArray,
+                userEmail = userEmail,
+                cipher = cipher
+            )
+
+        return BaseWrapper.encodeToBase64(signedImageData)
+    }
 
     override suspend fun doesUserHaveValidLocalKey(verifyUser: VerifyUser): Boolean {
         val userEmail = userRepository.retrieveUserEmail()
