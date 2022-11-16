@@ -3,6 +3,7 @@ package com.strikeprotocols.mobile.data
 import android.content.Context
 import android.content.SharedPreferences
 import com.strikeprotocols.mobile.common.BaseWrapper
+import java.util.UUID
 
 object SharedPrefsHelper {
 
@@ -11,6 +12,7 @@ object SharedPrefsHelper {
     private const val USER_LOGGED_IN = "skipped_login"
     private const val USER_EMAIL = "user_email"
     private const val USER_TOKEN = "user_token"
+    private const val DEVICE_ID = "_device_id"
 
     //Sentinel Data Storage
     private const val BGRD_INIT_VECTOR = "_bgrd_init_vector"
@@ -245,6 +247,29 @@ object SharedPrefsHelper {
 
     fun retrieveToken(encryptedPrefs: SharedPreferences): String {
         return encryptedPrefs.getString(USER_TOKEN, "") ?: ""
+    }
+    //endregion
+
+    //region device id
+    fun clearDeviceId(email: String) {
+        val editor = sharedPrefs.edit()
+        editor.putString("${email.lowercase().trim()}$DEVICE_ID", "")
+        editor.apply()
+    }
+
+    fun saveDeviceId(
+        email: String,
+        deviceId: String
+    ) {
+        val editor = sharedPrefs.edit()
+        editor.putString("${email.lowercase().trim()}$DEVICE_ID", deviceId)
+        editor.apply()
+    }
+
+    fun getDeviceId(
+        email: String
+    ): String {
+        return sharedPrefs.getString("${email.lowercase().trim()}$DEVICE_ID", "")?.lowercase()?.trim() ?: ""
     }
     //endregion
 }

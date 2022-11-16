@@ -54,6 +54,14 @@ interface BrooklynApiService {
     @Headers(AUTH_REQUIRED)
     suspend fun verifyUser(): RetrofitResponse<VerifyUser>
 
+    @GET("v1/user-devices")
+    @Headers(AUTH_REQUIRED)
+    suspend fun userDevices(): RetrofitResponse<List<UserDevice?>>
+
+    @POST("v1/user-devices")
+    @Headers(AUTH_REQUIRED)
+    suspend fun addUserDevice(@Body userDevice: UserDevice): RetrofitResponse<UserDevice>
+
     @GET("v1/wallet-signers")
     @Headers(AUTH_REQUIRED)
     suspend fun walletSigners(): RetrofitResponse<List<WalletSigner?>>

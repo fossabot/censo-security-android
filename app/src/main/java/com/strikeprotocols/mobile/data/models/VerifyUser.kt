@@ -7,7 +7,8 @@ data class VerifyUser(
     val loginName: String?,
     val organization: Organization?,
     val publicKeys: List<WalletPublicKey?>?,
-    val useStaticKey: Boolean?
+    val useStaticKey: Boolean?,
+    val deviceKey: String?
 ) {
     fun compareAgainstLocalKeys(hashMap: HashMap<String, String>): Boolean {
         if (publicKeys.isNullOrEmpty()) {

@@ -35,6 +35,7 @@ import com.strikeprotocols.mobile.presentation.approvals.ApprovalsListScreen
 import com.strikeprotocols.mobile.presentation.approvals.ApprovalsViewModel
 import com.strikeprotocols.mobile.presentation.components.OnLifecycleEvent
 import com.strikeprotocols.mobile.presentation.contact_strike.ContactStrikeScreen
+import com.strikeprotocols.mobile.presentation.device_registration.DeviceRegistrationScreen
 import com.strikeprotocols.mobile.presentation.entrance.EntranceScreen
 import com.strikeprotocols.mobile.presentation.key_management.KeyManagementInitialData
 import com.strikeprotocols.mobile.presentation.key_management.KeyManagementScreen
@@ -174,7 +175,7 @@ class MainActivity : FragmentActivity() {
 
         NavHost(
             navController = navController,
-            startDestination = Screen.EntranceRoute.route,
+            startDestination = Screen.DeviceRegistrationRoute.route,
         ) {
             composable(
                 route = Screen.EntranceRoute.route
@@ -243,6 +244,11 @@ class MainActivity : FragmentActivity() {
                 route = Screen.ResetPasswordRoute.route
             ) {
                 ResetPasswordScreen(navController = navController)
+            }
+            composable(
+                route = Screen.DeviceRegistrationRoute.route
+            ) {
+                DeviceRegistrationScreen(navController = navController)
             }
         }
     }

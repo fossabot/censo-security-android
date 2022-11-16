@@ -2,7 +2,12 @@ package com.strikeprotocols.mobile.data
 
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
+import com.strikeprotocols.mobile.common.strikeLog
+import java.security.KeyPairGenerator
 import java.security.KeyStore
+import java.security.PrivateKey
+import java.security.Signature
+import java.security.spec.ECGenParameterSpec
 import javax.crypto.Cipher
 import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
@@ -33,6 +38,8 @@ interface CryptographyManager {
     fun decryptData(ciphertext: ByteArray, cipher: Cipher): ByteArray
 
     fun deleteInvalidatedKey(keyName: String)
+    fun signDataWithDeviceKey(data: ByteArray, keyName: String): ByteArray
+    fun getPublicKeyFromKeystore(deviceId: String) : ByteArray
 }
 
 data class EncryptedData(val ciphertext: ByteArray, val initializationVector: ByteArray)
@@ -82,6 +89,23 @@ class CryptographyManagerImpl : CryptographyManager {
         keyStore.deleteEntry(keyName)
     }
 
+    override fun signDataWithDeviceKey(data: ByteArray, keyName: String): ByteArray {
+        val privateKey = getOrCreateDeviceKey(keyName)
+        val signature = Signature.getInstance("SHA256withECDSA")
+        signature.initSign(privateKey)
+        signature.update(data)
+        return signature.sign()
+    }
+
+    override fun getPublicKeyFromKeystore(deviceId: String): ByteArray {
+        getOrCreateDeviceKey(deviceId)
+        val keyStore = KeyStore.getInstance("AndroidKeyStore")
+        keyStore.load(null) // Keystore must be loaded before it can be accessed
+        val cert = keyStore.getCertificate(deviceId)
+        val publicKey = cert.publicKey
+        return publicKey.encoded
+    }
+
     private fun getOrCreateSecretKey(keyName: String): SecretKey {
         // If Secretkey was previously created for that keyName, then grab and return it.
         val keyStore = KeyStore.getInstance(ANDROID_KEYSTORE)
@@ -108,6 +132,45 @@ class CryptographyManagerImpl : CryptographyManager {
         )
         keyGenerator.init(keyGenParams)
         return keyGenerator.generateKey()
+    }
+
+    private fun getOrCreateDeviceKey(keyName: String): PrivateKey {
+        // If PrivateKey was previously created for that keyName, then grab and return it.
+        val keyStore = KeyStore.getInstance("AndroidKeyStore")
+        keyStore.load(null) // Keystore must be loaded before it can be accessed
+        val key = keyStore.getKey(keyName, null)
+
+        if (key != null) {
+            val cert = keyStore.getCertificate(keyName)
+            val publicKey = cert.publicKey
+            strikeLog(message = "Public key: $publicKey")
+            return key as PrivateKey
+        }
+
+        val kpg: KeyPairGenerator = KeyPairGenerator.getInstance(
+            KeyProperties.KEY_ALGORITHM_EC,
+            "AndroidKeyStore"
+        )
+
+        val paramBuilder = KeyGenParameterSpec.Builder(
+            keyName,
+            KeyProperties.PURPOSE_SIGN or KeyProperties.PURPOSE_VERIFY
+        )
+
+        val parameterSpec = paramBuilder
+            .setAlgorithmParameterSpec(ECGenParameterSpec("secp256r1"))
+            .setDigests(
+                KeyProperties.DIGEST_SHA256,
+                KeyProperties.DIGEST_SHA384,
+                KeyProperties.DIGEST_SHA512
+            )
+            .build()
+
+        kpg.initialize(parameterSpec)
+
+        val keyPair = kpg.generateKeyPair()
+
+        return keyPair.private
     }
 
 }

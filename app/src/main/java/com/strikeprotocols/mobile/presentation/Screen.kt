@@ -18,6 +18,7 @@ sealed class Screen(val route: String) {
         const val MIGRATION_ARG = "migration_arg"
     }
     object RegenerationRoute : Screen("regeneration_screen")
+    object DeviceRegistrationRoute : Screen("device_registration")
 
     fun buildScreenDeepLinkUri() = "$STRIKE_PROTOCOLS_URI${this.route}"
 
