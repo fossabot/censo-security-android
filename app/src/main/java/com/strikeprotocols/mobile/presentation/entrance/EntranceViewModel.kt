@@ -25,6 +25,7 @@ import java.security.KeyPair
 import java.security.KeyPairGenerator
 import java.security.KeyStore
 import java.security.PrivateKey
+import java.security.spec.ECGenParameterSpec
 import java.util.UUID
 import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
@@ -50,7 +51,7 @@ class EntranceViewModel @Inject constructor(
 
     private fun checkIfHardwareBackedStorage() {
         try {
-            val secretKey = getOrCreateSecretKey("Checkergiino")
+            val secretKey = getOrCreateSecretKey("Baloncestoo")
             strikeLog(message = "Key is: $secretKey")
 //            val factory = SecretKeyFactory.getInstance(secretKey.algorithm, "AndroidKeyStore")
 //            val keyInfo: KeyInfo = factory.getKeySpec(secretKey, KeyInfo::class.java) as KeyInfo
@@ -91,11 +92,13 @@ class EntranceViewModel @Inject constructor(
             KeyProperties.KEY_ALGORITHM_EC,
             "AndroidKeyStore"
         )
+
         val parameterSpec: KeyGenParameterSpec = KeyGenParameterSpec.Builder(
             keyName,
             KeyProperties.PURPOSE_SIGN or KeyProperties.PURPOSE_VERIFY
         ).run {
-            setDigests(KeyProperties.DIGEST_SHA256, KeyProperties.DIGEST_SHA512)
+            setAlgorithmParameterSpec(ECGenParameterSpec("secp256r1"))
+            setDigests(KeyProperties.DIGEST_SHA256, KeyProperties.DIGEST_SHA384, KeyProperties.DIGEST_SHA512)
             build()
         }
 
