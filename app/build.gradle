@@ -45,7 +45,7 @@ android {
         applicationId coreAppId
         minSdk 30
         targetSdk 33
-        versionCode 28
+        versionCode 29
 
         buildConfigField "int", "versionNameMajor", versionNameMajor
         buildConfigField "int", "versionNameMinor", versionNameMinor
@@ -211,12 +211,16 @@ dependencies {
     implementation "com.squareup.okhttp3:logging-interceptor:5.0.0-alpha.2"
 
     //Firebase BOM
-    implementation platform('com.google.firebase:firebase-bom:30.1.0')
+    implementation platform('com.google.firebase:firebase-bom:30.1.0') {
+        exclude module: "play-services-ads-identifier"
+        exclude module: "play-services-measurement"
+        exclude module: "play-services-measurement-sdk"
+        exclude module: "play-services-measurement-api"
+    }
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.6.4"
 
     //Push Notifications
     implementation 'com.google.firebase:firebase-messaging-ktx'
-    implementation 'com.google.firebase:firebase-analytics-ktx'
 
     //Encrypted Preferences
     implementation 'androidx.security:security-crypto-ktx:1.1.0-alpha04'
