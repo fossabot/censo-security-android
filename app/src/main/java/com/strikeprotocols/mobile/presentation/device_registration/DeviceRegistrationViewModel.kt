@@ -39,7 +39,7 @@ class DeviceRegistrationViewModel @Inject constructor(
 
     private suspend fun checkUserHasDeviceKey() {
         val userEmail = userRepository.retrieveUserEmail()
-        val deviceId = SharedPrefsHelper.getDeviceId(userEmail)
+        val deviceId = SharedPrefsHelper.retrieveDeviceId(userEmail)
 
         if (deviceId.isNotEmpty()) {
             checkUserInformationOnBackend(deviceId)

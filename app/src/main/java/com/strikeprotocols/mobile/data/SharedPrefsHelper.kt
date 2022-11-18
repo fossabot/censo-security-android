@@ -266,7 +266,9 @@ object SharedPrefsHelper {
         editor.apply()
     }
 
-    fun getDeviceId(
+    fun userHasDeviceIdSaved(email: String) = retrieveDeviceId(email).isNotEmpty()
+
+    fun retrieveDeviceId(
         email: String
     ): String {
         return sharedPrefs.getString("${email.lowercase().trim()}$DEVICE_ID", "")?.lowercase()?.trim() ?: ""

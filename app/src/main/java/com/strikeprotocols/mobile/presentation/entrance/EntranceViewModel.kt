@@ -71,12 +71,26 @@ class EntranceViewModel @Inject constructor(
 
         if (userLoggedIn) {
             strikeUserData.setEmail(userRepository.retrieveCachedUserEmail())
-            retrieveUserVerifyDetails()
+            checkIfUserHasDeviceRegistered()
         } else {
             //DESTINATION: Send user to login screen.
             state =
                 state.copy(
                     userDestinationResult = Resource.Success(UserDestination.LOGIN)
+                )
+        }
+    }
+
+
+    private suspend fun checkIfUserHasDeviceRegistered() {
+        val userEmail = userRepository.retrieveUserEmail()
+        if(SharedPrefsHelper.userHasDeviceIdSaved(userEmail)) {
+            //todo: check if user has correct device ID
+        } else {
+            //DESTINATION: Send user to device registration
+            state =
+                state.copy(
+                    userDestinationResult = Resource.Success(UserDestination.DEVICE_REGISTRATION)
                 )
         }
     }
