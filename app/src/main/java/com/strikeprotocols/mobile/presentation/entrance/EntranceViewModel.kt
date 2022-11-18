@@ -84,8 +84,25 @@ class EntranceViewModel @Inject constructor(
 
     private suspend fun checkIfUserHasDeviceRegistered() {
         val userEmail = userRepository.retrieveUserEmail()
-        if(SharedPrefsHelper.userHasDeviceIdSaved(userEmail)) {
+        if (SharedPrefsHelper.userHasDeviceIdSaved(userEmail)) {
             //todo: check if user has correct device ID
+            val verifyUser = retrieveUserVerifyDetails()
+
+            if (verifyUser != null) {
+                val userId = SharedPrefsHelper.retrieveDeviceId(userEmail)
+
+                val devicePublicKey = userRepository.retrieveUserDevicePublicKey()
+
+                if (userId == devicePublicKey) {
+                    determineUserDestination(verifyUser)
+                } else {
+                    //todo: HAVE WRONG PUBLIC DEVICE KEY. Ask team what should do here? I think we need some clean up.
+                    state = state.copy(
+                        userDestinationResult = Resource.Success(UserDestination.DEVICE_REGISTRATION)
+                    )
+                }
+
+            }
         } else {
             //DESTINATION: Send user to device registration
             state =
@@ -113,24 +130,27 @@ class EntranceViewModel @Inject constructor(
         }
     }
 
-    private suspend fun retrieveUserVerifyDetails() {
+    private suspend fun retrieveUserVerifyDetails(): VerifyUser? {
         val verifyUserDataResource = userRepository.verifyUser()
 
         if (verifyUserDataResource is Resource.Success) {
             val verifyUser = verifyUserDataResource.data
 
-            if (verifyUser != null) {
+            return if (verifyUser != null) {
                 strikeUserData.setStrikeUser(verifyUser = verifyUser)
                 state = state.copy(verifyUserResult = verifyUserDataResource)
-                determineUserDestination(verifyUser)
+                verifyUser
             } else {
                 handleVerifyUserError(verifyUserDataResource)
+                null
             }
 
         } else if (verifyUserDataResource is Resource.Error) {
             handleVerifyUserError(verifyUserDataResource)
+            return null
         }
 
+        return null
     }
 
     fun retryRetrieveVerifyUserDetails() {
