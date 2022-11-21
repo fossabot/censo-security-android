@@ -91,7 +91,7 @@ class EntranceViewModel @Inject constructor(
             if (verifyUser != null) {
                 val userId = SharedPrefsHelper.retrieveDeviceId(userEmail)
 
-                val devicePublicKey = userRepository.retrieveUserDevicePublicKey()
+                val devicePublicKey = userRepository.retrieveUserDevicePublicKey(userEmail)
 
                 if (userId == devicePublicKey) {
                     determineUserDestination(verifyUser)
