@@ -7,6 +7,7 @@ import android.graphics.Bitmap
 import android.provider.MediaStore
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.biometric.BiometricPrompt
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
@@ -26,9 +27,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
+import androidx.fragment.app.FragmentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.strikeprotocols.mobile.R
+import com.strikeprotocols.mobile.common.BioCryptoUtil
 import com.strikeprotocols.mobile.common.ImageCaptureError
 import com.strikeprotocols.mobile.common.Resource
 import com.strikeprotocols.mobile.presentation.device_registration.DeviceRegistrationViewModel.Companion.THUMBNAIL_DATA_KEY
@@ -43,7 +46,7 @@ fun DeviceRegistrationScreen(
 
     val state = viewModel.state
 
-    val context = LocalContext.current
+    val context = LocalContext.current as FragmentActivity
     val packageManager = context.packageManager
 
     val cameraResultLauncher = rememberLauncherForActivityResult(
@@ -91,6 +94,40 @@ fun DeviceRegistrationScreen(
                 cameraResultLauncher.launch(intent)
             }
             viewModel.resetTriggerImageCapture()
+        }
+
+        if (state.triggerBioPrompt is Resource.Success) {
+            viewModel.resetPromptTrigger()
+
+            state.triggerBioPrompt.data?.let {
+                val promptInfo = BioCryptoUtil.createPromptInfo(context = context)
+
+                val bioPrompt = BioCryptoUtil.createBioPrompt(
+                    fragmentActivity = context,
+                    onSuccess = {
+                        if (it != null) {
+                            viewModel.biometryApproved(it)
+                        } else {
+                            BioCryptoUtil.handleBioPromptOnFail(
+                                context = context,
+                                errorCode = BioCryptoUtil.NO_CIPHER_CODE
+                            ) {
+                                viewModel.biometryFailed()
+                            }
+                        }
+                    },
+                    onFail = {
+                        BioCryptoUtil.handleBioPromptOnFail(context = context, errorCode = it) {
+                            viewModel.biometryFailed()
+                        }
+                    }
+                )
+
+                bioPrompt.authenticate(
+                    promptInfo,
+                    state.triggerBioPrompt.data
+                )
+            }
         }
     }
 

@@ -1,5 +1,6 @@
 package com.strikeprotocols.mobile.data.models
 
+import android.hardware.biometrics.BiometricPrompt.CryptoObject
 import android.security.keystore.KeyPermanentlyInvalidatedException
 import com.strikeprotocols.mobile.common.BaseWrapper
 import com.strikeprotocols.mobile.data.*
@@ -14,6 +15,7 @@ interface CipherRepository {
     suspend fun getCipherForBackgroundDecryption(): Cipher?
     suspend fun getCipherForV2KeysDecryption(): Cipher?
     suspend fun getCipherForV3RootSeedDecryption(): Cipher?
+    suspend fun getCipherForDeviceSigning(keyName: String): Cipher?
 }
 
 class CipherRepositoryImpl(
@@ -68,6 +70,10 @@ class CipherRepositoryImpl(
         } catch (e: Exception) {
             handleCipherException(e, ROOT_SEED_KEY_NAME)
         }
+    }
+
+    override suspend fun getCipherForDeviceSigning(keyName: String): Cipher {
+        return encryptionManager.getInitializedCipherForDeviceSigning(keyName)
     }
 
     private suspend fun handleCipherException(e: Exception, keyName: String): Cipher? {

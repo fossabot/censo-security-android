@@ -114,6 +114,7 @@ interface EncryptionManager {
     fun deleteBiometryKeyFromKeystore(keyName: String)
 
     fun getInitializedCipherForEncryption(keyName: String): Cipher
+    fun getInitializedCipherForDeviceSigning(keyName: String) : Cipher
     fun getInitializedCipherForDecryption(keyName: String, initVector: ByteArray): Cipher
     fun haveSentinelDataStored(email: String): Boolean
     fun saveSentinelData(email: String, cipher: Cipher)
@@ -492,6 +493,10 @@ class EncryptionManagerImpl @Inject constructor(
 
     override fun getInitializedCipherForEncryption(keyName: String): Cipher {
         return cryptographyManager.getInitializedCipherForEncryption(keyName)
+    }
+
+    override fun getInitializedCipherForDeviceSigning(keyName: String): Cipher {
+        return cryptographyManager.getInitializedCipherForSigning(keyName)
     }
 
     override fun getInitializedCipherForDecryption(keyName: String, initVector: ByteArray): Cipher {

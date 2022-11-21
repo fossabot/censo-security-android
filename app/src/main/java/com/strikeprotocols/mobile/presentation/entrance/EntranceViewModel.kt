@@ -89,11 +89,10 @@ class EntranceViewModel @Inject constructor(
             val verifyUser = retrieveUserVerifyDetails()
 
             if (verifyUser != null) {
-                val userId = SharedPrefsHelper.retrieveDeviceId(userEmail)
+                val deviceId = userRepository.retrieveUserDevicePublicKey(userEmail)
+                val backendPublicKey = verifyUser.deviceKey
 
-                val devicePublicKey = userRepository.retrieveUserDevicePublicKey(userEmail)
-
-                if (userId == devicePublicKey) {
+                if (deviceId == backendPublicKey) {
                     determineUserDestination(verifyUser)
                 } else {
                     //todo: HAVE WRONG PUBLIC DEVICE KEY. Ask team what should do here? I think we need some clean up.
