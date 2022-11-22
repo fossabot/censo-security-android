@@ -16,6 +16,7 @@ import com.strikeprotocols.mobile.data.models.CipherRepository
 import com.strikeprotocols.mobile.data.models.UserImage
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
+import java.security.Signature
 import java.util.UUID
 import javax.crypto.Cipher
 import javax.inject.Inject
@@ -59,7 +60,7 @@ class DeviceRegistrationViewModel @Inject constructor(
         )
     }
 
-    fun biometryApproved(cryptoObject: androidx.biometric.BiometricPrompt.CryptoObject) {
+    fun biometryApproved(cryptoObject: BiometricPrompt.CryptoObject) {
         strikeLog(message = "Biometry approved: ${cryptoObject}")
     }
 
@@ -67,9 +68,9 @@ class DeviceRegistrationViewModel @Inject constructor(
 
     }
 
-    private fun triggerBioPrompt(cipher: Cipher) {
+    private fun triggerBioPrompt(signature: Signature) {
         state =
-            state.copy(triggerBioPrompt = Resource.Success(BiometricPrompt.CryptoObject(cipher)))
+            state.copy(triggerBioPrompt = Resource.Success(signature))
     }
 
 
@@ -88,9 +89,9 @@ class DeviceRegistrationViewModel @Inject constructor(
                 strikeLog(message = "Was able to create key: $devicePublicKey")
 
                 //need to go get cipher authenticated
-                val cipher = cipherRepository.getCipherForDeviceSigning(keyId)
-                if (cipher != null) {
-                    triggerBioPrompt(cipher)
+                val signature = cipherRepository.getSignatureForDeviceSigning(keyId)
+                if (signature != null) {
+                    triggerBioPrompt(signature)
                 }
 
             } catch (e: Exception) {

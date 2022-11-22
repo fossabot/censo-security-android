@@ -19,6 +19,7 @@ import com.strikeprotocols.mobile.data.models.SupplyDappInstruction
 import com.strikeprotocols.mobile.data.models.approval.InitiationRequest
 import java.nio.charset.Charset
 import java.security.SecureRandom
+import java.security.Signature
 import javax.crypto.Cipher
 import javax.inject.Inject
 
@@ -114,7 +115,7 @@ interface EncryptionManager {
     fun deleteBiometryKeyFromKeystore(keyName: String)
 
     fun getInitializedCipherForEncryption(keyName: String): Cipher
-    fun getInitializedCipherForDeviceSigning(keyName: String) : Cipher
+    fun getSignatureForDeviceSigning(keyName: String) : Signature
     fun getInitializedCipherForDecryption(keyName: String, initVector: ByteArray): Cipher
     fun haveSentinelDataStored(email: String): Boolean
     fun saveSentinelData(email: String, cipher: Cipher)
@@ -495,8 +496,8 @@ class EncryptionManagerImpl @Inject constructor(
         return cryptographyManager.getInitializedCipherForEncryption(keyName)
     }
 
-    override fun getInitializedCipherForDeviceSigning(keyName: String): Cipher {
-        return cryptographyManager.getInitializedCipherForSigning(keyName)
+    override fun getSignatureForDeviceSigning(keyName: String): Signature {
+        return cryptographyManager.getSignatureForDeviceSigning(keyName)
     }
 
     override fun getInitializedCipherForDecryption(keyName: String, initVector: ByteArray): Cipher {

@@ -3,6 +3,7 @@ package com.strikeprotocols.mobile.data
 import android.hardware.biometrics.BiometricPrompt.CryptoObject
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
+import android.security.keystore.KeyProperties.KEY_ALGORITHM_EC
 import com.strikeprotocols.mobile.common.strikeLog
 import java.security.KeyPairGenerator
 import java.security.KeyStore
@@ -22,7 +23,7 @@ interface CryptographyManager {
      */
     fun getInitializedCipherForEncryption(keyName: String): Cipher
 
-    fun getInitializedCipherForSigning(keyName: String) : Cipher
+    fun getSignatureForDeviceSigning(keyName: String) : Signature
 
     /**
      * This method first gets or generates an instance of SecretKey and then initializes the Cipher
@@ -63,12 +64,11 @@ class CryptographyManagerImpl : CryptographyManager {
         return cipher
     }
 
-    override fun getInitializedCipherForSigning(keyName: String) : Cipher {
-        val cipher = getCipher()
-        //todo think we need to connect this
-//        val secretKey = getDeviceKey(keyName)
-//        cipher.init(Cipher.PRIVATE_KEY, secretKey)
-        return cipher
+    override fun getSignatureForDeviceSigning(keyName: String): Signature {
+        val signature = Signature.getInstance("SHA256withECDSA")
+        val deviceKey = getDeviceKey(keyName)
+        signature.initSign(deviceKey)
+        return signature
     }
 
     override fun getInitializedCipherForDecryption(
@@ -102,9 +102,9 @@ class CryptographyManagerImpl : CryptographyManager {
     }
 
     override fun signDataWithDeviceKey(data: ByteArray, keyName: String, cryptoObject: CryptoObject): ByteArray {
-        val privateKey = getDeviceKey(keyName)
+        //val privateKey = getDeviceKey(keyName)
         val signature = cryptoObject.signature
-        signature.initSign(privateKey)
+        //signature.initSign(privateKey)
         signature.update(data)
         return signature.sign()
     }

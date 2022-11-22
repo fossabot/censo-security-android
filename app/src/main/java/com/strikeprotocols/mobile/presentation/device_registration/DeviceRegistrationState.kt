@@ -4,6 +4,7 @@ import android.graphics.Bitmap
 import androidx.biometric.BiometricPrompt
 import com.strikeprotocols.mobile.common.ImageCaptureError
 import com.strikeprotocols.mobile.common.Resource
+import java.security.Signature
 
 data class DeviceRegistrationState(
     val addUserDevice: Resource<Boolean> = Resource.Uninitialized,
@@ -11,5 +12,5 @@ data class DeviceRegistrationState(
     val triggerImageCapture: Resource<Unit> = Resource.Uninitialized,
     val capturedUserPhoto: Bitmap? = null,
     val imageCaptureFailedError: Resource<ImageCaptureError> = Resource.Uninitialized,
-    val triggerBioPrompt: Resource<BiometricPrompt.CryptoObject> = Resource.Uninitialized,
+    val triggerBioPrompt: Resource<Signature> = Resource.Uninitialized,
 )

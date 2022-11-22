@@ -8,6 +8,7 @@ import com.strikeprotocols.mobile.data.EncryptionManagerImpl.Companion.BIO_KEY_N
 import com.strikeprotocols.mobile.data.EncryptionManagerImpl.Companion.ROOT_SEED_KEY_NAME
 import com.strikeprotocols.mobile.data.EncryptionManagerImpl.Companion.SENTINEL_KEY_NAME
 import java.security.InvalidAlgorithmParameterException
+import java.security.Signature
 import javax.crypto.Cipher
 
 interface CipherRepository {
@@ -15,7 +16,7 @@ interface CipherRepository {
     suspend fun getCipherForBackgroundDecryption(): Cipher?
     suspend fun getCipherForV2KeysDecryption(): Cipher?
     suspend fun getCipherForV3RootSeedDecryption(): Cipher?
-    suspend fun getCipherForDeviceSigning(keyName: String): Cipher?
+    suspend fun getSignatureForDeviceSigning(keyName: String): Signature?
 }
 
 class CipherRepositoryImpl(
@@ -72,8 +73,8 @@ class CipherRepositoryImpl(
         }
     }
 
-    override suspend fun getCipherForDeviceSigning(keyName: String): Cipher {
-        return encryptionManager.getInitializedCipherForDeviceSigning(keyName)
+    override suspend fun getSignatureForDeviceSigning(keyName: String): Signature {
+        return encryptionManager.getSignatureForDeviceSigning(keyName)
     }
 
     private suspend fun handleCipherException(e: Exception, keyName: String): Cipher? {

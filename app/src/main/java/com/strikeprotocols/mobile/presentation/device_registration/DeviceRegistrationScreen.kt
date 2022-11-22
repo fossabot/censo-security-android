@@ -8,6 +8,7 @@ import android.provider.MediaStore
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.biometric.BiometricPrompt
+import androidx.biometric.BiometricPrompt.CryptoObject
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
@@ -125,7 +126,7 @@ fun DeviceRegistrationScreen(
 
                 bioPrompt.authenticate(
                     promptInfo,
-                    state.triggerBioPrompt.data
+                    CryptoObject(state.triggerBioPrompt.data)
                 )
             }
         }
