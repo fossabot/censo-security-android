@@ -5,9 +5,12 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import com.strikeprotocols.mobile.R
 import com.strikeprotocols.mobile.data.models.approval.ApprovalRequestDetails
+import com.strikeprotocols.mobile.presentation.approval_detail.approval_type_detail_items.WithdrawalRequestDetailParameterProvider
 
 @Composable
 fun WithdrawalRequestRowContent(withdrawalRequest: ApprovalRequestDetails.WithdrawalRequest) {
@@ -29,4 +32,10 @@ fun WithdrawalRequestRowContent(withdrawalRequest: ApprovalRequestDetails.Withdr
         toText = toAccount
     )
     Spacer(modifier = Modifier.height(20.dp))
+}
+
+@Preview
+@Composable
+fun WithdrawalRequestRowContentPreview(@PreviewParameter(WithdrawalRequestDetailParameterProvider::class) request: ApprovalRequestDetails.WithdrawalRequest) {
+    WithdrawalRequestRowContent(request)
 }

@@ -96,6 +96,7 @@
     <string name="withdrawal_request_approval_header">Send %1$s %2$s</string>
     <string name="bump_fee_request_approval_header">Bump Fee</string>
     <string name="bump_fee_request_approval_subtitle">for sending %1$s %2$s</string>
+    <string name="bump_fee_request_approval_details_subtitle">for sending</string>
     <string name="wrap_conversion_request_approval_header">Swap %1$s %2$s</string>
 
     <string name="whitelisted_addresses_title">Whitelisted Addresses</string>
