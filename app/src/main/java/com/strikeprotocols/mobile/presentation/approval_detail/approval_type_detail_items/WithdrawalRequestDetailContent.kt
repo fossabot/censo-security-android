@@ -22,18 +22,23 @@ import com.strikeprotocols.mobile.presentation.components.FactsData
 fun WithdrawalRequestDetailContent(
     withdrawalRequest: ApprovalRequestDetails.WithdrawalRequest
 ) {
+    val symbolAndAmountInfo = withdrawalRequest.symbolAndAmountInfo
+
     val header = withdrawalRequest.getHeader(LocalContext.current)
-    val usdEquivalent = withdrawalRequest.symbolAndAmountInfo.getUSDEquivalentText(
-        context = LocalContext.current,
-        hideSymbol = true
-    )
+    val subtitle = if (withdrawalRequest.symbolAndAmountInfo.replacementFee == null) {
+        withdrawalRequest.symbolAndAmountInfo.getUSDEquivalentText(
+            context = LocalContext.current,
+            hideSymbol = true
+        )
+    } else {
+        stringResource(R.string.bump_fee_request_approval_details_subtitle)
+    }
     val fromAccount = withdrawalRequest.account.name
     val toAccount = withdrawalRequest.destination.name
     val address = withdrawalRequest.destination.address
-    val symbolAndAmountInfo = withdrawalRequest.symbolAndAmountInfo
 
     ApprovalContentHeader(header = header, topSpacing = 24, bottomSpacing = 8)
-    ApprovalSubtitle(text = usdEquivalent)
+    ApprovalSubtitle(text = subtitle)
     Spacer(modifier = Modifier.height(24.dp))
 
     val facts = listOfNotNull(
@@ -106,6 +111,37 @@ class WithdrawalRequestDetailParameterProvider : PreviewParameterProvider<Approv
                         symbolInfo = SymbolInfo(symbol = "BTC", symbolDescription = "Bitcoin", tokenMintAddress = ""),
                         amount = "0.001",
                         usdEquivalent = "20.00"
+                    )
+                ),
+                destination = DestinationAddress(
+                    name = "Wallet 2",
+                    subName = null,
+                    address = "bc1qar0srrr7xfkvy5l643lydnw9re59gtzzwf5mdq",
+                    tag = null
+                ),
+                signingData = SigningData.BitcoinSigningData(0, BitcoinTransaction(0, emptyList(), emptyList(), 123L))
+            ),
+            ApprovalRequestDetails.WithdrawalRequest(
+                type = ApprovalType.WITHDRAWAL_TYPE.value,
+                account = AccountInfo(
+                    name = "Wallet 1",
+                    identifier = "5fb4556a-6de5-4a80-ac0e-6def9826384f",
+                    accountType = AccountType.BalanceAccount,
+                    address = "1BvBMSEYstWetqTFn5Au4m4GFg7xJaNVN2"
+                ),
+                symbolAndAmountInfo = SymbolAndAmountInfo(
+                    symbolInfo = SymbolInfo(symbol = "BTC", symbolDescription = "Bitcoin", tokenMintAddress = ""),
+                    amount = "1.000000",
+                    usdEquivalent = "20000.00",
+                    fee = Fee(
+                        symbolInfo = SymbolInfo(symbol = "BTC", symbolDescription = "Bitcoin", tokenMintAddress = ""),
+                        amount = "0.001",
+                        usdEquivalent = "20.00"
+                    ),
+                    replacementFee = Fee(
+                        symbolInfo = SymbolInfo(symbol = "BTC", symbolDescription = "Bitcoin", tokenMintAddress = ""),
+                        amount = "0.002",
+                        usdEquivalent = "40.00"
                     )
                 ),
                 destination = DestinationAddress(
