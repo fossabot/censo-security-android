@@ -6,18 +6,25 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import com.strikeprotocols.mobile.R
 import com.strikeprotocols.mobile.data.models.approval.ApprovalRequestDetails
 
 @Composable
 fun WithdrawalRequestRowContent(withdrawalRequest: ApprovalRequestDetails.WithdrawalRequest) {
+    val symbolAndAmountInfo = withdrawalRequest.symbolAndAmountInfo
+
     val header = withdrawalRequest.getHeader(LocalContext.current)
-    val usdEquivalent = withdrawalRequest.symbolAndAmountInfo.getUSDEquivalentText(context = LocalContext.current, hideSymbol = true)
+    val subtitle = if (symbolAndAmountInfo.replacementFee == null) {
+        symbolAndAmountInfo.getUSDEquivalentText(context = LocalContext.current, hideSymbol = true)
+    } else {
+        LocalContext.current.getString(R.string.bump_fee_request_approval_subtitle, symbolAndAmountInfo.amount, symbolAndAmountInfo.symbolInfo.symbol)
+    }
     val fromAccount = withdrawalRequest.account.name
     val toAccount = withdrawalRequest.destination.name
 
     TransferConversionContent(
         header = header,
-        usdEquivalent = usdEquivalent,
+        subtitle = subtitle,
         fromText = fromAccount,
         toText = toAccount
     )
