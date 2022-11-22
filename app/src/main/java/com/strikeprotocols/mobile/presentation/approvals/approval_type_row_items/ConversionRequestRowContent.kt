@@ -17,7 +17,7 @@ fun ConversionRequestRowContent(conversionRequest: ApprovalRequestDetails.Conver
 
     TransferConversionContent(
         header = header,
-        usdEquivalent = usdEquivalent,
+        subtitle = usdEquivalent,
         fromText = fromAccount,
         toText = toAccount
     )

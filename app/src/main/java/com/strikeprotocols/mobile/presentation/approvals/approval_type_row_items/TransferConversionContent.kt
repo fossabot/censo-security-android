@@ -19,12 +19,12 @@ import com.strikeprotocols.mobile.ui.theme.SubtitleGrey
 @Composable
 fun TransferConversionContent(
     header: String,
-    usdEquivalent: String,
+    subtitle: String,
     fromText: String,
     toText: String
 ) {
     ApprovalContentHeader(header = header, topSpacing = 16, bottomSpacing = 8)
-    ApprovalSubtitle(text = usdEquivalent)
+    ApprovalSubtitle(text = subtitle)
     Spacer(modifier = Modifier.height(32.dp))
     StrikeTagRow(
         text1 = fromText,

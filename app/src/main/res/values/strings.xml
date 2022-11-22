@@ -94,6 +94,8 @@
 
     <string name="conversion_request_approval_header">Convert %1$s %2$s</string>
     <string name="withdrawal_request_approval_header">Send %1$s %2$s</string>
+    <string name="bump_fee_request_approval_header">Bump Fee</string>
+    <string name="bump_fee_request_approval_subtitle">for sending %1$s %2$s</string>
     <string name="wrap_conversion_request_approval_header">Swap %1$s %2$s</string>
 
     <string name="whitelisted_addresses_title">Whitelisted Addresses</string>
@@ -123,6 +125,10 @@
     <string name="destination_address">Destination Address</string>
     <string name="swap_for">Swap for</string>
     <string name="nft_name">NFT Name</string>
+    <string name="amount">Amount</string>
+    <string name="fee">Fee</string>
+    <string name="original_fee">Original Fee</string>
+    <string name="new_fee">New Fee</string>
 
     <string name="hours">Hours</string>
     <string name="minutes">Minutes</string>

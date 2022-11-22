@@ -653,7 +653,9 @@ enum class AccountType(val value: String) {
 data class SymbolAndAmountInfo(
     val symbolInfo: SymbolInfo,
     val amount: String,
-    val usdEquivalent: String?
+    val usdEquivalent: String?,
+    val fee: Fee? = null,
+    val replacementFee: Fee? = null,
 ) {
 
     fun fundamentalAmount(): Long {
@@ -669,20 +671,10 @@ data class SymbolAndAmountInfo(
         }
     }
 
-    fun formattedAmount(): String {
-        val split = amount.split(".").toMutableList()
+    fun formattedAmount(): String = formattedAmount(amount)
 
-        val wholePart =
-            if (split.isNotEmpty() && split.size > 1) {
-                split.removeAt(0)
-            } else {
-                amount
-            }
-
-        val wholePartString = formatSeparator(wholePart.toInt())
-        split.add(0, wholePartString)
-        return split.joinToString(separator = ".")
-    }
+    fun formattedAmountWithSymbol(): String =
+        "${formattedAmount(amount)} ${symbolInfo.symbol}"
 
     fun formattedUSDEquivalent(hideSymbol: Boolean = true): String {
         if (usdEquivalent == null) {
@@ -692,10 +684,6 @@ data class SymbolAndAmountInfo(
         val decimal = usdEquivalent.toBigDecimal()
         val usdEquivalent = usdFormatter(hideSymbol).format(decimal)
         return usdEquivalent
-    }
-
-    private fun formatSeparator(number: Int): String {
-        return String.format("%,d", number)
     }
 
     private fun usdFormatter(hideSymbol: Boolean = true): DecimalFormat {
@@ -721,6 +709,34 @@ data class SymbolAndAmountInfo(
             }
         }
     }
+}
+
+fun formattedAmount(amount: String): String {
+    fun formatSeparator(number: Int): String {
+        return String.format("%,d", number)
+    }
+
+    val split = amount.split(".").toMutableList()
+
+    val wholePart =
+        if (split.isNotEmpty() && split.size > 1) {
+            split.removeAt(0)
+        } else {
+            amount
+        }
+
+    val wholePartString = formatSeparator(wholePart.toInt())
+    split.add(0, wholePartString)
+    return split.joinToString(separator = ".")
+}
+
+data class Fee(
+    val symbolInfo: SymbolInfo,
+    val amount: String,
+    val usdEquivalent: String? = null,
+) {
+    fun formattedAmountWithSymbol(): String =
+        "${formattedAmount(amount)} ${symbolInfo.symbol}"
 }
 
 data class NftMetadata(

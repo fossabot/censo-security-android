@@ -68,7 +68,11 @@ fun ApprovalRequestDetails.getHeader(context: Context): String {
         is WalletConfigPolicyUpdate ->
             context.getString(R.string.wallet_config_policy_update_approval_header)
         is WithdrawalRequest ->
-            context.getString(R.string.withdrawal_request_approval_header, symbolAndAmountInfo.amount, symbolAndAmountInfo.symbolInfo.symbol)
+            if (this.symbolAndAmountInfo.replacementFee == null) {
+                context.getString(R.string.withdrawal_request_approval_header, symbolAndAmountInfo.amount, symbolAndAmountInfo.symbolInfo.symbol)
+            } else {
+                context.getString(R.string.bump_fee_request_approval_header)
+            }
         is WrapConversionRequest ->
             context.getString(R.string.wrap_conversion_request_approval_header, symbolAndAmountInfo.amount, symbolAndAmountInfo.symbolInfo.symbol)
         else ->
