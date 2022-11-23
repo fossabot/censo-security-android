@@ -435,6 +435,40 @@ class ApprovalRequestSigningTest {
     }
 
     @Test
+    fun generateSignatureForEthereumWithdrawalRequest() {
+        val withdrawalRequestWalletApproval =
+            deserializer.parseData(JsonParser.parseString(ethereumWithdrawalRequestJson.trim()))
+
+        val disposition = if (Random().nextBoolean()) ApprovalDisposition.APPROVE else ApprovalDisposition.DENY
+        val approvalDispositionRequest = ApprovalDispositionRequest(
+            requestId = withdrawalRequestWalletApproval.id!!,
+            approvalDisposition = disposition,
+            requestType = withdrawalRequestWalletApproval.getApprovalRequestType(),
+            nonces = listOf(),
+            email = userEmail
+        )
+
+        val signature = encryptionManager.signEthereumApprovalDispositionMessage(
+            signable = approvalDispositionRequest, rootSeed = BaseWrapper.encode(rootSeed), email = userEmail
+        )
+
+        val expectedSignature = SignedPayload(signature = "MEUCIQCbPW0U/8yFnpZDD+Eih3coS+2gRub7Hm5EuHg0FE0rmgIgG+2F3ejwK0dXcW7BbMuJjIR1oifno+KAL7laVTQZhVA=", payload = "E1tL58tbDMCAwys2EEenIMjtqWHB7tFS2PfY9wsri5A=")
+        assertEquals(expectedSignature, signature)
+
+        whenever(mockEncryptionManager.signEthereumApprovalDispositionMessage(
+            signable = approvalDispositionRequest, cipher = cipherMock, email = userEmail)).thenReturn(expectedSignature)
+        val apiBody = approvalDispositionRequest.convertToApiBody(mockEncryptionManager, cipherMock)
+        assertEquals(disposition, apiBody.approvalDisposition)
+        assertEquals(ApprovalSignature.EthereumSignature(expectedSignature.signature), apiBody.signatureInfo)
+
+        verify(mockEncryptionManager, times(1)).signEthereumApprovalDispositionMessage(
+            signable = approvalDispositionRequest,
+            cipher = cipherMock,
+            email = userEmail,
+        )
+    }
+
+    @Test
     fun generateSignatureForConversionRequest() {
         val conversionRequestWalletApproval =
             deserializer.parseData(JsonParser.parseString(conversionRequestJson.trim()))

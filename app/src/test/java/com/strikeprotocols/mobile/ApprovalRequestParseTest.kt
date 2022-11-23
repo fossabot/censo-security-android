@@ -200,6 +200,11 @@ class ParseApprovalRequestTypes {
         val bitcoinWithdrawalRequestWalletApproval = deserializer.parseData(bitcoinWithdrawalRequestJson)
         allApprovalRequests.add(bitcoinWithdrawalRequestWalletApproval)
 
+        val ethereumWithdrawalRequestJson: JsonElement =
+            JsonParser.parseString(ethereumWithdrawalRequestJson.trim())
+        val ethereumWithdrawalRequestWalletApproval = deserializer.parseData(ethereumWithdrawalRequestJson)
+        allApprovalRequests.add(ethereumWithdrawalRequestWalletApproval)
+
         val multiSigWithConversionRequestJson: JsonElement =
             JsonParser.parseString(multiSigWithConversionRequestJson.trim())
         val multiSigWithConversionRequestWalletApproval =

@@ -8,6 +8,8 @@ import com.google.gson.annotations.SerializedName
 import com.strikeprotocols.mobile.data.models.Chain
 import java.io.ByteArrayOutputStream
 import java.lang.reflect.Modifier
+import java.math.BigDecimal
+import java.math.BigInteger
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
 import java.text.NumberFormat
@@ -596,6 +598,10 @@ data class BitcoinTransaction(
     val totalFee: Long,
 )
 
+data class EthereumTransaction(
+    val chainId: Long,
+    val safeNonce: Long,
+)
 
 sealed class SigningData {
     data class SolanaSigningData(
@@ -643,6 +649,10 @@ sealed class SigningData {
         val childKeyIndex: Int,
         val transaction: BitcoinTransaction
     ) : SigningData()
+
+    data class EthereumSigningData(
+        val transaction: EthereumTransaction
+    ) : SigningData()
 }
 
 enum class AccountType(val value: String) {
@@ -669,6 +679,10 @@ data class SymbolAndAmountInfo(
             val calculatedAmount = amountAsBigDecimal * (10.toBigDecimal().pow(decimals))
             calculatedAmount.toLong()
         }
+    }
+
+    fun fundamentalAmountAsBigInteger(): BigInteger {
+        return BigInteger(amount.replace(".", ""), 10)
     }
 
     fun formattedAmount(): String = formattedAmount(amount)

@@ -1,6 +1,8 @@
 package com.strikeprotocols.mobile.data.models.approval
 
 import com.strikeprotocols.mobile.common.BaseWrapper.decodeFromBase64
+import com.strikeprotocols.mobile.common.EthereumTransactionUtil
+import com.strikeprotocols.mobile.common.Operation
 import com.strikeprotocols.mobile.data.EncryptionManager
 import com.strikeprotocols.mobile.data.Signable
 import com.strikeprotocols.mobile.data.SignedPayload
@@ -15,6 +17,7 @@ import kotlin.Exception
 import com.strikeprotocols.mobile.data.models.approval.ApprovalRequestDetails.Companion.INVALID_REQUEST_APPROVAL
 import com.strikeprotocols.mobile.data.models.approval.ApprovalRequestDetails.Companion.UNKNOWN_REQUEST_APPROVAL
 import com.strikeprotocols.mobile.data.models.approval.ApprovalRequestDetails.*
+import java.math.BigInteger
 import javax.crypto.Cipher
 
 data class ApprovalDispositionRequest(
@@ -282,10 +285,28 @@ data class ApprovalDispositionRequest(
                 when (requestType.signingData) {
                     is SigningData.SolanaSigningData -> listOf(serializeSolanaRequest(approverPublicKey))
                     is SigningData.BitcoinSigningData -> requestType.signingData.transaction.txIns.map { decodeFromBase64(it.base64HashForSignature) }
+                    is SigningData.EthereumSigningData -> listOf(ethereumWithdrawal(requestType, requestType.signingData.transaction))
                 }
             }
             else -> listOf(serializeSolanaRequest(approverPublicKey))
         }
+    }
+
+    private fun ethereumWithdrawal(withdrawalRequest: WithdrawalRequest, ethereumTransaction: EthereumTransaction): ByteArray {
+        return EthereumTransactionUtil.computeSafeTransactionHash(
+            ethereumTransaction.chainId,
+            withdrawalRequest.account.address!!,
+            withdrawalRequest.destination.address,
+            withdrawalRequest.symbolAndAmountInfo.fundamentalAmountAsBigInteger(),
+            ByteArray(0),
+            Operation.CALL,
+            BigInteger.ZERO,
+            BigInteger.ZERO,
+            BigInteger.ZERO,
+            "0x0000000000000000000000000000000000000000",
+            "0x0000000000000000000000000000000000000000",
+            ethereumTransaction.safeNonce.toBigInteger(),
+        )
     }
 
     fun serializeSolanaRequest(approverPublicKey: String?): ByteArray {
@@ -356,6 +377,10 @@ data class ApprovalDispositionRequest(
                     is SigningData.BitcoinSigningData ->
                         ApprovalSignature.BitcoinSignatures(
                             signatures = signRequestWithBitcoinKey(encryptionManager, cipher, requestType.signingData.childKeyIndex).map { it.signature }
+                        )
+                    is SigningData.EthereumSigningData ->
+                        ApprovalSignature.EthereumSignature(
+                            signature = signRequestWithEthereumKey(encryptionManager, cipher).signature,
                         )
                     is SigningData.SolanaSigningData ->
                         ApprovalSignature.SolanaSignature(
