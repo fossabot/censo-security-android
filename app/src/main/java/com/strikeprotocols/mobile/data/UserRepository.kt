@@ -28,6 +28,7 @@ interface UserRepository {
     suspend fun setKeyInvalidated()
     suspend fun setInvalidSentinelData()
     suspend fun retrieveUserDevicePublicKey(email: String) : String
+    suspend fun addUserDevice(userDevice: UserDevice) : Resource<UserDevice>
 }
 
 class UserRepositoryImpl(
@@ -144,4 +145,10 @@ class UserRepositoryImpl(
 
     override suspend fun retrieveUserDevicePublicKey(email: String) =
         SharedPrefsHelper.retrieveDeviceId(email)
+
+    override suspend fun addUserDevice(userDevice: UserDevice): Resource<UserDevice> {
+        return retrieveApiResource {
+            api.addUserDevice(userDevice)
+        }
+    }
 }

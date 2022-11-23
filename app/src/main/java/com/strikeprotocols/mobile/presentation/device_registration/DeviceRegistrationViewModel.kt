@@ -13,6 +13,8 @@ import com.strikeprotocols.mobile.data.KeyRepository
 import com.strikeprotocols.mobile.data.SharedPrefsHelper
 import com.strikeprotocols.mobile.data.UserRepository
 import com.strikeprotocols.mobile.data.models.CipherRepository
+import com.strikeprotocols.mobile.data.models.DeviceType
+import com.strikeprotocols.mobile.data.models.UserDevice
 import com.strikeprotocols.mobile.data.models.UserImage
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
@@ -20,6 +22,7 @@ import java.security.Signature
 import java.util.UUID
 import javax.crypto.Cipher
 import javax.inject.Inject
+import kotlin.math.sign
 
 
 @HiltViewModel
@@ -48,24 +51,42 @@ class DeviceRegistrationViewModel @Inject constructor(
         }
     }
 
-    suspend fun createUserImage(
-        capturedUserPhoto: Bitmap,
-        cipher: Cipher,
-        keyRepository: KeyRepository
-    ): UserImage {
-        return generateUserImageObject(
-            userPhoto = capturedUserPhoto,
-            cipher = cipher,
-            keyRepository = keyRepository
-        )
-    }
-
     fun biometryApproved(cryptoObject: BiometricPrompt.CryptoObject) {
-        strikeLog(message = "Biometry approved: ${cryptoObject}")
+        sendUserDeviceAndImageToBackend(cryptoObject.signature)
     }
 
     fun biometryFailed() {
 
+    }
+
+    fun sendUserDeviceAndImageToBackend(signature: Signature?) {
+        viewModelScope.launch {
+            val capturedUserPhoto = state.capturedUserPhoto
+            val keyName = state.keyName
+
+            if (signature != null && capturedUserPhoto != null && keyName.isNotEmpty()) {
+                val userImage = generateUserImageObject(
+                    userPhoto = capturedUserPhoto,
+                    signature = signature,
+                    keyName = keyName,
+                    cryptographyManager = cryptographyManager
+                )
+
+                //todo: make api call to send user image up
+
+                userRepository.addUserDevice(
+                    UserDevice(
+                        publicKey = state.publicKey,
+                        deviceType = DeviceType.ANDROID,
+                        userImage = userImage
+                    )
+                )
+
+
+            } else {
+                //todo: broken flow data got wiped
+            }
+        }
     }
 
     private fun triggerBioPrompt(signature: Signature) {
@@ -83,9 +104,11 @@ class DeviceRegistrationViewModel @Inject constructor(
             val email = userRepository.retrieveUserEmail()
             val keyId = UUID.randomUUID().toString()
             SharedPrefsHelper.saveDeviceId(email, deviceId = keyId)
+            state = state.copy(keyName = keyId)
             try {
                 val devicePublicKey =
                     cryptographyManager.createPublicDeviceKey(keyName = keyId)
+                state = state.copy(publicKey = BaseWrapper.encode(devicePublicKey))
                 strikeLog(message = "Was able to create key: $devicePublicKey")
 
                 //need to go get cipher authenticated

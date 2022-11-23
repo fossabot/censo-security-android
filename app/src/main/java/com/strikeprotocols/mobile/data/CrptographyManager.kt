@@ -1,10 +1,7 @@
 package com.strikeprotocols.mobile.data
 
-import android.hardware.biometrics.BiometricPrompt.CryptoObject
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
-import android.security.keystore.KeyProperties.KEY_ALGORITHM_EC
-import com.strikeprotocols.mobile.common.strikeLog
 import java.security.KeyPairGenerator
 import java.security.KeyStore
 import java.security.PrivateKey
@@ -42,7 +39,7 @@ interface CryptographyManager {
     fun decryptData(ciphertext: ByteArray, cipher: Cipher): ByteArray
 
     fun deleteInvalidatedKey(keyName: String)
-    fun signDataWithDeviceKey(data: ByteArray, keyName: String, cryptoObject: CryptoObject): ByteArray
+    fun signDataWithDeviceKey(data: ByteArray, keyName: String, signature: Signature): ByteArray
     fun createPublicDeviceKey(keyName: String): ByteArray
     //fun getPublicKeyFromKeystore(deviceId: String) : ByteArray
 }
@@ -101,10 +98,11 @@ class CryptographyManagerImpl : CryptographyManager {
         keyStore.deleteEntry(keyName)
     }
 
-    override fun signDataWithDeviceKey(data: ByteArray, keyName: String, cryptoObject: CryptoObject): ByteArray {
-        //val privateKey = getDeviceKey(keyName)
-        val signature = cryptoObject.signature
-        //signature.initSign(privateKey)
+    override fun signDataWithDeviceKey(
+        data: ByteArray,
+        keyName: String,
+        signature: Signature
+    ): ByteArray {
         signature.update(data)
         return signature.sign()
     }
