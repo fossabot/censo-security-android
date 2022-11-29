@@ -17,7 +17,9 @@ import kotlin.Exception
 import com.strikeprotocols.mobile.data.models.approval.ApprovalRequestDetails.Companion.INVALID_REQUEST_APPROVAL
 import com.strikeprotocols.mobile.data.models.approval.ApprovalRequestDetails.Companion.UNKNOWN_REQUEST_APPROVAL
 import com.strikeprotocols.mobile.data.models.approval.ApprovalRequestDetails.*
+import org.bouncycastle.util.encoders.Hex
 import java.math.BigInteger
+import java.nio.ByteBuffer
 import javax.crypto.Cipher
 
 data class ApprovalDispositionRequest(
@@ -292,21 +294,50 @@ data class ApprovalDispositionRequest(
         }
     }
 
+    private fun ByteBuffer.putPadded(data: ByteArray, padTo: Int = 32) {
+        require(data.size <= padTo)
+        this.put(ByteArray(padTo - data.size))
+        this.put(data)
+    }
+
+    private fun erc20WithdrawalTx(withdrawalRequest: WithdrawalRequest): ByteArray {
+        val data = ByteBuffer.allocate(4 + 32*2)
+        data.put(Hex.decode("a9059cbb"))
+        data.putPadded(Hex.decode(withdrawalRequest.destination.address.removePrefix("0x")))
+        data.putPadded(withdrawalRequest.symbolAndAmountInfo.fundamentalAmountAsBigInteger().toByteArray())
+        return data.array()
+    }
+
     private fun ethereumWithdrawal(withdrawalRequest: WithdrawalRequest, ethereumTransaction: EthereumTransaction): ByteArray {
-        return EthereumTransactionUtil.computeSafeTransactionHash(
-            ethereumTransaction.chainId,
-            withdrawalRequest.account.address!!,
-            withdrawalRequest.destination.address,
-            withdrawalRequest.symbolAndAmountInfo.fundamentalAmountAsBigInteger(),
-            ByteArray(0),
-            Operation.CALL,
-            BigInteger.ZERO,
-            BigInteger.ZERO,
-            BigInteger.ZERO,
-            "0x0000000000000000000000000000000000000000",
-            "0x0000000000000000000000000000000000000000",
-            ethereumTransaction.safeNonce.toBigInteger(),
-        )
+        return if (withdrawalRequest.symbolAndAmountInfo.symbolInfo.tokenMintAddress == "")
+            EthereumTransactionUtil.computeSafeTransactionHash(
+                ethereumTransaction.chainId,
+                withdrawalRequest.account.address!!,
+                withdrawalRequest.destination.address,
+                withdrawalRequest.symbolAndAmountInfo.fundamentalAmountAsBigInteger(),
+                ByteArray(0),
+                Operation.CALL,
+                BigInteger.ZERO,
+                BigInteger.ZERO,
+                BigInteger.ZERO,
+                "0x0000000000000000000000000000000000000000",
+                "0x0000000000000000000000000000000000000000",
+                ethereumTransaction.safeNonce.toBigInteger(),
+            ) else
+            EthereumTransactionUtil.computeSafeTransactionHash(
+                ethereumTransaction.chainId,
+                withdrawalRequest.account.address!!,
+                withdrawalRequest.symbolAndAmountInfo.symbolInfo.tokenMintAddress,
+                BigInteger.ZERO,
+                erc20WithdrawalTx(withdrawalRequest),
+                Operation.CALL,
+                BigInteger.ZERO,
+                BigInteger.ZERO,
+                BigInteger.ZERO,
+                "0x0000000000000000000000000000000000000000",
+                "0x0000000000000000000000000000000000000000",
+                ethereumTransaction.safeNonce.toBigInteger(),
+            )
     }
 
     fun serializeSolanaRequest(approverPublicKey: String?): ByteArray {

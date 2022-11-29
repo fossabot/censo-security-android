@@ -469,6 +469,40 @@ class ApprovalRequestSigningTest {
     }
 
     @Test
+    fun generateSignatureForERC20WithdrawalRequest() {
+        val withdrawalRequestWalletApproval =
+            deserializer.parseData(JsonParser.parseString(erc20WithdrawalRequestJson.trim()))
+
+        val disposition = if (Random().nextBoolean()) ApprovalDisposition.APPROVE else ApprovalDisposition.DENY
+        val approvalDispositionRequest = ApprovalDispositionRequest(
+            requestId = withdrawalRequestWalletApproval.id!!,
+            approvalDisposition = disposition,
+            requestType = withdrawalRequestWalletApproval.getApprovalRequestType(),
+            nonces = listOf(),
+            email = userEmail
+        )
+
+        val signature = encryptionManager.signEthereumApprovalDispositionMessage(
+            signable = approvalDispositionRequest, rootSeed = BaseWrapper.encode(rootSeed), email = userEmail
+        )
+
+        val expectedSignature = SignedPayload(signature = "MEQCIGO53XGqg+DK1/Dh6ICv1tl1zy7gq/+YZOyUBjPUBfrfAiAKn9nl6M3Ft2zUXawThrJ1GYqVZSS5NRJoj6OM8EqAGQ==", payload = "AwxeB6IRd/IFEOgZA9e6jY4rPzVFdFKVOPAfQEehnmk=")
+        assertEquals(expectedSignature, signature)
+
+        whenever(mockEncryptionManager.signEthereumApprovalDispositionMessage(
+            signable = approvalDispositionRequest, cipher = cipherMock, email = userEmail)).thenReturn(expectedSignature)
+        val apiBody = approvalDispositionRequest.convertToApiBody(mockEncryptionManager, cipherMock)
+        assertEquals(disposition, apiBody.approvalDisposition)
+        assertEquals(ApprovalSignature.EthereumSignature(expectedSignature.signature), apiBody.signatureInfo)
+
+        verify(mockEncryptionManager, times(1)).signEthereumApprovalDispositionMessage(
+            signable = approvalDispositionRequest,
+            cipher = cipherMock,
+            email = userEmail,
+        )
+    }
+
+    @Test
     fun generateSignatureForConversionRequest() {
         val conversionRequestWalletApproval =
             deserializer.parseData(JsonParser.parseString(conversionRequestJson.trim()))
