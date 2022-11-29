@@ -13,6 +13,7 @@ interface AuthProvider {
     suspend fun retrieveToken(): String
     suspend fun signOut()
     suspend fun retrieveUserEmail(): String
+    suspend fun retrieveDeviceId() : String
 
     //UserState Notifying Functionality
     fun setUserState(userState: UserState)
@@ -103,6 +104,11 @@ class StrikeAuth(
         synchronized(listeners) { listeners.clear() }
     }
 
+    override suspend fun retrieveDeviceId(): String {
+        val email = retrieveUserEmail()
+        return SharedPrefsHelper.retrieveDeviceId(email)
+    }
+
     @AnyThread
     override fun setUserState(userState: UserState) {
         synchronized(listeners) {
@@ -114,6 +120,7 @@ class StrikeAuth(
 }
 
 class TokenExpiredException : Exception("Token No Longer Valid")
+class MissingDeviceIdException : Exception("No Device Id Found For Email")
 
 interface UserStateListener {
     fun onUserStateChanged(userState: UserState)

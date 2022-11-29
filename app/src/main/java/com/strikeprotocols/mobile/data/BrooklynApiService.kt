@@ -2,8 +2,10 @@ package com.strikeprotocols.mobile.data
 
 import com.google.gson.*
 import com.strikeprotocols.mobile.BuildConfig
+import com.strikeprotocols.mobile.common.strikeLog
 import com.strikeprotocols.mobile.data.BaseRepository.Companion.UNAUTHORIZED
 import com.strikeprotocols.mobile.data.BrooklynApiService.Companion.AUTH
+import com.strikeprotocols.mobile.data.BrooklynApiService.Companion.X_STRIKE_ID
 import com.strikeprotocols.mobile.data.models.*
 import com.strikeprotocols.mobile.data.models.approval.*
 import kotlinx.coroutines.runBlocking
@@ -21,6 +23,8 @@ interface BrooklynApiService {
 
         const val AUTH = "Authorization"
         const val AUTH_REQUIRED = "$AUTH: "
+        const val X_STRIKE_ID = "X-Strike-Device-Identifier"
+        const val X_STRIKE_ID_REQUIRED = "$X_STRIKE_ID: "
 
         fun create(authProvider: AuthProvider): BrooklynApiService {
 
@@ -59,7 +63,7 @@ interface BrooklynApiService {
     suspend fun userDevices(): RetrofitResponse<List<UserDevice?>>
 
     @POST("v1/user-devices")
-    @Headers(AUTH_REQUIRED)
+    @Headers(AUTH_REQUIRED, X_STRIKE_ID_REQUIRED)
     suspend fun addUserDevice(@Body userDevice: UserDevice): RetrofitResponse<UserDevice>
 
     @GET("v1/wallet-signers")
@@ -108,6 +112,8 @@ class AuthInterceptor(private val authProvider: AuthProvider) : Interceptor {
 
         val authRequired = request.header(AUTH) != null
 
+        val xStrikeRequired = request.header(X_STRIKE_ID) != null
+
         if (authRequired) {
             try {
                 val token = runBlocking {
@@ -129,6 +135,26 @@ class AuthInterceptor(private val authProvider: AuthProvider) : Interceptor {
                 authProvider.setUserState(userState = UserState.REFRESH_TOKEN_EXPIRED)
             }
         }
+
+        if (xStrikeRequired) {
+            try {
+                val deviceId = runBlocking { authProvider.retrieveDeviceId() }
+
+                if (deviceId.isEmpty()) {
+                    throw MissingDeviceIdException()
+                }
+
+                request = request.newBuilder()
+                    .removeHeader(X_STRIKE_ID)
+                    .addHeader(X_STRIKE_ID, deviceId)
+                    .build()
+            } catch (e: MissingDeviceIdException) {
+                runBlocking { authProvider.signOut() }
+                authProvider.setUserState(userState = UserState.REFRESH_TOKEN_EXPIRED)
+            }
+
+        }
+
         val response = chain.proceed(request)
 
         if (authRequired && response.code == UNAUTHORIZED) {

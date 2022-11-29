@@ -72,8 +72,6 @@ class DeviceRegistrationViewModel @Inject constructor(
                     cryptographyManager = cryptographyManager
                 )
 
-                //todo: make api call to send user image up
-
                 userRepository.addUserDevice(
                     UserDevice(
                         publicKey = state.publicKey,

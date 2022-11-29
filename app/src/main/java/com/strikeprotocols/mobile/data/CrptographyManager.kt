@@ -62,6 +62,7 @@ class CryptographyManagerImpl : CryptographyManager {
     }
 
     override fun getSignatureForDeviceSigning(keyName: String): Signature {
+        //todo: is this the right signature for signing?
         val signature = Signature.getInstance("SHA256withECDSA")
         val deviceKey = getDeviceKey(keyName)
         signature.initSign(deviceKey)
@@ -121,9 +122,7 @@ class CryptographyManagerImpl : CryptographyManager {
         val parameterSpec = paramBuilder
             .setAlgorithmParameterSpec(ECGenParameterSpec("secp256r1"))
             .setDigests(
-                KeyProperties.DIGEST_SHA256,
-                KeyProperties.DIGEST_SHA384,
-                KeyProperties.DIGEST_SHA512
+                KeyProperties.DIGEST_SHA256
             )
             .setUserAuthenticationRequired(true)
             .build()
