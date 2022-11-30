@@ -3,11 +3,8 @@ package com.strikeprotocols.mobile.data
 import android.annotation.SuppressLint
 import android.content.Context
 import android.provider.Settings
-import com.google.firebase.messaging.FirebaseMessaging
 import com.strikeprotocols.mobile.common.*
 import com.strikeprotocols.mobile.data.models.*
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.tasks.await
 import okhttp3.ResponseBody
 
 interface UserRepository {
@@ -27,8 +24,9 @@ interface UserRepository {
     suspend fun checkMinimumVersion(): Resource<SemanticVersionResponse>
     suspend fun setKeyInvalidated()
     suspend fun setInvalidSentinelData()
-    suspend fun retrieveUserDevicePublicKey(email: String) : String
+    suspend fun retrieveUserDeviceId(email: String) : String
     suspend fun addUserDevice(userDevice: UserDevice) : Resource<UserDevice>
+    suspend fun retrieveUserDevicePublicKey(email: String) : String
 }
 
 class UserRepositoryImpl(
@@ -143,8 +141,12 @@ class UserRepositoryImpl(
         authProvider.setUserState(userState = UserState.INVALID_SENTINEL_DATA)
     }
 
-    override suspend fun retrieveUserDevicePublicKey(email: String) =
+    override suspend fun retrieveUserDeviceId(email: String) =
         SharedPrefsHelper.retrieveDeviceId(email)
+
+    override suspend fun retrieveUserDevicePublicKey(email: String): String {
+        return SharedPrefsHelper.retrieveDevicePublicKey(email)
+    }
 
     override suspend fun addUserDevice(userDevice: UserDevice): Resource<UserDevice> {
         return retrieveApiResource {

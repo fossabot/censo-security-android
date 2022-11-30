@@ -9,6 +9,7 @@ import com.raygun.raygun4android.RaygunClient
 import com.strikeprotocols.mobile.BuildConfig
 import com.strikeprotocols.mobile.common.CrashReportingUtil
 import com.strikeprotocols.mobile.common.Resource
+import com.strikeprotocols.mobile.common.strikeLog
 import com.strikeprotocols.mobile.data.*
 import com.strikeprotocols.mobile.data.models.SemanticVersion
 import com.strikeprotocols.mobile.data.models.VerifyUser
@@ -89,12 +90,14 @@ class EntranceViewModel @Inject constructor(
             val verifyUser = retrieveUserVerifyDetails()
 
             if (verifyUser != null) {
-                val deviceId = userRepository.retrieveUserDevicePublicKey(userEmail)
+                val devicePublicKey = userRepository.retrieveUserDevicePublicKey(userEmail)
                 val backendPublicKey = verifyUser.deviceKey
 
-                if (deviceId == backendPublicKey) {
+                if (devicePublicKey.lowercase() == backendPublicKey?.lowercase()) {
+                    strikeLog(message = "Successfully saved device key for account...")
                     determineUserDestination(verifyUser)
                 } else {
+                    strikeLog(message = "No device key for account...")
                     //todo: HAVE WRONG PUBLIC DEVICE KEY. Ask team what should do here? I think we need some clean up.
                     state = state.copy(
                         userDestinationResult = Resource.Success(UserDestination.DEVICE_REGISTRATION)

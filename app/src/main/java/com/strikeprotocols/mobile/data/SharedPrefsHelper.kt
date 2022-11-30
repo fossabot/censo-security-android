@@ -13,6 +13,7 @@ object SharedPrefsHelper {
     private const val USER_EMAIL = "user_email"
     private const val USER_TOKEN = "user_token"
     private const val DEVICE_ID = "_device_id"
+    private const val DEVICE_PUBLIC_KEY = "_device_public_key"
 
     //Sentinel Data Storage
     private const val BGRD_INIT_VECTOR = "_bgrd_init_vector"
@@ -272,6 +273,31 @@ object SharedPrefsHelper {
         email: String
     ): String {
         return sharedPrefs.getString("${email.lowercase().trim()}$DEVICE_ID", "")?.lowercase()?.trim() ?: ""
+    }
+    //endregion
+
+    //region public key for device id
+    fun clearDevicePublicKey(email: String) {
+        val editor = sharedPrefs.edit()
+        editor.putString("${email.lowercase().trim()}$DEVICE_PUBLIC_KEY", "")
+        editor.apply()
+    }
+
+    fun saveDevicePublicKey(
+        email: String,
+        deviceId: String
+    ) {
+        val editor = sharedPrefs.edit()
+        editor.putString("${email.lowercase().trim()}$DEVICE_PUBLIC_KEY", deviceId)
+        editor.apply()
+    }
+
+    fun userHasDevicePublicKey(email: String) = retrieveDevicePublicKey(email).isNotEmpty()
+
+    fun retrieveDevicePublicKey(
+        email: String
+    ): String {
+        return sharedPrefs.getString("${email.lowercase().trim()}$DEVICE_PUBLIC_KEY", "")?.lowercase()?.trim() ?: ""
     }
     //endregion
 }

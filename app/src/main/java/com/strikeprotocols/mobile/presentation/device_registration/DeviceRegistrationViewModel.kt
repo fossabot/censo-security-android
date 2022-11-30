@@ -74,8 +74,6 @@ class DeviceRegistrationViewModel @Inject constructor(
                 )
 
                 val imageByteArray = BaseWrapper.decodeFromBase64(userImage.image)
-
-
                 val signatureToCheck = BaseWrapper.decodeFromBase64(userImage.signature)
                 val verified = cryptographyManager.verifySignature(
                     keyName = keyName,
@@ -85,14 +83,23 @@ class DeviceRegistrationViewModel @Inject constructor(
 
                 strikeLog(message = "Verified: $verified")
 
-
-                userRepository.addUserDevice(
+                val userDeviceAdded = userRepository.addUserDevice(
                     UserDevice(
                         publicKey = state.publicKey,
                         deviceType = DeviceType.ANDROID,
                         userImage = userImage
                     )
                 )
+
+                if (userDeviceAdded is Resource.Success) {
+                    val email = userRepository.retrieveUserEmail()
+
+                    SharedPrefsHelper.saveDeviceId(email, keyName)
+                    SharedPrefsHelper.saveDevicePublicKey(email, state.publicKey)
+
+                } else if (userDeviceAdded is Resource.Error) {
+                    //todo: show error to user
+                }
 
 
             } else {
@@ -113,9 +120,7 @@ class DeviceRegistrationViewModel @Inject constructor(
 
     private fun createKeyForDevice() {
         viewModelScope.launch {
-            val email = userRepository.retrieveUserEmail()
             val keyId = UUID.randomUUID().toString().replace("-", "")
-            SharedPrefsHelper.saveDeviceId(email, deviceId = keyId)
             state = state.copy(keyName = keyId)
             try {
                 val devicePublicKey =
