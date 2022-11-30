@@ -2,9 +2,12 @@ package com.strikeprotocols.mobile.data
 
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
+import com.strikeprotocols.mobile.common.BaseWrapper
+import com.strikeprotocols.mobile.common.strikeLog
 import java.security.KeyPairGenerator
 import java.security.KeyStore
 import java.security.PrivateKey
+import java.security.PublicKey
 import java.security.Signature
 import java.security.spec.ECGenParameterSpec
 import javax.crypto.Cipher
@@ -41,7 +44,8 @@ interface CryptographyManager {
     fun deleteInvalidatedKey(keyName: String)
     fun signDataWithDeviceKey(data: ByteArray, keyName: String, signature: Signature): ByteArray
     fun createPublicDeviceKey(keyName: String): ByteArray
-    //fun getPublicKeyFromKeystore(deviceId: String) : ByteArray
+    fun getPublicKeyFromKeystore(deviceId: String): PublicKey
+    fun verifySignature(keyName: String, signatureToCheck: ByteArray): Boolean
 }
 
 data class EncryptedData(val ciphertext: ByteArray, val initializationVector: ByteArray)
@@ -67,6 +71,16 @@ class CryptographyManagerImpl : CryptographyManager {
         val deviceKey = getDeviceKey(keyName)
         signature.initSign(deviceKey)
         return signature
+    }
+
+    override fun verifySignature(keyName: String, signatureToCheck: ByteArray): Boolean {
+        //todo: is this the right signature for signing?
+        val signature = Signature.getInstance("SHA256withECDSA")
+        val publicKey = getPublicKeyFromKeystore(keyName)
+        strikeLog(message = "Public key used to verify: ${BaseWrapper.encodeToBase64(publicKey.encoded)}")
+        signature.initVerify(publicKey)
+        val verified = signature.verify(signatureToCheck)
+        return verified
     }
 
     override fun getInitializedCipherForDecryption(
@@ -131,17 +145,17 @@ class CryptographyManagerImpl : CryptographyManager {
 
         val keyPair = kpg.generateKeyPair()
 
+        strikeLog(message = "Public key used to sign: ${BaseWrapper.encodeToBase64(keyPair.public.encoded)}")
+
         return keyPair.public.encoded
     }
 
-//    override fun getPublicKeyFromKeystore(deviceId: String): ByteArray {
-//        getOrCreateDeviceKey(deviceId)
-//        val keyStore = KeyStore.getInstance("AndroidKeyStore")
-//        keyStore.load(null) // Keystore must be loaded before it can be accessed
-//        val cert = keyStore.getCertificate(deviceId)
-//        val publicKey = cert.publicKey
-//        return publicKey.encoded
-//    }
+    override fun getPublicKeyFromKeystore(deviceId: String): PublicKey {
+        val keyStore = KeyStore.getInstance("AndroidKeyStore")
+        keyStore.load(null) // Keystore must be loaded before it can be accessed
+        val cert = keyStore.getCertificate(deviceId)
+        return cert.publicKey
+    }
 
     private fun getOrCreateSecretKey(keyName: String): SecretKey {
         // If Secretkey was previously created for that keyName, then grab and return it.

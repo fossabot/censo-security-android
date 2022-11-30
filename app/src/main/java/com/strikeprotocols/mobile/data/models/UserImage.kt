@@ -1,15 +1,18 @@
 package com.strikeprotocols.mobile.data.models
 
+import com.google.gson.annotations.SerializedName
+
 data class UserImage(
     val image: String,//Base64 encoded image data
     val type: LogoType,//Image type, we are using JPG mainly
     val signature: String//Signed image data
 )
 
-data class LogoType(
-    val type: ImageType
-)
+enum class LogoType(val value: String) {
+    @SerializedName("jpeg")
+    JPEG(value = "jpeg"),
 
-enum class ImageType(val value: String) {
-    JPEG(value = "jpg"), PNG(value = "png")
+    @SerializedName("png")
+    PNG(value = "png")
 }
+

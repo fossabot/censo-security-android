@@ -2,6 +2,7 @@ package com.strikeprotocols.mobile.presentation.device_registration
 
 import android.graphics.Bitmap
 import androidx.biometric.BiometricPrompt
+import androidx.biometric.BiometricPrompt.CryptoObject
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -72,6 +73,16 @@ class DeviceRegistrationViewModel @Inject constructor(
                     cryptographyManager = cryptographyManager
                 )
 
+
+                val signatureToCheck = BaseWrapper.decodeFromBase64(userImage.signature)
+                val verified = cryptographyManager.verifySignature(
+                    keyName = keyName,
+                    signatureToCheck = signatureToCheck
+                )
+
+                strikeLog(message = "Verified: $verified")
+
+
                 userRepository.addUserDevice(
                     UserDevice(
                         publicKey = state.publicKey,
@@ -106,8 +117,9 @@ class DeviceRegistrationViewModel @Inject constructor(
             try {
                 val devicePublicKey =
                     cryptographyManager.createPublicDeviceKey(keyName = keyId)
-                state = state.copy(publicKey = BaseWrapper.encode(devicePublicKey))
-                strikeLog(message = "Was able to create key: $devicePublicKey")
+
+                state = state.copy(publicKey = BaseWrapper.encodeToBase64(devicePublicKey))
+                strikeLog(message = "Was able to create key: ${BaseWrapper.encodeToBase64(devicePublicKey)}")
 
                 //need to go get cipher authenticated
                 val signature = cipherRepository.getSignatureForDeviceSigning(keyId)

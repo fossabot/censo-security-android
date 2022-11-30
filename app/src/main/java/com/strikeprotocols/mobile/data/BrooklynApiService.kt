@@ -125,7 +125,7 @@ class AuthInterceptor(private val authProvider: AuthProvider) : Interceptor {
                 }
 
                 request =
-                    chain.request().newBuilder()
+                    request.newBuilder()
                         .removeHeader(AUTH)
                         .addHeader(AUTH, "Bearer $token")
                         .build()
