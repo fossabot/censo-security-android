@@ -9,6 +9,7 @@ import java.security.KeyStore
 import java.security.PrivateKey
 import java.security.PublicKey
 import java.security.Signature
+import java.security.cert.Certificate
 import java.security.spec.ECGenParameterSpec
 import javax.crypto.Cipher
 import javax.crypto.KeyGenerator
@@ -44,8 +45,8 @@ interface CryptographyManager {
     fun deleteInvalidatedKey(keyName: String)
     fun signDataWithDeviceKey(data: ByteArray, keyName: String, signature: Signature): ByteArray
     fun createPublicDeviceKey(keyName: String): ByteArray
-    fun getPublicKeyFromKeystore(deviceId: String): PublicKey
-    fun verifySignature(keyName: String, signatureToCheck: ByteArray): Boolean
+    fun getPublicKeyFromKeystore(deviceId: String): Certificate
+    fun verifySignature(keyName: String, dataSigned: ByteArray, signatureToCheck: ByteArray): Boolean
 }
 
 data class EncryptedData(val ciphertext: ByteArray, val initializationVector: ByteArray)
@@ -66,19 +67,18 @@ class CryptographyManagerImpl : CryptographyManager {
     }
 
     override fun getSignatureForDeviceSigning(keyName: String): Signature {
-        //todo: is this the right signature for signing?
         val signature = Signature.getInstance("SHA256withECDSA")
         val deviceKey = getDeviceKey(keyName)
         signature.initSign(deviceKey)
         return signature
     }
 
-    override fun verifySignature(keyName: String, signatureToCheck: ByteArray): Boolean {
-        //todo: is this the right signature for signing?
+    override fun verifySignature(keyName: String, dataSigned: ByteArray, signatureToCheck: ByteArray): Boolean {
         val signature = Signature.getInstance("SHA256withECDSA")
         val publicKey = getPublicKeyFromKeystore(keyName)
         strikeLog(message = "Public key used to verify: ${BaseWrapper.encodeToBase64(publicKey.encoded)}")
         signature.initVerify(publicKey)
+        signature.update(dataSigned)
         val verified = signature.verify(signatureToCheck)
         return verified
     }
@@ -150,11 +150,11 @@ class CryptographyManagerImpl : CryptographyManager {
         return keyPair.public.encoded
     }
 
-    override fun getPublicKeyFromKeystore(deviceId: String): PublicKey {
+    override fun getPublicKeyFromKeystore(deviceId: String): Certificate {
         val keyStore = KeyStore.getInstance("AndroidKeyStore")
         keyStore.load(null) // Keystore must be loaded before it can be accessed
         val cert = keyStore.getCertificate(deviceId)
-        return cert.publicKey
+        return cert
     }
 
     private fun getOrCreateSecretKey(keyName: String): SecretKey {

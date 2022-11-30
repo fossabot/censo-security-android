@@ -73,10 +73,13 @@ class DeviceRegistrationViewModel @Inject constructor(
                     cryptographyManager = cryptographyManager
                 )
 
+                val imageByteArray = BaseWrapper.decodeFromBase64(userImage.image)
+
 
                 val signatureToCheck = BaseWrapper.decodeFromBase64(userImage.signature)
                 val verified = cryptographyManager.verifySignature(
                     keyName = keyName,
+                    dataSigned = imageByteArray,
                     signatureToCheck = signatureToCheck
                 )
 
