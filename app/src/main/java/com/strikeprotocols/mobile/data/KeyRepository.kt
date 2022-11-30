@@ -1,5 +1,6 @@
 package com.strikeprotocols.mobile.data
 
+import androidx.biometric.BiometricPrompt.CryptoObject
 import cash.z.ecc.android.bip39.Mnemonics
 import cash.z.ecc.android.bip39.toSeed
 import com.strikeprotocols.mobile.common.BaseWrapper
@@ -16,13 +17,13 @@ interface KeyRepository {
 
     suspend fun signTimestamp(
         timestamp: String,
-        cipher: Cipher,
+        cryptoObject: CryptoObject,
     ): String
 
     suspend fun generatePhrase(): String
     suspend fun doesUserHaveValidLocalKey(verifyUser: VerifyUser): Boolean
 
-    suspend fun saveV3RootKey(mnemonic: Mnemonics.MnemonicCode, cipher: Cipher)
+    suspend fun saveV3RootKey(mnemonic: Mnemonics.MnemonicCode, cryptoObject: CryptoObject)
     suspend fun saveV3PublicKeys(mnemonic: Mnemonics.MnemonicCode) : List<WalletSigner?>
     suspend fun retrieveV3PublicKeys() : List<WalletSigner?>
 
@@ -34,9 +35,9 @@ interface KeyRepository {
 
     suspend fun generateTimestamp() : String
 
-    suspend fun saveSentinelData(cipher: Cipher)
+    suspend fun saveSentinelData(cryptoObject: CryptoObject)
 
-    suspend fun retrieveSentinelData(cipher: Cipher) : String
+    suspend fun retrieveSentinelData(cryptoObject: CryptoObject) : String
 
     suspend fun removeSentinelDataAndKickUserToAppEntrance()
 
@@ -49,7 +50,7 @@ interface KeyRepository {
 
     suspend fun signImageData(
         imageByteArray: ByteArray,
-        cipher: Cipher
+        cryptoObject: CryptoObject
     ): String
 }
 
@@ -108,7 +109,7 @@ class KeyRepositoryImpl(
 
     override suspend fun signTimestamp(
         timestamp: String,
-        cipher: Cipher
+        cryptoObject: CryptoObject
     ): String {
         val userEmail = userRepository.retrieveUserEmail()
 
@@ -118,7 +119,7 @@ class KeyRepositoryImpl(
             encryptionManager.signDataWithSolanaEncryptedKey(
                 data = tokenByteArray,
                 userEmail = userEmail,
-                cipher = cipher
+                cryptoObject = cryptoObject
             )
 
         return BaseWrapper.encodeToBase64(signedTimestamp)
@@ -126,14 +127,14 @@ class KeyRepositoryImpl(
 
     override suspend fun generatePhrase(): String = encryptionManager.generatePhrase()
 
-    override suspend fun saveV3RootKey(mnemonic: Mnemonics.MnemonicCode, cipher: Cipher) {
+    override suspend fun saveV3RootKey(mnemonic: Mnemonics.MnemonicCode, cryptoObject: CryptoObject) {
         val userEmail = userRepository.retrieveUserEmail()
 
         val rootSeed = mnemonic.toSeed()
 
         encryptionManager.saveV3RootSeed(
             rootSeed = rootSeed,
-            cipher = cipher,
+            cryptoObject = cryptoObject,
             email = userEmail
         )
     }
@@ -176,14 +177,14 @@ class KeyRepositoryImpl(
     }
 
     //todo: this needs to be with device key, not solana key
-    override suspend fun signImageData(imageByteArray: ByteArray, cipher: Cipher): String {
+    override suspend fun signImageData(imageByteArray: ByteArray, cryptoObject: CryptoObject): String {
         val userEmail = userRepository.retrieveUserEmail()
 
         val signedImageData =
             encryptionManager.signDataWithSolanaEncryptedKey(
                 data = imageByteArray,
                 userEmail = userEmail,
-                cipher = cipher
+                cryptoObject = cryptoObject
             )
 
         return BaseWrapper.encodeToBase64(signedImageData)
@@ -205,15 +206,15 @@ class KeyRepositoryImpl(
     }
 
     override suspend fun generateTimestamp() = generateFormattedTimestamp()
-    override suspend fun saveSentinelData(cipher: Cipher) {
+    override suspend fun saveSentinelData(cryptoObject: CryptoObject) {
         val userEmail = userRepository.retrieveUserEmail()
 
-        encryptionManager.saveSentinelData(email = userEmail, cipher = cipher)
+        encryptionManager.saveSentinelData(email = userEmail, cryptoObject = cryptoObject)
     }
 
-    override suspend fun retrieveSentinelData(cipher: Cipher) : String {
+    override suspend fun retrieveSentinelData(cryptoObject: CryptoObject) : String {
         val userEmail = userRepository.retrieveUserEmail()
 
-        return encryptionManager.retrieveSentinelData(email = userEmail, cipher = cipher)
+        return encryptionManager.retrieveSentinelData(email = userEmail, cryptoObject = cryptoObject)
     }
 }

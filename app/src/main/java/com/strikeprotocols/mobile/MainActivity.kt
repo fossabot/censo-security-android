@@ -98,9 +98,8 @@ class MainActivity : FragmentActivity() {
                     val bioPrompt = BioCryptoUtil.createBioPrompt(
                         fragmentActivity = this@MainActivity,
                         onSuccess = {
-                            val cipher = it?.cipher
-                            if (cipher != null) {
-                                mainViewModel.biometryApproved(cipher)
+                            if (it != null) {
+                                mainViewModel.biometryApproved(it)
                             } else {
                                 BioCryptoUtil.handleBioPromptOnFail(context = context, errorCode = NO_CIPHER_CODE) {
                                     mainViewModel.biometryFailed(errorCode = NO_CIPHER_CODE)

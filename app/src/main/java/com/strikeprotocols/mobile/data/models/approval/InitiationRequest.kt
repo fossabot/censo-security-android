@@ -1,5 +1,6 @@
 package com.strikeprotocols.mobile.data.models.approval
 
+import androidx.biometric.BiometricPrompt.CryptoObject
 import com.strikeprotocols.mobile.common.BaseWrapper
 import com.strikeprotocols.mobile.data.EncryptionManager
 import com.strikeprotocols.mobile.data.Signable
@@ -394,7 +395,7 @@ data class InitiationRequest(
     }
 
     fun convertToApiBody(
-        encryptionManager: EncryptionManager, cipher: Cipher
+        encryptionManager: EncryptionManager, cryptoObject: CryptoObject
     ): InitiateRequestBody {
 
         val initiationSignedData : SignedInitiationData =
@@ -403,7 +404,7 @@ data class InitiationRequest(
                 email = email,
                 ephemeralPrivateKey = opAccountPrivateKey.encoded,
                 supplyInstructions = supplyInstructions,
-                cipher = cipher
+                cryptoObject = cryptoObject
             )
 
         val nonce = nonces.firstOrNull()?.value ?: ""

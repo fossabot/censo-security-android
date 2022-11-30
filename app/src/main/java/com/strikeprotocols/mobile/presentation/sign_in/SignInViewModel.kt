@@ -1,5 +1,6 @@
 package com.strikeprotocols.mobile.presentation.sign_in
 
+import androidx.biometric.BiometricPrompt.CryptoObject
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -98,10 +99,10 @@ class SignInViewModel @Inject constructor(
         }
     }
 
-    fun biometryApproved(cipher: Cipher) {
+    fun biometryApproved(cryptoObject: CryptoObject) {
         when(state.bioPromptReason) {
-            BioPromptReason.SAVE_SENTINEL -> saveSentinelData(cipher)
-            BioPromptReason.RETURN_LOGIN -> handleBiometryReturnLogin(cipher)
+            BioPromptReason.SAVE_SENTINEL -> saveSentinelData(cryptoObject)
+            BioPromptReason.RETURN_LOGIN -> handleBiometryReturnLogin(cryptoObject)
             else -> {}
         }
     }
@@ -110,10 +111,10 @@ class SignInViewModel @Inject constructor(
         state = state.copy(loginResult = Resource.Error())
     }
 
-    private fun saveSentinelData(cipher: Cipher) {
+    private fun saveSentinelData(cryptoObject: CryptoObject) {
         viewModelScope.launch {
             state = try {
-                keyRepository.saveSentinelData(cipher)
+                keyRepository.saveSentinelData(cryptoObject)
                 state.copy(exitLoginFlow = Resource.Success(Unit))
             } catch (e: Exception) {
                 keyRepository.removeSentinelDataAndKickUserToAppEntrance()
@@ -122,13 +123,13 @@ class SignInViewModel @Inject constructor(
         }
     }
 
-    private fun handleBiometryReturnLogin(cipher: Cipher) {
+    private fun handleBiometryReturnLogin(cryptoObject: CryptoObject) {
         viewModelScope.launch {
             try {
                 val timestamp = keyRepository.generateTimestamp()
                 val signedTimestamp = keyRepository.signTimestamp(
                     timestamp = timestamp,
-                    cipher = cipher
+                    cryptoObject = cryptoObject
                 )
 
                 loginWithBiometry(timestamp = timestamp, signedTimestamp = signedTimestamp)

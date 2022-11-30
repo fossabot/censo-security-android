@@ -1,5 +1,6 @@
 package com.strikeprotocols.mobile.data.models.approval
 
+import androidx.biometric.BiometricPrompt.CryptoObject
 import com.strikeprotocols.mobile.common.BaseWrapper.decodeFromBase64
 import com.strikeprotocols.mobile.data.EncryptionManager
 import com.strikeprotocols.mobile.data.Signable
@@ -341,32 +342,32 @@ data class ApprovalDispositionRequest(
 
     fun convertToApiBody(
         encryptionManager: EncryptionManager,
-        cipher: Cipher): RegisterApprovalDispositionBody {
+        cryptoObject: CryptoObject): RegisterApprovalDispositionBody {
 
         val signatureInfo: ApprovalSignature = when (requestType) {
             is LoginApprovalRequest, is PasswordReset, is AcceptVaultInvitation ->
                 ApprovalSignature.NoChainSignature(
-                    signRequestWithSolanaKey(encryptionManager, cipher)
+                    signRequestWithSolanaKey(encryptionManager, cryptoObject)
                 )
-            is WalletCreation -> getSignatureInfo(requestType.accountInfo.chain ?: Chain.solana, encryptionManager, cipher)
-            is CreateAddressBookEntry -> getSignatureInfo(requestType.chain, encryptionManager, cipher)
-            is DeleteAddressBookEntry -> getSignatureInfo(requestType.chain, encryptionManager, cipher)
+            is WalletCreation -> getSignatureInfo(requestType.accountInfo.chain ?: Chain.solana, encryptionManager, cryptoObject)
+            is CreateAddressBookEntry -> getSignatureInfo(requestType.chain, encryptionManager, cryptoObject)
+            is DeleteAddressBookEntry -> getSignatureInfo(requestType.chain, encryptionManager, cryptoObject)
             is WithdrawalRequest -> {
                 when (requestType.signingData) {
                     is SigningData.BitcoinSigningData ->
                         ApprovalSignature.BitcoinSignatures(
-                            signatures = signRequestWithBitcoinKey(encryptionManager, cipher, requestType.signingData.childKeyIndex).map { it.signature }
+                            signatures = signRequestWithBitcoinKey(encryptionManager, cryptoObject, requestType.signingData.childKeyIndex).map { it.signature }
                         )
                     is SigningData.SolanaSigningData ->
                         ApprovalSignature.SolanaSignature(
-                            signature = signRequestWithSolanaKey(encryptionManager, cipher).signature,
+                            signature = signRequestWithSolanaKey(encryptionManager, cryptoObject).signature,
                             nonce = nonces.first().value,
                             nonceAccountAddress = requestType.nonceAccountAddresses().first()
                         )
                 }
             }
             else -> ApprovalSignature.SolanaSignature(
-                signature = signRequestWithSolanaKey(encryptionManager, cipher).signature,
+                signature = signRequestWithSolanaKey(encryptionManager, cryptoObject).signature,
                 nonce = nonces.first().value,
                 nonceAccountAddress = requestType.nonceAccountAddresses().first()
             )
@@ -378,16 +379,16 @@ data class ApprovalDispositionRequest(
         )
     }
 
-    private fun getSignatureInfo(chain: Chain, encryptionManager: EncryptionManager, cipher: Cipher): ApprovalSignature {
+    private fun getSignatureInfo(chain: Chain, encryptionManager: EncryptionManager, cryptoObject: CryptoObject): ApprovalSignature {
         return when (chain) {
             Chain.bitcoin -> ApprovalSignature.NoChainSignature(
-                signRequestWithBitcoinKey(encryptionManager, cipher).first()
+                signRequestWithBitcoinKey(encryptionManager, cryptoObject).first()
             )
             Chain.ethereum -> ApprovalSignature.NoChainSignature(
-                signRequestWithEthereumKey(encryptionManager, cipher)
+                signRequestWithEthereumKey(encryptionManager, cryptoObject)
             )
             else -> ApprovalSignature.SolanaSignature(
-                signature = signRequestWithSolanaKey(encryptionManager, cipher).signature,
+                signature = signRequestWithSolanaKey(encryptionManager, cryptoObject).signature,
                 nonce = nonces.first().value,
                 nonceAccountAddress = requestType.nonceAccountAddresses().first()
             )
@@ -396,13 +397,13 @@ data class ApprovalDispositionRequest(
 
     private fun signRequestWithSolanaKey(
         encryptionManager: EncryptionManager,
-        cipher: Cipher): SignedPayload {
+        cryptoObject: CryptoObject): SignedPayload {
 
         return try {
             encryptionManager.signSolanaApprovalDispositionMessage(
                 signable = this,
                 email = email,
-                cipher = cipher
+                cryptoObject = cryptoObject
             )
         } catch (e: Exception) {
             throw Exception("Signing data failure")
@@ -411,13 +412,13 @@ data class ApprovalDispositionRequest(
 
     private fun signRequestWithBitcoinKey(
         encryptionManager: EncryptionManager,
-        cipher: Cipher,
+        cryptoObject: CryptoObject,
         childKeyIndex: Int): List<SignedPayload> {
 
         return try {
             encryptionManager.signBitcoinApprovalDispositionMessage(
                 signable = this,
-                cipher = cipher,
+                cryptoObject = cryptoObject,
                 email = email,
                 childKeyIndex = childKeyIndex
             )
@@ -428,13 +429,13 @@ data class ApprovalDispositionRequest(
 
     private fun signRequestWithBitcoinKey(
         encryptionManager: EncryptionManager,
-        cipher: Cipher): List<SignedPayload> {
+        cryptoObject: CryptoObject): List<SignedPayload> {
 
         return try {
             encryptionManager.signBitcoinApprovalDispositionMessage(
                 signable = this,
                 email = email,
-                cipher = cipher,
+                cryptoObject = cryptoObject,
             )
         } catch (e: Exception) {
             throw Exception("Signing data failure")
@@ -443,13 +444,13 @@ data class ApprovalDispositionRequest(
 
     private fun signRequestWithEthereumKey(
         encryptionManager: EncryptionManager,
-        cipher: Cipher): SignedPayload {
+        cryptoObject: CryptoObject): SignedPayload {
 
         return try {
             encryptionManager.signEthereumApprovalDispositionMessage(
                 signable = this,
                 email = email,
-                cipher = cipher,
+                cryptoObject = cryptoObject,
             )
         } catch (e: Exception) {
             throw Exception("Signing data failure")

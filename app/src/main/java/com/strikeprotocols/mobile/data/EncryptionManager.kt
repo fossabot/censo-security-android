@@ -1,5 +1,6 @@
 package com.strikeprotocols.mobile.data
 
+import androidx.biometric.BiometricPrompt.CryptoObject
 import cash.z.ecc.android.bip39.Mnemonics
 import com.strikeprotocols.mobile.common.*
 import com.strikeprotocols.mobile.common.BaseWrapper
@@ -41,14 +42,14 @@ interface EncryptionManager {
     fun signSolanaApprovalDispositionMessage(
         signable: Signable,
         email: String,
-        cipher: Cipher? = null,
+        cryptoObject: CryptoObject? = null,
         rootSeed: String? = null
     ): SignedPayload
 
     fun signBitcoinApprovalDispositionMessage(
         signable: Signable,
         email: String,
-        cipher: Cipher? = null,
+        cryptoObject: CryptoObject? = null,
         rootSeed: String? = null,
         childKeyIndex: Int
     ): List<SignedPayload>
@@ -57,14 +58,14 @@ interface EncryptionManager {
         signable: Signable,
         email: String,
         rootSeed: String? = null,
-        cipher: Cipher? = null,
+        cryptoObject: CryptoObject? = null,
     ): List<SignedPayload>
 
     fun signEthereumApprovalDispositionMessage(
         signable: Signable,
         email: String,
         rootSeed: String? = null,
-        cipher: Cipher? = null,
+        cryptoObject: CryptoObject? = null,
     ): SignedPayload
 
     fun signInitiationRequestData(
@@ -72,13 +73,13 @@ interface EncryptionManager {
         email: String,
         ephemeralPrivateKey: ByteArray,
         supplyInstructions: List<SupplyDappInstruction>,
-        cipher: Cipher
+        cryptoObject: CryptoObject
     ): SignedInitiationData
 
     fun signDataWithSolanaEncryptedKey(
         data: ByteArray,
         userEmail: String,
-        cipher: Cipher
+        cryptoObject: CryptoObject
     ): ByteArray
 
     fun signKeyForMigration(rootSeed: ByteArray, publicKey: String): ByteArray
@@ -94,14 +95,14 @@ interface EncryptionManager {
     fun saveV3RootSeed(
         rootSeed: ByteArray,
         email: String,
-        cipher: Cipher
+        cryptoObject: CryptoObject
     )
 
-    fun retrieveRootSeed(email: String, cipher: Cipher): String
+    fun retrieveRootSeed(email: String, cryptoObject: CryptoObject): String
 
     fun retrieveSavedV2Key(
         email: String,
-        cipher: Cipher,
+        cryptoObject: CryptoObject,
         keyType: String = SOLANA_KEY
     ): ByteArray
 
@@ -118,8 +119,8 @@ interface EncryptionManager {
     fun getSignatureForDeviceSigning(keyName: String) : Signature
     fun getInitializedCipherForDecryption(keyName: String, initVector: ByteArray): Cipher
     fun haveSentinelDataStored(email: String): Boolean
-    fun saveSentinelData(email: String, cipher: Cipher)
-    fun retrieveSentinelData(email: String, cipher: Cipher): String
+    fun saveSentinelData(email: String, cryptoObject: CryptoObject)
+    fun retrieveSentinelData(email: String, cryptoObject: CryptoObject): String
 
     //endregion
 }
@@ -136,13 +137,13 @@ class EncryptionManagerImpl @Inject constructor(
     }
 
     override fun signSolanaApprovalDispositionMessage(
-        signable: Signable, email: String, cipher: Cipher?, rootSeed: String?,
+        signable: Signable, email: String, cryptoObject: CryptoObject?, rootSeed: String?,
     ): SignedPayload {
-        if (cipher == null && rootSeed == null) {
+        if (cryptoObject == null && rootSeed == null) {
             throw Exception("Need to pass either cipher or root seed to sign data")
         }
 
-        val safeRootSeed = rootSeed ?: retrieveRootSeed(email = email, cipher = cipher!!)
+        val safeRootSeed = rootSeed ?: retrieveRootSeed(email = email, cryptoObject = cryptoObject!!)
 
         if (safeRootSeed.isEmpty()) {
             throw NoKeyDataException
@@ -174,15 +175,15 @@ class EncryptionManagerImpl @Inject constructor(
     override fun signBitcoinApprovalDispositionMessage(
         signable: Signable,
         email: String,
-        cipher: Cipher?,
+        cryptoObject: CryptoObject?,
         rootSeed: String?,
         childKeyIndex: Int,
     ): List<SignedPayload> {
-        if (cipher == null && rootSeed == null) {
+        if (cryptoObject == null && rootSeed == null) {
             throw Exception("Need to pass either cipher or root seed to sign data")
         }
 
-        val safeRootSeed = rootSeed ?: retrieveRootSeed(email = email, cipher = cipher!!)
+        val safeRootSeed = rootSeed ?: retrieveRootSeed(email = email, cryptoObject = cryptoObject!!)
 
         if (safeRootSeed.isEmpty()) {
             throw NoKeyDataException
@@ -208,13 +209,13 @@ class EncryptionManagerImpl @Inject constructor(
         signable: Signable,
         email: String,
         rootSeed: String?,
-        cipher: Cipher?,
+        cryptoObject: CryptoObject?,
     ): List<SignedPayload> {
-        if (cipher == null && rootSeed == null) {
+        if (cryptoObject == null && rootSeed == null) {
             throw Exception("Need to pass either cipher or root seed to sign data")
         }
 
-        val safeRootSeed = rootSeed ?: retrieveRootSeed(email = email, cipher = cipher!!)
+        val safeRootSeed = rootSeed ?: retrieveRootSeed(email = email, cryptoObject = cryptoObject!!)
 
         if (safeRootSeed.isEmpty()) {
             throw NoKeyDataException
@@ -239,13 +240,13 @@ class EncryptionManagerImpl @Inject constructor(
         signable: Signable,
         email: String,
         rootSeed: String?,
-        cipher: Cipher?,
+        cryptoObject: CryptoObject?,
     ): SignedPayload {
-        if (cipher == null && rootSeed == null) {
+        if (cryptoObject == null && rootSeed == null) {
             throw Exception("Need to pass either cipher or root seed to sign data")
         }
 
-        val safeRootSeed = rootSeed ?: retrieveRootSeed(email = email, cipher = cipher!!)
+        val safeRootSeed = rootSeed ?: retrieveRootSeed(email = email, cryptoObject = cryptoObject!!)
 
         if (safeRootSeed.isEmpty()) {
             throw NoKeyDataException
@@ -267,13 +268,13 @@ class EncryptionManagerImpl @Inject constructor(
         signable: Signable,
         email: String,
         rootSeed: String? = null,
-        cipher: Cipher? = null,
+        cryptoObject: CryptoObject? = null,
     ): String {
-        if (cipher == null && rootSeed == null) {
+        if (cryptoObject == null && rootSeed == null) {
             throw Exception("Need to pass either cipher or root seed to sign data")
         }
 
-        val safeRootSeed = rootSeed ?: retrieveRootSeed(email = email, cipher = cipher!!)
+        val safeRootSeed = rootSeed ?: retrieveRootSeed(email = email, cryptoObject = cryptoObject!!)
 
         if (safeRootSeed.isEmpty()) {
             throw NoKeyDataException
@@ -300,11 +301,11 @@ class EncryptionManagerImpl @Inject constructor(
         email: String,
         ephemeralPrivateKey: ByteArray,
         supplyInstructions: List<SupplyDappInstruction>,
-        cipher: Cipher
+        cryptoObject: CryptoObject
     ): SignedInitiationData {
         val rootSeed = retrieveRootSeed(
             email = email,
-            cipher = cipher,
+            cryptoObject = cryptoObject,
         )
 
         if (rootSeed.isEmpty()) {
@@ -363,9 +364,9 @@ class EncryptionManagerImpl @Inject constructor(
     override fun signDataWithSolanaEncryptedKey(
         data: ByteArray,
         userEmail: String,
-        cipher: Cipher,
+        cryptoObject: CryptoObject,
     ): ByteArray {
-        val rootSeed = retrieveRootSeed(email = userEmail, cipher = cipher)
+        val rootSeed = retrieveRootSeed(email = userEmail, cryptoObject = cryptoObject)
         val ed25519HierarchicalPrivateKey =
             Ed25519HierarchicalPrivateKey.fromRootSeed(BaseWrapper.decode(rootSeed))
 
@@ -448,45 +449,45 @@ class EncryptionManagerImpl @Inject constructor(
         )
     }
 
-    override fun saveV3RootSeed(rootSeed: ByteArray, email: String, cipher: Cipher) {
+    override fun saveV3RootSeed(rootSeed: ByteArray, email: String, cryptoObject: CryptoObject) {
         val encryptedRootSeed =
-            cryptographyManager.encryptData(data = BaseWrapper.encode(rootSeed), cipher = cipher)
+            cryptographyManager.encryptData(data = BaseWrapper.encode(rootSeed), cipher = cryptoObject.cipher!!)
 
         securePreferences.saveV3RootSeed(email = email, encryptedData = encryptedRootSeed)
     }
 
     override fun retrieveSavedV2Key(
         email: String,
-        cipher: Cipher,
+        cryptoObject: CryptoObject,
         keyType: String
     ): ByteArray {
         val savedKey = securePreferences.retrieveV2RootSeedAndPrivateKey(email)
 
         val keysMap = retrieveStoredKeys(
             json = savedKey,
-            cipher = cipher,
+            cryptoObject = cryptoObject,
         )
 
         return BaseWrapper.decode(keysMap[keyType] ?: "")
     }
 
-    override fun retrieveSentinelData(email: String, cipher: Cipher): String {
+    override fun retrieveSentinelData(email: String, cryptoObject: CryptoObject): String {
         val savedSentinelData = securePreferences.retrieveSentinelData(email)
 
         val decryptedSentinelData = cryptographyManager.decryptData(
             ciphertext = savedSentinelData.ciphertext,
-            cipher = cipher
+            cipher = cryptoObject.cipher!!
         )
 
         return String(decryptedSentinelData, charset = Charset.forName("UTF-8"))
     }
 
-    override fun retrieveRootSeed(email: String, cipher: Cipher): String {
+    override fun retrieveRootSeed(email: String, cryptoObject: CryptoObject): String {
         val savedRootSeedData = securePreferences.retrieveV3RootSeed(email)
 
         val decryptedRootSeed = cryptographyManager.decryptData(
             ciphertext = savedRootSeedData.ciphertext,
-            cipher = cipher
+            cipher = cryptoObject.cipher!!
         )
 
         return String(decryptedRootSeed, charset = Charset.forName("UTF-8"))
@@ -512,9 +513,9 @@ class EncryptionManagerImpl @Inject constructor(
 
     override fun haveSentinelDataStored(email: String) = securePreferences.hasSentinelData(email)
 
-    override fun saveSentinelData(email: String, cipher: Cipher) {
+    override fun saveSentinelData(email: String, cryptoObject: CryptoObject) {
         val encryptedSentinelData =
-            cryptographyManager.encryptData(data = SENTINEL_STATIC_DATA, cipher = cipher)
+            cryptographyManager.encryptData(data = SENTINEL_STATIC_DATA, cipher = cryptoObject.cipher!!)
 
         securePreferences.saveSentinelData(email = email, encryptedData = encryptedSentinelData)
     }
@@ -525,14 +526,14 @@ class EncryptionManagerImpl @Inject constructor(
 
     private fun retrieveStoredKeys(
         json: String,
-        cipher: Cipher,
+        cryptoObject: CryptoObject,
     ): HashMap<String, String> {
         val storedKeyData = StoredKeyData.fromJson(json)
 
         val encryptedKeysData = storedKeyData.encryptedKeysData
         val decryptedKeyJson = cryptographyManager.decryptData(
-            BaseWrapper.decode(encryptedKeysData),
-            cipher
+            ciphertext = BaseWrapper.decode(encryptedKeysData),
+            cipher = cryptoObject.cipher!!
         )
 
         //this is coming out as UTF-8 because we cannot store JSON in Base58

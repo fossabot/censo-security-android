@@ -1,5 +1,6 @@
 package com.strikeprotocols.mobile.presentation.semantic_version_check
 
+import androidx.biometric.BiometricPrompt.CryptoObject
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -86,19 +87,19 @@ data class MainViewModel @Inject constructor(
         }
     }
 
-    fun biometryApproved(cipher: Cipher) {
+    fun biometryApproved(cryptoObject: CryptoObject) {
         viewModelScope.launch {
             if (state.bioPromptReason == BioPromptReason.FOREGROUND_RETRIEVAL) {
-                checkSentinelDataAfterBiometricApproval(cipher)
+                checkSentinelDataAfterBiometricApproval(cryptoObject)
             } else if (state.bioPromptReason == BioPromptReason.FOREGROUND_SAVE) {
-                saveSentinelDataAfterBiometricApproval(cipher)
+                saveSentinelDataAfterBiometricApproval(cryptoObject)
             }
         }
     }
 
-    private suspend fun checkSentinelDataAfterBiometricApproval(cipher: Cipher) {
+    private suspend fun checkSentinelDataAfterBiometricApproval(cryptoObject: CryptoObject) {
         state = try {
-            val sentinelData = keyRepository.retrieveSentinelData(cipher)
+            val sentinelData = keyRepository.retrieveSentinelData(cryptoObject)
             if (sentinelData == SENTINEL_STATIC_DATA) {
                 biometrySuccessfulState()
             } else {
@@ -109,9 +110,9 @@ data class MainViewModel @Inject constructor(
         }
     }
 
-    private suspend fun saveSentinelDataAfterBiometricApproval(cipher: Cipher) {
+    private suspend fun saveSentinelDataAfterBiometricApproval(cryptoObject: CryptoObject) {
         state = try {
-            keyRepository.saveSentinelData(cipher)
+            keyRepository.saveSentinelData(cryptoObject)
             val updatedState = biometrySuccessfulState()
             updatedState.copy(
                 sendUserToEntrance = true

@@ -112,9 +112,8 @@ fun ApprovalsListScreen(
                 val bioPrompt = BioCryptoUtil.createBioPrompt(
                     fragmentActivity = context,
                     onSuccess = {
-                        val cipher = it?.cipher
-                        if (cipher != null) {
-                            approvalsViewModel.biometryApproved(cipher)
+                        if (it != null) {
+                            approvalsViewModel.biometryApproved(it)
                         } else {
                             BioCryptoUtil.handleBioPromptOnFail(
                                 context = context,

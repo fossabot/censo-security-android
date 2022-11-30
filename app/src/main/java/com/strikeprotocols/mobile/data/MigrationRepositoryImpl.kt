@@ -1,5 +1,6 @@
 package com.strikeprotocols.mobile.data
 
+import androidx.biometric.BiometricPrompt.CryptoObject
 import com.strikeprotocols.mobile.common.BaseWrapper
 import com.strikeprotocols.mobile.common.Resource
 import com.strikeprotocols.mobile.data.models.Signers
@@ -11,16 +12,16 @@ import com.strikeprotocols.mobile.data.models.mapToPublicKeysList
 import javax.crypto.Cipher
 
 interface MigrationRepository {
-    suspend fun saveV3RootSeed(rootSeed: ByteArray, cipher: Cipher)
+    suspend fun saveV3RootSeed(rootSeed: ByteArray, cryptoObject: CryptoObject)
     suspend fun saveV3PublicKeys(rootSeed: ByteArray)
 
     suspend fun retrieveV1RootSeed() : ByteArray?
-    suspend fun retrieveV3RootSeed(cipher: Cipher) : ByteArray?
+    suspend fun retrieveV3RootSeed(cryptoObject: CryptoObject) : ByteArray?
 
     suspend fun haveV2RootSeed() : Boolean
     suspend fun haveV3RootSeed() : Boolean
 
-    suspend fun retrieveV2RootSeed(cipher: Cipher): ByteArray?
+    suspend fun retrieveV2RootSeed(cryptoObject: CryptoObject): ByteArray?
     suspend fun retrieveV3PublicKeys(): HashMap<String, String>
 
     suspend fun retrieveWalletSignersToUpload(rootSeed: ByteArray): List<WalletSigner>
@@ -37,12 +38,12 @@ class MigrationRepositoryImpl(
     private val userRepository: UserRepository
 ) : MigrationRepository, BaseRepository() {
 
-    override suspend fun saveV3RootSeed(rootSeed: ByteArray, cipher: Cipher) {
+    override suspend fun saveV3RootSeed(rootSeed: ByteArray, cryptoObject: CryptoObject) {
         val userEmail = userRepository.retrieveUserEmail()
 
         encryptionManager.saveV3RootSeed(
             rootSeed = rootSeed,
-            cipher = cipher,
+            cryptoObject = cryptoObject,
             email = userEmail
         )
     }
@@ -79,7 +80,7 @@ class MigrationRepositoryImpl(
         return securePreferences.userHasV2RootSeedStored(userEmail)
     }
 
-    override suspend fun retrieveV2RootSeed(cipher: Cipher): ByteArray? {
+    override suspend fun retrieveV2RootSeed(cryptoObject: CryptoObject): ByteArray? {
         val userEmail = userRepository.retrieveUserEmail()
 
         val haveV2Data = securePreferences.userHasV2RootSeedStored(userEmail)
@@ -87,15 +88,15 @@ class MigrationRepositoryImpl(
         if (!haveV2Data) return null
 
         return encryptionManager.retrieveSavedV2Key(
-            email = userEmail, cipher = cipher, keyType = ROOT_SEED
+            email = userEmail, cryptoObject = cryptoObject, keyType = ROOT_SEED
         )
     }
 
-    override suspend fun retrieveV3RootSeed(cipher: Cipher): ByteArray {
+    override suspend fun retrieveV3RootSeed(cryptoObject: CryptoObject): ByteArray {
         val userEmail = userRepository.retrieveUserEmail()
 
         return BaseWrapper.decode(
-            encryptionManager.retrieveRootSeed(email = userEmail, cipher = cipher)
+            encryptionManager.retrieveRootSeed(email = userEmail, cryptoObject = cryptoObject)
         )
     }
 

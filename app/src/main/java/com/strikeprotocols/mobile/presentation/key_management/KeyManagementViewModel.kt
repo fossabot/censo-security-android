@@ -1,5 +1,6 @@
 package com.strikeprotocols.mobile.presentation.key_management
 
+import androidx.biometric.BiometricPrompt.CryptoObject
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -139,10 +140,10 @@ class KeyManagementViewModel @Inject constructor(
         }
     }
 
-    fun biometryApproved(cipher: Cipher) {
+    fun biometryApproved(cryptoObject: CryptoObject) {
         when (state.bioPromptData.bioPromptReason) {
             BioPromptReason.SAVE_V3_ROOT_SEED -> {
-                saveRootSeed(cipher)
+                saveRootSeed(cryptoObject)
             }
             else -> {}
         }
@@ -152,7 +153,7 @@ class KeyManagementViewModel @Inject constructor(
         state = state.copy(finalizeKeyFlow = Resource.Error())
     }
 
-    fun saveRootSeed(cipher: Cipher) {
+    fun saveRootSeed(cryptoObject: CryptoObject) {
         viewModelScope.launch {
             try {
                 val phrase = when (state.keyManagementFlow) {
@@ -176,7 +177,7 @@ class KeyManagementViewModel @Inject constructor(
 
                 keyRepository.saveV3RootKey(
                     Mnemonics.MnemonicCode(phrase = phrase),
-                    cipher = cipher
+                    cryptoObject = cryptoObject
                 )
 
                 val walletSigners =

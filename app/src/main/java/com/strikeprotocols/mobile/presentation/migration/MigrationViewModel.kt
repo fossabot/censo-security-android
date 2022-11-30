@@ -1,5 +1,6 @@
 package com.strikeprotocols.mobile.presentation.migration
 
+import androidx.biometric.BiometricPrompt.CryptoObject
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -113,14 +114,14 @@ class MigrationViewModel @Inject constructor(
     }
 
     //finish step 1 and kick off step 2
-    private suspend fun retrieveV2KeyDataAndKickOffKeyStorage(cipher: Cipher) {
-        val rootSeed = migrationRepository.retrieveV2RootSeed(cipher)
+    private suspend fun retrieveV2KeyDataAndKickOffKeyStorage(cryptoObject: CryptoObject) {
+        val rootSeed = migrationRepository.retrieveV2RootSeed(cryptoObject)
         state = state.copy(rootSeed = rootSeed?.toList())
         generateAllNecessaryData()
     }
 
-    private suspend fun retrieveV3RootSeedAndKickOffKeyStorage(cipher: Cipher) {
-        val rootSeed = migrationRepository.retrieveV3RootSeed(cipher)
+    private suspend fun retrieveV3RootSeedAndKickOffKeyStorage(cryptoObject: CryptoObject) {
+        val rootSeed = migrationRepository.retrieveV3RootSeed(cryptoObject)
 
         if (rootSeed == null) {
             state = state.copy(addWalletSigner = Resource.Error())
@@ -155,7 +156,7 @@ class MigrationViewModel @Inject constructor(
         }
     }
 
-    private suspend fun saveRootSeed(rootSeedCipher: Cipher) {
+    private suspend fun saveRootSeed(cryptoObject: CryptoObject) {
         val rootSeed = state.rootSeed
 
         if (rootSeed == null) {
@@ -165,7 +166,7 @@ class MigrationViewModel @Inject constructor(
 
         migrationRepository.saveV3RootSeed(
             rootSeed = rootSeed.toByteArray(),
-            cipher = rootSeedCipher
+            cryptoObject = cryptoObject
         )
 
         migrationRepository.saveV3PublicKeys(
@@ -204,12 +205,12 @@ class MigrationViewModel @Inject constructor(
     //endregion
 
     //region handle all biometry events
-    fun biometryApproved(cipher: Cipher) {
+    fun biometryApproved(cryptoObject: CryptoObject) {
         viewModelScope.launch {
             when (state.bioPromptData.bioPromptReason) {
-                BioPromptReason.RETRIEVE_V2_KEYS -> retrieveV2KeyDataAndKickOffKeyStorage(cipher)
-                BioPromptReason.RETRIEVE_V3_ROOT_SEED -> retrieveV3RootSeedAndKickOffKeyStorage(cipher)
-                BioPromptReason.SAVE_V3_ROOT_SEED -> saveRootSeed(cipher)
+                BioPromptReason.RETRIEVE_V2_KEYS -> retrieveV2KeyDataAndKickOffKeyStorage(cryptoObject)
+                BioPromptReason.RETRIEVE_V3_ROOT_SEED -> retrieveV3RootSeedAndKickOffKeyStorage(cryptoObject)
+                BioPromptReason.SAVE_V3_ROOT_SEED -> saveRootSeed(cryptoObject)
                 else -> {}
             }
         }
