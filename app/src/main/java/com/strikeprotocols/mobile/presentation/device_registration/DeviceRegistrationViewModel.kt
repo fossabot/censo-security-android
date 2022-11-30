@@ -82,6 +82,8 @@ class DeviceRegistrationViewModel @Inject constructor(
                 )
 
                 strikeLog(message = "Verified: $verified")
+                val email = userRepository.retrieveUserEmail()
+                SharedPrefsHelper.saveDeviceId(email = email, deviceId = keyName)
 
                 val userDeviceAdded = userRepository.addUserDevice(
                     UserDevice(
@@ -92,8 +94,6 @@ class DeviceRegistrationViewModel @Inject constructor(
                 )
 
                 if (userDeviceAdded is Resource.Success) {
-                    val email = userRepository.retrieveUserEmail()
-
                     SharedPrefsHelper.saveDeviceId(email, keyName)
                     SharedPrefsHelper.saveDevicePublicKey(email, state.publicKey)
 
