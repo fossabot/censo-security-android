@@ -7,7 +7,6 @@ import com.strikeprotocols.mobile.common.strikeLog
 import java.security.KeyPairGenerator
 import java.security.KeyStore
 import java.security.PrivateKey
-import java.security.PublicKey
 import java.security.Signature
 import java.security.cert.Certificate
 import java.security.spec.ECGenParameterSpec
@@ -45,7 +44,7 @@ interface CryptographyManager {
     fun deleteInvalidatedKey(keyName: String)
     fun signDataWithDeviceKey(data: ByteArray, keyName: String, signature: Signature): ByteArray
     fun createPublicDeviceKey(keyName: String): ByteArray
-    fun getPublicKeyFromKeystore(deviceId: String): Certificate
+    fun getCertificateFromKeystore(deviceId: String): Certificate
     fun verifySignature(keyName: String, dataSigned: ByteArray, signatureToCheck: ByteArray): Boolean
 }
 
@@ -75,9 +74,9 @@ class CryptographyManagerImpl : CryptographyManager {
 
     override fun verifySignature(keyName: String, dataSigned: ByteArray, signatureToCheck: ByteArray): Boolean {
         val signature = Signature.getInstance("SHA256withECDSA")
-        val publicKey = getPublicKeyFromKeystore(keyName)
-        strikeLog(message = "Public key used to verify: ${BaseWrapper.encodeToBase64(publicKey.encoded)}")
-        signature.initVerify(publicKey)
+        val certificate = getCertificateFromKeystore(keyName)
+        strikeLog(message = "Public key used to verify: ${BaseWrapper.encode(certificate.publicKey.encoded)}")
+        signature.initVerify(certificate)
         signature.update(dataSigned)
         val verified = signature.verify(signatureToCheck)
         return verified
@@ -123,6 +122,7 @@ class CryptographyManagerImpl : CryptographyManager {
     }
 
     override fun createPublicDeviceKey(keyName: String): ByteArray {
+        strikeLog(message = "Key name used when creating key: $keyName")
         val kpg: KeyPairGenerator = KeyPairGenerator.getInstance(
             KeyProperties.KEY_ALGORITHM_EC,
             "AndroidKeyStore"
@@ -145,12 +145,13 @@ class CryptographyManagerImpl : CryptographyManager {
 
         val keyPair = kpg.generateKeyPair()
 
-        strikeLog(message = "Public key used to sign: ${BaseWrapper.encodeToBase64(keyPair.public.encoded)}")
+        strikeLog(message = "Public key used to sign: ${BaseWrapper.encode(keyPair.public.encoded)}")
 
         return keyPair.public.encoded
     }
 
-    override fun getPublicKeyFromKeystore(deviceId: String): Certificate {
+    override fun getCertificateFromKeystore(deviceId: String): Certificate {
+        strikeLog(message = "Key name used when getting public key: $deviceId")
         val keyStore = KeyStore.getInstance("AndroidKeyStore")
         keyStore.load(null) // Keystore must be loaded before it can be accessed
         val cert = keyStore.getCertificate(deviceId)

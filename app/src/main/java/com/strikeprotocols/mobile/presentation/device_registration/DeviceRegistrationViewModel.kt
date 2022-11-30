@@ -121,8 +121,8 @@ class DeviceRegistrationViewModel @Inject constructor(
                 val devicePublicKey =
                     cryptographyManager.createPublicDeviceKey(keyName = keyId)
 
-                state = state.copy(publicKey = BaseWrapper.encodeToBase64(devicePublicKey))
-                strikeLog(message = "Was able to create key: ${BaseWrapper.encodeToBase64(devicePublicKey)}")
+                state = state.copy(publicKey = BaseWrapper.encode(devicePublicKey))
+                strikeLog(message = "Was able to create key: ${BaseWrapper.encode(devicePublicKey)}")
 
                 //need to go get cipher authenticated
                 val signature = cipherRepository.getSignatureForDeviceSigning(keyId)
