@@ -114,7 +114,7 @@ class DeviceRegistrationViewModel @Inject constructor(
     private fun createKeyForDevice() {
         viewModelScope.launch {
             val email = userRepository.retrieveUserEmail()
-            val keyId = UUID.randomUUID().toString()
+            val keyId = UUID.randomUUID().toString().replace("-", "")
             SharedPrefsHelper.saveDeviceId(email, deviceId = keyId)
             state = state.copy(keyName = keyId)
             try {

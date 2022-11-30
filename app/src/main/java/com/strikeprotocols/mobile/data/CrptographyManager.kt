@@ -4,16 +4,16 @@ import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
 import com.strikeprotocols.mobile.common.BaseWrapper
 import com.strikeprotocols.mobile.common.strikeLog
-import java.security.KeyPairGenerator
-import java.security.KeyStore
-import java.security.PrivateKey
-import java.security.Signature
+import io.reactivex.annotations.NonNull
+import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo
+import java.security.*
 import java.security.cert.Certificate
 import java.security.spec.ECGenParameterSpec
 import javax.crypto.Cipher
 import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
 import javax.crypto.spec.GCMParameterSpec
+
 
 interface CryptographyManager {
 
@@ -78,8 +78,7 @@ class CryptographyManagerImpl : CryptographyManager {
         strikeLog(message = "Public key used to verify: ${BaseWrapper.encode(certificate.publicKey.encoded)}")
         signature.initVerify(certificate)
         signature.update(dataSigned)
-        val verified = signature.verify(signatureToCheck)
-        return verified
+        return signature.verify(signatureToCheck)
     }
 
     override fun getInitializedCipherForDecryption(
@@ -147,7 +146,7 @@ class CryptographyManagerImpl : CryptographyManager {
 
         strikeLog(message = "Public key used to sign: ${BaseWrapper.encode(keyPair.public.encoded)}")
 
-        return keyPair.public.encoded
+        return extractData(keyPair.public)
     }
 
     override fun getCertificateFromKeystore(deviceId: String): Certificate {
@@ -156,6 +155,14 @@ class CryptographyManagerImpl : CryptographyManager {
         keyStore.load(null) // Keystore must be loaded before it can be accessed
         val cert = keyStore.getCertificate(deviceId)
         return cert
+    }
+
+    private fun extractData(publicKey: PublicKey): ByteArray {
+        val subjectPublicKeyInfo = SubjectPublicKeyInfo.getInstance(publicKey.encoded)
+        val encodedBytes = subjectPublicKeyInfo.publicKeyData.bytes
+        val publicKeyData = ByteArray(encodedBytes.size - 1)
+        System.arraycopy(encodedBytes, 1, publicKeyData, 0, encodedBytes.size - 1)
+        return publicKeyData
     }
 
     private fun getOrCreateSecretKey(keyName: String): SecretKey {

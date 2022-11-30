@@ -5,6 +5,7 @@ import com.strikeprotocols.mobile.data.CryptographyManager
 import com.strikeprotocols.mobile.data.models.LogoType
 import com.strikeprotocols.mobile.data.models.UserImage
 import java.io.ByteArrayOutputStream
+import java.security.MessageDigest
 import java.security.Signature
 
 const val MAX_QUALITY_JPEG = 100
@@ -20,7 +21,7 @@ fun Bitmap.convertToByteArrayWithJPEGCompression(): ByteArray {
     return stream.toByteArray()
 }
 
-suspend fun generateUserImageObject(
+fun generateUserImageObject(
     userPhoto: Bitmap,
     keyName: String,
     signature: Signature,
@@ -29,13 +30,18 @@ suspend fun generateUserImageObject(
     //Convert bitmap to byteArray
     val imageByteArray = userPhoto.convertToByteArrayWithJPEGCompression()
 
+    //256 hash of image bytes
+    val digest = MessageDigest.getInstance("SHA-256")
+    digest.update(imageByteArray)
+    val hash = digest.digest()
+
     //Encoded byteArray
     val encodedImageData = BaseWrapper.encodeToBase64(byteArray = imageByteArray)
 
     //Signed byteArray
     val signedImageData =
         cryptographyManager.signDataWithDeviceKey(
-            data = imageByteArray,
+            data = hash,
             keyName = keyName,
             signature = signature
         )
