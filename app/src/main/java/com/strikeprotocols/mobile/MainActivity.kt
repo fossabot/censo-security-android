@@ -19,17 +19,12 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.raygun.raygun4android.RaygunClient
-import com.strikeprotocols.mobile.common.BiometricUtil
-import com.strikeprotocols.mobile.common.CrashReportingUtil
-import com.strikeprotocols.mobile.common.Resource
 import com.strikeprotocols.mobile.common.*
 import com.strikeprotocols.mobile.common.BioCryptoUtil.NO_CIPHER_CODE
 import com.strikeprotocols.mobile.data.*
 import com.strikeprotocols.mobile.data.models.approval.ApprovalRequest
 import com.strikeprotocols.mobile.presentation.Screen
 import com.strikeprotocols.mobile.presentation.account.AccountScreen
-import com.strikeprotocols.mobile.presentation.semantic_version_check.EnforceUpdateScreen
-import com.strikeprotocols.mobile.presentation.semantic_version_check.MainViewModel
 import com.strikeprotocols.mobile.presentation.approval_detail.ApprovalDetailsScreen
 import com.strikeprotocols.mobile.presentation.approvals.ApprovalsListScreen
 import com.strikeprotocols.mobile.presentation.approvals.ApprovalsViewModel
@@ -38,17 +33,20 @@ import com.strikeprotocols.mobile.presentation.contact_strike.ContactStrikeScree
 import com.strikeprotocols.mobile.presentation.entrance.EntranceScreen
 import com.strikeprotocols.mobile.presentation.key_management.KeyManagementInitialData
 import com.strikeprotocols.mobile.presentation.key_management.KeyManagementScreen
-import com.strikeprotocols.mobile.presentation.migration.VerifyUserInitialData
 import com.strikeprotocols.mobile.presentation.migration.MigrationScreen
+import com.strikeprotocols.mobile.presentation.migration.VerifyUserInitialData
 import com.strikeprotocols.mobile.presentation.regeneration.RegenerationScreen
 import com.strikeprotocols.mobile.presentation.reset_password.ResetPasswordScreen
+import com.strikeprotocols.mobile.presentation.semantic_version_check.BlockingUI
+import com.strikeprotocols.mobile.presentation.semantic_version_check.EnforceUpdateScreen
+import com.strikeprotocols.mobile.presentation.semantic_version_check.MainViewModel
 import com.strikeprotocols.mobile.presentation.sign_in.SignInScreen
 import com.strikeprotocols.mobile.service.MessagingService.Companion.NOTIFICATION_DISPLAYED_KEY
 import com.strikeprotocols.mobile.ui.theme.BackgroundBlack
 import com.strikeprotocols.mobile.ui.theme.StrikeMobileTheme
-import com.strikeprotocols.mobile.presentation.semantic_version_check.BlockingUI
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
+
 
 @AndroidEntryPoint
 class MainActivity : FragmentActivity() {
