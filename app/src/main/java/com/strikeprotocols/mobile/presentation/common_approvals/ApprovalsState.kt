@@ -10,6 +10,7 @@ data class ApprovalsState(
 
     //list specific state
     val shouldShowErrorSnackbar: Boolean = false,
+    val showPushNotificationsDialog: Resource<Unit> = Resource.Uninitialized,
     val approvalsResultRequest: Resource<List<ApprovalRequest?>> = Resource.Uninitialized,
     val approvals: List<ApprovalRequest?> = emptyList(),
 
