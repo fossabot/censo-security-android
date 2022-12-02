@@ -14,7 +14,7 @@ class ParseApprovalRequestTypes {
     fun parseAllApprovalRequestTypes() {
         val allApprovalRequests = getFullListOfApprovalItems()
 
-        assertEquals(16, allApprovalRequests.size)
+        assertEquals(17, allApprovalRequests.size)
 
         allApprovalRequests.forEach { approvalRequest ->
             assertNotNull(approvalRequest)
