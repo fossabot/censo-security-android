@@ -760,7 +760,7 @@ data class NftMetadata(
 data class SymbolInfo(
     val symbol: String,
     val symbolDescription: String,
-    val tokenMintAddress: String,
+    val tokenMintAddress: String?,
     val imageUrl: String? = null,
     val nftMetadata: NftMetadata? = null
 ) {

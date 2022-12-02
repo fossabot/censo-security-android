@@ -91,7 +91,7 @@ data class ApprovalDispositionRequest(
                 buffer.write(requestType.account.identifier.sha256HashBytes())
                 buffer.write(requestType.destination.address.base58Bytes())
                 buffer.writeLongLE(requestType.symbolAndAmountInfo.fundamentalAmount())
-                buffer.write(requestType.symbolAndAmountInfo.symbolInfo.tokenMintAddress.base58Bytes())
+                buffer.write(requestType.symbolAndAmountInfo.symbolInfo.tokenMintAddress!!.base58Bytes())
 
                 buffer.toByteArray()
             }
@@ -106,7 +106,7 @@ data class ApprovalDispositionRequest(
                 buffer.write(requestType.account.identifier.sha256HashBytes())
                 buffer.write(requestType.destination.address.base58Bytes())
                 buffer.writeLongLE(requestType.symbolAndAmountInfo.fundamentalAmount())
-                buffer.write(requestType.symbolAndAmountInfo.symbolInfo.tokenMintAddress.base58Bytes())
+                buffer.write(requestType.symbolAndAmountInfo.symbolInfo.tokenMintAddress!!.base58Bytes())
 
                 buffer.toByteArray()
             }
@@ -309,13 +309,13 @@ data class ApprovalDispositionRequest(
     }
 
     private fun ethereumWithdrawal(withdrawalRequest: WithdrawalRequest, ethereumTransaction: EthereumTransaction): ByteArray {
-        return if (withdrawalRequest.symbolAndAmountInfo.symbolInfo.tokenMintAddress == "")
+        return withdrawalRequest.symbolAndAmountInfo.symbolInfo.tokenMintAddress?.let { contractAddress ->
             EthereumTransactionUtil.computeSafeTransactionHash(
                 ethereumTransaction.chainId,
                 withdrawalRequest.account.address!!,
-                withdrawalRequest.destination.address,
-                withdrawalRequest.symbolAndAmountInfo.fundamentalAmountAsBigInteger(),
-                ByteArray(0),
+                contractAddress,
+                BigInteger.ZERO,
+                erc20WithdrawalTx(withdrawalRequest),
                 Operation.CALL,
                 BigInteger.ZERO,
                 BigInteger.ZERO,
@@ -323,13 +323,14 @@ data class ApprovalDispositionRequest(
                 "0x0000000000000000000000000000000000000000",
                 "0x0000000000000000000000000000000000000000",
                 ethereumTransaction.safeNonce.toBigInteger(),
-            ) else
+            )
+        } ?:
             EthereumTransactionUtil.computeSafeTransactionHash(
                 ethereumTransaction.chainId,
                 withdrawalRequest.account.address!!,
-                withdrawalRequest.symbolAndAmountInfo.symbolInfo.tokenMintAddress,
-                BigInteger.ZERO,
-                erc20WithdrawalTx(withdrawalRequest),
+                withdrawalRequest.destination.address,
+                withdrawalRequest.symbolAndAmountInfo.fundamentalAmountAsBigInteger(),
+                ByteArray(0),
                 Operation.CALL,
                 BigInteger.ZERO,
                 BigInteger.ZERO,
