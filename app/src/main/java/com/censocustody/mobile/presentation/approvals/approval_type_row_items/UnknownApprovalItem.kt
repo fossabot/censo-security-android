@@ -19,7 +19,7 @@ import com.censocustody.mobile.R
 import com.censocustody.mobile.presentation.approvals.ApprovalItemHeader
 import com.censocustody.mobile.ui.theme.DividerGrey
 import com.censocustody.mobile.ui.theme.HeaderBlack
-import com.censocustody.mobile.ui.theme.StrikeWhite
+import com.censocustody.mobile.ui.theme.CensoWhite
 
 @Composable
 fun UnknownApprovalItem(
@@ -44,7 +44,7 @@ fun UnknownApprovalItem(
                 .padding(top = 16.dp),
             text = stringResource(R.string.unknown_approval_tip),
             textAlign = TextAlign.Center,
-            color = StrikeWhite,
+            color = CensoWhite,
             fontSize = 16.sp
         )
 
@@ -74,7 +74,7 @@ fun UnknownApprovalButtonRow(
                     modifier = Modifier.padding(top = 4.dp, bottom = 4.dp),
                     text = stringResource(R.string.update_censo_custody),
                     textAlign = TextAlign.Center,
-                    color = StrikeWhite,
+                    color = CensoWhite,
                     fontSize = 17.sp,
                     fontWeight = FontWeight.SemiBold
                 )

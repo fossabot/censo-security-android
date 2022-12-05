@@ -24,7 +24,7 @@ import com.censocustody.mobile.presentation.Screen
 import com.censocustody.mobile.presentation.key_management.KeyManagementState.Companion.INVALID_PHRASE_ERROR
 import com.censocustody.mobile.presentation.key_management.KeyManagementState.Companion.NO_PHRASE_ERROR
 import com.censocustody.mobile.presentation.key_management.flows.*
-import com.censocustody.mobile.ui.theme.StrikeWhite
+import com.censocustody.mobile.ui.theme.CensoWhite
 import com.censocustody.mobile.ui.theme.UnfocusedGrey
 
 @OptIn(
@@ -180,14 +180,14 @@ fun KeyManagementScreen(
             title = {
                 Text(
                     text = stringResource(R.string.key_recovery_failed_title),
-                    color = StrikeWhite,
+                    color = CensoWhite,
                     fontSize = 20.sp
                 )
             },
             text = {
                 Text(
                     text = stringResource(id = R.string.key_recovery_failed_message),
-                    color = StrikeWhite,
+                    color = CensoWhite,
                     fontSize = 16.sp
                 )
             },

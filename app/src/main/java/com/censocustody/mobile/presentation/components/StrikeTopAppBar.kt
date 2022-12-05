@@ -18,18 +18,18 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.censocustody.mobile.R
 import com.censocustody.mobile.ui.theme.BackgroundBlack
-import com.censocustody.mobile.ui.theme.StrikeWhite
+import com.censocustody.mobile.ui.theme.CensoWhite
 
 
 @Composable
-fun StrikeSignInTopAppBar(
+fun SignInTopAppBar(
     title: String,
     onAppBarIconClick: () -> Unit,
 ) {
     TopAppBar(
         modifier = Modifier.fillMaxWidth(),
         backgroundColor = Color.Transparent,
-        contentColor = StrikeWhite,
+        contentColor = CensoWhite,
         elevation = AppBarDefaults.TopAppBarElevation,
     ) {
         Row(
@@ -44,13 +44,13 @@ fun StrikeSignInTopAppBar(
                     modifier = Modifier.size(32.dp),
                     imageVector = Icons.Filled.ChevronLeft,
                     contentDescription = stringResource(R.string.back),
-                    tint = StrikeWhite
+                    tint = CensoWhite
                 )
                 Text(
                     text = title,
                     textAlign = TextAlign.Start,
                     fontSize = 16.sp,
-                    color = StrikeWhite,
+                    color = CensoWhite,
                     fontWeight = FontWeight.Bold,
                     maxLines = 1
                 )
@@ -62,14 +62,14 @@ fun StrikeSignInTopAppBar(
 }
 
 @Composable
-fun StrikeAuthTopAppBar(
+fun AuthTopAppBar(
     title: String,
     onAppBarIconClick: () -> Unit,
 ) {
     TopAppBar(
         modifier = Modifier.fillMaxWidth(),
         backgroundColor = Color.Transparent,
-        contentColor = StrikeWhite,
+        contentColor = CensoWhite,
         elevation = AppBarDefaults.TopAppBarElevation,
     ) {
         Row(
@@ -84,13 +84,13 @@ fun StrikeAuthTopAppBar(
                 modifier = Modifier.size(32.dp),
                 imageVector = Icons.Filled.ChevronLeft,
                 contentDescription = stringResource(R.string.back),
-                tint = StrikeWhite
+                tint = CensoWhite
             )
             Text(
                 text = title,
                 textAlign = TextAlign.Start,
                 fontSize = 16.sp,
-                color = StrikeWhite,
+                color = CensoWhite,
                 fontWeight = FontWeight.Bold,
                 maxLines = 1
             )
@@ -100,7 +100,7 @@ fun StrikeAuthTopAppBar(
 
 @SuppressLint("ComposableLambdaParameterNaming")
 @Composable
-fun StrikeCenteredTopAppBar(
+fun CenteredTopAppBar(
     title: String,
     onAppBarIconClick: () -> Unit,
     navigationIcon: ImageVector,
@@ -116,7 +116,7 @@ fun StrikeCenteredTopAppBar(
     TopAppBar(
         modifier = Modifier.fillMaxWidth(),
         backgroundColor = BackgroundBlack,
-        contentColor = StrikeWhite,
+        contentColor = CensoWhite,
         elevation = AppBarDefaults.TopAppBarElevation,
     ) {
         Box(modifier = Modifier.height(56.dp)) {
@@ -130,7 +130,7 @@ fun StrikeCenteredTopAppBar(
                         Icon(
                             navigationIcon,
                             navigationIconContentDes,
-                            tint = StrikeWhite
+                            tint = CensoWhite
                         )
                     }
                 }
@@ -158,7 +158,7 @@ fun StrikeCenteredTopAppBar(
                     text = title,
                     fontWeight = FontWeight.W600,
                     fontSize = 18.sp,
-                    color = StrikeWhite,
+                    color = CensoWhite,
                     lineHeight = 10.sp,
                     letterSpacing = 0.23.sp
                 )

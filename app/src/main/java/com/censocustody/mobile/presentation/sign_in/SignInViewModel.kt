@@ -24,7 +24,7 @@ class SignInViewModel @Inject constructor(
     private val pushRepository: PushRepository,
     private val cipherRepository: CipherRepository,
     private val keyRepository: KeyRepository,
-    private val strikeUserData: StrikeUserData
+    private val censoUserData: CensoUserData
 ) : ViewModel() {
 
     var state by mutableStateOf(SignInState())
@@ -220,7 +220,7 @@ class SignInViewModel @Inject constructor(
 
     private suspend fun userSuccessfullyLoggedIn(token: String) {
         userRepository.saveUserEmail(state.email)
-        strikeUserData.setEmail(state.email)
+        censoUserData.setEmail(state.email)
         userRepository.setUserLoggedIn()
         userRepository.saveToken(token)
         submitNotificationTokenForRegistration()
@@ -269,7 +269,7 @@ class SignInViewModel @Inject constructor(
                 val pushResource = pushRepository.addPushNotification(pushBody = pushBody)
 
                 if (pushResource is Resource.Error) {
-                    throw Exception("Push registration failed with code: ${pushResource.strikeError}")
+                    throw Exception("Push registration failed with code: ${pushResource.censoError}")
                 }
             } else {
                 if (token.isEmpty()) {

@@ -3,7 +3,7 @@ package com.censocustody.mobile.common
 import cash.z.ecc.android.bip39.Mnemonics
 import cash.z.ecc.android.bip39.toSeed
 import com.censocustody.mobile.data.EncryptionManagerImpl.Companion.DATA_CHECK
-import com.censocustody.mobile.data.StrikePrivateKey
+import com.censocustody.mobile.data.CensoPrivateKey
 import org.bitcoinj.core.Base58
 import org.bitcoinj.core.ECKey
 import org.bouncycastle.asn1.ASN1InputStream
@@ -68,7 +68,7 @@ class Secp256k1HierarchicalKey(
     private val childPathNumber: ChildPathNumber? = null,
     private val parentFingerprint: Int = 0,
     private val publicKey: ByteArray? = null
-) : StrikePrivateKey {
+) : CensoPrivateKey {
     companion object {
         private const val curveName = "secp256k1"
         private val bcProvider = BouncyCastleProvider()

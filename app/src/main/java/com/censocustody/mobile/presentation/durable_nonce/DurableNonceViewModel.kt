@@ -7,7 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.censocustody.mobile.BuildConfig
 import com.censocustody.mobile.common.Resource
-import com.censocustody.mobile.common.StrikeError
+import com.censocustody.mobile.common.CensoError
 import com.censocustody.mobile.data.BaseRepository.Companion.NO_CODE
 import com.censocustody.mobile.data.BaseRepository.Companion.TOO_MANY_REQUESTS_CODE
 import com.censocustody.mobile.data.SolanaRepository
@@ -74,7 +74,7 @@ class DurableNonceViewModel @Inject constructor(
                     nonceRetryCount = 0
                     state = state.copy(
                         multipleAccountsResult = Resource.Error(
-                            strikeError = StrikeError.DefaultApiError(statusCode = NO_CODE),
+                            censoError = CensoError.DefaultApiError(statusCode = NO_CODE),
                             exception = Exception(
                                 UNABLE_TO_RETRIEVE_VALID_NONCE
                             )
@@ -91,8 +91,8 @@ class DurableNonceViewModel @Inject constructor(
                     multipleAccounts = multipleAccounts
                 )
             } else if (multipleAccountsResult is Resource.Error) {
-                if (multipleAccountsResult.strikeError is StrikeError.ApiError) {
-                    if (multipleAccountsResult.strikeError.statusCode == TOO_MANY_REQUESTS_CODE) {
+                if (multipleAccountsResult.censoError is CensoError.ApiError) {
+                    if (multipleAccountsResult.censoError.statusCode == TOO_MANY_REQUESTS_CODE) {
                         delay(TOO_MANY_REQUESTS_DELAY)
                         nonceRetryCount++
                         retrieveMultipleAccounts()

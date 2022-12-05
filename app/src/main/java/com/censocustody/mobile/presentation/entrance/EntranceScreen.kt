@@ -19,12 +19,12 @@ import com.censocustody.mobile.common.AndroidUriWrapper
 import com.censocustody.mobile.common.Resource
 import com.censocustody.mobile.common.popUpToTop
 import com.censocustody.mobile.presentation.Screen
-import com.censocustody.mobile.presentation.components.StrikeErrorScreen
+import com.censocustody.mobile.presentation.components.CensoErrorScreen
 import com.censocustody.mobile.presentation.key_management.KeyManagementFlow
 import com.censocustody.mobile.presentation.key_management.KeyManagementInitialData
 import com.censocustody.mobile.presentation.migration.VerifyUserInitialData
 import com.censocustody.mobile.ui.theme.BackgroundBlack
-import com.censocustody.mobile.ui.theme.StrikeWhite
+import com.censocustody.mobile.ui.theme.CensoWhite
 
 @Composable
 fun EntranceScreen(
@@ -77,7 +77,7 @@ fun EntranceScreen(
                     "${Screen.KeyManagementRoute.route}/$keyManagementJson"
                 }
                 UserDestination.FORCE_UPDATE -> Screen.EnforceUpdateRoute.route
-                UserDestination.INVALID_KEY -> Screen.ContactStrikeRoute.route
+                UserDestination.INVALID_KEY -> Screen.ContactCensoRoute.route
                 UserDestination.LOGIN, null -> Screen.SignInRoute.route
             }
 
@@ -107,12 +107,12 @@ fun EntranceScreen(
             modifier = Modifier
                 .align(Alignment.Center)
                 .size(60.dp),
-            color = StrikeWhite
+            color = CensoWhite
         )
     }
 
     if (state.verifyUserResult is Resource.Error) {
-        StrikeErrorScreen(
+        CensoErrorScreen(
             errorResource = state.verifyUserResult,
             onDismiss = {
                 //since this screen is just loading UI, we always want to retry.

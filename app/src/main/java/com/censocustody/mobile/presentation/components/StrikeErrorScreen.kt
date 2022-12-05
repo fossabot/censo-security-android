@@ -20,22 +20,22 @@ import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat.startActivity
 import com.censocustody.mobile.R
 import com.censocustody.mobile.common.Resource
-import com.censocustody.mobile.common.StrikeError
+import com.censocustody.mobile.common.CensoError
 import com.censocustody.mobile.presentation.key_management.PurpleGradientBackgroundUI
 import com.censocustody.mobile.ui.theme.BackgroundBlack
-import com.censocustody.mobile.ui.theme.StrikeWhite
+import com.censocustody.mobile.ui.theme.CensoWhite
 
 @Composable
-fun StrikeErrorScreen(
+fun CensoErrorScreen(
     errorResource: Resource.Error<Any>,
     onDismiss: () -> Unit,
     onRetry: () -> Unit
 ) {
     val context = LocalContext.current
 
-    val maintenanceMode = errorResource.strikeError is StrikeError.MaintenanceError
+    val maintenanceMode = errorResource.censoError is CensoError.MaintenanceError
 
-    val displayMessage = errorResource.strikeError?.getErrorMessage(context)
+    val displayMessage = errorResource.censoError?.getErrorMessage(context)
         ?: stringResource(id = R.string.something_went_wrong)
 
     Box(
@@ -55,7 +55,7 @@ fun StrikeErrorScreen(
             Text(
                 modifier = Modifier.padding(horizontal = 16.dp),
                 text = displayMessage,
-                color = StrikeWhite,
+                color = CensoWhite,
                 fontSize = 16.sp,
                 textAlign = TextAlign.Center,
                 lineHeight = 24.sp
@@ -69,7 +69,7 @@ fun StrikeErrorScreen(
                 Text(
                     text = stringResource(id = R.string.retry),
                     fontWeight = FontWeight.SemiBold,
-                    color = StrikeWhite,
+                    color = CensoWhite,
                     fontSize = 16.sp
                 )
             }
@@ -79,7 +79,7 @@ fun StrikeErrorScreen(
                     onClick = {
                         val getHelpIntent = Intent(Intent.ACTION_VIEW).apply {
                             data =
-                                Uri.parse("https://help.strikeprotocols.com")
+                                Uri.parse("https://help.censocustody.com")
                         }
                         startActivity(context, getHelpIntent, null)
                     }

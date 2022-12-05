@@ -18,7 +18,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import com.censocustody.mobile.R
-import com.censocustody.mobile.ui.theme.StrikeWhite
+import com.censocustody.mobile.ui.theme.CensoWhite
 
 @Composable
 fun EnforceUpdateScreen() {
@@ -33,7 +33,7 @@ fun EnforceUpdateScreen() {
     ) {
         Text(
             text = stringResource(id = R.string.minimum_app_version),
-            color = StrikeWhite,
+            color = CensoWhite,
             fontSize = 22.sp,
             fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Center
@@ -53,7 +53,7 @@ fun EnforceUpdateScreen() {
         }) {
             Text(
                 text = stringResource(id = R.string.update_app),
-                color = StrikeWhite,
+                color = CensoWhite,
                 fontSize = 18.sp
             )
         }

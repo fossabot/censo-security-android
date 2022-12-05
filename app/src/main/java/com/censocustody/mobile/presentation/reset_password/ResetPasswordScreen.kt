@@ -21,7 +21,7 @@ import androidx.navigation.NavController
 import com.censocustody.mobile.R
 import com.censocustody.mobile.common.Resource
 import com.censocustody.mobile.presentation.components.SignInTextField
-import com.censocustody.mobile.presentation.components.StrikeCenteredTopAppBar
+import com.censocustody.mobile.presentation.components.CenteredTopAppBar
 import com.censocustody.mobile.ui.theme.*
 
 
@@ -42,7 +42,7 @@ fun ResetPasswordScreen(
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
-            StrikeCenteredTopAppBar(
+            CenteredTopAppBar(
                 title = stringResource(R.string.reset_password),
                 onAppBarIconClick = { navController.navigateUp() },
                 navigationIconContentDes = stringResource(id = R.string.content_des_back_icon),
@@ -62,7 +62,7 @@ fun ResetPasswordScreen(
                     Spacer(modifier = Modifier.height(24.dp))
                     Text(
                         text = stringResource(R.string.reset_pswd_email_sent),
-                        color = StrikeWhite,
+                        color = CensoWhite,
                         fontSize = 20.sp
                     )
                 }
@@ -88,8 +88,8 @@ fun ResetPasswordScreen(
                         .height(54.dp)
                         .clip(RoundedCornerShape(12.dp)),
                     colors = ButtonDefaults.buttonColors(
-                        backgroundColor = StrikePurple,
-                        disabledBackgroundColor = StrikePurple,
+                        backgroundColor = CensoPurple,
+                        disabledBackgroundColor = CensoPurple,
                     ),
                     enabled = resetPasswordState.resetButtonEnabled,
                     onClick = resetPasswordViewModel::submitResetPassword
@@ -98,7 +98,7 @@ fun ResetPasswordScreen(
                         is Resource.Loading -> {
                             CircularProgressIndicator(
                                 modifier = Modifier.height(40.dp),
-                                color = StrikeWhite,
+                                color = CensoWhite,
                                 strokeWidth = 4.dp,
                             )
                         }
@@ -106,14 +106,14 @@ fun ResetPasswordScreen(
                             Text(
                                 text = stringResource(R.string.retry_recover_password),
                                 fontSize = 16.sp,
-                                color = StrikeWhite
+                                color = CensoWhite
                             )
                         }
                         else -> {
                             Text(
                                 text = stringResource(R.string.reset_password),
                                 fontSize = 16.sp,
-                                color = StrikeWhite
+                                color = CensoWhite
                             )
                         }
                     }

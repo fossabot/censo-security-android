@@ -3,8 +3,8 @@ package com.censocustody.mobile.ui.theme
 import androidx.compose.ui.graphics.Color
 
 val BackgroundBlack = Color.Black
-val StrikePurple = Color(0xFF754dcc)
-val StrikeWhite = Color.White
+val CensoPurple = Color(0xFF754dcc)
+val CensoWhite = Color.White
 val UnfocusedGrey = Color(0xFF373737)
 val HeaderBlack = Color(0xFF191919)
 val SectionBlack = Color(0xFF141414)

@@ -1,8 +1,8 @@
 package com.censocustody.mobile.di
 
 import android.content.Context
-import com.censocustody.mobile.common.StrikeCountDownTimer
-import com.censocustody.mobile.common.StrikeCountDownTimerImpl
+import com.censocustody.mobile.common.CensoCountDownTimer
+import com.censocustody.mobile.common.CensoCountDownTimerImpl
 import com.censocustody.mobile.data.*
 import com.censocustody.mobile.data.UserRepository
 import com.censocustody.mobile.data.UserRepositoryImpl
@@ -25,7 +25,7 @@ object AppModule {
         encryptionManager: EncryptionManager,
         securePreferences: SecurePreferences
     ): AuthProvider {
-        return StrikeAuth(encryptionManager, securePreferences)
+        return CensoAuth(encryptionManager, securePreferences)
     }
 
     @Provides
@@ -123,13 +123,13 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideStrikeUserData(userRepository: UserRepository): StrikeUserData {
-        return StrikeUserDataImpl(userRepository)
+    fun provideUserData(userRepository: UserRepository): CensoUserData {
+        return CensoUserDataImpl(userRepository)
     }
 
     @Provides
-    fun provideStrikeCountDownTimer(): StrikeCountDownTimer {
-        return StrikeCountDownTimerImpl()
+    fun provideCountDownTimer(): CensoCountDownTimer {
+        return CensoCountDownTimerImpl()
     }
 
     @Singleton

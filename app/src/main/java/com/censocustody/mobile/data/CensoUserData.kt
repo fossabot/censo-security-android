@@ -2,20 +2,20 @@ package com.censocustody.mobile.data
 
 import com.censocustody.mobile.data.models.VerifyUser
 
-interface StrikeUserData {
-    fun getStrikeUser(): VerifyUser?
+interface CensoUserData {
+    fun getCensoUser(): VerifyUser?
     fun setEmail(userEmail: String)
     fun getEmail(): String
-    fun setStrikeUser(verifyUser: VerifyUser?)
+    fun setCensoUser(verifyUser: VerifyUser?)
     fun isNotNull(): Boolean
 }
 
 
-class StrikeUserDataImpl(val userRepository: UserRepository) : StrikeUserData {
-    private var strikeUser: VerifyUser? = null
+class CensoUserDataImpl(val userRepository: UserRepository) : CensoUserData {
+    private var censoUser: VerifyUser? = null
     private var email: String = ""
 
-    override fun getStrikeUser(): VerifyUser? = strikeUser
+    override fun getCensoUser(): VerifyUser? = censoUser
     override fun setEmail(userEmail: String) {
         email = userEmail
     }
@@ -27,9 +27,9 @@ class StrikeUserDataImpl(val userRepository: UserRepository) : StrikeUserData {
         return email
     }
 
-    override fun setStrikeUser(verifyUser: VerifyUser?) {
-        strikeUser = verifyUser
+    override fun setCensoUser(verifyUser: VerifyUser?) {
+        censoUser = verifyUser
     }
 
-    override fun isNotNull(): Boolean = strikeUser != null
+    override fun isNotNull(): Boolean = censoUser != null
 }

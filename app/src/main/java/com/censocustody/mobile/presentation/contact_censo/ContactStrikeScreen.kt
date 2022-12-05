@@ -1,4 +1,4 @@
-package com.censocustody.mobile.presentation.contact_strike
+package com.censocustody.mobile.presentation.contact_censo
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -13,11 +13,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.censocustody.mobile.R
-import com.censocustody.mobile.ui.theme.StrikePurple
-import com.censocustody.mobile.ui.theme.StrikeWhite
+import com.censocustody.mobile.ui.theme.CensoPurple
+import com.censocustody.mobile.ui.theme.CensoWhite
 
 @Composable
-fun ContactStrikeScreen() {
+fun ContactCensoScreen() {
     val localHandler = LocalUriHandler.current
 
     Column(
@@ -29,17 +29,17 @@ fun ContactStrikeScreen() {
             text = stringResource(R.string.contact_censo_custody),
             textAlign = TextAlign.Center,
             fontSize = 24.sp,
-            color = StrikeWhite
+            color = CensoWhite
         )
         Spacer(modifier = Modifier.height(24.dp))
         Text(
             modifier = Modifier
                 .clickable {
-                    localHandler.openUri("https://help.strikeprotocols.com")
+                    localHandler.openUri("https://help.censocustody.com")
                 }
                 .padding(24.dp),
             text = stringResource(R.string.get_help),
-            color = StrikePurple,
+            color = CensoPurple,
             fontWeight = FontWeight.W500,
             fontSize = 20.sp
         )

@@ -6,7 +6,7 @@ import com.nhaarman.mockitokotlin2.whenever
 import com.censocustody.mobile.BuildConfig
 import com.censocustody.mobile.common.Resource
 import com.censocustody.mobile.data.KeyRepository
-import com.censocustody.mobile.data.StrikeUserData
+import com.censocustody.mobile.data.CensoUserData
 import com.censocustody.mobile.data.UserRepository
 import com.censocustody.mobile.data.models.Chain
 import com.censocustody.mobile.data.models.Organization
@@ -42,7 +42,7 @@ class EntranceViewModelTest : BaseViewModelTest() {
     lateinit var keyRepository: KeyRepository
 
     @Mock
-    lateinit var strikeUserData: StrikeUserData
+    lateinit var censoUserData: CensoUserData
 
     private lateinit var currentVersionName: String
 
@@ -126,7 +126,7 @@ class EntranceViewModelTest : BaseViewModelTest() {
         entranceViewModel = EntranceViewModel(
             userRepository = userRepository,
             keyRepository = keyRepository,
-            strikeUserData = strikeUserData
+            censoUserData = censoUserData
         )
     }
 
@@ -143,12 +143,12 @@ class EntranceViewModelTest : BaseViewModelTest() {
     }
 
     @Test
-    fun `if user is logged in then we set email value on the strike user data`() = runTest {
+    fun `if user is logged in then we set email value on the censo user data`() = runTest {
         setupLoggedInUserWithValidEmail()
 
         entranceViewModel.onStart()
 
-        verify(strikeUserData, times(1)).setEmail(email)
+        verify(censoUserData, times(1)).setEmail(email)
     }
 
     @Test
@@ -166,8 +166,8 @@ class EntranceViewModelTest : BaseViewModelTest() {
         entranceViewModel.onStart()
         advanceUntilIdle()
 
-        verify(strikeUserData, times(1))
-            .setStrikeUser(basicVerifyUserWithOnlySolanaPublicKey)
+        verify(censoUserData, times(1))
+            .setCensoUser(basicVerifyUserWithOnlySolanaPublicKey)
 
         assertTrue(entranceViewModel.state.userDestinationResult is Resource.Success)
         assertTrue(entranceViewModel.state.userDestinationResult.data == UserDestination.KEY_MIGRATION)
@@ -188,8 +188,8 @@ class EntranceViewModelTest : BaseViewModelTest() {
         entranceViewModel.onStart()
         advanceUntilIdle()
 
-        verify(strikeUserData, times(1))
-            .setStrikeUser(basicVerifyUserWithValidPublicKey)
+        verify(censoUserData, times(1))
+            .setCensoUser(basicVerifyUserWithValidPublicKey)
 
         assertTrue(entranceViewModel.state.userDestinationResult is Resource.Success)
         assertTrue(entranceViewModel.state.userDestinationResult.data == UserDestination.LOGIN)
@@ -209,8 +209,8 @@ class EntranceViewModelTest : BaseViewModelTest() {
             entranceViewModel.onStart()
             advanceUntilIdle()
 
-            verify(strikeUserData, times(1))
-                .setStrikeUser(basicVerifyUserWithNoPublicKeys)
+            verify(censoUserData, times(1))
+                .setCensoUser(basicVerifyUserWithNoPublicKeys)
 
             assertTrue(entranceViewModel.state.userDestinationResult is Resource.Success)
             assertTrue(entranceViewModel.state.userDestinationResult.data == UserDestination.KEY_MANAGEMENT_CREATION)
@@ -230,8 +230,8 @@ class EntranceViewModelTest : BaseViewModelTest() {
             entranceViewModel.onStart()
             advanceUntilIdle()
 
-            verify(strikeUserData, times(1))
-                .setStrikeUser(basicVerifyUserWithNoPublicKeys)
+            verify(censoUserData, times(1))
+                .setCensoUser(basicVerifyUserWithNoPublicKeys)
 
             assertTrue(entranceViewModel.state.userDestinationResult is Resource.Success)
             assertTrue(entranceViewModel.state.userDestinationResult.data == UserDestination.REGENERATION)
@@ -251,8 +251,8 @@ class EntranceViewModelTest : BaseViewModelTest() {
             entranceViewModel.onStart()
             advanceUntilIdle()
 
-            verify(strikeUserData, times(1))
-                .setStrikeUser(basicVerifyUserWithValidPublicKey)
+            verify(censoUserData, times(1))
+                .setCensoUser(basicVerifyUserWithValidPublicKey)
 
             assertTrue(entranceViewModel.state.userDestinationResult is Resource.Success)
             assertTrue(entranceViewModel.state.userDestinationResult.data == UserDestination.KEY_MANAGEMENT_RECOVERY)
@@ -275,8 +275,8 @@ class EntranceViewModelTest : BaseViewModelTest() {
             entranceViewModel.onStart()
             advanceUntilIdle()
 
-            verify(strikeUserData, times(1))
-                .setStrikeUser(basicVerifyUserWithValidPublicKey)
+            verify(censoUserData, times(1))
+                .setCensoUser(basicVerifyUserWithValidPublicKey)
 
             assertTrue(entranceViewModel.state.userDestinationResult is Resource.Success)
             assertTrue(entranceViewModel.state.userDestinationResult.data == UserDestination.HOME)
@@ -299,8 +299,8 @@ class EntranceViewModelTest : BaseViewModelTest() {
             entranceViewModel.onStart()
             advanceUntilIdle()
 
-            verify(strikeUserData, times(1))
-                .setStrikeUser(basicVerifyUserWithValidPublicKey)
+            verify(censoUserData, times(1))
+                .setCensoUser(basicVerifyUserWithValidPublicKey)
 
             assertTrue(entranceViewModel.state.userDestinationResult is Resource.Success)
             assertTrue(entranceViewModel.state.userDestinationResult.data == UserDestination.INVALID_KEY)
@@ -318,8 +318,8 @@ class EntranceViewModelTest : BaseViewModelTest() {
             entranceViewModel.onStart()
             advanceUntilIdle()
 
-            verify(strikeUserData, times(1))
-                .setStrikeUser(null)
+            verify(censoUserData, times(1))
+                .setCensoUser(null)
 
             assertTrue(entranceViewModel.state.userDestinationResult is Resource.Uninitialized)
         }
@@ -338,8 +338,8 @@ class EntranceViewModelTest : BaseViewModelTest() {
 
             entranceViewModel.onStart()
 
-            verify(strikeUserData, times(1))
-                .setStrikeUser(null)
+            verify(censoUserData, times(1))
+                .setCensoUser(null)
 
             assertTrue(entranceViewModel.state.userDestinationResult is Resource.Uninitialized)
 
@@ -349,8 +349,8 @@ class EntranceViewModelTest : BaseViewModelTest() {
 
             entranceViewModel.retryRetrieveVerifyUserDetails()
 
-            verify(strikeUserData, times(1))
-                .setStrikeUser(basicVerifyUserWithValidPublicKey)
+            verify(censoUserData, times(1))
+                .setCensoUser(basicVerifyUserWithValidPublicKey)
 
             assertTrue(entranceViewModel.state.userDestinationResult is Resource.Success)
             assertTrue(entranceViewModel.state.userDestinationResult.data == UserDestination.HOME)

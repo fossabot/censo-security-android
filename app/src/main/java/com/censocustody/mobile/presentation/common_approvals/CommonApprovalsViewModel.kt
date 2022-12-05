@@ -6,8 +6,8 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.censocustody.mobile.common.Resource
-import com.censocustody.mobile.common.StrikeCountDownTimer
-import com.censocustody.mobile.common.StrikeCountDownTimerImpl
+import com.censocustody.mobile.common.CensoCountDownTimer
+import com.censocustody.mobile.common.CensoCountDownTimerImpl
 import com.censocustody.mobile.data.ApprovalsRepository
 import com.censocustody.mobile.data.KeyRepository
 import com.censocustody.mobile.data.models.ApprovalDisposition
@@ -25,7 +25,7 @@ abstract class CommonApprovalsViewModel(
     private val approvalsRepository: ApprovalsRepository,
     private val cipherRepository: CipherRepository,
     private val keyRepository: KeyRepository,
-    private val timer: StrikeCountDownTimer
+    private val timer: CensoCountDownTimer
 ) : ViewModel() {
 
     //region abstract methods
@@ -51,7 +51,7 @@ abstract class CommonApprovalsViewModel(
             approval?.let { handleInitialData(it) } ?: handleEmptyInitialData()
         }
 
-        timer.startCountDownTimer(StrikeCountDownTimerImpl.Companion.UPDATE_COUNTDOWN) {
+        timer.startCountDownTimer(CensoCountDownTimerImpl.Companion.UPDATE_COUNTDOWN) {
             updateTimers()
         }
     }

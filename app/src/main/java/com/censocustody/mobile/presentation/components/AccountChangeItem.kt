@@ -16,7 +16,7 @@ import androidx.compose.ui.unit.sp
 import com.censocustody.mobile.presentation.approvals.ApprovalContentHeader
 import com.censocustody.mobile.ui.theme.DetailInfoDarkBackground
 import com.censocustody.mobile.ui.theme.GreyText
-import com.censocustody.mobile.ui.theme.StrikeWhite
+import com.censocustody.mobile.ui.theme.CensoWhite
 
 @Composable
 fun AccountChangeItem(header: String, title: String, subtitle: String, headerTopSpacing: Int = 12, headerBottomSpacing: Int = 32) {
@@ -42,7 +42,7 @@ fun AccountTitleSubtitle(title: String, subtitle: String) {
             verticalArrangement = Arrangement.Center,
         ) {
             Spacer(modifier = Modifier.height(6.dp))
-            Text(title, color = StrikeWhite, fontSize = 17.sp)
+            Text(title, color = CensoWhite, fontSize = 17.sp)
             Spacer(modifier = Modifier.height(2.dp))
             Text(subtitle, color = GreyText, fontSize = 13.sp)
             Spacer(modifier = Modifier.height(10.dp))

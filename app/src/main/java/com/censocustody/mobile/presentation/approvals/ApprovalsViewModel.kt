@@ -2,7 +2,7 @@ package com.censocustody.mobile.presentation.approvals
 
 import androidx.lifecycle.viewModelScope
 import com.censocustody.mobile.common.Resource
-import com.censocustody.mobile.common.StrikeCountDownTimer
+import com.censocustody.mobile.common.CensoCountDownTimer
 import com.censocustody.mobile.data.ApprovalsRepository
 import com.censocustody.mobile.data.KeyRepository
 import com.censocustody.mobile.data.models.approval.ApprovalRequest
@@ -18,7 +18,7 @@ class ApprovalsViewModel @Inject constructor(
     private val approvalsRepository: ApprovalsRepository,
     keyRepository: KeyRepository,
     cipherRepository: CipherRepository,
-    timer: StrikeCountDownTimer,
+    timer: CensoCountDownTimer,
 ) : CommonApprovalsViewModel(
     approvalsRepository = approvalsRepository,
     keyRepository = keyRepository,

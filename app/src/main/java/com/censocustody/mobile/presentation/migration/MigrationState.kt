@@ -2,11 +2,9 @@ package com.censocustody.mobile.presentation.migration
 
 import com.censocustody.mobile.common.BioPromptReason
 import com.censocustody.mobile.common.Resource
-import com.censocustody.mobile.common.StrikeError
 import com.censocustody.mobile.data.BioPromptData
 import com.censocustody.mobile.data.models.Signers
 import com.censocustody.mobile.data.models.VerifyUser
-import com.censocustody.mobile.data.models.WalletSigner
 import javax.crypto.Cipher
 
 data class MigrationState(

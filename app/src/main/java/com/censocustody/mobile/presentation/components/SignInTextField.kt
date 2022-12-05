@@ -12,7 +12,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -20,7 +19,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import com.censocustody.mobile.R
-import com.censocustody.mobile.ui.theme.StrikePurple
+import com.censocustody.mobile.ui.theme.CensoPurple
 
 @ExperimentalComposeUiApi
 @Composable
@@ -64,7 +63,7 @@ fun SignInTextField(
             ),
             onValueChange = onValueChange,
             colors = TextFieldDefaults.outlinedTextFieldColors(
-                focusedBorderColor = StrikePurple,
+                focusedBorderColor = CensoPurple,
                 unfocusedBorderColor = Color.Transparent,
                 textColor = Color.Black,
                 backgroundColor = Color.White

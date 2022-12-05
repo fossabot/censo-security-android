@@ -1,7 +1,7 @@
 package com.censocustody.mobile.data
 
 import com.censocustody.mobile.common.Resource
-import com.censocustody.mobile.common.StrikeError
+import com.censocustody.mobile.common.CensoError
 import com.censocustody.mobile.data.models.InitiationDisposition
 import com.censocustody.mobile.data.models.RegisterApprovalDisposition
 import com.censocustody.mobile.data.models.approval.ApprovalDispositionRequest
@@ -41,13 +41,13 @@ class ApprovalsRepositoryImpl @Inject constructor(
         // Helper method anyItemNull() will check if any of the disposition properties are null,
         // this allows us to use !! operator later in this method without worrying of NPE
         if (registerApprovalDisposition.anyItemNull()) {
-            return Resource.Error(strikeError = StrikeError.DefaultDispositionError())
+            return Resource.Error(censoError = CensoError.DefaultDispositionError())
         }
 
         val userEmail = userRepository.retrieveUserEmail()
 
         if (userEmail.isEmpty()) {
-            return Resource.Error(strikeError = StrikeError.MissingUserEmailError())
+            return Resource.Error(censoError = CensoError.MissingUserEmailError())
         }
 
         val approvalDispositionRequest = ApprovalDispositionRequest(
@@ -61,7 +61,7 @@ class ApprovalsRepositoryImpl @Inject constructor(
         val registerApprovalDispositionBody = try {
                 approvalDispositionRequest.convertToApiBody(encryptionManager, cipher)
         } catch (e: Exception) {
-            return Resource.Error(strikeError = StrikeError.SigningDataError())
+            return Resource.Error(censoError = CensoError.SigningDataError())
         }
 
         return retrieveApiResource {
@@ -80,13 +80,13 @@ class ApprovalsRepositoryImpl @Inject constructor(
         // Helper method anyItemNull() will check if any of the disposition properties are null,
         // this allows us to use !! operator later in this method without worrying of NPE
         if (initialDisposition.anyItemNull()) {
-            return Resource.Error(strikeError = StrikeError.DefaultDispositionError())
+            return Resource.Error(censoError = CensoError.DefaultDispositionError())
         }
 
         val userEmail = userRepository.retrieveUserEmail()
 
         if (userEmail.isEmpty()) {
-            return Resource.Error(strikeError = StrikeError.MissingUserEmailError())
+            return Resource.Error(censoError = CensoError.MissingUserEmailError())
         }
 
         val initiationRequest = InitiationRequest(
@@ -100,7 +100,7 @@ class ApprovalsRepositoryImpl @Inject constructor(
         val initiationRequestBody = try {
             initiationRequest.convertToApiBody(encryptionManager, cipher)
         } catch (e: Exception) {
-            return Resource.Error(strikeError = StrikeError.SigningDataError())
+            return Resource.Error(censoError = CensoError.SigningDataError())
         }
 
         return retrieveApiResource {

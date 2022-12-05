@@ -29,7 +29,7 @@ import com.censocustody.mobile.common.Resource
 import com.censocustody.mobile.common.popUpToTop
 import com.censocustody.mobile.presentation.Screen
 import com.censocustody.mobile.presentation.approval_detail.approval_type_detail_items.AccountRow
-import com.censocustody.mobile.presentation.components.StrikeCenteredTopAppBar
+import com.censocustody.mobile.presentation.components.CenteredTopAppBar
 import com.censocustody.mobile.ui.theme.*
 import java.util.*
 
@@ -66,7 +66,7 @@ fun AccountScreen(
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
-            StrikeCenteredTopAppBar(
+            CenteredTopAppBar(
                 title = stringResource(id = R.string.user),
                 onAppBarIconClick = { navController.navigateUp() },
                 showNavIcon = false,
@@ -81,7 +81,7 @@ fun AccountScreen(
                         Text(
                             modifier = Modifier.align(alignment = Alignment.Center),
                             text = stringResource(id = R.string.done),
-                            color = StrikeWhite,
+                            color = CensoWhite,
                             textAlign = TextAlign.Center
                         )
                     }
@@ -106,19 +106,19 @@ fun AccountScreen(
                     ) {
                     Spacer(modifier = Modifier.height(44.dp))
                     AccountRow(
-                        titleColor = StrikeWhite,
+                        titleColor = CensoWhite,
                         title = stringResource(R.string.email),
                         value = accountState.email
                     )
                     Divider(modifier = Modifier.height(0.5.dp), color = DividerGrey)
                     AccountRow(
-                        titleColor = StrikeWhite,
+                        titleColor = CensoWhite,
                         title = stringResource(R.string.name),
                         value = accountState.name
                     )
                     Spacer(modifier = Modifier.height(64.dp))
                     Text(
-                        color = StrikeWhite,
+                        color = CensoWhite,
                         textAlign = TextAlign.Center,
                         text = stringResource(R.string.security_notice),
                         letterSpacing = 0.25.sp,
@@ -128,7 +128,7 @@ fun AccountScreen(
                     Spacer(modifier = Modifier.height(16.dp))
                     Text(
                         modifier = Modifier.padding(horizontal = 16.dp),
-                        color = StrikeWhite,
+                        color = CensoWhite,
                         lineHeight = 20.sp,
                         textAlign = TextAlign.Center,
                         letterSpacing = 0.25.sp,
@@ -139,11 +139,11 @@ fun AccountScreen(
                     Text(
                         modifier = Modifier
                             .clickable {
-                                localHandler.openUri("https://help.strikeprotocols.com")
+                                localHandler.openUri("https://help.censocustody.com")
                             }
                             .padding(24.dp),
                         text = stringResource(R.string.get_help),
-                        color = StrikePurple,
+                        color = CensoPurple,
                         fontWeight = FontWeight.W500,
                         fontSize = 20.sp
                     )
@@ -154,7 +154,7 @@ fun AccountScreen(
                     ) {
                     Text(
                         text = appVersionText,
-                        color = StrikeWhite,
+                        color = CensoWhite,
                         letterSpacing = 0.25.sp,
                         fontSize = 14.sp
                     )
@@ -183,7 +183,7 @@ fun AccountScreen(
                 Box(modifier = Modifier.fillMaxSize().background(color = Color.Black.copy(alpha = 0.25f)).clickable {  }) {
                     CircularProgressIndicator(
                         modifier = Modifier.align(alignment = Alignment.Center).size(60.dp),
-                        color = StrikeWhite
+                        color = CensoWhite
                     )
                 }
             }

@@ -228,7 +228,7 @@ fun ApprovalDetailsScreen(
                     approvalDetailsViewModel.resetShouldDisplayConfirmDisposition()
                     launchNonceWork()
                 } else {
-                    StrikeConfirmDispositionAlertDialog(
+                    CensoConfirmDispositionAlertDialog(
                         dialogMessages = approvalDetailsState.shouldDisplayConfirmDisposition.dialogMessages,
                         onConfirm = {
                             approvalDetailsViewModel.resetShouldDisplayConfirmDisposition()
@@ -245,7 +245,7 @@ fun ApprovalDetailsScreen(
             if (approvalDetailsState.approvalDispositionState?.registerApprovalDispositionResult is Resource.Error) {
                 val retryData = approvalDetailsState.approvalDispositionState.approvalRetryData
 
-                StrikeErrorScreen(
+                CensoErrorScreen(
                     errorResource = approvalDetailsState.approvalDispositionState.registerApprovalDispositionResult as Resource.Error<ApprovalDispositionRequest.RegisterApprovalDispositionBody>,
                     onDismiss = {
                         resetDataAfterErrorDismissed()
@@ -262,7 +262,7 @@ fun ApprovalDetailsScreen(
             if (approvalDetailsState.approvalDispositionState?.initiationDispositionResult is Resource.Error) {
                 val retryData = approvalDetailsState.approvalDispositionState.approvalRetryData
 
-                StrikeErrorScreen(
+                CensoErrorScreen(
                     errorResource = approvalDetailsState.approvalDispositionState.initiationDispositionResult as Resource.Error<InitiationRequest.InitiateRequestBody>,
                     onDismiss = {
                         resetDataAfterErrorDismissed()
@@ -279,7 +279,7 @@ fun ApprovalDetailsScreen(
             if (durableNonceState.multipleAccountsResult is Resource.Error) {
                 val retryData = approvalDetailsState.approvalDispositionState?.approvalRetryData
 
-                StrikeErrorScreen(
+                CensoErrorScreen(
                     errorResource = durableNonceState.multipleAccountsResult,
                     onDismiss = {
                         resetDataAfterErrorDismissed()
@@ -307,7 +307,7 @@ fun ApprovalDetailsTopAppBar(
     navigationIcon: ImageVector,
     navigationIconContentDes: String
 ) {
-    StrikeCenteredTopAppBar(
+    CenteredTopAppBar(
         title = stringResource(R.string.details_title),
         onAppBarIconClick = { onAppBarIconClick() },
         navigationIcon = navigationIcon,
@@ -391,7 +391,7 @@ fun ApprovalDetails(
         ) {
             CircularProgressIndicator(
                 modifier = Modifier.align(Alignment.Center),
-                color = StrikeWhite
+                color = CensoWhite
             )
         }
     }

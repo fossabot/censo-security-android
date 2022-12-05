@@ -20,7 +20,7 @@ interface AuthProvider {
     fun clearAllListeners()
 }
 
-class StrikeAuth(
+class CensoAuth(
     val encryptionManager: EncryptionManager,
     val securePreferences: SecurePreferences
 ) : AuthProvider {

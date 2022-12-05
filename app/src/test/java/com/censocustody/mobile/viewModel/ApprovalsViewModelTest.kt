@@ -14,7 +14,7 @@ import com.censocustody.mobile.presentation.approvals.ApprovalsViewModel
 import com.censocustody.mobile.presentation.durable_nonce.DurableNonceViewModel
 import com.censocustody.mobile.ResourceState.ERROR
 import com.censocustody.mobile.ResourceState.SUCCESS
-import com.censocustody.mobile.common.StrikeCountDownTimer
+import com.censocustody.mobile.common.CensoCountDownTimer
 import com.censocustody.mobile.data.models.CipherRepository
 import com.censocustody.mobile.presentation.approval_disposition.ApprovalDispositionState
 import junit.framework.TestCase.*
@@ -43,7 +43,7 @@ class ApprovalsViewModelTest : BaseViewModelTest() {
     lateinit var cipherRepository: CipherRepository
 
     @Mock
-    lateinit var countdownTimer: StrikeCountDownTimer
+    lateinit var countdownTimer: CensoCountDownTimer
 
     @Mock
     lateinit var keyRepository: KeyRepository

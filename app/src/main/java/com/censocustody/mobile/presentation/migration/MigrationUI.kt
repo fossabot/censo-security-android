@@ -17,7 +17,7 @@ import androidx.compose.ui.zIndex
 import com.censocustody.mobile.R
 import com.censocustody.mobile.presentation.key_management.PurpleGradientBackgroundUI
 import com.censocustody.mobile.presentation.key_management.SmallAuthFlowButton
-import com.censocustody.mobile.ui.theme.StrikeWhite
+import com.censocustody.mobile.ui.theme.CensoWhite
 import com.censocustody.mobile.ui.theme.UnfocusedGrey
 
 @Composable
@@ -42,7 +42,7 @@ fun MigrationUI(
             ) {
                 Text(
                     text = errorMessage ?: stringResource(R.string.something_went_wrong),
-                    color = StrikeWhite,
+                    color = CensoWhite,
                     fontSize = 16.sp,
                     textAlign = TextAlign.Center,
                     letterSpacing = 0.23.sp,
@@ -78,13 +78,13 @@ fun MigrationUI(
                         modifier = Modifier.padding(horizontal = 8.dp),
                         text = stringResource(R.string.migration_loading_text),
                         textAlign = TextAlign.Center,
-                        color = StrikeWhite,
+                        color = CensoWhite,
                         fontSize = 16.sp
                     )
                     Spacer(modifier = Modifier.height(36.dp))
                     CircularProgressIndicator(
                         modifier = Modifier.size(20.dp),
-                        color = StrikeWhite,
+                        color = CensoWhite,
                         strokeWidth = 2.5.dp,
                     )
                     Spacer(modifier = Modifier.height(36.dp))

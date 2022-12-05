@@ -13,14 +13,13 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
-import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.censocustody.mobile.R
-import com.censocustody.mobile.ui.theme.StrikeWhite
+import com.censocustody.mobile.ui.theme.CensoWhite
 
 @Composable
 fun <T> AutoCompleteUI(
@@ -93,9 +92,9 @@ fun QuerySearch(
         value = query,
         onValueChange = onQueryChanged,
         placeholder = {
-            Text(text = hint, color = StrikeWhite)
+            Text(text = hint, color = CensoWhite)
         },
-        textStyle = MaterialTheme.typography.subtitle1.copy(color = StrikeWhite),
+        textStyle = MaterialTheme.typography.subtitle1.copy(color = CensoWhite),
         singleLine = true,
         trailingIcon = {
             if (showClearButton) {
@@ -103,7 +102,7 @@ fun QuerySearch(
                     Icon(
                         imageVector = Icons.Filled.Close,
                         contentDescription = stringResource(R.string.clear),
-                        tint = StrikeWhite
+                        tint = CensoWhite
                     )
                 }
             }

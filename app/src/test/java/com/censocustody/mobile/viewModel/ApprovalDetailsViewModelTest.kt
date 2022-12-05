@@ -4,7 +4,7 @@ import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.whenever
 import com.censocustody.mobile.*
 import com.censocustody.mobile.common.Resource
-import com.censocustody.mobile.common.StrikeCountDownTimer
+import com.censocustody.mobile.common.CensoCountDownTimer
 import com.censocustody.mobile.data.ApprovalsRepository
 import com.censocustody.mobile.data.KeyRepository
 import com.censocustody.mobile.data.SolanaRepository
@@ -50,7 +50,7 @@ class ApprovalDetailsViewModelTest : BaseViewModelTest() {
     lateinit var cipher: Cipher
 
     @Mock
-    lateinit var countdownTimer: StrikeCountDownTimer
+    lateinit var countdownTimer: CensoCountDownTimer
 
     private lateinit var approvalDetailsViewModel: ApprovalDetailsViewModel
 

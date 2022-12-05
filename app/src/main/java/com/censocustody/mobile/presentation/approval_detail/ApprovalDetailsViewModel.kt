@@ -1,7 +1,7 @@
 package com.censocustody.mobile.presentation.approval_detail
 
 import com.censocustody.mobile.common.Resource
-import com.censocustody.mobile.common.StrikeCountDownTimer
+import com.censocustody.mobile.common.CensoCountDownTimer
 import com.censocustody.mobile.data.ApprovalsRepository
 import com.censocustody.mobile.data.KeyRepository
 import com.censocustody.mobile.data.models.approval.ApprovalRequest
@@ -17,7 +17,7 @@ class ApprovalDetailsViewModel @Inject constructor(
     approvalsRepository: ApprovalsRepository,
     keyRepository: KeyRepository,
     cipherRepository: CipherRepository,
-    timer: StrikeCountDownTimer,
+    timer: CensoCountDownTimer,
 ) : CommonApprovalsViewModel(
     approvalsRepository = approvalsRepository,
     keyRepository = keyRepository,

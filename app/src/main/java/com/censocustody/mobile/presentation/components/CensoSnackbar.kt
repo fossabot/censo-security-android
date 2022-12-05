@@ -9,10 +9,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.censocustody.mobile.ui.theme.SnackbarBackground
-import com.censocustody.mobile.ui.theme.StrikeWhite
+import com.censocustody.mobile.ui.theme.CensoWhite
 
 @Composable
-fun StrikeSnackbar(
+fun CensoSnackbar(
     snackbarHostState: SnackbarHostState,
     modifier: Modifier = Modifier,
 ) {
@@ -26,7 +26,7 @@ fun StrikeSnackbar(
                 modifier = Modifier
                     .padding(16.dp),
                 backgroundColor = SnackbarBackground,
-                contentColor = StrikeWhite,
+                contentColor = CensoWhite,
                 content = {
                     Text(
                         text = data.message,

@@ -18,7 +18,7 @@ import com.censocustody.mobile.ui.theme.*
 fun ApprovalRowTitleText(title: String) {
     Text(
         text = title,
-        color = StrikeWhite,
+        color = CensoWhite,
         fontSize = 22.sp,
         fontWeight = FontWeight.Bold
     )
@@ -52,7 +52,7 @@ fun ApprovalInfoRow(
         Text(
             modifier = Modifier.padding(start = 16.dp),
             text = title,
-            color = StrikeWhite,
+            color = CensoWhite,
             fontSize = 16.sp,
             letterSpacing = 0.25.sp,
         )
@@ -63,7 +63,7 @@ fun ApprovalInfoRow(
                 .wrapContentHeight(),
             text = value,
             textAlign = TextAlign.Center,
-            color = StrikeWhite,
+            color = CensoWhite,
             fontSize = 16.sp,
             fontWeight = FontWeight.Bold,
             letterSpacing = 0.25.sp
@@ -75,7 +75,7 @@ fun ApprovalInfoRow(
 fun AccountRow(
     title: String,
     value: String,
-    titleColor: Color = StrikeWhite,
+    titleColor: Color = CensoWhite,
 ) {
     Row(
         modifier = Modifier

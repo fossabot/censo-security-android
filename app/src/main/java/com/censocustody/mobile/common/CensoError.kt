@@ -3,7 +3,7 @@ package com.censocustody.mobile.common
 import android.content.Context
 import com.censocustody.mobile.R
 
-sealed class StrikeError(val errorCode: Int) {
+sealed class CensoError(val errorCode: Int) {
 
     fun getErrorMessage(context: Context) =
         when (this) {
@@ -22,19 +22,19 @@ sealed class StrikeError(val errorCode: Int) {
         }
 
     abstract class ApiError(errorCode: Int, val statusCode: Int) :
-        StrikeError(errorCode = errorCode)
+        CensoError(errorCode = errorCode)
 
     class DefaultApiError(statusCode: Int) : ApiError(errorCode = 10, statusCode = statusCode)
     class NoInternetError(statusCode: Int) : ApiError(errorCode = 20, statusCode = statusCode)
     class TimeoutError(statusCode: Int) : ApiError(errorCode = 30, statusCode = statusCode)
     class MaintenanceError(statusCode: Int) : ApiError(errorCode = 40, statusCode = statusCode)
 
-    abstract class ApprovalDispositionError(errorCode: Int) : StrikeError(errorCode = errorCode)
+    abstract class ApprovalDispositionError(errorCode: Int) : CensoError(errorCode = errorCode)
 
     class DefaultDispositionError : ApprovalDispositionError(errorCode = 50)
     class SigningDataError : ApprovalDispositionError(errorCode = 60)
 
-    abstract class ApprovalSigningError(errorCode: Int) : StrikeError(errorCode = errorCode)
+    abstract class ApprovalSigningError(errorCode: Int) : CensoError(errorCode = errorCode)
 
     class MissingKeyError : ApprovalSigningError(errorCode = 70)
     class MissingUserEmailError : ApprovalSigningError(errorCode = 80)

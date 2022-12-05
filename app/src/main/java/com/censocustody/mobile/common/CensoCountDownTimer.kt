@@ -2,12 +2,12 @@ package com.censocustody.mobile.common
 
 import android.os.CountDownTimer
 
-interface StrikeCountDownTimer {
+interface CensoCountDownTimer {
     fun startCountDownTimer(countdownInterval: Long, onTickCallback: () -> Unit)
     fun stopCountDownTimer()
 }
 
-class StrikeCountDownTimerImpl : StrikeCountDownTimer {
+class CensoCountDownTimerImpl : CensoCountDownTimer {
     private var timer: CountDownTimer? = null
 
     override fun startCountDownTimer(countdownInterval: Long, onTickCallback: () -> Unit) {

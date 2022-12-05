@@ -214,7 +214,7 @@ fun ApprovalsListScreen(
                     .padding(innerPadding)
                     .fillMaxHeight()
             ) {
-                StrikeSnackbar(
+                CensoSnackbar(
                     snackbarHostState = scaffoldState.snackbarHostState,
                     modifier = Modifier.align(Alignment.BottomCenter)
                 )
@@ -225,7 +225,7 @@ fun ApprovalsListScreen(
                     approvalsViewModel.resetShouldDisplayConfirmDisposition()
                     launchNonceWork()
                 } else {
-                    StrikeConfirmDispositionAlertDialog(
+                    CensoConfirmDispositionAlertDialog(
                         dialogMessages = approvalsState.shouldDisplayConfirmDisposition.dialogMessages,
                         onConfirm = {
                             approvalsViewModel.resetShouldDisplayConfirmDisposition()
@@ -239,7 +239,7 @@ fun ApprovalsListScreen(
             }
 
             if (approvalsState.approvalsResultRequest is Resource.Error) {
-                StrikeErrorScreen(
+                CensoErrorScreen(
                     errorResource = approvalsState.approvalsResultRequest,
                     onDismiss = {
                         approvalsViewModel.resetWalletApprovalsResult()
@@ -252,7 +252,7 @@ fun ApprovalsListScreen(
             }
 
             if (approvalsState.approvalDispositionState?.registerApprovalDispositionResult is Resource.Error) {
-                StrikeErrorScreen(
+                CensoErrorScreen(
                     errorResource = approvalsState.approvalDispositionState.registerApprovalDispositionResult as Resource.Error<ApprovalDispositionRequest.RegisterApprovalDispositionBody>,
                     onDismiss = {
                         resetDataAfterErrorDismissed()
@@ -262,7 +262,7 @@ fun ApprovalsListScreen(
             }
 
             if (approvalsState.approvalDispositionState?.initiationDispositionResult is Resource.Error) {
-                StrikeErrorScreen(
+                CensoErrorScreen(
                     errorResource = approvalsState.approvalDispositionState.initiationDispositionResult as Resource.Error<InitiationRequest.InitiateRequestBody>,
                     onDismiss = {
                         resetDataAfterErrorDismissed()
@@ -272,7 +272,7 @@ fun ApprovalsListScreen(
             }
 
             if (durableNonceState.multipleAccountsResult is Resource.Error) {
-                StrikeErrorScreen(
+                CensoErrorScreen(
                     errorResource = durableNonceState.multipleAccountsResult,
                     onDismiss = {
                         resetDataAfterErrorDismissed()
@@ -293,7 +293,7 @@ fun ApprovalsListTopAppBar(
     navigationIcon: ImageVector,
     navigationIconContentDes: String
 ) {
-    StrikeCenteredTopAppBar(
+    CenteredTopAppBar(
         title = title,
         onAppBarIconClick = { onAppBarIconClick() },
         navigationIcon = navigationIcon,

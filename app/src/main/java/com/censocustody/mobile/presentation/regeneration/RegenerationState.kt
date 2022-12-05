@@ -1,7 +1,7 @@
 package com.censocustody.mobile.presentation.regeneration
 
 import com.censocustody.mobile.common.Resource
-import com.censocustody.mobile.common.StrikeError
+import com.censocustody.mobile.common.CensoError
 import com.censocustody.mobile.data.models.WalletSigner
 
 data class RegenerationState(
@@ -10,5 +10,5 @@ data class RegenerationState(
 
     //API calls
     val addWalletSigner: Resource<WalletSigner> = Resource.Uninitialized,
-    val regenerationError: Resource<StrikeError> = Resource.Uninitialized,
+    val regenerationError: Resource<CensoError> = Resource.Uninitialized,
 )

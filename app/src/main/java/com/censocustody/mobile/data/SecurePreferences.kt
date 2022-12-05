@@ -220,6 +220,6 @@ class SecurePreferencesImpl @Inject constructor(applicationContext: Context) :
     //endregion
 
     object Companion {
-        const val SHARED_PREF_NAME = "strike_secure_shared_pref"
+        const val SHARED_PREF_NAME = "censo_secure_shared_pref"
     }
 }

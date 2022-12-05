@@ -21,7 +21,7 @@ import javax.inject.Inject
 class EntranceViewModel @Inject constructor(
     private val userRepository: UserRepository,
     private val keyRepository: KeyRepository,
-    private val strikeUserData: StrikeUserData
+    private val censoUserData: CensoUserData
 ) : ViewModel() {
 
     var state by mutableStateOf(EntranceState())
@@ -70,7 +70,7 @@ class EntranceViewModel @Inject constructor(
         }
 
         if (userLoggedIn) {
-            strikeUserData.setEmail(userRepository.retrieveCachedUserEmail())
+            censoUserData.setEmail(userRepository.retrieveCachedUserEmail())
             retrieveUserVerifyDetails()
         } else {
             //DESTINATION: Send user to login screen.
@@ -106,7 +106,7 @@ class EntranceViewModel @Inject constructor(
             val verifyUser = verifyUserDataResource.data
 
             if (verifyUser != null) {
-                strikeUserData.setStrikeUser(verifyUser = verifyUser)
+                censoUserData.setCensoUser(verifyUser = verifyUser)
                 state = state.copy(verifyUserResult = verifyUserDataResource)
                 determineUserDestination(verifyUser)
             } else {
@@ -127,7 +127,7 @@ class EntranceViewModel @Inject constructor(
     }
 
     private fun handleVerifyUserError(verifyUserDataResource: Resource<VerifyUser>) {
-        strikeUserData.setStrikeUser(null)
+        censoUserData.setCensoUser(null)
         state = state.copy(verifyUserResult = verifyUserDataResource)
     }
 

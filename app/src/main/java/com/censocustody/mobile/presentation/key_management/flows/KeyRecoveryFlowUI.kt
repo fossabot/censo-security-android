@@ -11,8 +11,7 @@ import androidx.compose.ui.res.stringResource
 import com.censocustody.mobile.R
 import com.censocustody.mobile.common.Resource
 import com.censocustody.mobile.data.models.Signers
-import com.censocustody.mobile.data.models.WalletSigner
-import com.censocustody.mobile.presentation.components.StrikeAuthTopAppBar
+import com.censocustody.mobile.presentation.components.AuthTopAppBar
 import com.censocustody.mobile.presentation.key_management.*
 
 fun moveUserToNextRecoveryScreen(flowStep: KeyRecoveryFlowStep) =
@@ -65,7 +64,7 @@ fun KeyRecoveryFlowUI(
         modifier = Modifier.fillMaxSize(),
         topBar = {
             if (screenTitle.isNotEmpty()) {
-                StrikeAuthTopAppBar(
+                AuthTopAppBar(
                     title = screenTitle,
                     onAppBarIconClick = { onBackNavigate() },
                 )

@@ -2,7 +2,7 @@ package com.censocustody.mobile.common
 
 import com.censocustody.mobile.data.EncryptionManagerImpl
 import com.censocustody.mobile.data.EncryptionManagerImpl.Companion.DATA_CHECK
-import com.censocustody.mobile.data.StrikePrivateKey
+import com.censocustody.mobile.data.CensoPrivateKey
 import org.bouncycastle.crypto.digests.SHA512Digest
 import org.bouncycastle.crypto.macs.HMac
 import org.bouncycastle.crypto.params.Ed25519PrivateKeyParameters
@@ -18,7 +18,7 @@ import kotlin.experimental.or
 
 class Ed25519HierarchicalPrivateKey(
     val data: ByteArray,
-) : StrikePrivateKey {
+) : CensoPrivateKey {
     private val privateKeyParams: Ed25519PrivateKeyParameters = Ed25519PrivateKeyParameters(data, 0)
     private val chainCode: KeyParameter = KeyParameter(data, 32, 32)
 

@@ -113,7 +113,7 @@ fun ApprovalButtonRow(
                 onClick = onMoreInfoClicked) {
                 Text(
                     stringResource(R.string.more_info),
-                    color = StrikeWhite,
+                    color = CensoWhite,
                     fontSize = 17.sp,
                     modifier = Modifier.padding(top = 4.dp, bottom = 4.dp),
                 )
@@ -135,7 +135,7 @@ fun VaultTitle(
         Text(
             modifier = Modifier.padding(start = 2.dp),
             text = vaultName,
-            color = StrikeWhite
+            color = CensoWhite
         )
     }
 }
@@ -253,14 +253,14 @@ fun DurableNonceErrorDialog(
         title = {
             Text(
                 text = stringResource(R.string.approval_disposition_error_title),
-                color = StrikeWhite,
+                color = CensoWhite,
                 fontSize = 22.sp
             )
         },
         text = {
             Text(
                 text = stringResource(R.string.default_error_message),
-                color = StrikeWhite,
+                color = CensoWhite,
                 fontSize = 16.sp
             )
         },

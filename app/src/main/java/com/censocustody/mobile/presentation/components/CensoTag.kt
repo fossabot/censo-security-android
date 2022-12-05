@@ -22,10 +22,10 @@ import androidx.constraintlayout.compose.Dimension
 import com.censocustody.mobile.R
 import com.censocustody.mobile.presentation.approvals.approval_type_row_items.getFullDestinationName
 import com.censocustody.mobile.ui.theme.SectionBlack
-import com.censocustody.mobile.ui.theme.StrikeWhite
+import com.censocustody.mobile.ui.theme.CensoWhite
 
 @Composable
-fun StrikeTag(
+fun CensoTag(
     modifier: Modifier = Modifier,
     text: String,
     paddingValues: PaddingValues,
@@ -38,14 +38,14 @@ fun StrikeTag(
         if(annotatedText != null) {
             Text(
                 text = annotatedText,
-                color = StrikeWhite,
+                color = CensoWhite,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.padding(paddingValues = paddingValues)
             )
         } else {
             Text(
                 text = text,
-                color = StrikeWhite,
+                color = CensoWhite,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.padding(paddingValues = paddingValues)
             )
@@ -54,7 +54,7 @@ fun StrikeTag(
 }
 
 @Composable
-fun StrikeTagRow(
+fun CensoTagRow(
     text1: String,
     text2: String,
     arrowForward: Boolean
@@ -64,17 +64,17 @@ fun StrikeTagRow(
             .fillMaxWidth()
             .padding(start = 16.dp, end = 16.dp)
     ) {
-        val strikeTag1Ref = createRef()
-        val strikeTag2Ref = createRef()
+        val censoTag1Ref = createRef()
+        val censoTag2Ref = createRef()
         val iconRef = createRef()
 
-        val strikeTagPaddingValues =
+        val censoTagPaddingValues =
             PaddingValues(top = 12.dp, bottom = 12.dp, start = 12.dp, end = 12.dp)
-        StrikeTag(
+        CensoTag(
             modifier = Modifier
                 .clip(RoundedCornerShape(8.dp))
                 .background(color = SectionBlack)
-                .constrainAs(strikeTag1Ref) {
+                .constrainAs(censoTag1Ref) {
                     start.linkTo(parent.start)
                     end.linkTo(iconRef.start, 2.dp)
                     top.linkTo(parent.top)
@@ -82,7 +82,7 @@ fun StrikeTagRow(
                     width = Dimension.fillToConstraints
                 },
             text = text1,
-            paddingValues = strikeTagPaddingValues
+            paddingValues = censoTagPaddingValues
         )
 
         val iconArrow = if (arrowForward) Icons.Filled.ArrowForward else Icons.Filled.ArrowBack
@@ -97,15 +97,15 @@ fun StrikeTagRow(
                     centerVerticallyTo(parent)
                 },
             imageVector = iconArrow,
-            tint = StrikeWhite,
+            tint = CensoWhite,
             contentDescription = iconContentDescription
         )
 
-        StrikeTag(
+        CensoTag(
             modifier = Modifier
                 .clip(RoundedCornerShape(8.dp))
                 .background(color = SectionBlack)
-                .constrainAs(strikeTag2Ref) {
+                .constrainAs(censoTag2Ref) {
                     start.linkTo(iconRef.end, 2.dp)
                     end.linkTo(parent.end)
                     top.linkTo(parent.top)
@@ -113,13 +113,13 @@ fun StrikeTagRow(
                     width = Dimension.fillToConstraints
                 },
             text = text2,
-            paddingValues = strikeTagPaddingValues
+            paddingValues = censoTagPaddingValues
         )
     }
 }
 
 @Composable
-fun StrikeTagLabeledRow(
+fun CensoTagLabeledRow(
     text1: String,
     text2: String,
     subText2: String = "",
@@ -132,21 +132,21 @@ fun StrikeTagLabeledRow(
             .fillMaxWidth()
             .padding(start = 16.dp, end = 16.dp)
     ) {
-        val strikeTag1Ref = createRef()
-        val strikeTag2Ref = createRef()
+        val censoTag1Ref = createRef()
+        val censoTag2Ref = createRef()
 
         val label1Ref = createRef()
         val label2Ref = createRef()
 
         val iconRef = createRef()
 
-        val strikeTagPaddingValues =
+        val censoTagPaddingValues =
             PaddingValues(top = 12.dp, bottom = 12.dp, start = 12.dp, end = 12.dp)
-        StrikeTag(
+        CensoTag(
             modifier = Modifier
                 .clip(RoundedCornerShape(8.dp))
                 .background(color = SectionBlack)
-                .constrainAs(strikeTag1Ref) {
+                .constrainAs(censoTag1Ref) {
                     start.linkTo(parent.start)
                     end.linkTo(iconRef.start, 2.dp)
                     top.linkTo(label1Ref.bottom)
@@ -154,7 +154,7 @@ fun StrikeTagLabeledRow(
                     width = Dimension.fillToConstraints
                 },
             text = text1,
-            paddingValues = strikeTagPaddingValues
+            paddingValues = censoTagPaddingValues
         )
 
         Text(
@@ -167,7 +167,7 @@ fun StrikeTagLabeledRow(
                 }.padding(bottom = 20.dp),
             text = label1,
             textAlign = TextAlign.Center,
-            color = StrikeWhite
+            color = CensoWhite
         )
 
         Text(
@@ -180,7 +180,7 @@ fun StrikeTagLabeledRow(
                 }.padding(bottom = 20.dp),
             text = label2,
             textAlign = TextAlign.Center,
-            color = StrikeWhite
+            color = CensoWhite
         )
 
         val iconArrow = if (arrowForward) Icons.Filled.ArrowForward else Icons.Filled.ArrowBack
@@ -192,18 +192,18 @@ fun StrikeTagLabeledRow(
                 .size(20.dp)
                 .constrainAs(iconRef) {
                     centerHorizontallyTo(parent)
-                    centerVerticallyTo(strikeTag1Ref)
+                    centerVerticallyTo(censoTag1Ref)
                 },
             imageVector = iconArrow,
-            tint = StrikeWhite,
+            tint = CensoWhite,
             contentDescription = iconContentDescription
         )
 
-        StrikeTag(
+        CensoTag(
             modifier = Modifier
                 .clip(RoundedCornerShape(8.dp))
                 .background(color = SectionBlack)
-                .constrainAs(strikeTag2Ref) {
+                .constrainAs(censoTag2Ref) {
                     start.linkTo(iconRef.end, 2.dp)
                     end.linkTo(parent.end)
                     top.linkTo(label2Ref.bottom)
@@ -212,15 +212,15 @@ fun StrikeTagLabeledRow(
                 },
             text = "",
             annotatedText = getFullDestinationName(initialValue = text2, subText = subText2),
-            paddingValues = strikeTagPaddingValues
+            paddingValues = censoTagPaddingValues
         )
     }
 }
 
 @Preview(showBackground = true)
 @Composable
-fun StrikeTagPreview() {
-    StrikeTag(
+fun CensoTagPreview() {
+    CensoTag(
         modifier = Modifier
             .clip(RoundedCornerShape(8.dp))
             .background(color = SectionBlack),
@@ -231,8 +231,8 @@ fun StrikeTagPreview() {
 
 @Preview(showBackground = true)
 @Composable
-fun StrikeTagRowPreview() {
-    StrikeTagRow(
+fun CensoTagRowPreview() {
+    CensoTagRow(
         text1 = "Sample DApp", text2 = "Main", arrowForward = false
     )
 }

@@ -34,7 +34,7 @@ import com.censocustody.mobile.presentation.approval_detail.ApprovalDetailsScree
 import com.censocustody.mobile.presentation.approvals.ApprovalsListScreen
 import com.censocustody.mobile.presentation.approvals.ApprovalsViewModel
 import com.censocustody.mobile.presentation.components.OnLifecycleEvent
-import com.censocustody.mobile.presentation.contact_strike.ContactStrikeScreen
+import com.censocustody.mobile.presentation.contact_censo.ContactCensoScreen
 import com.censocustody.mobile.presentation.entrance.EntranceScreen
 import com.censocustody.mobile.presentation.key_management.KeyManagementInitialData
 import com.censocustody.mobile.presentation.key_management.KeyManagementScreen
@@ -45,7 +45,7 @@ import com.censocustody.mobile.presentation.reset_password.ResetPasswordScreen
 import com.censocustody.mobile.presentation.sign_in.SignInScreen
 import com.censocustody.mobile.service.MessagingService.Companion.NOTIFICATION_DISPLAYED_KEY
 import com.censocustody.mobile.ui.theme.BackgroundBlack
-import com.censocustody.mobile.ui.theme.StrikeMobileTheme
+import com.censocustody.mobile.ui.theme.CensoMobileTheme
 import com.censocustody.mobile.presentation.semantic_version_check.BlockingUI
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -123,10 +123,10 @@ class MainActivity : FragmentActivity() {
                 }
             }
 
-            StrikeMobileTheme {
+            CensoMobileTheme {
                 Surface(color = BackgroundBlack) {
                     //NavHost
-                    StrikeNavHost(navController = navController)
+                    CensoNavHost(navController = navController)
 
                     navController.addOnDestinationChangedListener { _, destination, _ ->
                         mainViewModel.updateCurrentScreen(
@@ -170,7 +170,7 @@ class MainActivity : FragmentActivity() {
     }
 
     @Composable
-    private fun StrikeNavHost(navController: NavHostController) {
+    private fun CensoNavHost(navController: NavHostController) {
 
         NavHost(
             navController = navController,
@@ -200,9 +200,9 @@ class MainActivity : FragmentActivity() {
                 ApprovalDetailsScreen(navController = navController, approval = ApprovalRequest.fromJson(approvalArg))
             }
             composable(
-                route = Screen.ContactStrikeRoute.route
+                route = Screen.ContactCensoRoute.route
             ) {
-                ContactStrikeScreen()
+                ContactCensoScreen()
             }
             composable(
                 route = Screen.AccountRoute.route

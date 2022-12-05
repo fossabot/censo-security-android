@@ -7,11 +7,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.sp
 import com.censocustody.mobile.R
-import com.censocustody.mobile.ui.theme.StrikeWhite
+import com.censocustody.mobile.ui.theme.CensoWhite
 import com.censocustody.mobile.ui.theme.UnfocusedGrey
 
 @Composable
-fun StrikeApprovalDispositionErrorAlertDialog(
+fun CensoApprovalDispositionErrorAlertDialog(
     dialogTitle: String,
     dialogText: String,
     onConfirm: () -> Unit,
@@ -22,14 +22,14 @@ fun StrikeApprovalDispositionErrorAlertDialog(
         title = {
             Text(
                 text = dialogTitle,
-                color = StrikeWhite,
+                color = CensoWhite,
                 fontSize = 24.sp
             )
         },
         text = {
             Text(
                 text = dialogText,
-                color = StrikeWhite,
+                color = CensoWhite,
                 fontSize = 18.sp
             )
         },

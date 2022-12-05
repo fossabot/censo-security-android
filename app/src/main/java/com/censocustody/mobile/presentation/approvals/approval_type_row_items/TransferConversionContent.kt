@@ -11,7 +11,7 @@ import androidx.compose.ui.unit.sp
 import com.censocustody.mobile.data.models.approval.SymbolAndAmountInfo
 import com.censocustody.mobile.presentation.approval_detail.approval_type_detail_items.ApprovalSubtitle
 import com.censocustody.mobile.presentation.approvals.ApprovalContentHeader
-import com.censocustody.mobile.presentation.components.StrikeTagRow
+import com.censocustody.mobile.presentation.components.CensoTagRow
 import com.censocustody.mobile.ui.theme.MoneyGreen
 import com.censocustody.mobile.ui.theme.MoneyRed
 import com.censocustody.mobile.ui.theme.SubtitleGrey
@@ -26,7 +26,7 @@ fun TransferConversionContent(
     ApprovalContentHeader(header = header, topSpacing = 16, bottomSpacing = 8)
     ApprovalSubtitle(text = subtitle)
     Spacer(modifier = Modifier.height(32.dp))
-    StrikeTagRow(
+    CensoTagRow(
         text1 = fromText,
         text2 = toText,
         arrowForward = true
@@ -59,7 +59,7 @@ fun TransactionContent(
         letterSpacing = 0.23.sp
     )
     Spacer(modifier = Modifier.height(8.dp))
-    StrikeTagRow(
+    CensoTagRow(
         text1 = fromText,
         text2 = toText,
         arrowForward = positiveWithdrawal

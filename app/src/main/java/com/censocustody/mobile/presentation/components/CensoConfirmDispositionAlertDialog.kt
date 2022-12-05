@@ -14,8 +14,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -27,7 +25,7 @@ import com.censocustody.mobile.R
 import com.censocustody.mobile.ui.theme.*
 
 @Composable
-fun StrikeConfirmDispositionAlertDialog(
+fun CensoConfirmDispositionAlertDialog(
     dialogMessages: Pair<String, String>,
     onConfirm: () -> Unit,
     onDismiss: () -> Unit
@@ -73,7 +71,7 @@ fun StrikeConfirmDispositionAlertDialog(
                         .align(Alignment.Center),
                     text = stringResource(R.string.are_you_sure),
                     fontWeight = FontWeight.SemiBold,
-                    color = StrikeWhite,
+                    color = CensoWhite,
                     fontSize = 24.sp
                 )
                 IconButton(
@@ -85,7 +83,7 @@ fun StrikeConfirmDispositionAlertDialog(
                     Icon(
                         Icons.Filled.Close,
                         contentDescription = stringResource(R.string.close_dialog),
-                        tint = StrikeWhite
+                        tint = CensoWhite
                     )
                 }
             }
@@ -100,14 +98,14 @@ fun StrikeConfirmDispositionAlertDialog(
                 Text(
                     modifier = Modifier.padding(horizontal = 32.dp),
                     text = dialogMessages.first,
-                    color = StrikeWhite,
+                    color = CensoWhite,
                     fontSize = 20.sp
                 )
                 Spacer(modifier = Modifier.height(12.dp))
                 Text(
                     modifier = Modifier.padding(horizontal = 32.dp),
                     text = dialogMessages.second,
-                    color = StrikeWhite,
+                    color = CensoWhite,
                     fontSize = 20.sp
                 )
                 Spacer(modifier = Modifier.height(40.dp))
@@ -130,7 +128,7 @@ fun StrikeConfirmDispositionAlertDialog(
                             modifier = Modifier.padding(vertical = 2.dp),
                             fontSize = 18.sp,
                             text = stringResource(R.string.dismiss),
-                            color = StrikeWhite,
+                            color = CensoWhite,
                             textAlign = TextAlign.Center
                         )
                     }
@@ -145,7 +143,7 @@ fun StrikeConfirmDispositionAlertDialog(
                             modifier = Modifier.padding(vertical = 2.dp),
                             text = stringResource(id = R.string.confirm),
                             fontSize = 18.sp,
-                            color = StrikeWhite,
+                            color = CensoWhite,
                             textAlign = TextAlign.Center
                         )
                     }

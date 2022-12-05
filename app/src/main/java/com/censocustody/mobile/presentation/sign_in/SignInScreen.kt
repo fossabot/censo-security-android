@@ -34,7 +34,7 @@ import com.censocustody.mobile.common.BioCryptoUtil
 import com.censocustody.mobile.common.Resource
 import com.censocustody.mobile.presentation.Screen
 import com.censocustody.mobile.presentation.components.SignInTextField
-import com.censocustody.mobile.presentation.components.StrikeSignInTopAppBar
+import com.censocustody.mobile.presentation.components.SignInTopAppBar
 import com.censocustody.mobile.presentation.key_management.PurpleGradientBackgroundUI
 import com.censocustody.mobile.ui.theme.*
 
@@ -109,7 +109,7 @@ fun SignInScreen(
 
     Scaffold(
         topBar = {
-            StrikeSignInTopAppBar(
+            SignInTopAppBar(
                 title = screenTitle,
                 onAppBarIconClick = onNavClick,
             )
@@ -146,7 +146,7 @@ fun SignInScreen(
                         }
                     Text(
                         text = headerText,
-                        color = StrikeWhite,
+                        color = CensoWhite,
                         textAlign = TextAlign.Center,
                         fontSize = 17.sp,
                         letterSpacing = 0.25.sp
@@ -168,7 +168,7 @@ fun SignInScreen(
                             Text(
                                 modifier = Modifier.padding(horizontal = boxItemsHorizontalPadding),
                                 text = stringResource(id = R.string.email_hint),
-                                color = StrikeWhite,
+                                color = CensoWhite,
                                 fontSize = 18.sp
                             )
                             Spacer(modifier = Modifier.size(16.dp))
@@ -185,7 +185,7 @@ fun SignInScreen(
                             Text(
                                 modifier = Modifier.padding(horizontal = boxItemsHorizontalPadding),
                                 text = stringResource(id = R.string.password_hint),
-                                color = StrikeWhite,
+                                color = CensoWhite,
                                 fontSize = 18.sp
                             )
                             Spacer(modifier = Modifier.size(16.dp))
@@ -211,7 +211,7 @@ fun SignInScreen(
                                         .clickable { navController.navigate(Screen.ResetPasswordRoute.route) }
                                         .padding(top = 12.dp, end = 16.dp),
                                     text = stringResource(R.string.reset_password),
-                                    color = StrikePurple,
+                                    color = CensoPurple,
                                     textAlign = TextAlign.End,
                                     fontWeight = FontWeight.W400
                                 )
@@ -227,8 +227,8 @@ fun SignInScreen(
                             .height(54.dp)
                             .clip(RoundedCornerShape(12.dp)),
                         colors = ButtonDefaults.buttonColors(
-                            backgroundColor = StrikePurple,
-                            disabledBackgroundColor = StrikePurple,
+                            backgroundColor = CensoPurple,
+                            disabledBackgroundColor = CensoPurple,
                         ),
                         enabled = true,
                         onClick = {
@@ -241,14 +241,14 @@ fun SignInScreen(
                         if (state.loginResult is Resource.Loading) {
                             CircularProgressIndicator(
                                 modifier = Modifier.height(40.dp),
-                                color = StrikeWhite,
+                                color = CensoWhite,
                                 strokeWidth = 4.dp,
                             )
                         } else {
                             Text(
                                 text = stringResource(R.string.sign_in_button),
                                 fontSize = 16.sp,
-                                color = StrikeWhite
+                                color = CensoWhite
                             )
                         }
                     }
@@ -257,7 +257,7 @@ fun SignInScreen(
             }
 
             if (state.loginResult is Resource.Error) {
-                val errorReason = state.loginResult.strikeError?.getErrorMessage(context)
+                val errorReason = state.loginResult.censoError?.getErrorMessage(context)
 
                 if (state.loginStep == LoginStep.PASSWORD_ENTRY) {
 
@@ -324,14 +324,14 @@ fun LoginErrorAlertDialog(
         title = {
             Text(
                 text = title,
-                color = StrikeWhite,
+                color = CensoWhite,
                 fontSize = 20.sp
             )
         },
         text = {
             Text(
                 text = errorReason ?: errorReasonBackup,
-                color = StrikeWhite,
+                color = CensoWhite,
                 fontSize = 16.sp
             )
         }

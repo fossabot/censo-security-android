@@ -18,7 +18,7 @@ import androidx.compose.ui.unit.sp
 import com.censocustody.mobile.common.BiometricUtil
 import com.censocustody.mobile.common.Resource
 import com.censocustody.mobile.presentation.biometry_disabled.BiometryDisabledScreen
-import com.censocustody.mobile.ui.theme.StrikeWhite
+import com.censocustody.mobile.ui.theme.CensoWhite
 import javax.crypto.Cipher
 import com.censocustody.mobile.R
 
@@ -79,7 +79,7 @@ fun ForegroundBlockingUI(
                     stringResource(R.string.biometry_unavailable)
                 else stringResource(R.string.foreground_access_app),
                 fontSize = 24.sp,
-                color = StrikeWhite,
+                color = CensoWhite,
                 textAlign = TextAlign.Center
             )
             Spacer(modifier = Modifier.height(24.dp))
@@ -87,7 +87,7 @@ fun ForegroundBlockingUI(
                 Button(onClick = retry) {
                     Text(
                         text = stringResource(R.string.try_again),
-                        color = StrikeWhite,
+                        color = CensoWhite,
                         fontSize = 18.sp
                     )
                 }

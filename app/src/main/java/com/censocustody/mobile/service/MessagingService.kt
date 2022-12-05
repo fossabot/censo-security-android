@@ -99,7 +99,7 @@ class MessagingService : FirebaseMessagingService() {
                 val pushResponse = pushRepository.addPushNotification(pushBody)
 
                 if (pushResponse is Resource.Error) {
-                    RaygunClient.send(Exception("Failed to register token from automatic registration: ${pushResponse.strikeError}"))
+                    RaygunClient.send(Exception("Failed to register token from automatic registration: ${pushResponse.censoError}"))
                 }
             }
         }
@@ -174,7 +174,7 @@ class MessagingService : FirebaseMessagingService() {
         const val BODY_KEY = "body"
 
 
-        const val DEFAULT_TITLE = "Strike Mobile"
+        const val DEFAULT_TITLE = "Censo Custody"
         const val DEFAULT_BODY = "Verification Needed"
     }
 }

@@ -138,7 +138,7 @@ fun EntryScreenPhraseUI(
                     modifier = Modifier.size(32.dp),
                     imageVector = Icons.Outlined.AccountCircle,
                     contentDescription = stringResource(id = R.string.content_des_account_icon),
-                    tint = StrikeWhite
+                    tint = CensoWhite
                 )
             }
         }
@@ -151,7 +151,7 @@ fun EntryScreenPhraseUI(
         Spacer(modifier = Modifier.weight(1.0f))
         Text(
             text = title,
-            color = StrikeWhite,
+            color = CensoWhite,
             fontSize = 28.sp,
             fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Center,
@@ -160,7 +160,7 @@ fun EntryScreenPhraseUI(
         Spacer(modifier = Modifier.weight(0.8f))
         Text(
             text = subtitle,
-            color = StrikeWhite,
+            color = CensoWhite,
             fontSize = 18.sp,
             textAlign = TextAlign.Center,
             letterSpacing = 0.23.sp
@@ -229,7 +229,7 @@ fun CopyKeyUI(phrase: String, phraseCopied: Boolean, phraseSaved: Boolean, onNav
                 Spacer(modifier = Modifier.weight(3.0f))
                 Text(
                     text = stringResource(R.string.copy_key_message),
-                    color = StrikeWhite,
+                    color = CensoWhite,
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Center,
@@ -267,7 +267,7 @@ fun CopyKeyUI(phrase: String, phraseCopied: Boolean, phraseSaved: Boolean, onNav
                     Spacer(modifier = Modifier.weight(0.5f))
                     Text(
                         text = stringResource(R.string.copied_to_clipboard),
-                        color = StrikeWhite,
+                        color = CensoWhite,
                         fontSize = 18.sp,
                         textAlign = TextAlign.Center,
                         letterSpacing = 0.23.sp
@@ -331,7 +331,7 @@ fun ConfirmKeyUI(
         Spacer(modifier = Modifier.height(24.dp))
         Text(
             text = header,
-            color = StrikeWhite,
+            color = CensoWhite,
             fontSize = 28.sp,
             fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Center,
@@ -341,7 +341,7 @@ fun ConfirmKeyUI(
             Spacer(modifier = Modifier.height(30.dp))
             Text(
                 text = title,
-                color = StrikeWhite,
+                color = CensoWhite,
                 fontSize = 18.sp,
                 textAlign = TextAlign.Center,
                 letterSpacing = 0.23.sp
@@ -351,7 +351,7 @@ fun ConfirmKeyUI(
         Text(
             modifier = Modifier.padding(horizontal = 24.dp),
             text = message,
-            color = StrikeWhite,
+            color = CensoWhite,
             fontSize = 18.sp,
             textAlign = TextAlign.Center,
             letterSpacing = 0.23.sp
@@ -365,10 +365,10 @@ fun ConfirmKeyUI(
                 .background(color = Color.Black, shape = RoundedCornerShape(8.dp))
                 .fillMaxWidth(),
             colors = TextFieldDefaults.outlinedTextFieldColors(
-                focusedBorderColor = if (errorEnabled) Color.Red else StrikePurple,
+                focusedBorderColor = if (errorEnabled) Color.Red else CensoPurple,
                 unfocusedBorderColor = if (errorEnabled) Color.Red else GreyOutline,
                 cursorColor = Color.Transparent,
-                textColor = if (errorEnabled) Color.Red else StrikeWhite,
+                textColor = if (errorEnabled) Color.Red else CensoWhite,
                 errorBorderColor = Color.Red,
             ),
             value = pastedPhrase,
@@ -432,7 +432,7 @@ fun AllSetUI(
                     Spacer(modifier = Modifier.height(32.dp))
                     Text(
                         text = stringResource(R.string.all_set),
-                        color = StrikeWhite,
+                        color = CensoWhite,
                         fontSize = 24.sp,
                         fontWeight = FontWeight.Bold,
                         textAlign = TextAlign.Center,
@@ -470,13 +470,13 @@ fun AllSetUI(
                             modifier = Modifier.padding(horizontal = 8.dp),
                             text = loadingText ?: stringResource(R.string.registering_key_auth),
                             textAlign = TextAlign.Center,
-                            color = StrikeWhite,
+                            color = CensoWhite,
                             fontSize = 16.sp
                         )
                         Spacer(modifier = Modifier.height(36.dp))
                         CircularProgressIndicator(
                             modifier = Modifier.size(20.dp),
-                            color = StrikeWhite,
+                            color = CensoWhite,
                             strokeWidth = 2.5.dp,
                         )
                         Spacer(modifier = Modifier.height(36.dp))
@@ -490,9 +490,9 @@ fun AllSetUI(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text = allSetState.strikeError?.getErrorMessage(context)
+                        text = allSetState.censoError?.getErrorMessage(context)
                             ?: stringResource(R.string.something_went_wrong),
-                        color = StrikeWhite,
+                        color = CensoWhite,
                         fontSize = 16.sp,
                         textAlign = TextAlign.Center,
                         letterSpacing = 0.23.sp,
@@ -533,7 +533,7 @@ fun AuthFlowButton(
                 Icon(
                     imageVector = imageVector,
                     contentDescription = "",
-                    tint = StrikeWhite
+                    tint = CensoWhite
                 )
                 Spacer(modifier = Modifier.width(24.dp))
             }
@@ -541,7 +541,7 @@ fun AuthFlowButton(
                 modifier = Modifier.padding(vertical = textPadding),
                 text = text,
                 fontSize = 18.sp,
-                color = StrikeWhite,
+                color = CensoWhite,
                 textAlign = TextAlign.Center
             )
         }
@@ -567,7 +567,7 @@ fun SmallAuthFlowButton(
                 modifier = Modifier.padding(vertical = textPadding),
                 text = text,
                 fontSize = 18.sp,
-                color = StrikeWhite,
+                color = CensoWhite,
                 textAlign = TextAlign.Center
             )
         }
@@ -590,7 +590,7 @@ fun PhraseWords(
         if (phraseWords.isEmpty()) {
             Text(
                 text = stringResource(R.string.phrase_words_empty),
-                color = StrikeWhite,
+                color = CensoWhite,
                 textAlign = TextAlign.Center,
                 fontSize = 20.sp
             )
@@ -621,7 +621,7 @@ fun PhraseWords(
                     Spacer(modifier = Modifier.width(34.dp))
                     Text(
                         text = indexWord.wordValue,
-                        color = StrikeWhite,
+                        color = CensoWhite,
                         fontSize = 28.sp,
                         letterSpacing = 0.5.sp
                     )
@@ -690,7 +690,7 @@ fun WriteWordUI(
             )
             Text(
                 text = stringResource(id = R.string.write_each_word_down),
-                color = StrikeWhite,
+                color = CensoWhite,
                 fontSize = 24.sp,
                 textAlign = TextAlign.Center
             )
@@ -747,11 +747,11 @@ fun WriteWordUI(
                         modifier = Modifier.size(32.dp),
                         imageVector = Icons.Filled.NavigateBefore,
                         contentDescription = stringResource(R.string.previous_icon_content_desc),
-                        tint = StrikeWhite
+                        tint = CensoWhite
                     )
                     Text(
                         text = stringResource(R.string.previous),
-                        color = StrikeWhite,
+                        color = CensoWhite,
                         textAlign = TextAlign.Center
                     )
                 }
@@ -766,14 +766,14 @@ fun WriteWordUI(
                 ) {
                     Text(
                         text = stringResource(R.string.next),
-                        color = StrikeWhite,
+                        color = CensoWhite,
                         textAlign = TextAlign.Center
                     )
                     Icon(
                         modifier = Modifier.size(32.dp),
                         imageVector = Icons.Filled.NavigateNext,
                         contentDescription = stringResource(R.string.next_icon_content_desc),
-                        tint = StrikeWhite
+                        tint = CensoWhite
                     )
                 }
             }
@@ -847,14 +847,14 @@ fun VerifyPhraseWordUI(
         Spacer(modifier = Modifier.weight(0.05f))
         Text(
             text = stringResource(R.string.enter_word_number),
-            color = StrikeWhite,
+            color = CensoWhite,
             fontSize = 18.sp,
             fontWeight = FontWeight.SemiBold,
             letterSpacing = 0.3.sp
         )
         Text(
             text = (wordIndex + 1).toString(),
-            color = StrikeWhite,
+            color = CensoWhite,
             fontSize = 76.sp
         )
         Spacer(modifier = Modifier.weight(0.1f))
@@ -929,7 +929,7 @@ fun VerifyWordTextField(
             onPhraseEntryAction(PhraseEntryAction.UpdateWordInput(wordInput = textInput))
         },
         textStyle = LocalTextStyle.current.copy(
-            color = StrikeWhite,
+            color = CensoWhite,
             textAlign = TextAlign.Center,
             fontSize = 28.sp,
             letterSpacing = 0.75.sp,
@@ -944,7 +944,7 @@ fun VerifyWordTextField(
             onNext = { onPhraseEntryAction(PhraseEntryAction.SubmitWordInput(errorMessage)) }
         ),
         interactionSource = interactionSource,
-        cursorBrush = SolidColor(StrikePurple),
+        cursorBrush = SolidColor(CensoPurple),
         singleLine = singleLine
     ) { innerTextField ->
 
@@ -987,11 +987,11 @@ private fun WordNavigationButtons(
                 modifier = Modifier.padding(horizontal = 0.dp, vertical = 4.dp),
                 imageVector = Icons.Filled.NavigateBefore,
                 contentDescription = stringResource(R.string.previous_icon_content_desc),
-                tint = StrikeWhite
+                tint = CensoWhite
             )
             Text(
                 text = stringResource(R.string.previous),
-                color = StrikeWhite,
+                color = CensoWhite,
                 fontSize = 16.sp
             )
         }
@@ -1011,14 +1011,14 @@ private fun WordNavigationButtons(
         ) {
             Text(
                 text = nextButtonText,
-                color = if (nextButtonEnabled) StrikeWhite else GreyText,
+                color = if (nextButtonEnabled) CensoWhite else GreyText,
                 fontSize = 16.sp
             )
             Icon(
                 modifier = Modifier.padding(horizontal = 0.dp, vertical = 4.dp),
                 imageVector = Icons.Filled.NavigateNext,
                 contentDescription = nextButtonContentDes,
-                tint = if (nextButtonEnabled) StrikeWhite else GreyText
+                tint = if (nextButtonEnabled) CensoWhite else GreyText
             )
         }
     }
@@ -1049,7 +1049,7 @@ fun PreBiometryDialog(
                 modifier = Modifier.padding(horizontal = 16.dp),
                 text = mainText,
                 textAlign = TextAlign.Center,
-                color = StrikeWhite,
+                color = CensoWhite,
                 fontSize = 20.sp
             )
             Spacer(modifier = Modifier.height(36.dp))
@@ -1061,7 +1061,7 @@ fun PreBiometryDialog(
                 Text(
                     text = stringResource(id = R.string.continue_text),
                     fontSize = 18.sp,
-                    color = StrikeWhite,
+                    color = CensoWhite,
                     textAlign = TextAlign.Center
                 )
             }

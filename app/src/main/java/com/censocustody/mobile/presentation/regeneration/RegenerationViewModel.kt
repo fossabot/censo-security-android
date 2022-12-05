@@ -39,7 +39,7 @@ class RegenerationViewModel @Inject constructor(
             state = state.copy(finishedRegeneration = true)
         } else if (walletSignerResource is Resource.Error) {
             state =
-                state.copy(regenerationError = Resource.Success(walletSignerResource.strikeError))
+                state.copy(regenerationError = Resource.Success(walletSignerResource.censoError))
         }
     }
 

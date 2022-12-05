@@ -46,7 +46,7 @@ class SignInViewModelTest : BaseViewModelTest() {
     lateinit var pushRepository: PushRepository
 
     @Mock
-    lateinit var strikeUserData: StrikeUserData
+    lateinit var censoUserData: CensoUserData
 
     @Mock
     lateinit var cipher: Cipher
@@ -449,14 +449,14 @@ class SignInViewModelTest : BaseViewModelTest() {
         signInViewModel = SignInViewModel(
             keyRepository = keyRepository,
             userRepository = userRepository,
-            strikeUserData = strikeUserData,
+            censoUserData = censoUserData,
             pushRepository = pushRepository,
             cipherRepository = cipherRepository
         )
     }
 
     private suspend fun assertSavedDataAfterSuccessfulApiLogin() {
-        verify(strikeUserData, times(1)).setEmail(validEmail)
+        verify(censoUserData, times(1)).setEmail(validEmail)
         verify(userRepository, times(1)).setUserLoggedIn()
         verify(userRepository, times(1)).saveToken(jwt)
         assertPushNotificationRegistrationAttempted()

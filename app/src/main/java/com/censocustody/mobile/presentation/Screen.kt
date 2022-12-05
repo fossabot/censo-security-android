@@ -6,7 +6,7 @@ sealed class Screen(val route: String) {
     object ApprovalDetailRoute : Screen("approval_detail_screen") {
         const val APPROVAL_ARG = "approval"
     }
-    object ContactStrikeRoute : Screen("contact_strike_screen")
+    object ContactCensoRoute : Screen("contact_censo_screen")
     object AccountRoute : Screen("account_screen")
     object EnforceUpdateRoute : Screen("enforce_update_screen")
     object EntranceRoute : Screen("entrance_screen")
@@ -19,13 +19,13 @@ sealed class Screen(val route: String) {
     }
     object RegenerationRoute : Screen("regeneration_screen")
 
-    fun buildScreenDeepLinkUri() = "$STRIKE_PROTOCOLS_URI${this.route}"
+    fun buildScreenDeepLinkUri() = "$CENSO_CUSTODY_URI${this.route}"
 
     companion object {
         //Used for clearing the backstack to the first destination
         const val START_DESTINATION_ID = 0
 
         //Used for setting up deep linking options for composable screens
-        const val STRIKE_PROTOCOLS_URI = "data://strikeprotocols/"
+        const val CENSO_CUSTODY_URI = "data://censocustody/"
     }
 }

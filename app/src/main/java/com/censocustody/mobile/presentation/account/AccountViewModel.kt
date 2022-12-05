@@ -7,7 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.censocustody.mobile.common.Resource
 import com.censocustody.mobile.data.PushRepository
-import com.censocustody.mobile.data.StrikeUserData
+import com.censocustody.mobile.data.CensoUserData
 import com.censocustody.mobile.data.UserRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
@@ -17,7 +17,7 @@ import javax.inject.Inject
 class AccountViewModel @Inject constructor(
     private val userRepository: UserRepository,
     private val pushRepository: PushRepository,
-    private val strikeUserData: StrikeUserData
+    private val censoUserData: CensoUserData
 ) : ViewModel() {
 
     var state by mutableStateOf(AccountState())
@@ -29,8 +29,8 @@ class AccountViewModel @Inject constructor(
 
     private fun setUserInfo() {
         state = state.copy(
-            email = strikeUserData.getEmail(),
-            name = strikeUserData.getStrikeUser()?.fullName ?: ""
+            email = censoUserData.getEmail(),
+            name = censoUserData.getCensoUser()?.fullName ?: ""
         )
     }
 

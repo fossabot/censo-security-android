@@ -150,18 +150,18 @@ class EncryptionManagerImpl @Inject constructor(
             Ed25519HierarchicalPrivateKey.fromRootSeed(BaseWrapper.decode(safeRootSeed))
 
         return generateSignedPayload(
-            strikePrivateKey = ed25519HierarchicalPrivateKey,
+            censoPrivateKey = ed25519HierarchicalPrivateKey,
             signable = signable
         )
     }
 
-    private fun generateSignedPayload(strikePrivateKey: StrikePrivateKey, signable: Signable): SignedPayload {
+    private fun generateSignedPayload(censoPrivateKey: CensoPrivateKey, signable: Signable): SignedPayload {
         val messageToSign =
             signable.retrieveSignableData(
-                approverPublicKey = BaseWrapper.encode(strikePrivateKey.getPublicKeyBytes())
+                approverPublicKey = BaseWrapper.encode(censoPrivateKey.getPublicKeyBytes())
             ).first()
 
-        val signedData = strikePrivateKey.signData(messageToSign)
+        val signedData = censoPrivateKey.signData(messageToSign)
 
         return SignedPayload(
             signature = BaseWrapper.encodeToBase64(signedData),
@@ -255,7 +255,7 @@ class EncryptionManagerImpl @Inject constructor(
         )
 
         return generateSignedPayload(
-            strikePrivateKey = ethKey,
+            censoPrivateKey = ethKey,
             signable = signable
         )
     }

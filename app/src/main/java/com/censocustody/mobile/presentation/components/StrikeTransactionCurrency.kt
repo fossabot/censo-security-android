@@ -11,10 +11,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.censocustody.mobile.R
 import com.censocustody.mobile.ui.theme.GreyText
-import com.censocustody.mobile.ui.theme.StrikeWhite
+import com.censocustody.mobile.ui.theme.CensoWhite
 
 @Composable
-fun StrikeTransactionCurrency(
+fun CensoTransactionCurrency(
     cryptoValue: String,
     currencyEquivalentValue: String,
     contentSpacerHeight: Int,
@@ -22,7 +22,7 @@ fun StrikeTransactionCurrency(
 ) {
     Text(
         cryptoValue,
-        color = StrikeWhite, fontSize = fontSize.sp, textAlign = TextAlign.Center
+        color = CensoWhite, fontSize = fontSize.sp, textAlign = TextAlign.Center
     )
     Spacer(Modifier.height(contentSpacerHeight.dp))
     Text(

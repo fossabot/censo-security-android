@@ -9,16 +9,16 @@ import androidx.compose.ui.graphics.Color
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 
 private val DarkColorPalette = darkColors(
-    primary = StrikePurple,
-    primaryVariant = StrikePurple,
+    primary = CensoPurple,
+    primaryVariant = CensoPurple,
     secondary = Color.Black,
     background = Color.Black,
     surface = Color.Black
 )
 
 private val LightColorPalette = lightColors(
-    primary = StrikePurple,
-    primaryVariant = StrikePurple,
+    primary = CensoPurple,
+    primaryVariant = CensoPurple,
     secondary = Color.Black,
     background = Color.Black,
     surface = Color.Black
@@ -35,7 +35,7 @@ private val LightColorPalette = lightColors(
 )
 
 @Composable
-fun StrikeMobileTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Composable () -> Unit) {
+fun CensoMobileTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Composable () -> Unit) {
     val colors = if (darkTheme) {
         DarkColorPalette
     } else {
