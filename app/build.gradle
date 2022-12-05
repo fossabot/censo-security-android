@@ -9,8 +9,8 @@ plugins {
     id 'com.github.ben-manes.versions' version '0.43.0'
 }
 
-def final appName = 'Strike Mobile'
-def final coreAppId = "com.strikeprotocols.mobile"
+def final appName = 'Censo Custody'
+def final coreAppId = "com.censocustody.mobile"
 
 String versionNameMajor = 2
 String versionNameMinor = 2
@@ -62,7 +62,7 @@ android {
         proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
 
         manifestPlaceholders = [
-                "appAuthRedirectScheme": "com.strikeprotocols.mobile"
+                "appAuthRedirectScheme": "com.censocustody.mobile"
         ]
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -84,7 +84,7 @@ android {
             debuggable false
         }
         preProd {
-            resValue "string", "app_name", "PreProd Strike"
+            resValue "string", "app_name", "PreProd Censo"
             applicationIdSuffix ".demo"
             minifyEnabled true
             buildConfigField "String", "BASE_URL", "\"https://brooklyn-preprod.strikeprotocols.com/\""
@@ -96,7 +96,7 @@ android {
             debuggable false
         }
         demoTwo {
-            resValue "string", "app_name", "Demo2 Strike"
+            resValue "string", "app_name", "Demo2 Censo"
             applicationIdSuffix ".demo2"
             minifyEnabled false
             buildConfigField "String", "BASE_URL", "\"https://brooklyn-demo2.strikeprotocols.com/\""
@@ -108,7 +108,7 @@ android {
             debuggable false
         }
         preRelease {
-            resValue "string", "app_name", "PreRelease Strike"
+            resValue "string", "app_name", "PreRelease Censo"
             applicationIdSuffix ".prerelease"
             minifyEnabled false
             buildConfigField "String", "BASE_URL", "\"https://brooklyn-prerelease.strikeprotocols.com/\""
@@ -121,14 +121,14 @@ android {
         }
         auth {
             initWith preRelease
-            resValue "string", "app_name", "Auth Strike"
+            resValue "string", "app_name", "Auth Censo"
             applicationIdSuffix ".auth"
             minifyEnabled false
             debuggable false
         }
         debug {
             initWith preRelease
-            resValue "string", "app_name", "Debug Strike"
+            resValue "string", "app_name", "Debug Censo"
             applicationIdSuffix ".debug"
             minifyEnabled false
             debuggable true

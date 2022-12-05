@@ -46,7 +46,6 @@ import com.strikeprotocols.mobile.R
 import com.strikeprotocols.mobile.common.Resource
 import com.strikeprotocols.mobile.data.models.IndexedPhraseWord
 import com.strikeprotocols.mobile.data.models.Signers
-import com.strikeprotocols.mobile.data.models.WalletSigner
 import com.strikeprotocols.mobile.presentation.key_management.KeyManagementState.Companion.FIRST_WORD_INDEX
 import com.strikeprotocols.mobile.presentation.key_management.KeyManagementState.Companion.LAST_SET_START_INDEX
 import com.strikeprotocols.mobile.presentation.key_management.KeyManagementState.Companion.LAST_WORD_INDEX
@@ -444,7 +443,7 @@ fun AllSetUI(
                     modifier = Modifier
                         .align(Alignment.BottomCenter)
                         .padding(bottom = 56.dp),
-                    text = stringResource(R.string.continue_to_strike),
+                    text = stringResource(R.string.continue_to_censo_custody),
                     textPadding = 4.dp
                 ) {
                     onNavigate()

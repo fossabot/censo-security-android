@@ -2,7 +2,6 @@ package com.strikeprotocols.mobile.presentation.contact_strike
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -27,7 +26,7 @@ fun ContactStrikeScreen() {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text = stringResource(R.string.contact_strike),
+            text = stringResource(R.string.contact_censo_custody),
             textAlign = TextAlign.Center,
             fontSize = 24.sp,
             color = StrikeWhite

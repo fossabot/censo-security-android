@@ -14,7 +14,7 @@ sealed class StrikeError(val errorCode: Int) {
                 context.getString(R.string.not_connected_to_internet)
             }
             is MaintenanceError -> {
-                context.getString(R.string.strike_maintenance_message)
+                context.getString(R.string.censo_custody_maintenance_message)
             }
             else -> {
                 null

@@ -72,7 +72,7 @@ fun UnknownApprovalButtonRow(
             ) {
                 Text(
                     modifier = Modifier.padding(top = 4.dp, bottom = 4.dp),
-                    text = stringResource(R.string.update_strike_mobile),
+                    text = stringResource(R.string.update_censo_custody),
                     textAlign = TextAlign.Center,
                     color = StrikeWhite,
                     fontSize = 17.sp,
