@@ -1,17 +1,17 @@
-package com.strikeprotocols.mobile.viewModel
+package com.censocustody.mobile.viewModel
 
 import androidx.biometric.BiometricPrompt
 import androidx.biometric.BiometricPrompt.ERROR_USER_CANCELED
 import com.nhaarman.mockitokotlin2.whenever
-import com.strikeprotocols.mobile.common.BioPromptReason
-import com.strikeprotocols.mobile.common.BiometricUtil
-import com.strikeprotocols.mobile.common.Resource
-import com.strikeprotocols.mobile.data.EncryptionManagerImpl.Companion.SENTINEL_KEY_NAME
-import com.strikeprotocols.mobile.data.EncryptionManagerImpl.Companion.SENTINEL_STATIC_DATA
-import com.strikeprotocols.mobile.data.KeyRepository
-import com.strikeprotocols.mobile.data.UserRepository
-import com.strikeprotocols.mobile.data.models.CipherRepository
-import com.strikeprotocols.mobile.presentation.semantic_version_check.MainViewModel
+import com.censocustody.mobile.common.BioPromptReason
+import com.censocustody.mobile.common.BiometricUtil
+import com.censocustody.mobile.common.Resource
+import com.censocustody.mobile.data.EncryptionManagerImpl.Companion.SENTINEL_KEY_NAME
+import com.censocustody.mobile.data.EncryptionManagerImpl.Companion.SENTINEL_STATIC_DATA
+import com.censocustody.mobile.data.KeyRepository
+import com.censocustody.mobile.data.UserRepository
+import com.censocustody.mobile.data.models.CipherRepository
+import com.censocustody.mobile.presentation.semantic_version_check.MainViewModel
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertTrue
 import kotlinx.coroutines.Dispatchers

@@ -1,7 +1,7 @@
-package com.strikeprotocols.mobile.presentation.entrance
+package com.censocustody.mobile.presentation.entrance
 
-import com.strikeprotocols.mobile.common.Resource
-import com.strikeprotocols.mobile.data.models.VerifyUser
+import com.censocustody.mobile.common.Resource
+import com.censocustody.mobile.data.models.VerifyUser
 
 data class EntranceState(
     val userDestinationResult: Resource<UserDestination> = Resource.Uninitialized,

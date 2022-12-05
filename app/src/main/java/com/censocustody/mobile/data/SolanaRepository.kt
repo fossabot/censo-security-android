@@ -1,8 +1,8 @@
-package com.strikeprotocols.mobile.data
+package com.censocustody.mobile.data
 
-import com.strikeprotocols.mobile.common.Resource
-import com.strikeprotocols.mobile.data.models.MultipleAccountsResponse
-import com.strikeprotocols.mobile.presentation.durable_nonce.DurableNonceViewModel
+import com.censocustody.mobile.common.Resource
+import com.censocustody.mobile.data.models.MultipleAccountsResponse
+import com.censocustody.mobile.presentation.durable_nonce.DurableNonceViewModel
 import javax.inject.Inject
 
 interface SolanaRepository {

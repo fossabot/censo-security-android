@@ -1,13 +1,13 @@
-package com.strikeprotocols.mobile.data
+package com.censocustody.mobile.data
 
-import com.strikeprotocols.mobile.common.BaseWrapper
-import com.strikeprotocols.mobile.common.Resource
-import com.strikeprotocols.mobile.data.models.Signers
-import com.strikeprotocols.mobile.data.models.StoredKeyData.Companion.ROOT_SEED
-import com.strikeprotocols.mobile.data.models.StoredKeyData.Companion.SOLANA_KEY
-import com.strikeprotocols.mobile.data.models.VerifyUser
-import com.strikeprotocols.mobile.data.models.WalletSigner
-import com.strikeprotocols.mobile.data.models.mapToPublicKeysList
+import com.censocustody.mobile.common.BaseWrapper
+import com.censocustody.mobile.common.Resource
+import com.censocustody.mobile.data.models.Signers
+import com.censocustody.mobile.data.models.StoredKeyData.Companion.ROOT_SEED
+import com.censocustody.mobile.data.models.StoredKeyData.Companion.SOLANA_KEY
+import com.censocustody.mobile.data.models.VerifyUser
+import com.censocustody.mobile.data.models.WalletSigner
+import com.censocustody.mobile.data.models.mapToPublicKeysList
 import javax.crypto.Cipher
 
 interface MigrationRepository {

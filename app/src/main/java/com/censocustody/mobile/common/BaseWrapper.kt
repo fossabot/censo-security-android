@@ -1,4 +1,4 @@
-package com.strikeprotocols.mobile.common
+package com.censocustody.mobile.common
 
 import org.bitcoinj.core.Base58
 import java.util.*

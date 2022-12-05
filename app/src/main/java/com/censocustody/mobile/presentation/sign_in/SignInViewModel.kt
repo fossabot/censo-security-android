@@ -1,4 +1,4 @@
-package com.strikeprotocols.mobile.presentation.sign_in
+package com.censocustody.mobile.presentation.sign_in
 
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
@@ -8,13 +8,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.viewModelScope
 import com.raygun.raygun4android.RaygunClient
-import com.strikeprotocols.mobile.common.*
-import com.strikeprotocols.mobile.data.*
-import com.strikeprotocols.mobile.data.EncryptionManagerImpl.Companion.SENTINEL_KEY_NAME
-import com.strikeprotocols.mobile.data.NoInternetException.Companion.NO_INTERNET_ERROR
-import com.strikeprotocols.mobile.data.models.CipherRepository
-import com.strikeprotocols.mobile.data.models.LoginResponse
-import com.strikeprotocols.mobile.data.models.PushBody
+import com.censocustody.mobile.common.*
+import com.censocustody.mobile.data.*
+import com.censocustody.mobile.data.EncryptionManagerImpl.Companion.SENTINEL_KEY_NAME
+import com.censocustody.mobile.data.NoInternetException.Companion.NO_INTERNET_ERROR
+import com.censocustody.mobile.data.models.CipherRepository
+import com.censocustody.mobile.data.models.LoginResponse
+import com.censocustody.mobile.data.models.PushBody
 import kotlinx.coroutines.*
 import javax.crypto.Cipher
 

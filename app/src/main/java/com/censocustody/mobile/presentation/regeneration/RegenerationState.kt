@@ -1,8 +1,8 @@
-package com.strikeprotocols.mobile.presentation.regeneration
+package com.censocustody.mobile.presentation.regeneration
 
-import com.strikeprotocols.mobile.common.Resource
-import com.strikeprotocols.mobile.common.StrikeError
-import com.strikeprotocols.mobile.data.models.WalletSigner
+import com.censocustody.mobile.common.Resource
+import com.censocustody.mobile.common.StrikeError
+import com.censocustody.mobile.data.models.WalletSigner
 
 data class RegenerationState(
     //initial data + key management flow data

@@ -1,8 +1,8 @@
-package com.strikeprotocols.mobile.common
+package com.censocustody.mobile.common
 
-import com.strikeprotocols.mobile.data.EncryptionManagerImpl
-import com.strikeprotocols.mobile.data.EncryptionManagerImpl.Companion.DATA_CHECK
-import com.strikeprotocols.mobile.data.StrikePrivateKey
+import com.censocustody.mobile.data.EncryptionManagerImpl
+import com.censocustody.mobile.data.EncryptionManagerImpl.Companion.DATA_CHECK
+import com.censocustody.mobile.data.StrikePrivateKey
 import org.bouncycastle.crypto.digests.SHA512Digest
 import org.bouncycastle.crypto.macs.HMac
 import org.bouncycastle.crypto.params.Ed25519PrivateKeyParameters

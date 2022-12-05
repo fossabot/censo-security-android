@@ -1,7 +1,7 @@
-package com.strikeprotocols.mobile.data.models
+package com.censocustody.mobile.data.models
 
 import com.google.gson.annotations.SerializedName
-import com.strikeprotocols.mobile.data.models.approval.ApprovalRequestDetails
+import com.censocustody.mobile.data.models.approval.ApprovalRequestDetails
 
 data class RegisterApprovalDisposition(
     val approvalDisposition: ApprovalDisposition?,

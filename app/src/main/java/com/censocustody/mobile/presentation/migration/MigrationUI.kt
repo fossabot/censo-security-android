@@ -1,4 +1,4 @@
-package com.strikeprotocols.mobile.presentation.migration
+package com.censocustody.mobile.presentation.migration
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -14,11 +14,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
-import com.strikeprotocols.mobile.R
-import com.strikeprotocols.mobile.presentation.key_management.PurpleGradientBackgroundUI
-import com.strikeprotocols.mobile.presentation.key_management.SmallAuthFlowButton
-import com.strikeprotocols.mobile.ui.theme.StrikeWhite
-import com.strikeprotocols.mobile.ui.theme.UnfocusedGrey
+import com.censocustody.mobile.R
+import com.censocustody.mobile.presentation.key_management.PurpleGradientBackgroundUI
+import com.censocustody.mobile.presentation.key_management.SmallAuthFlowButton
+import com.censocustody.mobile.ui.theme.StrikeWhite
+import com.censocustody.mobile.ui.theme.UnfocusedGrey
 
 @Composable
 fun MigrationUI(

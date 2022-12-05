@@ -1,8 +1,8 @@
-package com.strikeprotocols.mobile.presentation.approvals.approval_type_row_items
+package com.censocustody.mobile.presentation.approvals.approval_type_row_items
 
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import com.strikeprotocols.mobile.ui.theme.StrikeWhite
+import com.censocustody.mobile.ui.theme.StrikeWhite
 
 @Composable
 fun DAppBookUpdateRowContent() {

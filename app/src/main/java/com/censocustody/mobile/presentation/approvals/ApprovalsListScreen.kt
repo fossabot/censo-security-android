@@ -1,4 +1,4 @@
-package com.strikeprotocols.mobile.presentation.approvals
+package com.censocustody.mobile.presentation.approvals
 
 import android.content.ActivityNotFoundException
 import android.content.Intent
@@ -29,20 +29,20 @@ import androidx.navigation.NavController
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.SwipeRefreshIndicator
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
-import com.strikeprotocols.mobile.R
-import com.strikeprotocols.mobile.common.*
-import com.strikeprotocols.mobile.common.BioCryptoUtil.NO_CIPHER_CODE
-import com.strikeprotocols.mobile.data.models.ApprovalDisposition
-import com.strikeprotocols.mobile.data.models.approval.ApprovalDispositionRequest
-import com.strikeprotocols.mobile.data.models.approval.InitiationRequest
-import com.strikeprotocols.mobile.data.models.approval.ApprovalRequestDetails.*
-import com.strikeprotocols.mobile.data.models.approval.ApprovalRequest
-import com.strikeprotocols.mobile.presentation.Screen
-import com.strikeprotocols.mobile.presentation.approvals.approval_type_row_items.*
-import com.strikeprotocols.mobile.presentation.components.*
-import com.strikeprotocols.mobile.presentation.durable_nonce.DurableNonceViewModel
-import com.strikeprotocols.mobile.ui.theme.*
-import com.strikeprotocols.mobile.ui.theme.BackgroundBlack
+import com.censocustody.mobile.R
+import com.censocustody.mobile.common.*
+import com.censocustody.mobile.common.BioCryptoUtil.NO_CIPHER_CODE
+import com.censocustody.mobile.data.models.ApprovalDisposition
+import com.censocustody.mobile.data.models.approval.ApprovalDispositionRequest
+import com.censocustody.mobile.data.models.approval.InitiationRequest
+import com.censocustody.mobile.data.models.approval.ApprovalRequestDetails.*
+import com.censocustody.mobile.data.models.approval.ApprovalRequest
+import com.censocustody.mobile.presentation.Screen
+import com.censocustody.mobile.presentation.approvals.approval_type_row_items.*
+import com.censocustody.mobile.presentation.components.*
+import com.censocustody.mobile.presentation.durable_nonce.DurableNonceViewModel
+import com.censocustody.mobile.ui.theme.*
+import com.censocustody.mobile.ui.theme.BackgroundBlack
 
 @Composable
 fun ApprovalsListScreen(
@@ -363,7 +363,7 @@ fun ApprovalsList(
                                 onUpdateAppClicked = {
                                     val playStoreIntent = Intent(Intent.ACTION_VIEW).apply {
                                         data =
-                                            Uri.parse("http://play.google.com/store/apps/details?id=com.strikeprotocols.mobile")
+                                            Uri.parse("http://play.google.com/store/apps/details?id=com.censocustody.mobile")
                                         setPackage("com.android.vending")
                                     }
                                     try {

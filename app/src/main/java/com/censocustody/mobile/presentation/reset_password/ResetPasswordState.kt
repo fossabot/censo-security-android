@@ -1,7 +1,7 @@
-package com.strikeprotocols.mobile.presentation.reset_password
+package com.censocustody.mobile.presentation.reset_password
 
 import android.util.Patterns
-import com.strikeprotocols.mobile.common.Resource
+import com.censocustody.mobile.common.Resource
 
 data class ResetPasswordState(
     val email: String = "",

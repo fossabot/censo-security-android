@@ -1,6 +1,6 @@
-package com.strikeprotocols.mobile.data
+package com.censocustody.mobile.data
 
-import com.strikeprotocols.mobile.data.models.VerifyUser
+import com.censocustody.mobile.data.models.VerifyUser
 
 interface StrikeUserData {
     fun getStrikeUser(): VerifyUser?

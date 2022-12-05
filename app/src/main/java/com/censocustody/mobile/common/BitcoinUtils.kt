@@ -1,4 +1,4 @@
-package com.strikeprotocols.mobile.common
+package com.censocustody.mobile.common
 
 import org.bouncycastle.crypto.digests.RIPEMD160Digest
 import org.bouncycastle.jce.provider.BouncyCastleProvider

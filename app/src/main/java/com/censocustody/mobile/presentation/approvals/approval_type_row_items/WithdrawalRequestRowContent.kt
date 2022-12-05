@@ -1,4 +1,4 @@
-package com.strikeprotocols.mobile.presentation.approvals.approval_type_row_items
+package com.censocustody.mobile.presentation.approvals.approval_type_row_items
 
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
@@ -8,9 +8,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
-import com.strikeprotocols.mobile.R
-import com.strikeprotocols.mobile.data.models.approval.ApprovalRequestDetails
-import com.strikeprotocols.mobile.presentation.approval_detail.approval_type_detail_items.WithdrawalRequestDetailParameterProvider
+import com.censocustody.mobile.R
+import com.censocustody.mobile.data.models.approval.ApprovalRequestDetails
+import com.censocustody.mobile.presentation.approval_detail.approval_type_detail_items.WithdrawalRequestDetailParameterProvider
 
 @Composable
 fun WithdrawalRequestRowContent(withdrawalRequest: ApprovalRequestDetails.WithdrawalRequest) {

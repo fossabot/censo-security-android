@@ -1,6 +1,6 @@
-package com.strikeprotocols.mobile.data.models
+package com.censocustody.mobile.data.models
 
-import com.strikeprotocols.mobile.data.models.approval.SolanaApprovalRequestDetails
+import com.censocustody.mobile.data.models.approval.SolanaApprovalRequestDetails
 
 data class InitiationDisposition(
     val approvalDisposition: ApprovalDisposition?,

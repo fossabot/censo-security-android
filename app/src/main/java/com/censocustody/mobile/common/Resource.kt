@@ -1,4 +1,4 @@
-package com.strikeprotocols.mobile.common
+package com.censocustody.mobile.common
 
 sealed class Resource<out T>(
     val data: T? = null,

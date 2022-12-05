@@ -1,4 +1,4 @@
-package com.strikeprotocols.mobile.presentation.components
+package com.censocustody.mobile.presentation.components
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Divider
@@ -8,8 +8,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.strikeprotocols.mobile.presentation.approval_detail.approval_type_detail_items.ApprovalInfoRow
-import com.strikeprotocols.mobile.ui.theme.*
+import com.censocustody.mobile.presentation.approval_detail.approval_type_detail_items.ApprovalInfoRow
+import com.censocustody.mobile.ui.theme.*
 
 @Composable
 fun FactRow(factsData: FactsData, modifier: Modifier = Modifier, hideFinalDivider: Boolean = false) {

@@ -1,11 +1,11 @@
-package com.strikeprotocols.mobile.presentation.sign_in
+package com.censocustody.mobile.presentation.sign_in
 
 import android.util.Patterns
-import com.strikeprotocols.mobile.common.BioPromptReason
-import com.strikeprotocols.mobile.common.Resource
-import com.strikeprotocols.mobile.data.models.LoginResponse
-import com.strikeprotocols.mobile.data.models.VerifyUser
-import com.strikeprotocols.mobile.data.models.WalletSigner
+import com.censocustody.mobile.common.BioPromptReason
+import com.censocustody.mobile.common.Resource
+import com.censocustody.mobile.data.models.LoginResponse
+import com.censocustody.mobile.data.models.VerifyUser
+import com.censocustody.mobile.data.models.WalletSigner
 import javax.crypto.Cipher
 
 data class SignInState(

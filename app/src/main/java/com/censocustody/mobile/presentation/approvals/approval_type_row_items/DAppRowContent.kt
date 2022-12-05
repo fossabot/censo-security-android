@@ -1,4 +1,4 @@
-package com.strikeprotocols.mobile.presentation.approvals.approval_type_row_items
+package com.censocustody.mobile.presentation.approvals.approval_type_row_items
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
@@ -9,9 +9,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import com.strikeprotocols.mobile.data.models.approval.ApprovalRequestDetails
-import com.strikeprotocols.mobile.presentation.approvals.ApprovalRowContentHeader
-import com.strikeprotocols.mobile.ui.theme.*
+import com.censocustody.mobile.data.models.approval.ApprovalRequestDetails
+import com.censocustody.mobile.presentation.approvals.ApprovalRowContentHeader
+import com.censocustody.mobile.ui.theme.*
 
 @Composable
 fun DAppTransactionRowContent(dAppTransactionRequest: ApprovalRequestDetails.DAppTransactionRequest) {

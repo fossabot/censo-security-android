@@ -1,4 +1,4 @@
-package com.strikeprotocols.mobile.presentation.biometry_disabled
+package com.censocustody.mobile.presentation.biometry_disabled
 
 import android.content.Intent
 import android.provider.Settings
@@ -16,8 +16,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat.startActivity
-import com.strikeprotocols.mobile.R
-import com.strikeprotocols.mobile.ui.theme.StrikeWhite
+import com.censocustody.mobile.R
+import com.censocustody.mobile.ui.theme.StrikeWhite
 
 @Composable
 fun BiometryDisabledScreen(message: String, biometryAvailable: Boolean) {

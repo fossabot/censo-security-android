@@ -1,4 +1,4 @@
-package com.strikeprotocols.mobile.presentation.reset_password
+package com.censocustody.mobile.presentation.reset_password
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.background
@@ -18,11 +18,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import com.strikeprotocols.mobile.R
-import com.strikeprotocols.mobile.common.Resource
-import com.strikeprotocols.mobile.presentation.components.SignInTextField
-import com.strikeprotocols.mobile.presentation.components.StrikeCenteredTopAppBar
-import com.strikeprotocols.mobile.ui.theme.*
+import com.censocustody.mobile.R
+import com.censocustody.mobile.common.Resource
+import com.censocustody.mobile.presentation.components.SignInTextField
+import com.censocustody.mobile.presentation.components.StrikeCenteredTopAppBar
+import com.censocustody.mobile.ui.theme.*
 
 
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")

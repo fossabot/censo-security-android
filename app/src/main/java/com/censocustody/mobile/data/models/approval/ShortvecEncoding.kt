@@ -1,4 +1,4 @@
-package com.strikeprotocols.mobile.data.models.approval
+package com.censocustody.mobile.data.models.approval
 
 object ShortvecEncoding {
     fun encodeLength(len: Int): ByteArray {

@@ -1,4 +1,4 @@
-package com.strikeprotocols.mobile
+package com.censocustody.mobile
 
 
 //region Multi Sign Op Approvals

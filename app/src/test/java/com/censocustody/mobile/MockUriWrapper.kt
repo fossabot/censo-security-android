@@ -1,6 +1,6 @@
-package com.strikeprotocols.mobile
+package com.censocustody.mobile
 
-import com.strikeprotocols.mobile.common.UriWrapper
+import com.censocustody.mobile.common.UriWrapper
 
 class MockUriWrapper : UriWrapper {
     override fun encode(data: String): String {

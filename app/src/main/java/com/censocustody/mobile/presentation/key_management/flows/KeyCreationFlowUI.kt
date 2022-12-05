@@ -1,4 +1,4 @@
-package com.strikeprotocols.mobile.presentation.key_management.flows
+package com.censocustody.mobile.presentation.key_management.flows
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.*
@@ -6,12 +6,12 @@ import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import com.strikeprotocols.mobile.R
-import com.strikeprotocols.mobile.common.Resource
-import com.strikeprotocols.mobile.data.models.Signers
-import com.strikeprotocols.mobile.data.models.WalletSigner
-import com.strikeprotocols.mobile.presentation.components.StrikeAuthTopAppBar
-import com.strikeprotocols.mobile.presentation.key_management.*
+import com.censocustody.mobile.R
+import com.censocustody.mobile.common.Resource
+import com.censocustody.mobile.data.models.Signers
+import com.censocustody.mobile.data.models.WalletSigner
+import com.censocustody.mobile.presentation.components.StrikeAuthTopAppBar
+import com.censocustody.mobile.presentation.key_management.*
 
 fun moveUserToNextCreationScreen(flowStep: KeyCreationFlowStep) =
     when (flowStep) {

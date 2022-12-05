@@ -1,11 +1,11 @@
-package com.strikeprotocols.mobile.data.models
+package com.censocustody.mobile.data.models
 
 import android.security.keystore.KeyPermanentlyInvalidatedException
-import com.strikeprotocols.mobile.common.BaseWrapper
-import com.strikeprotocols.mobile.data.*
-import com.strikeprotocols.mobile.data.EncryptionManagerImpl.Companion.BIO_KEY_NAME
-import com.strikeprotocols.mobile.data.EncryptionManagerImpl.Companion.ROOT_SEED_KEY_NAME
-import com.strikeprotocols.mobile.data.EncryptionManagerImpl.Companion.SENTINEL_KEY_NAME
+import com.censocustody.mobile.common.BaseWrapper
+import com.censocustody.mobile.data.*
+import com.censocustody.mobile.data.EncryptionManagerImpl.Companion.BIO_KEY_NAME
+import com.censocustody.mobile.data.EncryptionManagerImpl.Companion.ROOT_SEED_KEY_NAME
+import com.censocustody.mobile.data.EncryptionManagerImpl.Companion.SENTINEL_KEY_NAME
 import java.security.InvalidAlgorithmParameterException
 import javax.crypto.Cipher
 

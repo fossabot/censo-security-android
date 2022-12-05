@@ -1,8 +1,8 @@
-package com.strikeprotocols.mobile.presentation.key_management
+package com.censocustody.mobile.presentation.key_management
 
-import com.strikeprotocols.mobile.presentation.key_management.KeyManagementState.Companion.DEFAULT_WORDS_VERIFIED
-import com.strikeprotocols.mobile.presentation.key_management.KeyManagementState.Companion.FIRST_WORD_INDEX
-import com.strikeprotocols.mobile.presentation.key_management.KeyManagementState.Companion.PHRASE_WORD_COUNT
+import com.censocustody.mobile.presentation.key_management.KeyManagementState.Companion.DEFAULT_WORDS_VERIFIED
+import com.censocustody.mobile.presentation.key_management.KeyManagementState.Companion.FIRST_WORD_INDEX
+import com.censocustody.mobile.presentation.key_management.KeyManagementState.Companion.PHRASE_WORD_COUNT
 
 data class ConfirmPhraseWordsState(
     val phraseWordToVerify: String = "",

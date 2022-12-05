@@ -1,4 +1,4 @@
-package com.strikeprotocols.mobile.presentation.semantic_version_check
+package com.censocustody.mobile.presentation.semantic_version_check
 
 import android.content.ActivityNotFoundException
 import android.content.Intent
@@ -17,8 +17,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
-import com.strikeprotocols.mobile.R
-import com.strikeprotocols.mobile.ui.theme.StrikeWhite
+import com.censocustody.mobile.R
+import com.censocustody.mobile.ui.theme.StrikeWhite
 
 @Composable
 fun EnforceUpdateScreen() {
@@ -42,7 +42,7 @@ fun EnforceUpdateScreen() {
         Button(onClick = {
             val playStoreIntent = Intent(Intent.ACTION_VIEW).apply {
                 data =
-                    Uri.parse("http://play.google.com/store/apps/details?id=com.strikeprotocols.mobile")
+                    Uri.parse("http://play.google.com/store/apps/details?id=com.censocustody.mobile")
                 setPackage("com.android.vending")
             }
             try {

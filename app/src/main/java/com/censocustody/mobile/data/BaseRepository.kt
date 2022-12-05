@@ -1,7 +1,7 @@
-package com.strikeprotocols.mobile.data
+package com.censocustody.mobile.data
 
-import com.strikeprotocols.mobile.common.Resource
-import com.strikeprotocols.mobile.common.StrikeError
+import com.censocustody.mobile.common.Resource
+import com.censocustody.mobile.common.StrikeError
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import retrofit2.Response

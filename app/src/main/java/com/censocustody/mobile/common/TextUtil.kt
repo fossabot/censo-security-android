@@ -1,8 +1,8 @@
-package com.strikeprotocols.mobile.common
+package com.censocustody.mobile.common
 
 import android.content.Context
-import com.strikeprotocols.mobile.R
-import com.strikeprotocols.mobile.data.EncryptionManagerException
+import com.censocustody.mobile.R
+import com.censocustody.mobile.data.EncryptionManagerException
 
 fun Int.convertApprovalsNeededToDisplayMessage(context: Context): String {
     return when (this) {

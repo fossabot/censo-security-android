@@ -1,4 +1,4 @@
-package com.strikeprotocols.mobile.presentation.approvals.approval_type_row_items
+package com.censocustody.mobile.presentation.approvals.approval_type_row_items
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -15,11 +15,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.strikeprotocols.mobile.R
-import com.strikeprotocols.mobile.presentation.approvals.ApprovalItemHeader
-import com.strikeprotocols.mobile.ui.theme.DividerGrey
-import com.strikeprotocols.mobile.ui.theme.HeaderBlack
-import com.strikeprotocols.mobile.ui.theme.StrikeWhite
+import com.censocustody.mobile.R
+import com.censocustody.mobile.presentation.approvals.ApprovalItemHeader
+import com.censocustody.mobile.ui.theme.DividerGrey
+import com.censocustody.mobile.ui.theme.HeaderBlack
+import com.censocustody.mobile.ui.theme.StrikeWhite
 
 @Composable
 fun UnknownApprovalItem(

@@ -1,4 +1,4 @@
-package com.strikeprotocols.mobile.presentation.approvals.approval_type_row_items
+package com.censocustody.mobile.presentation.approvals.approval_type_row_items
 
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
@@ -8,13 +8,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.strikeprotocols.mobile.data.models.approval.SymbolAndAmountInfo
-import com.strikeprotocols.mobile.presentation.approval_detail.approval_type_detail_items.ApprovalSubtitle
-import com.strikeprotocols.mobile.presentation.approvals.ApprovalContentHeader
-import com.strikeprotocols.mobile.presentation.components.StrikeTagRow
-import com.strikeprotocols.mobile.ui.theme.MoneyGreen
-import com.strikeprotocols.mobile.ui.theme.MoneyRed
-import com.strikeprotocols.mobile.ui.theme.SubtitleGrey
+import com.censocustody.mobile.data.models.approval.SymbolAndAmountInfo
+import com.censocustody.mobile.presentation.approval_detail.approval_type_detail_items.ApprovalSubtitle
+import com.censocustody.mobile.presentation.approvals.ApprovalContentHeader
+import com.censocustody.mobile.presentation.components.StrikeTagRow
+import com.censocustody.mobile.ui.theme.MoneyGreen
+import com.censocustody.mobile.ui.theme.MoneyRed
+import com.censocustody.mobile.ui.theme.SubtitleGrey
 
 @Composable
 fun TransferConversionContent(

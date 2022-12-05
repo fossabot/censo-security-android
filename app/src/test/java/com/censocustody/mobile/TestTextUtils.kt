@@ -1,4 +1,4 @@
-package com.strikeprotocols.mobile
+package com.censocustody.mobile
 
 import org.bouncycastle.crypto.params.Ed25519PrivateKeyParameters
 

@@ -1,11 +1,11 @@
-package com.strikeprotocols.mobile.data
+package com.censocustody.mobile.data
 
 import android.content.Context
 import android.content.SharedPreferences
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
-import com.strikeprotocols.mobile.data.SecurePreferencesImpl.Companion.SHARED_PREF_NAME
-import com.strikeprotocols.mobile.data.models.StoredKeyData
+import com.censocustody.mobile.data.SecurePreferencesImpl.Companion.SHARED_PREF_NAME
+import com.censocustody.mobile.data.models.StoredKeyData
 import javax.inject.Inject
 
 interface SecurePreferences {

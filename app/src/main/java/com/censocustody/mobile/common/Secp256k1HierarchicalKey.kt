@@ -1,9 +1,9 @@
-package com.strikeprotocols.mobile.common
+package com.censocustody.mobile.common
 
 import cash.z.ecc.android.bip39.Mnemonics
 import cash.z.ecc.android.bip39.toSeed
-import com.strikeprotocols.mobile.data.EncryptionManagerImpl.Companion.DATA_CHECK
-import com.strikeprotocols.mobile.data.StrikePrivateKey
+import com.censocustody.mobile.data.EncryptionManagerImpl.Companion.DATA_CHECK
+import com.censocustody.mobile.data.StrikePrivateKey
 import org.bitcoinj.core.Base58
 import org.bitcoinj.core.ECKey
 import org.bouncycastle.asn1.ASN1InputStream

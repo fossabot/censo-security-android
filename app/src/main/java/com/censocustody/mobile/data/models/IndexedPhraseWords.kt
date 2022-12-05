@@ -1,4 +1,4 @@
-package com.strikeprotocols.mobile.data.models
+package com.censocustody.mobile.data.models
 
 data class IndexedPhraseWord(
     val wordIndex: Int,

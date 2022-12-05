@@ -1,8 +1,8 @@
-package com.strikeprotocols.mobile.data.models
+package com.censocustody.mobile.data.models
 
-import com.strikeprotocols.mobile.data.models.StoredKeyData.Companion.BITCOIN_KEY
-import com.strikeprotocols.mobile.data.models.StoredKeyData.Companion.ETHEREUM_KEY
-import com.strikeprotocols.mobile.data.models.StoredKeyData.Companion.SOLANA_KEY
+import com.censocustody.mobile.data.models.StoredKeyData.Companion.BITCOIN_KEY
+import com.censocustody.mobile.data.models.StoredKeyData.Companion.ETHEREUM_KEY
+import com.censocustody.mobile.data.models.StoredKeyData.Companion.SOLANA_KEY
 
 data class Signers(
     val signers: List<WalletSigner?>?

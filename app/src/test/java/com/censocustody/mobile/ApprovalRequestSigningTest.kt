@@ -1,14 +1,14 @@
-package com.strikeprotocols.mobile
+package com.censocustody.mobile
 
 import cash.z.ecc.android.bip39.Mnemonics
 import com.google.gson.JsonParser
 import com.nhaarman.mockitokotlin2.*
-import com.strikeprotocols.mobile.common.BaseWrapper
-import com.strikeprotocols.mobile.common.Secp256k1HierarchicalKey
-import com.strikeprotocols.mobile.data.*
-import com.strikeprotocols.mobile.data.models.ApprovalDisposition
-import com.strikeprotocols.mobile.data.models.Nonce
-import com.strikeprotocols.mobile.data.models.approval.*
+import com.censocustody.mobile.common.BaseWrapper
+import com.censocustody.mobile.common.Secp256k1HierarchicalKey
+import com.censocustody.mobile.data.*
+import com.censocustody.mobile.data.models.ApprovalDisposition
+import com.censocustody.mobile.data.models.Nonce
+import com.censocustody.mobile.data.models.approval.*
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Before

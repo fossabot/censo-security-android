@@ -1,4 +1,4 @@
-package com.strikeprotocols.mobile.data.models
+package com.censocustody.mobile.data.models
 
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken

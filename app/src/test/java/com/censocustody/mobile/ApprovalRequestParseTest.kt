@@ -1,8 +1,8 @@
-package com.strikeprotocols.mobile
+package com.censocustody.mobile
 
 import com.google.gson.JsonElement
 import com.google.gson.JsonParser
-import com.strikeprotocols.mobile.data.models.approval.*
+import com.censocustody.mobile.data.models.approval.*
 import org.junit.Assert.*
 import org.junit.Test
 

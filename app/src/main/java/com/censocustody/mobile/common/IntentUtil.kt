@@ -1,4 +1,4 @@
-package com.strikeprotocols.mobile.common
+package com.censocustody.mobile.common
 
 import android.content.Intent
 import android.content.pm.PackageManager

@@ -1,4 +1,4 @@
-package com.strikeprotocols.mobile.presentation.approvals.approval_type_row_items
+package com.censocustody.mobile.presentation.approvals.approval_type_row_items
 
 import android.content.Context
 import androidx.compose.ui.text.AnnotatedString
@@ -6,15 +6,15 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.sp
-import com.strikeprotocols.mobile.R
-import com.strikeprotocols.mobile.common.convertSecondsIntoCountdownText
-import com.strikeprotocols.mobile.common.maskAddress
-import com.strikeprotocols.mobile.common.toWalletName
-import com.strikeprotocols.mobile.data.models.ApprovalDisposition
-import com.strikeprotocols.mobile.data.models.approval.*
-import com.strikeprotocols.mobile.data.models.approval.AccountType.*
-import com.strikeprotocols.mobile.ui.theme.GreyText
-import com.strikeprotocols.mobile.data.models.approval.ApprovalRequestDetails.*
+import com.censocustody.mobile.R
+import com.censocustody.mobile.common.convertSecondsIntoCountdownText
+import com.censocustody.mobile.common.maskAddress
+import com.censocustody.mobile.common.toWalletName
+import com.censocustody.mobile.data.models.ApprovalDisposition
+import com.censocustody.mobile.data.models.approval.*
+import com.censocustody.mobile.data.models.approval.AccountType.*
+import com.censocustody.mobile.ui.theme.GreyText
+import com.censocustody.mobile.data.models.approval.ApprovalRequestDetails.*
 
 fun ApprovalRequestDetails.getHeader(context: Context): String {
     return when (this) {

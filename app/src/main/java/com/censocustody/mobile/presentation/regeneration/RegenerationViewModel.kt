@@ -1,14 +1,14 @@
-package com.strikeprotocols.mobile.presentation.regeneration
+package com.censocustody.mobile.presentation.regeneration
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.strikeprotocols.mobile.common.Resource
-import com.strikeprotocols.mobile.data.MigrationRepository
-import com.strikeprotocols.mobile.data.UserRepository
-import com.strikeprotocols.mobile.data.models.mapToPublicKeysList
+import com.censocustody.mobile.common.Resource
+import com.censocustody.mobile.data.MigrationRepository
+import com.censocustody.mobile.data.UserRepository
+import com.censocustody.mobile.data.models.mapToPublicKeysList
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject

@@ -1,6 +1,6 @@
-package com.strikeprotocols.mobile.data.models.approval
+package com.censocustody.mobile.data.models.approval
 
-import com.strikeprotocols.mobile.data.SignedPayload
+import com.censocustody.mobile.data.SignedPayload
 
 sealed class ApprovalSignature {
     data class SolanaSignature(

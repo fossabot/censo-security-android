@@ -1,4 +1,4 @@
-package com.strikeprotocols.mobile.presentation.components
+package com.censocustody.mobile.presentation.components
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.clickable
@@ -16,9 +16,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.strikeprotocols.mobile.R
-import com.strikeprotocols.mobile.ui.theme.BackgroundBlack
-import com.strikeprotocols.mobile.ui.theme.StrikeWhite
+import com.censocustody.mobile.R
+import com.censocustody.mobile.ui.theme.BackgroundBlack
+import com.censocustody.mobile.ui.theme.StrikeWhite
 
 
 @Composable

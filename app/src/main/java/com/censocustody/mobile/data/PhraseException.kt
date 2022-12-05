@@ -1,4 +1,4 @@
-package com.strikeprotocols.mobile.data
+package com.censocustody.mobile.data
 
 class PhraseException : Exception(NULL_PHRASE_IN_STATE) {
     companion object {

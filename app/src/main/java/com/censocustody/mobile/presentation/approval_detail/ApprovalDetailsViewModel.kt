@@ -1,14 +1,14 @@
-package com.strikeprotocols.mobile.presentation.approval_detail
+package com.censocustody.mobile.presentation.approval_detail
 
-import com.strikeprotocols.mobile.common.Resource
-import com.strikeprotocols.mobile.common.StrikeCountDownTimer
-import com.strikeprotocols.mobile.data.ApprovalsRepository
-import com.strikeprotocols.mobile.data.KeyRepository
-import com.strikeprotocols.mobile.data.models.approval.ApprovalRequest
-import com.strikeprotocols.mobile.data.models.CipherRepository
-import com.strikeprotocols.mobile.presentation.common_approvals.CommonApprovalsViewModel
-import com.strikeprotocols.mobile.presentation.approval_disposition.ApprovalRetryData
-import com.strikeprotocols.mobile.presentation.common_approvals.ApprovalsState
+import com.censocustody.mobile.common.Resource
+import com.censocustody.mobile.common.StrikeCountDownTimer
+import com.censocustody.mobile.data.ApprovalsRepository
+import com.censocustody.mobile.data.KeyRepository
+import com.censocustody.mobile.data.models.approval.ApprovalRequest
+import com.censocustody.mobile.data.models.CipherRepository
+import com.censocustody.mobile.presentation.common_approvals.CommonApprovalsViewModel
+import com.censocustody.mobile.presentation.approval_disposition.ApprovalRetryData
+import com.censocustody.mobile.presentation.common_approvals.ApprovalsState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 

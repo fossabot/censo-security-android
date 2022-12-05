@@ -1,7 +1,7 @@
-package com.strikeprotocols.mobile.common
+package com.censocustody.mobile.common
 
 import android.content.Context
-import com.strikeprotocols.mobile.R
+import com.censocustody.mobile.R
 
 sealed class StrikeError(val errorCode: Int) {
 

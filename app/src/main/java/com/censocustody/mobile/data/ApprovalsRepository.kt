@@ -1,12 +1,12 @@
-package com.strikeprotocols.mobile.data
+package com.censocustody.mobile.data
 
-import com.strikeprotocols.mobile.common.Resource
-import com.strikeprotocols.mobile.common.StrikeError
-import com.strikeprotocols.mobile.data.models.InitiationDisposition
-import com.strikeprotocols.mobile.data.models.RegisterApprovalDisposition
-import com.strikeprotocols.mobile.data.models.approval.ApprovalDispositionRequest
-import com.strikeprotocols.mobile.data.models.approval.InitiationRequest
-import com.strikeprotocols.mobile.data.models.approval.ApprovalRequest
+import com.censocustody.mobile.common.Resource
+import com.censocustody.mobile.common.StrikeError
+import com.censocustody.mobile.data.models.InitiationDisposition
+import com.censocustody.mobile.data.models.RegisterApprovalDisposition
+import com.censocustody.mobile.data.models.approval.ApprovalDispositionRequest
+import com.censocustody.mobile.data.models.approval.InitiationRequest
+import com.censocustody.mobile.data.models.approval.ApprovalRequest
 import javax.crypto.Cipher
 import javax.inject.Inject
 

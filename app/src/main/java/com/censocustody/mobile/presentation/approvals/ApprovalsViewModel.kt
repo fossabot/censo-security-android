@@ -1,13 +1,13 @@
-package com.strikeprotocols.mobile.presentation.approvals
+package com.censocustody.mobile.presentation.approvals
 
 import androidx.lifecycle.viewModelScope
-import com.strikeprotocols.mobile.common.Resource
-import com.strikeprotocols.mobile.common.StrikeCountDownTimer
-import com.strikeprotocols.mobile.data.ApprovalsRepository
-import com.strikeprotocols.mobile.data.KeyRepository
-import com.strikeprotocols.mobile.data.models.approval.ApprovalRequest
-import com.strikeprotocols.mobile.data.models.CipherRepository
-import com.strikeprotocols.mobile.presentation.common_approvals.CommonApprovalsViewModel
+import com.censocustody.mobile.common.Resource
+import com.censocustody.mobile.common.StrikeCountDownTimer
+import com.censocustody.mobile.data.ApprovalsRepository
+import com.censocustody.mobile.data.KeyRepository
+import com.censocustody.mobile.data.models.approval.ApprovalRequest
+import com.censocustody.mobile.data.models.CipherRepository
+import com.censocustody.mobile.presentation.common_approvals.CommonApprovalsViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch

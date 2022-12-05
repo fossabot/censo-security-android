@@ -1,4 +1,4 @@
-package com.strikeprotocols.mobile.data
+package com.censocustody.mobile.data
 
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties

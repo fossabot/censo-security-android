@@ -1,17 +1,17 @@
-package com.strikeprotocols.mobile.presentation.durable_nonce
+package com.censocustody.mobile.presentation.durable_nonce
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.strikeprotocols.mobile.BuildConfig
-import com.strikeprotocols.mobile.common.Resource
-import com.strikeprotocols.mobile.common.StrikeError
-import com.strikeprotocols.mobile.data.BaseRepository.Companion.NO_CODE
-import com.strikeprotocols.mobile.data.BaseRepository.Companion.TOO_MANY_REQUESTS_CODE
-import com.strikeprotocols.mobile.data.SolanaRepository
-import com.strikeprotocols.mobile.data.models.Nonce
+import com.censocustody.mobile.BuildConfig
+import com.censocustody.mobile.common.Resource
+import com.censocustody.mobile.common.StrikeError
+import com.censocustody.mobile.data.BaseRepository.Companion.NO_CODE
+import com.censocustody.mobile.data.BaseRepository.Companion.TOO_MANY_REQUESTS_CODE
+import com.censocustody.mobile.data.SolanaRepository
+import com.censocustody.mobile.data.models.Nonce
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch

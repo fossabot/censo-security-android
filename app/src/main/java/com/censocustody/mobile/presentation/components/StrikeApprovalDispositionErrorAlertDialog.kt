@@ -1,4 +1,4 @@
-package com.strikeprotocols.mobile.presentation.components
+package com.censocustody.mobile.presentation.components
 
 import androidx.compose.material.AlertDialog
 import androidx.compose.material.Text
@@ -6,9 +6,9 @@ import androidx.compose.material.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.sp
-import com.strikeprotocols.mobile.R
-import com.strikeprotocols.mobile.ui.theme.StrikeWhite
-import com.strikeprotocols.mobile.ui.theme.UnfocusedGrey
+import com.censocustody.mobile.R
+import com.censocustody.mobile.ui.theme.StrikeWhite
+import com.censocustody.mobile.ui.theme.UnfocusedGrey
 
 @Composable
 fun StrikeApprovalDispositionErrorAlertDialog(

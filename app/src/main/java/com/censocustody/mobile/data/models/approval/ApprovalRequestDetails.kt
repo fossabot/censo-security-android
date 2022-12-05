@@ -1,11 +1,11 @@
-package com.strikeprotocols.mobile.data.models.approval
+package com.censocustody.mobile.data.models.approval
 
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonElement
 import com.google.gson.JsonObject
 import com.google.gson.JsonPrimitive
 import com.google.gson.annotations.SerializedName
-import com.strikeprotocols.mobile.data.models.Chain
+import com.censocustody.mobile.data.models.Chain
 import java.io.ByteArrayOutputStream
 import java.lang.reflect.Modifier
 import java.text.DecimalFormat
@@ -15,12 +15,12 @@ import java.util.*
 
 sealed class SolanaApprovalRequestDetails {
 
-    data class ApprovalRequestDetails(val requestType: com.strikeprotocols.mobile.data.models.approval.ApprovalRequestDetails) :
+    data class ApprovalRequestDetails(val requestType: com.censocustody.mobile.data.models.approval.ApprovalRequestDetails) :
         SolanaApprovalRequestDetails()
 
     data class MultiSignOpInitiationDetails(
         val multisigOpInitiation: MultiSigOpInitiation,
-        val requestType: com.strikeprotocols.mobile.data.models.approval.ApprovalRequestDetails
+        val requestType: com.censocustody.mobile.data.models.approval.ApprovalRequestDetails
     ) : SolanaApprovalRequestDetails()
 
     companion object {

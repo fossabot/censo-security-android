@@ -1,4 +1,4 @@
-package com.strikeprotocols.mobile.presentation.approval_detail.approval_type_detail_items
+package com.censocustody.mobile.presentation.approval_detail.approval_type_detail_items
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -12,7 +12,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.strikeprotocols.mobile.ui.theme.*
+import com.censocustody.mobile.ui.theme.*
 
 @Composable
 fun ApprovalRowTitleText(title: String) {

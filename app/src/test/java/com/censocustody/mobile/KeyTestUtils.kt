@@ -1,8 +1,8 @@
-package com.strikeprotocols.mobile
+package com.censocustody.mobile
 
 import cash.z.ecc.android.bip39.Mnemonics
 import cash.z.ecc.android.bip39.toSeed
-import com.strikeprotocols.mobile.common.Ed25519HierarchicalPrivateKey
+import com.censocustody.mobile.common.Ed25519HierarchicalPrivateKey
 
 fun createSolanaKeyPairFromMnemonic(mnenomic: Mnemonics.MnemonicCode): TestKeyPair {
     val rootSeed = mnenomic.toSeed()

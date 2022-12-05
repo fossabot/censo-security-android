@@ -1,13 +1,13 @@
-package com.strikeprotocols.mobile.di
+package com.censocustody.mobile.di
 
 import android.content.Context
-import com.strikeprotocols.mobile.common.StrikeCountDownTimer
-import com.strikeprotocols.mobile.common.StrikeCountDownTimerImpl
-import com.strikeprotocols.mobile.data.*
-import com.strikeprotocols.mobile.data.UserRepository
-import com.strikeprotocols.mobile.data.UserRepositoryImpl
-import com.strikeprotocols.mobile.data.models.CipherRepository
-import com.strikeprotocols.mobile.data.models.CipherRepositoryImpl
+import com.censocustody.mobile.common.StrikeCountDownTimer
+import com.censocustody.mobile.common.StrikeCountDownTimerImpl
+import com.censocustody.mobile.data.*
+import com.censocustody.mobile.data.UserRepository
+import com.censocustody.mobile.data.UserRepositoryImpl
+import com.censocustody.mobile.data.models.CipherRepository
+import com.censocustody.mobile.data.models.CipherRepositoryImpl
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

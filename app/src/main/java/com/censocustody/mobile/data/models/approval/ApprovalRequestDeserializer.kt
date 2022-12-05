@@ -1,13 +1,13 @@
-package com.strikeprotocols.mobile.data.models.approval
+package com.censocustody.mobile.data.models.approval
 
 import com.google.gson.*
-import com.strikeprotocols.mobile.common.BaseWrapper
-import com.strikeprotocols.mobile.data.models.approval.ApprovalTypeMetaData.Companion.DATA_JSON_KEY
-import com.strikeprotocols.mobile.data.models.approval.ApprovalTypeMetaData.Companion.DETAILS_JSON_KEY
-import com.strikeprotocols.mobile.data.models.approval.ApprovalTypeMetaData.Companion.MULTI_SIG_JSON_KEY
-import com.strikeprotocols.mobile.data.models.approval.ApprovalTypeMetaData.Companion.REQUEST_TYPE_JSON_KEY
-import com.strikeprotocols.mobile.data.models.approval.ApprovalTypeMetaData.Companion.TYPE_JSON_KEY
-import com.strikeprotocols.mobile.data.models.approval.MultiSigOpInitiation.Companion.MULTI_SIG_TYPE
+import com.censocustody.mobile.common.BaseWrapper
+import com.censocustody.mobile.data.models.approval.ApprovalTypeMetaData.Companion.DATA_JSON_KEY
+import com.censocustody.mobile.data.models.approval.ApprovalTypeMetaData.Companion.DETAILS_JSON_KEY
+import com.censocustody.mobile.data.models.approval.ApprovalTypeMetaData.Companion.MULTI_SIG_JSON_KEY
+import com.censocustody.mobile.data.models.approval.ApprovalTypeMetaData.Companion.REQUEST_TYPE_JSON_KEY
+import com.censocustody.mobile.data.models.approval.ApprovalTypeMetaData.Companion.TYPE_JSON_KEY
+import com.censocustody.mobile.data.models.approval.MultiSigOpInitiation.Companion.MULTI_SIG_TYPE
 import java.lang.reflect.Type
 
 class ApprovalRequestDeserializer : JsonDeserializer<ApprovalRequest> {

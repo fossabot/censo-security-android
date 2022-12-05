@@ -1,4 +1,4 @@
-package com.strikeprotocols.mobile.presentation.components
+package com.censocustody.mobile.presentation.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -19,10 +19,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
-import com.strikeprotocols.mobile.R
-import com.strikeprotocols.mobile.presentation.approvals.approval_type_row_items.getFullDestinationName
-import com.strikeprotocols.mobile.ui.theme.SectionBlack
-import com.strikeprotocols.mobile.ui.theme.StrikeWhite
+import com.censocustody.mobile.R
+import com.censocustody.mobile.presentation.approvals.approval_type_row_items.getFullDestinationName
+import com.censocustody.mobile.ui.theme.SectionBlack
+import com.censocustody.mobile.ui.theme.StrikeWhite
 
 @Composable
 fun StrikeTag(

@@ -1,12 +1,12 @@
-package com.strikeprotocols.mobile
+package com.censocustody.mobile
 
 import com.google.gson.JsonParser
-import com.strikeprotocols.mobile.data.models.Chain
-import com.strikeprotocols.mobile.data.models.Organization
-import com.strikeprotocols.mobile.data.models.VerifyUser
-import com.strikeprotocols.mobile.data.models.WalletPublicKey
-import com.strikeprotocols.mobile.data.models.approval.ApprovalRequest
-import com.strikeprotocols.mobile.data.models.approval.ApprovalRequestDeserializer
+import com.censocustody.mobile.data.models.Chain
+import com.censocustody.mobile.data.models.Organization
+import com.censocustody.mobile.data.models.VerifyUser
+import com.censocustody.mobile.data.models.WalletPublicKey
+import com.censocustody.mobile.data.models.approval.ApprovalRequest
+import com.censocustody.mobile.data.models.approval.ApprovalRequestDeserializer
 
 private val deserializer = ApprovalRequestDeserializer()
 

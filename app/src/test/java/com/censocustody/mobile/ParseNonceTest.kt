@@ -1,8 +1,8 @@
-package com.strikeprotocols.mobile
+package com.censocustody.mobile
 
 import com.google.gson.JsonParser
-import com.strikeprotocols.mobile.data.MultipleAccountsDeserializer
-import com.strikeprotocols.mobile.data.models.Nonce
+import com.censocustody.mobile.data.MultipleAccountsDeserializer
+import com.censocustody.mobile.data.models.Nonce
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test

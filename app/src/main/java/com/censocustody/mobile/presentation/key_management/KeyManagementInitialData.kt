@@ -1,9 +1,9 @@
-package com.strikeprotocols.mobile.presentation.key_management
+package com.censocustody.mobile.presentation.key_management
 
 import com.google.gson.GsonBuilder
-import com.strikeprotocols.mobile.common.UriWrapper
-import com.strikeprotocols.mobile.data.models.VerifyUser
-import com.strikeprotocols.mobile.data.models.WalletSigner
+import com.censocustody.mobile.common.UriWrapper
+import com.censocustody.mobile.data.models.VerifyUser
+import com.censocustody.mobile.data.models.WalletSigner
 import java.lang.reflect.Modifier
 
 data class KeyManagementInitialData(

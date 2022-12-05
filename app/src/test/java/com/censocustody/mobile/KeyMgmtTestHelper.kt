@@ -1,9 +1,9 @@
-package com.strikeprotocols.mobile
+package com.censocustody.mobile
 
-import com.strikeprotocols.mobile.data.models.Chain
-import com.strikeprotocols.mobile.data.models.WalletSigner
-import com.strikeprotocols.mobile.presentation.key_management.KeyManagementFlow
-import com.strikeprotocols.mobile.presentation.key_management.KeyManagementInitialData
+import com.censocustody.mobile.data.models.Chain
+import com.censocustody.mobile.data.models.WalletSigner
+import com.censocustody.mobile.presentation.key_management.KeyManagementFlow
+import com.censocustody.mobile.presentation.key_management.KeyManagementInitialData
 
 fun getCreationFlowInitialData() = KeyManagementInitialData(
     verifyUserDetails = getVerifyUser(),

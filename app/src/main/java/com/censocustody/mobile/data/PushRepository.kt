@@ -1,12 +1,12 @@
-package com.strikeprotocols.mobile.data
+package com.censocustody.mobile.data
 
 import android.content.Context
 import android.provider.Settings
 import com.google.firebase.messaging.FirebaseMessaging
 import com.raygun.raygun4android.RaygunClient
-import com.strikeprotocols.mobile.common.CrashReportingUtil
-import com.strikeprotocols.mobile.common.Resource
-import com.strikeprotocols.mobile.data.models.PushBody
+import com.censocustody.mobile.common.CrashReportingUtil
+import com.censocustody.mobile.common.Resource
+import com.censocustody.mobile.data.models.PushBody
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 

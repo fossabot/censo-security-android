@@ -1,4 +1,4 @@
-package com.strikeprotocols.mobile.data.models.approval
+package com.censocustody.mobile.data.models.approval
 
 import java.lang.Exception
 

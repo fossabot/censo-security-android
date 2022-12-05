@@ -1,11 +1,11 @@
-package com.strikeprotocols.mobile.data
+package com.censocustody.mobile.data
 
 import android.annotation.SuppressLint
 import android.content.Context
 import android.provider.Settings
 import com.google.firebase.messaging.FirebaseMessaging
-import com.strikeprotocols.mobile.common.*
-import com.strikeprotocols.mobile.data.models.*
+import com.censocustody.mobile.common.*
+import com.censocustody.mobile.data.models.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.tasks.await
 import okhttp3.ResponseBody

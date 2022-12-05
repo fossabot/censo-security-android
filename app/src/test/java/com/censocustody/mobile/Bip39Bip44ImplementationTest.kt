@@ -1,9 +1,9 @@
-package com.strikeprotocols.mobile
+package com.censocustody.mobile
 
 import cash.z.ecc.android.bip39.Mnemonics
 import cash.z.ecc.android.bip39.toSeed
 import com.google.gson.Gson
-import com.strikeprotocols.mobile.common.*
+import com.censocustody.mobile.common.*
 import org.bitcoinj.core.Base58
 import org.junit.Assert.*
 import org.junit.Test

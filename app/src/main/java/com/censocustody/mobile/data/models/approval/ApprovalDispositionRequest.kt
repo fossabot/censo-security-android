@@ -1,20 +1,20 @@
-package com.strikeprotocols.mobile.data.models.approval
+package com.censocustody.mobile.data.models.approval
 
-import com.strikeprotocols.mobile.common.BaseWrapper.decodeFromBase64
-import com.strikeprotocols.mobile.data.EncryptionManager
-import com.strikeprotocols.mobile.data.Signable
-import com.strikeprotocols.mobile.data.SignedPayload
-import com.strikeprotocols.mobile.data.models.ApprovalDisposition
-import com.strikeprotocols.mobile.data.models.Chain
-import com.strikeprotocols.mobile.data.models.Nonce
-import com.strikeprotocols.mobile.data.models.approval.PublicKey.Companion.SYSVAR_CLOCK_PUBKEY
-import com.strikeprotocols.mobile.data.models.approval.TransactionInstruction.Companion.createAdvanceNonceInstruction
+import com.censocustody.mobile.common.BaseWrapper.decodeFromBase64
+import com.censocustody.mobile.data.EncryptionManager
+import com.censocustody.mobile.data.Signable
+import com.censocustody.mobile.data.SignedPayload
+import com.censocustody.mobile.data.models.ApprovalDisposition
+import com.censocustody.mobile.data.models.Chain
+import com.censocustody.mobile.data.models.Nonce
+import com.censocustody.mobile.data.models.approval.PublicKey.Companion.SYSVAR_CLOCK_PUBKEY
+import com.censocustody.mobile.data.models.approval.TransactionInstruction.Companion.createAdvanceNonceInstruction
 import org.web3j.crypto.Hash
 import java.io.ByteArrayOutputStream
 import kotlin.Exception
-import com.strikeprotocols.mobile.data.models.approval.ApprovalRequestDetails.Companion.INVALID_REQUEST_APPROVAL
-import com.strikeprotocols.mobile.data.models.approval.ApprovalRequestDetails.Companion.UNKNOWN_REQUEST_APPROVAL
-import com.strikeprotocols.mobile.data.models.approval.ApprovalRequestDetails.*
+import com.censocustody.mobile.data.models.approval.ApprovalRequestDetails.Companion.INVALID_REQUEST_APPROVAL
+import com.censocustody.mobile.data.models.approval.ApprovalRequestDetails.Companion.UNKNOWN_REQUEST_APPROVAL
+import com.censocustody.mobile.data.models.approval.ApprovalRequestDetails.*
 import javax.crypto.Cipher
 
 data class ApprovalDispositionRequest(

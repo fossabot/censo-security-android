@@ -1,4 +1,4 @@
-package com.strikeprotocols.mobile.presentation.key_management
+package com.censocustody.mobile.presentation.key_management
 
 import android.content.ClipData
 import android.content.Context
@@ -42,19 +42,19 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
-import com.strikeprotocols.mobile.R
-import com.strikeprotocols.mobile.common.Resource
-import com.strikeprotocols.mobile.data.models.IndexedPhraseWord
-import com.strikeprotocols.mobile.data.models.Signers
-import com.strikeprotocols.mobile.presentation.key_management.KeyManagementState.Companion.FIRST_WORD_INDEX
-import com.strikeprotocols.mobile.presentation.key_management.KeyManagementState.Companion.LAST_SET_START_INDEX
-import com.strikeprotocols.mobile.presentation.key_management.KeyManagementState.Companion.LAST_WORD_INDEX
-import com.strikeprotocols.mobile.presentation.key_management.PhraseUICompanion.DISPLAY_RANGE_SET
-import com.strikeprotocols.mobile.presentation.key_management.flows.KeyCreationFlowStep
-import com.strikeprotocols.mobile.presentation.key_management.flows.KeyRecoveryFlowStep
-import com.strikeprotocols.mobile.presentation.key_management.flows.PhraseEntryAction
-import com.strikeprotocols.mobile.presentation.key_management.flows.PhraseFlowAction
-import com.strikeprotocols.mobile.ui.theme.*
+import com.censocustody.mobile.R
+import com.censocustody.mobile.common.Resource
+import com.censocustody.mobile.data.models.IndexedPhraseWord
+import com.censocustody.mobile.data.models.Signers
+import com.censocustody.mobile.presentation.key_management.KeyManagementState.Companion.FIRST_WORD_INDEX
+import com.censocustody.mobile.presentation.key_management.KeyManagementState.Companion.LAST_SET_START_INDEX
+import com.censocustody.mobile.presentation.key_management.KeyManagementState.Companion.LAST_WORD_INDEX
+import com.censocustody.mobile.presentation.key_management.PhraseUICompanion.DISPLAY_RANGE_SET
+import com.censocustody.mobile.presentation.key_management.flows.KeyCreationFlowStep
+import com.censocustody.mobile.presentation.key_management.flows.KeyRecoveryFlowStep
+import com.censocustody.mobile.presentation.key_management.flows.PhraseEntryAction
+import com.censocustody.mobile.presentation.key_management.flows.PhraseFlowAction
+import com.censocustody.mobile.ui.theme.*
 
 object PhraseUICompanion {
     const val FIRST_SPACER_INDEX = 0

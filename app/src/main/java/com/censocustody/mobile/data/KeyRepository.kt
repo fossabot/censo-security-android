@@ -1,15 +1,15 @@
-package com.strikeprotocols.mobile.data
+package com.censocustody.mobile.data
 
 import cash.z.ecc.android.bip39.Mnemonics
 import cash.z.ecc.android.bip39.toSeed
-import com.strikeprotocols.mobile.common.BaseWrapper
-import com.strikeprotocols.mobile.common.generateFormattedTimestamp
-import com.strikeprotocols.mobile.data.EncryptionManagerImpl.Companion.SENTINEL_KEY_NAME
-import com.strikeprotocols.mobile.data.models.Chain
-import com.strikeprotocols.mobile.data.models.StoredKeyData.Companion.SOLANA_KEY
-import com.strikeprotocols.mobile.data.models.VerifyUser
-import com.strikeprotocols.mobile.data.models.WalletSigner
-import com.strikeprotocols.mobile.data.models.mapToPublicKeysList
+import com.censocustody.mobile.common.BaseWrapper
+import com.censocustody.mobile.common.generateFormattedTimestamp
+import com.censocustody.mobile.data.EncryptionManagerImpl.Companion.SENTINEL_KEY_NAME
+import com.censocustody.mobile.data.models.Chain
+import com.censocustody.mobile.data.models.StoredKeyData.Companion.SOLANA_KEY
+import com.censocustody.mobile.data.models.VerifyUser
+import com.censocustody.mobile.data.models.WalletSigner
+import com.censocustody.mobile.data.models.mapToPublicKeysList
 import javax.crypto.Cipher
 
 interface KeyRepository {

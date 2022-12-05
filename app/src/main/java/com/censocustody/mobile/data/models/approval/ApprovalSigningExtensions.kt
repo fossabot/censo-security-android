@@ -1,6 +1,6 @@
-package com.strikeprotocols.mobile.data.models.approval
+package com.censocustody.mobile.data.models.approval
 
-import com.strikeprotocols.mobile.common.BaseWrapper
+import com.censocustody.mobile.common.BaseWrapper
 import org.web3j.crypto.Hash
 import java.io.ByteArrayOutputStream
 import java.nio.ByteBuffer

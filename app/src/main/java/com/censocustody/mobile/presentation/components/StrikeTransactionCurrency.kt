@@ -1,4 +1,4 @@
-package com.strikeprotocols.mobile.presentation.components
+package com.censocustody.mobile.presentation.components
 
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
@@ -9,9 +9,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.strikeprotocols.mobile.R
-import com.strikeprotocols.mobile.ui.theme.GreyText
-import com.strikeprotocols.mobile.ui.theme.StrikeWhite
+import com.censocustody.mobile.R
+import com.censocustody.mobile.ui.theme.GreyText
+import com.censocustody.mobile.ui.theme.StrikeWhite
 
 @Composable
 fun StrikeTransactionCurrency(

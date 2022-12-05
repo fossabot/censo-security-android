@@ -1,9 +1,9 @@
 # App Environments and Package Ids
-    - Debug: com.strikeprotocols.mobile.debug
-    - PreRelease: com.strikeprotocols.mobile.prerelease
-    - DemoOne: com.strikeprotocols.mobile.demo
-    - DemoTwo: com.strikeprotocols.mobile.demo2
-    - Release: com.strikeprotocols.mobile
+    - Debug: com.censocustody.mobile.debug
+    - PreRelease: com.censocustody.mobile.prerelease
+    - DemoOne: com.censocustody.mobile.demo
+    - DemoTwo: com.censocustody.mobile.demo2
+    - Release: com.censocustody.mobile
 
 # Build Setup
 

@@ -1,4 +1,4 @@
-package com.strikeprotocols.mobile.presentation.approvals.approval_type_row_items
+package com.censocustody.mobile.presentation.approvals.approval_type_row_items
 
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
@@ -6,7 +6,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import com.strikeprotocols.mobile.data.models.approval.ApprovalRequestDetails
+import com.censocustody.mobile.data.models.approval.ApprovalRequestDetails
 
 @Composable
 fun ConversionRequestRowContent(conversionRequest: ApprovalRequestDetails.ConversionRequest) {

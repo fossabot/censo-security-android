@@ -1,4 +1,4 @@
-package com.strikeprotocols.mobile.data.models.approval
+package com.censocustody.mobile.data.models.approval
 
 import org.bitcoinj.core.Base58
 import org.bouncycastle.math.ec.rfc8032.Ed25519

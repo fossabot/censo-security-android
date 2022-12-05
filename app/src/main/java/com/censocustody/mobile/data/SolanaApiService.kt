@@ -1,11 +1,11 @@
-package com.strikeprotocols.mobile.data
+package com.censocustody.mobile.data
 
 import com.google.gson.*
-import com.strikeprotocols.mobile.BuildConfig
-import com.strikeprotocols.mobile.common.BaseWrapper
-import com.strikeprotocols.mobile.data.models.MultipleAccountsResponse
-import com.strikeprotocols.mobile.data.models.Nonce
-import com.strikeprotocols.mobile.presentation.durable_nonce.DurableNonceViewModel
+import com.censocustody.mobile.BuildConfig
+import com.censocustody.mobile.common.BaseWrapper
+import com.censocustody.mobile.data.models.MultipleAccountsResponse
+import com.censocustody.mobile.data.models.Nonce
+import com.censocustody.mobile.presentation.durable_nonce.DurableNonceViewModel
 import okhttp3.*
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit

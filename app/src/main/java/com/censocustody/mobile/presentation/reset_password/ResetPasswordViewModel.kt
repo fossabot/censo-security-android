@@ -1,12 +1,12 @@
-package com.strikeprotocols.mobile.presentation.reset_password
+package com.censocustody.mobile.presentation.reset_password
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.strikeprotocols.mobile.common.Resource
-import com.strikeprotocols.mobile.data.UserRepository
+import com.censocustody.mobile.common.Resource
+import com.censocustody.mobile.data.UserRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch

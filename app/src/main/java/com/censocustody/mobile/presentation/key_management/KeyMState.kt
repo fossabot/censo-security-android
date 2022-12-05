@@ -1,11 +1,11 @@
-package com.strikeprotocols.mobile.presentation.key_management
+package com.censocustody.mobile.presentation.key_management
 
-import com.strikeprotocols.mobile.common.BioPromptReason
-import com.strikeprotocols.mobile.common.Resource
-import com.strikeprotocols.mobile.data.BioPromptData
-import com.strikeprotocols.mobile.data.models.Signers
-import com.strikeprotocols.mobile.presentation.key_management.flows.KeyCreationFlowStep
-import com.strikeprotocols.mobile.presentation.key_management.flows.KeyManagementFlowStep
+import com.censocustody.mobile.common.BioPromptReason
+import com.censocustody.mobile.common.Resource
+import com.censocustody.mobile.data.BioPromptData
+import com.censocustody.mobile.data.models.Signers
+import com.censocustody.mobile.presentation.key_management.flows.KeyCreationFlowStep
+import com.censocustody.mobile.presentation.key_management.flows.KeyManagementFlowStep
 import javax.crypto.Cipher
 
 data class KeyManagementState(

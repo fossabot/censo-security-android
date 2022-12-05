@@ -1,4 +1,4 @@
-package com.strikeprotocols.mobile.data
+package com.censocustody.mobile.data
 
 interface StrikePrivateKey {
     fun getPublicKeyBytes(): ByteArray

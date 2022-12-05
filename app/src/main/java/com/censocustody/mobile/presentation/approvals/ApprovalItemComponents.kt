@@ -1,4 +1,4 @@
-package com.strikeprotocols.mobile.presentation.approvals
+package com.censocustody.mobile.presentation.approvals
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -12,13 +12,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.strikeprotocols.mobile.R
-import com.strikeprotocols.mobile.common.convertSecondsIntoCountdownText
-import com.strikeprotocols.mobile.data.models.approval.ApprovalRequestDetails
-import com.strikeprotocols.mobile.data.models.approval.ApprovalRequest
-import com.strikeprotocols.mobile.presentation.approval_detail.approval_type_detail_items.*
-import com.strikeprotocols.mobile.presentation.approvals.approval_type_row_items.*
-import com.strikeprotocols.mobile.ui.theme.*
+import com.censocustody.mobile.R
+import com.censocustody.mobile.common.convertSecondsIntoCountdownText
+import com.censocustody.mobile.data.models.approval.ApprovalRequestDetails
+import com.censocustody.mobile.data.models.approval.ApprovalRequest
+import com.censocustody.mobile.presentation.approval_detail.approval_type_detail_items.*
+import com.censocustody.mobile.presentation.approvals.approval_type_row_items.*
+import com.censocustody.mobile.ui.theme.*
 
 
 @Composable

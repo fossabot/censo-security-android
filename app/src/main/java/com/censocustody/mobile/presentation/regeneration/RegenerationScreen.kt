@@ -1,12 +1,12 @@
-package com.strikeprotocols.mobile.presentation.regeneration
+package com.censocustody.mobile.presentation.regeneration
 
 import androidx.compose.runtime.*
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import com.strikeprotocols.mobile.common.Resource
-import com.strikeprotocols.mobile.common.popUpToTop
-import com.strikeprotocols.mobile.presentation.Screen
-import com.strikeprotocols.mobile.presentation.migration.MigrationUI
+import com.censocustody.mobile.common.Resource
+import com.censocustody.mobile.common.popUpToTop
+import com.censocustody.mobile.presentation.Screen
+import com.censocustody.mobile.presentation.migration.MigrationUI
 
 @Composable
 fun RegenerationScreen(

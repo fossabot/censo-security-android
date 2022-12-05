@@ -1,6 +1,6 @@
-package com.strikeprotocols.mobile.presentation.account
+package com.censocustody.mobile.presentation.account
 
-import com.strikeprotocols.mobile.common.Resource
+import com.censocustody.mobile.common.Resource
 
 data class AccountState(
     val email: String = "",

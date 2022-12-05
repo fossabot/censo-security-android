@@ -1,6 +1,6 @@
-package com.strikeprotocols.mobile.data.models.approval
+package com.censocustody.mobile.data.models.approval
 
-import com.strikeprotocols.mobile.common.BaseWrapper
+import com.censocustody.mobile.common.BaseWrapper
 import java.io.ByteArrayOutputStream
 
 class SignDataHelper {

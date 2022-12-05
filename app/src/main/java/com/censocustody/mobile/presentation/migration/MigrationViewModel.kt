@@ -1,17 +1,17 @@
-package com.strikeprotocols.mobile.presentation.migration
+package com.censocustody.mobile.presentation.migration
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.strikeprotocols.mobile.common.BioCryptoUtil.FAIL_ERROR
-import com.strikeprotocols.mobile.common.BioPromptReason
-import com.strikeprotocols.mobile.common.Resource
-import com.strikeprotocols.mobile.data.BioPromptData
-import com.strikeprotocols.mobile.data.EncryptionManagerImpl.Companion.ROOT_SEED_KEY_NAME
-import com.strikeprotocols.mobile.data.MigrationRepository
-import com.strikeprotocols.mobile.data.models.CipherRepository
+import com.censocustody.mobile.common.BioCryptoUtil.FAIL_ERROR
+import com.censocustody.mobile.common.BioPromptReason
+import com.censocustody.mobile.common.Resource
+import com.censocustody.mobile.data.BioPromptData
+import com.censocustody.mobile.data.EncryptionManagerImpl.Companion.ROOT_SEED_KEY_NAME
+import com.censocustody.mobile.data.MigrationRepository
+import com.censocustody.mobile.data.models.CipherRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.crypto.Cipher

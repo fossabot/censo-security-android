@@ -1,4 +1,4 @@
-package com.strikeprotocols.mobile.presentation.account
+package com.censocustody.mobile.presentation.account
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -23,14 +23,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import com.strikeprotocols.mobile.BuildConfig
-import com.strikeprotocols.mobile.R
-import com.strikeprotocols.mobile.common.Resource
-import com.strikeprotocols.mobile.common.popUpToTop
-import com.strikeprotocols.mobile.presentation.Screen
-import com.strikeprotocols.mobile.presentation.approval_detail.approval_type_detail_items.AccountRow
-import com.strikeprotocols.mobile.presentation.components.StrikeCenteredTopAppBar
-import com.strikeprotocols.mobile.ui.theme.*
+import com.censocustody.mobile.BuildConfig
+import com.censocustody.mobile.R
+import com.censocustody.mobile.common.Resource
+import com.censocustody.mobile.common.popUpToTop
+import com.censocustody.mobile.presentation.Screen
+import com.censocustody.mobile.presentation.approval_detail.approval_type_detail_items.AccountRow
+import com.censocustody.mobile.presentation.components.StrikeCenteredTopAppBar
+import com.censocustody.mobile.ui.theme.*
 import java.util.*
 
 

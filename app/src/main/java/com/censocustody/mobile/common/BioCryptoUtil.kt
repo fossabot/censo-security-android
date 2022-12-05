@@ -1,4 +1,4 @@
-package com.strikeprotocols.mobile.common
+package com.censocustody.mobile.common
 
 import android.content.Context
 import android.widget.Toast
@@ -7,7 +7,7 @@ import androidx.biometric.BiometricPrompt
 import androidx.biometric.BiometricPrompt.ERROR_LOCKOUT
 import androidx.biometric.BiometricPrompt.ERROR_LOCKOUT_PERMANENT
 import androidx.fragment.app.FragmentActivity
-import com.strikeprotocols.mobile.R
+import com.censocustody.mobile.R
 
 object BioCryptoUtil {
 

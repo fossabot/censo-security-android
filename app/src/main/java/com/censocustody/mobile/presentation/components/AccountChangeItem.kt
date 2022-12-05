@@ -1,4 +1,4 @@
-package com.strikeprotocols.mobile.presentation.components
+package com.censocustody.mobile.presentation.components
 
 
 import androidx.compose.foundation.background
@@ -13,10 +13,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.strikeprotocols.mobile.presentation.approvals.ApprovalContentHeader
-import com.strikeprotocols.mobile.ui.theme.DetailInfoDarkBackground
-import com.strikeprotocols.mobile.ui.theme.GreyText
-import com.strikeprotocols.mobile.ui.theme.StrikeWhite
+import com.censocustody.mobile.presentation.approvals.ApprovalContentHeader
+import com.censocustody.mobile.ui.theme.DetailInfoDarkBackground
+import com.censocustody.mobile.ui.theme.GreyText
+import com.censocustody.mobile.ui.theme.StrikeWhite
 
 @Composable
 fun AccountChangeItem(header: String, title: String, subtitle: String, headerTopSpacing: Int = 12, headerBottomSpacing: Int = 32) {

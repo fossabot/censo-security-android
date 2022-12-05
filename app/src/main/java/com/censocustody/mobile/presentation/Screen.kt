@@ -1,4 +1,4 @@
-package com.strikeprotocols.mobile.presentation
+package com.censocustody.mobile.presentation
 
 sealed class Screen(val route: String) {
     object SignInRoute : Screen("sign_in_screen")

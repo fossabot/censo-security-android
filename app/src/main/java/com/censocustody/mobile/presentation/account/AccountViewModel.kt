@@ -1,14 +1,14 @@
-package com.strikeprotocols.mobile.presentation.account
+package com.censocustody.mobile.presentation.account
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.strikeprotocols.mobile.common.Resource
-import com.strikeprotocols.mobile.data.PushRepository
-import com.strikeprotocols.mobile.data.StrikeUserData
-import com.strikeprotocols.mobile.data.UserRepository
+import com.censocustody.mobile.common.Resource
+import com.censocustody.mobile.data.PushRepository
+import com.censocustody.mobile.data.StrikeUserData
+import com.censocustody.mobile.data.UserRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject

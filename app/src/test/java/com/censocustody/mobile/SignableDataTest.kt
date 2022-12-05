@@ -1,12 +1,12 @@
-package com.strikeprotocols.mobile
+package com.censocustody.mobile
 
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonParser
-import com.strikeprotocols.mobile.common.BaseWrapper
-import com.strikeprotocols.mobile.common.toHexString
-import com.strikeprotocols.mobile.data.models.ApprovalDisposition
-import com.strikeprotocols.mobile.data.models.Nonce
-import com.strikeprotocols.mobile.data.models.approval.*
+import com.censocustody.mobile.common.BaseWrapper
+import com.censocustody.mobile.common.toHexString
+import com.censocustody.mobile.data.models.ApprovalDisposition
+import com.censocustody.mobile.data.models.Nonce
+import com.censocustody.mobile.data.models.approval.*
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test

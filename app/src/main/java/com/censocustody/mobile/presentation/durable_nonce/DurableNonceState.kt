@@ -1,7 +1,7 @@
-package com.strikeprotocols.mobile.presentation.durable_nonce
+package com.censocustody.mobile.presentation.durable_nonce
 
-import com.strikeprotocols.mobile.common.Resource
-import com.strikeprotocols.mobile.data.models.MultipleAccountsResponse
+import com.censocustody.mobile.common.Resource
+import com.censocustody.mobile.data.models.MultipleAccountsResponse
 
 data class DurableNonceState(
     val multipleAccounts: DurableNonceViewModel.MultipleAccounts? = null,

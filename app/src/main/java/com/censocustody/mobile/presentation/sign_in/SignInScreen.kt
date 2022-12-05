@@ -1,4 +1,4 @@
-package com.strikeprotocols.mobile.presentation.sign_in
+package com.censocustody.mobile.presentation.sign_in
 
 import android.annotation.SuppressLint
 import androidx.biometric.BiometricPrompt
@@ -29,14 +29,14 @@ import androidx.compose.ui.zIndex
 import androidx.fragment.app.FragmentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import com.strikeprotocols.mobile.R
-import com.strikeprotocols.mobile.common.BioCryptoUtil
-import com.strikeprotocols.mobile.common.Resource
-import com.strikeprotocols.mobile.presentation.Screen
-import com.strikeprotocols.mobile.presentation.components.SignInTextField
-import com.strikeprotocols.mobile.presentation.components.StrikeSignInTopAppBar
-import com.strikeprotocols.mobile.presentation.key_management.PurpleGradientBackgroundUI
-import com.strikeprotocols.mobile.ui.theme.*
+import com.censocustody.mobile.R
+import com.censocustody.mobile.common.BioCryptoUtil
+import com.censocustody.mobile.common.Resource
+import com.censocustody.mobile.presentation.Screen
+import com.censocustody.mobile.presentation.components.SignInTextField
+import com.censocustody.mobile.presentation.components.StrikeSignInTopAppBar
+import com.censocustody.mobile.presentation.key_management.PurpleGradientBackgroundUI
+import com.censocustody.mobile.ui.theme.*
 
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @OptIn(ExperimentalComposeUiApi::class)

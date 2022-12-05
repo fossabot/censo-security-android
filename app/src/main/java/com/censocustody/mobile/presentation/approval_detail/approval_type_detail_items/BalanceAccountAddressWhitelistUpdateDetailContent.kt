@@ -1,4 +1,4 @@
-package com.strikeprotocols.mobile.presentation.approval_detail.approval_type_detail_items
+package com.censocustody.mobile.presentation.approval_detail.approval_type_detail_items
 
 import android.content.Context
 import androidx.compose.foundation.layout.Spacer
@@ -8,13 +8,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.strikeprotocols.mobile.R
-import com.strikeprotocols.mobile.common.toWalletName
-import com.strikeprotocols.mobile.data.models.approval.ApprovalRequestDetails
-import com.strikeprotocols.mobile.presentation.approvals.ApprovalRowContentHeader
-import com.strikeprotocols.mobile.presentation.approvals.approval_type_row_items.*
-import com.strikeprotocols.mobile.presentation.components.FactRow
-import com.strikeprotocols.mobile.presentation.components.FactsData
+import com.censocustody.mobile.R
+import com.censocustody.mobile.common.toWalletName
+import com.censocustody.mobile.data.models.approval.ApprovalRequestDetails
+import com.censocustody.mobile.presentation.approvals.ApprovalRowContentHeader
+import com.censocustody.mobile.presentation.approvals.approval_type_row_items.*
+import com.censocustody.mobile.presentation.components.FactRow
+import com.censocustody.mobile.presentation.components.FactsData
 
 @Composable
 fun BalanceAccountAddressWhitelistUpdateDetailContent(

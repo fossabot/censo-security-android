@@ -1,6 +1,6 @@
-package com.strikeprotocols.mobile
+package com.censocustody.mobile
 
-import com.strikeprotocols.mobile.data.PhraseValidatorImpl
+import com.censocustody.mobile.data.PhraseValidatorImpl
 import junit.framework.Assert.assertFalse
 import org.junit.Test
 

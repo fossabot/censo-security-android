@@ -1,8 +1,8 @@
-package com.strikeprotocols.mobile
+package com.censocustody.mobile
 
-import com.strikeprotocols.mobile.data.models.Chain
-import com.strikeprotocols.mobile.data.models.approval.*
-import com.strikeprotocols.mobile.data.models.approval.ApprovalRequestDetails.*
+import com.censocustody.mobile.data.models.Chain
+import com.censocustody.mobile.data.models.approval.*
+import com.censocustody.mobile.data.models.approval.ApprovalRequestDetails.*
 import java.util.*
 
 

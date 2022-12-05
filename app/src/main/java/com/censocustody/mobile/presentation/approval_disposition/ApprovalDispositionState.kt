@@ -1,10 +1,10 @@
-package com.strikeprotocols.mobile.presentation.approval_disposition
+package com.censocustody.mobile.presentation.approval_disposition
 
-import com.strikeprotocols.mobile.common.Resource
-import com.strikeprotocols.mobile.data.models.ApprovalDisposition
-import com.strikeprotocols.mobile.data.models.approval.ApprovalDispositionRequest
-import com.strikeprotocols.mobile.data.models.approval.InitiationRequest
-import com.strikeprotocols.mobile.data.models.approval.ApprovalRequest
+import com.censocustody.mobile.common.Resource
+import com.censocustody.mobile.data.models.ApprovalDisposition
+import com.censocustody.mobile.data.models.approval.ApprovalDispositionRequest
+import com.censocustody.mobile.data.models.approval.InitiationRequest
+import com.censocustody.mobile.data.models.approval.ApprovalRequest
 
 data class ApprovalDispositionState(
     val approvalDisposition: Resource<ApprovalDisposition> = Resource.Uninitialized,

@@ -1,16 +1,16 @@
-package com.strikeprotocols.mobile
+package com.censocustody.mobile
 
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.times
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
-import com.strikeprotocols.mobile.common.Resource
-import com.strikeprotocols.mobile.data.SolanaRepository
-import com.strikeprotocols.mobile.data.models.MultipleAccountsResponse
-import com.strikeprotocols.mobile.data.models.Nonce
-import com.strikeprotocols.mobile.presentation.durable_nonce.DurableNonceViewModel
-import com.strikeprotocols.mobile.presentation.durable_nonce.DurableNonceViewModel.Companion.UNABLE_TO_RETRIEVE_VALID_NONCE
-import com.strikeprotocols.mobile.viewModel.BaseViewModelTest
+import com.censocustody.mobile.common.Resource
+import com.censocustody.mobile.data.SolanaRepository
+import com.censocustody.mobile.data.models.MultipleAccountsResponse
+import com.censocustody.mobile.data.models.Nonce
+import com.censocustody.mobile.presentation.durable_nonce.DurableNonceViewModel
+import com.censocustody.mobile.presentation.durable_nonce.DurableNonceViewModel.Companion.UNABLE_TO_RETRIEVE_VALID_NONCE
+import com.censocustody.mobile.viewModel.BaseViewModelTest
 import junit.framework.Assert.assertEquals
 import junit.framework.TestCase
 import kotlinx.coroutines.Dispatchers

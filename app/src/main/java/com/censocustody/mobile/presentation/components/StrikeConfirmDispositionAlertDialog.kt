@@ -1,4 +1,4 @@
-package com.strikeprotocols.mobile.presentation.components
+package com.censocustody.mobile.presentation.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -23,8 +23,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
-import com.strikeprotocols.mobile.R
-import com.strikeprotocols.mobile.ui.theme.*
+import com.censocustody.mobile.R
+import com.censocustody.mobile.ui.theme.*
 
 @Composable
 fun StrikeConfirmDispositionAlertDialog(

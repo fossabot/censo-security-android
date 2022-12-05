@@ -1,4 +1,4 @@
-package com.strikeprotocols.mobile.presentation.key_management.flows
+package com.censocustody.mobile.presentation.key_management.flows
 
 sealed class KeyManagementFlowStep() {
 

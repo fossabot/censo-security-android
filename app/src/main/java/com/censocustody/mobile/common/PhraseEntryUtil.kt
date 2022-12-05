@@ -1,15 +1,15 @@
-package com.strikeprotocols.mobile.common
+package com.censocustody.mobile.common
 
-import com.strikeprotocols.mobile.data.PhraseException
-import com.strikeprotocols.mobile.data.models.IndexedPhraseWord
-import com.strikeprotocols.mobile.presentation.key_management.ConfirmPhraseWordsState
-import com.strikeprotocols.mobile.presentation.key_management.KeyManagementFlow
-import com.strikeprotocols.mobile.presentation.key_management.KeyManagementState
-import com.strikeprotocols.mobile.presentation.key_management.KeyManagementState.Companion.CHANGE_AMOUNT
-import com.strikeprotocols.mobile.presentation.key_management.KeyManagementState.Companion.FIRST_WORD_INDEX
-import com.strikeprotocols.mobile.presentation.key_management.KeyManagementState.Companion.LAST_SET_START_INDEX
-import com.strikeprotocols.mobile.presentation.key_management.KeyManagementState.Companion.LAST_WORD_INDEX
-import com.strikeprotocols.mobile.presentation.key_management.KeyManagementState.Companion.PHRASE_WORD_COUNT
+import com.censocustody.mobile.data.PhraseException
+import com.censocustody.mobile.data.models.IndexedPhraseWord
+import com.censocustody.mobile.presentation.key_management.ConfirmPhraseWordsState
+import com.censocustody.mobile.presentation.key_management.KeyManagementFlow
+import com.censocustody.mobile.presentation.key_management.KeyManagementState
+import com.censocustody.mobile.presentation.key_management.KeyManagementState.Companion.CHANGE_AMOUNT
+import com.censocustody.mobile.presentation.key_management.KeyManagementState.Companion.FIRST_WORD_INDEX
+import com.censocustody.mobile.presentation.key_management.KeyManagementState.Companion.LAST_SET_START_INDEX
+import com.censocustody.mobile.presentation.key_management.KeyManagementState.Companion.LAST_WORD_INDEX
+import com.censocustody.mobile.presentation.key_management.KeyManagementState.Companion.PHRASE_WORD_COUNT
 
 object PhraseEntryUtil {
 

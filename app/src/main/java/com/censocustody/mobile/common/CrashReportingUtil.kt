@@ -1,4 +1,4 @@
-package com.strikeprotocols.mobile.common
+package com.censocustody.mobile.common
 
 object CrashReportingUtil {
     const val BROADCAST_RECEIVER_TAG = "BroadcastReceiver"

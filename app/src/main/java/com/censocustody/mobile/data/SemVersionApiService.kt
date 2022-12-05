@@ -1,8 +1,8 @@
-package com.strikeprotocols.mobile.data
+package com.censocustody.mobile.data
 
 import com.google.gson.GsonBuilder
-import com.strikeprotocols.mobile.BuildConfig
-import com.strikeprotocols.mobile.data.models.SemanticVersionResponse
+import com.censocustody.mobile.BuildConfig
+import com.censocustody.mobile.data.models.SemanticVersionResponse
 import okhttp3.OkHttpClient
 import retrofit2.Response as RetrofitResponse
 import okhttp3.logging.HttpLoggingInterceptor

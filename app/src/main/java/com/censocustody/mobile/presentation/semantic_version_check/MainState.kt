@@ -1,8 +1,8 @@
-package com.strikeprotocols.mobile.presentation.semantic_version_check
+package com.censocustody.mobile.presentation.semantic_version_check
 
-import com.strikeprotocols.mobile.common.BioPromptReason
-import com.strikeprotocols.mobile.common.BiometricUtil
-import com.strikeprotocols.mobile.common.Resource
+import com.censocustody.mobile.common.BioPromptReason
+import com.censocustody.mobile.common.BiometricUtil
+import com.censocustody.mobile.common.Resource
 import javax.crypto.Cipher
 
 data class MainState(

@@ -1,4 +1,4 @@
-package com.strikeprotocols.mobile.data
+package com.censocustody.mobile.data
 
 sealed class EncryptionManagerException(val value: String) : Exception(value) {
 

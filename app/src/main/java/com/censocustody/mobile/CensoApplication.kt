@@ -1,15 +1,14 @@
-package com.strikeprotocols.mobile
+package com.censocustody.mobile
 
 import android.app.Application
 import com.google.firebase.FirebaseApp
-import com.google.firebase.FirebaseOptions
 import com.raygun.raygun4android.RaygunClient
-import com.strikeprotocols.mobile.common.CrashReportingUtil
-import com.strikeprotocols.mobile.data.SharedPrefsHelper
+import com.censocustody.mobile.common.CrashReportingUtil
+import com.censocustody.mobile.data.SharedPrefsHelper
 import dagger.hilt.android.HiltAndroidApp
 
 @HiltAndroidApp
-class StrikeApplication : Application() {
+class CensoApplication : Application() {
 
     override fun onCreate() {
         super.onCreate()

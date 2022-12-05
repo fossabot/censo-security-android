@@ -1,23 +1,23 @@
-package com.strikeprotocols.mobile.presentation.common_approvals
+package com.censocustody.mobile.presentation.common_approvals
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.strikeprotocols.mobile.common.Resource
-import com.strikeprotocols.mobile.common.StrikeCountDownTimer
-import com.strikeprotocols.mobile.common.StrikeCountDownTimerImpl
-import com.strikeprotocols.mobile.data.ApprovalsRepository
-import com.strikeprotocols.mobile.data.KeyRepository
-import com.strikeprotocols.mobile.data.models.ApprovalDisposition
-import com.strikeprotocols.mobile.data.models.CipherRepository
-import com.strikeprotocols.mobile.data.models.InitiationDisposition
-import com.strikeprotocols.mobile.data.models.RegisterApprovalDisposition
-import com.strikeprotocols.mobile.data.models.approval.SolanaApprovalRequestDetails
-import com.strikeprotocols.mobile.data.models.approval.ApprovalRequest
-import com.strikeprotocols.mobile.presentation.approval_disposition.ApprovalDispositionState
-import com.strikeprotocols.mobile.presentation.durable_nonce.DurableNonceViewModel
+import com.censocustody.mobile.common.Resource
+import com.censocustody.mobile.common.StrikeCountDownTimer
+import com.censocustody.mobile.common.StrikeCountDownTimerImpl
+import com.censocustody.mobile.data.ApprovalsRepository
+import com.censocustody.mobile.data.KeyRepository
+import com.censocustody.mobile.data.models.ApprovalDisposition
+import com.censocustody.mobile.data.models.CipherRepository
+import com.censocustody.mobile.data.models.InitiationDisposition
+import com.censocustody.mobile.data.models.RegisterApprovalDisposition
+import com.censocustody.mobile.data.models.approval.SolanaApprovalRequestDetails
+import com.censocustody.mobile.data.models.approval.ApprovalRequest
+import com.censocustody.mobile.presentation.approval_disposition.ApprovalDispositionState
+import com.censocustody.mobile.presentation.durable_nonce.DurableNonceViewModel
 import kotlinx.coroutines.launch
 import javax.crypto.Cipher
 

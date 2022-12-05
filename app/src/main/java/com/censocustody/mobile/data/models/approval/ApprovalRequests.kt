@@ -1,10 +1,10 @@
-package com.strikeprotocols.mobile.data.models.approval
+package com.censocustody.mobile.data.models.approval
 
 import android.content.Context
 import com.google.gson.*
-import com.strikeprotocols.mobile.R
-import com.strikeprotocols.mobile.common.UriWrapper
-import com.strikeprotocols.mobile.data.models.approval.ApprovalRequestDetails.Companion.UNKNOWN_REQUEST_APPROVAL
+import com.censocustody.mobile.R
+import com.censocustody.mobile.common.UriWrapper
+import com.censocustody.mobile.data.models.approval.ApprovalRequestDetails.Companion.UNKNOWN_REQUEST_APPROVAL
 import java.lang.reflect.Modifier
 
 data class ApprovalRequest(

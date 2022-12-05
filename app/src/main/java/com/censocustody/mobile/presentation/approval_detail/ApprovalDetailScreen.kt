@@ -1,4 +1,4 @@
-package com.strikeprotocols.mobile.presentation.approval_detail
+package com.censocustody.mobile.presentation.approval_detail
 
 import android.annotation.SuppressLint
 import androidx.biometric.BiometricPrompt
@@ -25,21 +25,21 @@ import androidx.fragment.app.FragmentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.navigation.NavController
-import com.strikeprotocols.mobile.R
-import com.strikeprotocols.mobile.common.*
-import com.strikeprotocols.mobile.data.models.ApprovalDisposition
-import com.strikeprotocols.mobile.data.models.approval.ApprovalDispositionRequest
-import com.strikeprotocols.mobile.data.models.approval.InitiationRequest
-import com.strikeprotocols.mobile.data.models.approval.ApprovalRequestDetails
-import com.strikeprotocols.mobile.data.models.approval.ApprovalRequest
-import com.strikeprotocols.mobile.presentation.approvals.ApprovalsViewModel
-import com.strikeprotocols.mobile.ui.theme.*
-import com.strikeprotocols.mobile.data.models.approval.ApprovalRequestDetails.*
-import com.strikeprotocols.mobile.presentation.approvals.ApprovalDetailContent
-import com.strikeprotocols.mobile.presentation.approvals.approval_type_row_items.getApprovalTimerText
-import com.strikeprotocols.mobile.presentation.approvals.approval_type_row_items.getDialogMessages
-import com.strikeprotocols.mobile.presentation.components.*
-import com.strikeprotocols.mobile.presentation.durable_nonce.DurableNonceViewModel
+import com.censocustody.mobile.R
+import com.censocustody.mobile.common.*
+import com.censocustody.mobile.data.models.ApprovalDisposition
+import com.censocustody.mobile.data.models.approval.ApprovalDispositionRequest
+import com.censocustody.mobile.data.models.approval.InitiationRequest
+import com.censocustody.mobile.data.models.approval.ApprovalRequestDetails
+import com.censocustody.mobile.data.models.approval.ApprovalRequest
+import com.censocustody.mobile.presentation.approvals.ApprovalsViewModel
+import com.censocustody.mobile.ui.theme.*
+import com.censocustody.mobile.data.models.approval.ApprovalRequestDetails.*
+import com.censocustody.mobile.presentation.approvals.ApprovalDetailContent
+import com.censocustody.mobile.presentation.approvals.approval_type_row_items.getApprovalTimerText
+import com.censocustody.mobile.presentation.approvals.approval_type_row_items.getDialogMessages
+import com.censocustody.mobile.presentation.components.*
+import com.censocustody.mobile.presentation.durable_nonce.DurableNonceViewModel
 
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable

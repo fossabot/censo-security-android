@@ -1,4 +1,4 @@
-package com.strikeprotocols.mobile.presentation.key_management
+package com.censocustody.mobile.presentation.key_management
 
 import android.widget.Toast
 import androidx.biometric.BiometricPrompt
@@ -16,16 +16,16 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.navigation.NavController
-import com.strikeprotocols.mobile.R
-import com.strikeprotocols.mobile.common.BioCryptoUtil
-import com.strikeprotocols.mobile.common.Resource
-import com.strikeprotocols.mobile.common.popUpToTop
-import com.strikeprotocols.mobile.presentation.Screen
-import com.strikeprotocols.mobile.presentation.key_management.KeyManagementState.Companion.INVALID_PHRASE_ERROR
-import com.strikeprotocols.mobile.presentation.key_management.KeyManagementState.Companion.NO_PHRASE_ERROR
-import com.strikeprotocols.mobile.presentation.key_management.flows.*
-import com.strikeprotocols.mobile.ui.theme.StrikeWhite
-import com.strikeprotocols.mobile.ui.theme.UnfocusedGrey
+import com.censocustody.mobile.R
+import com.censocustody.mobile.common.BioCryptoUtil
+import com.censocustody.mobile.common.Resource
+import com.censocustody.mobile.common.popUpToTop
+import com.censocustody.mobile.presentation.Screen
+import com.censocustody.mobile.presentation.key_management.KeyManagementState.Companion.INVALID_PHRASE_ERROR
+import com.censocustody.mobile.presentation.key_management.KeyManagementState.Companion.NO_PHRASE_ERROR
+import com.censocustody.mobile.presentation.key_management.flows.*
+import com.censocustody.mobile.ui.theme.StrikeWhite
+import com.censocustody.mobile.ui.theme.UnfocusedGrey
 
 @OptIn(
     ExperimentalComposeUiApi::class,

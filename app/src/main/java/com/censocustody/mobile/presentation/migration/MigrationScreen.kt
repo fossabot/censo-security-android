@@ -1,8 +1,8 @@
-package com.strikeprotocols.mobile.presentation.migration
+package com.censocustody.mobile.presentation.migration
 
 
 import android.widget.Toast
-import com.strikeprotocols.mobile.presentation.key_management.PreBiometryDialog
+import com.censocustody.mobile.presentation.key_management.PreBiometryDialog
 import androidx.biometric.BiometricPrompt
 import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalContext
@@ -10,13 +10,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.fragment.app.FragmentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import com.strikeprotocols.mobile.R
-import com.strikeprotocols.mobile.common.BioCryptoUtil
-import com.strikeprotocols.mobile.common.BioCryptoUtil.NO_CIPHER_CODE
-import com.strikeprotocols.mobile.common.BioPromptReason
-import com.strikeprotocols.mobile.common.Resource
-import com.strikeprotocols.mobile.common.popUpToTop
-import com.strikeprotocols.mobile.presentation.Screen
+import com.censocustody.mobile.R
+import com.censocustody.mobile.common.BioCryptoUtil
+import com.censocustody.mobile.common.BioCryptoUtil.NO_CIPHER_CODE
+import com.censocustody.mobile.common.BioPromptReason
+import com.censocustody.mobile.common.Resource
+import com.censocustody.mobile.common.popUpToTop
+import com.censocustody.mobile.presentation.Screen
 
 @OptIn(
     androidx.compose.foundation.ExperimentalFoundationApi::class

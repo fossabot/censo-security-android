@@ -1,9 +1,9 @@
-package com.strikeprotocols.mobile.presentation.common_approvals
+package com.censocustody.mobile.presentation.common_approvals
 
-import com.strikeprotocols.mobile.common.Resource
-import com.strikeprotocols.mobile.data.models.approval.ApprovalRequest
-import com.strikeprotocols.mobile.presentation.approval_disposition.ApprovalDispositionState
-import com.strikeprotocols.mobile.presentation.durable_nonce.DurableNonceViewModel
+import com.censocustody.mobile.common.Resource
+import com.censocustody.mobile.data.models.approval.ApprovalRequest
+import com.censocustody.mobile.presentation.approval_disposition.ApprovalDispositionState
+import com.censocustody.mobile.presentation.durable_nonce.DurableNonceViewModel
 import javax.crypto.Cipher
 
 data class ApprovalsState(

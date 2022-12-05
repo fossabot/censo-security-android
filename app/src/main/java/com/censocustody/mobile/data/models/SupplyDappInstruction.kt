@@ -1,10 +1,10 @@
-package com.strikeprotocols.mobile.data.models
+package com.censocustody.mobile.data.models
 
-import com.strikeprotocols.mobile.data.Signable
-import com.strikeprotocols.mobile.data.models.approval.*
-import com.strikeprotocols.mobile.data.models.approval.PublicKey
-import com.strikeprotocols.mobile.data.models.approval.Transaction.compileMessage
-import com.strikeprotocols.mobile.data.models.approval.TransactionInstruction.Companion.createAdvanceNonceInstruction
+import com.censocustody.mobile.data.Signable
+import com.censocustody.mobile.data.models.approval.*
+import com.censocustody.mobile.data.models.approval.PublicKey
+import com.censocustody.mobile.data.models.approval.Transaction.compileMessage
+import com.censocustody.mobile.data.models.approval.TransactionInstruction.Companion.createAdvanceNonceInstruction
 
 class SupplyDappInstruction(
     val nonce: Nonce,

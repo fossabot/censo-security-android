@@ -1,4 +1,4 @@
-package com.strikeprotocols.mobile.presentation.entrance
+package com.censocustody.mobile.presentation.entrance
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -6,13 +6,13 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.raygun.raygun4android.RaygunClient
-import com.strikeprotocols.mobile.BuildConfig
-import com.strikeprotocols.mobile.common.CrashReportingUtil
-import com.strikeprotocols.mobile.common.Resource
-import com.strikeprotocols.mobile.data.*
-import com.strikeprotocols.mobile.data.models.SemanticVersion
-import com.strikeprotocols.mobile.data.models.VerifyUser
-import com.strikeprotocols.mobile.presentation.semantic_version_check.MainViewModel
+import com.censocustody.mobile.BuildConfig
+import com.censocustody.mobile.common.CrashReportingUtil
+import com.censocustody.mobile.common.Resource
+import com.censocustody.mobile.data.*
+import com.censocustody.mobile.data.models.SemanticVersion
+import com.censocustody.mobile.data.models.VerifyUser
+import com.censocustody.mobile.presentation.semantic_version_check.MainViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject

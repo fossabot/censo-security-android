@@ -1,4 +1,4 @@
-package com.strikeprotocols.mobile.presentation.semantic_version_check
+package com.censocustody.mobile.presentation.semantic_version_check
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -15,12 +15,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.strikeprotocols.mobile.common.BiometricUtil
-import com.strikeprotocols.mobile.common.Resource
-import com.strikeprotocols.mobile.presentation.biometry_disabled.BiometryDisabledScreen
-import com.strikeprotocols.mobile.ui.theme.StrikeWhite
+import com.censocustody.mobile.common.BiometricUtil
+import com.censocustody.mobile.common.Resource
+import com.censocustody.mobile.presentation.biometry_disabled.BiometryDisabledScreen
+import com.censocustody.mobile.ui.theme.StrikeWhite
 import javax.crypto.Cipher
-import com.strikeprotocols.mobile.R
+import com.censocustody.mobile.R
 
 @Composable
 fun BlockingUI(

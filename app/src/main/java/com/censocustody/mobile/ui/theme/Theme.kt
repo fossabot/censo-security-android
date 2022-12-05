@@ -1,4 +1,4 @@
-package com.strikeprotocols.mobile.ui.theme
+package com.censocustody.mobile.ui.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material.MaterialTheme

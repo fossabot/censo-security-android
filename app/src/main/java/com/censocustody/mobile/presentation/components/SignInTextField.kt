@@ -1,4 +1,4 @@
-package com.strikeprotocols.mobile.presentation.components
+package com.censocustody.mobile.presentation.components
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -19,8 +19,8 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
-import com.strikeprotocols.mobile.R
-import com.strikeprotocols.mobile.ui.theme.StrikePurple
+import com.censocustody.mobile.R
+import com.censocustody.mobile.ui.theme.StrikePurple
 
 @ExperimentalComposeUiApi
 @Composable

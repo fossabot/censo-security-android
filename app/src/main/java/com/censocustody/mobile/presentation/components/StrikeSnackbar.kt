@@ -1,4 +1,4 @@
-package com.strikeprotocols.mobile.presentation.components
+package com.censocustody.mobile.presentation.components
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -8,8 +8,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.strikeprotocols.mobile.ui.theme.SnackbarBackground
-import com.strikeprotocols.mobile.ui.theme.StrikeWhite
+import com.censocustody.mobile.ui.theme.SnackbarBackground
+import com.censocustody.mobile.ui.theme.StrikeWhite
 
 @Composable
 fun StrikeSnackbar(

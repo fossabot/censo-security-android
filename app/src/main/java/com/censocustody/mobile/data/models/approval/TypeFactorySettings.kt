@@ -1,4 +1,4 @@
-package com.strikeprotocols.mobile.data.models.approval
+package com.censocustody.mobile.data.models.approval
 
 import com.google.gson.typeadapters.RuntimeTypeAdapterFactory
 

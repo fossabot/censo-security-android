@@ -1,8 +1,8 @@
-package com.strikeprotocols.mobile.data
+package com.censocustody.mobile.data
 
 import android.content.Context
 import android.content.SharedPreferences
-import com.strikeprotocols.mobile.common.BaseWrapper
+import com.censocustody.mobile.common.BaseWrapper
 
 object SharedPrefsHelper {
 

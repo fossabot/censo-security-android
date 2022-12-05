@@ -1,4 +1,4 @@
-package com.strikeprotocols.mobile.viewModel
+package com.censocustody.mobile.viewModel
 
 import org.junit.Before
 import org.mockito.MockitoAnnotations

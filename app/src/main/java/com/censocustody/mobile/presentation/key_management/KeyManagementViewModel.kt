@@ -1,4 +1,4 @@
-package com.strikeprotocols.mobile.presentation.key_management
+package com.censocustody.mobile.presentation.key_management
 
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
@@ -8,16 +8,16 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.viewModelScope
 import cash.z.ecc.android.bip39.Mnemonics
-import com.strikeprotocols.mobile.common.*
-import com.strikeprotocols.mobile.data.*
-import com.strikeprotocols.mobile.data.EncryptionManagerImpl.Companion.ROOT_SEED_KEY_NAME
-import com.strikeprotocols.mobile.data.models.CipherRepository
-import com.strikeprotocols.mobile.data.models.IndexedPhraseWord
-import com.strikeprotocols.mobile.data.models.Signers
-import com.strikeprotocols.mobile.data.models.WalletSigner
-import com.strikeprotocols.mobile.presentation.key_management.KeyManagementState.Companion.NO_PHRASE_ERROR
-import com.strikeprotocols.mobile.presentation.key_management.KeyManagementState.Companion.FIRST_WORD_INDEX
-import com.strikeprotocols.mobile.presentation.key_management.flows.*
+import com.censocustody.mobile.common.*
+import com.censocustody.mobile.data.*
+import com.censocustody.mobile.data.EncryptionManagerImpl.Companion.ROOT_SEED_KEY_NAME
+import com.censocustody.mobile.data.models.CipherRepository
+import com.censocustody.mobile.data.models.IndexedPhraseWord
+import com.censocustody.mobile.data.models.Signers
+import com.censocustody.mobile.data.models.WalletSigner
+import com.censocustody.mobile.presentation.key_management.KeyManagementState.Companion.NO_PHRASE_ERROR
+import com.censocustody.mobile.presentation.key_management.KeyManagementState.Companion.FIRST_WORD_INDEX
+import com.censocustody.mobile.presentation.key_management.flows.*
 import kotlinx.coroutines.*
 import javax.crypto.Cipher
 

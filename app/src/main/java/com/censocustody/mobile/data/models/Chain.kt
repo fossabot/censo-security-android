@@ -1,4 +1,4 @@
-package com.strikeprotocols.mobile.data.models
+package com.censocustody.mobile.data.models
 
 import androidx.compose.ui.text.capitalize
 import androidx.compose.ui.text.intl.Locale

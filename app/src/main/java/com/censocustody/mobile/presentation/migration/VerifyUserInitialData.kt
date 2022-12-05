@@ -1,8 +1,8 @@
-package com.strikeprotocols.mobile.presentation.migration
+package com.censocustody.mobile.presentation.migration
 
 import com.google.gson.GsonBuilder
-import com.strikeprotocols.mobile.common.UriWrapper
-import com.strikeprotocols.mobile.data.models.VerifyUser
+import com.censocustody.mobile.common.UriWrapper
+import com.censocustody.mobile.data.models.VerifyUser
 import java.lang.reflect.Modifier
 
 data class VerifyUserInitialData(val verifyUserDetails: VerifyUser?) {

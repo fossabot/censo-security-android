@@ -1,5 +1,5 @@
-package com.strikeprotocols.mobile.data
+package com.censocustody.mobile.data
 
-import com.strikeprotocols.mobile.common.BioPromptReason
+import com.censocustody.mobile.common.BioPromptReason
 
 data class BioPromptData(val bioPromptReason: BioPromptReason, val immediate: Boolean = false)

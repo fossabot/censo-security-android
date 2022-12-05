@@ -1,4 +1,4 @@
-package com.strikeprotocols.mobile.presentation.entrance
+package com.censocustody.mobile.presentation.entrance
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -14,17 +14,17 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import com.strikeprotocols.mobile.R
-import com.strikeprotocols.mobile.common.AndroidUriWrapper
-import com.strikeprotocols.mobile.common.Resource
-import com.strikeprotocols.mobile.common.popUpToTop
-import com.strikeprotocols.mobile.presentation.Screen
-import com.strikeprotocols.mobile.presentation.components.StrikeErrorScreen
-import com.strikeprotocols.mobile.presentation.key_management.KeyManagementFlow
-import com.strikeprotocols.mobile.presentation.key_management.KeyManagementInitialData
-import com.strikeprotocols.mobile.presentation.migration.VerifyUserInitialData
-import com.strikeprotocols.mobile.ui.theme.BackgroundBlack
-import com.strikeprotocols.mobile.ui.theme.StrikeWhite
+import com.censocustody.mobile.R
+import com.censocustody.mobile.common.AndroidUriWrapper
+import com.censocustody.mobile.common.Resource
+import com.censocustody.mobile.common.popUpToTop
+import com.censocustody.mobile.presentation.Screen
+import com.censocustody.mobile.presentation.components.StrikeErrorScreen
+import com.censocustody.mobile.presentation.key_management.KeyManagementFlow
+import com.censocustody.mobile.presentation.key_management.KeyManagementInitialData
+import com.censocustody.mobile.presentation.migration.VerifyUserInitialData
+import com.censocustody.mobile.ui.theme.BackgroundBlack
+import com.censocustody.mobile.ui.theme.StrikeWhite
 
 @Composable
 fun EntranceScreen(
