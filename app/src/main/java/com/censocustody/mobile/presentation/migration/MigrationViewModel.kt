@@ -9,7 +9,6 @@ import com.censocustody.mobile.common.BioCryptoUtil.FAIL_ERROR
 import com.censocustody.mobile.common.BioPromptReason
 import com.censocustody.mobile.common.Resource
 import com.censocustody.mobile.data.BioPromptData
-import com.censocustody.mobile.data.EncryptionManagerImpl.Companion.ROOT_SEED_KEY_NAME
 import com.censocustody.mobile.data.MigrationRepository
 import com.censocustody.mobile.data.models.CipherRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -64,21 +63,6 @@ class MigrationViewModel @Inject constructor(
 
     //region Step 1: Get Existing Root Seed
     private suspend fun retrieveRootSeed() {
-        val v1RootSeed = migrationRepository.retrieveV1RootSeed()
-
-        if (v1RootSeed != null) {
-            state = state.copy(rootSeed = v1RootSeed.toList())
-            generateAllNecessaryData(isImmediate = false)
-            return
-        }
-
-        val haveV2RootSeed = migrationRepository.haveV2RootSeed()
-
-        if (haveV2RootSeed) {
-            retrieveCipherToDecryptV2RootSeed()
-            return
-        }
-
         val haveV3RootSeed = migrationRepository.haveV3RootSeed()
 
         if (haveV3RootSeed) {
@@ -88,18 +72,6 @@ class MigrationViewModel @Inject constructor(
 
         //have no data to migrate kick user out
         state = state.copy(kickUserOut = true)
-    }
-
-    //start step 1 for v2 migration
-    private suspend fun retrieveCipherToDecryptV2RootSeed() {
-        //look in biometryApproved to see where we retrieve root seed then move onto Step 2
-        val cipher = cipherRepository.getCipherForV2KeysDecryption()
-        if (cipher != null) {
-            state = state.copy(
-                triggerBioPrompt = Resource.Success(cipher),
-                bioPromptData = BioPromptData(BioPromptReason.RETRIEVE_V2_KEYS, false)
-            )
-        }
     }
 
     private suspend fun retrieveCipherToDecryptV3RootSeed() {
@@ -112,12 +84,6 @@ class MigrationViewModel @Inject constructor(
         }
     }
 
-    //finish step 1 and kick off step 2
-    private suspend fun retrieveV2KeyDataAndKickOffKeyStorage(cipher: Cipher) {
-        val rootSeed = migrationRepository.retrieveV2RootSeed(cipher)
-        state = state.copy(rootSeed = rootSeed?.toList())
-        generateAllNecessaryData()
-    }
 
     private suspend fun retrieveV3RootSeedAndKickOffKeyStorage(cipher: Cipher) {
         val rootSeed = migrationRepository.retrieveV3RootSeed(cipher)
@@ -130,7 +96,6 @@ class MigrationViewModel @Inject constructor(
         state = state.copy(rootSeed = rootSeed.toList())
 
         migrationRepository.saveV3PublicKeys(rootSeed = rootSeed)
-        migrationRepository.clearOldData()
 
         makeApiCallToSaveDataWithBackend()
     }
@@ -141,19 +106,6 @@ class MigrationViewModel @Inject constructor(
     // 1. Get cipher to save root seed
     // 2. Save root seed and go get cipher to save private keys
     // 3. Save private and public keys
-    private suspend fun generateAllNecessaryData(isImmediate: Boolean = true) {
-        //step 1: save root seed
-        val cipher = cipherRepository.getCipherForEncryption(ROOT_SEED_KEY_NAME)
-        if (cipher != null) {
-            state = state.copy(
-                triggerBioPrompt = Resource.Success(cipher),
-                bioPromptData = BioPromptData(
-                    BioPromptReason.SAVE_V3_ROOT_SEED,
-                    immediate = isImmediate
-                )
-            )
-        }
-    }
 
     private suspend fun saveRootSeed(rootSeedCipher: Cipher) {
         val rootSeed = state.rootSeed
@@ -171,8 +123,6 @@ class MigrationViewModel @Inject constructor(
         migrationRepository.saveV3PublicKeys(
             rootSeed = rootSeed.toByteArray()
         )
-
-        migrationRepository.clearOldData()
 
         makeApiCallToSaveDataWithBackend()
     }
@@ -207,7 +157,6 @@ class MigrationViewModel @Inject constructor(
     fun biometryApproved(cipher: Cipher) {
         viewModelScope.launch {
             when (state.bioPromptData.bioPromptReason) {
-                BioPromptReason.RETRIEVE_V2_KEYS -> retrieveV2KeyDataAndKickOffKeyStorage(cipher)
                 BioPromptReason.RETRIEVE_V3_ROOT_SEED -> retrieveV3RootSeedAndKickOffKeyStorage(cipher)
                 BioPromptReason.SAVE_V3_ROOT_SEED -> saveRootSeed(cipher)
                 else -> {}

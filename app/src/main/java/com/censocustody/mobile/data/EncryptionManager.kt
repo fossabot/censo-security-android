@@ -88,8 +88,6 @@ interface EncryptionManager {
     //endregion
 
     //region save/retrieve key data
-    fun haveARootSeedStored(email: String): Boolean
-
     fun saveV3RootSeed(
         rootSeed: ByteArray,
         email: String,
@@ -97,12 +95,6 @@ interface EncryptionManager {
     )
 
     fun retrieveRootSeed(email: String, cipher: Cipher): String
-
-    fun retrieveSavedV2Key(
-        email: String,
-        cipher: Cipher,
-        keyType: String = SOLANA_KEY
-    ): ByteArray
 
     fun saveV3PublicKeys(rootSeed: ByteArray, email: String): HashMap<String, String>
 
@@ -453,21 +445,6 @@ class EncryptionManagerImpl @Inject constructor(
         securePreferences.saveV3RootSeed(email = email, encryptedData = encryptedRootSeed)
     }
 
-    override fun retrieveSavedV2Key(
-        email: String,
-        cipher: Cipher,
-        keyType: String
-    ): ByteArray {
-        val savedKey = securePreferences.retrieveV2RootSeedAndPrivateKey(email)
-
-        val keysMap = retrieveStoredKeys(
-            json = savedKey,
-            cipher = cipher,
-        )
-
-        return BaseWrapper.decode(keysMap[keyType] ?: "")
-    }
-
     override fun retrieveSentinelData(email: String, cipher: Cipher): String {
         val savedSentinelData = securePreferences.retrieveSentinelData(email)
 
@@ -499,10 +476,6 @@ class EncryptionManagerImpl @Inject constructor(
             keyName = keyName, initializationVector = initVector
         )
     }
-
-    override fun haveARootSeedStored(email: String) =
-        securePreferences.userHasV1RootSeedStored(email) || securePreferences.userHasV2RootSeedStored(email)
-                || securePreferences.hasV3RootSeed(email = email)
 
     override fun haveSentinelDataStored(email: String) = securePreferences.hasSentinelData(email)
 

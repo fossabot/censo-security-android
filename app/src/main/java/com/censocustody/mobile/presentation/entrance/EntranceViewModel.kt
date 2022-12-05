@@ -144,7 +144,6 @@ class EntranceViewModel @Inject constructor(
 
         //Setup Data
         val userHasUploadedKeysToBackendBefore = !verifyUser.publicKeys.isNullOrEmpty()
-        val userHasLocallySavedRootSeed = keyRepository.haveARootSeedStored()
         val userHasV3RootSeedSaved = keyRepository.hasV3RootSeedStored()
         val localPublicKeys = keyRepository.retrieveV3PublicKeys()
 
@@ -153,7 +152,7 @@ class EntranceViewModel @Inject constructor(
 
         //Check 2 MIGRATION/UPDATE: Migration of either v1/v2 data or need to add a new chain to public keys
         val needToUpdateKeysSavedOnBackend = userHasUploadedKeysToBackendBefore
-                && userHasLocallySavedRootSeed
+                && userHasV3RootSeedSaved
                 && verifyUser.userNeedsToUpdateKeyRegistration(localPublicKeys)
 
         //Check 3 CREATE/RECOVER: This user does not have a local private key and needs to either create a key or recover a key

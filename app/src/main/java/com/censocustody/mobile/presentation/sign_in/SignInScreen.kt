@@ -132,7 +132,7 @@ fun SignInScreen(
                         contentDescription = "",
                         contentScale = ContentScale.FillWidth,
                     )
-                    Spacer(modifier = Modifier.weight(1.00f))
+                    Spacer(modifier = Modifier.weight(0.75f))
                     val headerText =
                         buildAnnotatedString {
                             if (state.loginStep == LoginStep.EMAIL_ENTRY) {
