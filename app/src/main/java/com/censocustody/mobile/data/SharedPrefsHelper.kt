@@ -16,14 +16,6 @@ object SharedPrefsHelper {
     private const val BGRD_INIT_VECTOR = "_bgrd_init_vector"
     private const val BGRD_CIPHER_TEXT = "_bgrd_cipher_text"
 
-    //V1 Key Storage
-    private const val V1_SOLANA_KEY = "_solana_key"
-    private const val V1_ROOT_SEED = "_root_seed"
-
-    //V2 Key Storage
-    private const val V2_ROOT_SEED_PRIVATE_KEYS = "_key_data"
-    private const val V2_SOLANA_PUBLIC_KEY = "_solana_public_key"
-
     //V3 Key Storage
     private const val V3_ROOT_SEED = "_v3_root_seed"
     private const val V3_ROOT_SEED_INIT_VECTOR = "_v3_root_seed_init_vector"
@@ -94,47 +86,6 @@ object SharedPrefsHelper {
     }
 
     //endregion
-
-    //region V1 Storage
-    fun retrieveV1RootSeed(encryptedPrefs: SharedPreferences, email: String) =
-        encryptedPrefs.getString("${email.lowercase().trim()}$V1_ROOT_SEED", "") ?: ""
-
-    fun clearV1RootSeed(encryptedPrefs: SharedPreferences, email: String) {
-        val editor = encryptedPrefs.edit()
-        editor.putString("${email.lowercase().trim()}$V1_ROOT_SEED", "")
-        editor.apply()
-    }
-
-    fun retrieveV1PrivateKey(encryptedPrefs: SharedPreferences, email: String) =
-        encryptedPrefs.getString("${email.lowercase().trim()}$V1_SOLANA_KEY", "") ?: ""
-
-    fun clearV1SolanaPrivateKey(encryptedPrefs: SharedPreferences, email: String) {
-        val editor = encryptedPrefs.edit()
-        editor.putString("${email.lowercase().trim()}$V1_SOLANA_KEY", "")
-        editor.apply()
-    }
-    //endregion
-
-    //region V2 Storage
-    fun retrieveV2SolanaPublicKey(encryptedPrefs: SharedPreferences, email: String): String {
-        return encryptedPrefs.getString("${email.lowercase().trim()}$V2_SOLANA_PUBLIC_KEY", "") ?: ""
-    }
-
-    fun clearV2SolanaPublicKey(encryptedPrefs: SharedPreferences, email: String) {
-        val editor = encryptedPrefs.edit()
-        editor.putString("${email.lowercase().trim()}$V2_SOLANA_PUBLIC_KEY", "")
-        editor.apply()
-    }
-
-    fun retrieveV2RootSeedAndPrivateKey(encryptedPrefs: SharedPreferences, email: String): String {
-        return encryptedPrefs.getString("${email.lowercase().trim()}$V2_ROOT_SEED_PRIVATE_KEYS", "") ?: ""
-    }
-
-    fun clearV2RootSeedAndPrivateKey(encryptedPrefs: SharedPreferences, email: String) {
-        val editor = encryptedPrefs.edit()
-        editor.putString("${email.lowercase().trim()}$V2_ROOT_SEED_PRIVATE_KEYS", "")
-        editor.apply()
-    }
 
     //endregion
 

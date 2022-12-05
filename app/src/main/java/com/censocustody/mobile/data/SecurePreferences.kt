@@ -15,21 +15,6 @@ interface SecurePreferences {
     fun retrieveToken(): String
     fun clearToken()
 
-    //v1 storage
-    fun retrieveV1SolanaKey(email: String): String
-    fun retrieveV1RootSeed(email: String): String
-    fun clearV1SolanaKey(email: String)
-    fun clearV1RootSeed(email: String)
-    fun userHasV1RootSeedStored(email: String) : Boolean
-    fun clearAllV1KeyData(email: String)
-
-    //v2 storage
-    fun clearAllV2KeyData(email: String)
-    fun retrieveV2RootSeedAndPrivateKey(email: String): String
-    fun retrieveV2SolanaPublicKey(email: String): String
-    fun clearV2SolanaPublicKey(email: String)
-    fun userHasV2RootSeedStored(email: String) : Boolean
-
     //v3 storage
     fun clearAllV3KeyData(email: String)
     fun retrieveV3RootSeed(email: String): EncryptedData
@@ -77,65 +62,6 @@ class SecurePreferencesImpl @Inject constructor(applicationContext: Context) :
         SharedPrefsHelper.saveToken(secureSharedPreferences, "")
     }
 
-    //endregion
-
-    //region V1 Storage
-    override fun retrieveV1SolanaKey(email: String) =
-        SharedPrefsHelper.retrieveV1PrivateKey(secureSharedPreferences, email = email)
-
-    override fun retrieveV1RootSeed(email: String) =
-        SharedPrefsHelper.retrieveV1RootSeed(secureSharedPreferences, email = email)
-
-    override fun clearAllV1KeyData(email: String) {
-        clearV1RootSeed(email)
-        clearV1SolanaKey(email)
-    }
-
-    override fun clearV1SolanaKey(email: String) {
-        SharedPrefsHelper.clearV1SolanaPrivateKey(secureSharedPreferences, email = email)
-    }
-
-    override fun clearV1RootSeed(email: String) {
-        SharedPrefsHelper.clearV1RootSeed(secureSharedPreferences, email = email)
-    }
-
-    override fun userHasV1RootSeedStored(email: String): Boolean {
-        return SharedPrefsHelper.retrieveV1RootSeed(secureSharedPreferences, email = email).isNotEmpty()
-    }
-    //endregion
-
-    //region V2 Storage
-    override fun retrieveV2RootSeedAndPrivateKey(email: String): String {
-        return SharedPrefsHelper.retrieveV2RootSeedAndPrivateKey(
-            encryptedPrefs = secureSharedPreferences,
-            email
-        )
-    }
-
-    override fun retrieveV2SolanaPublicKey(email: String) =
-        SharedPrefsHelper.retrieveV2SolanaPublicKey(
-            encryptedPrefs = secureSharedPreferences, email = email
-        )
-
-
-    override fun clearV2SolanaPublicKey(email: String) {
-        SharedPrefsHelper.clearV2SolanaPublicKey(
-            encryptedPrefs = secureSharedPreferences,
-            email = email
-        )
-    }
-
-    override fun userHasV2RootSeedStored(email: String): Boolean {
-        return SharedPrefsHelper.retrieveV2RootSeedAndPrivateKey(
-            encryptedPrefs = secureSharedPreferences,
-            email = email
-        ).isNotEmpty()
-    }
-
-    override fun clearAllV2KeyData(email: String) {
-        clearV2SolanaPublicKey(email)
-        SharedPrefsHelper.clearV2RootSeedAndPrivateKey(secureSharedPreferences, email)
-    }
     //endregion
 
     //region V3 Storage

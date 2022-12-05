@@ -31,7 +31,7 @@ data class VerifyUser(
     }
 
     fun userNeedsToUpdateKeyRegistration(localKeys: List<WalletSigner?>): Boolean {
-        //User has no keys saved to public keys. Could also be a v1/v2 storage situation.
+        //User has no keys saved to public keys
         if (localKeys.isEmpty()) return true
 
         //which chains has the user saved on the backend?

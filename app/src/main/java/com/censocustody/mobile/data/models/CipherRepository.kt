@@ -1,7 +1,6 @@
 package com.censocustody.mobile.data.models
 
 import android.security.keystore.KeyPermanentlyInvalidatedException
-import com.censocustody.mobile.common.BaseWrapper
 import com.censocustody.mobile.data.*
 import com.censocustody.mobile.data.EncryptionManagerImpl.Companion.BIO_KEY_NAME
 import com.censocustody.mobile.data.EncryptionManagerImpl.Companion.ROOT_SEED_KEY_NAME
@@ -12,7 +11,6 @@ import javax.crypto.Cipher
 interface CipherRepository {
     suspend fun getCipherForEncryption(keyName: String): Cipher?
     suspend fun getCipherForBackgroundDecryption(): Cipher?
-    suspend fun getCipherForV2KeysDecryption(): Cipher?
     suspend fun getCipherForV3RootSeedDecryption(): Cipher?
 }
 
@@ -40,20 +38,6 @@ class CipherRepositoryImpl(
             )
         } catch (e: Exception) {
             handleCipherException(e, SENTINEL_KEY_NAME)
-        }
-    }
-
-    override suspend fun getCipherForV2KeysDecryption(): Cipher? {
-        return try {
-            val email = userRepository.retrieveUserEmail()
-            val encryptedData = securePreferences.retrieveV2RootSeedAndPrivateKey(email)
-            val storedKeyData = StoredKeyData.fromJson(encryptedData)
-            val initVector = BaseWrapper.decode(storedKeyData.initVector)
-            encryptionManager.getInitializedCipherForDecryption(
-                initVector = initVector, keyName = BIO_KEY_NAME
-            )
-        } catch (e: Exception) {
-            handleCipherException(e, BIO_KEY_NAME)
         }
     }
 
@@ -87,7 +71,6 @@ class CipherRepositoryImpl(
         encryptionManager.deleteBiometryKeyFromKeystore(BIO_KEY_NAME)
         encryptionManager.deleteBiometryKeyFromKeystore(SENTINEL_KEY_NAME)
         encryptionManager.deleteBiometryKeyFromKeystore(ROOT_SEED_KEY_NAME)
-        securePreferences.clearAllV2KeyData(email)
         securePreferences.clearAllV3KeyData(email)
         securePreferences.clearSentinelData(email)
         if (keyName == SENTINEL_KEY_NAME) {

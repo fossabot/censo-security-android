@@ -14,20 +14,15 @@ interface MigrationRepository {
     suspend fun saveV3RootSeed(rootSeed: ByteArray, cipher: Cipher)
     suspend fun saveV3PublicKeys(rootSeed: ByteArray)
 
-    suspend fun retrieveV1RootSeed() : ByteArray?
     suspend fun retrieveV3RootSeed(cipher: Cipher) : ByteArray?
 
-    suspend fun haveV2RootSeed() : Boolean
     suspend fun haveV3RootSeed() : Boolean
 
-    suspend fun retrieveV2RootSeed(cipher: Cipher): ByteArray?
     suspend fun retrieveV3PublicKeys(): HashMap<String, String>
 
     suspend fun retrieveWalletSignersToUpload(rootSeed: ByteArray): List<WalletSigner>
 
     suspend fun migrateSigner(walletSigners: List<WalletSigner>): Resource<Signers>
-
-    suspend fun clearOldData()
 }
 
 class MigrationRepositoryImpl(
@@ -55,40 +50,10 @@ class MigrationRepositoryImpl(
         )
     }
 
-    override suspend fun retrieveV1RootSeed(): ByteArray? {
-        val userEmail = userRepository.retrieveUserEmail()
-
-        val hasV1Data = securePreferences.userHasV1RootSeedStored(email = userEmail)
-
-        if (!hasV1Data) return null
-
-        val rootSeed = securePreferences.retrieveV1RootSeed(userEmail)
-
-        return if (rootSeed.isEmpty()) null else BaseWrapper.decode(rootSeed)
-    }
-
     override suspend fun haveV3RootSeed(): Boolean {
         val userEmail = userRepository.retrieveUserEmail()
 
         return securePreferences.hasV3RootSeed(userEmail)
-    }
-
-    override suspend fun haveV2RootSeed(): Boolean {
-        val userEmail = userRepository.retrieveUserEmail()
-
-        return securePreferences.userHasV2RootSeedStored(userEmail)
-    }
-
-    override suspend fun retrieveV2RootSeed(cipher: Cipher): ByteArray? {
-        val userEmail = userRepository.retrieveUserEmail()
-
-        val haveV2Data = securePreferences.userHasV2RootSeedStored(userEmail)
-
-        if (!haveV2Data) return null
-
-        return encryptionManager.retrieveSavedV2Key(
-            email = userEmail, cipher = cipher, keyType = ROOT_SEED
-        )
     }
 
     override suspend fun retrieveV3RootSeed(cipher: Cipher): ByteArray {
@@ -128,12 +93,5 @@ class MigrationRepositoryImpl(
                 Signers(walletSigners)
             )
         }
-    }
-
-    override suspend fun clearOldData() {
-        val userEmail = userRepository.retrieveUserEmail()
-
-        securePreferences.clearAllV1KeyData(userEmail)
-        securePreferences.clearAllV2KeyData(userEmail)
     }
 }

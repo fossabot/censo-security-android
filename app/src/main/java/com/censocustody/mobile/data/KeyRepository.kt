@@ -27,8 +27,6 @@ interface KeyRepository {
     suspend fun retrieveV3PublicKeys() : List<WalletSigner?>
 
     suspend fun hasV3RootSeedStored() : Boolean
-    //checks v1, v2, and v3 storage
-    suspend fun haveARootSeedStored(): Boolean
 
     suspend fun haveSentinelData() : Boolean
 
@@ -57,7 +55,7 @@ class KeyRepositoryImpl(
     override suspend fun doesUserHaveValidLocalKey(verifyUser: VerifyUser): Boolean {
         val userEmail = userRepository.retrieveUserEmail()
         val publicKeys = securePreferences.retrieveV3PublicKeys(email = userEmail)
-        val havePrivateKey = encryptionManager.haveARootSeedStored(email = userEmail)
+        val havePrivateKey = securePreferences.hasV3RootSeed(email = userEmail)
 
 
         if (publicKeys.isEmpty() || !havePrivateKey) {
@@ -173,11 +171,6 @@ class KeyRepositoryImpl(
     override suspend fun hasV3RootSeedStored(): Boolean {
         val userEmail = userRepository.retrieveUserEmail()
         return securePreferences.hasV3RootSeed(userEmail)
-    }
-
-    override suspend fun haveARootSeedStored(): Boolean {
-        val userEmail = userRepository.retrieveUserEmail()
-        return encryptionManager.haveARootSeedStored(userEmail)
     }
 
     override suspend fun haveSentinelData(): Boolean {

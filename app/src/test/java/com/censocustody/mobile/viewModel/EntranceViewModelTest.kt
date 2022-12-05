@@ -121,7 +121,7 @@ class EntranceViewModelTest : BaseViewModelTest() {
             )
         }
         whenever(keyRepository.retrieveV3PublicKeys()).then { validWalletSigners }
-        whenever(keyRepository.haveARootSeedStored()).then { true }
+        whenever(keyRepository.hasV3RootSeedStored()).then { true }
 
         entranceViewModel = EntranceViewModel(
             userRepository = userRepository,
@@ -152,28 +152,6 @@ class EntranceViewModelTest : BaseViewModelTest() {
     }
 
     @Test
-    fun `if old key is present then send user to migration destination`() = runTest {
-        setupLoggedInUserWithValidEmail()
-
-        whenever(userRepository.verifyUser()).then {
-            Resource.Success(basicVerifyUserWithOnlySolanaPublicKey)
-        }
-
-        whenever(keyRepository.hasV3RootSeedStored()).then { false }
-
-        whenever(keyRepository.haveARootSeedStored()).then { true }
-
-        entranceViewModel.onStart()
-        advanceUntilIdle()
-
-        verify(censoUserData, times(1))
-            .setCensoUser(basicVerifyUserWithOnlySolanaPublicKey)
-
-        assertTrue(entranceViewModel.state.userDestinationResult is Resource.Success)
-        assertTrue(entranceViewModel.state.userDestinationResult.data == UserDestination.KEY_MIGRATION)
-    }
-
-    @Test
     fun `if user does not have sentinel data send them to sign in`() = runTest {
         setupLoggedInUserWithValidEmail()
         whenever(keyRepository.haveSentinelData()).then { false }
@@ -182,8 +160,6 @@ class EntranceViewModelTest : BaseViewModelTest() {
         whenever(userRepository.verifyUser()).then {
             Resource.Success(basicVerifyUserWithValidPublicKey)
         }
-
-        whenever(keyRepository.haveARootSeedStored()).then { true }
 
         entranceViewModel.onStart()
         advanceUntilIdle()
