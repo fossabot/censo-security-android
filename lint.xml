@@ -10,7 +10,7 @@
         <ignore path="**/strings.xml" />
     </issue>
     <issue id="LogNotTimber">
-        <ignore path="**/StrikeLog.kt" />
+        <ignore path="**/CensoLog.kt" />
     </issue>
     <issue id="InvalidPackage">
         <ignore regexp="kotlinx.coroutines.debug.AgentPremain"/>

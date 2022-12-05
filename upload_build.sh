@@ -19,29 +19,17 @@ fi
 environment="Debug"
 
 prerelease="PreRelease"
-demoTwo="DemoTwo"
 release="Release"
 preprod="PreProd"
-auth="Auth"
 
 PS3='Please choose environment: '
-options=("$prerelease" "$demoTwo" "$preprod" "$auth" "$release")
+options=("$prerelease" "$preprod" "$release")
 select opt in "${options[@]}"
 do
     case $opt in
         "$prerelease")
             environment=$prerelease
             echo "Creating PreRelease build..."
-            break
-            ;;
-        "$demoTwo")
-            echo "Creating DemoTwo build..."
-            environment=$demoTwo
-            break
-            ;;
-       "$auth")
-            echo "Creating Auth build..."
-            environment=$auth
             break
             ;;
         "$preprod")
