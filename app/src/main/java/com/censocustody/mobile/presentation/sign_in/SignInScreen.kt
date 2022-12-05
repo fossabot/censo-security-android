@@ -127,12 +127,12 @@ fun SignInScreen(
                     val passwordVisibility = remember { mutableStateOf(false) }
 
                     Image(
-                        modifier = Modifier.padding(),
-                        painter = painterResource(R.drawable.strike_main_logo),
+                        modifier = Modifier.padding(horizontal = 44.dp),
+                        painter = painterResource(R.drawable.censo_wordmark_ko),
                         contentDescription = "",
                         contentScale = ContentScale.FillWidth,
                     )
-                    Spacer(modifier = Modifier.weight(1.25f))
+                    Spacer(modifier = Modifier.weight(1.00f))
                     val headerText =
                         buildAnnotatedString {
                             if (state.loginStep == LoginStep.EMAIL_ENTRY) {

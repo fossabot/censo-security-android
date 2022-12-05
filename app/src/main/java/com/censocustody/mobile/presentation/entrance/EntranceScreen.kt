@@ -99,7 +99,7 @@ fun EntranceScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 172.dp, start = 44.dp, end = 44.dp),
-            painter = painterResource(R.drawable.strike_main_logo),
+            painter = painterResource(R.drawable.censo_horizontal_ko),
             contentDescription = "",
             contentScale = ContentScale.FillWidth,
         )
