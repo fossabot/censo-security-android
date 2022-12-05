@@ -25,5 +25,5 @@ dependencyResolutionManagement {
         mavenCentral()
     }
 }
-rootProject.name = "Strike Mobile"
+rootProject.name = "Censo Custody"
 include ':app'

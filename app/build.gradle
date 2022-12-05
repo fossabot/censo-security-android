@@ -9,12 +9,12 @@ plugins {
     id 'com.github.ben-manes.versions' version '0.43.0'
 }
 
-def final appName = 'Strike Mobile'
-def final coreAppId = "com.strikeprotocols.mobile"
+def final appName = 'Censo Custody'
+def final coreAppId = "com.censocustody.mobile"
 
-String versionNameMajor = 2
-String versionNameMinor = 2
-String versionNamePatch = 2
+String versionNameMajor = 1
+String versionNameMinor = 0
+String versionNamePatch = 0
 
 android {
     Boolean signBuild = false
@@ -45,7 +45,7 @@ android {
         applicationId coreAppId
         minSdk 30
         targetSdk 33
-        versionCode 30
+        versionCode 1
 
         buildConfigField "int", "versionNameMajor", versionNameMajor
         buildConfigField "int", "versionNameMinor", versionNameMinor
@@ -62,7 +62,7 @@ android {
         proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
 
         manifestPlaceholders = [
-                "appAuthRedirectScheme": "com.strikeprotocols.mobile"
+                "appAuthRedirectScheme": "com.censocustody.mobile"
         ]
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -75,60 +75,41 @@ android {
         release {
             resValue "string", "app_name", appName
             minifyEnabled true
-            buildConfigField "String", "BASE_URL", "\"https://brooklyn.strikeprotocols.com/\""
+            buildConfigField "String", "BASE_URL", "\"https://brooklyn.censocustody.com/\""
             buildConfigField "String", "SOLANA_URL", "\"https://api.mainnet-beta.solana.com\""
-            buildConfigField "String", "MIN_VERSION_ENDPOINT", "\"strike-security-app-version.json\""
-            buildConfigField "String", "ANCHOR_URL", "\"https://wallet.strikeprotocols.com/\""
+            buildConfigField "String", "MIN_VERSION_ENDPOINT", "\"censo-security-app-version.json\""
+            buildConfigField "String", "ANCHOR_URL", "\"https://wallet.censocustody.com/\""
             buildConfigField "String", "SOLANA_COMMITMENT", "\"finalized\""
             resValue "string", "RAYGUN_APP_ID", "\"vuxX53AURVfZS87D1WPqeg\""
             debuggable false
         }
         preProd {
-            resValue "string", "app_name", "PreProd Strike"
-            applicationIdSuffix ".demo"
+            resValue "string", "app_name", "PreProd Censo"
+            applicationIdSuffix ".preprod"
             minifyEnabled true
-            buildConfigField "String", "BASE_URL", "\"https://brooklyn-preprod.strikeprotocols.com/\""
+            buildConfigField "String", "BASE_URL", "\"https://brooklyn-preprod.censocustody.com/\""
             buildConfigField "String", "SOLANA_URL", "\"https://api.mainnet-beta.solana.com\""
-            buildConfigField "String", "MIN_VERSION_ENDPOINT", "\"strike-security-app-version.json\""
-            buildConfigField "String", "ANCHOR_URL", "\"https://preprod.strikeprotocols.com/\""
+            buildConfigField "String", "MIN_VERSION_ENDPOINT", "\"censo-security-app-version.json\""
+            buildConfigField "String", "ANCHOR_URL", "\"https://preprod.censocustody.com/\""
             buildConfigField "String", "SOLANA_COMMITMENT", "\"finalized\""
             resValue "string", "RAYGUN_APP_ID", "\"CtOnGQjIo1U8dELkoUf0iw\""
             debuggable false
         }
-        demoTwo {
-            resValue "string", "app_name", "Demo2 Strike"
-            applicationIdSuffix ".demo2"
-            minifyEnabled false
-            buildConfigField "String", "BASE_URL", "\"https://brooklyn-demo2.strikeprotocols.com/\""
-            buildConfigField "String", "SOLANA_URL", "\"https://solana-validator-demo2.strikeprotocols.com\""
-            buildConfigField "String", "MIN_VERSION_ENDPOINT", "\"strike-security-app-version-dev.json\""
-            buildConfigField "String", "ANCHOR_URL", "\"https://demo2.strikeprotocols.com/\""
-            buildConfigField "String", "SOLANA_COMMITMENT", "\"confirmed\""
-            resValue "string", "RAYGUN_APP_ID", "\"CtOnGQjIo1U8dELkoUf0iw\""
-            debuggable false
-        }
         preRelease {
-            resValue "string", "app_name", "PreRelease Strike"
+            resValue "string", "app_name", "PreRelease Censo"
             applicationIdSuffix ".prerelease"
             minifyEnabled false
-            buildConfigField "String", "BASE_URL", "\"https://brooklyn-prerelease.strikeprotocols.com/\""
-            buildConfigField "String", "SOLANA_URL", "\"https://solana-validator-prerelease.strikeprotocols.com\""
-            buildConfigField "String", "MIN_VERSION_ENDPOINT", "\"strike-security-app-version-dev.json\""
-            buildConfigField "String", "ANCHOR_URL", "\"https://prerelease.strikeprotocols.com/\""
+            buildConfigField "String", "BASE_URL", "\"https://brooklyn-prerelease.censocustody.com/\""
+            buildConfigField "String", "SOLANA_URL", "\"https://solana-validator-prerelease.censocustody.com\""
+            buildConfigField "String", "MIN_VERSION_ENDPOINT", "\"censo-security-app-version-dev.json\""
+            buildConfigField "String", "ANCHOR_URL", "\"https://prerelease.censocustody.com/\""
             buildConfigField "String", "SOLANA_COMMITMENT", "\"confirmed\""
             resValue "string", "RAYGUN_APP_ID", "\"L9T2bPaEjr3Lede3SNpFJw\""
             debuggable false
         }
-        auth {
-            initWith preRelease
-            resValue "string", "app_name", "Auth Strike"
-            applicationIdSuffix ".auth"
-            minifyEnabled false
-            debuggable false
-        }
         debug {
             initWith preRelease
-            resValue "string", "app_name", "Debug Strike"
+            resValue "string", "app_name", "Debug Censo"
             applicationIdSuffix ".debug"
             minifyEnabled false
             debuggable true
