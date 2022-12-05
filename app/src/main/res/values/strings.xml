@@ -18,7 +18,7 @@
     <string name="login_failed_message">User with email and password not found.\n\nPlease try again.</string>
 
     <string name="cancel">Cancel</string>
-    <string name="contact_strike">We are unable to verify your key. Please contact Strike directly to resolve this issue.</string>
+    <string name="contact_censo_custody">We are unable to verify your key. Please contact Censo Custody directly to resolve this issue.</string>
 
     <string name="approvals">Approvals</string>
     <string name="content_des_account_icon">Account Icon</string>
@@ -45,11 +45,11 @@
 
     <string name="approval_disposition_error_title">Something went wrong</string>
 
-    <string name="biometry_disabled_message">You must enable biometric security in your device settings.\n\nIf you already have biometry enabled, you may need to enable a different biometric option to meet the security threshold of the Strike Security App.</string>
-    <string name="biometry_unavailable_message">Your device does not support biometric security at the level required for the Strike Security App.</string>
+    <string name="biometry_disabled_message">You must enable biometric security in your device settings.\n\nIf you already have biometry enabled, you may need to enable a different biometric option to meet the security threshold of the Censo Custody App.</string>
+    <string name="biometry_unavailable_message">Your device does not support biometric security at the level required for the Censo Custody App.</string>
     <string name="biometry_deeplink_device_settings">Device Biometry Settings</string>
 
-    <string name="update_strike_mobile">Update Strike Mobile…</string>
+    <string name="update_censo_custody">Update Censo Mobile…</string>
     <string name="unknown_approval_tip">You have an unknown approval request. Please update this app to see the request details</string>
 
     <string name="you_are_about_to_approve">You are about to approve the following request:</string>
@@ -139,7 +139,7 @@
     <string name="done">Done</string>
     <string name="get_help">Get Help</string>
     <string name="security_notice">SECURITY NOTICE:</string>
-    <string name="security_message">To help protect your account\'s security Strike will never request any confidential information in regards to your account (such as password or secret recovery phrase).</string>
+    <string name="security_message">To help protect your account\'s security Censo Custody will never request any confidential information in regards to your account (such as password or secret recovery phrase).</string>
     <string name="email">Email</string>
 
     <string name="accept_vault_invitation_approval_header">Accept Invitation</string>
@@ -164,7 +164,7 @@
 
     <string name="confirm_recovery_phrase">Confirm recovery phrase</string>
     <string name="all_set">You\'re all set.</string>
-    <string name="continue_to_strike">Continue to Strike</string>
+    <string name="continue_to_censo_custody">Continue to Censo Custody</string>
     <string name="confirm_recovery_phrase_header">Confirm recovery phrase</string>
     <string name="paste_phrase">Paste Phrase</string>
     <string name="how_did_you_back_it_up">How did you back it up?</string>
@@ -190,7 +190,7 @@
     <string name="do_not_leave_text_field_empty">Please do not leave the text field empty when submitting a word</string>
     <string name="something_went_wrong">Something went wrong</string>
     <string name="retry">Retry</string>
-    <string name="registering_key_auth">Registering your key with Strike…</string>
+    <string name="registering_key_auth">Registering your key with Censo Custody…</string>
     <string name="migration_loading_text">Migrating your key behind biometry protection…</string>
     <string name="i_saved_key">I saved the recovery phrase &#10132;</string>
 
@@ -201,11 +201,11 @@
     <string name="update_biometric_settings">Unable to open biometry settings. Please open device settings.</string>
     <string name="default_error_message">Unable to retrieve data.\n\nPlease make sure you are connected to internet and try again.</string>
     <string name="key_icon_content_desc">key image</string>
-    <string name="strike_maintenance_message">Strike is upgrading its service, we should be back online shortly. Please retry in a few minutes</string>
+    <string name="censo_custody_maintenance_message">Censo Custody is upgrading its service, we should be back online shortly. Please retry in a few minutes</string>
     <string name="not_connected_to_internet">You don\'t seem to be connected to the internet. Please check your connection and retry</string>
     <string name="request_timed_out">Your request timed out. Please retry</string>
 
-    <string name="minimum_app_version">This version of Strike Securities is outdated. Please update this app to continue using it.</string>
+    <string name="minimum_app_version">This version of Censo Custody is outdated. Please update this app to continue using it.</string>
     <string name="update_app">Update App</string>
     <string name="key_recovery_failed_message">Key recovery failed. Please try again.</string>
     <string name="key_recovery_failed_title">Recovery Failed</string>
@@ -219,7 +219,7 @@
     <string name="error_occurred_signature_login">An error occurred trying to sign you in</string>
     <string name="try_again">Try Again</string>
 
-    <string name="save_biometry_info">Strike protects your private key using biometric verification.\n\nIf you change the biometry settings on your device, you will need to recover your key from your recovery phrase.</string>
+    <string name="save_biometry_info">Censo Custody protects your private key using biometric verification.\n\nIf you change the biometry settings on your device, you will need to recover your key from your recovery phrase.</string>
     <string name="are_you_sure">Are you sure?</string>
     <string name="continue_text">Continue</string>
     <string name="close_dialog">close dialog</string>
@@ -229,12 +229,12 @@
     <string name="solana">Solana</string>
 
     <string name="biometry_changed_key_invalidated">Biometry for device has changed. Key invalidated.</string>
-    <string name="foreground_access_app">Biometry is required to access the Strike Security App</string>
+    <string name="foreground_access_app">Biometry is required to access the Censo Custody App</string>
     <string name="complete_biometry">Complete Biometry</string>
     <string name="sentinel_data_invalidated">Biometry for device failed. Please log back into the app.</string>
     <string name="biometry_unavailable">Unable to show biometry to gain access to the app.\n\nPlease authenticate device from lock screen.</string>
     <string name="need_complete_migration">Migration restarted. Please complete migration to enter app.</string>
-    <string name="initial_migration_message">As we migrate your data behind biometry, you will see several biometry dialogs. Please complete all to gain access to the Strike Security app.</string>
+    <string name="initial_migration_message">As we migrate your data behind biometry, you will see several biometry dialogs. Please complete all to gain access to the Censo Custody app.</string>
 
     <string name="reset_password">Reset Password</string>
     <string name="retry_recover_password">Retry</string>

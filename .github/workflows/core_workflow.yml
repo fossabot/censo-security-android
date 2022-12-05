@@ -51,8 +51,8 @@ jobs:
         env:
           DATA: ${{ secrets.googleServices }}
         run: |
-          cat /home/runner/work/strike-mobile-android/strike-mobile-android/app/google-services.json | base64
-          echo $DATA > /home/runner/work/strike-mobile-android/strike-mobile-android/app/google-services.json
+          cat /home/runner/work/censo-security-android/censo-security-android/app/google-services.json | base64
+          echo $DATA > /home/runner/work/censo-security-android/censo-security-android/app/google-services.json
 
       - name: Run lint
         run: "./gradlew lint${{ inputs.variant }}"

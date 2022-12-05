@@ -1,9 +1,8 @@
 # App Environments and Package Ids
-    - Debug: com.strikeprotocols.mobile.debug
-    - PreRelease: com.strikeprotocols.mobile.prerelease
-    - DemoOne: com.strikeprotocols.mobile.demo
-    - DemoTwo: com.strikeprotocols.mobile.demo2
-    - Release: com.strikeprotocols.mobile
+    - Debug: com.censocustody.mobile.debug
+    - PreRelease: com.censocustody.mobile.prerelease
+    - PreProd: com.censocustody.mobile.preprod
+    - Release: com.censocustody.mobile
 
 # Build Setup
 
@@ -72,7 +71,7 @@ Pushing to:
 
 `develop` will create a prerelease build.
 
-`staging` will create a demo1 and demo2 build.
+`staging` will create a preprod build.
 
 `master` will create a release build.
 
