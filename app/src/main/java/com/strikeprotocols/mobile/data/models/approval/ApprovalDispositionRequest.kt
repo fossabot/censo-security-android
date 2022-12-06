@@ -308,6 +308,39 @@ data class ApprovalDispositionRequest(
         return data.array()
     }
 
+    private fun erc721WithdrawalTx(withdrawalRequest: WithdrawalRequest): ByteArray {
+        // safeTransferFrom(address,address,uint256)
+        val data = ByteBuffer.allocate(4 + 32*3)
+        data.put(Hex.decode("42842e0e"))
+        withdrawalRequest.account.address?.let {
+            data.putPadded(Hex.decode(withdrawalRequest.account.address.removePrefix("0x")))
+        }
+        data.putPadded(Hex.decode(withdrawalRequest.destination.address.removePrefix("0x")))
+        withdrawalRequest.symbolAndAmountInfo.symbolInfo.ethTokenInfo?.tokenId?.let { tokenId ->
+            data.putPadded(BigInteger(tokenId).toByteArray())
+        }
+        return data.array()
+    }
+
+    private fun erc1155WithdrawalTx(withdrawalRequest: WithdrawalRequest): ByteArray {
+        // safeTransferFrom(address,address,uint256,uint256,bytes)
+        val data = ByteBuffer.allocate(4 + 32*6)
+        data.put(Hex.decode("f242432a"))
+        withdrawalRequest.account.address?.let {
+            data.putPadded(Hex.decode(withdrawalRequest.account.address.removePrefix("0x")))
+        }
+        data.putPadded(Hex.decode(withdrawalRequest.destination.address.removePrefix("0x")))
+        withdrawalRequest.symbolAndAmountInfo.symbolInfo.ethTokenInfo?.tokenId?.let { tokenId ->
+            data.putPadded(BigInteger(tokenId).toByteArray())
+        }
+        data.putPadded(withdrawalRequest.symbolAndAmountInfo.fundamentalAmountAsBigInteger().toByteArray())
+        // this the 5th bytes param which is dynamic data - the 160 is the offset where dynamic data starts
+        // followed by 32 bytes of 0 for the length of the dynamic data
+        data.putPadded(BigInteger("160").toByteArray())
+        data.putPadded(ByteArray(0))
+        return data.array()
+    }
+
     private fun ethereumWithdrawal(withdrawalRequest: WithdrawalRequest, ethereumTransaction: EthereumTransaction): ByteArray {
         return withdrawalRequest.symbolAndAmountInfo.symbolInfo.tokenMintAddress?.let { contractAddress ->
             EthereumTransactionUtil.computeSafeTransactionHash(
@@ -315,7 +348,11 @@ data class ApprovalDispositionRequest(
                 withdrawalRequest.account.address!!,
                 contractAddress,
                 BigInteger.ZERO,
-                erc20WithdrawalTx(withdrawalRequest),
+                when (withdrawalRequest.symbolAndAmountInfo.symbolInfo.ethTokenInfo?.tokenType) {
+                    EthTokenType.ERC721 -> erc721WithdrawalTx(withdrawalRequest)
+                    EthTokenType.ERC1155 -> erc1155WithdrawalTx(withdrawalRequest)
+                    else -> erc20WithdrawalTx(withdrawalRequest)
+                },
                 Operation.CALL,
                 BigInteger.ZERO,
                 BigInteger.ZERO,

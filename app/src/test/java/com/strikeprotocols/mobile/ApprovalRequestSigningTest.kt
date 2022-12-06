@@ -470,8 +470,31 @@ class ApprovalRequestSigningTest {
 
     @Test
     fun generateSignatureForERC20WithdrawalRequest() {
+        testGenerateSignatureForERCTokenWithdrawalRequest(
+            erc20WithdrawalRequestJson,
+            SignedPayload(signature = "MEUCIQCoC4YdUk5CVfogDgKztB75NFY0JplYKtZMZfH7Q5Y9kAIga5pf/NJwqRmBOJdHjTTjv6Gcw03P45WO4HltjYUXJnQ=", payload = "+UjgvUBrkEqxUeHPp1kXUZdO1m5rryK0x+9ZNCf5G0g=")
+        )
+    }
+
+    @Test
+    fun generateSignatureForERC721WithdrawalRequest() {
+        testGenerateSignatureForERCTokenWithdrawalRequest(
+            erc721WithdrawalRequestJson,
+            SignedPayload(signature = "MEQCIC7ENseMB9/Q32g0a9f3WyE05szSk4//n+62Z8Q/QmMMAiBtjm8lEo8Gn7madwLUZIMBFsSSa4vvT3NAgcVsi+gkMw==", payload = "JSXFQ5iHWOJpxUP76kb13iznmLGbalu9lRCjik4pqwk=")
+        )
+    }
+
+    @Test
+    fun generateSignatureForERC1155WithdrawalRequest() {
+        testGenerateSignatureForERCTokenWithdrawalRequest(
+            erc1155WithdrawalRequestJson,
+            SignedPayload(signature = "MEQCIH1KQPb4NRvyB9jeuLcJQQex8uTAkVLbh7PaJL4sBKsjAiBd0bEAp/HV/Hr0MO7Z/6J7OkEqROcpek2/mOdr6EVA0g==", payload = "wmNRZJdEqZwm/cpfkrViTENo3GiDjUwIQd4HYKrZTH8=")
+        )
+    }
+
+    private fun testGenerateSignatureForERCTokenWithdrawalRequest(request: String, expectedSignature: SignedPayload) {
         val withdrawalRequestWalletApproval =
-            deserializer.parseData(JsonParser.parseString(erc20WithdrawalRequestJson.trim()))
+            deserializer.parseData(JsonParser.parseString(request.trim()))
 
         val disposition = if (Random().nextBoolean()) ApprovalDisposition.APPROVE else ApprovalDisposition.DENY
         val approvalDispositionRequest = ApprovalDispositionRequest(
@@ -485,8 +508,6 @@ class ApprovalRequestSigningTest {
         val signature = encryptionManager.signEthereumApprovalDispositionMessage(
             signable = approvalDispositionRequest, rootSeed = BaseWrapper.encode(rootSeed), email = userEmail
         )
-
-        val expectedSignature = SignedPayload(signature = "MEQCIGO53XGqg+DK1/Dh6ICv1tl1zy7gq/+YZOyUBjPUBfrfAiAKn9nl6M3Ft2zUXawThrJ1GYqVZSS5NRJoj6OM8EqAGQ==", payload = "AwxeB6IRd/IFEOgZA9e6jY4rPzVFdFKVOPAfQEehnmk=")
         assertEquals(expectedSignature, signature)
 
         whenever(mockEncryptionManager.signEthereumApprovalDispositionMessage(

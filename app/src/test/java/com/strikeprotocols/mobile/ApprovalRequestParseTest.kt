@@ -14,7 +14,7 @@ class ParseApprovalRequestTypes {
     fun parseAllApprovalRequestTypes() {
         val allApprovalRequests = getFullListOfApprovalItems()
 
-        assertEquals(17, allApprovalRequests.size)
+        assertEquals(20, allApprovalRequests.size)
 
         allApprovalRequests.forEach { approvalRequest ->
             assertNotNull(approvalRequest)
@@ -204,6 +204,21 @@ class ParseApprovalRequestTypes {
             JsonParser.parseString(ethereumWithdrawalRequestJson.trim())
         val ethereumWithdrawalRequestWalletApproval = deserializer.parseData(ethereumWithdrawalRequestJson)
         allApprovalRequests.add(ethereumWithdrawalRequestWalletApproval)
+
+        val erc20WithdrawalRequestJson: JsonElement =
+            JsonParser.parseString(erc20WithdrawalRequestJson.trim())
+        val erc20WithdrawalRequestWalletApproval = deserializer.parseData(erc20WithdrawalRequestJson)
+        allApprovalRequests.add(erc20WithdrawalRequestWalletApproval)
+
+        val erc721WithdrawalRequestJson: JsonElement =
+            JsonParser.parseString(erc721WithdrawalRequestJson.trim())
+        val erc721WithdrawalRequestWalletApproval = deserializer.parseData(erc721WithdrawalRequestJson)
+        allApprovalRequests.add(erc721WithdrawalRequestWalletApproval)
+
+        val erc1155WithdrawalRequestJson: JsonElement =
+            JsonParser.parseString(erc1155WithdrawalRequestJson.trim())
+        val erc1155WithdrawalRequestWalletApproval = deserializer.parseData(erc1155WithdrawalRequestJson)
+        allApprovalRequests.add(erc1155WithdrawalRequestWalletApproval)
 
         val multiSigWithConversionRequestJson: JsonElement =
             JsonParser.parseString(multiSigWithConversionRequestJson.trim())
