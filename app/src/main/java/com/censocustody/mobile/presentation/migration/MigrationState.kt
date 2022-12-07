@@ -13,7 +13,6 @@ data class MigrationState(
     val verifyUser: VerifyUser? = null,
 
     val finishedMigration: Boolean = false,
-    val rootSeed: List<Byte>? = null,
 
     //API calls
     val addWalletSigner: Resource<Signers> = Resource.Uninitialized,

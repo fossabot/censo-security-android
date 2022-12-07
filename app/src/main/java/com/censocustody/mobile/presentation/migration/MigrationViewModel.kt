@@ -20,9 +20,8 @@ import javax.inject.Inject
  *
  * Get root seed. Create all data w/ root seed. Send data to backend.
  *
- * Step 1: Get existing root seed
- *  - This involves biometry approval for v2 and v3 cases.
- * Step 2: Save all new data to v3 storage: root seed and public keys
+ * Step 1: Get existing root seed: this involves biometry approval
+ * Step 2: Save all new data to v3 storage: public keys
  *  - Will require 1 biometry approval
  * Step 3: Send public keys to backend (sign certain ones if needed)
  *  - Depending if backend does not have certain keys, we may need to sign some local keys when sending
@@ -30,9 +29,7 @@ import javax.inject.Inject
  * Kick off by calling retrieveRootSeed()
  *
  * Step 1:
- * V1: No need for biometry
- * V2: retrieveCipherToDecryptV2RootSeed() -> biometryApproved(RETRIEVE_V2_KEYS) -> retrieveV2KeyDataAndKickOffKeyStorage()
- * V3: retrieveCipherToDecryptV3RootSeed() -> biometryApproved(RETRIEVE_V3_ROOT_SEED) -> retrieveV3RootSeedAndKickOffKeyStorage()
+ * retrieveCipherToDecryptV3RootSeed() -> biometryApproved(RETRIEVE_V3_ROOT_SEED) -> retrieveV3RootSeedAndKickOffKeyStorage()
  *
  * Step 2 + 3 same for all migrations:
  * generateAllNecessaryData() -> biometryApproved(SAVE_V3_ROOT_SEED) -> saveRootSeed() -> biometryApproved(SAVE_V3_KEYS) -> savePrivateAndPublicKeys -> makeApiCallToSaveDataWithBackend()
@@ -84,7 +81,7 @@ class MigrationViewModel @Inject constructor(
         }
     }
 
-
+    //region Step 2: Save new public keys
     private suspend fun retrieveV3RootSeedAndKickOffKeyStorage(cipher: Cipher) {
         val rootSeed = migrationRepository.retrieveV3RootSeed(cipher)
 
@@ -93,55 +90,25 @@ class MigrationViewModel @Inject constructor(
             return
         }
 
-        state = state.copy(rootSeed = rootSeed.toList())
-
         migrationRepository.saveV3PublicKeys(rootSeed = rootSeed)
-
-        makeApiCallToSaveDataWithBackend()
+        makeApiCallToSaveDataWithBackend(rootSeed = rootSeed)
     }
     //endregion
 
-
-    //region Step 2: Generate all data and send to backend. We will have a root seed at this point.
-    // 1. Get cipher to save root seed
-    // 2. Save root seed and go get cipher to save private keys
-    // 3. Save private and public keys
-
-    private suspend fun saveRootSeed(rootSeedCipher: Cipher) {
-        val rootSeed = state.rootSeed
-
-        if (rootSeed == null) {
-            state = state.copy(addWalletSigner = Resource.Error())
-            return
-        }
-
-        migrationRepository.saveV3RootSeed(
-            rootSeed = rootSeed.toByteArray(),
-            cipher = rootSeedCipher
-        )
-
-        migrationRepository.saveV3PublicKeys(
-            rootSeed = rootSeed.toByteArray()
-        )
-
-        makeApiCallToSaveDataWithBackend()
-    }
-    //endregion
 
     //region Step 3: Save all data
-    private suspend fun makeApiCallToSaveDataWithBackend() {
-        val rootSeed = state.rootSeed
+    private suspend fun makeApiCallToSaveDataWithBackend(rootSeed: ByteArray) {
         val verifyUser = state.verifyUser
 
-        if (rootSeed == null || verifyUser == null) {
+        if (verifyUser == null) {
             state = state.copy(addWalletSigner = Resource.Error())
             return
         }
 
         val walletSignersToAdd =
-            migrationRepository.retrieveWalletSignersToUpload(rootSeed.toByteArray())
+            migrationRepository.retrieveWalletSignersToUpload(rootSeed)
 
-        //make API call to send up bitcoin signed key
+        //make API call to send up any needed signed keys
         val walletSigner = migrationRepository.migrateSigner(walletSignersToAdd)
 
         if (walletSigner is Resource.Success) {
@@ -150,15 +117,15 @@ class MigrationViewModel @Inject constructor(
             state = state.copy(addWalletSigner = walletSigner)
         }
     }
-
     //endregion
 
     //region handle all biometry events
     fun biometryApproved(cipher: Cipher) {
         viewModelScope.launch {
             when (state.bioPromptData.bioPromptReason) {
-                BioPromptReason.RETRIEVE_V3_ROOT_SEED -> retrieveV3RootSeedAndKickOffKeyStorage(cipher)
-                BioPromptReason.SAVE_V3_ROOT_SEED -> saveRootSeed(cipher)
+                BioPromptReason.RETRIEVE_V3_ROOT_SEED -> retrieveV3RootSeedAndKickOffKeyStorage(
+                    cipher
+                )
                 else -> {}
             }
         }
