@@ -163,14 +163,10 @@ fun KeyManagementScreen(
             viewModel.resetPromptTrigger()
         }
 
-        if (state.bioPromptData.immediate) {
-            kickOffBioPrompt()
-        } else {
-            PreBiometryDialog(
-                mainText = stringResource(id = R.string.save_biometry_info),
-                onAccept = kickOffBioPrompt
-            )
-        }
+        PreBiometryDialog(
+            mainText = stringResource(id = R.string.save_biometry_info),
+            onAccept = kickOffBioPrompt
+        )
     }
     //endregion
 

@@ -76,7 +76,7 @@ class MigrationViewModel @Inject constructor(
         if (cipher != null) {
             state = state.copy(
                 triggerBioPrompt = Resource.Success(cipher),
-                bioPromptData = BioPromptData(BioPromptReason.RETRIEVE_V3_ROOT_SEED, false)
+                bioPromptData = BioPromptData(BioPromptReason.RETRIEVE_V3_ROOT_SEED)
             )
         }
     }
@@ -145,10 +145,6 @@ class MigrationViewModel @Inject constructor(
             state = state.copy(showToast = Resource.Success(""))
             retry()
         }
-    }
-
-    fun cleanUp() {
-        state = state.copy(rootSeed = null)
     }
 
     fun resetKickOut() {

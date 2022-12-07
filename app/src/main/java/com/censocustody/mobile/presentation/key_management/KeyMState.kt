@@ -28,7 +28,7 @@ data class KeyManagementState(
 
     //Utility state
     val triggerBioPrompt: Resource<Cipher> = Resource.Uninitialized,
-    val bioPromptData: BioPromptData = BioPromptData(BioPromptReason.UNINITIALIZED, false),
+    val bioPromptData: BioPromptData = BioPromptData(BioPromptReason.UNINITIALIZED),
     val showToast: Resource<String> = Resource.Uninitialized,
     val goToAccount: Resource<Boolean> = Resource.Uninitialized,
     val keyRecoveryManualEntryError: Resource<Boolean> = Resource.Uninitialized,

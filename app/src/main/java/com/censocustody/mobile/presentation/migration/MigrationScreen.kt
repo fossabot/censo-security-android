@@ -1,6 +1,5 @@
 package com.censocustody.mobile.presentation.migration
 
-
 import android.widget.Toast
 import com.censocustody.mobile.presentation.key_management.PreBiometryDialog
 import androidx.biometric.BiometricPrompt
@@ -13,7 +12,6 @@ import androidx.navigation.NavController
 import com.censocustody.mobile.R
 import com.censocustody.mobile.common.BioCryptoUtil
 import com.censocustody.mobile.common.BioCryptoUtil.NO_CIPHER_CODE
-import com.censocustody.mobile.common.BioPromptReason
 import com.censocustody.mobile.common.Resource
 import com.censocustody.mobile.common.popUpToTop
 import com.censocustody.mobile.presentation.Screen
@@ -34,9 +32,7 @@ fun MigrationScreen(
     //region DisposableEffect
     DisposableEffect(key1 = viewModel) {
         viewModel.onStart(initialData)
-        onDispose {
-            viewModel.cleanUp()
-        }
+        onDispose { }
     }
     //endregion
 
@@ -105,14 +101,10 @@ fun MigrationScreen(
             viewModel.resetPromptTrigger()
         }
 
-        if (state.bioPromptData.immediate) {
-            kickOffBioPrompt()
-        } else {
-            PreBiometryDialog(
-                mainText = stringResource(id = R.string.initial_migration_message),
-                onAccept = kickOffBioPrompt
-            )
-        }
+        PreBiometryDialog(
+            mainText = stringResource(id = R.string.initial_migration_message),
+            onAccept = kickOffBioPrompt
+        )
     }
 
     if (state.showToast is Resource.Success) {

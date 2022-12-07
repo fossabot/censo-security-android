@@ -114,7 +114,7 @@ class KeyManagementViewModel @Inject constructor(
     fun triggerBioPrompt(inputMethod: PhraseInputMethod? = null) {
         viewModelScope.launch {
             val cipher = cipherRepository.getCipherForEncryption(ROOT_SEED_KEY_NAME)
-            val bioPromptData = BioPromptData(BioPromptReason.SAVE_V3_ROOT_SEED, false)
+            val bioPromptData = BioPromptData(BioPromptReason.SAVE_V3_ROOT_SEED)
 
             if (cipher != null) {
                 state = when (state.keyManagementFlow) {
