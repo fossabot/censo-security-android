@@ -106,8 +106,6 @@ class MessagingService : FirebaseMessagingService() {
     }
 
     private fun parsePushData(data: Map<String, String>): PushData {
-        //TODO: str-258 https://linear.app/strike-android/issue/STR-258/consume-the-push-data-image-in-the-notification-icon
-        // Consume image data for notification icon
         return PushData(
             title = data.getOrDefault(TITLE_KEY, DEFAULT_TITLE),
             body = data.getOrDefault(BODY_KEY, DEFAULT_BODY)
