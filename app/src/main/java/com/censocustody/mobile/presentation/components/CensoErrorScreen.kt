@@ -5,7 +5,6 @@ import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.Button
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
 import androidx.compose.runtime.Composable
@@ -19,10 +18,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.censocustody.mobile.R
 import androidx.core.content.ContextCompat.startActivity
+import com.censocustody.mobile.common.CensoButton
 import com.censocustody.mobile.common.Resource
 import com.censocustody.mobile.common.CensoError
-import com.censocustody.mobile.presentation.key_management.PurpleGradientBackgroundUI
+import com.censocustody.mobile.presentation.key_management.GradientBackgroundUI
 import com.censocustody.mobile.ui.theme.BackgroundBlack
+import com.censocustody.mobile.ui.theme.CensoTextBlue
 import com.censocustody.mobile.ui.theme.CensoWhite
 
 @Composable
@@ -45,7 +46,7 @@ fun CensoErrorScreen(
             .clickable { onDismiss() },
         contentAlignment = Alignment.Center
     ) {
-        PurpleGradientBackgroundUI()
+        GradientBackgroundUI()
 
         Column(
             modifier = Modifier.fillMaxSize(),
@@ -61,9 +62,8 @@ fun CensoErrorScreen(
                 lineHeight = 24.sp
             )
             Spacer(modifier = Modifier.height(36.dp))
-            Button(
-                modifier = Modifier
-                    .width(width = 124.dp),
+            CensoButton(
+                contentPadding = PaddingValues(horizontal = 32.dp, vertical = 12.dp),
                 onClick = onRetry
             ) {
                 Text(
@@ -86,6 +86,7 @@ fun CensoErrorScreen(
                 ) {
                     Text(
                         text = stringResource(id = R.string.get_help),
+                        color = CensoTextBlue,
                         fontSize = 16.sp
                     )
                 }

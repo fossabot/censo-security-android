@@ -143,7 +143,7 @@ fun AccountScreen(
                             }
                             .padding(24.dp),
                         text = stringResource(R.string.get_help),
-                        color = CensoPurple,
+                        color = CensoTextBlue,
                         fontWeight = FontWeight.W500,
                         fontSize = 20.sp
                     )

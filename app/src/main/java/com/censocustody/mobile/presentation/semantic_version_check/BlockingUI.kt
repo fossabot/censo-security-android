@@ -4,7 +4,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.Button
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -21,6 +20,7 @@ import com.censocustody.mobile.presentation.biometry_disabled.BiometryDisabledSc
 import com.censocustody.mobile.ui.theme.CensoWhite
 import javax.crypto.Cipher
 import com.censocustody.mobile.R
+import com.censocustody.mobile.common.CensoButton
 
 @Composable
 fun BlockingUI(
@@ -82,9 +82,10 @@ fun ForegroundBlockingUI(
                 color = CensoWhite,
                 textAlign = TextAlign.Center
             )
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(32.dp))
             if (bioPromptTrigger is Resource.Error) {
-                Button(onClick = retry) {
+                CensoButton(
+                    contentPadding = PaddingValues(horizontal = 36.dp, vertical = 10.dp), onClick = retry) {
                     Text(
                         text = stringResource(R.string.try_again),
                         color = CensoWhite,

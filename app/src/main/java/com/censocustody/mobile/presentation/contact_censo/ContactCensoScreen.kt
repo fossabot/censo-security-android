@@ -13,7 +13,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.censocustody.mobile.R
-import com.censocustody.mobile.ui.theme.CensoPurple
+import com.censocustody.mobile.ui.theme.CensoTextBlue
 import com.censocustody.mobile.ui.theme.CensoWhite
 
 @Composable
@@ -39,7 +39,7 @@ fun ContactCensoScreen() {
                 }
                 .padding(24.dp),
             text = stringResource(R.string.get_help),
-            color = CensoPurple,
+            color = CensoTextBlue,
             fontWeight = FontWeight.W500,
             fontSize = 20.sp
         )
