@@ -19,7 +19,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import com.censocustody.mobile.R
-import com.censocustody.mobile.ui.theme.CensoPurple
+import com.censocustody.mobile.ui.theme.CensoButtonBlue
 
 @ExperimentalComposeUiApi
 @Composable
@@ -63,7 +63,7 @@ fun SignInTextField(
             ),
             onValueChange = onValueChange,
             colors = TextFieldDefaults.outlinedTextFieldColors(
-                focusedBorderColor = CensoPurple,
+                focusedBorderColor = CensoButtonBlue,
                 unfocusedBorderColor = Color.Transparent,
                 textColor = Color.Black,
                 backgroundColor = Color.White

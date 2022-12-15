@@ -15,7 +15,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import com.censocustody.mobile.R
-import com.censocustody.mobile.presentation.key_management.PurpleGradientBackgroundUI
+import com.censocustody.mobile.presentation.key_management.GradientBackgroundUI
 import com.censocustody.mobile.presentation.key_management.SmallAuthFlowButton
 import com.censocustody.mobile.ui.theme.CensoWhite
 import com.censocustody.mobile.ui.theme.UnfocusedGrey
@@ -27,7 +27,7 @@ fun MigrationUI(
     retry: () -> Unit,
 ) {
 
-    PurpleGradientBackgroundUI()
+    GradientBackgroundUI()
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -52,7 +52,6 @@ fun MigrationUI(
                 SmallAuthFlowButton(
                     modifier = Modifier.wrapContentWidth(),
                     text = stringResource(R.string.retry),
-                    textPadding = 4.dp
                 ) {
                     retry()
                 }

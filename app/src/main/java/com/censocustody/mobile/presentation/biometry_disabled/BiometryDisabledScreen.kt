@@ -4,7 +4,6 @@ import android.content.Intent
 import android.provider.Settings
 import android.widget.Toast
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.Button
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -17,6 +16,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat.startActivity
 import com.censocustody.mobile.R
+import com.censocustody.mobile.common.CensoButton
 import com.censocustody.mobile.ui.theme.CensoWhite
 
 @Composable
@@ -44,7 +44,8 @@ fun BiometryDisabledScreen(message: String, biometryAvailable: Boolean) {
             val intent = Intent(Settings.ACTION_SECURITY_SETTINGS)
 
             Spacer(modifier = Modifier.height(32.dp))
-            Button(
+            CensoButton(
+                contentPadding = PaddingValues(horizontal = 32.dp, vertical = 4.dp),
                 onClick = {
                     try {
                         startActivity(context, intent, null)
@@ -60,7 +61,7 @@ fun BiometryDisabledScreen(message: String, biometryAvailable: Boolean) {
                     modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
                     textAlign = TextAlign.Center,
                     text = stringResource(R.string.biometry_deeplink_device_settings),
-                    fontSize = 20.sp,
+                    fontSize = 18.sp,
                     color = CensoWhite
                 )
             }

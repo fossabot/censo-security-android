@@ -47,7 +47,7 @@
 
     <string name="biometry_disabled_message">You must enable biometric security in your device settings.\n\nIf you already have biometry enabled, you may need to enable a different biometric option to meet the security threshold of the Censo Custody App.</string>
     <string name="biometry_unavailable_message">Your device does not support biometric security at the level required for the Censo Custody App.</string>
-    <string name="biometry_deeplink_device_settings">Device Biometry Settings</string>
+    <string name="biometry_deeplink_device_settings">Biometry Settings</string>
 
     <string name="update_censo_custody">Update Censo Mobile…</string>
     <string name="unknown_approval_tip">You have an unknown approval request. Please update this app to see the request details</string>
@@ -164,7 +164,7 @@
 
     <string name="confirm_recovery_phrase">Confirm recovery phrase</string>
     <string name="all_set">You\'re all set.</string>
-    <string name="continue_to_censo_custody">Continue to Censo Custody</string>
+    <string name="continue_to_censo_custody">Continue to Censo</string>
     <string name="confirm_recovery_phrase_header">Confirm recovery phrase</string>
     <string name="paste_phrase">Paste Phrase</string>
     <string name="how_did_you_back_it_up">How did you back it up?</string>
@@ -241,4 +241,5 @@
     <string name="reset_pswd_email_sent">Reset password email sent!</string>
     <string name="reset_email_error">Unable to send reset email. Please try again or reset your password from our website.</string>
     <string name="invalid_phrase">Invalid phrase entered. Please re-enter phrase.</string>
+    <string name="play_store_not_found">Play Store not found on this device.</string>
 </resources>
