@@ -73,7 +73,7 @@ fun KeyRecoveryFlowUI(
             }
         },
         content = {
-            PurpleGradientBackgroundUI()
+            GradientBackgroundUI()
             Box {
                 when (keyRecoveryFlowStep) {
                     KeyRecoveryFlowStep.VERIFY_WORDS_STEP -> VerifyPhraseWordUI(

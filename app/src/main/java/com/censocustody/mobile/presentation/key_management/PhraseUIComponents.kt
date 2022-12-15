@@ -23,11 +23,11 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.*
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.layout
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
@@ -38,11 +38,11 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import com.censocustody.mobile.R
+import com.censocustody.mobile.common.CensoButton
 import com.censocustody.mobile.common.Resource
 import com.censocustody.mobile.data.models.IndexedPhraseWord
 import com.censocustody.mobile.data.models.Signers
@@ -55,6 +55,7 @@ import com.censocustody.mobile.presentation.key_management.flows.KeyRecoveryFlow
 import com.censocustody.mobile.presentation.key_management.flows.PhraseEntryAction
 import com.censocustody.mobile.presentation.key_management.flows.PhraseFlowAction
 import com.censocustody.mobile.ui.theme.*
+import java.lang.Integer.max
 
 object PhraseUICompanion {
     const val FIRST_SPACER_INDEX = 0
@@ -67,42 +68,27 @@ object PhraseUICompanion {
 }
 
 @Composable
-fun PurpleGradientBackgroundUI() {
-    when {
-        Build.VERSION.SDK_INT >= Build.VERSION_CODES.S ->
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .alpha(0.50f)
-                    .blur(250.dp)
-                    .background(
-                        brush = Brush.radialGradient(
-                            colorStops = arrayOf(
-                                0.0f to Color(0xFF996cfd),
-                                2.50f to Color(0xFF7351BE),
-                                5.0f to Color(0xFF4D367F),
-                                7.5f to Color(0xFF261B3F),
-                                10.0f to Color(0xFF000000),
-                            )
-                        )
-                    )
-            )
-        else ->
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .alpha(0.40f)
-                    .blur(250.dp)
-                    .background(
-                        brush = Brush.radialGradient(
-                            colorStops = arrayOf(
-                                0.0f to Color(0xFF996cfd),
-                                10.0f to Color(0xFF000000)
-                            )
-                        )
-                    )
-            )
+fun GradientBackgroundUI() {
+
+    val configuration = LocalConfiguration.current
+
+    val calculatedRadius = try {
+        max(configuration.screenHeightDp, configuration.screenWidthDp).toFloat()
+    } catch (e: Exception) {
+        null
     }
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .alpha(0.50f)
+            .background(
+                brush = Brush.radialGradient(
+                    colorStops = GradientColors,
+                    radius = calculatedRadius ?: Float.POSITIVE_INFINITY
+                )
+            )
+    )
 }
 
 @Composable
@@ -168,7 +154,6 @@ fun EntryScreenPhraseUI(
         Spacer(modifier = Modifier.weight(0.8f))
         AuthFlowButton(
             text = buttonOneText,
-            textPadding = 1.dp
         ) {
             if (creationFlow) {
                 onPhraseFlowAction(
@@ -187,7 +172,6 @@ fun EntryScreenPhraseUI(
         Spacer(modifier = Modifier.weight(0.25f))
         AuthFlowButton(
             text = buttonTwoText,
-            textPadding = 1.dp
         ) {
             if (creationFlow) {
                 onPhraseFlowAction(PhraseFlowAction.LaunchManualKeyCreation)
@@ -365,7 +349,7 @@ fun ConfirmKeyUI(
                 .background(color = Color.Black, shape = RoundedCornerShape(8.dp))
                 .fillMaxWidth(),
             colors = TextFieldDefaults.outlinedTextFieldColors(
-                focusedBorderColor = if (errorEnabled) Color.Red else CensoPurple,
+                focusedBorderColor = if (errorEnabled) Color.Red else CensoButtonBlue,
                 unfocusedBorderColor = if (errorEnabled) Color.Red else GreyOutline,
                 cursorColor = Color.Transparent,
                 textColor = if (errorEnabled) Color.Red else CensoWhite,
@@ -444,7 +428,6 @@ fun AllSetUI(
                         .align(Alignment.BottomCenter)
                         .padding(bottom = 56.dp),
                     text = stringResource(R.string.continue_to_censo_custody),
-                    textPadding = 4.dp
                 ) {
                     onNavigate()
                 }
@@ -502,7 +485,6 @@ fun AllSetUI(
                     SmallAuthFlowButton(
                         modifier = Modifier.wrapContentWidth(),
                         text = stringResource(R.string.retry),
-                        textPadding = 4.dp
                     ) {
                         retry()
                     }
@@ -515,16 +497,14 @@ fun AllSetUI(
 @Composable
 fun AuthFlowButton(
     modifier: Modifier = Modifier,
-    textPadding: Dp = 0.dp,
     text: String,
     imageVector: ImageVector? = null,
     onClick: () -> Unit
 ) {
-    Button(
-        modifier = modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(8.dp)),
-        onClick = onClick,
+    CensoButton(
+        modifier = modifier.fillMaxWidth(),
+        contentPadding = PaddingValues(vertical = 12.dp),
+        onClick = onClick
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically
@@ -538,7 +518,6 @@ fun AuthFlowButton(
                 Spacer(modifier = Modifier.width(24.dp))
             }
             Text(
-                modifier = Modifier.padding(vertical = textPadding),
                 text = text,
                 fontSize = 18.sp,
                 color = CensoWhite,
@@ -551,26 +530,20 @@ fun AuthFlowButton(
 @Composable
 fun SmallAuthFlowButton(
     modifier: Modifier = Modifier,
-    textPadding: Dp = 0.dp,
     text: String,
     onClick: () -> Unit
 ) {
-    Button(
-        modifier = modifier
-            .clip(RoundedCornerShape(8.dp)),
-        onClick = onClick,
+    CensoButton(
+        modifier = modifier,
+        height = 44.dp,
+        onClick = onClick
     ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                modifier = Modifier.padding(vertical = textPadding),
-                text = text,
-                fontSize = 18.sp,
-                color = CensoWhite,
-                textAlign = TextAlign.Center
-            )
-        }
+        Text(
+            text = text,
+            fontSize = 18.sp,
+            color = CensoWhite,
+            textAlign = TextAlign.Center
+        )
     }
 }
 
@@ -944,7 +917,7 @@ fun VerifyWordTextField(
             onNext = { onPhraseEntryAction(PhraseEntryAction.SubmitWordInput(errorMessage)) }
         ),
         interactionSource = interactionSource,
-        cursorBrush = SolidColor(CensoPurple),
+        cursorBrush = SolidColor(CensoButtonBlue),
         singleLine = singleLine
     ) { innerTextField ->
 

@@ -9,16 +9,16 @@ import androidx.compose.ui.graphics.Color
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 
 private val DarkColorPalette = darkColors(
-    primary = CensoPurple,
-    primaryVariant = CensoPurple,
+    primary = CensoButtonBlue,
+    primaryVariant = CensoButtonBlue,
     secondary = Color.Black,
     background = Color.Black,
     surface = Color.Black
 )
 
 private val LightColorPalette = lightColors(
-    primary = CensoPurple,
-    primaryVariant = CensoPurple,
+    primary = CensoButtonBlue,
+    primaryVariant = CensoButtonBlue,
     secondary = Color.Black,
     background = Color.Black,
     surface = Color.Black

@@ -3,7 +3,9 @@ package com.censocustody.mobile.ui.theme
 import androidx.compose.ui.graphics.Color
 
 val BackgroundBlack = Color.Black
-val CensoPurple = Color(0xFF754dcc)
+val CensoTextBlue = Color(0xFF05B5FF)
+val CensoButtonBlue = Color(0xFF001749)
+val ButtonBorder = Color(0xFF57526c)
 val CensoWhite = Color.White
 val UnfocusedGrey = Color(0xFF373737)
 val HeaderBlack = Color(0xFF191919)
@@ -37,3 +39,8 @@ val BackgroundDark = Color(red = 1f, green = 1f, blue = 1f, alpha = 0.06f)
 val CancelButtonGrey = Color(0xFF32323d)
 val DialogHeaderBlack = Color(0xFF1d1d21)
 val DialogMainBackground = Color(0xFF2b2b35)
+
+val GradientColors = arrayOf(
+    0.0f to Color(0xFF001749),
+    10.0f to Color(0xFF000000),
+)

@@ -4,13 +4,11 @@ import android.annotation.SuppressLint
 import androidx.biometric.BiometricPrompt
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -31,11 +29,12 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.censocustody.mobile.R
 import com.censocustody.mobile.common.BioCryptoUtil
+import com.censocustody.mobile.common.CensoButton
 import com.censocustody.mobile.common.Resource
 import com.censocustody.mobile.presentation.Screen
 import com.censocustody.mobile.presentation.components.SignInTextField
 import com.censocustody.mobile.presentation.components.SignInTopAppBar
-import com.censocustody.mobile.presentation.key_management.PurpleGradientBackgroundUI
+import com.censocustody.mobile.presentation.key_management.GradientBackgroundUI
 import com.censocustody.mobile.ui.theme.*
 
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
@@ -116,7 +115,7 @@ fun SignInScreen(
         },
         content = {
             Box {
-                PurpleGradientBackgroundUI()
+                GradientBackgroundUI()
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.SpaceBetween,
@@ -125,10 +124,9 @@ fun SignInScreen(
                         .verticalScroll(rememberScrollState())
                 ) {
                     val passwordVisibility = remember { mutableStateOf(false) }
-
                     Image(
-                        modifier = Modifier.padding(horizontal = 44.dp),
-                        painter = painterResource(R.drawable.censo_wordmark_ko),
+                        modifier = Modifier.width(200.dp),
+                        painter = painterResource(R.drawable.censo_horizontal_ko),
                         contentDescription = "",
                         contentScale = ContentScale.FillWidth,
                     )
@@ -149,9 +147,10 @@ fun SignInScreen(
                         color = CensoWhite,
                         textAlign = TextAlign.Center,
                         fontSize = 17.sp,
+                        lineHeight = 24.sp,
                         letterSpacing = 0.25.sp
                     )
-                    Spacer(modifier = Modifier.weight(1.0f))
+                    Spacer(modifier = Modifier.weight(0.75f))
 
                     val boxItemsHorizontalPadding = 32.dp
 
@@ -203,52 +202,52 @@ fun SignInScreen(
                                 isPassword = true,
                                 showDoneAction = true
                             )
-                            Spacer(modifier = Modifier.size(12.dp))
-                            Box(modifier = Modifier.fillMaxWidth()) {
-                                Text(
-                                    modifier = Modifier
-                                        .align(Alignment.CenterEnd)
-                                        .clickable { navController.navigate(Screen.ResetPasswordRoute.route) }
-                                        .padding(top = 12.dp, end = 16.dp),
-                                    text = stringResource(R.string.reset_password),
-                                    color = CensoPurple,
-                                    textAlign = TextAlign.End,
-                                    fontWeight = FontWeight.W400
-                                )
-                            }
                         }
-                        Spacer(modifier = Modifier.size(32.dp))
+                        Spacer(modifier = Modifier.size(12.dp))
+                        Box(modifier = Modifier.fillMaxWidth()) {
+                            Text(
+                                modifier = Modifier
+                                    .align(Alignment.CenterEnd)
+                                    .clickable { navController.navigate(Screen.ResetPasswordRoute.route) }
+                                    .padding(top = 8.dp, end = 32.dp),
+                                text = stringResource(R.string.reset_password),
+                                color = CensoTextBlue,
+                                textAlign = TextAlign.End,
+                                fontWeight = FontWeight.W400
+                            )
+                        }
+                        Spacer(modifier = Modifier.size(24.dp))
                     }
                     Spacer(modifier = Modifier.weight(6f))
-                    Button(
+                    CensoButton(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 24.dp)
-                            .height(54.dp)
-                            .clip(RoundedCornerShape(12.dp)),
-                        colors = ButtonDefaults.buttonColors(
-                            backgroundColor = CensoPurple,
-                            disabledBackgroundColor = CensoPurple,
-                        ),
-                        enabled = true,
+                            .padding(horizontal = 24.dp),
+                        contentPadding = PaddingValues(vertical = 16.dp),
+                        enabled = state.email.isNotEmpty(),
                         onClick = {
                             if(state.loginStep != LoginStep.EMAIL_ENTRY) {
                                 keyboardController?.hide()
                             }
                             viewModel.signInActionCompleted()
-                        }
-                    ) {
+                        }) {
                         if (state.loginResult is Resource.Loading) {
-                            CircularProgressIndicator(
-                                modifier = Modifier.height(40.dp),
-                                color = CensoWhite,
-                                strokeWidth = 4.dp,
-                            )
+                            Box(
+                                modifier = Modifier
+                                    .height(28.dp)
+                                    .width(28.dp)
+                            ) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.height(28.dp),
+                                    color = CensoWhite,
+                                    strokeWidth = 2.dp,
+                                )
+                            }
                         } else {
                             Text(
                                 text = stringResource(R.string.sign_in_button),
-                                fontSize = 16.sp,
-                                color = CensoWhite
+                                fontSize = 18.sp,
+                                color = if(state.email.isNotEmpty()) CensoWhite else CensoWhite.copy(alpha = 0.35f)
                             )
                         }
                     }
@@ -311,7 +310,7 @@ fun LoginErrorAlertDialog(
         onDismissRequest = onDismiss,
         confirmButton = {
             TextButton(onClick = onConfirm) {
-                Text(text = confirmText)
+                Text(text = confirmText, color = CensoWhite)
             }
         },
         dismissButton = {

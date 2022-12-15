@@ -3,7 +3,6 @@ package com.censocustody.mobile.presentation.reset_password
 import android.annotation.SuppressLint
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ArrowBack
@@ -11,7 +10,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -19,6 +17,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.censocustody.mobile.R
+import com.censocustody.mobile.common.CensoButton
 import com.censocustody.mobile.common.Resource
 import com.censocustody.mobile.presentation.components.SignInTextField
 import com.censocustody.mobile.presentation.components.CenteredTopAppBar
@@ -82,18 +81,12 @@ fun ResetPasswordScreen(
                     onDoneAction = { resetPasswordViewModel.submitResetPassword() },
                 )
                 Spacer(modifier = Modifier.height(48.dp))
-                Button(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(54.dp)
-                        .clip(RoundedCornerShape(12.dp)),
-                    colors = ButtonDefaults.buttonColors(
-                        backgroundColor = CensoPurple,
-                        disabledBackgroundColor = CensoPurple,
-                    ),
+                CensoButton(
+                    modifier = Modifier.fillMaxWidth(),
                     enabled = resetPasswordState.resetButtonEnabled,
-                    onClick = resetPasswordViewModel::submitResetPassword
-                ) {
+                    height = 54.dp,
+                    onClick = resetPasswordViewModel::submitResetPassword) {
+                    val textColor =  if(resetPasswordState.resetButtonEnabled) CensoWhite else CensoWhite.copy(alpha = 0.35f)
                     when (resetPasswordState.resetPasswordResult) {
                         is Resource.Loading -> {
                             CircularProgressIndicator(
@@ -106,18 +99,17 @@ fun ResetPasswordScreen(
                             Text(
                                 text = stringResource(R.string.retry_recover_password),
                                 fontSize = 16.sp,
-                                color = CensoWhite
+                                color = textColor
                             )
                         }
                         else -> {
                             Text(
                                 text = stringResource(R.string.reset_password),
                                 fontSize = 16.sp,
-                                color = CensoWhite
+                                color = textColor
                             )
                         }
                     }
-
                 }
             }
         }
