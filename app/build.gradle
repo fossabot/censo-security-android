@@ -10,7 +10,7 @@ plugins {
 }
 
 def final appName = 'Censo Custody'
-def final coreAppId = "com.censocustody.mobile"
+def final coreAppId = "com.censocustody.android"
 
 String versionNameMajor = 1
 String versionNameMinor = 0
