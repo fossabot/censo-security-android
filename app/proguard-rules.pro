@@ -17,9 +17,9 @@
 -renamesourcefileattribute SourceFile
 
 # Keep the classes that are used for deserialization
--keep class com.censocustody.mobile.data.** { *; }
+-keep class com.censocustody.android.data.** { *; }
 
--keep class com.censocustody.mobile.presentation.durable_nonce.** { *; }
+-keep class com.censocustody.android.presentation.durable_nonce.** { *; }
 
 # Bouncy Castle
 -dontwarn java8.util.**
