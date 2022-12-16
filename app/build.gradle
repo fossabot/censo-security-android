@@ -62,7 +62,7 @@ android {
         proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
 
         manifestPlaceholders = [
-                "appAuthRedirectScheme": "com.censocustody.mobile"
+                "appAuthRedirectScheme": "com.censocustody.android"
         ]
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"

@@ -1,8 +1,8 @@
 # App Environments and Package Ids
-    - Debug: com.censocustody.mobile.debug
-    - PreRelease: com.censocustody.mobile.prerelease
-    - PreProd: com.censocustody.mobile.preprod
-    - Release: com.censocustody.mobile
+    - Debug: com.censocustody.android.debug
+    - PreRelease: com.censocustody.android.prerelease
+    - PreProd: com.censocustody.android.preprod
+    - Release: com.censocustody.android
 
 # Build Setup
 
