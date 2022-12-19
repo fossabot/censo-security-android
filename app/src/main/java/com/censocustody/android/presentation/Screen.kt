@@ -10,6 +10,7 @@ sealed class Screen(val route: String) {
     object AccountRoute : Screen("account_screen")
     object EnforceUpdateRoute : Screen("enforce_update_screen")
     object EntranceRoute : Screen("entrance_screen")
+    object KeyCreationRoute : Screen("key_creation_state")
     object KeyManagementRoute : Screen("key_management_screen") {
         const val KEY_MGMT_ARG = "key_mgmt_arg"
     }

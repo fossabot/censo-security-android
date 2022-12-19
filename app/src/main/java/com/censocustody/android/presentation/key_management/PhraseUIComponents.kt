@@ -475,7 +475,7 @@ fun AllSetUI(
                         text = allSetState.censoError?.getErrorMessage(context)
                             ?: stringResource(R.string.something_went_wrong),
                         color = CensoWhite,
-                        fontSize = 16.sp,
+                        fontSize = 18.sp,
                         textAlign = TextAlign.Center,
                         letterSpacing = 0.23.sp,
                         lineHeight = 32.sp
@@ -534,7 +534,7 @@ fun SmallAuthFlowButton(
 ) {
     CensoButton(
         modifier = modifier,
-        height = 44.dp,
+        contentPadding = PaddingValues(horizontal = 24.dp, vertical = 8.dp),
         onClick = onClick
     ) {
         Text(
@@ -1025,9 +1025,8 @@ fun PreBiometryDialog(
                 fontSize = 20.sp
             )
             Spacer(modifier = Modifier.height(36.dp))
-            Button(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(8.dp)),
+            CensoButton(
+                contentPadding = PaddingValues(horizontal = 24.dp, vertical = 8.dp),
                 onClick = onAccept,
             ) {
                 Text(

@@ -36,6 +36,7 @@ import com.censocustody.android.presentation.approvals.ApprovalsViewModel
 import com.censocustody.android.presentation.components.OnLifecycleEvent
 import com.censocustody.android.presentation.contact_censo.ContactCensoScreen
 import com.censocustody.android.presentation.entrance.EntranceScreen
+import com.censocustody.android.presentation.key_creation.KeyCreationScreen
 import com.censocustody.android.presentation.key_management.KeyManagementInitialData
 import com.censocustody.android.presentation.key_management.KeyManagementScreen
 import com.censocustody.android.presentation.migration.VerifyUserInitialData
@@ -174,7 +175,7 @@ class MainActivity : FragmentActivity() {
 
         NavHost(
             navController = navController,
-            startDestination = Screen.EntranceRoute.route,
+            startDestination = Screen.KeyCreationRoute.route,
         ) {
             composable(
                 route = Screen.EntranceRoute.route
@@ -210,6 +211,11 @@ class MainActivity : FragmentActivity() {
                 AccountScreen(
                     navController = navController
                 )
+            }
+            composable(
+                route = Screen.KeyCreationRoute.route
+            ) {
+                KeyCreationScreen(navController = navController)
             }
             composable(
                 route = "${Screen.KeyManagementRoute.route}/{${Screen.KeyManagementRoute.KEY_MGMT_ARG}}",
