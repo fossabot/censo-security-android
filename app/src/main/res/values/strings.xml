@@ -244,4 +244,8 @@
     <string name="reset_email_error">Unable to send reset email. Please try again or reset your password from our website.</string>
     <string name="invalid_phrase">Invalid phrase entered. Please re-enter phrase.</string>
     <string name="play_store_not_found">Play Store not found on this device.</string>
+
+    <string name="image_capture_failed_no_camera_message">Please ensure this device has a camera available for capturing user image.</string>
+    <string name="image_capture_failed_action_cancelled_message">A photo image is required as part of the initial wallet creation process, please try again.</string>
+    <string name="image_capture_failed_default_message">Failed to capture an image, please try again.</string>
 </resources>

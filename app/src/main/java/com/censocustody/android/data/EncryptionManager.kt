@@ -19,6 +19,7 @@ import com.censocustody.android.data.models.SupplyDappInstruction
 import com.censocustody.android.data.models.approval.InitiationRequest
 import java.nio.charset.Charset
 import java.security.SecureRandom
+import java.security.Signature
 import javax.crypto.Cipher
 import javax.inject.Inject
 
@@ -110,6 +111,7 @@ interface EncryptionManager {
     fun haveSentinelDataStored(email: String): Boolean
     fun saveSentinelData(email: String, cipher: Cipher)
     fun retrieveSentinelData(email: String, cipher: Cipher): String
+    fun getSignatureForDeviceSigning(keyName: String) : Signature
 
     //endregion
 }
@@ -488,6 +490,10 @@ class EncryptionManagerImpl @Inject constructor(
 
     override fun deleteBiometryKeyFromKeystore(keyName: String) {
         cryptographyManager.deleteInvalidatedKey(keyName)
+    }
+
+    override fun getSignatureForDeviceSigning(keyName: String): Signature {
+        return cryptographyManager.getSignatureForDeviceSigning(keyName)
     }
 
     private fun retrieveStoredKeys(

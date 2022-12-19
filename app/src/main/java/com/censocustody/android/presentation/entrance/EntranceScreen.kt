@@ -76,6 +76,7 @@ fun EntranceScreen(
                         )
                     "${Screen.KeyManagementRoute.route}/$keyManagementJson"
                 }
+                UserDestination.DEVICE_REGISTRATION -> Screen.DeviceRegistrationRoute.route
                 UserDestination.FORCE_UPDATE -> Screen.EnforceUpdateRoute.route
                 UserDestination.INVALID_KEY -> Screen.ContactCensoRoute.route
                 UserDestination.LOGIN, null -> Screen.SignInRoute.route
