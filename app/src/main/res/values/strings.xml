@@ -192,6 +192,7 @@
     <string name="retry">Retry</string>
     <string name="registering_key_auth">Registering your key with Censo Custody…</string>
     <string name="migration_loading_text">Migrating your key behind biometry protection…</string>
+    <string name="saving_key_to_device">Saving your key to your device…</string>
     <string name="i_saved_key">I saved the recovery phrase &#10132;</string>
 
     <string name="sign_in_subtitle">Sign in with the account you\ncreated on the web</string>
@@ -220,6 +221,7 @@
     <string name="try_again">Try Again</string>
 
     <string name="save_biometry_info">Censo Custody protects your private key using biometric verification.\n\nIf you change the biometry settings on your device, you will need to recover your key from your recovery phrase.</string>
+    <string name="save_biometry_info_key_creation">Censo Custody protects your private key using biometric verification.</string>
     <string name="are_you_sure">Are you sure?</string>
     <string name="continue_text">Continue</string>
     <string name="close_dialog">close dialog</string>
