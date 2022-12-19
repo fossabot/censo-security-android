@@ -47,13 +47,13 @@ class KeyCreationViewModel @Inject constructor(
     suspend fun triggerBioPrompt() {
         val cipher =
             cipherRepository.getCipherForEncryption(EncryptionManagerImpl.Companion.ROOT_SEED_KEY_NAME)
-        val bioPromptData = BioPromptData(BioPromptReason.SAVE_V3_ROOT_SEED)
+        val bioPromptReason = BioPromptReason.SAVE_V3_ROOT_SEED
 
         if (cipher != null) {
             state =
                 state.copy(
                     triggerBioPrompt = Resource.Success(cipher),
-                    bioPromptData = bioPromptData
+                    bioPromptReason = bioPromptReason
                 )
         }
     }
