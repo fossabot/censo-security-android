@@ -9,8 +9,7 @@ import javax.crypto.Cipher
 data class KeyCreationState(
     val keyGeneratedPhrase: String? = null,
     val triggerBioPrompt: Resource<Cipher> = Resource.Uninitialized,
-    val bioPromptData: BioPromptData = BioPromptData(BioPromptReason.UNINITIALIZED),
-    val showToast: Resource<String> = Resource.Uninitialized,
+    val bioPromptReason: BioPromptReason = BioPromptReason.UNINITIALIZED,
     val finishedKeyUpload: Boolean = false,
 
     //API calls
