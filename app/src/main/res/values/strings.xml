@@ -246,4 +246,8 @@
     <string name="play_store_not_found">Play Store not found on this device.</string>
     <string name="push_notification_never_dialog">Strike Protocols sends you a push notification for every approval.\n\nApprovals are time-sensitive and push notifications help you to respond promptly.</string>
     <string name="skip">Skip</string>
+
+    <string name="image_capture_failed_no_camera_message">Please ensure this device has a camera available for capturing user image.</string>
+    <string name="image_capture_failed_action_cancelled_message">A photo image is required as part of the initial wallet creation process, please try again.</string>
+    <string name="image_capture_failed_default_message">Failed to capture an image, please try again.</string>
 </resources>

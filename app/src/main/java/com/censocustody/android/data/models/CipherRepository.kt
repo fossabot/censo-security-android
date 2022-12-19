@@ -6,12 +6,14 @@ import com.censocustody.android.data.EncryptionManagerImpl.Companion.BIO_KEY_NAM
 import com.censocustody.android.data.EncryptionManagerImpl.Companion.ROOT_SEED_KEY_NAME
 import com.censocustody.android.data.EncryptionManagerImpl.Companion.SENTINEL_KEY_NAME
 import java.security.InvalidAlgorithmParameterException
+import java.security.Signature
 import javax.crypto.Cipher
 
 interface CipherRepository {
     suspend fun getCipherForEncryption(keyName: String): Cipher?
     suspend fun getCipherForBackgroundDecryption(): Cipher?
     suspend fun getCipherForV3RootSeedDecryption(): Cipher?
+    suspend fun getSignatureForDeviceSigning(keyName: String): Signature?
 }
 
 class CipherRepositoryImpl(
@@ -52,6 +54,10 @@ class CipherRepositoryImpl(
         } catch (e: Exception) {
             handleCipherException(e, ROOT_SEED_KEY_NAME)
         }
+    }
+
+    override suspend fun getSignatureForDeviceSigning(keyName: String): Signature {
+        return encryptionManager.getSignatureForDeviceSigning(keyName)
     }
 
     private suspend fun handleCipherException(e: Exception, keyName: String): Cipher? {

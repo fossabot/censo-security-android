@@ -9,6 +9,7 @@ import com.raygun.raygun4android.RaygunClient
 import com.censocustody.android.BuildConfig
 import com.censocustody.android.common.CrashReportingUtil
 import com.censocustody.android.common.Resource
+import com.censocustody.android.common.censoLog
 import com.censocustody.android.data.*
 import com.censocustody.android.data.models.SemanticVersion
 import com.censocustody.android.data.models.VerifyUser
@@ -71,12 +72,43 @@ class EntranceViewModel @Inject constructor(
 
         if (userLoggedIn) {
             censoUserData.setEmail(userRepository.retrieveCachedUserEmail())
-            retrieveUserVerifyDetails()
+            checkIfUserHasDeviceRegistered()
         } else {
             //DESTINATION: Send user to login screen.
             state =
                 state.copy(
                     userDestinationResult = Resource.Success(UserDestination.LOGIN)
+                )
+        }
+    }
+
+    private suspend fun checkIfUserHasDeviceRegistered() {
+        val userEmail = userRepository.retrieveUserEmail()
+        if (SharedPrefsHelper.userHasDeviceIdSaved(userEmail)) {
+            //todo: check if user has correct device ID
+            val verifyUser = retrieveUserVerifyDetails()
+
+            if (verifyUser != null) {
+                val devicePublicKey = userRepository.retrieveUserDevicePublicKey(userEmail)
+                val backendPublicKey = verifyUser.deviceKey
+
+                if (devicePublicKey.lowercase() == backendPublicKey?.lowercase()) {
+                    censoLog(message = "Successfully saved device key for account...")
+                    determineUserDestination(verifyUser)
+                } else {
+                    censoLog(message = "No device key for account...")
+                    //todo: HAVE WRONG PUBLIC DEVICE KEY. Ask team what should do here? I think we need some clean up.
+                    state = state.copy(
+                        userDestinationResult = Resource.Success(UserDestination.DEVICE_REGISTRATION)
+                    )
+                }
+
+            }
+        } else {
+            //DESTINATION: Send user to device registration
+            state =
+                state.copy(
+                    userDestinationResult = Resource.Success(UserDestination.DEVICE_REGISTRATION)
                 )
         }
     }
@@ -99,24 +131,28 @@ class EntranceViewModel @Inject constructor(
         }
     }
 
-    private suspend fun retrieveUserVerifyDetails() {
+    private suspend fun retrieveUserVerifyDetails() : VerifyUser?{
         val verifyUserDataResource = userRepository.verifyUser()
 
         if (verifyUserDataResource is Resource.Success) {
             val verifyUser = verifyUserDataResource.data
 
-            if (verifyUser != null) {
+            return if (verifyUser != null) {
                 censoUserData.setCensoUser(verifyUser = verifyUser)
                 state = state.copy(verifyUserResult = verifyUserDataResource)
                 determineUserDestination(verifyUser)
+                verifyUser
             } else {
                 handleVerifyUserError(verifyUserDataResource)
+                null
             }
 
         } else if (verifyUserDataResource is Resource.Error) {
             handleVerifyUserError(verifyUserDataResource)
+            null
         }
 
+        return null
     }
 
     fun retryRetrieveVerifyUserDetails() {
