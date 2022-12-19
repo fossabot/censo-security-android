@@ -104,11 +104,11 @@ class WithdrawalRequestDetailParameterProvider : PreviewParameterProvider<Approv
                     address = "1BvBMSEYstWetqTFn5Au4m4GFg7xJaNVN2"
                 ),
                 symbolAndAmountInfo = SymbolAndAmountInfo(
-                    symbolInfo = SymbolInfo(symbol = "BTC", symbolDescription = "Bitcoin", tokenMintAddress = ""),
+                    symbolInfo = SymbolInfo(symbol = "BTC", symbolDescription = "Bitcoin", tokenMintAddress = null),
                     amount = "1.000000",
                     usdEquivalent = "20000.00",
                     fee = Fee(
-                        symbolInfo = SymbolInfo(symbol = "BTC", symbolDescription = "Bitcoin", tokenMintAddress = ""),
+                        symbolInfo = SymbolInfo(symbol = "BTC", symbolDescription = "Bitcoin", tokenMintAddress = null),
                         amount = "0.001",
                         usdEquivalent = "20.00"
                     )
@@ -130,16 +130,16 @@ class WithdrawalRequestDetailParameterProvider : PreviewParameterProvider<Approv
                     address = "1BvBMSEYstWetqTFn5Au4m4GFg7xJaNVN2"
                 ),
                 symbolAndAmountInfo = SymbolAndAmountInfo(
-                    symbolInfo = SymbolInfo(symbol = "BTC", symbolDescription = "Bitcoin", tokenMintAddress = ""),
+                    symbolInfo = SymbolInfo(symbol = "BTC", symbolDescription = "Bitcoin", tokenMintAddress = null),
                     amount = "1.000000",
                     usdEquivalent = "20000.00",
                     fee = Fee(
-                        symbolInfo = SymbolInfo(symbol = "BTC", symbolDescription = "Bitcoin", tokenMintAddress = ""),
+                        symbolInfo = SymbolInfo(symbol = "BTC", symbolDescription = "Bitcoin", tokenMintAddress = null),
                         amount = "0.001",
                         usdEquivalent = "20.00"
                     ),
                     replacementFee = Fee(
-                        symbolInfo = SymbolInfo(symbol = "BTC", symbolDescription = "Bitcoin", tokenMintAddress = ""),
+                        symbolInfo = SymbolInfo(symbol = "BTC", symbolDescription = "Bitcoin", tokenMintAddress = null),
                         amount = "0.002",
                         usdEquivalent = "40.00"
                     )

@@ -8,6 +8,7 @@ import com.google.gson.annotations.SerializedName
 import com.censocustody.android.data.models.Chain
 import java.io.ByteArrayOutputStream
 import java.lang.reflect.Modifier
+import java.math.BigInteger
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
 import java.text.NumberFormat
@@ -598,6 +599,11 @@ data class BitcoinTransaction(
 
 
 sealed class SigningData {
+    data class EthereumTransaction(
+        val chainId: Long,
+        val safeNonce: Long,
+    )
+
     data class SolanaSigningData(
         val feePayer: String,
         val walletProgramId: String,
@@ -643,6 +649,10 @@ sealed class SigningData {
         val childKeyIndex: Int,
         val transaction: BitcoinTransaction
     ) : SigningData()
+
+    data class EthereumSigningData(
+        val transaction: EthereumTransaction
+    ) : SigningData()
 }
 
 enum class AccountType(val value: String) {
@@ -671,7 +681,9 @@ data class SymbolAndAmountInfo(
         }
     }
 
-    fun formattedAmount(): String = formattedAmount(amount)
+    fun fundamentalAmountAsBigInteger(): BigInteger {
+        return BigInteger(amount.replace(".", ""), 10)
+    }
 
     fun formattedAmountWithSymbol(): String =
         "${formattedAmount(amount)} ${symbolInfo.symbol}"
@@ -743,11 +755,23 @@ data class NftMetadata(
     val name: String
 )
 
+enum class EthTokenType {
+    ERC20,
+    ERC721,
+    ERC1155
+}
+
+data class EthTokenInfo(
+    val tokenId: String?,
+    val tokenType: EthTokenType
+)
+
 data class SymbolInfo(
     val symbol: String,
     val symbolDescription: String,
-    val tokenMintAddress: String,
+    val tokenMintAddress: String?,
     val imageUrl: String? = null,
+    val ethTokenInfo: EthTokenInfo? = null,
     val nftMetadata: NftMetadata? = null
 ) {
     fun getSOLProgramValue() : Byte = if (symbol == "SOL") 0 else 1

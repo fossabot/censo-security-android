@@ -434,6 +434,95 @@ class ApprovalRequestSigningTest {
     }
 
     @Test
+    fun generateSignatureForEthereumWithdrawalRequest() {
+        val withdrawalRequestWalletApproval =
+            deserializer.parseData(JsonParser.parseString(ethereumWithdrawalRequestJson.trim()))
+
+        val disposition = if (Random().nextBoolean()) ApprovalDisposition.APPROVE else ApprovalDisposition.DENY
+        val approvalDispositionRequest = ApprovalDispositionRequest(
+            requestId = withdrawalRequestWalletApproval.id!!,
+            approvalDisposition = disposition,
+            requestType = withdrawalRequestWalletApproval.getApprovalRequestType(),
+            nonces = listOf(),
+            email = userEmail
+        )
+
+        val signature = encryptionManager.signEthereumApprovalDispositionMessage(
+            signable = approvalDispositionRequest, rootSeed = BaseWrapper.encode(rootSeed), email = userEmail
+        )
+
+        val expectedSignature = SignedPayload(signature = "MEUCIQCbPW0U/8yFnpZDD+Eih3coS+2gRub7Hm5EuHg0FE0rmgIgG+2F3ejwK0dXcW7BbMuJjIR1oifno+KAL7laVTQZhVA=", payload = "E1tL58tbDMCAwys2EEenIMjtqWHB7tFS2PfY9wsri5A=")
+        assertEquals(expectedSignature, signature)
+
+        whenever(mockEncryptionManager.signEthereumApprovalDispositionMessage(
+            signable = approvalDispositionRequest, cipher = cipherMock, email = userEmail)).thenReturn(expectedSignature)
+        val apiBody = approvalDispositionRequest.convertToApiBody(mockEncryptionManager, cipherMock)
+        assertEquals(disposition, apiBody.approvalDisposition)
+        assertEquals(ApprovalSignature.EthereumSignature(expectedSignature.signature), apiBody.signatureInfo)
+
+        verify(mockEncryptionManager, times(1)).signEthereumApprovalDispositionMessage(
+            signable = approvalDispositionRequest,
+            cipher = cipherMock,
+            email = userEmail,
+        )
+    }
+
+    @Test
+    fun generateSignatureForERC20WithdrawalRequest() {
+        testGenerateSignatureForERCTokenWithdrawalRequest(
+            erc20WithdrawalRequestJson,
+            SignedPayload(signature = "MEUCIQCoC4YdUk5CVfogDgKztB75NFY0JplYKtZMZfH7Q5Y9kAIga5pf/NJwqRmBOJdHjTTjv6Gcw03P45WO4HltjYUXJnQ=", payload = "+UjgvUBrkEqxUeHPp1kXUZdO1m5rryK0x+9ZNCf5G0g=")
+        )
+    }
+
+    @Test
+    fun generateSignatureForERC721WithdrawalRequest() {
+        testGenerateSignatureForERCTokenWithdrawalRequest(
+            erc721WithdrawalRequestJson,
+            SignedPayload(signature = "MEQCIC7ENseMB9/Q32g0a9f3WyE05szSk4//n+62Z8Q/QmMMAiBtjm8lEo8Gn7madwLUZIMBFsSSa4vvT3NAgcVsi+gkMw==", payload = "JSXFQ5iHWOJpxUP76kb13iznmLGbalu9lRCjik4pqwk=")
+        )
+    }
+
+    @Test
+    fun generateSignatureForERC1155WithdrawalRequest() {
+        testGenerateSignatureForERCTokenWithdrawalRequest(
+            erc1155WithdrawalRequestJson,
+            SignedPayload(signature = "MEQCIH1KQPb4NRvyB9jeuLcJQQex8uTAkVLbh7PaJL4sBKsjAiBd0bEAp/HV/Hr0MO7Z/6J7OkEqROcpek2/mOdr6EVA0g==", payload = "wmNRZJdEqZwm/cpfkrViTENo3GiDjUwIQd4HYKrZTH8=")
+        )
+    }
+
+    private fun testGenerateSignatureForERCTokenWithdrawalRequest(request: String, expectedSignature: SignedPayload) {
+        val withdrawalRequestWalletApproval =
+            deserializer.parseData(JsonParser.parseString(request.trim()))
+
+        val disposition = if (Random().nextBoolean()) ApprovalDisposition.APPROVE else ApprovalDisposition.DENY
+        val approvalDispositionRequest = ApprovalDispositionRequest(
+            requestId = withdrawalRequestWalletApproval.id!!,
+            approvalDisposition = disposition,
+            requestType = withdrawalRequestWalletApproval.getApprovalRequestType(),
+            nonces = listOf(),
+            email = userEmail
+        )
+
+        val signature = encryptionManager.signEthereumApprovalDispositionMessage(
+            signable = approvalDispositionRequest, rootSeed = BaseWrapper.encode(rootSeed), email = userEmail
+        )
+        assertEquals(expectedSignature, signature)
+
+        whenever(mockEncryptionManager.signEthereumApprovalDispositionMessage(
+            signable = approvalDispositionRequest, cipher = cipherMock, email = userEmail)).thenReturn(expectedSignature)
+        val apiBody = approvalDispositionRequest.convertToApiBody(mockEncryptionManager, cipherMock)
+        assertEquals(disposition, apiBody.approvalDisposition)
+        assertEquals(ApprovalSignature.EthereumSignature(expectedSignature.signature), apiBody.signatureInfo)
+
+        verify(mockEncryptionManager, times(1)).signEthereumApprovalDispositionMessage(
+            signable = approvalDispositionRequest,
+            cipher = cipherMock,
+            email = userEmail,
+        )
+    }
+
+    @Test
     fun generateSignatureForConversionRequest() {
         val conversionRequestWalletApproval =
             deserializer.parseData(JsonParser.parseString(conversionRequestJson.trim()))
