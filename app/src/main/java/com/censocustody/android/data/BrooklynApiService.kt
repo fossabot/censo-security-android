@@ -4,6 +4,7 @@ import com.google.gson.*
 import com.censocustody.android.BuildConfig
 import com.censocustody.android.data.BaseRepository.Companion.UNAUTHORIZED
 import com.censocustody.android.data.BrooklynApiService.Companion.AUTH
+import com.censocustody.android.data.BrooklynApiService.Companion.X_STRIKE_ID
 import com.censocustody.android.data.models.*
 import com.censocustody.android.data.models.approval.*
 import kotlinx.coroutines.runBlocking
@@ -21,6 +22,7 @@ interface BrooklynApiService {
 
         const val AUTH = "Authorization"
         const val AUTH_REQUIRED = "$AUTH: "
+        const val X_STRIKE_ID = "X-Strike-Device-Identifier"
 
         fun create(authProvider: AuthProvider): BrooklynApiService {
 
@@ -53,6 +55,14 @@ interface BrooklynApiService {
     @GET("v1/users")
     @Headers(AUTH_REQUIRED)
     suspend fun verifyUser(): RetrofitResponse<VerifyUser>
+
+    @GET("v1/user-devices")
+    @Headers(AUTH_REQUIRED)
+    suspend fun userDevices(): RetrofitResponse<List<UserDevice?>>
+
+    @POST("v1/user-devices")
+    @Headers(AUTH_REQUIRED)
+    suspend fun addUserDevice(@Body userDevice: UserDevice): RetrofitResponse<UserDevice>
 
     @GET("v1/wallet-signers")
     @Headers(AUTH_REQUIRED)
@@ -110,17 +120,26 @@ class AuthInterceptor(private val authProvider: AuthProvider) : Interceptor {
                     throw TokenExpiredException()
                 }
 
-                request =
-                    chain.request().newBuilder()
-                        .removeHeader(AUTH)
-                        .addHeader(AUTH, "Bearer $token")
-                        .build()
+                request = request.newBuilder()
+                    .removeHeader(AUTH)
+                    .addHeader(AUTH, "Bearer $token")
+                    .build()
 
             } catch (e: TokenExpiredException) {
                 runBlocking { authProvider.signOut() }
                 authProvider.setUserState(userState = UserState.REFRESH_TOKEN_EXPIRED)
             }
         }
+
+        val deviceId = runBlocking { authProvider.retrieveDeviceId() }
+
+        if (deviceId.isNotEmpty()) {
+            request = request.newBuilder()
+                .removeHeader(X_STRIKE_ID)
+                .addHeader(X_STRIKE_ID, deviceId)
+                .build()
+        }
+
         val response = chain.proceed(request)
 
         if (authRequired && response.code == UNAUTHORIZED) {
