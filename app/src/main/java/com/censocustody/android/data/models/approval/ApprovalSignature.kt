@@ -13,6 +13,10 @@ sealed class ApprovalSignature {
         val signatures: List<String>
     ) : ApprovalSignature()
 
+    data class EthereumSignature(
+        val signature: String
+    ) : ApprovalSignature()
+
     data class NoChainSignature(
         val signature: String,
         val signedData: String
