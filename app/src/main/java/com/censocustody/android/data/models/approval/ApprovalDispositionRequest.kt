@@ -15,7 +15,12 @@ import kotlin.Exception
 import com.censocustody.android.data.models.approval.ApprovalRequestDetails.Companion.INVALID_REQUEST_APPROVAL
 import com.censocustody.android.data.models.approval.ApprovalRequestDetails.Companion.UNKNOWN_REQUEST_APPROVAL
 import com.censocustody.android.data.models.approval.ApprovalRequestDetails.*
+import com.censocustody.android.common.EthereumTransactionUtil
+import com.censocustody.android.common.Operation
+import java.nio.ByteBuffer
 import javax.crypto.Cipher
+import org.bouncycastle.util.encoders.Hex
+import java.math.BigInteger
 
 data class ApprovalDispositionRequest(
     val requestId: String,
@@ -86,7 +91,7 @@ data class ApprovalDispositionRequest(
                 buffer.write(requestType.account.identifier.sha256HashBytes())
                 buffer.write(requestType.destination.address.base58Bytes())
                 buffer.writeLongLE(requestType.symbolAndAmountInfo.fundamentalAmount())
-                buffer.write(requestType.symbolAndAmountInfo.symbolInfo.tokenMintAddress.base58Bytes())
+                buffer.write(requestType.symbolAndAmountInfo.symbolInfo.tokenMintAddress!!.base58Bytes())
 
                 buffer.toByteArray()
             }
@@ -101,7 +106,7 @@ data class ApprovalDispositionRequest(
                 buffer.write(requestType.account.identifier.sha256HashBytes())
                 buffer.write(requestType.destination.address.base58Bytes())
                 buffer.writeLongLE(requestType.symbolAndAmountInfo.fundamentalAmount())
-                buffer.write(requestType.symbolAndAmountInfo.symbolInfo.tokenMintAddress.base58Bytes())
+                buffer.write(requestType.symbolAndAmountInfo.symbolInfo.tokenMintAddress!!.base58Bytes())
 
                 buffer.toByteArray()
             }
@@ -282,10 +287,95 @@ data class ApprovalDispositionRequest(
                 when (requestType.signingData) {
                     is SigningData.SolanaSigningData -> listOf(serializeSolanaRequest(approverPublicKey))
                     is SigningData.BitcoinSigningData -> requestType.signingData.transaction.txIns.map { decodeFromBase64(it.base64HashForSignature) }
+                    is SigningData.EthereumSigningData -> listOf(ethereumWithdrawal(requestType, requestType.signingData.transaction))
                 }
             }
             else -> listOf(serializeSolanaRequest(approverPublicKey))
         }
+    }
+
+    private fun ByteBuffer.putPadded(data: ByteArray, padTo: Int = 32) {
+        require(data.size <= padTo)
+        this.put(ByteArray(padTo - data.size))
+        this.put(data)
+    }
+
+    private fun erc20WithdrawalTx(withdrawalRequest: WithdrawalRequest): ByteArray {
+        val data = ByteBuffer.allocate(4 + 32*2)
+        data.put(Hex.decode("a9059cbb"))
+        data.putPadded(Hex.decode(withdrawalRequest.destination.address.removePrefix("0x")))
+        data.putPadded(withdrawalRequest.symbolAndAmountInfo.fundamentalAmountAsBigInteger().toByteArray())
+        return data.array()
+    }
+
+    private fun erc721WithdrawalTx(withdrawalRequest: WithdrawalRequest): ByteArray {
+        // safeTransferFrom(address,address,uint256)
+        val data = ByteBuffer.allocate(4 + 32*3)
+        data.put(Hex.decode("42842e0e"))
+        withdrawalRequest.account.address?.let {
+            data.putPadded(Hex.decode(withdrawalRequest.account.address.removePrefix("0x")))
+        }
+        data.putPadded(Hex.decode(withdrawalRequest.destination.address.removePrefix("0x")))
+        withdrawalRequest.symbolAndAmountInfo.symbolInfo.ethTokenInfo?.tokenId?.let { tokenId ->
+            data.putPadded(BigInteger(tokenId).toByteArray())
+        }
+        return data.array()
+    }
+
+    private fun erc1155WithdrawalTx(withdrawalRequest: WithdrawalRequest): ByteArray {
+        // safeTransferFrom(address,address,uint256,uint256,bytes)
+        val data = ByteBuffer.allocate(4 + 32*6)
+        data.put(Hex.decode("f242432a"))
+        withdrawalRequest.account.address?.let {
+            data.putPadded(Hex.decode(withdrawalRequest.account.address.removePrefix("0x")))
+        }
+        data.putPadded(Hex.decode(withdrawalRequest.destination.address.removePrefix("0x")))
+        withdrawalRequest.symbolAndAmountInfo.symbolInfo.ethTokenInfo?.tokenId?.let { tokenId ->
+            data.putPadded(BigInteger(tokenId).toByteArray())
+        }
+        data.putPadded(withdrawalRequest.symbolAndAmountInfo.fundamentalAmountAsBigInteger().toByteArray())
+        // this the 5th bytes param which is dynamic data - the 160 is the offset where dynamic data starts
+        // followed by 32 bytes of 0 for the length of the dynamic data
+        data.putPadded(BigInteger("160").toByteArray())
+        data.putPadded(ByteArray(0))
+        return data.array()
+    }
+
+    private fun ethereumWithdrawal(withdrawalRequest: WithdrawalRequest, ethereumTransaction: SigningData.EthereumTransaction): ByteArray {
+        return withdrawalRequest.symbolAndAmountInfo.symbolInfo.tokenMintAddress?.let { contractAddress ->
+            EthereumTransactionUtil.computeSafeTransactionHash(
+                ethereumTransaction.chainId,
+                withdrawalRequest.account.address!!,
+                contractAddress,
+                BigInteger.ZERO,
+                when (withdrawalRequest.symbolAndAmountInfo.symbolInfo.ethTokenInfo?.tokenType) {
+                    EthTokenType.ERC721 -> erc721WithdrawalTx(withdrawalRequest)
+                    EthTokenType.ERC1155 -> erc1155WithdrawalTx(withdrawalRequest)
+                    else -> erc20WithdrawalTx(withdrawalRequest)
+                },
+                Operation.CALL,
+                BigInteger.ZERO,
+                BigInteger.ZERO,
+                BigInteger.ZERO,
+                "0x0000000000000000000000000000000000000000",
+                "0x0000000000000000000000000000000000000000",
+                ethereumTransaction.safeNonce.toBigInteger(),
+            )
+        } ?:
+        EthereumTransactionUtil.computeSafeTransactionHash(
+            ethereumTransaction.chainId,
+            withdrawalRequest.account.address!!,
+            withdrawalRequest.destination.address,
+            withdrawalRequest.symbolAndAmountInfo.fundamentalAmountAsBigInteger(),
+            ByteArray(0),
+            Operation.CALL,
+            BigInteger.ZERO,
+            BigInteger.ZERO,
+            BigInteger.ZERO,
+            "0x0000000000000000000000000000000000000000",
+            "0x0000000000000000000000000000000000000000",
+            ethereumTransaction.safeNonce.toBigInteger(),
+        )
     }
 
     fun serializeSolanaRequest(approverPublicKey: String?): ByteArray {
@@ -362,6 +452,10 @@ data class ApprovalDispositionRequest(
                             signature = signRequestWithSolanaKey(encryptionManager, cipher).signature,
                             nonce = nonces.first().value,
                             nonceAccountAddress = requestType.nonceAccountAddresses().first()
+                        )
+                    is SigningData.EthereumSigningData ->
+                        ApprovalSignature.EthereumSignature(
+                            signature = signRequestWithEthereumKey(encryptionManager, cipher).signature,
                         )
                 }
             }

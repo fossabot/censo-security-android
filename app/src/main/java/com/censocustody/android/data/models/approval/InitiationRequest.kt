@@ -273,7 +273,7 @@ data class InitiationRequest(
                 getTransferAndConversionAccounts(
                     sourceAddress = requestType.account.address!!,
                     destinationAddress = requestType.destination.address,
-                    tokenMintAddress = requestType.symbolAndAmountInfo.symbolInfo.tokenMintAddress,
+                    tokenMintAddress = requestType.symbolAndAmountInfo.symbolInfo.tokenMintAddress!!,
                     approverPublicKey = approverPublicKey
                 )
             }
@@ -281,7 +281,7 @@ data class InitiationRequest(
                 getTransferAndConversionAccounts(
                     sourceAddress = requestType.account.address!!,
                     destinationAddress = requestType.destination.address,
-                    tokenMintAddress = requestType.symbolAndAmountInfo.symbolInfo.tokenMintAddress,
+                    tokenMintAddress = requestType.symbolAndAmountInfo.symbolInfo.tokenMintAddress!!,
                     approverPublicKey = approverPublicKey
                 )
             }
