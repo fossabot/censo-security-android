@@ -1,31 +1,60 @@
-package com.censocustody.android.presentation.migration
+package com.censocustody.android.presentation.key_creation
 
+import androidx.biometric.BiometricPrompt
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
+import com.censocustody.android.common.Resource
+import com.censocustody.android.common.popUpToTop
+import com.censocustody.android.presentation.Screen
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
+import androidx.fragment.app.FragmentActivity
 import com.censocustody.android.presentation.key_management.GradientBackgroundUI
 import com.censocustody.android.presentation.key_management.SmallAuthFlowButton
 import com.censocustody.android.ui.theme.CensoWhite
 import com.censocustody.android.ui.theme.UnfocusedGrey
 import com.censocustody.android.R
+import com.censocustody.android.common.BioCryptoUtil
+import com.censocustody.android.presentation.key_management.PreBiometryDialog
 
 @Composable
-fun MigrationUI(
-    errorEnabled: Boolean,
-    errorMessage: String? = null,
-    retry: () -> Unit,
+fun KeyCreationScreen(
+    navController: NavController,
+    viewModel: KeyCreationViewModel = hiltViewModel(),
 ) {
+    val state = viewModel.state
+    val context = LocalContext.current as FragmentActivity
+
+    DisposableEffect(key1 = viewModel) {
+        viewModel.onStart()
+        onDispose {
+            viewModel.cleanUp()
+        }
+    }
+
+    LaunchedEffect(key1 = state) {
+        if (state.uploadingKeyProcess is Resource.Success) {
+            navController.navigate(Screen.ApprovalListRoute.route) {
+                launchSingleTop = true
+                popUpToTop()
+            }
+            viewModel.resetAddWalletSignerCall()
+        }
+    }
 
     GradientBackgroundUI()
     Box(
@@ -33,15 +62,14 @@ fun MigrationUI(
             .fillMaxSize()
             .padding(horizontal = 40.dp)
     ) {
-
-        if (errorEnabled) {
+        if (state.uploadingKeyProcess is Resource.Error) {
             Column(
                 modifier = Modifier.align(Alignment.Center),
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
-                    text = errorMessage ?: stringResource(R.string.something_went_wrong),
+                    text = stringResource(R.string.something_went_wrong),
                     color = CensoWhite,
                     fontSize = 18.sp,
                     textAlign = TextAlign.Center,
@@ -53,7 +81,7 @@ fun MigrationUI(
                     modifier = Modifier.wrapContentWidth(),
                     text = stringResource(R.string.retry),
                 ) {
-                    retry()
+                    viewModel.retryKeyCreation()
                 }
             }
         } else {
@@ -75,7 +103,7 @@ fun MigrationUI(
                     Spacer(modifier = Modifier.height(36.dp))
                     Text(
                         modifier = Modifier.padding(horizontal = 8.dp),
-                        text = stringResource(R.string.migration_loading_text),
+                        text = stringResource(R.string.saving_key_to_device),
                         textAlign = TextAlign.Center,
                         color = CensoWhite,
                         fontSize = 16.sp
@@ -90,5 +118,45 @@ fun MigrationUI(
                 }
             }
         }
+    }
+
+    if (state.triggerBioPrompt is Resource.Success) {
+        val kickOffBioPrompt = {
+            state.triggerBioPrompt.data?.let {
+                val promptInfo = BioCryptoUtil.createPromptInfo(context = context)
+                val bioPrompt = BioCryptoUtil.createBioPrompt(
+                    fragmentActivity = context,
+                    onSuccess = {
+                        val cipher = it?.cipher
+                        if (cipher != null) {
+                            viewModel.biometryApproved(cipher)
+                        } else {
+                            BioCryptoUtil.handleBioPromptOnFail(
+                                context = context,
+                                errorCode = BioCryptoUtil.NO_CIPHER_CODE
+                            ) {
+                                viewModel.biometryFailed()
+                            }
+                        }
+                    },
+                    onFail = {
+                        BioCryptoUtil.handleBioPromptOnFail(context = context, errorCode = it) {
+                            viewModel.biometryFailed()
+                        }
+                    }
+                )
+
+                bioPrompt.authenticate(
+                    promptInfo,
+                    BiometricPrompt.CryptoObject(state.triggerBioPrompt.data)
+                )
+            }
+            viewModel.resetPromptTrigger()
+        }
+
+        PreBiometryDialog(
+            mainText = stringResource(id = R.string.save_biometry_info_key_creation),
+            onAccept = kickOffBioPrompt
+        )
     }
 }
