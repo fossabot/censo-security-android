@@ -12,6 +12,7 @@ data class ApprovalsState(
     val shouldShowErrorSnackbar: Boolean = false,
     val approvalsResultRequest: Resource<List<ApprovalRequest?>> = Resource.Uninitialized,
     val approvals: List<ApprovalRequest?> = emptyList(),
+    val showPushNotificationsDialog: Resource<Unit> = Resource.Uninitialized,
 
     //detail specific state
     val screenWasBackgrounded: Boolean = false,

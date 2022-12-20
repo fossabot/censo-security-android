@@ -66,6 +66,14 @@ class ApprovalsViewModel @Inject constructor(
         )
     }
 
+    fun triggerPushNotificationDialog() {
+        state = state.copy(showPushNotificationsDialog = Resource.Success(Unit))
+    }
+
+    fun resetPushNotificationDialog() {
+        state = state.copy(showPushNotificationsDialog = Resource.Uninitialized)
+    }
+
     fun resetWalletApprovalsResult() {
         state = state.copy(approvalsResultRequest = Resource.Uninitialized)
     }

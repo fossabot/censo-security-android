@@ -1,13 +1,19 @@
 package com.censocustody.android.presentation.approvals
 
+import android.Manifest
 import android.content.ActivityNotFoundException
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
+import android.os.Build
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.biometric.BiometricPrompt
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.AccountCircle
@@ -15,12 +21,17 @@ import androidx.compose.material.icons.rounded.ArrowDownward
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.zIndex
+import androidx.core.app.ActivityCompat.shouldShowRequestPermissionRationale
+import androidx.core.content.ContextCompat
 import androidx.core.content.ContextCompat.startActivity
 import androidx.fragment.app.FragmentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -29,9 +40,11 @@ import androidx.navigation.NavController
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.SwipeRefreshIndicator
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
+import com.raygun.raygun4android.RaygunClient
 import com.censocustody.android.R
 import com.censocustody.android.common.*
 import com.censocustody.android.common.BioCryptoUtil.NO_CIPHER_CODE
+import com.censocustody.android.data.SharedPrefsHelper
 import com.censocustody.android.data.models.ApprovalDisposition
 import com.censocustody.android.data.models.approval.ApprovalDispositionRequest
 import com.censocustody.android.data.models.approval.InitiationRequest
@@ -64,6 +77,49 @@ fun ApprovalsListScreen(
     val promptInfo = BioCryptoUtil.createPromptInfo(context = context)
 
     val scaffoldState = rememberScaffoldState()
+
+    val notificationPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission(),
+        onResult = { }
+    )
+
+    fun checkPermissionDialog() {
+        try {
+            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.S_V2) {
+                val notificationGranted =
+                    ContextCompat.checkSelfPermission(
+                        context,
+                        Manifest.permission.POST_NOTIFICATIONS
+                    )
+
+                val shownPermissionJustOnceBefore = shouldShowRequestPermissionRationale(
+                    context,
+                    Manifest.permission.POST_NOTIFICATIONS
+                )
+
+                val seenDialogBefore = SharedPrefsHelper.userHasSeenPermissionDialog()
+
+                if (notificationGranted != PackageManager.PERMISSION_GRANTED) {
+                    if (shownPermissionJustOnceBefore && !seenDialogBefore) {
+                        //show dialog to user because they have rejected permissions once before
+                        SharedPrefsHelper.setUserSeenPermissionDialog(true)
+                        approvalsViewModel.triggerPushNotificationDialog()
+                    } else if (!seenDialogBefore) {
+                        //show permission to user for first time with no dialog
+                        notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            RaygunClient.send(
+                e,
+                listOf(
+                    CrashReportingUtil.MANUALLY_REPORTED_TAG,
+                    CrashReportingUtil.PUSH_NOTIFICATION_PERMISSION_TAG
+                )
+            )
+        }
+    }
 
     fun launchNonceWork() {
         val nonceAddresses = approvalsState.selectedApproval?.retrieveAccountAddresses()
@@ -156,6 +212,7 @@ fun ApprovalsListScreen(
             Lifecycle.Event.ON_START
             -> {
                 approvalsViewModel.handleScreenForegrounded()
+                checkPermissionDialog()
             }
             else -> Unit
         }
@@ -236,6 +293,22 @@ fun ApprovalsListScreen(
                         }
                     )
                 }
+            }
+
+            if (approvalsState.showPushNotificationsDialog is Resource.Success) {
+                PushNotificationDialog(
+                    text = stringResource(id = R.string.push_notification_never_dialog),
+                    onAccept = {
+                        approvalsViewModel.resetPushNotificationDialog()
+                        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.S_V2) {
+                            notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                        }
+                    },
+                    onDismiss = {
+                        SharedPrefsHelper.setUserSeenPermissionDialog(false)
+                        approvalsViewModel.resetPushNotificationDialog()
+                    }
+                )
             }
 
             if (approvalsState.approvalsResultRequest is Resource.Error) {
@@ -451,3 +524,62 @@ fun checkForHardRefreshAfterBackNavigation(
     }
 }
 //endregion
+
+@Composable
+fun PushNotificationDialog(
+    text: String,
+    onAccept: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    Column(
+        Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp)
+                .clip(RoundedCornerShape(8.dp))
+                .border(width = 1.dp, color = UnfocusedGrey.copy(alpha = 0.50f))
+                .background(color = DialogMainBackground)
+                .zIndex(2.5f),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Spacer(modifier = Modifier.height(24.dp))
+            Text(
+                modifier = Modifier.padding(horizontal = 32.dp),
+                text = text,
+                textAlign = TextAlign.Center,
+                color = CensoWhite,
+                fontSize = 20.sp
+            )
+            Spacer(modifier = Modifier.height(36.dp))
+            Row {
+                TextButton(onClick = onDismiss) {
+                    Text(
+                        text = stringResource(id = R.string.skip),
+                        fontSize = 18.sp,
+                        color = CensoWhite,
+                        textAlign = TextAlign.Center
+                    )
+                }
+                Spacer(modifier = Modifier.width(12.dp))
+                Button(
+                    modifier = Modifier.clip(RoundedCornerShape(8.dp)),
+                    onClick = onAccept,
+                ) {
+                    Text(
+                        text = stringResource(id = R.string.continue_text),
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                        fontSize = 18.sp,
+                        color = CensoWhite,
+                        textAlign = TextAlign.Center
+                    )
+                }
+            }
+            Spacer(modifier = Modifier.height(24.dp))
+        }
+    }
+}
