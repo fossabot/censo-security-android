@@ -244,4 +244,6 @@
     <string name="reset_email_error">Unable to send reset email. Please try again or reset your password from our website.</string>
     <string name="invalid_phrase">Invalid phrase entered. Please re-enter phrase.</string>
     <string name="play_store_not_found">Play Store not found on this device.</string>
+    <string name="push_notification_never_dialog">Strike Protocols sends you a push notification for every approval.\n\nApprovals are time-sensitive and push notifications help you to respond promptly.</string>
+    <string name="skip">Skip</string>
 </resources>

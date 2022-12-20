@@ -8,6 +8,8 @@ object SharedPrefsHelper {
 
     private const val MAIN_PREFS = "main_prefs"
 
+    private const val USER_SEEN_PERMISSION_DIALOG = "user_seen_permission_dialog"
+
     private const val USER_LOGGED_IN = "skipped_login"
     private const val USER_EMAIL = "user_email"
     private const val USER_TOKEN = "user_token"
@@ -196,6 +198,18 @@ object SharedPrefsHelper {
 
     fun retrieveToken(encryptedPrefs: SharedPreferences): String {
         return encryptedPrefs.getString(USER_TOKEN, "") ?: ""
+    }
+    //endregion
+
+    //region push dialog
+    fun userHasSeenPermissionDialog(): Boolean {
+        return sharedPrefs.getBoolean(USER_SEEN_PERMISSION_DIALOG, false)
+    }
+
+    fun setUserSeenPermissionDialog(seenDialog: Boolean) {
+        val editor = sharedPrefs.edit()
+        editor.putBoolean(USER_SEEN_PERMISSION_DIALOG, seenDialog)
+        editor.apply()
     }
     //endregion
 }
