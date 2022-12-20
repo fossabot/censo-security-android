@@ -13,10 +13,12 @@ import org.bouncycastle.crypto.params.Ed25519PrivateKeyParameters
 import com.censocustody.android.data.EncryptionManagerImpl.Companion.SENTINEL_STATIC_DATA
 import com.censocustody.android.data.models.StoredKeyData
 import com.censocustody.android.data.models.StoredKeyData.Companion.BITCOIN_KEY
+import com.censocustody.android.data.models.StoredKeyData.Companion.CENSO_KEY
 import com.censocustody.android.data.models.StoredKeyData.Companion.ETHEREUM_KEY
 import com.censocustody.android.data.models.StoredKeyData.Companion.SOLANA_KEY
 import com.censocustody.android.data.models.SupplyDappInstruction
 import com.censocustody.android.data.models.approval.InitiationRequest
+import org.web3j.crypto.Hash
 import java.nio.charset.Charset
 import java.security.SecureRandom
 import javax.crypto.Cipher
@@ -60,6 +62,13 @@ interface EncryptionManager {
     ): List<SignedPayload>
 
     fun signEthereumApprovalDispositionMessage(
+        signable: Signable,
+        email: String,
+        rootSeed: String? = null,
+        cipher: Cipher? = null,
+    ): SignedPayload
+
+    fun signCensoApprovalDispositionMessage(
         signable: Signable,
         email: String,
         rootSeed: String? = null,
@@ -147,13 +156,13 @@ class EncryptionManagerImpl @Inject constructor(
         )
     }
 
-    private fun generateSignedPayload(censoPrivateKey: CensoPrivateKey, signable: Signable): SignedPayload {
+    private fun generateSignedPayload(censoPrivateKey: CensoPrivateKey, signable: Signable, hashForSigning: Boolean = false): SignedPayload {
         val messageToSign =
             signable.retrieveSignableData(
                 approverPublicKey = BaseWrapper.encode(censoPrivateKey.getPublicKeyBytes())
             ).first()
 
-        val signedData = censoPrivateKey.signData(messageToSign)
+        val signedData = censoPrivateKey.signData(if (hashForSigning) Hash.sha256(messageToSign) else messageToSign)
 
         return SignedPayload(
             signature = BaseWrapper.encodeToBase64(signedData),
@@ -249,6 +258,34 @@ class EncryptionManagerImpl @Inject constructor(
         return generateSignedPayload(
             censoPrivateKey = ethKey,
             signable = signable
+        )
+    }
+
+    override fun signCensoApprovalDispositionMessage(
+        signable: Signable,
+        email: String,
+        rootSeed: String?,
+        cipher: Cipher?,
+    ): SignedPayload {
+        if (cipher == null && rootSeed == null) {
+            throw Exception("Need to pass either cipher or root seed to sign data")
+        }
+
+        val safeRootSeed = rootSeed ?: retrieveRootSeed(email = email, cipher = cipher!!)
+
+        if (safeRootSeed.isEmpty()) {
+            throw NoKeyDataException
+        }
+
+        val censoKey = Secp256k1HierarchicalKey.fromRootSeed(
+            rootSeed = BaseWrapper.decode(safeRootSeed),
+            pathList = Secp256k1HierarchicalKey.censoDerivationPath
+        )
+
+        return generateSignedPayload(
+            censoPrivateKey = censoKey,
+            signable = signable,
+            hashForSigning = true
         )
     }
 
@@ -370,11 +407,13 @@ class EncryptionManagerImpl @Inject constructor(
         val solanaPublicKey = BaseWrapper.encode(keys.solanaKey.getPublicKeyBytes())
         val bitcoinPublicKey = keys.bitcoinKey.getBase58ExtendedPublicKey()
         val ethereumPublicKey = keys.ethereumKey.getBase58UncompressedPublicKey()
+        val censoPublicKey = keys.censoKey.getBase58UncompressedPublicKey()
 
         val keyDataAsJson = createV3PublicKeyJson(
             solanaPublicKey = solanaPublicKey,
             bitcoinPublicKey = bitcoinPublicKey,
-            ethereumPublicKey = ethereumPublicKey
+            ethereumPublicKey = ethereumPublicKey,
+            censoPublicKey = censoPublicKey
         )
 
         securePreferences.saveV3PublicKeys(
@@ -385,7 +424,8 @@ class EncryptionManagerImpl @Inject constructor(
         return hashMapOf(
             SOLANA_KEY to solanaPublicKey,
             BITCOIN_KEY to bitcoinPublicKey,
-            ETHEREUM_KEY to ethereumPublicKey
+            ETHEREUM_KEY to ethereumPublicKey,
+            CENSO_KEY to censoPublicKey
         )
     }
 
@@ -398,13 +438,15 @@ class EncryptionManagerImpl @Inject constructor(
     private fun createV3PublicKeyJson(
         solanaPublicKey: String,
         bitcoinPublicKey: String,
-        ethereumPublicKey: String
+        ethereumPublicKey: String,
+        censoPublicKey: String
     ): String {
         val mapOfKeys: HashMap<String, String> =
             hashMapOf(
                 SOLANA_KEY to solanaPublicKey,
                 BITCOIN_KEY to bitcoinPublicKey,
-                ETHEREUM_KEY to ethereumPublicKey
+                ETHEREUM_KEY to ethereumPublicKey,
+                CENSO_KEY to censoPublicKey
             )
 
         return StoredKeyData.mapToJson(
@@ -423,10 +465,15 @@ class EncryptionManagerImpl @Inject constructor(
             rootSeed, Secp256k1HierarchicalKey.ethereumDerivationPath
         )
 
+        val censoHierarchicalKey = Secp256k1HierarchicalKey.fromRootSeed(
+            rootSeed, Secp256k1HierarchicalKey.censoDerivationPath
+        )
+
         listOf(
             solanaHierarchicalKey,
             bitcoinHierarchicalKey,
-            ethereumHierarchicalKey
+            ethereumHierarchicalKey,
+            censoHierarchicalKey
         ).forEach {
             it.signData(DATA_CHECK)
         }
@@ -434,7 +481,8 @@ class EncryptionManagerImpl @Inject constructor(
         return AllKeys(
             solanaKey = solanaHierarchicalKey,
             bitcoinKey = bitcoinHierarchicalKey,
-            ethereumKey = ethereumHierarchicalKey
+            ethereumKey = ethereumHierarchicalKey,
+            censoKey = censoHierarchicalKey
         )
     }
 
@@ -527,7 +575,8 @@ class EncryptionManagerImpl @Inject constructor(
 data class AllKeys(
     val solanaKey: Ed25519HierarchicalPrivateKey,
     val bitcoinKey: Secp256k1HierarchicalKey,
-    val ethereumKey: Secp256k1HierarchicalKey
+    val ethereumKey: Secp256k1HierarchicalKey,
+    val censoKey: Secp256k1HierarchicalKey
 )
 
 interface Signable {

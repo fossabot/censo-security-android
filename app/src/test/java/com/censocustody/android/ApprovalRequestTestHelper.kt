@@ -207,6 +207,7 @@ fun getSolWithdrawalRequest(nonceAccountAddresses: List<String>) : WithdrawalReq
                 tokenMintAddress = "11111111111111111111111111111111"
             ),
             amount = "0.500000000",
+            nativeAmount = "0.500000000",
             usdEquivalent = "17.75"
         ),
         destination = DestinationAddress(
@@ -246,6 +247,7 @@ fun getSplWithdrawalRequest(nonceAccountAddresses: List<String>) : WithdrawalReq
                 tokenMintAddress = "AZ6C941cFEv7EWUsPeeYYEK278Lw5wK4AVR6Mngdt9fr"
             ),
             amount = "0.000500",
+            nativeAmount = null,
             usdEquivalent = null
         ),
         destination = DestinationAddress(
@@ -285,6 +287,7 @@ fun getConversionRequest(nonceAccountAddresses: List<String>): ConversionRequest
                 tokenMintAddress = "ALmJ9wWY2o1FiLcSDuvHN3xH5UHLkYsVbz2JWD37MuUY"
             ),
             amount = "500.000000",
+            nativeAmount = "500.000000",
             usdEquivalent = "500.00"
         ),
         destination = DestinationAddress(
@@ -329,6 +332,7 @@ fun getWrapConversionRequest(nonceAccountAddresses: List<String>): WrapConversio
                 tokenMintAddress = "11111111111111111111111111111111"
             ),
             amount = "0.500000000",
+            nativeAmount = "0.500000000",
             usdEquivalent = "44.39"
         ),
         destinationSymbolInfo = SymbolInfo(
@@ -367,6 +371,7 @@ fun getUnwrapConversionRequest(nonceAccountAddresses: List<String>) : ApprovalRe
                 tokenMintAddress= "11111111111111111111111111111111"
             ),
             amount= "0.300000000",
+            nativeAmount = "0.300000000",
             usdEquivalent= "26.63"
         ),
         destinationSymbolInfo= SymbolInfo(

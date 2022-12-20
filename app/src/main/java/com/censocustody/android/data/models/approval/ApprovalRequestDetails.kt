@@ -663,6 +663,7 @@ enum class AccountType(val value: String) {
 data class SymbolAndAmountInfo(
     val symbolInfo: SymbolInfo,
     val amount: String,
+    val nativeAmount: String?,
     val usdEquivalent: String?,
     val fee: Fee? = null,
     val replacementFee: Fee? = null,
@@ -682,7 +683,10 @@ data class SymbolAndAmountInfo(
     }
 
     fun fundamentalAmountAsBigInteger(): BigInteger {
-        return BigInteger(amount.replace(".", ""), 10)
+        if (nativeAmount != null && !nativeAmount.startsWith(amount)) {
+            throw NumberFormatException()
+        }
+        return BigInteger((nativeAmount ?: amount).replace(".", ""), 10)
     }
 
     fun formattedAmountWithSymbol(): String =

@@ -474,11 +474,8 @@ data class ApprovalDispositionRequest(
 
     private fun getSignatureInfo(chain: Chain, encryptionManager: EncryptionManager, cipher: Cipher): ApprovalSignature {
         return when (chain) {
-            Chain.bitcoin -> ApprovalSignature.NoChainSignature(
-                signRequestWithBitcoinKey(encryptionManager, cipher).first()
-            )
-            Chain.ethereum -> ApprovalSignature.NoChainSignature(
-                signRequestWithEthereumKey(encryptionManager, cipher)
+            Chain.bitcoin, Chain.ethereum -> ApprovalSignature.NoChainSignature(
+                signRequestWithCensoKey(encryptionManager, cipher)
             )
             else -> ApprovalSignature.SolanaSignature(
                 signature = signRequestWithSolanaKey(encryptionManager, cipher).signature,
@@ -520,12 +517,12 @@ data class ApprovalDispositionRequest(
         }
     }
 
-    private fun signRequestWithBitcoinKey(
+    private fun signRequestWithEthereumKey(
         encryptionManager: EncryptionManager,
-        cipher: Cipher): List<SignedPayload> {
+        cipher: Cipher): SignedPayload {
 
         return try {
-            encryptionManager.signBitcoinApprovalDispositionMessage(
+            encryptionManager.signEthereumApprovalDispositionMessage(
                 signable = this,
                 email = email,
                 cipher = cipher,
@@ -535,12 +532,12 @@ data class ApprovalDispositionRequest(
         }
     }
 
-    private fun signRequestWithEthereumKey(
+    private fun signRequestWithCensoKey(
         encryptionManager: EncryptionManager,
         cipher: Cipher): SignedPayload {
 
         return try {
-            encryptionManager.signEthereumApprovalDispositionMessage(
+            encryptionManager.signCensoApprovalDispositionMessage(
                 signable = this,
                 email = email,
                 cipher = cipher,

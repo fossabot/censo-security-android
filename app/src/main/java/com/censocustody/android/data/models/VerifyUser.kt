@@ -62,6 +62,7 @@ data class WalletPublicKey(
             Chain.bitcoin -> StoredKeyData.BITCOIN_KEY
             Chain.solana -> StoredKeyData.SOLANA_KEY
             Chain.ethereum -> StoredKeyData.ETHEREUM_KEY
+            Chain.censo -> StoredKeyData.CENSO_KEY
             else -> ""
         }
 }

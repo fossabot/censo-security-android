@@ -106,6 +106,7 @@ class WithdrawalRequestDetailParameterProvider : PreviewParameterProvider<Approv
                 symbolAndAmountInfo = SymbolAndAmountInfo(
                     symbolInfo = SymbolInfo(symbol = "BTC", symbolDescription = "Bitcoin", tokenMintAddress = null),
                     amount = "1.000000",
+                    nativeAmount = "1.000000",
                     usdEquivalent = "20000.00",
                     fee = Fee(
                         symbolInfo = SymbolInfo(symbol = "BTC", symbolDescription = "Bitcoin", tokenMintAddress = null),
@@ -132,6 +133,7 @@ class WithdrawalRequestDetailParameterProvider : PreviewParameterProvider<Approv
                 symbolAndAmountInfo = SymbolAndAmountInfo(
                     symbolInfo = SymbolInfo(symbol = "BTC", symbolDescription = "Bitcoin", tokenMintAddress = null),
                     amount = "1.000000",
+                    nativeAmount = "1.000000",
                     usdEquivalent = "20000.00",
                     fee = Fee(
                         symbolInfo = SymbolInfo(symbol = "BTC", symbolDescription = "Bitcoin", tokenMintAddress = null),
