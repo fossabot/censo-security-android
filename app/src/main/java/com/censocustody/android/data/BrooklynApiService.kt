@@ -23,9 +23,7 @@ interface BrooklynApiService {
         const val AUTH = "Authorization"
         const val AUTH_REQUIRED = "$AUTH: "
         const val X_STRIKE_ID = "X-Strike-Device-Identifier"
-
         fun create(authProvider: AuthProvider): BrooklynApiService {
-
             val client = OkHttpClient.Builder()
                 .addInterceptor(AuthInterceptor(authProvider))
 
@@ -68,7 +66,11 @@ interface BrooklynApiService {
     @Headers(AUTH_REQUIRED)
     suspend fun walletSigners(): RetrofitResponse<List<WalletSigner?>>
 
-    @POST("v2/wallet-signers")
+//    @POST("v2/wallet-signers")
+//    @Headers(AUTH_REQUIRED)
+//    suspend fun addWalletSigner(@Body signers: Signers): RetrofitResponse<Signers>
+
+    @POST("v3/wallet-signers")
     @Headers(AUTH_REQUIRED)
     suspend fun addWalletSigner(@Body signers: Signers): RetrofitResponse<Signers>
 

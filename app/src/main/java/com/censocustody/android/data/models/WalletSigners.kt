@@ -5,10 +5,6 @@ import com.censocustody.android.data.models.StoredKeyData.Companion.CENSO_KEY
 import com.censocustody.android.data.models.StoredKeyData.Companion.ETHEREUM_KEY
 import com.censocustody.android.data.models.StoredKeyData.Companion.SOLANA_KEY
 
-data class Signers(
-    val signers: List<WalletSigner?>?
-)
-
 data class WalletSigner(
     val publicKey: String?,
     val chain: Chain?,
