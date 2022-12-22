@@ -16,6 +16,8 @@ import com.censocustody.android.data.models.StoredKeyData.Companion.BITCOIN_KEY
 import com.censocustody.android.data.models.StoredKeyData.Companion.ETHEREUM_KEY
 import com.censocustody.android.data.models.StoredKeyData.Companion.SOLANA_KEY
 import com.censocustody.android.data.models.SupplyDappInstruction
+import com.censocustody.android.data.models.Signers
+import com.censocustody.android.data.models.WalletSigner
 import com.censocustody.android.data.models.approval.InitiationRequest
 import java.nio.charset.Charset
 import java.security.SecureRandom
@@ -82,6 +84,12 @@ interface EncryptionManager {
     ): ByteArray
 
     fun signKeyForMigration(rootSeed: ByteArray, publicKey: String): ByteArray
+
+    fun signKeysForUpload(
+        email: String,
+        signature: Signature,
+        walletSigners: List<WalletSigner>
+    ): ByteArray
     //endregion
 
     //region generic key work
@@ -125,6 +133,20 @@ class EncryptionManagerImpl @Inject constructor(
     override fun signKeyForMigration(rootSeed: ByteArray, publicKey: String): ByteArray {
         val solanaHierarchicalKey = Ed25519HierarchicalPrivateKey.fromRootSeed(rootSeed)
         return solanaHierarchicalKey.signData(BaseWrapper.decode(publicKey))
+    }
+
+    override fun signKeysForUpload(
+        email: String,
+        signature: Signature,
+        walletSigners: List<WalletSigner>
+    ): ByteArray {
+        val dataToSign = Signers.retrieveDataToSign(walletSigners)
+
+        return cryptographyManager.signDataWithDeviceKey(
+            signature = signature,
+            data = dataToSign,
+            keyName = SharedPrefsHelper.retrieveDeviceId(email)
+        )
     }
 
     override fun signSolanaApprovalDispositionMessage(
