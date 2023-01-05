@@ -88,6 +88,11 @@ class EntranceViewModelTest : BaseViewModelTest() {
         key = ""
     )
 
+    private val validCensoPublicKey = WalletPublicKey(
+        chain = Chain.censo,
+        key = ""
+    )
+
     private val validWalletSigners = listOf(
         WalletSigner(chain = Chain.solana, publicKey = validSolanaPublicKey.key)
     )
@@ -97,7 +102,8 @@ class EntranceViewModelTest : BaseViewModelTest() {
             publicKeys = listOf(
                 validSolanaPublicKey,
                 validBitcoinPublicKey,
-                validEthereumPublicKey
+                validEthereumPublicKey,
+                validCensoPublicKey
             )
         )
 

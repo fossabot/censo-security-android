@@ -6,7 +6,8 @@ import androidx.compose.ui.text.intl.Locale
 enum class Chain {
     solana,
     bitcoin,
-    ethereum;
+    ethereum,
+    censo;
 
     fun label(): String {
         return this.name.capitalize(Locale.current)
