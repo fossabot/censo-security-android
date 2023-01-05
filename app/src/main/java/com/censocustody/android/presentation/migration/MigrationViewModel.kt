@@ -1,5 +1,6 @@
 package com.censocustody.android.presentation.migration
 
+import androidx.biometric.BiometricPrompt.CryptoObject
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -10,9 +11,11 @@ import com.censocustody.android.common.BioPromptReason
 import com.censocustody.android.common.Resource
 import com.censocustody.android.data.BioPromptData
 import com.censocustody.android.data.MigrationRepository
+import com.censocustody.android.data.UserRepository
 import com.censocustody.android.data.models.CipherRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
+import java.security.Signature
 import javax.crypto.Cipher
 import javax.inject.Inject
 
@@ -38,7 +41,8 @@ import javax.inject.Inject
 @HiltViewModel
 class MigrationViewModel @Inject constructor(
     private val cipherRepository: CipherRepository,
-    private val migrationRepository: MigrationRepository
+    private val migrationRepository: MigrationRepository,
+    private val userRepository: UserRepository
 ) : ViewModel() {
 
     var state by mutableStateOf(MigrationState())
@@ -75,9 +79,22 @@ class MigrationViewModel @Inject constructor(
         val cipher = cipherRepository.getCipherForV3RootSeedDecryption()
         if (cipher != null) {
             state = state.copy(
-                triggerBioPrompt = Resource.Success(cipher),
-                bioPromptData = BioPromptData(BioPromptReason.RETRIEVE_V3_ROOT_SEED)
+                triggerBioPrompt = Resource.Success(CryptoObject(cipher)),
+                bioPromptData = BioPromptData(BioPromptReason.RETRIEVE_V3_ROOT_SEED),
             )
+        }
+    }
+
+    suspend fun triggerBioPromptForDeviceSignature() {
+        val userEmail = userRepository.retrieveUserEmail()
+        val deviceKeyId = userRepository.retrieveUserDeviceId(userEmail)
+        val signature = cipherRepository.getSignatureForDeviceSigning(deviceKeyId)
+        if (signature != null) {
+            state =
+                state.copy(
+                    triggerBioPrompt = Resource.Success(CryptoObject(signature)),
+                    bioPromptData = BioPromptData(BioPromptReason.RETRIEVE_DEVICE_SIGNATURE),
+                )
         }
     }
 
@@ -91,13 +108,13 @@ class MigrationViewModel @Inject constructor(
         }
 
         migrationRepository.saveV3PublicKeys(rootSeed = rootSeed)
-        makeApiCallToSaveDataWithBackend(rootSeed = rootSeed)
+        retrieveWalletSignersAndTriggerDeviceSignatureRetrieval(rootSeed = rootSeed)
     }
     //endregion
 
 
     //region Step 3: Save all data
-    private suspend fun makeApiCallToSaveDataWithBackend(rootSeed: ByteArray) {
+    private suspend fun retrieveWalletSignersAndTriggerDeviceSignatureRetrieval(rootSeed: ByteArray) {
         val verifyUser = state.verifyUser
 
         if (verifyUser == null) {
@@ -108,25 +125,34 @@ class MigrationViewModel @Inject constructor(
         val walletSignersToAdd =
             migrationRepository.retrieveWalletSignersToUpload(rootSeed)
 
-        //make API call to send up any needed signed keys
-        val walletSigner = migrationRepository.migrateSigner(walletSignersToAdd)
+        state = state.copy(walletSigners = walletSignersToAdd)
 
-        if (walletSigner is Resource.Success) {
-            state = state.copy(finishedMigration = true)
-        } else if (walletSigner is Resource.Error) {
-            state = state.copy(addWalletSigner = walletSigner)
-        }
+        triggerBioPromptForDeviceSignature()
     }
     //endregion
 
-    //region handle all biometry events
-    fun biometryApproved(cipher: Cipher) {
+    private fun uploadSigners(signature: Signature) {
         viewModelScope.launch {
-            when (state.bioPromptData.bioPromptReason) {
-                BioPromptReason.RETRIEVE_V3_ROOT_SEED -> retrieveV3RootSeedAndKickOffKeyStorage(
-                    cipher
-                )
-                else -> {}
+            //make API call to send up any needed signed keys
+            val walletSigner = migrationRepository.migrateSigner(state.walletSigners, signature)
+
+            if (walletSigner is Resource.Success) {
+                state = state.copy(finishedMigration = true)
+            } else if (walletSigner is Resource.Error) {
+                state = state.copy(addWalletSigner = walletSigner)
+            }
+        }
+    }
+
+    //region handle all biometry events
+    fun biometryApproved(cryptoObject: CryptoObject) {
+        viewModelScope.launch {
+            if (state.bioPromptData.bioPromptReason == BioPromptReason.RETRIEVE_V3_ROOT_SEED && cryptoObject.cipher != null) {
+                retrieveV3RootSeedAndKickOffKeyStorage(cryptoObject.cipher!!)
+            }
+
+            if (state.bioPromptData.bioPromptReason == BioPromptReason.RETRIEVE_DEVICE_SIGNATURE && cryptoObject.signature != null) {
+                uploadSigners(cryptoObject.signature!!)
             }
         }
     }

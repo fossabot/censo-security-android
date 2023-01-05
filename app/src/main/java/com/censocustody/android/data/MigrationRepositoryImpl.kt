@@ -5,6 +5,7 @@ import com.censocustody.android.common.Resource
 import com.censocustody.android.data.models.Signers
 import com.censocustody.android.data.models.WalletSigner
 import com.censocustody.android.data.models.mapToPublicKeysList
+import java.security.Signature
 import javax.crypto.Cipher
 
 interface MigrationRepository {
@@ -15,11 +16,9 @@ interface MigrationRepository {
 
     suspend fun haveV3RootSeed() : Boolean
 
-    suspend fun retrieveV3PublicKeys(): HashMap<String, String>
-
     suspend fun retrieveWalletSignersToUpload(rootSeed: ByteArray): List<WalletSigner>
 
-    suspend fun migrateSigner(walletSigners: List<WalletSigner>): Resource<Signers>
+    suspend fun migrateSigner(walletSigners: List<WalletSigner>, signature: Signature): Resource<Signers>
 }
 
 class MigrationRepositoryImpl(
@@ -61,12 +60,6 @@ class MigrationRepositoryImpl(
         )
     }
 
-    override suspend fun retrieveV3PublicKeys(): HashMap<String, String> {
-        val userEmail = userRepository.retrieveUserEmail()
-
-        return securePreferences.retrieveV3PublicKeys(email = userEmail)
-    }
-
     override suspend fun retrieveWalletSignersToUpload(rootSeed: ByteArray): List<WalletSigner> {
         val userEmail = userRepository.retrieveUserEmail()
         val publicKeysMap = securePreferences.retrieveV3PublicKeys(userEmail)
@@ -84,10 +77,12 @@ class MigrationRepositoryImpl(
         return keysToAdd
     }
 
-    override suspend fun migrateSigner(walletSigners: List<WalletSigner>): Resource<Signers> {
+    override suspend fun migrateSigner(walletSigners: List<WalletSigner>, signature: Signature): Resource<Signers> {
+        val email = userRepository.retrieveUserEmail()
+        val signedData = encryptionManager.signKeysForUpload(email, signature, walletSigners)
         return retrieveApiResource {
             api.addWalletSigner(
-                Signers(walletSigners)
+                Signers(walletSigners, BaseWrapper.encodeToBase64(signedData))
             )
         }
     }

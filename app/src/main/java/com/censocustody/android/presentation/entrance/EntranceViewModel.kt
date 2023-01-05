@@ -149,7 +149,7 @@ class EntranceViewModel @Inject constructor(
 
         } else if (verifyUserDataResource is Resource.Error) {
             handleVerifyUserError(verifyUserDataResource)
-            null
+            return null
         }
 
         return null
