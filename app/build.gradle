@@ -14,7 +14,7 @@ def final coreAppId = "com.censocustody.android"
 
 String versionNameMajor = 1
 String versionNameMinor = 0
-String versionNamePatch = 1
+String versionNamePatch = 2
 
 android {
     Boolean signBuild = false
