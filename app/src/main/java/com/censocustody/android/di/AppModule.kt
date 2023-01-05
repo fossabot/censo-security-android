@@ -54,6 +54,7 @@ object AppModule {
         anchorApiService: AnchorApiService,
         securePreferences: SecurePreferences,
         semVersionApiService: SemVersionApiService,
+        encryptionManager: EncryptionManager,
         @ApplicationContext applicationContext: Context
     ): UserRepository {
         return UserRepositoryImpl(
@@ -62,7 +63,8 @@ object AppModule {
             anchorApiService = anchorApiService,
             securePreferences = securePreferences,
             versionApiService = semVersionApiService,
-            applicationContext = applicationContext
+            applicationContext = applicationContext,
+            encryptionManager = encryptionManager
         )
     }
 

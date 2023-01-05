@@ -4,12 +4,14 @@ import android.graphics.Bitmap
 import androidx.biometric.BiometricPrompt
 import com.censocustody.android.common.ImageCaptureError
 import com.censocustody.android.common.Resource
+import com.censocustody.android.data.models.UserDevice
 import java.security.Signature
 
 data class DeviceRegistrationState(
-    val addUserDevice: Resource<Boolean> = Resource.Uninitialized,
+    val addUserDevice: Resource<UserDevice> = Resource.Uninitialized,
     //User Photo
     val triggerImageCapture: Resource<Unit> = Resource.Uninitialized,
+    val userApproveSaveDeviceKey: Resource<Unit> = Resource.Uninitialized,
     val capturedUserPhoto: Bitmap? = null,
     val keyName: String = "",
     val publicKey: String = "",

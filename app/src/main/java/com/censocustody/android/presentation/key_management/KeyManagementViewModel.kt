@@ -1,5 +1,6 @@
 package com.censocustody.android.presentation.key_management
 
+import androidx.biometric.BiometricPrompt.CryptoObject
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -19,6 +20,7 @@ import com.censocustody.android.presentation.key_management.KeyManagementState.C
 import com.censocustody.android.presentation.key_management.KeyManagementState.Companion.FIRST_WORD_INDEX
 import com.censocustody.android.presentation.key_management.flows.*
 import kotlinx.coroutines.*
+import java.security.Signature
 import javax.crypto.Cipher
 
 @HiltViewModel
@@ -84,13 +86,14 @@ class KeyManagementViewModel @Inject constructor(
     //endregion
 
     //region API CALLS
-    private suspend fun attemptAddWalletSigner(walletSignerBody: List<WalletSigner?>?): Resource<Signers> {
-        val walletSignerResource =
-            userRepository.addWalletSigner(walletSignerBody)
-
-        state = state.copy(finalizeKeyFlow = walletSignerResource)
-        return walletSignerResource
-    }
+    //todo: no longer doing key creation in this flow
+//    private suspend fun attemptAddWalletSigner(walletSignerBody: List<WalletSigner>): Resource<Signers> {
+//        val walletSignerResource =
+//            userRepository.addWalletSigner(walletSignerBody)
+//
+//        state = state.copy(finalizeKeyFlow = walletSignerResource)
+//        return walletSignerResource
+//    }
     //endregion
 
     //region RETRY
@@ -120,13 +123,13 @@ class KeyManagementViewModel @Inject constructor(
                 state = when (state.keyManagementFlow) {
                     KeyManagementFlow.KEY_CREATION -> {
                         state.copy(
-                            triggerBioPrompt = Resource.Success(cipher),
+                            triggerBioPrompt = Resource.Success(CryptoObject(cipher)),
                             bioPromptData = bioPromptData
                         )
                     }
                     KeyManagementFlow.KEY_RECOVERY -> {
                         state.copy(
-                            triggerBioPrompt = Resource.Success(cipher),
+                            triggerBioPrompt = Resource.Success(CryptoObject(cipher)),
                             bioPromptData = bioPromptData,
                             inputMethod = inputMethod ?: PhraseInputMethod.MANUAL
                         )
@@ -139,12 +142,28 @@ class KeyManagementViewModel @Inject constructor(
         }
     }
 
-    fun biometryApproved(cipher: Cipher) {
-        when (state.bioPromptData.bioPromptReason) {
-            BioPromptReason.SAVE_V3_ROOT_SEED -> {
-                saveRootSeed(cipher)
+    private fun triggerDeviceSignatureRetrieval() {
+        viewModelScope.launch {
+            val userEmail = userRepository.retrieveUserEmail()
+            val deviceKeyId = userRepository.retrieveUserDeviceId(userEmail)
+            val signature = cipherRepository.getSignatureForDeviceSigning(deviceKeyId)
+            if (signature != null) {
+                state =
+                    state.copy(
+                        triggerBioPrompt = Resource.Success(CryptoObject(signature)),
+                        bioPromptData = BioPromptData(BioPromptReason.RETRIEVE_DEVICE_SIGNATURE)
+                    )
             }
-            else -> {}
+        }
+    }
+
+    fun biometryApproved(cryptoObject: CryptoObject) {
+        if (state.bioPromptData.bioPromptReason == BioPromptReason.SAVE_V3_ROOT_SEED && cryptoObject.cipher != null) {
+            saveRootSeed(cryptoObject.cipher!!)
+        }
+
+        if (state.bioPromptData.bioPromptReason == BioPromptReason.RETRIEVE_DEVICE_SIGNATURE && cryptoObject.signature != null) {
+            uploadKeys(cryptoObject.signature!!)
         }
     }
 
@@ -182,7 +201,7 @@ class KeyManagementViewModel @Inject constructor(
                 val walletSigners =
                     keyRepository.saveV3PublicKeys(mnemonic = Mnemonics.MnemonicCode(phrase = phrase))
 
-                finalizeKeyCreationOrRecovery(phrase = phrase, walletSigners = walletSigners)
+                finalizeKeyCreationOrRecovery(walletSigners = walletSigners)
             } catch (e: Exception) {
                 when (state.keyManagementFlow) {
                     KeyManagementFlow.KEY_CREATION -> {
@@ -199,35 +218,33 @@ class KeyManagementViewModel @Inject constructor(
         }
     }
 
-    private suspend fun finalizeKeyCreationOrRecovery(
-        phrase: String,
-        walletSigners: List<WalletSigner?>
-    ) {
+    private suspend fun finalizeKeyCreationOrRecovery(walletSigners: List<WalletSigner>) {
         when (state.keyManagementFlow) {
             KeyManagementFlow.KEY_CREATION -> createAndSaveKey(walletSigners)
-            KeyManagementFlow.KEY_RECOVERY -> recoverKey(phrase, walletSigners)
+            KeyManagementFlow.KEY_RECOVERY -> recoverKey(walletSigners)
             KeyManagementFlow.UNINITIALIZED -> {}
         }
     }
 
-    suspend fun createAndSaveKey(localKeys: List<WalletSigner?>) {
+    suspend fun createAndSaveKey(localKeys: List<WalletSigner>) {
         try {
-            val addWalletSignerResource = attemptAddWalletSigner(localKeys)
-
-            if (addWalletSignerResource is Resource.Success) {
-                state =
-                    state.copy(
-                        keyManagementFlowStep = KeyManagementFlowStep.CreationFlow(
-                            KeyCreationFlowStep.ALL_SET_STEP
-                        ),
-                        finalizeKeyFlow = Resource.Success(addWalletSignerResource.data),
-                        keyGeneratedPhrase = null
-                    )
-            } else if (addWalletSignerResource is Resource.Error) {
-                state = state.copy(
-                    finalizeKeyFlow = addWalletSignerResource
-                )
-            }
+            //todo: can I remove this flow now that we have removed this code flow?
+//            val addWalletSignerResource = attemptAddWalletSigner(localKeys)
+//
+//            if (addWalletSignerResource is Resource.Success) {
+//                state =
+//                    state.copy(
+//                        keyManagementFlowStep = KeyManagementFlowStep.CreationFlow(
+//                            KeyCreationFlowStep.ALL_SET_STEP
+//                        ),
+//                        finalizeKeyFlow = Resource.Success(addWalletSignerResource.data),
+//                        keyGeneratedPhrase = null
+//                    )
+//            } else if (addWalletSignerResource is Resource.Error) {
+//                state = state.copy(
+//                    finalizeKeyFlow = addWalletSignerResource
+//                )
+//            }
         } catch (e: Exception) {
             state = state.copy(
                 finalizeKeyFlow = Resource.Error(exception = e)
@@ -235,37 +252,39 @@ class KeyManagementViewModel @Inject constructor(
         }
     }
 
-    suspend fun recoverKey(phrase: String, localKeys: List<WalletSigner?>) {
+    fun recoverKey(localKeys: List<WalletSigner>) {
         try {
             //need to update wallet signer call
             val keysNotSavedOnBackend =
                 state.initialData?.verifyUserDetails?.determineKeysUserNeedsToUpload(localKeys)
 
-            if (keysNotSavedOnBackend?.isNotEmpty() == true) {
-                val signedKeys =
-                    keyRepository.signPublicKeys(
-                        publicKeys = localKeys,
-                        mnemonic = Mnemonics.MnemonicCode(phrase = phrase)
-                    )
-                val walletSignerResource =
-                    userRepository.addWalletSigner(signedKeys)
-
-                if (walletSignerResource is Resource.Success) {
-                    state =
-                        state.copy(
-                            finalizeKeyFlow = Resource.Success(walletSignerResource.data),
-                        )
-                } else if (walletSignerResource is Resource.Error) {
-                    state = state.copy(
-                        finalizeKeyFlow = walletSignerResource
-                    )
-                }
-            } else {
-                //no API call needed, move on
-                state = state.copy(finalizeKeyFlow = Resource.Success(null))
-            }
+  //          if (keysNotSavedOnBackend?.isNotEmpty() == true) {
+                state = state.copy(walletSignersToAdd = localKeys)
+                triggerDeviceSignatureRetrieval()
+//            } else {
+//                //no API call needed, move on
+//                state = state.copy(finalizeKeyFlow = Resource.Success(null))
+//            }
         } catch (e: Exception) {
             recoverKeyFailure()
+        }
+    }
+
+    private fun uploadKeys(signature: Signature) {
+        viewModelScope.launch {
+            val walletSignerResource =
+                userRepository.addWalletSigner(state.walletSignersToAdd, signature)
+
+            if (walletSignerResource is Resource.Success) {
+                state =
+                    state.copy(
+                        finalizeKeyFlow = Resource.Success(walletSignerResource.data),
+                    )
+            } else if (walletSignerResource is Resource.Error) {
+                state = state.copy(
+                    finalizeKeyFlow = walletSignerResource
+                )
+            }
         }
     }
     //endregion

@@ -93,17 +93,17 @@ object SharedPrefsHelper {
 
     //region V3 Storage
     fun saveV3PublicKeys(encryptedPrefs: SharedPreferences, email: String, keyData: String) {
-        val editor = encryptedPrefs.edit()
+        val editor = sharedPrefs.edit()
         editor.putString("${email.lowercase().trim()}$V3_PUBLIC_KEYS", keyData)
         editor.apply()
     }
 
     fun retrieveV3PublicKeys(encryptedPrefs: SharedPreferences, email: String): String? {
-        return encryptedPrefs.getString("${email.lowercase().trim()}$V3_PUBLIC_KEYS", "")
+        return sharedPrefs.getString("${email.lowercase().trim()}$V3_PUBLIC_KEYS", "")
     }
 
     fun clearV3PublicKeys(encryptedPrefs: SharedPreferences, email: String) {
-        val editor = encryptedPrefs.edit()
+        val editor = sharedPrefs.edit()
         editor.putString("${email.lowercase().trim()}$V3_PUBLIC_KEYS", "")
         editor.apply()
     }
