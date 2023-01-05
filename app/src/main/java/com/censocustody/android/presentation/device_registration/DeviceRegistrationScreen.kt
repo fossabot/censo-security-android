@@ -7,14 +7,15 @@ import android.graphics.Bitmap
 import android.provider.MediaStore
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.biometric.BiometricPrompt
 import androidx.biometric.BiometricPrompt.CryptoObject
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.AlertDialog
 import androidx.compose.material.Button
 import androidx.compose.material.Text
+import androidx.compose.material.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -32,9 +33,8 @@ import androidx.fragment.app.FragmentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.censocustody.android.R
-import com.censocustody.android.common.BioCryptoUtil
-import com.censocustody.android.common.ImageCaptureError
-import com.censocustody.android.common.Resource
+import com.censocustody.android.common.*
+import com.censocustody.android.presentation.Screen
 import com.censocustody.android.presentation.device_registration.DeviceRegistrationViewModel.Companion.THUMBNAIL_DATA_KEY
 import com.censocustody.android.ui.theme.CensoWhite
 import com.censocustody.android.ui.theme.UnfocusedGrey
@@ -86,6 +86,15 @@ fun DeviceRegistrationScreen(
     }
 
     LaunchedEffect(key1 = state) {
+
+        if (state.addUserDevice is Resource.Success) {
+            navController.navigate(Screen.EntranceRoute.route) {
+                launchSingleTop = true
+                popUpToTop()
+            }
+            viewModel.resetUserDevice()
+        }
+
         if (state.triggerImageCapture is Resource.Success) {
             val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
 
@@ -141,6 +150,37 @@ fun DeviceRegistrationScreen(
 
         ImageCaptureErrorDialog(mainText = message) {
             viewModel.resetImageCaptureFailedError()
+        }
+    }
+
+    if (state.userApproveSaveDeviceKey is Resource.Success) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(color = Color.Black)
+                .padding(all = 24.dp),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            CensoButton(
+                onClick = {
+                    viewModel.createKeyForDevice()
+                    viewModel.resetUserDialogToSaveDeviceKey()
+                },
+                contentPadding = PaddingValues(vertical = 12.dp, horizontal = 24.dp)
+            ) {
+                Text(text = stringResource(R.string.i_have_taken_photo), textAlign = TextAlign.Center)
+            }
+            Spacer(modifier = Modifier.height(72.dp))
+            CensoButton(
+                onClick = {
+                    viewModel.triggerImageCapture()
+                    viewModel.resetUserDialogToSaveDeviceKey()
+                },
+                contentPadding = PaddingValues(vertical = 12.dp, horizontal = 24.dp)
+            ) {
+                Text(text = stringResource(R.string.retake_photo), textAlign = TextAlign.Center)
+            }
         }
     }
 }

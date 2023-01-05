@@ -4,7 +4,7 @@ import com.google.gson.*
 import com.censocustody.android.BuildConfig
 import com.censocustody.android.data.BaseRepository.Companion.UNAUTHORIZED
 import com.censocustody.android.data.BrooklynApiService.Companion.AUTH
-import com.censocustody.android.data.BrooklynApiService.Companion.X_STRIKE_ID
+import com.censocustody.android.data.BrooklynApiService.Companion.X_CENSO_ID
 import com.censocustody.android.data.models.*
 import com.censocustody.android.data.models.approval.*
 import kotlinx.coroutines.runBlocking
@@ -22,7 +22,7 @@ interface BrooklynApiService {
 
         const val AUTH = "Authorization"
         const val AUTH_REQUIRED = "$AUTH: "
-        const val X_STRIKE_ID = "X-Strike-Device-Identifier"
+        const val X_CENSO_ID = "X-Censo-Device-Identifier"
         fun create(authProvider: AuthProvider): BrooklynApiService {
             val client = OkHttpClient.Builder()
                 .addInterceptor(AuthInterceptor(authProvider))
@@ -137,8 +137,8 @@ class AuthInterceptor(private val authProvider: AuthProvider) : Interceptor {
 
         if (deviceId.isNotEmpty()) {
             request = request.newBuilder()
-                .removeHeader(X_STRIKE_ID)
-                .addHeader(X_STRIKE_ID, deviceId)
+                .removeHeader(X_CENSO_ID)
+                .addHeader(X_CENSO_ID, deviceId)
                 .build()
         }
 

@@ -250,4 +250,6 @@
     <string name="image_capture_failed_no_camera_message">Please ensure this device has a camera available for capturing user image.</string>
     <string name="image_capture_failed_action_cancelled_message">A photo image is required as part of the initial wallet creation process, please try again.</string>
     <string name="image_capture_failed_default_message">Failed to capture an image, please try again.</string>
+    <string name="i_have_taken_photo">I have taken my photo</string>
+    <string name="retake_photo">Retake photo</string>
 </resources>

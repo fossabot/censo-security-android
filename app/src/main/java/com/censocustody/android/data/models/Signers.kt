@@ -10,11 +10,9 @@ data class Signers(
 ) {
     companion object {
         fun retrieveDataToSign(walletSigners: List<WalletSigner>) =
-            walletSigners.filter { it.publicKey != null }.map { BaseWrapper.decode(it.publicKey!!) }
+            walletSigners
+                .filter { it.publicKey != null }
+                .map { BaseWrapper.decode(it.publicKey!!) }
                 .reduce { array, next -> array + next }
     }
 }
-
-//Backend code grabbing this data
-//I should be doing the same thing to append my keys together.
-//val dataToSign = message.signers.map { Base58.decode(it.publicKey) }.reduce { array, next -> array + next }
