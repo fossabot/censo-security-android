@@ -22,8 +22,8 @@ interface KeyRepository {
     suspend fun doesUserHaveValidLocalKey(verifyUser: VerifyUser): Boolean
 
     suspend fun saveV3RootKey(mnemonic: Mnemonics.MnemonicCode, cipher: Cipher)
-    suspend fun saveV3PublicKeys(mnemonic: Mnemonics.MnemonicCode) : List<WalletSigner?>
-    suspend fun retrieveV3PublicKeys() : List<WalletSigner?>
+    suspend fun saveV3PublicKeys(mnemonic: Mnemonics.MnemonicCode) : List<WalletSigner>
+    suspend fun retrieveV3PublicKeys() : List<WalletSigner>
 
     suspend fun hasV3RootSeedStored() : Boolean
 
@@ -135,7 +135,7 @@ class KeyRepositoryImpl(
         )
     }
 
-    override suspend fun saveV3PublicKeys(mnemonic: Mnemonics.MnemonicCode) : List<WalletSigner?> {
+    override suspend fun saveV3PublicKeys(mnemonic: Mnemonics.MnemonicCode) : List<WalletSigner> {
         val userEmail = userRepository.retrieveUserEmail()
 
         val rootSeed = mnemonic.toSeed()
@@ -148,7 +148,7 @@ class KeyRepositoryImpl(
         return publicKeys.mapToPublicKeysList()
     }
 
-    override suspend fun retrieveV3PublicKeys(): List<WalletSigner?> {
+    override suspend fun retrieveV3PublicKeys(): List<WalletSigner> {
         val userEmail = userRepository.retrieveUserEmail()
         return securePreferences.retrieveV3PublicKeys(userEmail).mapToPublicKeysList()
     }

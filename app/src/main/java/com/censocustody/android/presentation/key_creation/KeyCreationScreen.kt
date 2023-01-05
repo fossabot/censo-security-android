@@ -1,6 +1,5 @@
 package com.censocustody.android.presentation.key_creation
 
-import androidx.biometric.BiometricPrompt
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.*
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -127,9 +126,8 @@ fun KeyCreationScreen(
                 val bioPrompt = BioCryptoUtil.createBioPrompt(
                     fragmentActivity = context,
                     onSuccess = {
-                        val cipher = it?.cipher
-                        if (cipher != null) {
-                            viewModel.biometryApproved(cipher)
+                        if (it?.cipher != null || it?.signature != null) {
+                            viewModel.biometryApproved(it)
                         } else {
                             BioCryptoUtil.handleBioPromptOnFail(
                                 context = context,
@@ -148,7 +146,7 @@ fun KeyCreationScreen(
 
                 bioPrompt.authenticate(
                     promptInfo,
-                    BiometricPrompt.CryptoObject(state.triggerBioPrompt.data)
+                    state.triggerBioPrompt.data
                 )
             }
             viewModel.resetPromptTrigger()

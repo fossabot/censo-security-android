@@ -1,11 +1,9 @@
 package com.censocustody.android.presentation.key_management
 
 import android.widget.Toast
-import androidx.biometric.BiometricPrompt
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.stringResource
@@ -26,11 +24,6 @@ import com.censocustody.android.presentation.key_management.KeyManagementState.C
 import com.censocustody.android.presentation.key_management.flows.*
 import com.censocustody.android.ui.theme.CensoWhite
 import com.censocustody.android.ui.theme.UnfocusedGrey
-
-@OptIn(
-    ExperimentalComposeUiApi::class,
-    androidx.compose.foundation.ExperimentalFoundationApi::class
-)
 
 @Composable
 fun KeyManagementScreen(
@@ -136,9 +129,8 @@ fun KeyManagementScreen(
                 val bioPrompt = BioCryptoUtil.createBioPrompt(
                     fragmentActivity = context,
                     onSuccess = {
-                        val cipher = it?.cipher
-                        if (cipher != null) {
-                            viewModel.biometryApproved(cipher)
+                        if (it?.cipher != null || it?.signature != null) {
+                            viewModel.biometryApproved(it)
                         } else {
                             BioCryptoUtil.handleBioPromptOnFail(
                                 context = context,
@@ -155,10 +147,7 @@ fun KeyManagementScreen(
                     }
                 )
 
-                bioPrompt.authenticate(
-                    promptInfo,
-                    BiometricPrompt.CryptoObject(state.triggerBioPrompt.data)
-                )
+                bioPrompt.authenticate(promptInfo, state.triggerBioPrompt.data)
             }
             viewModel.resetPromptTrigger()
         }

@@ -53,11 +53,12 @@ class DeviceRegistrationViewModel @Inject constructor(
     }
 
     fun biometryApproved(cryptoObject: BiometricPrompt.CryptoObject) {
+        censoLog(message = "Biometry approved for device key registration")
         sendUserDeviceAndImageToBackend(cryptoObject.signature)
     }
 
     fun biometryFailed() {
-
+        censoLog(message = "Biometry failed for device key registration")
     }
 
     fun sendUserDeviceAndImageToBackend(signature: Signature?) {
@@ -97,13 +98,19 @@ class DeviceRegistrationViewModel @Inject constructor(
                     SharedPrefsHelper.saveDeviceId(email, keyName)
                     SharedPrefsHelper.saveDevicePublicKey(email, state.publicKey)
 
+                    state = state.copy(addUserDevice = userDeviceAdded)
+
                 } else if (userDeviceAdded is Resource.Error) {
                     //todo: show error to user
+                    censoLog(message = "Error when creating device key: ${userDeviceAdded.exception}")
+                    state = state.copy(addUserDevice = userDeviceAdded)
                 }
 
 
             } else {
                 //todo: broken flow data got wiped
+                censoLog(message = "Error when creating device key: null data")
+                state = state.copy(addUserDevice = Resource.Error(exception = Exception("Missing essential data for device registration")))
             }
         }
     }
@@ -114,11 +121,11 @@ class DeviceRegistrationViewModel @Inject constructor(
     }
 
 
-    private fun triggerImageCapture() {
+    fun triggerImageCapture() {
         state = state.copy(triggerImageCapture = Resource.Success(Unit))
     }
 
-    private fun createKeyForDevice() {
+    fun createKeyForDevice() {
         viewModelScope.launch {
             val keyId = UUID.randomUUID().toString().replace("-", "")
             state = state.copy(keyName = keyId)
@@ -143,7 +150,11 @@ class DeviceRegistrationViewModel @Inject constructor(
 
     fun handleCapturedUserPhoto(userPhoto: Bitmap) {
         state = state.copy(capturedUserPhoto = userPhoto)
-        createKeyForDevice()
+        showUserDialogToSaveDeviceKey()
+    }
+
+    fun showUserDialogToSaveDeviceKey() {
+        state = state.copy(userApproveSaveDeviceKey = Resource.Success(Unit))
     }
 
     fun handleImageCaptureError(imageCaptureError: ImageCaptureError) {
@@ -158,11 +169,19 @@ class DeviceRegistrationViewModel @Inject constructor(
         state = state.copy(capturedUserPhoto = null)
     }
 
+    fun resetUserDevice() {
+        state = state.copy(addUserDevice = Resource.Uninitialized)
+    }
+
     fun resetPromptTrigger() {
         state = state.copy(triggerBioPrompt = Resource.Uninitialized)
     }
 
     fun resetImageCaptureFailedError() {
         state = state.copy(imageCaptureFailedError = Resource.Uninitialized)
+    }
+
+    fun resetUserDialogToSaveDeviceKey() {
+        state = state.copy(userApproveSaveDeviceKey = Resource.Uninitialized)
     }
 }

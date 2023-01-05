@@ -3,9 +3,11 @@ package com.censocustody.android.data
 import android.annotation.SuppressLint
 import android.content.Context
 import android.provider.Settings
+import androidx.biometric.BiometricPrompt.CryptoObject
 import com.censocustody.android.common.*
 import com.censocustody.android.data.models.*
 import okhttp3.ResponseBody
+import java.security.Signature
 
 interface UserRepository {
     suspend fun loginWithPassword(email: String, password: String): Resource<LoginResponse>
@@ -13,7 +15,7 @@ interface UserRepository {
     suspend fun saveToken(token: String)
     suspend fun verifyUser(): Resource<VerifyUser>
     suspend fun getWalletSigners(): Resource<List<WalletSigner?>>
-    suspend fun addWalletSigner(walletSignerBody: List<WalletSigner?>?): Resource<Signers>
+    suspend fun addWalletSigner(walletSigners: List<WalletSigner>, signature: Signature): Resource<Signers>
     suspend fun userLoggedIn(): Boolean
     suspend fun setUserLoggedIn()
     suspend fun logOut(): Boolean
@@ -35,6 +37,7 @@ class UserRepositoryImpl(
     private val securePreferences: SecurePreferences,
     private val anchorApiService: AnchorApiService,
     private val versionApiService: SemVersionApiService,
+    private val encryptionManager: EncryptionManager,
     private val applicationContext: Context
 ) : UserRepository, BaseRepository() {
 
@@ -94,12 +97,15 @@ class UserRepositoryImpl(
     override suspend fun getWalletSigners(): Resource<List<WalletSigner?>> =
         retrieveApiResource { api.walletSigners() }
 
-    override suspend fun addWalletSigner(walletSignerBody: List<WalletSigner?>?): Resource<Signers> =
-        retrieveApiResource {
+    override suspend fun addWalletSigner(walletSigners: List<WalletSigner>, signature: Signature): Resource<Signers> {
+        val email = retrieveUserEmail()
+        val signedData = encryptionManager.signKeysForUpload(email, signature, walletSigners)
+        return retrieveApiResource {
             api.addWalletSigner(
-                Signers(walletSignerBody)
+                Signers(walletSigners, BaseWrapper.encodeToBase64(signedData))
             )
         }
+    }
 
     override suspend fun retrieveUserEmail(): String {
         return try {
