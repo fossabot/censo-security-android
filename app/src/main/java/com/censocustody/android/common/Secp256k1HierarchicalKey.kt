@@ -93,6 +93,13 @@ class Secp256k1HierarchicalKey(
             ChildPathNumber(0, false)
         )
 
+        val censoDerivationPath = listOf(
+            ChildPathNumber(44, true),
+            ChildPathNumber(16743510, true),  // Utils.sha256("censo").substring(0 until 6).toInt(16)
+            ChildPathNumber(0, true),
+            ChildPathNumber(0, false)
+        )
+
         fun getECPrivateKey(privateKeyBytes: ByteArray): ECPrivateKey {
             return factory.generatePrivate(ECPrivateKeySpec(BigInteger(1, privateKeyBytes), spec)) as ECPrivateKey
         }
