@@ -17,6 +17,7 @@ data class ApprovalRequest(
     val submitterEmail: String?,
     val submitterName: String?,
     val vaultName: String?,
+    val initiationOnly: Boolean?,
     @Transient val details: SolanaApprovalRequestDetails?
 ) {
 
@@ -28,7 +29,7 @@ data class ApprovalRequest(
         }
 
     fun approveButtonCaption(context: Context) =
-        if (details is SolanaApprovalRequestDetails.MultiSignOpInitiationDetails && !details.multisigOpInitiation.initiatorIsApprover) {
+        if (initiationOnly == true) {
             context.getString(R.string.initiate)
         } else {
             context.getString(R.string.approve)
