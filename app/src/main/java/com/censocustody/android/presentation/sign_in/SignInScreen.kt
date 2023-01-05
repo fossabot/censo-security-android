@@ -316,7 +316,7 @@ fun LoginErrorAlertDialog(
         dismissButton = {
             if (shouldDisplayDismissButton) {
                 TextButton(onClick = onDismiss) {
-                    Text(text = dismissText)
+                    Text(text = dismissText, color = CensoWhite)
                 }
             }
         },

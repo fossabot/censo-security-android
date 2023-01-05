@@ -71,9 +71,8 @@ fun MigrationScreen(
                 val bioPrompt = BioCryptoUtil.createBioPrompt(
                     fragmentActivity = context,
                     onSuccess = {
-                        val cipher = it?.cipher
-                        if (cipher != null) {
-                            viewModel.biometryApproved(cipher)
+                        if (it?.cipher != null || it?.signature != null) {
+                            viewModel.biometryApproved(it)
                         } else {
                             BioCryptoUtil.handleBioPromptOnFail(
                                 context = context,
@@ -95,7 +94,7 @@ fun MigrationScreen(
 
                 bioPrompt.authenticate(
                     promptInfo,
-                    BiometricPrompt.CryptoObject(state.triggerBioPrompt.data)
+                    state.triggerBioPrompt.data
                 )
             }
             viewModel.resetPromptTrigger()

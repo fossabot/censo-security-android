@@ -18,7 +18,7 @@ data class StoredKeyData(
         }
 
         fun mapFromJson(json: String): HashMap<String, String> {
-            val typeOfHashMap: Type = object : TypeToken<HashMap<String?, String?>?>() {}.type
+            val typeOfHashMap: Type = object : TypeToken<HashMap<String, String>>() {}.type
             return Gson().fromJson(json, typeOfHashMap)
         }
 
