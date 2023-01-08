@@ -11,10 +11,8 @@ import androidx.lifecycle.viewModelScope
 import cash.z.ecc.android.bip39.Mnemonics
 import com.censocustody.android.common.*
 import com.censocustody.android.data.*
-import com.censocustody.android.data.EncryptionManagerImpl.Companion.ROOT_SEED_KEY_NAME
 import com.censocustody.android.data.models.CipherRepository
 import com.censocustody.android.data.models.IndexedPhraseWord
-import com.censocustody.android.data.models.Signers
 import com.censocustody.android.data.models.WalletSigner
 import com.censocustody.android.presentation.key_management.KeyManagementState.Companion.NO_PHRASE_ERROR
 import com.censocustody.android.presentation.key_management.KeyManagementState.Companion.FIRST_WORD_INDEX
@@ -116,7 +114,9 @@ class KeyManagementViewModel @Inject constructor(
     //region CORE ACTIONS
     fun triggerBioPrompt(inputMethod: PhraseInputMethod? = null) {
         viewModelScope.launch {
-            val cipher = cipherRepository.getCipherForEncryption(ROOT_SEED_KEY_NAME)
+            val email = userRepository.retrieveUserEmail()
+            val deviceId = userRepository.retrieveUserDeviceId(email)
+            val cipher = cipherRepository.getCipherForDeviceKeyEncryption(deviceId)
             val bioPromptData = BioPromptData(BioPromptReason.SAVE_V3_ROOT_SEED)
 
             if (cipher != null) {

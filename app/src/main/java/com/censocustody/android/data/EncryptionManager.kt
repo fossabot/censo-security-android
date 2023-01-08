@@ -116,6 +116,8 @@ interface EncryptionManager {
 
     fun getInitializedCipherForEncryption(keyName: String): Cipher
     fun getInitializedCipherForDecryption(keyName: String, initVector: ByteArray): Cipher
+    fun getInitializedCipherForDeviceKeyDecryption(keyName: String, initVector: ByteArray): Cipher
+    fun getInitializedCipherForDeviceKeyEncryption(keyName: String): Cipher
     fun haveSentinelDataStored(email: String): Boolean
     fun saveSentinelData(email: String, cipher: Cipher)
     fun retrieveSentinelData(email: String, cipher: Cipher): String
@@ -501,6 +503,16 @@ class EncryptionManagerImpl @Inject constructor(
         )
     }
 
+    override fun getInitializedCipherForDeviceKeyEncryption(keyName: String): Cipher {
+        return cryptographyManager.getInitializedCipherForDeviceKeyEncryption(keyName)
+    }
+
+    override fun getInitializedCipherForDeviceKeyDecryption(keyName: String, initVector: ByteArray): Cipher {
+        return cryptographyManager.getInitializedCipherForDeviceKeyDecryption(
+            keyName = keyName, initializationVector = initVector
+        )
+    }
+
     override fun haveSentinelDataStored(email: String) = securePreferences.hasSentinelData(email)
 
     override fun saveSentinelData(email: String, cipher: Cipher) {
@@ -542,7 +554,6 @@ class EncryptionManagerImpl @Inject constructor(
     object Companion {
         const val BIO_KEY_NAME = "biometric_encryption_key"
         const val SENTINEL_KEY_NAME = "sentinel_biometry_key"
-        const val ROOT_SEED_KEY_NAME = "root_seed_encryption_key"
         const val SENTINEL_STATIC_DATA = "sentinel_static_data"
         const val NO_OFFSET_INDEX = 0
         val DATA_CHECK = BaseWrapper.decode("VerificationCheck")

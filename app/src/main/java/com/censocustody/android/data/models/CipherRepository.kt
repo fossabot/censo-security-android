@@ -3,7 +3,6 @@ package com.censocustody.android.data.models
 import android.security.keystore.KeyPermanentlyInvalidatedException
 import com.censocustody.android.data.*
 import com.censocustody.android.data.EncryptionManagerImpl.Companion.BIO_KEY_NAME
-import com.censocustody.android.data.EncryptionManagerImpl.Companion.ROOT_SEED_KEY_NAME
 import com.censocustody.android.data.EncryptionManagerImpl.Companion.SENTINEL_KEY_NAME
 import java.security.InvalidAlgorithmParameterException
 import java.security.Signature
@@ -11,6 +10,7 @@ import javax.crypto.Cipher
 
 interface CipherRepository {
     suspend fun getCipherForEncryption(keyName: String): Cipher?
+    suspend fun getCipherForDeviceKeyEncryption(keyName: String): Cipher?
     suspend fun getCipherForBackgroundDecryption(): Cipher?
     suspend fun getCipherForV3RootSeedDecryption(): Cipher?
     suspend fun getSignatureForDeviceSigning(keyName: String): Signature?
@@ -30,6 +30,14 @@ class CipherRepositoryImpl(
         }
     }
 
+    override suspend fun getCipherForDeviceKeyEncryption(keyName: String): Cipher? {
+        return try {
+            encryptionManager.getInitializedCipherForDeviceKeyEncryption(keyName)
+        } catch (e: Exception) {
+            handleCipherException(e, keyName)
+        }
+    }
+
     override suspend fun getCipherForBackgroundDecryption(): Cipher? {
         return try {
             val email = userRepository.retrieveUserEmail()
@@ -44,15 +52,17 @@ class CipherRepositoryImpl(
     }
 
     override suspend fun getCipherForV3RootSeedDecryption(): Cipher? {
+        var deviceId = ""
         return try {
             val email = userRepository.retrieveUserEmail()
+            deviceId = userRepository.retrieveUserDeviceId(email)
             val encryptedData = securePreferences.retrieveV3RootSeed(email)
-            encryptionManager.getInitializedCipherForDecryption(
+            encryptionManager.getInitializedCipherForDeviceKeyDecryption(
                 initVector = encryptedData.initializationVector,
-                keyName = ROOT_SEED_KEY_NAME
+                keyName = deviceId
             )
         } catch (e: Exception) {
-            handleCipherException(e, ROOT_SEED_KEY_NAME)
+            handleCipherException(e, deviceId)
         }
     }
 
@@ -74,9 +84,10 @@ class CipherRepositoryImpl(
 
     private suspend fun wipeAllDataAfterKeyInvalidatedException(keyName: String) {
         val email = userRepository.retrieveUserEmail()
+        val deviceId = userRepository.retrieveUserDeviceId(email)
         encryptionManager.deleteBiometryKeyFromKeystore(BIO_KEY_NAME)
         encryptionManager.deleteBiometryKeyFromKeystore(SENTINEL_KEY_NAME)
-        encryptionManager.deleteBiometryKeyFromKeystore(ROOT_SEED_KEY_NAME)
+        encryptionManager.deleteBiometryKeyFromKeystore(deviceId)
         securePreferences.clearAllV3KeyData(email)
         securePreferences.clearSentinelData(email)
         if (keyName == SENTINEL_KEY_NAME) {

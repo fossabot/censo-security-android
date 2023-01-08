@@ -8,7 +8,6 @@ import com.censocustody.android.*
 import com.censocustody.android.common.BioPromptReason
 import com.censocustody.android.common.PhraseEntryUtil
 import com.censocustody.android.common.Resource
-import com.censocustody.android.data.EncryptionManagerImpl.Companion.ROOT_SEED_KEY_NAME
 import com.censocustody.android.data.KeyRepository
 import com.censocustody.android.data.PhraseException
 import com.censocustody.android.data.PhraseValidator

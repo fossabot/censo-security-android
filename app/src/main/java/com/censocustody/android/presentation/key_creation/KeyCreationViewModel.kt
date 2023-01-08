@@ -47,8 +47,10 @@ class KeyCreationViewModel @Inject constructor(
     }
 
     private suspend fun triggerBioPromptForRootSeedSave() {
+        val email = userRepository.retrieveUserEmail()
+        val deviceId = userRepository.retrieveUserDeviceId(email)
         val cipher =
-            cipherRepository.getCipherForEncryption(EncryptionManagerImpl.Companion.ROOT_SEED_KEY_NAME)
+            cipherRepository.getCipherForDeviceKeyEncryption(deviceId)
         val bioPromptReason = BioPromptReason.SAVE_V3_ROOT_SEED
 
         if (cipher != null) {
