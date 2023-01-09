@@ -1,10 +1,10 @@
 package com.censocustody.android.presentation.common_approvals
 
+import androidx.biometric.BiometricPrompt
 import com.censocustody.android.common.Resource
 import com.censocustody.android.data.models.approval.ApprovalRequest
 import com.censocustody.android.presentation.approval_disposition.ApprovalDispositionState
 import com.censocustody.android.presentation.durable_nonce.DurableNonceViewModel
-import javax.crypto.Cipher
 
 data class ApprovalsState(
 
@@ -22,7 +22,7 @@ data class ApprovalsState(
     val approvalDispositionState: ApprovalDispositionState? = ApprovalDispositionState(),
     val multipleAccounts: DurableNonceViewModel.MultipleAccounts? = null,
     val shouldDisplayConfirmDisposition: ConfirmDispositionDialogDetails? = null,
-    val bioPromptTrigger: Resource<Cipher> = Resource.Uninitialized,
+    val bioPromptTrigger: Resource<BiometricPrompt.CryptoObject> = Resource.Uninitialized,
     val selectedApproval: ApprovalRequest? = null,
 ) {
     val loadingData = approvalsResultRequest is Resource.Loading ||

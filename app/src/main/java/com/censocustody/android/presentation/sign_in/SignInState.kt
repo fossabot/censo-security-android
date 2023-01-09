@@ -1,6 +1,7 @@
 package com.censocustody.android.presentation.sign_in
 
 import android.util.Patterns
+import androidx.biometric.BiometricPrompt.CryptoObject
 import com.censocustody.android.common.BioPromptReason
 import com.censocustody.android.common.Resource
 import com.censocustody.android.data.models.LoginResponse
@@ -17,7 +18,7 @@ data class SignInState(
     val loginResult: Resource<LoginResponse> = Resource.Uninitialized,
     val verifyUserResult: Resource<VerifyUser> = Resource.Uninitialized,
     val walletSignersResult: Resource<List<WalletSigner?>> = Resource.Uninitialized,
-    val triggerBioPrompt: Resource<Cipher> = Resource.Uninitialized,
+    val triggerBioPrompt: Resource<CryptoObject> = Resource.Uninitialized,
     val bioPromptReason: BioPromptReason = BioPromptReason.UNINITIALIZED,
     val exitLoginFlow : Resource<Unit> = Resource.Uninitialized
     ) {

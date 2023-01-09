@@ -9,13 +9,14 @@ import com.censocustody.android.data.models.Chain
 import com.censocustody.android.data.models.VerifyUser
 import com.censocustody.android.data.models.WalletSigner
 import com.censocustody.android.data.models.mapToPublicKeysList
+import java.security.Signature
 import javax.crypto.Cipher
 
 interface KeyRepository {
 
     suspend fun signTimestamp(
         timestamp: String,
-        cipher: Cipher,
+        signature: Signature,
     ): String
 
     suspend fun generatePhrase(): String
@@ -105,18 +106,17 @@ class KeyRepositoryImpl(
 
     override suspend fun signTimestamp(
         timestamp: String,
-        cipher: Cipher
+        signature: Signature
     ): String {
         val userEmail = userRepository.retrieveUserEmail()
 
         val tokenByteArray = timestamp.toByteArray(charset = Charsets.UTF_8)
 
-        val signedTimestamp =
-            encryptionManager.signDataWithSolanaEncryptedKey(
-                data = tokenByteArray,
-                userEmail = userEmail,
-                cipher = cipher
-            )
+        val signedTimestamp = encryptionManager.signDataWithDeviceKey(
+            data = tokenByteArray,
+            signature = signature,
+            email = userEmail
+        )
 
         return BaseWrapper.encodeToBase64(signedTimestamp)
     }
