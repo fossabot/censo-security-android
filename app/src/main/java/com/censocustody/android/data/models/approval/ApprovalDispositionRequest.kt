@@ -1,5 +1,6 @@
 package com.censocustody.android.data.models.approval
 
+import androidx.biometric.BiometricPrompt
 import com.censocustody.android.common.BaseWrapper.decodeFromBase64
 import com.censocustody.android.data.EncryptionManager
 import com.censocustody.android.data.Signable
@@ -18,6 +19,7 @@ import com.censocustody.android.data.models.approval.ApprovalRequestDetails.*
 import com.censocustody.android.common.EthereumTransactionUtil
 import com.censocustody.android.common.Operation
 import java.nio.ByteBuffer
+import java.security.Signature
 import javax.crypto.Cipher
 import org.bouncycastle.util.encoders.Hex
 import java.math.BigInteger
@@ -431,36 +433,41 @@ data class ApprovalDispositionRequest(
 
     fun convertToApiBody(
         encryptionManager: EncryptionManager,
-        cipher: Cipher): RegisterApprovalDispositionBody {
+        cryptoObject: BiometricPrompt.CryptoObject
+    ): RegisterApprovalDispositionBody {
+
+        if(cryptoObject.cipher == null && cryptoObject.signature == null) {
+            throw Exception("Missing biometry approved cipher or signature")
+        }
 
         val signatureInfo: ApprovalSignature = when (requestType) {
             is LoginApprovalRequest, is PasswordReset, is AcceptVaultInvitation ->
                 ApprovalSignature.NoChainSignature(
-                    signRequestWithSolanaKey(encryptionManager, cipher)
+                    signRequestWithDeviceKey(encryptionManager, cryptoObject.signature!!)
                 )
-            is WalletCreation -> getSignatureInfo(requestType.accountInfo.chain ?: Chain.solana, encryptionManager, cipher)
-            is CreateAddressBookEntry -> getSignatureInfo(requestType.chain, encryptionManager, cipher)
-            is DeleteAddressBookEntry -> getSignatureInfo(requestType.chain, encryptionManager, cipher)
+            is WalletCreation -> getSignatureInfo(requestType.accountInfo.chain ?: Chain.solana, encryptionManager, cryptoObject.cipher!!)
+            is CreateAddressBookEntry -> getSignatureInfo(requestType.chain, encryptionManager, cryptoObject.cipher!!)
+            is DeleteAddressBookEntry -> getSignatureInfo(requestType.chain, encryptionManager, cryptoObject.cipher!!)
             is WithdrawalRequest -> {
                 when (requestType.signingData) {
                     is SigningData.BitcoinSigningData ->
                         ApprovalSignature.BitcoinSignatures(
-                            signatures = signRequestWithBitcoinKey(encryptionManager, cipher, requestType.signingData.childKeyIndex).map { it.signature }
+                            signatures = signRequestWithBitcoinKey(encryptionManager, cryptoObject.cipher!!, requestType.signingData.childKeyIndex).map { it.signature }
                         )
                     is SigningData.SolanaSigningData ->
                         ApprovalSignature.SolanaSignature(
-                            signature = signRequestWithSolanaKey(encryptionManager, cipher).signature,
+                            signature = signRequestWithSolanaKey(encryptionManager, cryptoObject.cipher!!).signature,
                             nonce = nonces.first().value,
                             nonceAccountAddress = requestType.nonceAccountAddresses().first()
                         )
                     is SigningData.EthereumSigningData ->
                         ApprovalSignature.EthereumSignature(
-                            signature = signRequestWithEthereumKey(encryptionManager, cipher).signature,
+                            signature = signRequestWithEthereumKey(encryptionManager, cryptoObject.cipher!!).signature,
                         )
                 }
             }
             else -> ApprovalSignature.SolanaSignature(
-                signature = signRequestWithSolanaKey(encryptionManager, cipher).signature,
+                signature = signRequestWithSolanaKey(encryptionManager, cryptoObject.cipher!!).signature,
                 nonce = nonces.first().value,
                 nonceAccountAddress = requestType.nonceAccountAddresses().first()
             )
@@ -485,6 +492,20 @@ data class ApprovalDispositionRequest(
         }
     }
 
+    private fun signRequestWithDeviceKey(
+        encryptionManager: EncryptionManager,
+        signature: Signature) : SignedPayload {
+        return try {
+            encryptionManager.signApprovalWithDeviceKey(
+                signable = this,
+                email = email,
+                signature = signature
+            )
+        } catch (e: Exception) {
+            throw Exception("Signing with device key failure")
+        }
+    }
+
     private fun signRequestWithSolanaKey(
         encryptionManager: EncryptionManager,
         cipher: Cipher): SignedPayload {
@@ -496,7 +517,7 @@ data class ApprovalDispositionRequest(
                 cipher = cipher
             )
         } catch (e: Exception) {
-            throw Exception("Signing data failure")
+            throw Exception("Signing with solana key failure")
         }
     }
 

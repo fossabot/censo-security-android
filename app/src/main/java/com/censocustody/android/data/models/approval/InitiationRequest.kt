@@ -1,5 +1,6 @@
 package com.censocustody.android.data.models.approval
 
+import androidx.biometric.BiometricPrompt
 import com.censocustody.android.common.BaseWrapper
 import com.censocustody.android.data.EncryptionManager
 import com.censocustody.android.data.Signable
@@ -20,7 +21,6 @@ import com.censocustody.android.data.models.approval.ApprovalRequestDetails.Comp
 import com.censocustody.android.data.models.approval.TransactionInstruction.Companion.createAdvanceNonceInstruction
 import org.bouncycastle.crypto.params.Ed25519PrivateKeyParameters
 import java.io.ByteArrayOutputStream
-import javax.crypto.Cipher
 
 data class InitiationRequest(
     val requestId: String,
@@ -393,8 +393,12 @@ data class InitiationRequest(
     }
 
     fun convertToApiBody(
-        encryptionManager: EncryptionManager, cipher: Cipher
+        encryptionManager: EncryptionManager, cryptoObject: BiometricPrompt.CryptoObject
     ): InitiateRequestBody {
+
+        if (cryptoObject.cipher == null) {
+            throw Exception("Missing cipher to sign data")
+        }
 
         val initiationSignedData : SignedInitiationData =
             encryptionManager.signInitiationRequestData(
@@ -402,7 +406,7 @@ data class InitiationRequest(
                 email = email,
                 ephemeralPrivateKey = opAccountPrivateKey.encoded,
                 supplyInstructions = supplyInstructions,
-                cipher = cipher
+                cipher = cryptoObject.cipher!!
             )
 
         val nonce = nonces.firstOrNull()?.value ?: ""
