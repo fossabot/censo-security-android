@@ -4,6 +4,7 @@ import com.censocustody.android.common.Resource
 import com.censocustody.android.common.CensoCountDownTimer
 import com.censocustody.android.data.ApprovalsRepository
 import com.censocustody.android.data.KeyRepository
+import com.censocustody.android.data.UserRepository
 import com.censocustody.android.data.models.approval.ApprovalRequest
 import com.censocustody.android.data.models.CipherRepository
 import com.censocustody.android.presentation.common_approvals.CommonApprovalsViewModel
@@ -15,12 +16,12 @@ import javax.inject.Inject
 @HiltViewModel
 class ApprovalDetailsViewModel @Inject constructor(
     approvalsRepository: ApprovalsRepository,
-    keyRepository: KeyRepository,
+    userRepository: UserRepository,
     cipherRepository: CipherRepository,
     timer: CensoCountDownTimer,
 ) : CommonApprovalsViewModel(
     approvalsRepository = approvalsRepository,
-    keyRepository = keyRepository,
+    userRepository = userRepository,
     cipherRepository = cipherRepository,
     timer = timer
 ) {

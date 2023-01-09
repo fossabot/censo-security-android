@@ -1,5 +1,6 @@
 package com.censocustody.android.presentation.sign_in
 
+import androidx.biometric.BiometricPrompt.CryptoObject
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -16,6 +17,7 @@ import com.censocustody.android.data.models.CipherRepository
 import com.censocustody.android.data.models.LoginResponse
 import com.censocustody.android.data.models.PushBody
 import kotlinx.coroutines.*
+import java.security.Signature
 import javax.crypto.Cipher
 
 @HiltViewModel
@@ -84,10 +86,12 @@ class SignInViewModel @Inject constructor(
     fun kickOffBiometryLoginOrMoveToPasswordEntry() {
         viewModelScope.launch {
             if (keyRepository.hasV3RootSeedStored()) {
-                val cipher = cipherRepository.getCipherForV3RootSeedDecryption()
-                if (cipher != null) {
+                val email = userRepository.retrieveUserEmail()
+                val deviceId = userRepository.retrieveUserDeviceId(email)
+                val signature = cipherRepository.getSignatureForDeviceSigning(deviceId)
+                if (signature != null) {
                     state = state.copy(
-                        triggerBioPrompt = Resource.Success(cipher),
+                        triggerBioPrompt = Resource.Success(CryptoObject(signature)),
                         bioPromptReason = BioPromptReason.RETURN_LOGIN,
                         loginResult = Resource.Uninitialized
                     )
@@ -98,11 +102,13 @@ class SignInViewModel @Inject constructor(
         }
     }
 
-    fun biometryApproved(cipher: Cipher) {
-        when(state.bioPromptReason) {
-            BioPromptReason.SAVE_SENTINEL -> saveSentinelData(cipher)
-            BioPromptReason.RETURN_LOGIN -> handleBiometryReturnLogin(cipher)
-            else -> {}
+    fun biometryApproved(cryptoObject: CryptoObject) {
+        if (state.bioPromptReason == BioPromptReason.SAVE_SENTINEL && cryptoObject.cipher != null) {
+            saveSentinelData(cryptoObject.cipher!!)
+        }
+
+        if (state.bioPromptReason == BioPromptReason.RETURN_LOGIN && cryptoObject.signature != null) {
+            handleBiometryReturnLogin(cryptoObject.signature!!)
         }
     }
 
@@ -122,13 +128,13 @@ class SignInViewModel @Inject constructor(
         }
     }
 
-    private fun handleBiometryReturnLogin(cipher: Cipher) {
+    private fun handleBiometryReturnLogin(signature: Signature) {
         viewModelScope.launch {
             try {
                 val timestamp = keyRepository.generateTimestamp()
                 val signedTimestamp = keyRepository.signTimestamp(
                     timestamp = timestamp,
-                    cipher = cipher
+                    signature = signature
                 )
 
                 loginWithBiometry(timestamp = timestamp, signedTimestamp = signedTimestamp)
@@ -229,10 +235,12 @@ class SignInViewModel @Inject constructor(
 
     private suspend fun saveSentinelDataToDevice() {
         val cipher = cipherRepository.getCipherForEncryption(SENTINEL_KEY_NAME)
-        state = state.copy(
-            triggerBioPrompt = Resource.Success(cipher),
-            bioPromptReason = BioPromptReason.SAVE_SENTINEL
-        )
+        if (cipher != null) {
+            state = state.copy(
+                triggerBioPrompt = Resource.Success(CryptoObject(cipher)),
+                bioPromptReason = BioPromptReason.SAVE_SENTINEL
+            )
+        }
     }
 
     private suspend fun handleReturnLoggedInUser() {

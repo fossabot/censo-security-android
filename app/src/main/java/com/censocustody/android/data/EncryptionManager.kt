@@ -90,6 +90,18 @@ interface EncryptionManager {
         signature: Signature,
         walletSigners: List<WalletSigner>
     ): ByteArray
+
+    fun signApprovalWithDeviceKey(
+        signable: Signable,
+        email: String,
+        signature: Signature
+    ): SignedPayload
+
+    fun signDataWithDeviceKey(
+        data: ByteArray,
+        signature: Signature,
+        email: String
+    ) : ByteArray
     //endregion
 
     //region generic key work
@@ -146,6 +158,34 @@ class EncryptionManagerImpl @Inject constructor(
             signature = signature,
             data = dataToSign,
             keyName = SharedPrefsHelper.retrieveDeviceId(email)
+        )
+    }
+
+    override fun signApprovalWithDeviceKey(signable: Signable, email: String, signature: Signature) : SignedPayload {
+        val data = signable.retrieveSignableData(null).first()
+
+        val signedData = cryptographyManager.signDataWithDeviceKey(
+            data = data,
+            signature = signature,
+            keyName = SharedPrefsHelper.retrieveDeviceId(email)
+        )
+
+        return SignedPayload(
+            signature = BaseWrapper.encodeToBase64(signedData),
+            payload = BaseWrapper.encodeToBase64(data)
+        )
+    }
+
+    override fun signDataWithDeviceKey(
+        data: ByteArray,
+        signature: Signature,
+        email: String
+    ): ByteArray {
+        val deviceId = SharedPrefsHelper.retrieveDeviceId(email)
+        return cryptographyManager.signDataWithDeviceKey(
+            signature = signature,
+            data = data,
+            keyName = deviceId
         )
     }
 

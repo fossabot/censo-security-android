@@ -1,5 +1,7 @@
 package com.censocustody.android.presentation.common_approvals
 
+import androidx.biometric.BiometricPrompt
+import androidx.biometric.BiometricPrompt.CryptoObject
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -9,22 +11,22 @@ import com.censocustody.android.common.Resource
 import com.censocustody.android.common.CensoCountDownTimer
 import com.censocustody.android.common.CensoCountDownTimerImpl
 import com.censocustody.android.data.ApprovalsRepository
-import com.censocustody.android.data.KeyRepository
+import com.censocustody.android.data.UserRepository
 import com.censocustody.android.data.models.ApprovalDisposition
 import com.censocustody.android.data.models.CipherRepository
 import com.censocustody.android.data.models.InitiationDisposition
 import com.censocustody.android.data.models.RegisterApprovalDisposition
 import com.censocustody.android.data.models.approval.SolanaApprovalRequestDetails
 import com.censocustody.android.data.models.approval.ApprovalRequest
+import com.censocustody.android.data.models.approval.ApprovalRequestDetails
 import com.censocustody.android.presentation.approval_disposition.ApprovalDispositionState
 import com.censocustody.android.presentation.durable_nonce.DurableNonceViewModel
 import kotlinx.coroutines.launch
-import javax.crypto.Cipher
 
-abstract class CommonApprovalsViewModel(
+abstract class  CommonApprovalsViewModel(
     private val approvalsRepository: ApprovalsRepository,
+    private val userRepository: UserRepository,
     private val cipherRepository: CipherRepository,
-    private val keyRepository: KeyRepository,
     private val timer: CensoCountDownTimer
 ) : ViewModel() {
 
@@ -71,18 +73,34 @@ abstract class CommonApprovalsViewModel(
 
     private fun triggerBioPrompt() {
         viewModelScope.launch {
-            val cipher = cipherRepository.getCipherForV3RootSeedDecryption()
-            if (cipher != null) {
-                state = state.copy(bioPromptTrigger = Resource.Success(cipher))
+            val approvalType = state.selectedApproval?.getApprovalRequestType()
+
+            when (approvalType) {
+                is ApprovalRequestDetails.LoginApprovalRequest, is ApprovalRequestDetails.AcceptVaultInvitation, is ApprovalRequestDetails.PasswordReset -> {
+                    val email = userRepository.retrieveUserEmail()
+                    val deviceId = userRepository.retrieveUserDeviceId(email)
+                    val signature = cipherRepository.getSignatureForDeviceSigning(deviceId)
+                    if (signature != null) {
+                        state =
+                            state.copy(bioPromptTrigger = Resource.Success(CryptoObject(signature)))
+                    }
+                }
+                else -> {
+                    val cipher = cipherRepository.getCipherForV3RootSeedDecryption()
+                    if (cipher != null) {
+                        state =
+                            state.copy(bioPromptTrigger = Resource.Success(CryptoObject(cipher)))
+                    }
+                }
             }
         }
     }
 
-    fun biometryApproved(cipher: Cipher) {
-        registerApprovalDisposition(cipher)
+    fun biometryApproved(cryptoObject: BiometricPrompt.CryptoObject) {
+        registerApprovalDisposition(cryptoObject)
     }
 
-    private fun registerApprovalDisposition(cipher: Cipher) {
+    private fun registerApprovalDisposition(cryptoObject: BiometricPrompt.CryptoObject) {
         viewModelScope.launch {
             state = state.copy(
                 approvalDispositionState = state.approvalDispositionState?.copy(
@@ -95,7 +113,7 @@ abstract class CommonApprovalsViewModel(
                 approval = state.selectedApproval,
                 multipleAccounts = state.multipleAccounts,
                 approvalsRepository = approvalsRepository,
-                cipher = cipher
+                cryptoObject = cryptoObject,
             )
 
             state = state.copy(approvalDispositionState = approvalDispositionState)
@@ -107,7 +125,7 @@ abstract class CommonApprovalsViewModel(
         approval: ApprovalRequest?,
         multipleAccounts: DurableNonceViewModel.MultipleAccounts?,
         approvalsRepository: ApprovalsRepository,
-        cipher: Cipher
+        cryptoObject: BiometricPrompt.CryptoObject
     ): ApprovalDispositionState? {
 
         val isInitiationRequest =
@@ -164,7 +182,7 @@ abstract class CommonApprovalsViewModel(
             val initiationResponseResource = approvalsRepository.approveOrDenyInitiation(
                 requestId = approvalId,
                 initialDisposition = initiationDisposition,
-                cipher = cipher
+                cryptoObject = cryptoObject
             )
             return approvalDispositionState.copy(
                 initiationDispositionResult = initiationResponseResource
@@ -180,7 +198,7 @@ abstract class CommonApprovalsViewModel(
                 approvalsRepository.approveOrDenyDisposition(
                     requestId = approvalId,
                     registerApprovalDisposition = registerApprovalDisposition,
-                    cipher = cipher
+                    cryptoObject = cryptoObject
                 )
 
             return approvalDispositionState.copy(
