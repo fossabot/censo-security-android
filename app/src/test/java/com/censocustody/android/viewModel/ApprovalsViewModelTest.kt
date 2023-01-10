@@ -1,5 +1,6 @@
 package com.censocustody.android.viewModel
 
+import androidx.biometric.BiometricPrompt.CryptoObject
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.times
 import com.nhaarman.mockitokotlin2.verify
@@ -49,7 +50,13 @@ class ApprovalsViewModelTest : BaseViewModelTest() {
     lateinit var keyRepository: KeyRepository
 
     @Mock
+    lateinit var userRepository: UserRepository
+
+    @Mock
     lateinit var cipher: Cipher
+
+    @Mock
+    lateinit var cryptoObject: CryptoObject
 
     private lateinit var approvalsViewModel: ApprovalsViewModel
 
@@ -95,7 +102,7 @@ class ApprovalsViewModelTest : BaseViewModelTest() {
         approvalsViewModel =
             ApprovalsViewModel(
                 approvalsRepository = approvalsRepository,
-                keyRepository = keyRepository,
+                userRepository = userRepository,
                 cipherRepository = cipherRepository,
                 timer = countdownTimer
             )
@@ -504,7 +511,7 @@ class ApprovalsViewModelTest : BaseViewModelTest() {
         setMultipleAccountsAndAssertNonceDataAndBioPromptState()
 
         //Trigger the register disposition call (user triggers this when they give biometry approval)
-        approvalsViewModel.biometryApproved(cipher)
+        approvalsViewModel.biometryApproved(cryptoObject)
     }
 
     private suspend fun setApprovalsDataInStateAndAssertStateWasSet() = runTest {

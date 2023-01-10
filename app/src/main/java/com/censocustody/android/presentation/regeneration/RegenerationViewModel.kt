@@ -7,14 +7,10 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.censocustody.android.common.BioCryptoUtil
-import com.censocustody.android.common.BioPromptReason
 import com.censocustody.android.common.Resource
-import com.censocustody.android.common.censoLog
 import com.censocustody.android.data.KeyRepository
-import com.censocustody.android.data.MigrationRepository
 import com.censocustody.android.data.UserRepository
 import com.censocustody.android.data.models.CipherRepository
-import com.censocustody.android.data.models.mapToPublicKeysList
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import java.security.Signature
@@ -52,7 +48,6 @@ class RegenerationViewModel @Inject constructor(
 
     fun biometryApproved(cryptoObject: BiometricPrompt.CryptoObject) {
         viewModelScope.launch {
-            censoLog(message = "Signature passed back from biometry: ${cryptoObject.signature}")
             handleKeyReUploadKeys(cryptoObject.signature!!)
         }
     }

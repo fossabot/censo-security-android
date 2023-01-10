@@ -11,17 +11,13 @@ import androidx.biometric.BiometricPrompt.CryptoObject
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.AlertDialog
-import androidx.compose.material.Button
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Text
-import androidx.compose.material.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -36,6 +32,8 @@ import com.censocustody.android.R
 import com.censocustody.android.common.*
 import com.censocustody.android.presentation.Screen
 import com.censocustody.android.presentation.device_registration.DeviceRegistrationViewModel.Companion.THUMBNAIL_DATA_KEY
+import com.censocustody.android.presentation.key_management.GradientBackgroundUI
+import com.censocustody.android.presentation.key_management.SmallAuthFlowButton
 import com.censocustody.android.ui.theme.CensoWhite
 import com.censocustody.android.ui.theme.UnfocusedGrey
 
@@ -45,6 +43,7 @@ fun DeviceRegistrationScreen(
     viewModel: DeviceRegistrationViewModel = hiltViewModel(),
 ) {
 
+    //region Variables
     val state = viewModel.state
 
     val context = LocalContext.current as FragmentActivity
@@ -58,28 +57,42 @@ fun DeviceRegistrationScreen(
                 result.data?.extras?.get(THUMBNAIL_DATA_KEY) as Bitmap?
 
             if (imageThumbnailBitmap != null) {
-                viewModel.handleCapturedUserPhoto(userPhoto = imageThumbnailBitmap)
+                viewModel.capturedUserPhotoSuccess(userPhoto = imageThumbnailBitmap)
             } else {
-                viewModel.handleImageCaptureError(ImageCaptureError.BAD_RESULT)
+                viewModel.capturedUserPhotoError(ImageCaptureError.BAD_RESULT)
             }
         } else {
-            viewModel.handleImageCaptureError(ImageCaptureError.ACTION_CANCELLED)
+            viewModel.capturedUserPhotoError(ImageCaptureError.ACTION_CANCELLED)
         }
     }
 
-    fun getImageCaptureErrorMessage(context: Context, state: DeviceRegistrationState) =
-        when (state.imageCaptureFailedError.data) {
-            ImageCaptureError.NO_HARDWARE_CAMERA ->
-                context.getString(R.string.image_capture_failed_no_camera_message)
-            ImageCaptureError.BAD_RESULT ->
-                context.getString(R.string.image_capture_failed_default_message)
-            ImageCaptureError.ACTION_CANCELLED ->
-                context.getString(R.string.image_capture_failed_action_cancelled_message)
-            null -> {
-                context.getString(R.string.image_capture_failed_default_message)
+    fun getErrorMessage(
+        context: Context,
+        deviceRegistrationError: DeviceRegistrationError,
+        imageCaptureError: ImageCaptureError? = null
+    ) = when (deviceRegistrationError) {
+        DeviceRegistrationError.NONE -> context.getString(R.string.image_capture_failed_default_message)
+        DeviceRegistrationError.API -> context.getString(R.string.device_registration_api_error)
+        DeviceRegistrationError.IMAGE_CAPTURE -> {
+            when (imageCaptureError) {
+                ImageCaptureError.NO_HARDWARE_CAMERA ->
+                    context.getString(R.string.image_capture_failed_no_camera_message)
+                ImageCaptureError.BAD_RESULT ->
+                    context.getString(R.string.image_capture_failed_default_message)
+                ImageCaptureError.ACTION_CANCELLED ->
+                    context.getString(R.string.image_capture_failed_action_cancelled_message)
+                null -> {
+                    context.getString(R.string.image_capture_failed_default_message)
+                }
             }
         }
+        DeviceRegistrationError.SIGNING_IMAGE -> context.getString(R.string.signing_image_error)
+        DeviceRegistrationError.BIOMETRY -> context.getString(R.string.biometry_failed_device_registration_error)
+    }
 
+    //endregion
+
+    //region Launched Effects
     DisposableEffect(key1 = viewModel) {
         viewModel.onStart()
         onDispose { }
@@ -95,11 +108,19 @@ fun DeviceRegistrationScreen(
             viewModel.resetUserDevice()
         }
 
+        if (!state.userLoggedIn) {
+            navController.navigate(Screen.EntranceRoute.route) {
+                launchSingleTop = true
+                popUpToTop()
+            }
+            viewModel.resetUserLoggedIn()
+        }
+
         if (state.triggerImageCapture is Resource.Success) {
             val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
 
             if (intent.resolveActivity(packageManager) == null) {
-                viewModel.handleImageCaptureError(ImageCaptureError.NO_HARDWARE_CAMERA)
+                viewModel.capturedUserPhotoError(ImageCaptureError.NO_HARDWARE_CAMERA)
             } else {
                 cameraResultLauncher.launch(intent)
             }
@@ -141,15 +162,76 @@ fun DeviceRegistrationScreen(
         }
     }
 
-    Box(modifier = Modifier.fillMaxSize()) {
-        Text("Key Device Registration", color = CensoWhite)
-    }
+    //endregion
 
-    if (state.imageCaptureFailedError is Resource.Error) {
-        val message = getImageCaptureErrorMessage(context = context, state = state)
+    //region Main UI
+    GradientBackgroundUI()
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 40.dp)
+    ) {
+        if (state.deviceRegistrationError != DeviceRegistrationError.NONE) {
+            val message = getErrorMessage(
+                context = context,
+                deviceRegistrationError = state.deviceRegistrationError,
+                imageCaptureError = state.imageCaptureFailedError.data
+            )
 
-        ImageCaptureErrorDialog(mainText = message) {
-            viewModel.resetImageCaptureFailedError()
+            Column(
+                modifier = Modifier.align(Alignment.Center),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = message,
+                    color = CensoWhite,
+                    fontSize = 18.sp,
+                    textAlign = TextAlign.Center,
+                    letterSpacing = 0.23.sp,
+                    lineHeight = 32.sp
+                )
+                Spacer(modifier = Modifier.height(24.dp))
+                SmallAuthFlowButton(
+                    modifier = Modifier.wrapContentWidth(),
+                    text = stringResource(R.string.retry),
+                ) {
+                    viewModel.retry()
+                }
+            }
+        } else {
+            Column(
+                Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp)
+                        .border(width = 1.5.dp, color = UnfocusedGrey.copy(alpha = 0.50f))
+                        .background(color = Color.Black)
+                        .zIndex(2.5f),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Spacer(modifier = Modifier.height(36.dp))
+                    Text(
+                        modifier = Modifier.padding(horizontal = 8.dp),
+                        text = stringResource(R.string.adding_photo_main_message),
+                        textAlign = TextAlign.Center,
+                        color = CensoWhite,
+                        fontSize = 16.sp
+                    )
+                    Spacer(modifier = Modifier.height(36.dp))
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(20.dp),
+                        color = CensoWhite,
+                        strokeWidth = 2.5.dp,
+                    )
+                    Spacer(modifier = Modifier.height(36.dp))
+                }
+            }
         }
     }
 
@@ -169,12 +251,15 @@ fun DeviceRegistrationScreen(
                 },
                 contentPadding = PaddingValues(vertical = 12.dp, horizontal = 24.dp)
             ) {
-                Text(text = stringResource(R.string.i_have_taken_photo), textAlign = TextAlign.Center)
+                Text(
+                    text = stringResource(R.string.i_have_taken_photo),
+                    textAlign = TextAlign.Center
+                )
             }
-            Spacer(modifier = Modifier.height(72.dp))
+            Spacer(modifier = Modifier.height(32.dp))
             CensoButton(
                 onClick = {
-                    viewModel.triggerImageCapture()
+                    viewModel.retry()
                     viewModel.resetUserDialogToSaveDeviceKey()
                 },
                 contentPadding = PaddingValues(vertical = 12.dp, horizontal = 24.dp)
@@ -183,50 +268,6 @@ fun DeviceRegistrationScreen(
             }
         }
     }
-}
 
-@Composable
-fun ImageCaptureErrorDialog(
-    mainText: String,
-    onAccept: () -> Unit,
-) {
-    Column(
-        Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp)
-                .border(width = 1.5.dp, color = UnfocusedGrey.copy(alpha = 0.50f))
-                .background(color = Color.Black)
-                .zIndex(2.5f),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Spacer(modifier = Modifier.height(36.dp))
-            Text(
-                modifier = Modifier.padding(horizontal = 16.dp),
-                text = mainText,
-                textAlign = TextAlign.Center,
-                color = CensoWhite,
-                fontSize = 20.sp
-            )
-            Spacer(modifier = Modifier.height(36.dp))
-            Button(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(8.dp)),
-                onClick = onAccept,
-            ) {
-                Text(
-                    text = stringResource(id = R.string.ok),
-                    fontSize = 18.sp,
-                    color = CensoWhite,
-                    textAlign = TextAlign.Center
-                )
-            }
-            Spacer(modifier = Modifier.height(36.dp))
-        }
-    }
+    //endregion
 }
