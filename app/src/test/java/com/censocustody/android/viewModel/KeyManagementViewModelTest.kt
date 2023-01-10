@@ -367,7 +367,7 @@ class KeyManagementViewModelTest : BaseViewModelTest() {
             keyMgmtViewModel.state.keyManagementFlowStep
         )
 
-        keyMgmtViewModel.recoverKey(phrase = testValidPhrase, validWalletSigners)
+        keyMgmtViewModel.recoverKey(validWalletSigners)
 
         advanceUntilIdle()
 
@@ -380,7 +380,7 @@ class KeyManagementViewModelTest : BaseViewModelTest() {
             testWalletSigners
         }
 
-        whenever(userRepository.addWalletSigner(any())).thenAnswer {
+        whenever(userRepository.addWalletSigner(any(), any())).thenAnswer {
             Resource.Success(data = testWalletSigners)
         }
 
@@ -404,7 +404,7 @@ class KeyManagementViewModelTest : BaseViewModelTest() {
 
         //todo: this test seems to be showing that we
 
-        verify(userRepository, times(1)).addWalletSigner(any())
+        verify(userRepository, times(1)).addWalletSigner(any(), any())
 
         assertTrue(keyMgmtViewModel.state.finalizeKeyFlow is Resource.Success)
         assertEquals(testWalletSigners, keyMgmtViewModel.state.finalizeKeyFlow.data)

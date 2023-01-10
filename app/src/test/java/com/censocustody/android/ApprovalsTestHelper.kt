@@ -138,7 +138,8 @@ fun getVerifyUser() = VerifyUser(
         name = "cryptology"
     ),
     publicKeys = listOf(WalletPublicKey(key = ExampleMnemonicAndKeys.PUBLIC_KEY, chain = Chain.solana)),
-    useStaticKey = false
+    useStaticKey = false,
+    deviceKey = ""
 )
 
 class ExampleMnemonicAndKeys {
