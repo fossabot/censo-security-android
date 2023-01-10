@@ -8,8 +8,6 @@ import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
 import javax.crypto.spec.GCMParameterSpec
 import com.censocustody.android.common.BaseWrapper
-import com.censocustody.android.common.censoLog
-import io.reactivex.annotations.NonNull
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo
 import java.security.*
 import java.security.cert.Certificate
@@ -75,7 +73,6 @@ class CryptographyManagerImpl : CryptographyManager {
     override fun verifySignature(keyName: String, dataSigned: ByteArray, signatureToCheck: ByteArray): Boolean {
         val signature = Signature.getInstance("SHA256withECDSA")
         val certificate = getCertificateFromKeystore(keyName)
-        censoLog(message = "Public key used to verify: ${BaseWrapper.encode(certificate.publicKey.encoded)}")
         signature.initVerify(certificate)
         signature.update(dataSigned)
         return signature.verify(signatureToCheck)
@@ -121,7 +118,6 @@ class CryptographyManagerImpl : CryptographyManager {
     }
 
     override fun createPublicDeviceKey(keyName: String): ByteArray {
-        censoLog(message = "Key name used when creating key: $keyName")
         val kpg: KeyPairGenerator = KeyPairGenerator.getInstance(
             KeyProperties.KEY_ALGORITHM_EC,
             "AndroidKeyStore"
@@ -144,13 +140,10 @@ class CryptographyManagerImpl : CryptographyManager {
 
         val keyPair = kpg.generateKeyPair()
 
-        censoLog(message = "Public key used to sign: ${BaseWrapper.encode(keyPair.public.encoded)}")
-
         return extractData(keyPair.public)
     }
 
     override fun getCertificateFromKeystore(deviceId: String): Certificate {
-        censoLog(message = "Key name used when getting public key: $deviceId")
         val keyStore = KeyStore.getInstance("AndroidKeyStore")
         keyStore.load(null) // Keystore must be loaded before it can be accessed
         val cert = keyStore.getCertificate(deviceId)
