@@ -1,5 +1,6 @@
 package com.censocustody.android
 
+import androidx.biometric.BiometricPrompt.CryptoObject
 import cash.z.ecc.android.bip39.Mnemonics
 import com.google.gson.JsonParser
 import com.nhaarman.mockitokotlin2.any
@@ -32,6 +33,9 @@ class InitiationRequestSigningTest {
 
     @Mock
     lateinit var cipher: Cipher
+
+    @Mock
+    lateinit var cryptoObject: CryptoObject
 
     private lateinit var encryptionManager: EncryptionManager
 
@@ -81,7 +85,7 @@ class InitiationRequestSigningTest {
     fun fullBalanceAccountIntitiationApiBody() {
         val initiationRequest = generateWalletCreationInitiationSignableData()
 
-        val apiBody = initiationRequest.convertToApiBody(encryptionManager, cipher)
+        val apiBody = initiationRequest.convertToApiBody(encryptionManager, cryptoObject)
 
         assert(apiBody.approvalDisposition == initiationRequest.approvalDisposition)
         assert(apiBody.nonce == exampleNonces.first().value)
@@ -98,7 +102,7 @@ class InitiationRequestSigningTest {
     fun signersUpdateIntitiationApiBody() {
         val initiationRequest = generateSignersUpdateInitiationSignableData()
 
-        val apiBody = initiationRequest.convertToApiBody(encryptionManager, cipher)
+        val apiBody = initiationRequest.convertToApiBody(encryptionManager, cryptoObject)
 
         assert(apiBody.approvalDisposition == initiationRequest.approvalDisposition)
         assert(apiBody.nonce == exampleNonces.first().value)
@@ -115,7 +119,7 @@ class InitiationRequestSigningTest {
     fun withdrawalRequestIntitiationApiBody() {
         val initiationRequest = generateWithdrawalRequestInitiationSignableData()
 
-        val apiBody = initiationRequest.convertToApiBody(encryptionManager, cipher)
+        val apiBody = initiationRequest.convertToApiBody(encryptionManager, cryptoObject)
 
         assert(apiBody.approvalDisposition == initiationRequest.approvalDisposition)
         assert(apiBody.nonce == exampleNonces.first().value)
@@ -132,7 +136,7 @@ class InitiationRequestSigningTest {
     fun conversionRequestIntitiationApiBody() {
         val initiationRequest = generateConversionRequestInitiationSignableData()
 
-        val apiBody = initiationRequest.convertToApiBody(encryptionManager, cipher)
+        val apiBody = initiationRequest.convertToApiBody(encryptionManager, cryptoObject)
 
         assert(apiBody.approvalDisposition == initiationRequest.approvalDisposition)
         assert(apiBody.nonce == exampleNonces.first().value)

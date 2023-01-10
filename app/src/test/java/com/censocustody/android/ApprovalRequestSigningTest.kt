@@ -1,5 +1,6 @@
 package com.censocustody.android
 
+import androidx.biometric.BiometricPrompt.CryptoObject
 import cash.z.ecc.android.bip39.Mnemonics
 import com.google.gson.JsonParser
 import com.nhaarman.mockitokotlin2.*
@@ -48,6 +49,7 @@ class ApprovalRequestSigningTest {
 
     private val mockEncryptionManager = mock<EncryptionManager>()
     private val cipherMock = mock<Cipher>()
+    private val cryptoMock = mock<CryptoObject>()
 
     @Before
     fun setUp() {
@@ -269,7 +271,7 @@ class ApprovalRequestSigningTest {
             email = userEmail,
             cipher = cipherMock,
         )).then { SignedPayload(signature = "someSignature", payload = "somePayload")  }
-        val apiBody = approvalDispositionRequest.convertToApiBody(mockEncryptionManager, cipherMock)
+        val apiBody = approvalDispositionRequest.convertToApiBody(mockEncryptionManager, cryptoMock)
         assertEquals(disposition, apiBody.approvalDisposition)
         assertEquals(
             ApprovalSignature.NoChainSignature(signature = "someSignature", signedData = "somePayload"),
@@ -379,7 +381,7 @@ class ApprovalRequestSigningTest {
 
         whenever(mockEncryptionManager.signSolanaApprovalDispositionMessage(signable = approvalDispositionRequest, email = userEmail, cipher = cipherMock))
             .thenReturn(SignedPayload(signature = "someSignature", payload = ""))
-        val apiBody = approvalDispositionRequest.convertToApiBody(mockEncryptionManager, cipherMock)
+        val apiBody = approvalDispositionRequest.convertToApiBody(mockEncryptionManager, cryptoMock)
         assertEquals(disposition, apiBody.approvalDisposition)
         assertEquals(
             ApprovalSignature.SolanaSignature("someSignature", exampleNonces.first().value, "57bGarSm6DxPnWds3KVWMVkDZ9s4D8WGnqm6DSzBiLpN"),
@@ -421,7 +423,7 @@ class ApprovalRequestSigningTest {
 
         whenever(mockEncryptionManager.signBitcoinApprovalDispositionMessage(
             signable = approvalDispositionRequest, cipher = cipherMock, email = userEmail, childKeyIndex = 0)).thenReturn(expectedSignatures)
-        val apiBody = approvalDispositionRequest.convertToApiBody(mockEncryptionManager, cipherMock)
+        val apiBody = approvalDispositionRequest.convertToApiBody(mockEncryptionManager, cryptoMock)
         assertEquals(disposition, apiBody.approvalDisposition)
         assertEquals(ApprovalSignature.BitcoinSignatures(expectedSignatures.map { it.signature}), apiBody.signatureInfo)
 

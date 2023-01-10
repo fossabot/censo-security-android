@@ -1,7 +1,6 @@
 package com.censocustody.android.presentation.device_registration
 
 import android.graphics.Bitmap
-import androidx.biometric.BiometricPrompt
 import androidx.biometric.BiometricPrompt.CryptoObject
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -10,20 +9,16 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.censocustody.android.common.*
 import com.censocustody.android.data.CryptographyManager
-import com.censocustody.android.data.KeyRepository
 import com.censocustody.android.data.SharedPrefsHelper
 import com.censocustody.android.data.UserRepository
 import com.censocustody.android.data.models.CipherRepository
 import com.censocustody.android.data.models.DeviceType
 import com.censocustody.android.data.models.UserDevice
-import com.censocustody.android.data.models.UserImage
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import java.security.Signature
 import java.util.UUID
-import javax.crypto.Cipher
 import javax.inject.Inject
-import kotlin.math.sign
 
 
 @HiltViewModel
@@ -45,23 +40,27 @@ class DeviceRegistrationViewModel @Inject constructor(
             val isUserLoggedIn = userRepository.userLoggedIn()
 
             if (!isUserLoggedIn) {
-                //todo: kick user to login
+                state = state.copy(userLoggedIn = false)
             } else {
                 triggerImageCapture()
             }
         }
     }
 
-    fun biometryApproved(cryptoObject: BiometricPrompt.CryptoObject) {
-        censoLog(message = "Biometry approved for device key registration")
+    fun retry() {
+        state = DeviceRegistrationState()
+        triggerImageCapture()
+    }
+
+    fun biometryApproved(cryptoObject: CryptoObject) {
         sendUserDeviceAndImageToBackend(cryptoObject.signature)
     }
 
     fun biometryFailed() {
-        censoLog(message = "Biometry failed for device key registration")
+        state = state.copy(deviceRegistrationError = DeviceRegistrationError.BIOMETRY)
     }
 
-    fun sendUserDeviceAndImageToBackend(signature: Signature?) {
+    private fun sendUserDeviceAndImageToBackend(signature: Signature?) {
         viewModelScope.launch {
             val capturedUserPhoto = state.capturedUserPhoto
             val keyName = state.keyName
@@ -82,7 +81,6 @@ class DeviceRegistrationViewModel @Inject constructor(
                     signatureToCheck = signatureToCheck
                 )
 
-                censoLog(message = "Verified: $verified")
                 val email = userRepository.retrieveUserEmail()
                 SharedPrefsHelper.saveDeviceId(email = email, deviceId = keyName)
 
@@ -101,16 +99,18 @@ class DeviceRegistrationViewModel @Inject constructor(
                     state = state.copy(addUserDevice = userDeviceAdded)
 
                 } else if (userDeviceAdded is Resource.Error) {
-                    //todo: show error to user
-                    censoLog(message = "Error when creating device key: ${userDeviceAdded.exception}")
-                    state = state.copy(addUserDevice = userDeviceAdded)
+                    state = state.copy(
+                        addUserDevice = userDeviceAdded,
+                        deviceRegistrationError = DeviceRegistrationError.API
+                    )
                 }
 
 
             } else {
-                //todo: broken flow data got wiped
-                censoLog(message = "Error when creating device key: null data")
-                state = state.copy(addUserDevice = Resource.Error(exception = Exception("Missing essential data for device registration")))
+                state = state.copy(
+                    addUserDevice = Resource.Error(exception = Exception("Missing essential data for device registration")),
+                    deviceRegistrationError = DeviceRegistrationError.API
+                )
             }
         }
     }
@@ -134,31 +134,32 @@ class DeviceRegistrationViewModel @Inject constructor(
                     cryptographyManager.createPublicDeviceKey(keyName = keyId)
 
                 state = state.copy(publicKey = BaseWrapper.encode(devicePublicKey))
-                censoLog(message = "Was able to create key: ${BaseWrapper.encode(devicePublicKey)}")
 
-                //need to go get cipher authenticated
                 val signature = cipherRepository.getSignatureForDeviceSigning(keyId)
                 if (signature != null) {
                     triggerBioPrompt(signature)
                 }
 
             } catch (e: Exception) {
-                censoLog(message = "Failed to sign data or create key: $e")
+                state = state.copy(deviceRegistrationError = DeviceRegistrationError.SIGNING_IMAGE)
             }
         }
     }
 
-    fun handleCapturedUserPhoto(userPhoto: Bitmap) {
+    fun capturedUserPhotoSuccess(userPhoto: Bitmap) {
         state = state.copy(capturedUserPhoto = userPhoto)
         showUserDialogToSaveDeviceKey()
     }
 
-    fun showUserDialogToSaveDeviceKey() {
-        state = state.copy(userApproveSaveDeviceKey = Resource.Success(Unit))
+    fun capturedUserPhotoError(imageCaptureError: ImageCaptureError?) {
+        state = state.copy(
+            deviceRegistrationError = DeviceRegistrationError.IMAGE_CAPTURE,
+            imageCaptureFailedError = Resource.Success(imageCaptureError)
+        )
     }
 
-    fun handleImageCaptureError(imageCaptureError: ImageCaptureError) {
-        state = state.copy(imageCaptureFailedError = Resource.Error(data = imageCaptureError))
+    private fun showUserDialogToSaveDeviceKey() {
+        state = state.copy(userApproveSaveDeviceKey = Resource.Success(Unit))
     }
 
     fun resetTriggerImageCapture() {
@@ -177,11 +178,18 @@ class DeviceRegistrationViewModel @Inject constructor(
         state = state.copy(triggerBioPrompt = Resource.Uninitialized)
     }
 
-    fun resetImageCaptureFailedError() {
-        state = state.copy(imageCaptureFailedError = Resource.Uninitialized)
+    fun resetErrorState() {
+        state = state.copy(
+            deviceRegistrationError = DeviceRegistrationError.NONE,
+            imageCaptureFailedError = Resource.Uninitialized
+        )
     }
 
     fun resetUserDialogToSaveDeviceKey() {
         state = state.copy(userApproveSaveDeviceKey = Resource.Uninitialized)
+    }
+
+    fun resetUserLoggedIn() {
+        state = state.copy(userLoggedIn = true)
     }
 }

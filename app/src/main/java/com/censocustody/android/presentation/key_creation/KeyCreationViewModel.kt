@@ -9,7 +9,6 @@ import androidx.lifecycle.viewModelScope
 import cash.z.ecc.android.bip39.Mnemonics
 import com.censocustody.android.common.BioPromptReason
 import com.censocustody.android.common.Resource
-import com.censocustody.android.common.censoLog
 import com.censocustody.android.data.*
 import com.censocustody.android.data.models.CipherRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -72,7 +71,7 @@ class KeyCreationViewModel @Inject constructor(
                     bioPromptReason = bioPromptReason
                 )
         } else {
-            censoLog(message = "No signature to grab because we did not send user to device registration...")
+            //todo: need to show error to user
         }
     }
 

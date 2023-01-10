@@ -1,5 +1,6 @@
 package com.censocustody.android.viewModel
 
+import androidx.biometric.BiometricPrompt.CryptoObject
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.times
 import com.nhaarman.mockitokotlin2.verify
@@ -50,6 +51,9 @@ class SignInViewModelTest : BaseViewModelTest() {
 
     @Mock
     lateinit var cipher: Cipher
+
+    @Mock
+    lateinit var crypto: CryptoObject
 
     private val validEmail = "sam@ok.com"
     private val invalidEmail = ""
@@ -288,7 +292,7 @@ class SignInViewModelTest : BaseViewModelTest() {
 
             advanceUntilIdle()
 
-            signInViewModel.biometryApproved(cipher)
+            signInViewModel.biometryApproved(crypto)
 
             verify(userRepository, times(1)).loginWithTimestamp(
                 validEmail, timestamp, signedTimestamp
@@ -314,7 +318,7 @@ class SignInViewModelTest : BaseViewModelTest() {
 
             advanceUntilIdle()
 
-            signInViewModel.biometryApproved(cipher)
+            signInViewModel.biometryApproved(crypto)
 
             verify(keyRepository, times(1)).saveSentinelData(cipher)
             assertTrue(signInViewModel.state.exitLoginFlow is Resource.Success)
@@ -337,7 +341,7 @@ class SignInViewModelTest : BaseViewModelTest() {
 
             advanceUntilIdle()
 
-            signInViewModel.biometryApproved(cipher)
+            signInViewModel.biometryApproved(crypto)
 
             advanceUntilIdle()
 
@@ -363,7 +367,7 @@ class SignInViewModelTest : BaseViewModelTest() {
 
             advanceUntilIdle()
 
-            signInViewModel.biometryApproved(cipher)
+            signInViewModel.biometryApproved(crypto)
 
             advanceUntilIdle()
 
@@ -394,7 +398,7 @@ class SignInViewModelTest : BaseViewModelTest() {
 
             advanceUntilIdle()
 
-            signInViewModel.biometryApproved(cipher)
+            signInViewModel.biometryApproved(crypto)
 
             advanceUntilIdle()
 
@@ -417,7 +421,7 @@ class SignInViewModelTest : BaseViewModelTest() {
 
             advanceUntilIdle()
 
-            signInViewModel.biometryApproved(cipher)
+            signInViewModel.biometryApproved(crypto)
 
             advanceUntilIdle()
 
