@@ -9,7 +9,6 @@ import com.raygun.raygun4android.RaygunClient
 import com.censocustody.android.BuildConfig
 import com.censocustody.android.common.CrashReportingUtil
 import com.censocustody.android.common.Resource
-import com.censocustody.android.common.censoLog
 import com.censocustody.android.data.*
 import com.censocustody.android.data.models.SemanticVersion
 import com.censocustody.android.data.models.VerifyUser
@@ -93,10 +92,8 @@ class EntranceViewModel @Inject constructor(
                 val backendPublicKey = verifyUser.deviceKey
 
                 if (devicePublicKey.lowercase() == backendPublicKey?.lowercase()) {
-                    censoLog(message = "Successfully saved device key for account...")
                     determineUserDestination(verifyUser)
                 } else {
-                    censoLog(message = "No device key for account...")
                     //todo: HAVE WRONG PUBLIC DEVICE KEY. Ask team what should do here? I think we need some clean up.
                     state = state.copy(
                         userDestinationResult = Resource.Success(UserDestination.DEVICE_REGISTRATION)

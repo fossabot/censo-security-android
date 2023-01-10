@@ -1,5 +1,6 @@
 package com.censocustody.android.viewModel
 
+import androidx.biometric.BiometricPrompt.CryptoObject
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.whenever
 import com.censocustody.android.*
@@ -8,6 +9,7 @@ import com.censocustody.android.common.CensoCountDownTimer
 import com.censocustody.android.data.ApprovalsRepository
 import com.censocustody.android.data.KeyRepository
 import com.censocustody.android.data.SolanaRepository
+import com.censocustody.android.data.UserRepository
 import com.censocustody.android.data.models.ApprovalDisposition
 import com.censocustody.android.data.models.CipherRepository
 import com.censocustody.android.data.models.Nonce
@@ -44,10 +46,13 @@ class ApprovalDetailsViewModelTest : BaseViewModelTest() {
     lateinit var cipherRepository: CipherRepository
 
     @Mock
-    lateinit var keyRepository: KeyRepository
+    lateinit var userRepository: UserRepository
 
     @Mock
     lateinit var cipher: Cipher
+
+    @Mock
+    lateinit var cryptoObject: CryptoObject
 
     @Mock
     lateinit var countdownTimer: CensoCountDownTimer
@@ -85,7 +90,7 @@ class ApprovalDetailsViewModelTest : BaseViewModelTest() {
         approvalDetailsViewModel =
             ApprovalDetailsViewModel(
                 approvalsRepository = approvalsRepository,
-                keyRepository = keyRepository,
+                userRepository = userRepository,
                 cipherRepository = cipherRepository,
                 timer = countdownTimer
             )
@@ -511,7 +516,7 @@ class ApprovalDetailsViewModelTest : BaseViewModelTest() {
         assertEquals(testMultipleAccounts, approvalDetailsViewModel.state.multipleAccounts)
         assertTrue(approvalDetailsViewModel.state.bioPromptTrigger is Resource.Success)
 
-        approvalDetailsViewModel.biometryApproved(cipher)
+        approvalDetailsViewModel.biometryApproved(cryptoObject)
     }
     //endregion
 
