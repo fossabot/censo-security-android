@@ -26,7 +26,7 @@ fun ContactCensoScreen() {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text = stringResource(R.string.contact_censo_custody),
+            text = stringResource(R.string.contact_censo),
             textAlign = TextAlign.Center,
             fontSize = 24.sp,
             color = CensoWhite
