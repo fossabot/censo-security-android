@@ -14,6 +14,7 @@ import com.censocustody.android.data.UserRepository
 import com.censocustody.android.data.models.CipherRepository
 import com.censocustody.android.data.models.DeviceType
 import com.censocustody.android.data.models.UserDevice
+import com.raygun.raygun4android.RaygunClient
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import java.security.Signature
@@ -30,10 +31,6 @@ class DeviceRegistrationViewModel @Inject constructor(
 
     var state by mutableStateOf(DeviceRegistrationState())
         private set
-
-    companion object {
-        const val THUMBNAIL_DATA_KEY = "data"
-    }
 
     fun onStart() {
         viewModelScope.launch {
@@ -76,6 +73,7 @@ class DeviceRegistrationViewModel @Inject constructor(
 
                 val imageByteArray = BaseWrapper.decodeFromBase64(userImage.image)
                 val signatureToCheck = BaseWrapper.decodeFromBase64(userImage.signature)
+                //todo: make sure signature is verified before moving forward...
                 val verified = cryptographyManager.verifySignature(
                     keyName = keyName,
                     dataSigned = imageByteArray,
@@ -126,12 +124,12 @@ class DeviceRegistrationViewModel @Inject constructor(
 
     fun triggerImageCapture() {
         state = state.copy(
-            triggerImageCapture = Resource.Success(Unit),
+            triggerImageCapture = Resource.Loading(),
             capturingDeviceKey = Resource.Loading()
         )
     }
 
-    fun createKeyForDevice() {
+    private fun createKeyForDevice() {
         viewModelScope.launch {
             val keyId = UUID.randomUUID().toString().replace("-", "")
             state = state.copy(keyName = keyId)
@@ -156,20 +154,25 @@ class DeviceRegistrationViewModel @Inject constructor(
     }
 
     fun capturedUserPhotoSuccess(userPhoto: Bitmap) {
-        state = state.copy(capturedUserPhoto = userPhoto)
-        showUserDialogToSaveDeviceKey()
+        state = state.copy(
+            capturedUserPhoto = userPhoto,
+            triggerImageCapture = Resource.Uninitialized
+        )
+        createKeyForDevice()
     }
 
-    fun capturedUserPhotoError(imageCaptureError: ImageCaptureError?) {
+    fun capturedUserPhotoError(exception: Exception) {
+        RaygunClient.send(
+            exception, listOf(
+                CrashReportingUtil.IMAGE,
+                CrashReportingUtil.MANUALLY_REPORTED_TAG
+            )
+        )
         state = state.copy(
             deviceRegistrationError = DeviceRegistrationError.IMAGE_CAPTURE,
-            imageCaptureFailedError = Resource.Success(imageCaptureError),
+            triggerImageCapture = Resource.Uninitialized,
             capturingDeviceKey = Resource.Uninitialized
         )
-    }
-
-    private fun showUserDialogToSaveDeviceKey() {
-        state = state.copy(userApproveSaveDeviceKey = Resource.Success(Unit))
     }
 
     fun resetTriggerImageCapture() {
@@ -191,12 +194,7 @@ class DeviceRegistrationViewModel @Inject constructor(
     fun resetErrorState() {
         state = state.copy(
             deviceRegistrationError = DeviceRegistrationError.NONE,
-            imageCaptureFailedError = Resource.Uninitialized
         )
-    }
-
-    fun resetUserDialogToSaveDeviceKey() {
-        state = state.copy(userApproveSaveDeviceKey = Resource.Uninitialized)
     }
 
     fun resetUserLoggedIn() {
