@@ -215,21 +215,40 @@ fun DeviceRegistrationScreen(
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Spacer(modifier = Modifier.height(36.dp))
-                    Text(
-                        modifier = Modifier.padding(horizontal = 8.dp),
-                        text = stringResource(R.string.adding_photo_main_message),
-                        textAlign = TextAlign.Center,
-                        color = CensoWhite,
-                        fontSize = 16.sp
-                    )
-                    Spacer(modifier = Modifier.height(36.dp))
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(20.dp),
-                        color = CensoWhite,
-                        strokeWidth = 2.5.dp,
-                    )
-                    Spacer(modifier = Modifier.height(36.dp))
+                    if(state.capturingDeviceKey is Resource.Uninitialized) {
+                        Spacer(modifier = Modifier.height(36.dp))
+                        Text(
+                            modifier = Modifier.padding(horizontal = 8.dp),
+                            text = "Please take a photo for your Censo Custody account.",
+                            textAlign = TextAlign.Center,
+                            color = CensoWhite,
+                            fontSize = 18.sp
+                        )
+                        Spacer(modifier = Modifier.height(36.dp))
+                        CensoButton(
+                            onClick = { viewModel.triggerImageCapture() },
+                            contentPadding = PaddingValues(vertical = 16.dp, horizontal = 28.dp)
+                        ) {
+                            Text("Open Camera")
+                        }
+                        Spacer(modifier = Modifier.height(36.dp))
+                    } else {
+                        Spacer(modifier = Modifier.height(36.dp))
+                        Text(
+                            modifier = Modifier.padding(horizontal = 8.dp),
+                            text = stringResource(R.string.adding_photo_main_message),
+                            textAlign = TextAlign.Center,
+                            color = CensoWhite,
+                            fontSize = 16.sp
+                        )
+                        Spacer(modifier = Modifier.height(36.dp))
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(20.dp),
+                            color = CensoWhite,
+                            strokeWidth = 2.5.dp,
+                        )
+                        Spacer(modifier = Modifier.height(36.dp))
+                    }
                 }
             }
         }
