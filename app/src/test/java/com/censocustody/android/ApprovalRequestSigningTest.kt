@@ -458,7 +458,7 @@ class ApprovalRequestSigningTest {
 
         whenever(mockEncryptionManager.signEthereumApprovalDispositionMessage(
             signable = approvalDispositionRequest, cipher = cipherMock, email = userEmail)).thenReturn(expectedSignature)
-        val apiBody = approvalDispositionRequest.convertToApiBody(mockEncryptionManager, cipherMock)
+        val apiBody = approvalDispositionRequest.convertToApiBody(mockEncryptionManager, cryptoMock)
         assertEquals(disposition, apiBody.approvalDisposition)
         assertEquals(ApprovalSignature.EthereumSignature(expectedSignature.signature), apiBody.signatureInfo)
 
@@ -513,7 +513,7 @@ class ApprovalRequestSigningTest {
 
         whenever(mockEncryptionManager.signEthereumApprovalDispositionMessage(
             signable = approvalDispositionRequest, cipher = cipherMock, email = userEmail)).thenReturn(expectedSignature)
-        val apiBody = approvalDispositionRequest.convertToApiBody(mockEncryptionManager, cipherMock)
+        val apiBody = approvalDispositionRequest.convertToApiBody(mockEncryptionManager, cryptoMock)
         assertEquals(disposition, apiBody.approvalDisposition)
         assertEquals(ApprovalSignature.EthereumSignature(expectedSignature.signature), apiBody.signatureInfo)
 

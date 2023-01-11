@@ -436,8 +436,16 @@ data class ApprovalDispositionRequest(
         cryptoObject: BiometricPrompt.CryptoObject
     ): RegisterApprovalDispositionBody {
 
-        if(cryptoObject.cipher == null && cryptoObject.signature == null) {
-            throw Exception("Missing biometry approved cipher or signature")
+        val cipher = cryptoObject.cipher
+        val signature = cryptoObject.signature
+
+        when (requestType) {
+            is LoginApprovalRequest, is PasswordReset, is AcceptVaultInvitation -> {
+                if (signature == null) throw Exception("Missing biometry approved signature")
+            }
+            else -> {
+                if (cipher == null) throw Exception("Missing biometry approved cipher")
+            }
         }
 
         val signatureInfo: ApprovalSignature = when (requestType) {
