@@ -125,7 +125,7 @@ class CryptographyManagerImpl : CryptographyManager {
 
         val paramBuilder = KeyGenParameterSpec.Builder(
             keyName,
-            KeyProperties.PURPOSE_SIGN or KeyProperties.PURPOSE_VERIFY
+            KeyProperties.PURPOSE_AGREE_KEY or KeyProperties.PURPOSE_SIGN or KeyProperties.PURPOSE_VERIFY
         )
 
         val parameterSpec = paramBuilder
@@ -133,7 +133,11 @@ class CryptographyManagerImpl : CryptographyManager {
             .setDigests(
                 KeyProperties.DIGEST_SHA256
             )
-            .setUserAuthenticationRequired(true)
+            .setUserAuthenticationParameters(
+                0,
+                KeyProperties.AUTH_DEVICE_CREDENTIAL
+                        or KeyProperties.AUTH_BIOMETRIC_STRONG
+            )
             .build()
 
         kpg.initialize(parameterSpec)
