@@ -1,21 +1,12 @@
 package com.censocustody.android.presentation.device_registration
 
-import android.app.Activity
 import android.content.Context
-import android.content.Intent
-import android.graphics.Bitmap
-import android.provider.MediaStore
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.biometric.BiometricPrompt.CryptoObject
+import androidx.biometric.BiometricPrompt
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.material.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -31,40 +22,23 @@ import androidx.navigation.NavController
 import com.censocustody.android.R
 import com.censocustody.android.common.*
 import com.censocustody.android.presentation.Screen
-import com.censocustody.android.presentation.device_registration.DeviceRegistrationViewModel.Companion.THUMBNAIL_DATA_KEY
 import com.censocustody.android.presentation.key_management.GradientBackgroundUI
 import com.censocustody.android.presentation.key_management.SmallAuthFlowButton
 import com.censocustody.android.ui.theme.CensoWhite
 import com.censocustody.android.ui.theme.UnfocusedGrey
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 
+@OptIn(ExperimentalPermissionsApi::class, ExperimentalCoroutinesApi::class)
 @Composable
 fun DeviceRegistrationScreen(
     navController: NavController,
-    viewModel: DeviceRegistrationViewModel = hiltViewModel(),
+    viewModel: DeviceRegistrationViewModel = hiltViewModel()
 ) {
 
-    //region Variables
     val state = viewModel.state
 
     val context = LocalContext.current as FragmentActivity
-    val packageManager = context.packageManager
-
-    val cameraResultLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.StartActivityForResult()
-    ) { result ->
-        if (result.resultCode == Activity.RESULT_OK) {
-            val imageThumbnailBitmap =
-                result.data?.extras?.get(THUMBNAIL_DATA_KEY) as Bitmap?
-
-            if (imageThumbnailBitmap != null) {
-                viewModel.capturedUserPhotoSuccess(userPhoto = imageThumbnailBitmap)
-            } else {
-                viewModel.capturedUserPhotoError(ImageCaptureError.BAD_RESULT)
-            }
-        } else {
-            viewModel.capturedUserPhotoError(ImageCaptureError.ACTION_CANCELLED)
-        }
-    }
 
     fun getErrorMessage(
         context: Context,
@@ -90,8 +64,6 @@ fun DeviceRegistrationScreen(
         DeviceRegistrationError.BIOMETRY -> context.getString(R.string.biometry_failed_device_registration_error)
     }
 
-    //endregion
-
     //region Launched Effects
     DisposableEffect(key1 = viewModel) {
         viewModel.onStart()
@@ -114,17 +86,6 @@ fun DeviceRegistrationScreen(
                 popUpToTop()
             }
             viewModel.resetUserLoggedIn()
-        }
-
-        if (state.triggerImageCapture is Resource.Success) {
-            val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
-
-            if (intent.resolveActivity(packageManager) == null) {
-                viewModel.capturedUserPhotoError(ImageCaptureError.NO_HARDWARE_CAMERA)
-            } else {
-                cameraResultLauncher.launch(intent)
-            }
-            viewModel.resetTriggerImageCapture()
         }
 
         if (state.triggerBioPrompt is Resource.Success) {
@@ -156,7 +117,7 @@ fun DeviceRegistrationScreen(
 
                 bioPrompt.authenticate(
                     promptInfo,
-                    CryptoObject(state.triggerBioPrompt.data)
+                    BiometricPrompt.CryptoObject(state.triggerBioPrompt.data)
                 )
             }
         }
@@ -164,18 +125,14 @@ fun DeviceRegistrationScreen(
 
     //endregion
 
-    //region Main UI
     GradientBackgroundUI()
     Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(horizontal = 40.dp)
+        modifier = Modifier.fillMaxSize()
     ) {
         if (state.deviceRegistrationError != DeviceRegistrationError.NONE) {
             val message = getErrorMessage(
                 context = context,
                 deviceRegistrationError = state.deviceRegistrationError,
-                imageCaptureError = state.imageCaptureFailedError.data
             )
 
             Column(
@@ -199,94 +156,63 @@ fun DeviceRegistrationScreen(
                     viewModel.retry()
                 }
             }
+
+        } else if (state.triggerImageCapture is Resource.Loading) {
+            CaptureUserImageContent(
+                onImageCaptureSuccess = { bitmap ->
+                    viewModel.capturedUserPhotoSuccess(bitmap)
+                },
+                onImageCaptureError = {
+                    viewModel.capturedUserPhotoError(it)
+                }
+            )
         } else {
             Column(
-                Modifier.fillMaxSize(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.Center)
+                    .padding(horizontal = 16.dp)
+                    .border(width = 1.5.dp, color = UnfocusedGrey.copy(alpha = 0.50f))
+                    .background(color = Color.Black)
+                    .zIndex(2.5f),
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp)
-                        .border(width = 1.5.dp, color = UnfocusedGrey.copy(alpha = 0.50f))
-                        .background(color = Color.Black)
-                        .zIndex(2.5f),
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    if(state.capturingDeviceKey is Resource.Uninitialized) {
-                        Spacer(modifier = Modifier.height(36.dp))
-                        Text(
-                            modifier = Modifier.padding(horizontal = 8.dp),
-                            text = "Please take a photo for your Censo Custody account.",
-                            textAlign = TextAlign.Center,
-                            color = CensoWhite,
-                            fontSize = 18.sp
-                        )
-                        Spacer(modifier = Modifier.height(36.dp))
-                        CensoButton(
-                            onClick = { viewModel.triggerImageCapture() },
-                            contentPadding = PaddingValues(vertical = 16.dp, horizontal = 28.dp)
-                        ) {
-                            Text("Open Camera")
-                        }
-                        Spacer(modifier = Modifier.height(36.dp))
-                    } else {
-                        Spacer(modifier = Modifier.height(36.dp))
-                        Text(
-                            modifier = Modifier.padding(horizontal = 8.dp),
-                            text = stringResource(R.string.adding_photo_main_message),
-                            textAlign = TextAlign.Center,
-                            color = CensoWhite,
-                            fontSize = 16.sp
-                        )
-                        Spacer(modifier = Modifier.height(36.dp))
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(20.dp),
-                            color = CensoWhite,
-                            strokeWidth = 2.5.dp,
-                        )
-                        Spacer(modifier = Modifier.height(36.dp))
+                if (state.capturingDeviceKey is Resource.Uninitialized) {
+                    Spacer(modifier = Modifier.height(36.dp))
+                    Text(
+                        modifier = Modifier.padding(horizontal = 16.dp),
+                        text = stringResource(R.string.take_photo_description),
+                        textAlign = TextAlign.Center,
+                        color = CensoWhite,
+                        fontSize = 18.sp
+                    )
+                    Spacer(modifier = Modifier.height(36.dp))
+                    CensoButton(
+                        onClick = { viewModel.triggerImageCapture() },
+                        contentPadding = PaddingValues(vertical = 16.dp, horizontal = 28.dp)
+                    ) {
+                        Text(stringResource(R.string.open_camera), color = CensoWhite)
                     }
+                    Spacer(modifier = Modifier.height(36.dp))
+                } else {
+                    Spacer(modifier = Modifier.height(36.dp))
+                    Text(
+                        modifier = Modifier.padding(horizontal = 8.dp),
+                        text = stringResource(R.string.adding_photo_main_message),
+                        textAlign = TextAlign.Center,
+                        color = CensoWhite,
+                        fontSize = 16.sp
+                    )
+                    Spacer(modifier = Modifier.height(36.dp))
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(20.dp),
+                        color = CensoWhite,
+                        strokeWidth = 2.5.dp,
+                    )
+                    Spacer(modifier = Modifier.height(36.dp))
                 }
             }
         }
     }
-
-    if (state.userApproveSaveDeviceKey is Resource.Success) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(color = Color.Black)
-                .padding(all = 24.dp),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            CensoButton(
-                onClick = {
-                    viewModel.createKeyForDevice()
-                    viewModel.resetUserDialogToSaveDeviceKey()
-                },
-                contentPadding = PaddingValues(vertical = 12.dp, horizontal = 24.dp)
-            ) {
-                Text(
-                    text = stringResource(R.string.i_have_taken_photo),
-                    textAlign = TextAlign.Center
-                )
-            }
-            Spacer(modifier = Modifier.height(32.dp))
-            CensoButton(
-                onClick = {
-                    viewModel.retry()
-                    viewModel.resetUserDialogToSaveDeviceKey()
-                },
-                contentPadding = PaddingValues(vertical = 12.dp, horizontal = 24.dp)
-            ) {
-                Text(text = stringResource(R.string.retake_photo), textAlign = TextAlign.Center)
-            }
-        }
-    }
-
-    //endregion
 }
