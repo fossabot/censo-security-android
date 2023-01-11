@@ -41,8 +41,6 @@ class DeviceRegistrationViewModel @Inject constructor(
 
             if (!isUserLoggedIn) {
                 state = state.copy(userLoggedIn = false)
-            } else {
-                triggerImageCapture()
             }
         }
     }
@@ -57,7 +55,10 @@ class DeviceRegistrationViewModel @Inject constructor(
     }
 
     fun biometryFailed() {
-        state = state.copy(deviceRegistrationError = DeviceRegistrationError.BIOMETRY)
+        state = state.copy(
+            deviceRegistrationError = DeviceRegistrationError.BIOMETRY,
+            capturingDeviceKey = Resource.Uninitialized
+        )
     }
 
     private fun sendUserDeviceAndImageToBackend(signature: Signature?) {
@@ -101,7 +102,8 @@ class DeviceRegistrationViewModel @Inject constructor(
                 } else if (userDeviceAdded is Resource.Error) {
                     state = state.copy(
                         addUserDevice = userDeviceAdded,
-                        deviceRegistrationError = DeviceRegistrationError.API
+                        deviceRegistrationError = DeviceRegistrationError.API,
+                        capturingDeviceKey = Resource.Uninitialized
                     )
                 }
 
@@ -109,7 +111,8 @@ class DeviceRegistrationViewModel @Inject constructor(
             } else {
                 state = state.copy(
                     addUserDevice = Resource.Error(exception = Exception("Missing essential data for device registration")),
-                    deviceRegistrationError = DeviceRegistrationError.API
+                    deviceRegistrationError = DeviceRegistrationError.API,
+                    capturingDeviceKey = Resource.Uninitialized
                 )
             }
         }
@@ -122,7 +125,10 @@ class DeviceRegistrationViewModel @Inject constructor(
 
 
     fun triggerImageCapture() {
-        state = state.copy(triggerImageCapture = Resource.Success(Unit))
+        state = state.copy(
+            triggerImageCapture = Resource.Success(Unit),
+            capturingDeviceKey = Resource.Loading()
+        )
     }
 
     fun createKeyForDevice() {
@@ -141,7 +147,10 @@ class DeviceRegistrationViewModel @Inject constructor(
                 }
 
             } catch (e: Exception) {
-                state = state.copy(deviceRegistrationError = DeviceRegistrationError.SIGNING_IMAGE)
+                state = state.copy(
+                    deviceRegistrationError = DeviceRegistrationError.SIGNING_IMAGE,
+                    capturingDeviceKey = Resource.Uninitialized
+                )
             }
         }
     }
@@ -154,7 +163,8 @@ class DeviceRegistrationViewModel @Inject constructor(
     fun capturedUserPhotoError(imageCaptureError: ImageCaptureError?) {
         state = state.copy(
             deviceRegistrationError = DeviceRegistrationError.IMAGE_CAPTURE,
-            imageCaptureFailedError = Resource.Success(imageCaptureError)
+            imageCaptureFailedError = Resource.Success(imageCaptureError),
+            capturingDeviceKey = Resource.Uninitialized
         )
     }
 
