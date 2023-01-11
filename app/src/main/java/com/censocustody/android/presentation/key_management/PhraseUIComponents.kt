@@ -22,7 +22,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.*
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.layout
@@ -426,7 +425,7 @@ fun AllSetUI(
                     modifier = Modifier
                         .align(Alignment.BottomCenter)
                         .padding(bottom = 56.dp),
-                    text = stringResource(R.string.continue_to_censo_custody),
+                    text = stringResource(R.string.continue_to_censo),
                 ) {
                     onNavigate()
                 }

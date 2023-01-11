@@ -72,7 +72,7 @@ fun UnknownApprovalButtonRow(
             ) {
                 Text(
                     modifier = Modifier.padding(top = 4.dp, bottom = 4.dp),
-                    text = stringResource(R.string.update_censo_custody),
+                    text = stringResource(R.string.update_censo),
                     textAlign = TextAlign.Center,
                     color = CensoWhite,
                     fontSize = 17.sp,
