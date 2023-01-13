@@ -60,56 +60,70 @@ class DeviceRegistrationViewModel @Inject constructor(
 
     private fun sendUserDeviceAndImageToBackend(signature: Signature?) {
         viewModelScope.launch {
-            val capturedUserPhoto = state.capturedUserPhoto
-            val keyName = state.keyName
+            try {
+                val capturedUserPhoto = state.capturedUserPhoto
+                val keyName = state.keyName
 
-            if (signature != null && capturedUserPhoto != null && keyName.isNotEmpty()) {
-                val userImage = generateUserImageObject(
-                    userPhoto = capturedUserPhoto,
-                    signature = signature,
-                    keyName = keyName,
-                    cryptographyManager = cryptographyManager
-                )
-
-                val imageByteArray = BaseWrapper.decodeFromBase64(userImage.image)
-                val signatureToCheck = BaseWrapper.decodeFromBase64(userImage.signature)
-                //todo: make sure signature is verified before moving forward...
-                val verified = cryptographyManager.verifySignature(
-                    keyName = keyName,
-                    dataSigned = imageByteArray,
-                    signatureToCheck = signatureToCheck
-                )
-
-                val email = userRepository.retrieveUserEmail()
-                SharedPrefsHelper.saveDeviceId(email = email, deviceId = keyName)
-
-                val userDeviceAdded = userRepository.addUserDevice(
-                    UserDevice(
-                        publicKey = state.publicKey,
-                        deviceType = DeviceType.ANDROID,
-                        userImage = userImage
+                if (signature != null && capturedUserPhoto != null && keyName.isNotEmpty()) {
+                    val userImage = generateUserImageObject(
+                        userPhoto = capturedUserPhoto,
+                        signature = signature,
+                        keyName = keyName,
+                        cryptographyManager = cryptographyManager
                     )
-                )
 
-                if (userDeviceAdded is Resource.Success) {
-                    SharedPrefsHelper.saveDeviceId(email, keyName)
-                    SharedPrefsHelper.saveDevicePublicKey(email, state.publicKey)
+                    val imageByteArray = BaseWrapper.decodeFromBase64(userImage.image)
+                    val hashOfImage = hashOfUserImage(imageByteArray)
 
-                    state = state.copy(addUserDevice = userDeviceAdded)
+                    val signatureToCheck = BaseWrapper.decodeFromBase64(userImage.signature)
 
-                } else if (userDeviceAdded is Resource.Error) {
+                    val verified = cryptographyManager.verifySignature(
+                        keyName = keyName,
+                        dataSigned = hashOfImage,
+                        signatureToCheck = signatureToCheck
+                    )
+
+                    if (!verified) {
+                        throw Exception("Device image signature not valid.")
+                    }
+
+                    val email = userRepository.retrieveUserEmail()
+                    SharedPrefsHelper.saveDeviceId(email = email, deviceId = keyName)
+
+                    val userDeviceAdded = userRepository.addUserDevice(
+                        UserDevice(
+                            publicKey = state.publicKey,
+                            deviceType = DeviceType.ANDROID,
+                            userImage = userImage
+                        )
+                    )
+
+                    if (userDeviceAdded is Resource.Success) {
+                        SharedPrefsHelper.saveDeviceId(email, keyName)
+                        SharedPrefsHelper.saveDevicePublicKey(email, state.publicKey)
+
+                        state = state.copy(addUserDevice = userDeviceAdded)
+
+                    } else if (userDeviceAdded is Resource.Error) {
+                        state = state.copy(
+                            addUserDevice = userDeviceAdded,
+                            deviceRegistrationError = DeviceRegistrationError.API,
+                            capturingDeviceKey = Resource.Uninitialized
+                        )
+                    }
+
+
+                } else {
                     state = state.copy(
-                        addUserDevice = userDeviceAdded,
+                        addUserDevice = Resource.Error(exception = Exception("Missing essential data for device registration")),
                         deviceRegistrationError = DeviceRegistrationError.API,
                         capturingDeviceKey = Resource.Uninitialized
                     )
                 }
-
-
-            } else {
+            } catch (e: Exception) {
                 state = state.copy(
-                    addUserDevice = Resource.Error(exception = Exception("Missing essential data for device registration")),
-                    deviceRegistrationError = DeviceRegistrationError.API,
+                    addUserDevice = Resource.Error(exception = e),
+                    deviceRegistrationError = DeviceRegistrationError.SIGNING_IMAGE,
                     capturingDeviceKey = Resource.Uninitialized
                 )
             }

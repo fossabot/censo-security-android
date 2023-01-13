@@ -14,6 +14,7 @@ import com.censocustody.android.presentation.approvals.approval_type_row_items.g
 import com.censocustody.android.presentation.approvals.approval_type_row_items.getUSDEquivalentText
 import com.censocustody.android.presentation.components.FactRow
 import com.censocustody.android.presentation.components.FactsData
+import com.censocustody.android.presentation.components.RowData
 
 @Composable
 fun WrapConversionRequestDetailContent(
@@ -31,8 +32,8 @@ fun WrapConversionRequestDetailContent(
     val factsData = FactsData(
         facts =
         listOf(
-            Pair(stringResource(R.string.wallet_title), wallet),
-            Pair(stringResource(R.string.swap_for), swapFor)
+            RowData(title = stringResource(R.string.wallet_title), value = wallet),
+            RowData(title = stringResource(R.string.swap_for), value = swapFor)
         )
     )
     FactRow(factsData = factsData)

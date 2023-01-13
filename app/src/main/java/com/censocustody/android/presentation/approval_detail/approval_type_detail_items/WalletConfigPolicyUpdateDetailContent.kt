@@ -15,6 +15,7 @@ import com.censocustody.android.presentation.approvals.approval_type_row_items.r
 import com.censocustody.android.presentation.components.FactRow
 import com.censocustody.android.presentation.components.FactsData
 import com.censocustody.android.R
+import com.censocustody.android.presentation.components.RowData
 
 @Composable
 fun WalletConfigPolicyUpdateDetailContent(
@@ -52,8 +53,14 @@ fun generateWalletConfigPolicyRows(
     val approvalsRequiredRow = FactsData(
         title = context.getString(R.string.approvals),
         facts = listOf(
-            Pair(context.getString(R.string.approvals_required), approvalsRequired),
-            Pair(context.getString(R.string.approval_expiration), convertSecondsIntoReadableText(walletConfigPolicyUpdate.approvalPolicy.approvalTimeout.toInt(), context))
+            RowData(
+                title = context.getString(R.string.approvals_required),
+                value = approvalsRequired,
+            ),
+            RowData(
+                title = context.getString(R.string.approval_expiration),
+                value = convertSecondsIntoReadableText(walletConfigPolicyUpdate.approvalPolicy.approvalTimeout.toInt(), context),
+            )
         )
     )
     approverRowInfoData.add(approvalsRequiredRow)
@@ -62,7 +69,12 @@ fun generateWalletConfigPolicyRows(
     //region Approvers Row
     val approversList = walletConfigPolicyUpdate.approvalPolicy.approvers.retrieveSlotRowData()
     if (approversList.isEmpty()) {
-        approversList.add(Pair(context.getString(R.string.no_approvers_text), ""))
+        approversList.add(
+            RowData(
+                title = context.getString(R.string.no_approvers_text),
+                value = ""
+            )
+        )
     }
 
     val approverRow = FactsData(
