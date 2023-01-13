@@ -17,6 +17,7 @@ import com.censocustody.android.presentation.approvals.ApprovalContentHeader
 import com.censocustody.android.presentation.approvals.approval_type_row_items.getHeader
 import com.censocustody.android.presentation.components.FactRow
 import com.censocustody.android.presentation.components.FactsData
+import com.censocustody.android.presentation.components.RowData
 import com.censocustody.android.ui.theme.BackgroundBlack
 
 @Composable
@@ -33,11 +34,22 @@ fun SignersUpdateDetailContent(signersUpdate: ApprovalRequestDetails.SignersUpda
     ) {
         ApprovalContentHeader(header = header, topSpacing = 24)
         Spacer(modifier = Modifier.height(24.dp))
+        //todo: Get UI for this where we have multiple rows for same user
         val factsData = FactsData(
             facts =
             listOf(
-                Pair(stringResource(R.string.signer_name), name),
-                Pair(stringResource(R.string.signer_email), email)
+                RowData(
+                    title = stringResource(R.string.signer_name),
+                    value = name,
+                    userImage = value.jpegThumbnail,
+                    userRow = false
+                ),
+                RowData(
+                    title = stringResource(R.string.signer_email),
+                    value = email,
+                    userImage = value.jpegThumbnail,
+                    userRow = false
+                )
             )
         )
         FactRow(factsData = factsData)

@@ -15,6 +15,7 @@ import com.censocustody.android.data.models.approval.*
 import com.censocustody.android.data.models.approval.AccountType.*
 import com.censocustody.android.ui.theme.GreyText
 import com.censocustody.android.data.models.approval.ApprovalRequestDetails.*
+import com.censocustody.android.presentation.components.RowData
 
 fun ApprovalRequestDetails.getHeader(context: Context): String {
     return when (this) {
@@ -157,6 +158,22 @@ fun getApprovalTimerText(context: Context, timeRemainingInSeconds: Long?) : Stri
     }
 }
 
+fun String.nameToInitials() =
+    try {
+        val splitName = this.split(" ")
+        val initialBuilder = StringBuilder()
+        for (name in splitName) {
+            initialBuilder.append(name[0])
+        }
+        initialBuilder.toString().trim()
+    } catch (e: Exception) {
+        try {
+            this[0]
+        } catch (e: Exception) {
+            ""
+        }
+    }
+
 fun buildFromToDisplayText(from: String, to: String, context: Context): String {
     return "${from.toWalletName()} ${context.getString(R.string.to).lowercase()} ${to.toWalletName()}"
 }
@@ -164,23 +181,32 @@ fun buildFromToDisplayText(from: String, to: String, context: Context): String {
 private fun List<SlotSignerInfo>.sortApprovers() = this.sortedBy { it.value.name }
 private fun List<SlotDestinationInfo>.sortDestinations() = this.sortedBy { it.value.name }
 
-fun List<SlotDestinationInfo>.retrieveDestinationsRowData() : MutableList<Pair<String, String>> {
-    val destinationsList = mutableListOf<Pair<String, String>>()
+fun List<SlotDestinationInfo>.retrieveDestinationsRowData() : MutableList<RowData> {
+    val destinationsList = mutableListOf<RowData>()
     if (isNotEmpty()) {
         for (destination in sortDestinations()) {
             destinationsList.add(
-                Pair(destination.value.name, destination.value.address.maskAddress())
+                RowData(
+                    title = destination.value.name,
+                    value = destination.value.address.maskAddress(),
+                )
             )
         }
     }
     return destinationsList
 }
 
-fun List<SlotSignerInfo>.retrieveSlotRowData(): MutableList<Pair<String, String>> {
-    val approversList = mutableListOf<Pair<String, String>>()
+fun List<SlotSignerInfo>.retrieveSlotRowData(): MutableList<RowData> {
+    val approversList = mutableListOf<RowData>()
     if (isNotEmpty()) {
         for (approver in sortApprovers()) {
-            approversList.add(Pair(approver.value.name, approver.value.email))
+            approversList.add(
+                RowData(
+                    title = approver.value.name,
+                    value = approver.value.email,
+                    userImage = approver.value.jpegThumbnail,
+                    userRow = true
+                ))
         }
     }
     return approversList

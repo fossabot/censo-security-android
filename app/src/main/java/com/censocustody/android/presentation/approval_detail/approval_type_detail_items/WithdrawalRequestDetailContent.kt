@@ -17,6 +17,7 @@ import com.censocustody.android.presentation.approvals.ApprovalContentHeader
 import com.censocustody.android.presentation.approvals.approval_type_row_items.*
 import com.censocustody.android.presentation.components.FactRow
 import com.censocustody.android.presentation.components.FactsData
+import com.censocustody.android.presentation.components.RowData
 
 @Composable
 fun WithdrawalRequestDetailContent(
@@ -42,46 +43,46 @@ fun WithdrawalRequestDetailContent(
     Spacer(modifier = Modifier.height(24.dp))
 
     val facts = listOfNotNull(
-        Pair(
-            stringResource(R.string.from_wallet),
-            fromAccount
+        RowData(
+            title = stringResource(R.string.from_wallet),
+            value = fromAccount,
         ),
-        Pair(
-            stringResource(R.string.destination),
-            toAccount
+        RowData(
+            title = stringResource(R.string.destination),
+            value = toAccount,
         ),
-        Pair(
-            stringResource(R.string.destination_address),
-            address.maskAddress()
+        RowData(
+            title = stringResource(R.string.destination_address),
+            value = address.maskAddress(),
         ),
         if (symbolAndAmountInfo.symbolInfo.nftMetadata != null) {
-            Pair(
-                stringResource(R.string.nft_name),
-                symbolAndAmountInfo.symbolInfo.nftMetadata.name
+            RowData(
+                title = stringResource(R.string.nft_name),
+                value = symbolAndAmountInfo.symbolInfo.nftMetadata.name,
             )
         } else null,
     )
 
     val feeFacts = if (symbolAndAmountInfo.fee != null && symbolAndAmountInfo.replacementFee != null) {
         listOf(
-            Pair(
-                stringResource(R.string.amount),
-                symbolAndAmountInfo.formattedAmountWithSymbol()
+            RowData(
+                title = stringResource(R.string.amount),
+                value = symbolAndAmountInfo.formattedAmountWithSymbol(),
             ),
-            Pair(
-                stringResource(R.string.original_fee),
-                symbolAndAmountInfo.fee.formattedAmountWithSymbol()
+            RowData(
+                title = stringResource(R.string.original_fee),
+                value = symbolAndAmountInfo.fee.formattedAmountWithSymbol(),
             ),
-            Pair(
-                stringResource(R.string.new_fee),
-                symbolAndAmountInfo.replacementFee.formattedAmountWithSymbol()
+            RowData(
+                title = stringResource(R.string.new_fee),
+                value = symbolAndAmountInfo.replacementFee.formattedAmountWithSymbol(),
             )
         )
     } else if (symbolAndAmountInfo.fee != null) {
         listOf(
-            Pair(
-                stringResource(R.string.fee),
-                symbolAndAmountInfo.fee.formattedAmountWithSymbol()
+            RowData(
+                title = stringResource(R.string.fee),
+                value = symbolAndAmountInfo.fee.formattedAmountWithSymbol(),
             )
         )
     } else {

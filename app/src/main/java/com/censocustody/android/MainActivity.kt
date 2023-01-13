@@ -140,9 +140,9 @@ class MainActivity : FragmentActivity() {
                         when (event) {
                             Lifecycle.Event.ON_START
                             -> {
-                                mainViewModel.onForeground(
-                                    BiometricUtil.checkForBiometricFeaturesOnDevice(context),
-                                )
+//                                mainViewModel.onForeground(
+//                                    BiometricUtil.checkForBiometricFeaturesOnDevice(context),
+//                                )
                             }
                             else -> Unit
                         }
@@ -157,15 +157,15 @@ class MainActivity : FragmentActivity() {
                         mainViewModel.resetSendUserToEntrance()
                     }
 
-                    val blockAppUI = mainViewModel.blockUIStatus()
-
-                    BlockingUI(
-                        blockAppUI = blockAppUI,
-                        bioPromptTrigger = mainState.bioPromptTrigger,
-                        biometryUnavailable = mainState.biometryTooManyAttempts,
-                        biometryStatus = mainState.biometryStatus,
-                        retry = mainViewModel::retryBiometricGate
-                    )
+//                    val blockAppUI = mainViewModel.blockUIStatus()
+//
+//                    BlockingUI(
+//                        blockAppUI = blockAppUI,
+//                        bioPromptTrigger = mainState.bioPromptTrigger,
+//                        biometryUnavailable = mainState.biometryTooManyAttempts,
+//                        biometryStatus = mainState.biometryStatus,
+//                        retry = mainViewModel::retryBiometricGate
+//                    )
                 }
             }
         }

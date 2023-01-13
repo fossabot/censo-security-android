@@ -12,6 +12,7 @@ import com.censocustody.android.data.models.Chain
 import com.censocustody.android.presentation.approvals.ApprovalContentHeader
 import com.censocustody.android.presentation.components.FactRow
 import com.censocustody.android.presentation.components.FactsData
+import com.censocustody.android.presentation.components.RowData
 
 @Composable
 fun CreateOrDeleteAddressBookEntryDetailContent(
@@ -24,9 +25,18 @@ fun CreateOrDeleteAddressBookEntryDetailContent(
     Spacer(modifier = Modifier.height(24.dp))
     val factsData = FactsData(
         facts = listOf(
-            Pair(stringResource(R.string.name), entryName),
-            Pair(stringResource(R.string.address), entryAddress.maskAddress()),
-            Pair(stringResource(R.string.chain), chain.label()),
+            RowData(
+                title = stringResource(R.string.name),
+                value = entryName,
+            ),
+            RowData(
+                title = stringResource(R.string.address),
+                value = entryAddress.maskAddress(),
+            ),
+            RowData(
+                title = stringResource(R.string.chain),
+                value = chain.label(),
+            ),
         )
     )
     FactRow(factsData = factsData)
