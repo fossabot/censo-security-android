@@ -100,9 +100,7 @@ fun generateUserImageObject(
     val imageByteArray = userPhoto.convertToByteArrayWithJPEGCompression()
 
     //256 hash of image bytes
-    val digest = MessageDigest.getInstance("SHA-256")
-    digest.update(imageByteArray)
-    val hash = digest.digest()
+    val hash = hashOfUserImage(imageByteArray)
 
     //Encoded byteArray
     val encodedImageData = BaseWrapper.encodeToBase64(byteArray = imageByteArray)
@@ -120,6 +118,12 @@ fun generateUserImageObject(
         type = LogoType.JPEG,
         signature = BaseWrapper.encodeToBase64(signedImageData)
     )
+}
+
+fun hashOfUserImage(byteArray: ByteArray): ByteArray {
+    val digest = MessageDigest.getInstance("SHA-256")
+    digest.update(byteArray)
+    return digest.digest()
 }
 
 enum class ImageCaptureError {
