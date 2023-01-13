@@ -15,6 +15,7 @@ import com.censocustody.android.presentation.approvals.ApprovalRowContentHeader
 import com.censocustody.android.presentation.approvals.approval_type_row_items.*
 import com.censocustody.android.presentation.components.FactRow
 import com.censocustody.android.presentation.components.FactsData
+import com.censocustody.android.presentation.components.RowData
 
 @Composable
 fun BalanceAccountAddressWhitelistUpdateDetailContent(
@@ -44,7 +45,7 @@ fun generateBalanceAccountAddressWhitelistUpdateDetailRows(addressWhitelistUpdat
     val destinationsList = addressWhitelistUpdate.destinations.retrieveDestinationsRowData()
 
     if (destinationsList.isEmpty()) {
-        destinationsList.add(Pair(context.getString(R.string.no_whitelisted_addresses), ""))
+        destinationsList.add(RowData(title = context.getString(R.string.no_whitelisted_addresses), value = ""))
     }
 
     val destinationsRow = FactsData(

@@ -29,7 +29,8 @@
 
     <string name="expires_in">Expires in</string>
     <string name="content_des_back_icon">Back Icon</string>
-    <string name="requested_by">Initiated By</string>
+    <string name="requested_by">Requested By</string>
+    <string name="initiated_by">Initiated By</string>
     <string name="invited_by">Invited By</string>
     <string name="invited_by_email">Invited By Email</string>
     <string name="no_more_approvals_needed">No more approvals needed</string>

@@ -16,6 +16,7 @@ import com.censocustody.android.presentation.approvals.ApprovalContentHeader
 import com.censocustody.android.presentation.approvals.approval_type_row_items.getHeader
 import com.censocustody.android.presentation.components.FactRow
 import com.censocustody.android.presentation.components.FactsData
+import com.censocustody.android.presentation.components.RowData
 import com.censocustody.android.ui.theme.GreyText
 
 @Composable
@@ -28,10 +29,20 @@ fun LoginApprovalDetailContent(loginApproval: ApprovalRequestDetails.LoginApprov
         fontSize = 12.sp
     )
     Spacer(modifier = Modifier.height(20.dp))
+    //todo: Ask backend to send user image here. Login approvals will always be associated with a user.
+    //todo: Get UI for this where we have multiple rows for same user.
     val factsData = FactsData(
         facts = listOf(
-            Pair(stringResource(R.string.login_name), loginApproval.name ?: ""),
-            Pair(stringResource(R.string.login_email), loginApproval.email ?: "")
+            RowData(
+                title = stringResource(R.string.login_name),
+                value = loginApproval.name ?: "",
+                userRow = false
+            ),
+            RowData(
+                title = stringResource(R.string.login_email),
+                value = loginApproval.email ?: "",
+                userRow = false
+            )
         )
     )
 
