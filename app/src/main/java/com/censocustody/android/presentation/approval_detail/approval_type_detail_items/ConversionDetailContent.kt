@@ -14,6 +14,7 @@ import com.censocustody.android.presentation.approvals.ApprovalContentHeader
 import com.censocustody.android.presentation.approvals.approval_type_row_items.*
 import com.censocustody.android.presentation.components.FactRow
 import com.censocustody.android.presentation.components.FactsData
+import com.censocustody.android.presentation.components.RowData
 
 @Composable
 fun ConversionDetailContent(
@@ -34,17 +35,17 @@ fun ConversionDetailContent(
 
     val factsData = FactsData(
         facts = listOf(
-            Pair(
-                stringResource(R.string.from_wallet),
-                fromAccount
+            RowData(
+                title = stringResource(R.string.from_wallet),
+                value = fromAccount,
             ),
-            Pair(
-                stringResource(R.string.destination),
-                toAccount
+            RowData(
+                title = stringResource(R.string.destination),
+                value = toAccount,
             ),
-            Pair(
-                stringResource(R.string.destination_address),
-                address.maskAddress()
+            RowData(
+                title = stringResource(R.string.destination_address),
+                value = address.maskAddress(),
             )
         )
     )

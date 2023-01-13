@@ -33,6 +33,7 @@ fun getSignersUpdateRequestForApproval(nonceAccountAddresses: List<String>): App
                 name = "User 3",
                 email = "user3@org1",
                 nameHashIsEmpty = false,
+                jpegThumbnail = null
             )
         ),
         signingData = SigningData.SolanaSigningData(
@@ -60,6 +61,7 @@ fun getSignersUpdateRequest(nonceAccountAddresses: List<String>) = SignersUpdate
                 name = "User 2",
                 email = "user2@org1",
                 nameHashIsEmpty = false,
+                jpegThumbnail = null
             )
         ),
         signingData = SigningData.SolanaSigningData(
@@ -104,6 +106,7 @@ fun getSolanaWalletCreationRequest(nonceAccountAddresses: List<String>) : Wallet
                         email = "authorized1@org1",
                         publicKey = "3wKxhgiogoCaA2uxPYeH7cy3cG4hxRPogrPmDPLS54iZ",
                         nameHashIsEmpty = false,
+                        jpegThumbnail = null
                     )
                 )
             )
@@ -148,6 +151,7 @@ fun getBitcoinWalletCreationRequest() : WalletCreation {
                         email = "authorized1@org1",
                         publicKey = "3wKxhgiogoCaA2uxPYeH7cy3cG4hxRPogrPmDPLS54iZ",
                         nameHashIsEmpty = false,
+                        jpegThumbnail = null
                     )
                 )
             )
@@ -181,6 +185,7 @@ fun getEthereumWalletCreationRequest() : WalletCreation {
                         email = "authorized1@org1",
                         publicKey = "3wKxhgiogoCaA2uxPYeH7cy3cG4hxRPogrPmDPLS54iZ",
                         nameHashIsEmpty = false,
+                        jpegThumbnail = null
                     )
                 )
             )
@@ -522,6 +527,7 @@ fun getWalletConfigPolicyUpdate(nonceAccountAddresses: List<String>): ApprovalRe
                         name = "User 1",
                         email = "authorized1@org1",
                         nameHashIsEmpty = false,
+                        jpegThumbnail = null
                     )
                 ),
                 SlotSignerInfo(
@@ -531,6 +537,7 @@ fun getWalletConfigPolicyUpdate(nonceAccountAddresses: List<String>): ApprovalRe
                         name = "User 2",
                         email = "user2@org1",
                         nameHashIsEmpty = false,
+                        jpegThumbnail = null
                     )
                 ),
             )
@@ -565,11 +572,11 @@ fun getBalanceAccountPolicyUpdate(nonceAccountAddresses: List<String>) : Approva
             approvers= listOf(
                 SlotSignerInfo(
                     slotId= 0,
-                    value= SignerInfo(publicKey= "4q8ApWsB3rSW2HPFwc1aWmGgcBMfj7tSKBbb5sBGAB6h", name= "User 1", email= "authorized1@org1", nameHashIsEmpty = false)
+                    value= SignerInfo(publicKey= "4q8ApWsB3rSW2HPFwc1aWmGgcBMfj7tSKBbb5sBGAB6h", name= "User 1", email= "authorized1@org1", nameHashIsEmpty = false, jpegThumbnail = null)
                 ),
                 SlotSignerInfo(
                     slotId= 1,
-                    value= SignerInfo(publicKey= "CDrdR8xX8t83eXxB2ESuHp9AxkiJkUuKnD98zyDfMtrG", name= "User 2", email= "user2@org1", nameHashIsEmpty = false)
+                    value= SignerInfo(publicKey= "CDrdR8xX8t83eXxB2ESuHp9AxkiJkUuKnD98zyDfMtrG", name= "User 2", email= "user2@org1", nameHashIsEmpty = false, jpegThumbnail = null)
                 ),
             )
         ),

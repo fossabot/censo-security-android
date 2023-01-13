@@ -360,7 +360,8 @@ fun ApprovalDetails(
                 denialsReceived = approval?.numberOfDeniesReceived ?: 0,
                 expiresIn = expiresInText,
                 vaultName = approval?.vaultName,
-                requestType = requestType
+                requestType = requestType,
+                isInitiationRequest = initiationRequest
             )
             Spacer(modifier = Modifier.height(28.dp))
 
@@ -393,6 +394,7 @@ fun ApprovalDetails(
     }
 }
 
+//todo: Need user image here and would need to be a unique row also to show image for Requested/Initiated By
 @Composable
 fun ApprovalStatus(
     requestedBy: String,
@@ -402,28 +404,39 @@ fun ApprovalStatus(
     denialsReceived: Int,
     expiresIn: String?,
     vaultName: String?,
-    requestType: ApprovalRequestDetails?
+    requestType: ApprovalRequestDetails?,
+    isInitiationRequest: Boolean
 ) {
-
-    val facts = mutableListOf<Pair<String, String>>()
-    vaultName?.let { facts.add(Pair(stringResource(R.string.vault_name), vaultName)) }
+    val facts = mutableListOf<RowData>()
+    vaultName?.let { facts.add(RowData(title = stringResource(R.string.vault_name), value = vaultName)) }
     val sectionTitle = if (requestType is AcceptVaultInvitation) {
-        facts.add(Pair(stringResource(R.string.invited_by), requestedByName))
-        facts.add(Pair(stringResource(R.string.invited_by_email), requestedBy))
+        facts.add(RowData(title = stringResource(R.string.invited_by), value = requestedByName))
+        facts.add(RowData(title = stringResource(R.string.invited_by_email), value = requestedBy))
         ""
     } else {
-        facts.add(Pair(stringResource(R.string.requested_by), requestedBy))
-        facts.add(Pair(
-            stringResource(R.string.approvals_received),
-            "$approvalsReceived ${stringResource(id = R.string.of)} $totalApprovals"
+        facts.add(
+            RowData(
+                title = if (isInitiationRequest) {
+                    stringResource(R.string.initiated_by)
+                } else {
+                    stringResource(R.string.requested_by)
+                },
+                value = requestedBy
+            )
+        )
+        facts.add(
+            RowData(
+            title = stringResource(R.string.approvals_received),
+            value = "$approvalsReceived ${stringResource(id = R.string.of)} $totalApprovals",
         ))
-        facts.add(Pair(
-            stringResource(R.string.denials_received),
-            "$denialsReceived ${stringResource(id = R.string.of)} $totalApprovals"
+        facts.add(RowData(
+            title = stringResource(R.string.denials_received),
+            value = "$denialsReceived ${stringResource(id = R.string.of)} $totalApprovals",
         ))
         stringResource(R.string.status)
     }
-    expiresIn?.let { facts.add(Pair(stringResource(R.string.expires_in), expiresIn))  }
+    expiresIn?.let { facts.add(
+         RowData(title = stringResource(R.string.expires_in), value = expiresIn))  }
     
     val factsData = FactsData(title = sectionTitle, facts = facts.toList())
     

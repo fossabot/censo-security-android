@@ -15,6 +15,7 @@ import com.censocustody.android.presentation.approvals.approval_type_row_items.r
 import com.censocustody.android.presentation.components.FactRow
 import com.censocustody.android.presentation.components.FactsData
 import com.censocustody.android.R
+import com.censocustody.android.presentation.components.RowData
 
 @Composable
 fun BalanceAccountDetailContent(
@@ -32,7 +33,7 @@ fun BalanceAccountDetailContent(
     Spacer(modifier = Modifier.height(24.dp))
     val factsData = FactsData(
         facts = listOf(
-            Pair(stringResource(R.string.wallet_name_title), accountName),
+            RowData(title = stringResource(R.string.wallet_name_title), value = accountName),
         )
     )
     FactRow(factsData = factsData)
@@ -61,16 +62,16 @@ fun generateBalanceAccountDetailRows(
     val approvalsRequiredRow = FactsData(
         title = context.getString(R.string.approvals),
         facts = listOf(
-            Pair(
-                context.getString(R.string.approvals_required_title),
-                "$approvalsReceived ${context.getString(R.string.of)} ${walletCreation.approvalPolicy.approvalsRequired.toInt()}"
+            RowData(
+                title = context.getString(R.string.approvals_required_title),
+                value = "$approvalsReceived ${context.getString(R.string.of)} ${walletCreation.approvalPolicy.approvalsRequired.toInt()}",
             ),
-            Pair(
-                context.getString(R.string.approval_expiration),
-                convertSecondsIntoReadableText(
+            RowData(
+                title = context.getString(R.string.approval_expiration),
+                value = convertSecondsIntoReadableText(
                     walletCreation.approvalPolicy.approvalTimeout.toInt(),
                     context
-                )
+                ),
             )
         )
     )
@@ -81,7 +82,8 @@ fun generateBalanceAccountDetailRows(
     //region Approvers Row
     val approversList = walletCreation.approvalPolicy.approvers.retrieveSlotRowData()
     if (approversList.isEmpty()) {
-        approversList.add(Pair(context.getString(R.string.no_approvers_text), ""))
+        approversList.add(
+            RowData(title = context.getString(R.string.no_approvers_text), value = ""))
     }
 
     val approverRow = FactsData(
