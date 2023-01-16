@@ -83,7 +83,7 @@ class EntranceViewModel @Inject constructor(
 
     private suspend fun checkIfUserHasDeviceRegistered() {
         val userEmail = userRepository.retrieveUserEmail()
-        if (SharedPrefsHelper.userHasDeviceIdSaved(userEmail)) {
+        if (userRepository.userHasDeviceIdSaved(userEmail)) {
             //todo: check if user has correct device ID
             val verifyUser = retrieveUserVerifyDetails()
 
