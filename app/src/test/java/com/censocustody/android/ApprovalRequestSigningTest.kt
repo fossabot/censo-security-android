@@ -15,6 +15,7 @@ import org.junit.Before
 import org.junit.Test
 import org.mockito.Mock
 import org.mockito.MockitoAnnotations
+import java.security.Signature
 import java.util.*
 import javax.crypto.Cipher
 
@@ -49,6 +50,7 @@ class ApprovalRequestSigningTest {
 
     private val mockEncryptionManager = mock<EncryptionManager>()
     private val cipherMock = mock<Cipher>()
+    private val signatureMock = mock<Signature>()
     private val cryptoMock = mock<CryptoObject>()
 
     @Before
@@ -65,6 +67,8 @@ class ApprovalRequestSigningTest {
         }
 
         whenever(cryptographyManager.decryptData(fakeCipherText, cipherMock)).then { rootSeed }
+        whenever(cryptoMock.cipher).then { cipherMock }
+        whenever(cryptoMock.signature).then { signatureMock }
 
         approverPublicKey = BaseWrapper.encode(keyPair.publicKey)
 
@@ -266,10 +270,10 @@ class ApprovalRequestSigningTest {
 
         whenever(mockEncryptionManager.retrieveRootSeed(any(), any())).thenReturn(BaseWrapper.encode(rootSeed))
 
-        whenever(mockEncryptionManager.signSolanaApprovalDispositionMessage(
+        whenever(mockEncryptionManager.signApprovalWithDeviceKey(
             signable = approvalDispositionRequest,
             email = userEmail,
-            cipher = cipherMock,
+            signature = signatureMock
         )).then { SignedPayload(signature = "someSignature", payload = "somePayload")  }
         val apiBody = approvalDispositionRequest.convertToApiBody(mockEncryptionManager, cryptoMock)
         assertEquals(disposition, apiBody.approvalDisposition)
@@ -278,10 +282,10 @@ class ApprovalRequestSigningTest {
             apiBody.signatureInfo
         )
 
-        verify(mockEncryptionManager, times(1)).signSolanaApprovalDispositionMessage(
+        verify(mockEncryptionManager, times(1)).signApprovalWithDeviceKey(
             signable = approvalDispositionRequest,
             email = userEmail,
-            cipher = cipherMock
+            signature = signatureMock
         )
 
         assertNotNull(loginApprovalSignableData)
