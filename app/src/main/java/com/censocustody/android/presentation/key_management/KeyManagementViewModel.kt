@@ -258,13 +258,13 @@ class KeyManagementViewModel @Inject constructor(
             val keysNotSavedOnBackend =
                 state.initialData?.verifyUserDetails?.determineKeysUserNeedsToUpload(localKeys)
 
-  //          if (keysNotSavedOnBackend?.isNotEmpty() == true) {
+            if (keysNotSavedOnBackend?.isNotEmpty() == true) {
                 state = state.copy(walletSignersToAdd = localKeys)
                 triggerDeviceSignatureRetrieval()
-//            } else {
-//                //no API call needed, move on
-//                state = state.copy(finalizeKeyFlow = Resource.Success(null))
-//            }
+            } else {
+                //no API call needed, move on
+                state = state.copy(finalizeKeyFlow = Resource.Success(null))
+            }
         } catch (e: Exception) {
             recoverKeyFailure()
         }

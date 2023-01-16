@@ -27,6 +27,7 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mock
+import java.security.Signature
 import javax.crypto.Cipher
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -50,6 +51,9 @@ class ApprovalDetailsViewModelTest : BaseViewModelTest() {
 
     @Mock
     lateinit var cipher: Cipher
+
+    @Mock
+    lateinit var signature: Signature
 
     @Mock
     lateinit var cryptoObject: CryptoObject
@@ -120,6 +124,9 @@ class ApprovalDetailsViewModelTest : BaseViewModelTest() {
      */
     @Test
     fun `approve an approval successfully then view model should reflect the success in state`() = runTest {
+        whenever(userRepository.retrieveUserEmail()).then { "userEmail@ok.com" }
+        whenever(userRepository.retrieveUserDeviceId(any())).then { "device_id" }
+        whenever(cipherRepository.getSignatureForDeviceSigning(any())).then { signature }
         whenever(approvalsRepository.approveOrDenyDisposition(any(), any(), any())).thenAnswer {
             Resource.Success(data = null)
         }

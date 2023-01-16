@@ -63,6 +63,9 @@ class EntranceViewModelTest : BaseViewModelTest() {
 
     val email = "legitimate@ok.com"
 
+    val deviceId = "9786545254367"
+    val devicePublicKey = "G4JuLGBbyGAS5nAhDdfNX2LbckBAmCnKMB9xTdZfQS7n"
+
     private val basicVerifyUserWithNoPublicKeys = VerifyUser(
         fullName = "Jason Jasonson",
         hasApprovalPermission = true,
@@ -71,7 +74,7 @@ class EntranceViewModelTest : BaseViewModelTest() {
         loginName = "jasonson",
         organization = Organization(id = "0987659876", name = "Main Company"),
         publicKeys = emptyList(),
-        deviceKey = "1234519988"
+        deviceKey = devicePublicKey
     )
 
     private val validSolanaPublicKey = WalletPublicKey(
@@ -152,6 +155,7 @@ class EntranceViewModelTest : BaseViewModelTest() {
     @Test
     fun `if user is logged in then we set email value on the censo user data`() = runTest {
         setupLoggedInUserWithValidEmail()
+        setupUserWithDeviceIdAndPublicKey()
 
         entranceViewModel.onStart()
 
@@ -161,6 +165,8 @@ class EntranceViewModelTest : BaseViewModelTest() {
     @Test
     fun `if user does not have sentinel data send them to sign in`() = runTest {
         setupLoggedInUserWithValidEmail()
+        setupUserWithDeviceIdAndPublicKey()
+
         whenever(keyRepository.haveSentinelData()).then { false }
         whenever(keyRepository.hasV3RootSeedStored()).then { true }
 
@@ -182,6 +188,7 @@ class EntranceViewModelTest : BaseViewModelTest() {
     fun `if no key is present locally or on backend then send user to create a key destination`() =
         runTest {
             setupLoggedInUserWithValidEmail()
+            setupUserWithDeviceIdAndPublicKey()
 
             whenever(userRepository.verifyUser()).then {
                 Resource.Success(basicVerifyUserWithNoPublicKeys)
@@ -203,6 +210,7 @@ class EntranceViewModelTest : BaseViewModelTest() {
     fun `if a key is present locally but a key is not present on backend then send user to key regeneration destination`() =
         runTest {
             setupLoggedInUserWithValidEmail()
+            setupUserWithDeviceIdAndPublicKey()
 
             whenever(userRepository.verifyUser()).then {
                 Resource.Success(basicVerifyUserWithNoPublicKeys)
@@ -224,6 +232,7 @@ class EntranceViewModelTest : BaseViewModelTest() {
     fun `if no key is present locally but a key is present on backend then send user to key recovery destination`() =
         runTest {
             setupLoggedInUserWithValidEmail()
+            setupUserWithDeviceIdAndPublicKey()
 
             whenever(userRepository.verifyUser()).then {
                 Resource.Success(basicVerifyUserWithValidPublicKey)
@@ -245,6 +254,7 @@ class EntranceViewModelTest : BaseViewModelTest() {
     fun `if key is present locally and matches key on backend then send user to home`() =
         runTest {
             setupLoggedInUserWithValidEmail()
+            setupUserWithDeviceIdAndPublicKey()
 
             whenever(userRepository.verifyUser()).then {
                 Resource.Success(basicVerifyUserWithValidPublicKey)
@@ -269,6 +279,7 @@ class EntranceViewModelTest : BaseViewModelTest() {
     fun `if key is present locally and does not match key on backend then send user to invalid key`() =
         runTest {
             setupLoggedInUserWithValidEmail()
+            setupUserWithDeviceIdAndPublicKey()
 
             whenever(userRepository.verifyUser()).then {
                 Resource.Success(basicVerifyUserWithValidPublicKey)
@@ -293,6 +304,7 @@ class EntranceViewModelTest : BaseViewModelTest() {
     fun `if verify user fails then set user null and do not set a user destination`() =
         runTest {
             setupLoggedInUserWithValidEmail()
+            setupUserWithDeviceIdAndPublicKey()
 
             whenever(userRepository.verifyUser()).then {
                 Resource.Error<VerifyUser>()
@@ -311,6 +323,7 @@ class EntranceViewModelTest : BaseViewModelTest() {
     fun `can continue to home after initial verify user failure`() =
         runBlocking {
             setupLoggedInUserWithValidEmail()
+            setupUserWithDeviceIdAndPublicKey()
 
             whenever(userRepository.verifyUser()).then {
                 Resource.Error<VerifyUser>()
@@ -544,6 +557,12 @@ class EntranceViewModelTest : BaseViewModelTest() {
     private suspend fun setupLoggedInUserWithValidEmail() {
         whenever(userRepository.retrieveCachedUserEmail()).then { email }
         whenever(userRepository.userLoggedIn()).then { true }
+    }
+
+    private suspend fun setupUserWithDeviceIdAndPublicKey() {
+        whenever(userRepository.retrieveUserEmail()).then { email }
+        whenever(userRepository.userHasDeviceIdSaved(email)).then { true }
+        whenever(userRepository.retrieveUserDevicePublicKey(email)).then { devicePublicKey }
     }
 
     @After
