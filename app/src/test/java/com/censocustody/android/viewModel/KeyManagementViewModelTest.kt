@@ -192,6 +192,7 @@ class KeyManagementViewModelTest : BaseViewModelTest() {
 
     @Test
     fun `after the user has submitted all 24 words during creation flow ensure that the bioPrompt is triggered`() = runTest {
+
         //Setup confirm words state
         setCreationFlowDataInStateForConfirmWordsProcessAndAssertChangesInState()
 
@@ -374,42 +375,43 @@ class KeyManagementViewModelTest : BaseViewModelTest() {
         assertTrue(keyMgmtViewModel.state.finalizeKeyFlow is Resource.Success)
     }
 
-    @Test
-    fun `after the user biometry is approved during creation flow ensure key creation is a success`() = runTest {
-        whenever(keyRepository.saveV3PublicKeys(any())).thenAnswer {
-            testWalletSigners
-        }
-
-        whenever(userRepository.addWalletSigner(any(), any())).thenAnswer {
-            Resource.Success(data = testWalletSigners)
-        }
-
-        assertDefaultStateForInitialDataProperties()
-
-        keyMgmtViewModel.onStart(testCreationInitialData)
-
-        advanceUntilIdle()
-
-        assertEquals(testValidPhrase, keyMgmtViewModel.state.keyGeneratedPhrase)
-        assertEquals(testCreationInitialData, keyMgmtViewModel.state.initialData)
-        assertEquals(KeyManagementFlow.KEY_CREATION, keyMgmtViewModel.state.keyManagementFlow)
-        assertEquals(
-            KeyManagementFlowStep.CreationFlow(KeyCreationFlowStep.ENTRY_STEP),
-            keyMgmtViewModel.state.keyManagementFlowStep
-        )
-
-        keyMgmtViewModel.createAndSaveKey(validWalletSigners)
-
-        advanceUntilIdle()
-
-        //todo: this test seems to be showing that we
-
-        verify(userRepository, times(1)).addWalletSigner(any(), any())
-
-        assertTrue(keyMgmtViewModel.state.finalizeKeyFlow is Resource.Success)
-        assertEquals(testWalletSigners, keyMgmtViewModel.state.finalizeKeyFlow.data)
-        assertNull(keyMgmtViewModel.state.keyGeneratedPhrase)
-    }
+    /**
+    Key creation is no longer done in the KeyMgmtVM. But if we need to bring it back, then tests will need to be re-implemented.
+     */
+//    @Test
+//    fun `after the user biometry is approved during creation flow ensure key creation is a success`() = runTest {
+//        whenever(keyRepository.saveV3PublicKeys(any())).thenAnswer {
+//            testWalletSigners
+//        }
+//
+//        whenever(userRepository.addWalletSigner(any(), any())).thenAnswer {
+//            Resource.Success(data = testWalletSigners)
+//        }
+//
+//        assertDefaultStateForInitialDataProperties()
+//
+//        keyMgmtViewModel.onStart(testCreationInitialData)
+//
+//        advanceUntilIdle()
+//
+//        assertEquals(testValidPhrase, keyMgmtViewModel.state.keyGeneratedPhrase)
+//        assertEquals(testCreationInitialData, keyMgmtViewModel.state.initialData)
+//        assertEquals(KeyManagementFlow.KEY_CREATION, keyMgmtViewModel.state.keyManagementFlow)
+//        assertEquals(
+//            KeyManagementFlowStep.CreationFlow(KeyCreationFlowStep.ENTRY_STEP),
+//            keyMgmtViewModel.state.keyManagementFlowStep
+//        )
+//
+//        keyMgmtViewModel.createAndSaveKey(validWalletSigners)
+//
+//        advanceUntilIdle()
+//
+//        verify(userRepository, times(1)).addWalletSigner(any(), any())
+//
+//        assertTrue(keyMgmtViewModel.state.finalizeKeyFlow is Resource.Success)
+//        assertEquals(testWalletSigners, keyMgmtViewModel.state.finalizeKeyFlow.data)
+//        assertNull(keyMgmtViewModel.state.keyGeneratedPhrase)
+//    }
 
     //endregion
 
@@ -926,35 +928,38 @@ class KeyManagementViewModelTest : BaseViewModelTest() {
         assertTriggerBioPromptIsSuccessAndHasCipherData()
     }
 
-    @Test
-    fun `after error occurs during key creation then retrying should trigger bio prompt`() = runTest {
-        whenever(keyRepository.saveV3RootKey(any(), any())).thenAnswer {
-            throw Exception(defaultErrorMessage)
-        }
-
-        setCreationFlowDataInStateForConfirmWordsProcessAndAssertChangesInState()
-
-        keyMgmtViewModel.createAndSaveKey(validWalletSigners)
-
-        advanceUntilIdle()
-
-        assertTrue(keyMgmtViewModel.state.finalizeKeyFlow is Resource.Error)
-
-        keyMgmtViewModel.retryKeyCreationFromPhrase()
-
-        advanceUntilIdle()
-
-        assertEquals(
-            KeyManagementFlowStep.CreationFlow(KeyCreationFlowStep.ALL_SET_STEP),
-            keyMgmtViewModel.state.keyManagementFlowStep
-        )
-        assertTrue(keyMgmtViewModel.state.finalizeKeyFlow is Resource.Loading)
-        assertEquals(
-            BioPromptReason.SAVE_V3_ROOT_SEED,
-            keyMgmtViewModel.state.bioPromptData.bioPromptReason
-        )
-        assertTriggerBioPromptIsSuccessAndHasCipherData()
-    }
+    /**
+    Key creation is no longer done in the KeyMgmtVM. But if we need to bring it back, then tests will need to be re-implemented.
+     */
+//    @Test
+//    fun `after error occurs during key creation then retrying should trigger bio prompt`() = runTest {
+//        whenever(keyRepository.saveV3RootKey(any(), any())).thenAnswer {
+//            throw Exception(defaultErrorMessage)
+//        }
+//
+//        setCreationFlowDataInStateForConfirmWordsProcessAndAssertChangesInState()
+//
+//        keyMgmtViewModel.createAndSaveKey(validWalletSigners)
+//
+//        advanceUntilIdle()
+//
+//        assertTrue(keyMgmtViewModel.state.finalizeKeyFlow is Resource.Error)
+//
+//        keyMgmtViewModel.retryKeyCreationFromPhrase()
+//
+//        advanceUntilIdle()
+//
+//        assertEquals(
+//            KeyManagementFlowStep.CreationFlow(KeyCreationFlowStep.ALL_SET_STEP),
+//            keyMgmtViewModel.state.keyManagementFlowStep
+//        )
+//        assertTrue(keyMgmtViewModel.state.finalizeKeyFlow is Resource.Loading)
+//        assertEquals(
+//            BioPromptReason.SAVE_V3_ROOT_SEED,
+//            keyMgmtViewModel.state.bioPromptData.bioPromptReason
+//        )
+//        assertTriggerBioPromptIsSuccessAndHasCipherData()
+//    }
     //endregion
 
     //endregion
@@ -979,7 +984,7 @@ class KeyManagementViewModelTest : BaseViewModelTest() {
 
     private fun assertTriggerBioPromptIsSuccessAndHasCipherData() {
         assertTrue(keyMgmtViewModel.state.triggerBioPrompt is Resource.Success)
-        assertEquals(rootSeedEncryptionCipher, keyMgmtViewModel.state.triggerBioPrompt.data)
+        assertEquals(rootSeedEncryptionCipher, keyMgmtViewModel.state.triggerBioPrompt.data?.cipher)
     }
 
     private fun callExitPhraseFlowAndAssertChangesInState() {

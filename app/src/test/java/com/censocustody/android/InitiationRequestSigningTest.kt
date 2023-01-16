@@ -18,6 +18,7 @@ import org.junit.Before
 import org.junit.Test
 import org.mockito.Mock
 import org.mockito.MockitoAnnotations
+import java.security.Signature
 import java.util.*
 import javax.crypto.Cipher
 
@@ -33,6 +34,9 @@ class InitiationRequestSigningTest {
 
     @Mock
     lateinit var cipher: Cipher
+
+    @Mock
+    lateinit var signature: Signature
 
     @Mock
     lateinit var cryptoObject: CryptoObject
@@ -68,6 +72,9 @@ class InitiationRequestSigningTest {
             initVector = BaseWrapper.encode(byteArrayOf(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)),
             encryptedKeysData = ""
         )
+
+        whenever(cryptoObject.signature).then { signature }
+        whenever(cryptoObject.cipher).then { cipher }
 
         whenever(securePreferences.retrieveV3RootSeed(userEmail)).then {
             EncryptedData(ciphertext = byteArrayOf(), initializationVector = byteArrayOf(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0))
