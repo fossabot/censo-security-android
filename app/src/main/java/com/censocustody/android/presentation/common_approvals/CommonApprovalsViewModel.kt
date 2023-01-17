@@ -1,6 +1,5 @@
 package com.censocustody.android.presentation.common_approvals
 
-import androidx.biometric.BiometricPrompt
 import androidx.biometric.BiometricPrompt.CryptoObject
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -18,7 +17,7 @@ import com.censocustody.android.data.models.InitiationDisposition
 import com.censocustody.android.data.models.RegisterApprovalDisposition
 import com.censocustody.android.data.models.approval.SolanaApprovalRequestDetails
 import com.censocustody.android.data.models.approval.ApprovalRequest
-import com.censocustody.android.data.models.approval.ApprovalRequestDetails
+import com.censocustody.android.data.models.approval.ApprovalRequestDetails.UnknownApprovalType.isDeviceKeyApprovalType
 import com.censocustody.android.presentation.approval_disposition.ApprovalDispositionState
 import com.censocustody.android.presentation.durable_nonce.DurableNonceViewModel
 import kotlinx.coroutines.launch
@@ -73,34 +72,59 @@ abstract class  CommonApprovalsViewModel(
 
     private fun triggerBioPrompt() {
         viewModelScope.launch {
-            val approvalType = state.selectedApproval?.getApprovalRequestType()
+            val isInitiationRequest =
+                state.selectedApproval?.details is SolanaApprovalRequestDetails.MultiSignOpInitiationDetails
+            val selectedApproval = state.selectedApproval
 
-            when (approvalType) {
-                is ApprovalRequestDetails.LoginApprovalRequest, is ApprovalRequestDetails.AcceptVaultInvitation, is ApprovalRequestDetails.PasswordReset -> {
-                    val email = userRepository.retrieveUserEmail()
-                    val deviceId = userRepository.retrieveUserDeviceId(email)
-                    val signature = cipherRepository.getSignatureForDeviceSigning(deviceId)
-                    if (signature != null) {
-                        state =
-                            state.copy(bioPromptTrigger = Resource.Success(CryptoObject(signature)))
-                    }
+            if (selectedApproval == null) {
+                state = state.copy(
+                    approvalDispositionState =
+                    errorRegisteringResult(state.approvalDispositionState, isInitiationRequest)
+                )
+                return@launch
+            }
+
+            if (selectedApproval.getApprovalRequestType().isDeviceKeyApprovalType()) {
+                val email = userRepository.retrieveUserEmail()
+                val deviceId = userRepository.retrieveUserDeviceId(email)
+                val signature = cipherRepository.getSignatureForDeviceSigning(deviceId)
+                if (signature != null) {
+                    state =
+                        state.copy(bioPromptTrigger = Resource.Success(CryptoObject(signature)))
                 }
-                else -> {
-                    val cipher = cipherRepository.getCipherForV3RootSeedDecryption()
-                    if (cipher != null) {
-                        state =
-                            state.copy(bioPromptTrigger = Resource.Success(CryptoObject(cipher)))
-                    }
+            } else {
+                val cipher = cipherRepository.getCipherForV3RootSeedDecryption()
+                if (cipher != null) {
+                    state =
+                        state.copy(bioPromptTrigger = Resource.Success(CryptoObject(cipher)))
                 }
             }
         }
     }
 
-    fun biometryApproved(cryptoObject: BiometricPrompt.CryptoObject) {
-        registerApprovalDisposition(cryptoObject)
+    fun biometryApproved(cryptoObject: CryptoObject) {
+        val isInitiationRequest =
+            state.selectedApproval?.details is SolanaApprovalRequestDetails.MultiSignOpInitiationDetails
+        val selectedApproval = state.selectedApproval
+
+        if (selectedApproval == null) {
+            state = state.copy(
+                approvalDispositionState =
+                errorRegisteringResult(state.approvalDispositionState, isInitiationRequest)
+            )
+            return
+        }
+
+        val isDeviceKeyType = selectedApproval.getApprovalRequestType().isDeviceKeyApprovalType()
+
+        if (isDeviceKeyType && cryptoObject.signature != null) {
+            registerApprovalDisposition(cryptoObject)
+        } else if (!isDeviceKeyType && cryptoObject.cipher != null) {
+            registerApprovalDisposition(cryptoObject)
+        }
     }
 
-    private fun registerApprovalDisposition(cryptoObject: BiometricPrompt.CryptoObject) {
+    private fun registerApprovalDisposition(cryptoObject: CryptoObject) {
         viewModelScope.launch {
             state = state.copy(
                 approvalDispositionState = state.approvalDispositionState?.copy(
@@ -125,7 +149,7 @@ abstract class  CommonApprovalsViewModel(
         approval: ApprovalRequest?,
         multipleAccounts: DurableNonceViewModel.MultipleAccounts?,
         approvalsRepository: ApprovalsRepository,
-        cryptoObject: BiometricPrompt.CryptoObject
+        cryptoObject: CryptoObject
     ): ApprovalDispositionState? {
 
         val isInitiationRequest =
@@ -133,42 +157,18 @@ abstract class  CommonApprovalsViewModel(
 
         //Data retrieval and checks
         val nonces = multipleAccounts?.nonces
-            ?: return if (isInitiationRequest) {
-                approvalDispositionState?.copy(
-                    initiationDispositionResult = Resource.Error()
-                )
-            } else {
-                approvalDispositionState?.copy(
-                    registerApprovalDispositionResult = Resource.Error()
-                )
-            }
+            ?: return errorRegisteringResult(approvalDispositionState, isInitiationRequest)
 
         val approvalId = approval?.id ?: ""
         val solanaApprovalRequestType = approval?.getApprovalRequestType()
         if (solanaApprovalRequestType == null || approval.id == null) {
-            return if (isInitiationRequest) {
-                approvalDispositionState?.copy(
-                    initiationDispositionResult = Resource.Error()
-                )
-            } else {
-                approvalDispositionState?.copy(
-                    registerApprovalDispositionResult = Resource.Error()
-                )
-            }
+            return errorRegisteringResult(approvalDispositionState, isInitiationRequest)
         }
 
         val recentApprovalDisposition = approvalDispositionState?.approvalDisposition
         val approvalDisposition =
             if (recentApprovalDisposition is Resource.Success) recentApprovalDisposition.data else null
-                ?: return if (isInitiationRequest) {
-                    approvalDispositionState?.copy(
-                        initiationDispositionResult = Resource.Error()
-                    )
-                } else {
-                    approvalDispositionState?.copy(
-                        registerApprovalDispositionResult = Resource.Error()
-                    )
-                }
+                ?: return errorRegisteringResult(approvalDispositionState, isInitiationRequest)
 
         if (isInitiationRequest) {
             val multiSignOpDetails =
@@ -203,6 +203,21 @@ abstract class  CommonApprovalsViewModel(
 
             return approvalDispositionState.copy(
                 registerApprovalDispositionResult = approvalDispositionResponseResource
+            )
+        }
+    }
+
+    private fun errorRegisteringResult(
+        approvalDispositionState: ApprovalDispositionState?,
+        isInitiationRequest: Boolean
+    ): ApprovalDispositionState? {
+        return if (isInitiationRequest) {
+            approvalDispositionState?.copy(
+                initiationDispositionResult = Resource.Error()
+            )
+        } else {
+            approvalDispositionState?.copy(
+                registerApprovalDispositionResult = Resource.Error()
             )
         }
     }
