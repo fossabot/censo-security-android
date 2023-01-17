@@ -88,7 +88,7 @@ class DeviceRegistrationViewModel @Inject constructor(
                     }
 
                     val email = userRepository.retrieveUserEmail()
-                    SharedPrefsHelper.saveDeviceId(email = email, deviceId = keyName)
+                    userRepository.saveDeviceId(email = email, deviceId = keyName)
 
                     val userDeviceAdded = userRepository.addUserDevice(
                         UserDevice(
@@ -99,8 +99,8 @@ class DeviceRegistrationViewModel @Inject constructor(
                     )
 
                     if (userDeviceAdded is Resource.Success) {
-                        SharedPrefsHelper.saveDeviceId(email, keyName)
-                        SharedPrefsHelper.saveDevicePublicKey(email, state.publicKey)
+                        userRepository.saveDeviceId(email = email, deviceId = keyName)
+                        userRepository.saveDevicePublicKey(email = email, publicKey = state.publicKey)
 
                         state = state.copy(addUserDevice = userDeviceAdded)
 

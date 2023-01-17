@@ -249,10 +249,10 @@ object SharedPrefsHelper {
 
     fun saveDevicePublicKey(
         email: String,
-        deviceId: String
+        publicKey: String
     ) {
         val editor = sharedPrefs.edit()
-        editor.putString("${email.lowercase().trim()}$DEVICE_PUBLIC_KEY", deviceId)
+        editor.putString("${email.lowercase().trim()}$DEVICE_PUBLIC_KEY", publicKey)
         editor.apply()
     }
 
