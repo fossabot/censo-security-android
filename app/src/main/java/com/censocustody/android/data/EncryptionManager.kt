@@ -163,20 +163,20 @@ class EncryptionManagerImpl @Inject constructor(
     ): ByteArray {
         val dataToSign = Signers.retrieveDataToSign(walletSigners)
 
-        return cryptographyManager.signDataWithDeviceKey(
+        return signDataWithDeviceKey(
             signature = signature,
             data = dataToSign,
-            keyName = SharedPrefsHelper.retrieveDeviceId(email)
+            email = email
         )
     }
 
     override fun signApprovalWithDeviceKey(signable: Signable, email: String, signature: Signature) : SignedPayload {
         val data = signable.retrieveSignableData(null).first()
 
-        val signedData = cryptographyManager.signDataWithDeviceKey(
+        val signedData = signDataWithDeviceKey(
             data = data,
             signature = signature,
-            keyName = SharedPrefsHelper.retrieveDeviceId(email)
+            email = email
         )
 
         return SignedPayload(
