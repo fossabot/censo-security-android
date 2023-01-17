@@ -23,11 +23,7 @@
         android:screenOrientation="portrait"
         android:supportsRtl="true"
         android:theme="@style/Theme.CensoCustody"
-        android:dataExtractionRules="@xml/data_extraction_rules"
-        tools:targetApi="s">
-<!--    The [tools:targetApi="s"] is used to silence
-        a warning for using the [android:dataExtractionRules=""]
-        when the minSDK is lower than 31    -->
+        android:dataExtractionRules="@xml/data_extraction_rules" >
 
         <activity
             android:name=".MainActivity"
