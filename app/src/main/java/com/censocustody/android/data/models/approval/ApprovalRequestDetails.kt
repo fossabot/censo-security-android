@@ -87,6 +87,9 @@ sealed class ApprovalRequestDetails {
             .create()
             .toJson(this)
 
+    fun ApprovalRequestDetails.isDeviceKeyApprovalType() =
+        this is LoginApprovalRequest || this is AcceptVaultInvitation || this is PasswordReset
+
     data class WithdrawalRequest(
         val type: String,
         val account: AccountInfo,

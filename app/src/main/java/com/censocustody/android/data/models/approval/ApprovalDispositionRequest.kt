@@ -18,6 +18,7 @@ import com.censocustody.android.data.models.approval.ApprovalRequestDetails.Comp
 import com.censocustody.android.data.models.approval.ApprovalRequestDetails.*
 import com.censocustody.android.common.EthereumTransactionUtil
 import com.censocustody.android.common.Operation
+import com.censocustody.android.data.models.approval.ApprovalRequestDetails.UnknownApprovalType.isDeviceKeyApprovalType
 import java.nio.ByteBuffer
 import java.security.Signature
 import javax.crypto.Cipher
@@ -439,43 +440,40 @@ data class ApprovalDispositionRequest(
         val cipher = cryptoObject.cipher
         val signature = cryptoObject.signature
 
-        when (requestType) {
-            is LoginApprovalRequest, is PasswordReset, is AcceptVaultInvitation -> {
-                if (signature == null) throw Exception("Missing biometry approved signature")
-            }
-            else -> {
-                if (cipher == null) throw Exception("Missing biometry approved cipher")
-            }
+        if (requestType.isDeviceKeyApprovalType()) {
+            if (signature == null) throw Exception("Missing biometry approved signature")
+        } else {
+            if (cipher == null) throw Exception("Missing biometry approved cipher")
         }
 
         val signatureInfo: ApprovalSignature = when (requestType) {
             is LoginApprovalRequest, is PasswordReset, is AcceptVaultInvitation ->
                 ApprovalSignature.NoChainSignature(
-                    signRequestWithDeviceKey(encryptionManager, cryptoObject.signature!!)
+                    signRequestWithDeviceKey(encryptionManager, signature!!)
                 )
-            is WalletCreation -> getSignatureInfo(requestType.accountInfo.chain ?: Chain.solana, encryptionManager, cryptoObject.cipher!!)
-            is CreateAddressBookEntry -> getSignatureInfo(requestType.chain, encryptionManager, cryptoObject.cipher!!)
-            is DeleteAddressBookEntry -> getSignatureInfo(requestType.chain, encryptionManager, cryptoObject.cipher!!)
+            is WalletCreation -> getSignatureInfo(requestType.accountInfo.chain ?: Chain.solana, encryptionManager, cipher!!)
+            is CreateAddressBookEntry -> getSignatureInfo(requestType.chain, encryptionManager, cipher!!)
+            is DeleteAddressBookEntry -> getSignatureInfo(requestType.chain, encryptionManager, cipher!!)
             is WithdrawalRequest -> {
                 when (requestType.signingData) {
                     is SigningData.BitcoinSigningData ->
                         ApprovalSignature.BitcoinSignatures(
-                            signatures = signRequestWithBitcoinKey(encryptionManager, cryptoObject.cipher!!, requestType.signingData.childKeyIndex).map { it.signature }
+                            signatures = signRequestWithBitcoinKey(encryptionManager, cipher!!, requestType.signingData.childKeyIndex).map { it.signature }
                         )
                     is SigningData.SolanaSigningData ->
                         ApprovalSignature.SolanaSignature(
-                            signature = signRequestWithSolanaKey(encryptionManager, cryptoObject.cipher!!).signature,
+                            signature = signRequestWithSolanaKey(encryptionManager, cipher!!).signature,
                             nonce = nonces.first().value,
                             nonceAccountAddress = requestType.nonceAccountAddresses().first()
                         )
                     is SigningData.EthereumSigningData ->
                         ApprovalSignature.EthereumSignature(
-                            signature = signRequestWithEthereumKey(encryptionManager, cryptoObject.cipher!!).signature,
+                            signature = signRequestWithEthereumKey(encryptionManager, cipher!!).signature,
                         )
                 }
             }
             else -> ApprovalSignature.SolanaSignature(
-                signature = signRequestWithSolanaKey(encryptionManager, cryptoObject.cipher!!).signature,
+                signature = signRequestWithSolanaKey(encryptionManager, cipher!!).signature,
                 nonce = nonces.first().value,
                 nonceAccountAddress = requestType.nonceAccountAddresses().first()
             )
