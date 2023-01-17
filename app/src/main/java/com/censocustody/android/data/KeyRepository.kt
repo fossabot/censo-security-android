@@ -44,11 +44,6 @@ interface KeyRepository {
         publicKeys: List<WalletSigner?>,
         mnemonic: Mnemonics.MnemonicCode
     ): List<WalletSigner>
-
-    suspend fun signImageData(
-        imageByteArray: ByteArray,
-        cipher: Cipher
-    ): String
 }
 
 class KeyRepositoryImpl(
@@ -170,20 +165,6 @@ class KeyRepositoryImpl(
         }
 
         return signedKeysToAdd
-    }
-
-    //todo: this needs to be with device key, not solana key
-    override suspend fun signImageData(imageByteArray: ByteArray, cipher: Cipher): String {
-        val userEmail = userRepository.retrieveUserEmail()
-
-        val signedImageData =
-            encryptionManager.signDataWithSolanaEncryptedKey(
-                data = imageByteArray,
-                userEmail = userEmail,
-                cipher = cipher
-            )
-
-        return BaseWrapper.encodeToBase64(signedImageData)
     }
 
     override suspend fun hasV3RootSeedStored(): Boolean {
