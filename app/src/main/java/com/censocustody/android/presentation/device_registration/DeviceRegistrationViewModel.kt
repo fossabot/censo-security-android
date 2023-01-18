@@ -143,7 +143,7 @@ class DeviceRegistrationViewModel @Inject constructor(
         )
     }
 
-    private fun createKeyForDevice() {
+    fun createKeyForDevice() {
         viewModelScope.launch {
             val keyId = UUID.randomUUID().toString().replace("-", "")
             state = state.copy(keyName = keyId)
@@ -170,9 +170,8 @@ class DeviceRegistrationViewModel @Inject constructor(
     fun capturedUserPhotoSuccess(userPhoto: Bitmap) {
         state = state.copy(
             capturedUserPhoto = userPhoto,
-            triggerImageCapture = Resource.Uninitialized
+            triggerImageCapture = Resource.Success(Unit)
         )
-        createKeyForDevice()
     }
 
     fun capturedUserPhotoError(exception: Exception) {

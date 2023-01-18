@@ -1,17 +1,22 @@
 package com.censocustody.android.common
 
+import android.R.attr.bitmap
 import android.content.Context
 import android.graphics.Bitmap
+import android.graphics.Matrix
+import android.net.Uri
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
+import androidx.exifinterface.media.ExifInterface
 import com.censocustody.android.data.CryptographyManager
 import com.censocustody.android.data.models.LogoType
 import com.censocustody.android.data.models.UserImage
 import com.raygun.raygun4android.RaygunClient
 import java.io.ByteArrayOutputStream
 import java.io.File
+import java.io.InputStream
 import java.security.MessageDigest
 import java.security.Signature
 import java.util.concurrent.Executor
@@ -19,7 +24,9 @@ import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
 
+
 const val MAX_QUALITY_JPEG = 100
+const val MAX_IMAGE_SIZE_BYTES = 8_388_608 //8MB
 
 suspend fun Context.getCameraProvider(): ProcessCameraProvider = suspendCoroutine { continuation ->
     try {
@@ -90,6 +97,74 @@ fun Bitmap.convertToByteArrayWithJPEGCompression(): ByteArray {
     return stream.toByteArray()
 }
 
+/**
+ * Rotate an image if required.
+ *
+ * @param img           The image bitmap
+ * @param selectedImage Image URI
+ * @return The resulted Bitmap after manipulation
+ */
+fun rotateImageIfRequired(context: Context, image: Bitmap, imageFile: File?): Bitmap {
+
+    var inputStream: InputStream? = null
+
+    try {
+
+        if (imageFile == null) return image
+
+        val selectedImageUri = Uri.fromFile(imageFile)
+
+        inputStream = context.contentResolver.openInputStream(selectedImageUri) ?: return image
+        val exifInterface = ExifInterface(inputStream)
+        val orientation = exifInterface.getAttributeInt(
+            ExifInterface.TAG_ORIENTATION,
+            ExifInterface.ORIENTATION_NORMAL
+        )
+        inputStream.close()
+
+        return when (orientation) {
+            ExifInterface.ORIENTATION_ROTATE_90 -> rotateImage(image, 90f)
+            ExifInterface.ORIENTATION_ROTATE_180 -> rotateImage(image, 180f)
+            ExifInterface.ORIENTATION_ROTATE_270 -> rotateImage(image, 270f)
+            else -> image
+        }
+    } catch (e: Exception) {
+        inputStream?.close()
+        return image
+    }
+}
+
+private fun rotateImage(image: Bitmap, degree: Float): Bitmap {
+    val matrix = Matrix()
+    matrix.postRotate(degree)
+    val rotatedImage = Bitmap.createBitmap(
+        image, 0, 0, image.width, image.height, matrix, true
+    )
+    image.recycle()
+    return rotatedImage
+}
+
+private fun Bitmap.compressImageToMaxSize(maxSizeBytes: Int): ByteArray {
+    val stream = ByteArrayOutputStream()
+    var currSize: Int
+    var currQuality = MAX_QUALITY_JPEG
+
+    do {
+        stream.reset()
+        compress(Bitmap.CompressFormat.JPEG, currQuality, stream)
+        currSize = stream.toByteArray().size
+        // limit quality by 5 percent every time
+        currQuality -= 5
+    } while (currSize >= maxSizeBytes && currQuality > 5)
+
+    recycle()
+
+    val reducedImage = stream.toByteArray()
+    stream.reset()
+
+    return reducedImage
+}
+
 fun generateUserImageObject(
     userPhoto: Bitmap,
     keyName: String,
@@ -97,7 +172,7 @@ fun generateUserImageObject(
     cryptographyManager: CryptographyManager
 ): UserImage {
     //Convert bitmap to byteArray
-    val imageByteArray = userPhoto.convertToByteArrayWithJPEGCompression()
+    val imageByteArray = userPhoto.compressImageToMaxSize(MAX_IMAGE_SIZE_BYTES)
 
     //256 hash of image bytes
     val hash = hashOfUserImage(imageByteArray)
