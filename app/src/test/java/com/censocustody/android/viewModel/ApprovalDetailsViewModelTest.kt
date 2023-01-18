@@ -151,6 +151,8 @@ class ApprovalDetailsViewModelTest : BaseViewModelTest() {
 
         assertExpectedDispositionAndExpectedInitiation(ApprovalDisposition.APPROVE, isInitiationRequest)
 
+        whenever(cryptoObject.signature).then { signature }
+
         triggerRegisterDispositionCallAndAssertNonceDataAndBioPromptState()
 
         advanceUntilIdle()
@@ -522,6 +524,8 @@ class ApprovalDetailsViewModelTest : BaseViewModelTest() {
 
         assertEquals(testMultipleAccounts, approvalDetailsViewModel.state.multipleAccounts)
         assertTrue(approvalDetailsViewModel.state.bioPromptTrigger is Resource.Success)
+
+        whenever(cryptoObject.cipher).then { cipher }
 
         approvalDetailsViewModel.biometryApproved(cryptoObject)
     }
