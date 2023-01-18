@@ -16,8 +16,11 @@ import androidx.camera.core.UseCase
 import androidx.camera.view.PreviewView
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Icon
 import androidx.compose.material.OutlinedButton
@@ -27,12 +30,18 @@ import androidx.compose.material.icons.filled.PhotoCamera
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.geometry.toRect
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Outline
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import androidx.compose.ui.unit.*
 import androidx.compose.ui.viewinterop.AndroidView
 import coil.annotation.ExperimentalCoilApi
 import coil.compose.rememberImagePainter
@@ -50,6 +59,8 @@ fun CaptureUserImageContent(
     onImageCaptureSuccess: (Bitmap) -> Unit,
     onImageCaptureError: (Exception) -> Unit
 ) {
+    val context = LocalContext.current
+
     var imageFile: File? by remember { mutableStateOf(null) }
     if (imageFile != null) {
         Box(modifier = modifier) {
@@ -66,7 +77,9 @@ fun CaptureUserImageContent(
                 Spacer(modifier = Modifier.height(32.dp))
                 CensoButton(
                     onClick = {
-                        val bitmap = BitmapFactory.decodeFile(imageFile?.absolutePath)
+                        val imageUrl = imageFile?.absolutePath
+                        var bitmap = BitmapFactory.decodeFile(imageUrl)
+                        bitmap = rotateImageIfRequired(context, bitmap, imageFile)
                         onImageCaptureSuccess(bitmap)
                     },
                     contentPadding = PaddingValues(horizontal = 32.dp, vertical = 16.dp)
@@ -162,7 +175,7 @@ fun CameraCapture(
             }
             Box {
                 CameraPreview(
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = Modifier.padding(bottom = 160.dp).fillMaxSize(),
                     onUseCase = {
                         previewUseCase = it
                     }
@@ -182,8 +195,8 @@ fun CameraCapture(
                         .size(100.dp)
                         .align(Alignment.BottomCenter),
                     shape = CircleShape,
-                    border = BorderStroke(1.dp, CensoWhite),
-                    colors = ButtonDefaults.outlinedButtonColors(contentColor = CensoButtonBlue)
+                    border = BorderStroke(width = 1.5.dp, color = CensoWhite),
+                    colors = ButtonDefaults.outlinedButtonColors(backgroundColor = CensoButtonBlue)
                 ) {
                     Icon(
                         modifier = Modifier.size(32.dp),
@@ -192,6 +205,16 @@ fun CameraCapture(
                         tint = CensoWhite
                     )
                 }
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(start = 44.dp, end = 44.dp, top = 92.dp, bottom = 254.dp)
+                        .border(
+                            border = BorderStroke(width = 5.dp, color = CensoWhite),
+                            shape = RoundedCornerShape(50)
+                        )
+                        .background(color = Color.Transparent)
+                )
             }
             LaunchedEffect(previewUseCase) {
                 val cameraProvider = context.getCameraProvider()
