@@ -121,6 +121,17 @@ fun DeviceRegistrationScreen(
                 )
             }
         }
+
+        if (state.triggerImageCapture is Resource.Success) {
+            val cameraProvider = context.getCameraProvider()
+            try {
+                cameraProvider.unbindAll()
+            } catch (ex: Exception) {
+
+            }
+            viewModel.resetTriggerImageCapture()
+            viewModel.createKeyForDevice()
+        }
     }
 
     //endregion

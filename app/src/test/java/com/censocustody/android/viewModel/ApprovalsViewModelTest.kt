@@ -510,6 +510,8 @@ class ApprovalsViewModelTest : BaseViewModelTest() {
     private fun triggerRegisterDispositionCallAndAssertNonceDataAndBioPromptState() = runTest {
         setMultipleAccountsAndAssertNonceDataAndBioPromptState()
 
+        whenever(cryptoObject.cipher).then { cipher }
+
         //Trigger the register disposition call (user triggers this when they give biometry approval)
         approvalsViewModel.biometryApproved(cryptoObject)
     }
