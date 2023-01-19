@@ -16,11 +16,8 @@ import androidx.camera.core.UseCase
 import androidx.camera.view.PreviewView
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Icon
 import androidx.compose.material.OutlinedButton
@@ -30,14 +27,12 @@ import androidx.compose.material.icons.filled.PhotoCamera
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.geometry.toRect
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Outline
-import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.*
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -124,6 +119,17 @@ fun CameraCapture(
     onError: (Exception) -> Unit
 ) {
     val context = LocalContext.current
+    val configuration = LocalConfiguration.current
+
+    val screenHeight = configuration.screenHeightDp.dp
+    val screenWidth = configuration.screenWidthDp.dp
+
+    val screenHeightPixels = screenHeight.dpToPx()
+    val screenWidthPixels = screenWidth.dpToPx()
+
+    val bottomPaddingForCamera = 160.dp
+    val bottomPaddingForCameraPixels = bottomPaddingForCamera.dpToPx()
+
     Permission(
         permission = Manifest.permission.CAMERA,
         rationale = stringResource(R.string.explain_photo_permission),
@@ -175,7 +181,9 @@ fun CameraCapture(
             }
             Box {
                 CameraPreview(
-                    modifier = Modifier.padding(bottom = 160.dp).fillMaxSize(),
+                    modifier = Modifier
+                        .padding(bottom = bottomPaddingForCamera)
+                        .fillMaxSize(),
                     onUseCase = {
                         previewUseCase = it
                     }
@@ -205,16 +213,31 @@ fun CameraCapture(
                         tint = CensoWhite
                     )
                 }
-                Box(
+                androidx.compose.foundation.Canvas(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(start = 44.dp, end = 44.dp, top = 92.dp, bottom = 254.dp)
-                        .border(
-                            border = BorderStroke(width = 5.dp, color = CensoWhite),
-                            shape = RoundedCornerShape(50)
-                        )
-                        .background(color = Color.Transparent)
-                )
+                        .padding(bottom = bottomPaddingForCamera)
+                        .graphicsLayer {
+                            alpha = .99f
+                        }
+                ) {
+
+                    // Destination
+                    drawRect(Color.Black.copy(alpha = 0.5f))
+
+                    val ovalWidth = screenWidthPixels * 0.85f
+                    val ovalHeight = screenHeightPixels * 0.50f
+
+                    val topLeftX = (screenWidthPixels - ovalWidth) / 2
+                    val topLeftY = (screenHeightPixels - ovalHeight - bottomPaddingForCameraPixels) / 2
+
+                    drawOval(
+                        topLeft = Offset(x = topLeftX, y = topLeftY),
+                        size = Size(height = ovalHeight, width = ovalWidth),
+                        color = Color.Transparent,
+                        blendMode = BlendMode.Clear
+                    )
+                }
             }
             LaunchedEffect(previewUseCase) {
                 val cameraProvider = context.getCameraProvider()
@@ -259,3 +282,6 @@ fun CameraPreview(
         }
     )
 }
+
+@Composable
+fun Dp.dpToPx() = with(LocalDensity.current) { this@dpToPx.toPx() }
