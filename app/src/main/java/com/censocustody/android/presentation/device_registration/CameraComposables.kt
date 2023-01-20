@@ -225,8 +225,8 @@ fun CameraCapture(
                     // Destination
                     drawRect(Color.Black.copy(alpha = 0.5f))
 
-                    val ovalWidth = screenWidthPixels * 0.85f
-                    val ovalHeight = screenHeightPixels * 0.50f
+                    val ovalWidth = screenWidthPixels * 0.65f
+                    val ovalHeight = screenHeightPixels * 0.35f
 
                     val topLeftX = (screenWidthPixels - ovalWidth) / 2
                     val topLeftY = (screenHeightPixels - ovalHeight - bottomPaddingForCameraPixels) / 2
