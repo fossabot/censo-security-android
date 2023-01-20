@@ -1,6 +1,5 @@
 package com.censocustody.android.common
 
-import android.R.attr.bitmap
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Matrix
@@ -8,6 +7,9 @@ import android.net.Uri
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
 import androidx.camera.lifecycle.ProcessCameraProvider
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.Dp
 import androidx.core.content.ContextCompat
 import androidx.exifinterface.media.ExifInterface
 import com.censocustody.android.data.CryptographyManager
@@ -27,6 +29,9 @@ import kotlin.coroutines.suspendCoroutine
 
 const val MAX_QUALITY_JPEG = 100
 const val MAX_IMAGE_SIZE_BYTES = 8_388_608 //8MB
+
+@Composable
+fun Dp.dpToPx() = with(LocalDensity.current) { this@dpToPx.toPx() }
 
 suspend fun Context.getCameraProvider(): ProcessCameraProvider = suspendCoroutine { continuation ->
     try {
@@ -132,6 +137,21 @@ fun rotateImageIfRequired(context: Context, image: Bitmap, imageFile: File?): Bi
         inputStream?.close()
         return image
     }
+}
+
+fun squareCropImage(image: Bitmap): Bitmap {
+    val imageWidth = image.width
+    val imageHeight = image.height
+
+    val startY = (imageHeight - imageWidth) / 2
+
+    return Bitmap.createBitmap(
+        image,
+        0,
+        startY,
+        imageWidth,
+        imageWidth
+    )
 }
 
 private fun rotateImage(image: Bitmap, degree: Float): Bitmap {
