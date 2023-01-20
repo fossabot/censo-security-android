@@ -1,4 +1,4 @@
-@file:OptIn(ExperimentalCoilApi::class, ExperimentalPermissionsApi::class)
+@file:OptIn(ExperimentalPermissionsApi::class)
 
 package com.censocustody.android.presentation.device_registration
 
@@ -9,6 +9,7 @@ import android.graphics.BitmapFactory
 import android.net.Uri
 import android.provider.Settings
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.Preview
@@ -16,6 +17,7 @@ import androidx.camera.core.UseCase
 import androidx.camera.view.PreviewView
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.ButtonDefaults
@@ -30,21 +32,21 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.*
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.*
 import androidx.compose.ui.viewinterop.AndroidView
-import coil.annotation.ExperimentalCoilApi
-import coil.compose.rememberImagePainter
+import androidx.compose.foundation.Canvas
 import com.censocustody.android.R
 import com.censocustody.android.common.*
 import com.censocustody.android.ui.theme.CensoButtonBlue
 import com.censocustody.android.ui.theme.CensoWhite
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.raygun.raygun4android.RaygunClient
 import kotlinx.coroutines.launch
 import java.io.File
 
@@ -55,15 +57,42 @@ fun CaptureUserImageContent(
     onImageCaptureError: (Exception) -> Unit
 ) {
     val context = LocalContext.current
+    val configuration = LocalConfiguration.current
+
+    val screenWidth = configuration.screenWidthDp.dp
 
     var imageFile: File? by remember { mutableStateOf(null) }
     if (imageFile != null) {
-        Box(modifier = modifier) {
-            Image(
-                modifier = Modifier.fillMaxSize(),
-                painter = rememberImagePainter(imageFile),
-                contentDescription = stringResource(R.string.capture_image_content_desc)
+
+        var userImageBitmap: Bitmap?
+        try {
+            val imageUrl = imageFile?.absolutePath
+            userImageBitmap = BitmapFactory.decodeFile(imageUrl)
+            if (userImageBitmap != null) {
+                userImageBitmap = rotateImageIfRequired(context, userImageBitmap, imageFile)
+                userImageBitmap = squareCropImage(userImageBitmap)
+            }
+        } catch (e: Exception) {
+            RaygunClient.send(e,
+                listOf(
+                    CrashReportingUtil.MANUALLY_REPORTED_TAG,
+                    CrashReportingUtil.IMAGE
+                )
             )
+            userImageBitmap = null
+        }
+
+        Box(modifier = modifier) {
+            if(userImageBitmap != null) {
+                Image(
+                    modifier = Modifier
+                        .size(DpSize(width = screenWidth, height = screenWidth))
+                        .align(Alignment.Center),
+                    bitmap = userImageBitmap.asImageBitmap(),
+                    contentScale = ContentScale.FillWidth,
+                    contentDescription = stringResource(R.string.capture_image_content_desc)
+                )
+            }
             Column(
                 modifier = Modifier.fillMaxSize(),
                 verticalArrangement = Arrangement.Bottom,
@@ -72,10 +101,15 @@ fun CaptureUserImageContent(
                 Spacer(modifier = Modifier.height(32.dp))
                 CensoButton(
                     onClick = {
-                        val imageUrl = imageFile?.absolutePath
-                        var bitmap = BitmapFactory.decodeFile(imageUrl)
-                        bitmap = rotateImageIfRequired(context, bitmap, imageFile)
-                        onImageCaptureSuccess(bitmap)
+                        if(userImageBitmap != null) {
+                            onImageCaptureSuccess(userImageBitmap)
+                        } else {
+                            Toast.makeText(
+                                context,
+                                context.getString(R.string.unable_process_image),
+                                Toast.LENGTH_LONG
+                            ).show()
+                        }
                     },
                     contentPadding = PaddingValues(horizontal = 32.dp, vertical = 16.dp)
                 ) {
@@ -121,14 +155,7 @@ fun CameraCapture(
     val context = LocalContext.current
     val configuration = LocalConfiguration.current
 
-    val screenHeight = configuration.screenHeightDp.dp
     val screenWidth = configuration.screenWidthDp.dp
-
-    val screenHeightPixels = screenHeight.dpToPx()
-    val screenWidthPixels = screenWidth.dpToPx()
-
-    val bottomPaddingForCamera = 160.dp
-    val bottomPaddingForCameraPixels = bottomPaddingForCamera.dpToPx()
 
     Permission(
         permission = Manifest.permission.CAMERA,
@@ -182,8 +209,8 @@ fun CameraCapture(
             Box {
                 CameraPreview(
                     modifier = Modifier
-                        .padding(bottom = bottomPaddingForCamera)
-                        .fillMaxSize(),
+                        .size(DpSize(width = screenWidth, height = screenWidth))
+                        .align(Alignment.Center),
                     onUseCase = {
                         previewUseCase = it
                     }
@@ -213,31 +240,6 @@ fun CameraCapture(
                         tint = CensoWhite
                     )
                 }
-                androidx.compose.foundation.Canvas(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(bottom = bottomPaddingForCamera)
-                        .graphicsLayer {
-                            alpha = .99f
-                        }
-                ) {
-
-                    // Destination
-                    drawRect(Color.Black.copy(alpha = 0.5f))
-
-                    val ovalWidth = screenWidthPixels * 0.65f
-                    val ovalHeight = screenHeightPixels * 0.35f
-
-                    val topLeftX = (screenWidthPixels - ovalWidth) / 2
-                    val topLeftY = (screenHeightPixels - ovalHeight - bottomPaddingForCameraPixels) / 2
-
-                    drawOval(
-                        topLeft = Offset(x = topLeftX, y = topLeftY),
-                        size = Size(height = ovalHeight, width = ovalWidth),
-                        color = Color.Transparent,
-                        blendMode = BlendMode.Clear
-                    )
-                }
             }
             LaunchedEffect(previewUseCase) {
                 val cameraProvider = context.getCameraProvider()
@@ -261,6 +263,17 @@ fun CameraPreview(
     scaleType: PreviewView.ScaleType = PreviewView.ScaleType.FILL_CENTER,
     onUseCase: (UseCase) -> Unit = { }
 ) {
+
+    val configuration = LocalConfiguration.current
+
+    val screenHeight = configuration.screenHeightDp.dp
+    val screenWidth = configuration.screenWidthDp.dp
+
+    val screenHeightPixels = screenHeight.dpToPx()
+    val screenWidthPixels = screenWidth.dpToPx()
+
+    val cutoffSize = (screenHeight - screenWidth) / 2
+
     AndroidView(
         modifier = modifier,
         factory = { context ->
@@ -281,7 +294,48 @@ fun CameraPreview(
             previewView
         }
     )
-}
 
-@Composable
-fun Dp.dpToPx() = with(LocalDensity.current) { this@dpToPx.toPx() }
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.SpaceBetween
+    ) {
+        Spacer(
+            modifier =
+            Modifier
+                .height(cutoffSize)
+                .fillMaxWidth()
+                .background(color = Color.Black)
+        )
+
+        Spacer(
+            modifier =
+            Modifier
+                .height(cutoffSize)
+                .fillMaxWidth()
+                .background(color = Color.Black)
+        )
+    }
+
+    Canvas(
+        modifier = Modifier
+            .fillMaxSize()
+            .graphicsLayer { alpha = .99f }
+    ) {
+        // Destination
+        drawRect(Color.Black.copy(alpha = 0.5f))
+
+        val ovalWidth = screenWidthPixels * 0.75f
+        val ovalHeight = screenHeightPixels * 0.45f
+
+        val topLeftX = (screenWidthPixels - ovalWidth) / 2
+        val topLeftY = (screenHeightPixels - ovalHeight) / 2
+
+        drawOval(
+            topLeft = Offset(x = topLeftX, y = topLeftY),
+            size = Size(height = ovalHeight, width = ovalWidth),
+            color = Color.Transparent,
+            blendMode = BlendMode.Clear
+        )
+    }
+
+}
