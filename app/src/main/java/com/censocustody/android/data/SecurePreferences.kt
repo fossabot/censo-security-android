@@ -28,6 +28,9 @@ interface SecurePreferences {
     fun saveSentinelData(email: String, encryptedData: EncryptedData)
     fun clearSentinelData(email: String)
     fun hasSentinelData(email: String): Boolean
+
+    //device key data
+    fun clearDeviceKeyData(email: String)
 }
 
 class SecurePreferencesImpl @Inject constructor(applicationContext: Context) :
@@ -143,6 +146,13 @@ class SecurePreferencesImpl @Inject constructor(applicationContext: Context) :
             email = email
         )
 
+    //endregion
+
+    //region Device Key Data
+    override fun clearDeviceKeyData(email: String) {
+        SharedPrefsHelper.clearDeviceId(email)
+        SharedPrefsHelper.clearDevicePublicKey(email)
+    }
     //endregion
 
     object Companion {
