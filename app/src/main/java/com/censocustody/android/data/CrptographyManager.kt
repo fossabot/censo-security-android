@@ -8,6 +8,7 @@ import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
 import javax.crypto.spec.GCMParameterSpec
 import com.censocustody.android.common.BaseWrapper
+import com.censocustody.android.common.censoLog
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo
 import java.security.*
 import java.security.cert.Certificate
@@ -40,6 +41,7 @@ interface CryptographyManager {
     fun decryptData(ciphertext: ByteArray, cipher: Cipher): ByteArray
 
     fun deleteInvalidatedKey(keyName: String)
+    fun deleteKeyIfPresent(keyName: String)
     fun signDataWithDeviceKey(data: ByteArray, keyName: String, signature: Signature): ByteArray
     fun createPublicDeviceKey(keyName: String): ByteArray
     fun getCertificateFromKeystore(deviceId: String): Certificate
@@ -50,11 +52,15 @@ data class EncryptedData(val ciphertext: ByteArray, val initializationVector: By
 
 class CryptographyManagerImpl : CryptographyManager {
 
-    private val KEY_SIZE: Int = 256
-    val ANDROID_KEYSTORE = "AndroidKeyStore"
-    private val ENCRYPTION_BLOCK_MODE = KeyProperties.BLOCK_MODE_GCM
-    private val ENCRYPTION_PADDING = KeyProperties.ENCRYPTION_PADDING_NONE
-    private val ENCRYPTION_ALGORITHM = KeyProperties.KEY_ALGORITHM_AES
+    companion object {
+        const val KEY_SIZE: Int = 256
+        const val ANDROID_KEYSTORE = "AndroidKeyStore"
+        const val SHA_256_ECDSA = "SHA256withECDSA"
+        const val SECP_256_R1 = "secp256r1"
+        const val ENCRYPTION_BLOCK_MODE = KeyProperties.BLOCK_MODE_GCM
+        const val ENCRYPTION_PADDING = KeyProperties.ENCRYPTION_PADDING_NONE
+        const val ENCRYPTION_ALGORITHM = KeyProperties.KEY_ALGORITHM_AES
+    }
 
     override fun getInitializedCipherForEncryption(keyName: String): Cipher {
         val cipher = getCipher()
@@ -64,14 +70,14 @@ class CryptographyManagerImpl : CryptographyManager {
     }
 
     override fun getSignatureForDeviceSigning(keyName: String): Signature {
-        val signature = Signature.getInstance("SHA256withECDSA")
+        val signature = Signature.getInstance(SHA_256_ECDSA)
         val deviceKey = getDeviceKey(keyName)
         signature.initSign(deviceKey)
         return signature
     }
 
     override fun verifySignature(keyName: String, dataSigned: ByteArray, signatureToCheck: ByteArray): Boolean {
-        val signature = Signature.getInstance("SHA256withECDSA")
+        val signature = Signature.getInstance(SHA_256_ECDSA)
         val certificate = getCertificateFromKeystore(keyName)
         signature.initVerify(certificate)
         signature.update(dataSigned)
@@ -108,6 +114,18 @@ class CryptographyManagerImpl : CryptographyManager {
         keyStore.deleteEntry(keyName)
     }
 
+    override fun deleteKeyIfPresent(keyName: String) {
+        val keyStore = KeyStore.getInstance(ANDROID_KEYSTORE)
+        keyStore.load(null)
+        val haveKey = keyStore.containsAlias(keyName)
+
+        censoLog(message = "Do we have device key saved in keystore: $haveKey")
+
+        if (haveKey) {
+            keyStore.deleteEntry(keyName)
+        }
+    }
+
     override fun signDataWithDeviceKey(
         data: ByteArray,
         keyName: String,
@@ -120,7 +138,7 @@ class CryptographyManagerImpl : CryptographyManager {
     override fun createPublicDeviceKey(keyName: String): ByteArray {
         val kpg: KeyPairGenerator = KeyPairGenerator.getInstance(
             KeyProperties.KEY_ALGORITHM_EC,
-            "AndroidKeyStore"
+            ANDROID_KEYSTORE
         )
 
         val paramBuilder = KeyGenParameterSpec.Builder(
@@ -129,10 +147,11 @@ class CryptographyManagerImpl : CryptographyManager {
         )
 
         val parameterSpec = paramBuilder
-            .setAlgorithmParameterSpec(ECGenParameterSpec("secp256r1"))
+            .setAlgorithmParameterSpec(ECGenParameterSpec(SECP_256_R1))
             .setDigests(
                 KeyProperties.DIGEST_SHA256
             )
+            .setInvalidatedByBiometricEnrollment(true)
             .setUserAuthenticationParameters(
                 0,
                 KeyProperties.AUTH_DEVICE_CREDENTIAL
@@ -148,7 +167,7 @@ class CryptographyManagerImpl : CryptographyManager {
     }
 
     override fun getCertificateFromKeystore(deviceId: String): Certificate {
-        val keyStore = KeyStore.getInstance("AndroidKeyStore")
+        val keyStore = KeyStore.getInstance(ANDROID_KEYSTORE)
         keyStore.load(null) // Keystore must be loaded before it can be accessed
         val cert = keyStore.getCertificate(deviceId)
         return cert
@@ -179,6 +198,7 @@ class CryptographyManagerImpl : CryptographyManager {
             setEncryptionPaddings(ENCRYPTION_PADDING)
             setKeySize(KEY_SIZE)
             setUserAuthenticationRequired(true)
+            setInvalidatedByBiometricEnrollment(true)
         }
 
         val keyGenParams = paramsBuilder.build()
@@ -192,7 +212,7 @@ class CryptographyManagerImpl : CryptographyManager {
 
     private fun getDeviceKey(keyName: String): PrivateKey {
         // If PrivateKey was previously created for that keyName, then grab and return it.
-        val keyStore = KeyStore.getInstance("AndroidKeyStore")
+        val keyStore = KeyStore.getInstance(ANDROID_KEYSTORE)
         keyStore.load(null) // Keystore must be loaded before it can be accessed
         val key = keyStore.getKey(keyName, null)
         //AndroidKeyStoreECPrivateKey
