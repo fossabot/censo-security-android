@@ -2,6 +2,7 @@ package com.censocustody.android.data
 
 import com.google.gson.*
 import com.censocustody.android.BuildConfig
+import com.censocustody.android.common.censoLog
 import com.censocustody.android.data.BaseRepository.Companion.UNAUTHORIZED
 import com.censocustody.android.data.BrooklynApiService.Companion.AUTH
 import com.censocustody.android.data.BrooklynApiService.Companion.X_CENSO_ID
@@ -133,13 +134,19 @@ class AuthInterceptor(private val authProvider: AuthProvider) : Interceptor {
             }
         }
 
-        val deviceId = runBlocking { authProvider.retrieveDeviceId() }
+        try {
+            val deviceId = runBlocking { authProvider.retrieveDeviceId() }
 
-        if (deviceId.isNotEmpty()) {
-            request = request.newBuilder()
-                .removeHeader(X_CENSO_ID)
-                .addHeader(X_CENSO_ID, deviceId)
-                .build()
+            if (deviceId.isNotEmpty()) {
+                request = request.newBuilder()
+                    .removeHeader(X_CENSO_ID)
+                    .addHeader(X_CENSO_ID, deviceId)
+                    .build()
+            }
+        } catch (e: TokenExpiredException) {
+            censoLog(message = "Received token expired exception: $e")
+            runBlocking { authProvider.signOut() }
+            authProvider.setUserState(userState = UserState.REFRESH_TOKEN_EXPIRED)
         }
 
         val response = chain.proceed(request)

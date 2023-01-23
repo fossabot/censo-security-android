@@ -264,6 +264,8 @@ class MainActivity : FragmentActivity() {
             override fun onUserStateChanged(userState: UserState) {
                 runOnUiThread {
                     if (userState == UserState.INVALIDATED_KEY) {
+                        mainViewModel.resetBiometry()
+
                         Toast.makeText(
                             context,
                             getString(R.string.biometry_changed_key_invalidated),
