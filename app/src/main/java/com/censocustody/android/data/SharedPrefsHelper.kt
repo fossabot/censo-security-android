@@ -256,8 +256,6 @@ object SharedPrefsHelper {
         editor.apply()
     }
 
-    fun userHasDevicePublicKey(email: String) = retrieveDevicePublicKey(email).isNotEmpty()
-
     fun retrieveDevicePublicKey(
         email: String
     ): String {

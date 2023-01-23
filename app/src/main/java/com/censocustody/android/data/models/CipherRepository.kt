@@ -1,6 +1,7 @@
 package com.censocustody.android.data.models
 
 import android.security.keystore.KeyPermanentlyInvalidatedException
+import com.censocustody.android.common.censoLog
 import com.censocustody.android.data.*
 import com.censocustody.android.data.EncryptionManagerImpl.Companion.BIO_KEY_NAME
 import com.censocustody.android.data.EncryptionManagerImpl.Companion.ROOT_SEED_KEY_NAME
@@ -56,11 +57,17 @@ class CipherRepositoryImpl(
         }
     }
 
-    override suspend fun getSignatureForDeviceSigning(keyName: String): Signature {
-        return encryptionManager.getSignatureForDeviceSigning(keyName)
+    override suspend fun getSignatureForDeviceSigning(keyName: String): Signature? {
+        return try {
+            encryptionManager.getSignatureForDeviceSigning(keyName)
+        } catch (e: Exception) {
+            handleCipherException(e = e, keyName = keyName)
+            null
+        }
     }
 
     private suspend fun handleCipherException(e: Exception, keyName: String): Cipher? {
+        censoLog(message = "Could not get cipher or signature: ${e.printStackTrace()}")
         when (e) {
             is KeyPermanentlyInvalidatedException,
             is InvalidAlgorithmParameterException,
@@ -79,11 +86,23 @@ class CipherRepositoryImpl(
         encryptionManager.deleteBiometryKeyFromKeystore(ROOT_SEED_KEY_NAME)
         securePreferences.clearAllV3KeyData(email)
         securePreferences.clearSentinelData(email)
-        if (keyName == SENTINEL_KEY_NAME) {
-            userRepository.setInvalidSentinelData()
-        } else {
+        deleteDeviceKeyInfoWhenBiometryInvalidated(email)
+        //todo: ask team about this. Because a user should reauthenticate after biometry failure.
+//        if (keyName == SENTINEL_KEY_NAME) {
+//            userRepository.setInvalidSentinelData()
+//        } else {
             userRepository.logOut()
             userRepository.setKeyInvalidated()
+        //}
+    }
+
+    private fun deleteDeviceKeyInfoWhenBiometryInvalidated(email: String) {
+        val deviceId = SharedPrefsHelper.retrieveDeviceId(email)
+
+        censoLog(message = "Device id when clearing out data: $deviceId")
+        if (deviceId.isNotEmpty()) {
+            encryptionManager.deleteKeyIfInKeystore(deviceId)
         }
+        securePreferences.clearDeviceKeyData(email)
     }
 }

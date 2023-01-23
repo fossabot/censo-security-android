@@ -134,6 +134,7 @@ interface EncryptionManager {
     //region Work with device keystore
 
     fun deleteBiometryKeyFromKeystore(keyName: String)
+    fun deleteKeyIfInKeystore(keyName: String)
 
     fun getInitializedCipherForEncryption(keyName: String): Cipher
     fun getInitializedCipherForDecryption(keyName: String, initVector: ByteArray): Cipher
@@ -600,6 +601,10 @@ class EncryptionManagerImpl @Inject constructor(
 
     override fun deleteBiometryKeyFromKeystore(keyName: String) {
         cryptographyManager.deleteInvalidatedKey(keyName)
+    }
+
+    override fun deleteKeyIfInKeystore(keyName: String) {
+        cryptographyManager.deleteKeyIfPresent(keyName)
     }
 
     override fun getSignatureForDeviceSigning(keyName: String): Signature {
