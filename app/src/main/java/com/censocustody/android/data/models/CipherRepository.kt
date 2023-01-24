@@ -27,7 +27,7 @@ class CipherRepositoryImpl(
         return try {
             encryptionManager.getInitializedCipherForEncryption(keyName)
         } catch (e: Exception) {
-            handleCipherException(e, keyName)
+            handleCipherException(e)
         }
     }
 
@@ -40,7 +40,7 @@ class CipherRepositoryImpl(
                 keyName = SENTINEL_KEY_NAME
             )
         } catch (e: Exception) {
-            handleCipherException(e, SENTINEL_KEY_NAME)
+            handleCipherException(e)
         }
     }
 
@@ -53,7 +53,7 @@ class CipherRepositoryImpl(
                 keyName = ROOT_SEED_KEY_NAME
             )
         } catch (e: Exception) {
-            handleCipherException(e, ROOT_SEED_KEY_NAME)
+            handleCipherException(e)
         }
     }
 
@@ -61,25 +61,25 @@ class CipherRepositoryImpl(
         return try {
             encryptionManager.getSignatureForDeviceSigning(keyName)
         } catch (e: Exception) {
-            handleCipherException(e = e, keyName = keyName)
+            handleCipherException(e = e)
             null
         }
     }
 
-    private suspend fun handleCipherException(e: Exception, keyName: String): Cipher? {
+    private suspend fun handleCipherException(e: Exception): Cipher? {
         censoLog(message = "Could not get cipher or signature: ${e.printStackTrace()}")
         when (e) {
             is KeyPermanentlyInvalidatedException,
             is InvalidAlgorithmParameterException,
             is InvalidKeyPhraseException -> {
-                wipeAllDataAfterKeyInvalidatedException(keyName)
+                wipeAllDataAfterKeyInvalidatedException()
             }
             else -> throw  e
         }
         return null
     }
 
-    private suspend fun wipeAllDataAfterKeyInvalidatedException(keyName: String) {
+    private suspend fun wipeAllDataAfterKeyInvalidatedException() {
         val email = userRepository.retrieveUserEmail()
         encryptionManager.deleteBiometryKeyFromKeystore(BIO_KEY_NAME)
         encryptionManager.deleteBiometryKeyFromKeystore(SENTINEL_KEY_NAME)
@@ -87,19 +87,13 @@ class CipherRepositoryImpl(
         securePreferences.clearAllV3KeyData(email)
         securePreferences.clearSentinelData(email)
         deleteDeviceKeyInfoWhenBiometryInvalidated(email)
-        //todo: ask team about this. Because a user should reauthenticate after biometry failure.
-//        if (keyName == SENTINEL_KEY_NAME) {
-//            userRepository.setInvalidSentinelData()
-//        } else {
-            userRepository.logOut()
-            userRepository.setKeyInvalidated()
-        //}
+        userRepository.logOut()
+        userRepository.setKeyInvalidated()
     }
 
     private fun deleteDeviceKeyInfoWhenBiometryInvalidated(email: String) {
         val deviceId = SharedPrefsHelper.retrieveDeviceId(email)
 
-        censoLog(message = "Device id when clearing out data: $deviceId")
         if (deviceId.isNotEmpty()) {
             encryptionManager.deleteKeyIfInKeystore(deviceId)
         }
