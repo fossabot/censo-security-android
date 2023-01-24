@@ -144,7 +144,6 @@ class AuthInterceptor(private val authProvider: AuthProvider) : Interceptor {
                     .build()
             }
         } catch (e: TokenExpiredException) {
-            censoLog(message = "Received token expired exception: $e")
             runBlocking { authProvider.signOut() }
             authProvider.setUserState(userState = UserState.REFRESH_TOKEN_EXPIRED)
         }

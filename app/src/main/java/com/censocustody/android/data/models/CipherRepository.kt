@@ -67,7 +67,6 @@ class CipherRepositoryImpl(
     }
 
     private suspend fun handleCipherException(e: Exception): Cipher? {
-        censoLog(message = "Could not get cipher or signature: ${e.printStackTrace()}")
         when (e) {
             is KeyPermanentlyInvalidatedException,
             is InvalidAlgorithmParameterException,
