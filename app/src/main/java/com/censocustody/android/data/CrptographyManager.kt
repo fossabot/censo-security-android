@@ -7,8 +7,6 @@ import javax.crypto.Cipher
 import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
 import javax.crypto.spec.GCMParameterSpec
-import com.censocustody.android.common.BaseWrapper
-import com.censocustody.android.common.censoLog
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo
 import java.security.*
 import java.security.cert.Certificate
@@ -118,8 +116,6 @@ class CryptographyManagerImpl : CryptographyManager {
         val keyStore = KeyStore.getInstance(ANDROID_KEYSTORE)
         keyStore.load(null)
         val haveKey = keyStore.containsAlias(keyName)
-
-        censoLog(message = "Do we have device key saved in keystore: $haveKey")
 
         if (haveKey) {
             keyStore.deleteEntry(keyName)
