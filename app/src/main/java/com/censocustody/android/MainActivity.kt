@@ -40,6 +40,7 @@ import com.censocustody.android.presentation.entrance.EntranceScreen
 import com.censocustody.android.presentation.key_creation.KeyCreationScreen
 import com.censocustody.android.presentation.key_management.KeyManagementInitialData
 import com.censocustody.android.presentation.key_management.KeyManagementScreen
+import com.censocustody.android.presentation.key_recovery.KeyRecoveryScreen
 import com.censocustody.android.presentation.migration.VerifyUserInitialData
 import com.censocustody.android.presentation.migration.MigrationScreen
 import com.censocustody.android.presentation.regeneration.RegenerationScreen
@@ -140,9 +141,9 @@ class MainActivity : FragmentActivity() {
                         when (event) {
                             Lifecycle.Event.ON_START
                             -> {
-                                mainViewModel.onForeground(
-                                    BiometricUtil.checkForBiometricFeaturesOnDevice(context),
-                                )
+//                                mainViewModel.onForeground(
+//                                    BiometricUtil.checkForBiometricFeaturesOnDevice(context),
+//                                )
                             }
                             else -> Unit
                         }
@@ -157,15 +158,15 @@ class MainActivity : FragmentActivity() {
                         mainViewModel.resetSendUserToEntrance()
                     }
 
-                    val blockAppUI = mainViewModel.blockUIStatus()
-
-                    BlockingUI(
-                        blockAppUI = blockAppUI,
-                        bioPromptTrigger = mainState.bioPromptTrigger,
-                        biometryUnavailable = mainState.biometryTooManyAttempts,
-                        biometryStatus = mainState.biometryStatus,
-                        retry = mainViewModel::retryBiometricGate
-                    )
+//                    val blockAppUI = mainViewModel.blockUIStatus()
+//
+//                    BlockingUI(
+//                        blockAppUI = blockAppUI,
+//                        bioPromptTrigger = mainState.bioPromptTrigger,
+//                        biometryUnavailable = mainState.biometryTooManyAttempts,
+//                        biometryStatus = mainState.biometryStatus,
+//                        retry = mainViewModel::retryBiometricGate
+//                    )
                 }
             }
         }
@@ -217,6 +218,11 @@ class MainActivity : FragmentActivity() {
                 route = Screen.KeyCreationRoute.route
             ) {
                 KeyCreationScreen(navController = navController)
+            }
+            composable(
+                route = Screen.KeyRecoveryRoute.route
+            ) {
+                KeyRecoveryScreen(navController = navController)
             }
             composable(
                 route = "${Screen.KeyManagementRoute.route}/{${Screen.KeyManagementRoute.KEY_MGMT_ARG}}",

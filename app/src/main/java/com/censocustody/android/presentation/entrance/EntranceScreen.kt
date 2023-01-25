@@ -55,12 +55,13 @@ fun EntranceScreen(
                     "${Screen.MigrationRoute.route}/$migrationJson"
                 }
                 UserDestination.REGENERATION -> Screen.RegenerationRoute.route
-                UserDestination.KEY_MANAGEMENT_CREATION -> Screen.KeyCreationRoute.route
-                UserDestination.KEY_MANAGEMENT_RECOVERY -> {
+                UserDestination.KEY_CREATION -> Screen.KeyCreationRoute.route
+                UserDestination.KEY_RECOVERY -> Screen.KeyRecoveryRoute.route
+                UserDestination.KEY_MANAGEMENT -> {
 
                     val flow = when (state.userDestinationResult.data) {
-                        UserDestination.KEY_MANAGEMENT_CREATION -> KeyManagementFlow.KEY_CREATION
-                        UserDestination.KEY_MANAGEMENT_RECOVERY -> KeyManagementFlow.KEY_RECOVERY
+                        UserDestination.KEY_CREATION -> KeyManagementFlow.KEY_CREATION
+                        UserDestination.KEY_MANAGEMENT, UserDestination.KEY_RECOVERY -> KeyManagementFlow.KEY_RECOVERY
                         else -> KeyManagementFlow.KEY_CREATION
                     }
 

@@ -203,7 +203,7 @@ class EntranceViewModelTest : BaseViewModelTest() {
                 .setCensoUser(basicVerifyUserWithNoPublicKeys)
 
             assertTrue(entranceViewModel.state.userDestinationResult is Resource.Success)
-            assertTrue(entranceViewModel.state.userDestinationResult.data == UserDestination.KEY_MANAGEMENT_CREATION)
+            assertTrue(entranceViewModel.state.userDestinationResult.data == UserDestination.KEY_RECOVERY)
         }
 
     @Test
@@ -247,7 +247,7 @@ class EntranceViewModelTest : BaseViewModelTest() {
                 .setCensoUser(basicVerifyUserWithValidPublicKey)
 
             assertTrue(entranceViewModel.state.userDestinationResult is Resource.Success)
-            assertTrue(entranceViewModel.state.userDestinationResult.data == UserDestination.KEY_MANAGEMENT_RECOVERY)
+            assertTrue(entranceViewModel.state.userDestinationResult.data == UserDestination.KEY_RECOVERY)
         }
 
     @Test
