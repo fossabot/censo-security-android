@@ -148,10 +148,6 @@ fun ApprovalRowContent(
     when (type) {
         is ApprovalRequestDetails.WithdrawalRequest ->
             WithdrawalRequestRowContent(withdrawalRequest = type)
-        is ApprovalRequestDetails.ConversionRequest ->
-            ConversionRequestRowContent(conversionRequest = type)
-        is ApprovalRequestDetails.SignersUpdate ->
-            SignersUpdateRowContent(signersUpdate = type)
         is ApprovalRequestDetails.WalletCreation ->
             WalletCreationRowContent(walletCreation = type)
         is ApprovalRequestDetails.DAppTransactionRequest ->
@@ -176,11 +172,8 @@ fun ApprovalRowContent(
             BalanceAccountPolicyUpdateRowContent(accountPolicyUpdate = type)
         is ApprovalRequestDetails.BalanceAccountSettingsUpdate ->
             BalanceAccountSettingsUpdateRowContent(accountSettingsUpdate = type)
-        is ApprovalRequestDetails.DAppBookUpdate -> DAppBookUpdateRowContent()
         is ApprovalRequestDetails.WalletConfigPolicyUpdate ->
             WalletConfigPolicyUpdateRowContent(walletConfigPolicyUpdate = type)
-        is ApprovalRequestDetails.WrapConversionRequest ->
-            WrapConversionRequestRowContent(wrapConversionRequest = type)
         is ApprovalRequestDetails.AcceptVaultInvitation ->
             AcceptVaultInvitationRowContent(acceptVaultInvitation = type)
         is ApprovalRequestDetails.PasswordReset ->
@@ -197,15 +190,11 @@ fun ApprovalDetailContent(approval: ApprovalRequest, type: ApprovalRequestDetail
     when (type) {
         is ApprovalRequestDetails.WalletCreation ->
             BalanceAccountDetailContent(walletCreation = type, approvalsReceived = approval.numberOfApprovalsReceived.toString())
-        is ApprovalRequestDetails.ConversionRequest ->
-            ConversionDetailContent(conversionRequest = type)
         is ApprovalRequestDetails.DAppTransactionRequest ->
             DAppTransactionDetailContent(dAppTransactionRequest = type)
         is ApprovalRequestDetails.LoginApprovalRequest -> {
             LoginApprovalDetailContent(loginApproval = type)
         }
-        is ApprovalRequestDetails.SignersUpdate ->
-            SignersUpdateDetailContent(signersUpdate = type)
         is ApprovalRequestDetails.WithdrawalRequest ->
             WithdrawalRequestDetailContent(withdrawalRequest = type)
         is ApprovalRequestDetails.CreateAddressBookEntry ->
@@ -230,11 +219,8 @@ fun ApprovalDetailContent(approval: ApprovalRequest, type: ApprovalRequestDetail
             BalanceAccountPolicyUpdateDetailContent(accountPolicyUpdate = type)
         is ApprovalRequestDetails.BalanceAccountSettingsUpdate ->
             BalanceAccountSettingsUpdateDetailContent(accountSettingsUpdate = type)
-        is ApprovalRequestDetails.DAppBookUpdate -> DAppBookUpdateDetailContent()
         is ApprovalRequestDetails.WalletConfigPolicyUpdate ->
             WalletConfigPolicyUpdateDetailContent(walletConfigPolicyUpdate = type)
-        is ApprovalRequestDetails.WrapConversionRequest ->
-            WrapConversionRequestDetailContent(wrapConversionRequest = type)
         is ApprovalRequestDetails.AcceptVaultInvitation ->
             AcceptVaultInvitationDetailContent(acceptVaultInvitation = type)
         is ApprovalRequestDetails.PasswordReset ->

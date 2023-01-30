@@ -36,19 +36,14 @@ data class InitiationRequest(
         when (requestType) {
             is WalletCreation -> requestType.signingData!!
             is WithdrawalRequest -> requestType.signingData as SigningData.SolanaSigningData
-            is ConversionRequest -> requestType.signingData
-            is SignersUpdate -> requestType.signingData
             is DAppTransactionRequest -> requestType.signingData
-            is WrapConversionRequest -> requestType.signingData
             is WalletConfigPolicyUpdate -> requestType.signingData
             is BalanceAccountSettingsUpdate -> requestType.signingData
-            is DAppBookUpdate -> requestType.signingData
             is CreateAddressBookEntry -> requestType.signingData!!
             is DeleteAddressBookEntry -> requestType.signingData!!
             is BalanceAccountNameUpdate -> requestType.signingData
             is BalanceAccountPolicyUpdate -> requestType.signingData
             is BalanceAccountAddressWhitelistUpdate -> requestType.signingData
-            is SignData -> requestType.signingData
             is LoginApprovalRequest,
             is AcceptVaultInvitation,
             is PasswordReset,
@@ -59,19 +54,13 @@ data class InitiationRequest(
     private val opCode : Byte = when(requestType) {
         is WalletCreation -> 3
         is WithdrawalRequest -> 7
-        is ConversionRequest -> 7
-        is WrapConversionRequest -> 10
-        is SignersUpdate -> 12
         is WalletConfigPolicyUpdate -> 14
         is DAppTransactionRequest -> 16
         is BalanceAccountSettingsUpdate -> 18
-        is DAppBookUpdate -> 20
         is CreateAddressBookEntry, is DeleteAddressBookEntry -> 22
         is BalanceAccountNameUpdate -> 24
         is BalanceAccountPolicyUpdate -> 26
         is BalanceAccountAddressWhitelistUpdate -> 33
-        is SignData -> 35
-
         is UnknownApprovalType,
         is AcceptVaultInvitation,
         is PasswordReset,
@@ -143,23 +132,6 @@ data class InitiationRequest(
                 buffer.write(requestType.destination.name.sha256HashBytes())
                 return buffer.toByteArray()
             }
-            is ConversionRequest -> {
-                val buffer = ByteArrayOutputStream()
-                buffer.write(byteArrayOf(opCode))
-                buffer.write(commonBytes)
-                buffer.write(requestType.account.identifier.sha256HashBytes())
-                buffer.writeLongLE(requestType.symbolAndAmountInfo.fundamentalAmount())
-                buffer.write(requestType.destination.name.sha256HashBytes())
-                return buffer.toByteArray()
-            }
-            is SignersUpdate -> {
-                val buffer = ByteArrayOutputStream()
-                buffer.write(byteArrayOf(opCode))
-                buffer.write(commonBytes)
-                buffer.write(byteArrayOf(requestType.slotUpdateType.toSolanaProgramValue()))
-                buffer.write(requestType.signer.combinedBytes())
-                return buffer.toByteArray()
-            }
             is DAppTransactionRequest -> {
                 val buffer = ByteArrayOutputStream()
                 buffer.write(byteArrayOf(opCode))
@@ -168,15 +140,6 @@ data class InitiationRequest(
                 buffer.write(requestType.dappInfo.address.base58Bytes())
                 buffer.write(requestType.dappInfo.name.sha256HashBytes())
                 buffer.writeShortLE(requestType.instructions.sumOf { it.decodedData().size }.toShort())
-                return buffer.toByteArray()
-            }
-            is WrapConversionRequest -> {
-                val buffer = ByteArrayOutputStream()
-                buffer.write(byteArrayOf(opCode))
-                buffer.write(commonBytes)
-                buffer.write(requestType.account.identifier.sha256HashBytes())
-                buffer.writeLongLE(requestType.symbolAndAmountInfo.fundamentalAmount())
-                buffer.write(byteArrayOf(requestType.symbolAndAmountInfo.symbolInfo.getSOLProgramValue()))
                 return buffer.toByteArray()
             }
             is BalanceAccountPolicyUpdate -> {
@@ -228,16 +191,6 @@ data class InitiationRequest(
                 buffer.write(requestType.combinedBytes())
                 return buffer.toByteArray()
             }
-            is DAppBookUpdate -> {
-                val buffer = ByteArrayOutputStream()
-                buffer.write(byteArrayOf(opCode))
-                buffer.write(commonBytes)
-                buffer.write(requestType.combinedBytes())
-                return buffer.toByteArray()
-            }
-            is SignData -> {
-                return SignDataHelper.serializeSignData(requestType.base64Data, commonBytes, opCode)
-            }
             is LoginApprovalRequest, is AcceptVaultInvitation, is UnknownApprovalType, is PasswordReset -> {
                 throw Exception("Unknown Approval")
             }
@@ -275,66 +228,6 @@ data class InitiationRequest(
                     destinationAddress = requestType.destination.address,
                     tokenMintAddress = requestType.symbolAndAmountInfo.symbolInfo.tokenMintAddress!!,
                     approverPublicKey = approverPublicKey
-                )
-            }
-            is ConversionRequest -> {
-                getTransferAndConversionAccounts(
-                    sourceAddress = requestType.account.address!!,
-                    destinationAddress = requestType.destination.address,
-                    tokenMintAddress = requestType.symbolAndAmountInfo.symbolInfo.tokenMintAddress!!,
-                    approverPublicKey = approverPublicKey
-                )
-            }
-            is WrapConversionRequest -> {
-                if(requestType.account.address == null) {
-                    throw Exception("MISSING_SOURCE_KEY")
-                }
-
-                val sourcePublicKey = PublicKey(requestType.account.address)
-                val sourceTokenPublicKey = PublicKey.tokenAddress(
-                        wallet = sourcePublicKey,
-                        tokenMint = WRAPPED_SOL_MINT
-                    )
-
-                val isUnwrap = requestType.destinationSymbolInfo.symbol == "SOL"
-                listOfNotNull(
-                    AccountMeta(opAccountPublicKey(), isSigner = false, isWritable = true),
-                    AccountMeta(PublicKey(signingData.walletAddress), isSigner = false, isWritable = true),
-                    AccountMeta(sourcePublicKey, isSigner = false, isWritable = true),
-                    AccountMeta(sourceTokenPublicKey, isSigner = false, isWritable = true),
-                    AccountMeta(WRAPPED_SOL_MINT, isSigner = false, isWritable = false),
-                    AccountMeta(approverPublicKey, isSigner = true, isWritable = false),
-                    AccountMeta(SYSVAR_CLOCK_PUBKEY, isSigner = false, isWritable = false),
-                    AccountMeta(publicKey = PublicKey(signingData.feePayer), isSigner = true, isWritable = false),
-                    if (isUnwrap) {
-                        AccountMeta(
-                            PublicKey.findProgramAddress(
-                                listOf(
-                                    b64Decoder.decode(signingData.walletGuidHash),
-                                    opAccountPublicKey().bytes
-                                ), PublicKey(signingData.walletProgramId)
-                            ).address,
-                            isSigner = false,
-                            isWritable = true
-                        )
-                    } else null,
-                    AccountMeta(SYS_PROGRAM_ID, isSigner = false, isWritable = false),
-                    AccountMeta(TOKEN_PROGRAM_ID, isSigner = false, isWritable = false),
-                    AccountMeta(SYSVAR_RENT_PUBKEY, isSigner = false, isWritable = false),
-                    AccountMeta(ASSOCIATED_TOKEN_PROGRAM_ID, isSigner = false, isWritable = false),
-                    if (isUnwrap) {
-                        AccountMeta(
-                            PublicKey.findProgramAddress(
-                                listOf(
-                                    b64Decoder.decode(signingData.walletGuidHash),
-                                    b64Decoder.decode(signingData.feeAccountGuidHash),
-                                ),
-                                PublicKey(signingData.walletProgramId)
-                            ).address,
-                            isSigner = false,
-                            isWritable = true
-                        )
-                    } else null,
                 )
             }
             is DAppTransactionRequest -> {

@@ -168,10 +168,6 @@ class ApprovalRequestDeserializer : JsonDeserializer<ApprovalRequest> {
         return when (approvalType) {
             ApprovalType.WITHDRAWAL_TYPE ->
                 getGson().fromJson(details, ApprovalRequestDetails.WithdrawalRequest::class.java)
-            ApprovalType.CONVERSION_REQUEST_TYPE ->
-                getGson().fromJson(details, ApprovalRequestDetails.ConversionRequest::class.java)
-            ApprovalType.SIGNERS_UPDATE_TYPE ->
-                getGson().fromJson(details, ApprovalRequestDetails.SignersUpdate::class.java)
             ApprovalType.WALLET_CREATION_TYPE ->
                 getGson().fromJson(
                     details,
@@ -186,12 +182,6 @@ class ApprovalRequestDeserializer : JsonDeserializer<ApprovalRequest> {
                 getGson().fromJson(
                     details,
                     ApprovalRequestDetails.LoginApprovalRequest::class.java
-                )
-            }
-            ApprovalType.WRAP_CONVERSION_REQUEST_TYPE -> {
-                getGson().fromJson(
-                    details,
-                    ApprovalRequestDetails.WrapConversionRequest::class.java
                 )
             }
             ApprovalType.BALANCE_ACCOUNT_NAME_UPDATE_TYPE -> {
@@ -216,12 +206,6 @@ class ApprovalRequestDeserializer : JsonDeserializer<ApprovalRequest> {
                 getGson().fromJson(
                     details,
                     ApprovalRequestDetails.DeleteAddressBookEntry::class.java
-                )
-            }
-            ApprovalType.DAPP_BOOK_UPDATE_TYPE -> {
-                getGson().fromJson(
-                    details,
-                    ApprovalRequestDetails.DAppBookUpdate::class.java
                 )
             }
             ApprovalType.WALLET_CONFIG_POLICY_UPDATE_TYPE -> {
@@ -253,37 +237,6 @@ class ApprovalRequestDeserializer : JsonDeserializer<ApprovalRequest> {
                     details,
                     ApprovalRequestDetails.PasswordReset::class.java
                 )
-            }
-            ApprovalType.SIGN_DATA_TYPE -> {
-                val signDataRequest = getGson().fromJson(
-                    details,
-                    ApprovalRequestDetails.SignData::class.java
-                )
-                //
-                // if the base64 data is an approval type json string, we will return that
-                // type but in the signing data put the string that needs to be signed.
-                // if it not one of the standard approval types, then it just becomes a sign data
-                // that needs to be signed.
-                //
-                val data = String(BaseWrapper.decodeFromBase64(signDataRequest.base64Data))
-
-                val jsonElement = try {
-                    JsonParser.parseString(data)
-                } catch (e: JsonSyntaxException) {
-                    null
-                }
-                if(jsonElement is JsonObject) {
-                    when (val signDataType = getRequestTypeFromSignDataJson(jsonElement)) {
-                        is ApprovalRequestDetails.WalletCreation -> {
-                            signDataType.copy(
-                                signingData = signDataRequest.signingData.copy(
-                                    base64DataToSign = signDataRequest.base64Data
-                                )
-                            )
-                        }
-                        else -> signDataRequest
-                    }
-                } else signDataRequest
             }
             else -> ApprovalRequestDetails.UnknownApprovalType
         }

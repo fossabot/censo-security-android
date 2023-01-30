@@ -41,20 +41,14 @@ data class ApprovalDispositionRequest(
     private fun retrieveOpCode(): Byte {
         return when (requestType) {
             is WalletCreation -> 1
-            is WithdrawalRequest, is ConversionRequest -> 3
-            is SignersUpdate -> 5
-            is WrapConversionRequest -> 4
+            is WithdrawalRequest -> 3
             is WalletConfigPolicyUpdate -> 6
             is DAppTransactionRequest -> 7
             is BalanceAccountSettingsUpdate -> 8
-
-            is DAppBookUpdate -> 9
             is CreateAddressBookEntry, is DeleteAddressBookEntry -> 10
             is BalanceAccountNameUpdate -> 11
             is BalanceAccountPolicyUpdate -> 12
             is BalanceAccountAddressWhitelistUpdate -> 14
-            is SignData -> 15
-
             is LoginApprovalRequest,
             is UnknownApprovalType,
             is AcceptVaultInvitation,
@@ -98,43 +92,6 @@ data class ApprovalDispositionRequest(
 
                 buffer.toByteArray()
             }
-            is ConversionRequest -> {
-                val buffer = ByteArrayOutputStream()
-
-                val opAndCommonBuffer = ByteArrayOutputStream()
-                opAndCommonBuffer.write(byteArrayOf(retrieveOpCode()))
-                opAndCommonBuffer.write(commonBytes)
-                buffer.write(opAndCommonBuffer.toByteArray())
-
-                buffer.write(requestType.account.identifier.sha256HashBytes())
-                buffer.write(requestType.destination.address.base58Bytes())
-                buffer.writeLongLE(requestType.symbolAndAmountInfo.fundamentalAmount())
-                buffer.write(requestType.symbolAndAmountInfo.symbolInfo.tokenMintAddress!!.base58Bytes())
-
-                buffer.toByteArray()
-            }
-            is SignersUpdate -> {
-                val buffer = ByteArrayOutputStream()
-
-                buffer.write(byteArrayOf(retrieveOpCode()))
-                buffer.write(commonBytes)
-                buffer.write(byteArrayOf(requestType.slotUpdateType.toSolanaProgramValue()))
-                buffer.write(requestType.signer.opHashBytes())
-
-                buffer.toByteArray()
-            }
-
-            is WrapConversionRequest -> {
-                val buffer = ByteArrayOutputStream()
-
-                buffer.write(byteArrayOf(retrieveOpCode()))
-                buffer.write(commonBytes)
-                buffer.write(requestType.account.identifier.sha256HashBytes())
-                buffer.writeLongLE(requestType.symbolAndAmountInfo.fundamentalAmount())
-                buffer.write(byteArrayOf(requestType.symbolAndAmountInfo.symbolInfo.getSOLProgramValue()))
-
-                buffer.toByteArray()
-            }
             is WalletConfigPolicyUpdate -> {
                 val buffer = ByteArrayOutputStream()
 
@@ -145,15 +102,6 @@ data class ApprovalDispositionRequest(
                 buffer.toByteArray()
             }
             is BalanceAccountSettingsUpdate -> {
-                val buffer = ByteArrayOutputStream()
-
-                buffer.write(byteArrayOf(retrieveOpCode()))
-                buffer.write(commonBytes)
-                buffer.write(requestType.combinedBytes())
-
-                buffer.toByteArray()
-            }
-            is DAppBookUpdate -> {
                 val buffer = ByteArrayOutputStream()
 
                 buffer.write(byteArrayOf(retrieveOpCode()))
@@ -217,9 +165,6 @@ data class ApprovalDispositionRequest(
                 buffer.write(requestType.instructions.map { it.decodedData() }.reduce { array, next -> array + next })
                 buffer.toByteArray()
             }
-            is SignData -> {
-                SignDataHelper.serializeSignData(requestType.base64Data, commonBytes, 15)
-            }
             is LoginApprovalRequest, is AcceptVaultInvitation, is PasswordReset -> throw Exception(
                 INVALID_REQUEST_APPROVAL
             )
@@ -233,19 +178,14 @@ data class ApprovalDispositionRequest(
         when (requestType) {
             is WalletCreation -> requestType.signingData ?: throw Exception(INVALID_REQUEST_APPROVAL)
             is WithdrawalRequest -> requestType.signingData
-            is ConversionRequest -> requestType.signingData
-            is SignersUpdate -> requestType.signingData
-            is WrapConversionRequest -> requestType.signingData
             is WalletConfigPolicyUpdate -> requestType.signingData
             is BalanceAccountSettingsUpdate -> requestType.signingData
-            is DAppBookUpdate -> requestType.signingData
             is CreateAddressBookEntry -> requestType.signingData ?: throw Exception(INVALID_REQUEST_APPROVAL)
             is DeleteAddressBookEntry -> requestType.signingData ?: throw Exception(INVALID_REQUEST_APPROVAL)
             is BalanceAccountNameUpdate -> requestType.signingData
             is BalanceAccountPolicyUpdate -> requestType.signingData
             is BalanceAccountAddressWhitelistUpdate -> requestType.signingData
             is DAppTransactionRequest -> requestType.signingData
-            is SignData -> requestType.signingData
 
             is LoginApprovalRequest, is AcceptVaultInvitation, is PasswordReset -> throw Exception(
                 INVALID_REQUEST_APPROVAL
@@ -512,6 +452,7 @@ data class ApprovalDispositionRequest(
         }
     }
 
+    //todo: This should be completely wiped
     private fun signRequestWithSolanaKey(
         encryptionManager: EncryptionManager,
         cipher: Cipher): SignedPayload {

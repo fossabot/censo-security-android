@@ -47,21 +47,10 @@ fun ApprovalRequestDetails.getHeader(context: Context): String {
                 context.getString(R.string.enable_transfer_balance_account_settings_update_approval_header)
             }
         }
-        is ConversionRequest ->
-            context.getString(R.string.conversion_request_approval_header, symbolAndAmountInfo.amount, symbolAndAmountInfo.symbolInfo.symbol)
-        is DAppBookUpdate ->
-            context.getString(R.string.dapp_book_update_approval_header)
         is DAppTransactionRequest ->
             context.getString(R.string.dapp_transaction_request_approval_header)
         is LoginApprovalRequest ->
             context.getString(R.string.login_approval_header)
-        is SignersUpdate -> {
-            if (slotUpdateType == SlotUpdateType.Clear) {
-                context.getString(R.string.remove_signers_update_approval_header)
-            } else {
-                context.getString(R.string.add_signers_update_approval_header)
-            }
-        }
         is AcceptVaultInvitation ->
             context.getString(R.string.accept_vault_invitation_approval_header)
         is PasswordReset ->
@@ -74,8 +63,6 @@ fun ApprovalRequestDetails.getHeader(context: Context): String {
             } else {
                 context.getString(R.string.bump_fee_request_approval_header)
             }
-        is WrapConversionRequest ->
-            context.getString(R.string.wrap_conversion_request_approval_header, symbolAndAmountInfo.amount, symbolAndAmountInfo.symbolInfo.symbol)
         else ->
             context.getString(R.string.unknown_approval_header)
     }
@@ -104,8 +91,7 @@ fun ApprovalRequestDetails.getApprovalRowMetaData(vaultName: String?): ApprovalR
     )
 }
 
-fun ApprovalRequestDetails.isUnknownTypeOrUIUnimplemented() =
-    this is UnknownApprovalType || this is DAppBookUpdate
+fun ApprovalRequestDetails.isUnknownTypeOrUIUnimplemented() = this is UnknownApprovalType
 
 fun ApprovalRequestDetails.getRowTitle(vaultName: String?): String? =
     when (this) {
