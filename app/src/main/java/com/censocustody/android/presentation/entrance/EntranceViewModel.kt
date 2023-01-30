@@ -84,7 +84,6 @@ class EntranceViewModel @Inject constructor(
     private suspend fun checkIfUserHasDeviceRegistered() {
         val userEmail = userRepository.retrieveUserEmail()
         if (userRepository.userHasDeviceIdSaved(userEmail)) {
-            //todo: check if user has correct device ID
             val verifyUser = retrieveUserVerifyDetails()
 
             if (verifyUser != null) {
@@ -94,7 +93,7 @@ class EntranceViewModel @Inject constructor(
                 if (devicePublicKey.lowercase() == backendPublicKey?.lowercase()) {
                     determineUserDestination(verifyUser)
                 } else {
-                    //todo: HAVE WRONG PUBLIC DEVICE KEY. Ask team what should do here? I think we need some clean up.
+                    //DESTINATION: Send user to device registration
                     state = state.copy(
                         userDestinationResult = Resource.Success(UserDestination.DEVICE_REGISTRATION)
                     )

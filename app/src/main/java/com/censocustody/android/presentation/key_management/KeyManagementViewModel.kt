@@ -86,7 +86,7 @@ class KeyManagementViewModel @Inject constructor(
     //endregion
 
     //region API CALLS
-    //todo: no longer doing key creation in this flow
+    //todo: no longer doing key creation with a phrase
 //    private suspend fun attemptAddWalletSigner(walletSignerBody: List<WalletSigner>): Resource<Signers> {
 //        val walletSignerResource =
 //            userRepository.addWalletSigner(walletSignerBody)
@@ -228,7 +228,7 @@ class KeyManagementViewModel @Inject constructor(
 
     suspend fun createAndSaveKey(localKeys: List<WalletSigner>) {
         try {
-            //todo: can I remove this flow now that we have removed this code flow?
+            //todo: remove this flow now that key creation no longer works with a phrase
 //            val addWalletSignerResource = attemptAddWalletSigner(localKeys)
 //
 //            if (addWalletSignerResource is Resource.Success) {
