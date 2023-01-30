@@ -26,6 +26,7 @@ data class StoredKeyData(
             return Gson().fromJson(json, StoredKeyData::class.java)
         }
 
+        const val SOLANA_KEY = "solana_key"
         const val ETHEREUM_KEY = "ethereum_key"
         const val BITCOIN_KEY = "bitcoin_key"
         const val CENSO_KEY = "censo_key"

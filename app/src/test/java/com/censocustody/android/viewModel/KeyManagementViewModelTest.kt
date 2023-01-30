@@ -69,7 +69,7 @@ class KeyManagementViewModelTest : BaseViewModelTest() {
     private val defaultErrorMessage = "test_err_message"
 
     private val validPublicKey = WalletPublicKey(
-        chain = Chain.censo,
+        chain = Chain.solana,
         key = "F7JuLRBbyGAS9nAhDdfNX1LbckBAmCnKMB2xTdZfQS1n"
     )
 

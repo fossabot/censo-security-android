@@ -39,11 +39,6 @@ interface KeyRepository {
     suspend fun removeSentinelDataAndKickUserToAppEntrance()
 
     fun validateUserEnteredPhraseAgainstBackendKeys(phrase: String, verifyUser: VerifyUser?) : Boolean
-
-//    suspend fun signPublicKeys(
-//        publicKeys: List<WalletSigner?>,
-//        mnemonic: Mnemonics.MnemonicCode
-//    ): List<WalletSigner>
 }
 
 class KeyRepositoryImpl(
@@ -147,25 +142,6 @@ class KeyRepositoryImpl(
         val userEmail = userRepository.retrieveUserEmail()
         return securePreferences.retrieveV3PublicKeys(userEmail).mapToPublicKeysList()
     }
-
-//    override suspend fun signPublicKeys(
-//        publicKeys: List<WalletSigner?>,
-//        mnemonic: Mnemonics.MnemonicCode
-//    ): List<WalletSigner> {
-//        val rootSeed = mnemonic.toSeed()
-//
-//        val signedKeysToAdd = mutableListOf<WalletSigner>()
-//
-//        for (key in publicKeys.filterNotNull()) {
-//            val signedKey = encryptionManager.signKeyForMigration(
-//                rootSeed = rootSeed,
-//                publicKey = key.publicKey ?: ""
-//            )
-//            signedKeysToAdd.add(key.copy(signature = BaseWrapper.encodeToBase64(signedKey)))
-//        }
-//
-//        return signedKeysToAdd
-//    }
 
     override suspend fun hasV3RootSeedStored(): Boolean {
         val userEmail = userRepository.retrieveUserEmail()

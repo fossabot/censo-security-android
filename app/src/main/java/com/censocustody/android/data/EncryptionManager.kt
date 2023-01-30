@@ -17,6 +17,7 @@ import com.censocustody.android.data.models.StoredKeyData.Companion.CENSO_KEY
 import com.censocustody.android.data.models.StoredKeyData.Companion.ETHEREUM_KEY
 import com.censocustody.android.data.models.SupplyDappInstruction
 import com.censocustody.android.data.models.Signers
+import com.censocustody.android.data.models.StoredKeyData.Companion.SOLANA_KEY
 import com.censocustody.android.data.models.WalletSigner
 import com.censocustody.android.data.models.approval.InitiationRequest
 import org.web3j.crypto.Hash
@@ -468,11 +469,13 @@ class EncryptionManagerImpl @Inject constructor(
 
     override fun saveV3PublicKeys(rootSeed: ByteArray, email: String): HashMap<String, String> {
         val keys = createAllKeys(rootSeed)
+        val solanaPublicKey = BaseWrapper.encode(keys.solanaKey.getPublicKeyBytes())
         val bitcoinPublicKey = keys.bitcoinKey.getBase58ExtendedPublicKey()
         val ethereumPublicKey = keys.ethereumKey.getBase58UncompressedPublicKey()
         val censoPublicKey = keys.censoKey.getBase58UncompressedPublicKey()
 
         val keyDataAsJson = createV3PublicKeyJson(
+            solanaPublicKey = solanaPublicKey,
             bitcoinPublicKey = bitcoinPublicKey,
             ethereumPublicKey = ethereumPublicKey,
             censoPublicKey = censoPublicKey
@@ -497,12 +500,14 @@ class EncryptionManagerImpl @Inject constructor(
     }
 
     private fun createV3PublicKeyJson(
+        solanaPublicKey: String,
         bitcoinPublicKey: String,
         ethereumPublicKey: String,
         censoPublicKey: String
     ): String {
         val mapOfKeys: HashMap<String, String> =
             hashMapOf(
+                SOLANA_KEY to solanaPublicKey,
                 BITCOIN_KEY to bitcoinPublicKey,
                 ETHEREUM_KEY to ethereumPublicKey,
                 CENSO_KEY to censoPublicKey
