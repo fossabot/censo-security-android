@@ -98,22 +98,6 @@ sealed class ApprovalRequestDetails {
         val signingData: SigningData
     ) : ApprovalRequestDetails()
 
-    data class ConversionRequest(
-        val type: String,
-        val account: AccountInfo,
-        val symbolAndAmountInfo: SymbolAndAmountInfo,
-        val destination: DestinationAddress,
-        val destinationSymbolInfo: SymbolInfo,
-        val signingData: SigningData.SolanaSigningData
-    ) : ApprovalRequestDetails()
-
-    data class SignersUpdate(
-        val type: String,
-        val slotUpdateType: SlotUpdateType,
-        val signer: SlotSignerInfo,
-        val signingData: SigningData.SolanaSigningData
-    ) : ApprovalRequestDetails()
-
     data class WalletCreation(
         val type: String,
         var accountSlot: Byte,
@@ -146,14 +130,6 @@ sealed class ApprovalRequestDetails {
         var dappInfo: SolanaDApp,
         var balanceChanges: List<SymbolAndAmountInfo>,
         var instructions: List<SolanaInstructionChunk>,
-        var signingData: SigningData.SolanaSigningData
-    ) : ApprovalRequestDetails()
-
-    data class WrapConversionRequest(
-        val type: String,
-        val account: AccountInfo,
-        val symbolAndAmountInfo: SymbolAndAmountInfo,
-        val destinationSymbolInfo: SymbolInfo,
         var signingData: SigningData.SolanaSigningData
     ) : ApprovalRequestDetails()
 
@@ -205,25 +181,6 @@ sealed class ApprovalRequestDetails {
                     buffer.write(byteArrayOf(programValue))
                 }
             }
-
-            return buffer.toByteArray()
-        }
-    }
-
-    data class DAppBookUpdate(
-        val type: String,
-        val entriesToAdd: List<SlotDAppInfo>,
-        val entriesToRemove: List<SlotDAppInfo>,
-        var signingData: SigningData.SolanaSigningData
-    ) : ApprovalRequestDetails() {
-
-        fun combinedBytes() : ByteArray {
-            val buffer = ByteArrayOutputStream()
-
-            buffer.write(byteArrayOf(entriesToAdd.size.toByte()))
-            buffer.write(entriesToAdd.flatMap { it.combinedBytes().toList() }.toByteArray())
-            buffer.write(byteArrayOf(entriesToRemove.size.toByte()))
-            buffer.write(entriesToRemove.flatMap { it.combinedBytes().toList() }.toByteArray())
 
             return buffer.toByteArray()
         }
@@ -353,11 +310,6 @@ sealed class ApprovalRequestDetails {
         val type: String
     ) : ApprovalRequestDetails()
 
-    data class SignData(
-        val base64Data: String,
-        val signingData: SigningData.SolanaSigningData,
-    ) : ApprovalRequestDetails()
-
     object UnknownApprovalType : ApprovalRequestDetails()
 
     companion object {
@@ -372,32 +324,26 @@ sealed class ApprovalRequestDetails {
                 is SigningData.SolanaSigningData -> (signingData as SigningData.SolanaSigningData).nonceAccountAddresses
                 else -> emptyList()
             }
-            is ConversionRequest -> signingData.nonceAccountAddresses
-            is SignersUpdate -> signingData.nonceAccountAddresses
             is WalletCreation -> signingData?.nonceAccountAddresses ?: emptyList()
             is DAppTransactionRequest -> signingData.nonceAccountAddresses
-            is WrapConversionRequest -> signingData.nonceAccountAddresses
             is WalletConfigPolicyUpdate -> signingData.nonceAccountAddresses
             is BalanceAccountSettingsUpdate -> signingData.nonceAccountAddresses
-            is DAppBookUpdate -> signingData.nonceAccountAddresses
             is CreateAddressBookEntry -> signingData?.nonceAccountAddresses ?: emptyList()
             is DeleteAddressBookEntry -> signingData?.nonceAccountAddresses ?: emptyList()
             is BalanceAccountNameUpdate -> signingData.nonceAccountAddresses
             is BalanceAccountPolicyUpdate -> signingData.nonceAccountAddresses
             is BalanceAccountAddressWhitelistUpdate -> signingData.nonceAccountAddresses
-            is SignData -> signingData.nonceAccountAddresses
             is LoginApprovalRequest, is UnknownApprovalType, is AcceptVaultInvitation, is PasswordReset -> emptyList()
         }
     }
 
     fun nonceAccountAddressesSlot() : Int {
         return when(this) {
-            is WithdrawalRequest, is ConversionRequest, is SignersUpdate,
-            is WalletCreation, is DAppTransactionRequest, is WrapConversionRequest,
-            is WalletConfigPolicyUpdate, is BalanceAccountSettingsUpdate, is DAppBookUpdate,
+            is WithdrawalRequest, is WalletCreation, is DAppTransactionRequest,
+            is WalletConfigPolicyUpdate, is BalanceAccountSettingsUpdate,
             is CreateAddressBookEntry, is DeleteAddressBookEntry,
             is BalanceAccountNameUpdate, is BalanceAccountPolicyUpdate,
-            is BalanceAccountAddressWhitelistUpdate, is SignData -> {
+            is BalanceAccountAddressWhitelistUpdate -> {
                 when (val signingData = signingData()) {
                     is SigningData.SolanaSigningData -> signingData.nonceAccountAddressesSlot
                     else -> 0
@@ -411,20 +357,15 @@ sealed class ApprovalRequestDetails {
     private fun signingData(): SigningData? =
         when (this) {
             is WithdrawalRequest -> signingData
-            is ConversionRequest -> signingData
-            is SignersUpdate -> signingData
             is WalletCreation -> signingData
             is DAppTransactionRequest -> signingData
-            is WrapConversionRequest -> signingData
             is WalletConfigPolicyUpdate -> signingData
             is BalanceAccountSettingsUpdate -> signingData
-            is DAppBookUpdate -> signingData
             is CreateAddressBookEntry -> signingData
             is DeleteAddressBookEntry -> signingData
             is BalanceAccountNameUpdate -> signingData
             is BalanceAccountPolicyUpdate -> signingData
             is BalanceAccountAddressWhitelistUpdate -> signingData
-            is SignData -> signingData
             is LoginApprovalRequest, is UnknownApprovalType,
             is AcceptVaultInvitation, is PasswordReset -> null
         }
@@ -433,23 +374,18 @@ sealed class ApprovalRequestDetails {
 
 enum class ApprovalType(val value: String) {
     WITHDRAWAL_TYPE("WithdrawalRequest"),
-    CONVERSION_REQUEST_TYPE("ConversionRequest"),
-    SIGNERS_UPDATE_TYPE("SignersUpdate"),
     WALLET_CREATION_TYPE("WalletCreation"),
     DAPP_TRANSACTION_REQUEST_TYPE("DAppTransactionRequest"),
     LOGIN_TYPE("LoginApproval"),
-    WRAP_CONVERSION_REQUEST_TYPE("WrapConversionRequest"),
     BALANCE_ACCOUNT_NAME_UPDATE_TYPE("BalanceAccountNameUpdate"),
     BALANCE_ACCOUNT_POLICY_UPDATE_TYPE("BalanceAccountPolicyUpdate"),
     BALANCE_ACCOUNT_SETTINGS_UPDATE_TYPE("BalanceAccountSettingsUpdate"),
     CREATE_ADDRESS_BOOK_ENTRY_TYPE("CreateAddressBookEntry"),
     DELETE_ADDRESS_BOOK_ENTRY_TYPE("DeleteAddressBookEntry"),
-    DAPP_BOOK_UPDATE_TYPE("DAppBookUpdate"),
     WALLET_CONFIG_POLICY_UPDATE_TYPE("WalletConfigPolicyUpdate"),
     BALANCE_ACCOUNT_ADDRESS_WHITE_LIST_UPDATE_TYPE("BalanceAccountAddressWhitelistUpdate"),
     ACCEPT_VAULT_INVITATION_TYPE("AcceptVaultInvitation"),
     PASSWORD_RESET_TYPE("PasswordReset"),
-    SIGN_DATA_TYPE("SignData"),
 
     UNKNOWN_TYPE("");
 
@@ -457,23 +393,18 @@ enum class ApprovalType(val value: String) {
         fun fromString(type: String?): ApprovalType =
             when (type) {
                 WITHDRAWAL_TYPE.value -> WITHDRAWAL_TYPE
-                CONVERSION_REQUEST_TYPE.value -> CONVERSION_REQUEST_TYPE
-                SIGNERS_UPDATE_TYPE.value -> SIGNERS_UPDATE_TYPE
                 WALLET_CREATION_TYPE.value -> WALLET_CREATION_TYPE
                 DAPP_TRANSACTION_REQUEST_TYPE.value -> DAPP_TRANSACTION_REQUEST_TYPE
                 LOGIN_TYPE.value -> LOGIN_TYPE
-                WRAP_CONVERSION_REQUEST_TYPE.value -> WRAP_CONVERSION_REQUEST_TYPE
                 BALANCE_ACCOUNT_NAME_UPDATE_TYPE.value -> BALANCE_ACCOUNT_NAME_UPDATE_TYPE
                 BALANCE_ACCOUNT_POLICY_UPDATE_TYPE.value -> BALANCE_ACCOUNT_POLICY_UPDATE_TYPE
                 BALANCE_ACCOUNT_SETTINGS_UPDATE_TYPE.value -> BALANCE_ACCOUNT_SETTINGS_UPDATE_TYPE
                 CREATE_ADDRESS_BOOK_ENTRY_TYPE.value -> CREATE_ADDRESS_BOOK_ENTRY_TYPE
                 DELETE_ADDRESS_BOOK_ENTRY_TYPE.value -> DELETE_ADDRESS_BOOK_ENTRY_TYPE
-                DAPP_BOOK_UPDATE_TYPE.value -> DAPP_BOOK_UPDATE_TYPE
                 WALLET_CONFIG_POLICY_UPDATE_TYPE.value -> WALLET_CONFIG_POLICY_UPDATE_TYPE
                 BALANCE_ACCOUNT_ADDRESS_WHITE_LIST_UPDATE_TYPE.value -> BALANCE_ACCOUNT_ADDRESS_WHITE_LIST_UPDATE_TYPE
                 ACCEPT_VAULT_INVITATION_TYPE.value -> ACCEPT_VAULT_INVITATION_TYPE
                 PASSWORD_RESET_TYPE.value -> PASSWORD_RESET_TYPE
-                SIGN_DATA_TYPE.value -> SIGN_DATA_TYPE
                 else -> UNKNOWN_TYPE
             }
     }
