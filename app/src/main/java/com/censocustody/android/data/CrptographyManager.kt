@@ -2,6 +2,7 @@ package com.censocustody.android.data
 
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
+import com.censocustody.android.BuildConfig
 import java.security.KeyStore
 import javax.crypto.Cipher
 import javax.crypto.KeyGenerator
@@ -147,12 +148,10 @@ class CryptographyManagerImpl : CryptographyManager {
             .setDigests(
                 KeyProperties.DIGEST_SHA256
             )
-            .setInvalidatedByBiometricEnrollment(true)
-            .setUserAuthenticationParameters(
-                0,
-                KeyProperties.AUTH_DEVICE_CREDENTIAL
-                        or KeyProperties.AUTH_BIOMETRIC_STRONG
-            )
+            .setUserAuthenticationRequired(true)
+            .setUserAuthenticationParameters(5, KeyProperties.AUTH_BIOMETRIC_STRONG)
+            .setRandomizedEncryptionRequired(true)
+            .setIsStrongBoxBacked(!BuildConfig.DEBUG)
             .build()
 
         kpg.initialize(parameterSpec)
@@ -195,6 +194,8 @@ class CryptographyManagerImpl : CryptographyManager {
             setKeySize(KEY_SIZE)
             setUserAuthenticationRequired(true)
             setInvalidatedByBiometricEnrollment(true)
+            setRandomizedEncryptionRequired(true)
+            setIsStrongBoxBacked(!BuildConfig.DEBUG)
         }
 
         val keyGenParams = paramsBuilder.build()
