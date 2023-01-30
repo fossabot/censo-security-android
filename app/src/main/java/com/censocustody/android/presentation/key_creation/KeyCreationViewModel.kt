@@ -64,14 +64,13 @@ class KeyCreationViewModel @Inject constructor(
         val deviceKeyId = userRepository.retrieveUserDeviceId(userEmail)
         val signature = cipherRepository.getSignatureForDeviceSigning(deviceKeyId)
         val bioPromptReason = BioPromptReason.RETRIEVE_DEVICE_SIGNATURE
+        //if signature is null then we wipe all key data and send user to login
         if (signature != null) {
             state =
                 state.copy(
                     triggerBioPrompt = Resource.Success(CryptoObject(signature)),
                     bioPromptReason = bioPromptReason
                 )
-        } else {
-            //todo: need to show error to user
         }
     }
 

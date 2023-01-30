@@ -1,7 +1,6 @@
 package com.censocustody.android.data.models
 
 import android.security.keystore.KeyPermanentlyInvalidatedException
-import com.censocustody.android.common.censoLog
 import com.censocustody.android.data.*
 import com.censocustody.android.data.EncryptionManagerImpl.Companion.BIO_KEY_NAME
 import com.censocustody.android.data.EncryptionManagerImpl.Companion.ROOT_SEED_KEY_NAME

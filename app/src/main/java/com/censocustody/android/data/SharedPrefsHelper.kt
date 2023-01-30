@@ -236,7 +236,7 @@ object SharedPrefsHelper {
     fun retrieveDeviceId(
         email: String
     ): String {
-        return sharedPrefs.getString("${email.lowercase().trim()}$DEVICE_ID", "")?.lowercase()?.trim() ?: ""
+        return sharedPrefs.getString("${email.lowercase().trim()}$DEVICE_ID", "") ?: ""
     }
     //endregion
 
@@ -259,7 +259,7 @@ object SharedPrefsHelper {
     fun retrieveDevicePublicKey(
         email: String
     ): String {
-        return sharedPrefs.getString("${email.lowercase().trim()}$DEVICE_PUBLIC_KEY", "")?.lowercase()?.trim() ?: ""
+        return sharedPrefs.getString("${email.lowercase().trim()}$DEVICE_PUBLIC_KEY", "") ?: ""
     }
     //endregion
 }
