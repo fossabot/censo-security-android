@@ -2,7 +2,6 @@ package com.censocustody.android.common.evm
 
 import com.censocustody.android.common.pad
 import com.censocustody.android.common.toHexString
-import com.censocustody.android.data.models.approval.BooleanSetting
 import com.censocustody.android.data.models.approvalV2.ApprovalRequestDetailsV2
 import org.web3j.crypto.Hash
 import java.nio.ByteBuffer
