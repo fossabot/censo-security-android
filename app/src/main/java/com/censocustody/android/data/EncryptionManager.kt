@@ -15,7 +15,6 @@ import com.censocustody.android.data.models.StoredKeyData
 import com.censocustody.android.data.models.StoredKeyData.Companion.BITCOIN_KEY
 import com.censocustody.android.data.models.StoredKeyData.Companion.CENSO_KEY
 import com.censocustody.android.data.models.StoredKeyData.Companion.ETHEREUM_KEY
-import com.censocustody.android.data.models.StoredKeyData.Companion.SOLANA_KEY
 import com.censocustody.android.data.models.SupplyDappInstruction
 import com.censocustody.android.data.models.Signers
 import com.censocustody.android.data.models.WalletSigner
@@ -42,12 +41,12 @@ data class SignedPayload(
 interface EncryptionManager {
 
     //region sign data
-    fun signSolanaApprovalDispositionMessage(
-        signable: Signable,
-        email: String,
-        cipher: Cipher? = null,
-        rootSeed: String? = null
-    ): SignedPayload
+//    fun signSolanaApprovalDispositionMessage(
+//        signable: Signable,
+//        email: String,
+//        cipher: Cipher? = null,
+//        rootSeed: String? = null
+//    ): SignedPayload
 
     fun signBitcoinApprovalDispositionMessage(
         signable: Signable,
@@ -92,6 +91,7 @@ interface EncryptionManager {
         cipher: Cipher
     ): ByteArray
 
+    //todo: this should be signing with something that is not solana
     fun signKeyForMigration(rootSeed: ByteArray, publicKey: String): ByteArray
 
     fun signKeysForUpload(
@@ -128,7 +128,7 @@ interface EncryptionManager {
 
     fun saveV3PublicKeys(rootSeed: ByteArray, email: String): HashMap<String, String>
 
-    fun generateSolanaPublicKeyFromRootSeed(rootSeed: ByteArray): String
+    fun generateCensoPublicKeyFromRootSeed(rootSeed: ByteArray): String
     //endregion
 
     //region Work with device keystore
@@ -152,6 +152,7 @@ class EncryptionManagerImpl @Inject constructor(
 ) : EncryptionManager {
 
     //region interface methods
+    //todo: this should be done with device key now. Still need to create all new keys.
     override fun signKeyForMigration(rootSeed: ByteArray, publicKey: String): ByteArray {
         val solanaHierarchicalKey = Ed25519HierarchicalPrivateKey.fromRootSeed(rootSeed)
         return solanaHierarchicalKey.signData(BaseWrapper.decode(publicKey))
@@ -199,27 +200,27 @@ class EncryptionManagerImpl @Inject constructor(
         )
     }
 
-    override fun signSolanaApprovalDispositionMessage(
-        signable: Signable, email: String, cipher: Cipher?, rootSeed: String?,
-    ): SignedPayload {
-        if (cipher == null && rootSeed == null) {
-            throw Exception("Need to pass either cipher or root seed to sign data")
-        }
-
-        val safeRootSeed = rootSeed ?: retrieveRootSeed(email = email, cipher = cipher!!)
-
-        if (safeRootSeed.isEmpty()) {
-            throw NoKeyDataException
-        }
-
-        val ed25519HierarchicalPrivateKey =
-            Ed25519HierarchicalPrivateKey.fromRootSeed(BaseWrapper.decode(safeRootSeed))
-
-        return generateSignedPayload(
-            censoPrivateKey = ed25519HierarchicalPrivateKey,
-            signable = signable
-        )
-    }
+//    override fun signSolanaApprovalDispositionMessage(
+//        signable: Signable, email: String, cipher: Cipher?, rootSeed: String?,
+//    ): SignedPayload {
+//        if (cipher == null && rootSeed == null) {
+//            throw Exception("Need to pass either cipher or root seed to sign data")
+//        }
+//
+//        val safeRootSeed = rootSeed ?: retrieveRootSeed(email = email, cipher = cipher!!)
+//
+//        if (safeRootSeed.isEmpty()) {
+//            throw NoKeyDataException
+//        }
+//
+//        val ed25519HierarchicalPrivateKey =
+//            Ed25519HierarchicalPrivateKey.fromRootSeed(BaseWrapper.decode(safeRootSeed))
+//
+//        return generateSignedPayload(
+//            censoPrivateKey = ed25519HierarchicalPrivateKey,
+//            signable = signable
+//        )
+//    }
 
     private fun generateSignedPayload(censoPrivateKey: CensoPrivateKey, signable: Signable, hashForSigning: Boolean = false): SignedPayload {
         val messageToSign =
@@ -387,6 +388,7 @@ class EncryptionManagerImpl @Inject constructor(
         return BaseWrapper.encodeToBase64(signedData)
     }
 
+    //todo: How should we handle initiation request data now?
     override fun signInitiationRequestData(
         signable: Signable,
         email: String,
@@ -403,15 +405,16 @@ class EncryptionManagerImpl @Inject constructor(
             throw NoKeyDataException
         }
 
-        val initiatorSignature = try {
-            signSolanaApprovalDispositionMessage(
-                signable = signable,
-                rootSeed = rootSeed,
-                email = email
-            ).signature
-        } catch (e: Exception) {
-            throw Exception("SIGNING_DATA_FAILURE")
-        }
+        val initiatorSignature = ""
+//        val initiatorSignature = try {
+//            signSolanaApprovalDispositionMessage(
+//                signable = signable,
+//                rootSeed = rootSeed,
+//                email = email
+//            ).signature
+//        } catch (e: Exception) {
+//            throw Exception("SIGNING_DATA_FAILURE")
+//        }
 
         val opAccountSignature = try {
             signSolanaApprovalInitiationMessage(
@@ -426,15 +429,13 @@ class EncryptionManagerImpl @Inject constructor(
 
         val supplyDappInstruction =
             if (supplyInstructions.isNotEmpty()) {
+                //todo: what is the signature for supply dapp instruction?
                 val supplyInstructionInitiatorSignatures = supplyInstructions.map { instruction ->
                     InitiationRequest.SupplyDappInstructionsTxSignature(
                         nonce = instruction.nonce.value,
                         nonceAccountAddress = instruction.nonceAccountAddress,
-                        signature = signSolanaApprovalDispositionMessage(
-                            signable = instruction,
-                            rootSeed = rootSeed,
-                            email = email,
-                        ).signature
+                        signature = ""
+                        //signSolanaApprovalDispositionMessage(signable = instruction, rootSeed = rootSeed, email = email,).signature
                     )
                 }
 
@@ -469,13 +470,12 @@ class EncryptionManagerImpl @Inject constructor(
 
     override fun saveV3PublicKeys(rootSeed: ByteArray, email: String): HashMap<String, String> {
         val keys = createAllKeys(rootSeed)
-        val solanaPublicKey = BaseWrapper.encode(keys.solanaKey.getPublicKeyBytes())
+        //val solanaPublicKey = BaseWrapper.encode(keys.solanaKey.getPublicKeyBytes())
         val bitcoinPublicKey = keys.bitcoinKey.getBase58ExtendedPublicKey()
         val ethereumPublicKey = keys.ethereumKey.getBase58UncompressedPublicKey()
         val censoPublicKey = keys.censoKey.getBase58UncompressedPublicKey()
 
         val keyDataAsJson = createV3PublicKeyJson(
-            solanaPublicKey = solanaPublicKey,
             bitcoinPublicKey = bitcoinPublicKey,
             ethereumPublicKey = ethereumPublicKey,
             censoPublicKey = censoPublicKey
@@ -487,28 +487,25 @@ class EncryptionManagerImpl @Inject constructor(
         )
 
         return hashMapOf(
-            SOLANA_KEY to solanaPublicKey,
             BITCOIN_KEY to bitcoinPublicKey,
             ETHEREUM_KEY to ethereumPublicKey,
             CENSO_KEY to censoPublicKey
         )
     }
 
-    override fun generateSolanaPublicKeyFromRootSeed(rootSeed: ByteArray): String {
+    override fun generateCensoPublicKeyFromRootSeed(rootSeed: ByteArray): String {
         val keys = createAllKeys(rootSeed)
 
-        return BaseWrapper.encode(keys.solanaKey.getPublicKeyBytes())
+        return BaseWrapper.encode(keys.censoKey.getPublicKeyBytes())
     }
 
     private fun createV3PublicKeyJson(
-        solanaPublicKey: String,
         bitcoinPublicKey: String,
         ethereumPublicKey: String,
         censoPublicKey: String
     ): String {
         val mapOfKeys: HashMap<String, String> =
             hashMapOf(
-                SOLANA_KEY to solanaPublicKey,
                 BITCOIN_KEY to bitcoinPublicKey,
                 ETHEREUM_KEY to ethereumPublicKey,
                 CENSO_KEY to censoPublicKey
@@ -520,8 +517,6 @@ class EncryptionManagerImpl @Inject constructor(
     }
 
     private fun createAllKeys(rootSeed: ByteArray): AllKeys {
-        val solanaHierarchicalKey = Ed25519HierarchicalPrivateKey.fromRootSeed(rootSeed)
-
         val bitcoinHierarchicalKey = Secp256k1HierarchicalKey.fromRootSeed(
             rootSeed, Secp256k1HierarchicalKey.bitcoinDerivationPath
         )
@@ -535,7 +530,6 @@ class EncryptionManagerImpl @Inject constructor(
         )
 
         listOf(
-            solanaHierarchicalKey,
             bitcoinHierarchicalKey,
             ethereumHierarchicalKey,
             censoHierarchicalKey
@@ -544,7 +538,6 @@ class EncryptionManagerImpl @Inject constructor(
         }
 
         return AllKeys(
-            solanaKey = solanaHierarchicalKey,
             bitcoinKey = bitcoinHierarchicalKey,
             ethereumKey = ethereumHierarchicalKey,
             censoKey = censoHierarchicalKey
@@ -610,25 +603,6 @@ class EncryptionManagerImpl @Inject constructor(
     override fun getSignatureForDeviceSigning(keyName: String): Signature {
         return cryptographyManager.getSignatureForDeviceSigning(keyName)
     }
-
-    private fun retrieveStoredKeys(
-        json: String,
-        cipher: Cipher,
-    ): HashMap<String, String> {
-        val storedKeyData = StoredKeyData.fromJson(json)
-
-        val encryptedKeysData = storedKeyData.encryptedKeysData
-        val decryptedKeyJson = cryptographyManager.decryptData(
-            BaseWrapper.decode(encryptedKeysData),
-            cipher
-        )
-
-        //this is coming out as UTF-8 because we cannot store JSON in Base58
-        val keys =
-            StoredKeyData.mapFromJson(String(decryptedKeyJson, charset = Charset.forName("UTF-8")))
-
-        return keys
-    }
     //endregion
 
     //region companion
@@ -646,7 +620,6 @@ class EncryptionManagerImpl @Inject constructor(
 }
 
 data class AllKeys(
-    val solanaKey: Ed25519HierarchicalPrivateKey,
     val bitcoinKey: Secp256k1HierarchicalKey,
     val ethereumKey: Secp256k1HierarchicalKey,
     val censoKey: Secp256k1HierarchicalKey

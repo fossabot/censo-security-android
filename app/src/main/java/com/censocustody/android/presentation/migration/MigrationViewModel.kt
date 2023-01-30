@@ -10,6 +10,7 @@ import com.censocustody.android.common.BioCryptoUtil.FAIL_ERROR
 import com.censocustody.android.common.BioPromptReason
 import com.censocustody.android.common.Resource
 import com.censocustody.android.data.BioPromptData
+import com.censocustody.android.data.KeyRepository
 import com.censocustody.android.data.MigrationRepository
 import com.censocustody.android.data.UserRepository
 import com.censocustody.android.data.models.CipherRepository
@@ -42,6 +43,7 @@ import javax.inject.Inject
 class MigrationViewModel @Inject constructor(
     private val cipherRepository: CipherRepository,
     private val migrationRepository: MigrationRepository,
+    private val keyRepository: KeyRepository,
     private val userRepository: UserRepository
 ) : ViewModel() {
 

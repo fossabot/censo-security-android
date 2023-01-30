@@ -451,7 +451,7 @@ data class ApprovalDispositionRequest(
                 ApprovalSignature.NoChainSignature(
                     signRequestWithDeviceKey(encryptionManager, signature!!)
                 )
-            is WalletCreation -> getSignatureInfo(requestType.accountInfo.chain ?: Chain.solana, encryptionManager, cipher!!)
+            is WalletCreation -> getSignatureInfo(requestType.accountInfo.chain ?: Chain.censo, encryptionManager, cipher!!)
             is CreateAddressBookEntry -> getSignatureInfo(requestType.chain, encryptionManager, cipher!!)
             is DeleteAddressBookEntry -> getSignatureInfo(requestType.chain, encryptionManager, cipher!!)
             is WithdrawalRequest -> {

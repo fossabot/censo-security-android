@@ -40,10 +40,10 @@ interface KeyRepository {
 
     fun validateUserEnteredPhraseAgainstBackendKeys(phrase: String, verifyUser: VerifyUser?) : Boolean
 
-    suspend fun signPublicKeys(
-        publicKeys: List<WalletSigner?>,
-        mnemonic: Mnemonics.MnemonicCode
-    ): List<WalletSigner>
+//    suspend fun signPublicKeys(
+//        publicKeys: List<WalletSigner?>,
+//        mnemonic: Mnemonics.MnemonicCode
+//    ): List<WalletSigner>
 }
 
 class KeyRepositoryImpl(
@@ -87,10 +87,10 @@ class KeyRepositoryImpl(
             val rootSeed = Mnemonics.MnemonicCode(phrase = phrase).toSeed()
 
             val backendSolanaPublicKey =
-                verifyUser?.publicKeys?.first { it?.chain == Chain.solana }
+                verifyUser?.publicKeys?.first { it?.chain == Chain.censo }
 
             val userInputtedPublicKey =
-                encryptionManager.generateSolanaPublicKeyFromRootSeed(rootSeed)
+                encryptionManager.generateCensoPublicKeyFromRootSeed(rootSeed)
 
             !backendSolanaPublicKey?.key.isNullOrEmpty() && userInputtedPublicKey.isNotEmpty() &&
                     backendSolanaPublicKey?.key == userInputtedPublicKey
@@ -148,24 +148,24 @@ class KeyRepositoryImpl(
         return securePreferences.retrieveV3PublicKeys(userEmail).mapToPublicKeysList()
     }
 
-    override suspend fun signPublicKeys(
-        publicKeys: List<WalletSigner?>,
-        mnemonic: Mnemonics.MnemonicCode
-    ): List<WalletSigner> {
-        val rootSeed = mnemonic.toSeed()
-
-        val signedKeysToAdd = mutableListOf<WalletSigner>()
-
-        for (key in publicKeys.filterNotNull()) {
-            val signedKey = encryptionManager.signKeyForMigration(
-                rootSeed = rootSeed,
-                publicKey = key.publicKey ?: ""
-            )
-            signedKeysToAdd.add(key.copy(signature = BaseWrapper.encodeToBase64(signedKey)))
-        }
-
-        return signedKeysToAdd
-    }
+//    override suspend fun signPublicKeys(
+//        publicKeys: List<WalletSigner?>,
+//        mnemonic: Mnemonics.MnemonicCode
+//    ): List<WalletSigner> {
+//        val rootSeed = mnemonic.toSeed()
+//
+//        val signedKeysToAdd = mutableListOf<WalletSigner>()
+//
+//        for (key in publicKeys.filterNotNull()) {
+//            val signedKey = encryptionManager.signKeyForMigration(
+//                rootSeed = rootSeed,
+//                publicKey = key.publicKey ?: ""
+//            )
+//            signedKeysToAdd.add(key.copy(signature = BaseWrapper.encodeToBase64(signedKey)))
+//        }
+//
+//        return signedKeysToAdd
+//    }
 
     override suspend fun hasV3RootSeedStored(): Boolean {
         val userEmail = userRepository.retrieveUserEmail()
