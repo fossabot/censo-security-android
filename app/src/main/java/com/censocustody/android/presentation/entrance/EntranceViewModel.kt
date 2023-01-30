@@ -197,12 +197,12 @@ class EntranceViewModel @Inject constructor(
 
         //DESTINATION: Any when clause will trigger a user navigating to destination
         when {
-            needToAddSentinelData -> {
-                state = state.copy(
-                    userDestinationResult = Resource.Success(UserDestination.LOGIN)
-                )
-                return
-            }
+//            needToAddSentinelData -> {
+//                state = state.copy(
+//                    userDestinationResult = Resource.Success(UserDestination.LOGIN)
+//                )
+//                return
+//            }
             needToUpdateKeysSavedOnBackend -> {
                 state = state.copy(
                     userDestinationResult = Resource.Success(UserDestination.KEY_MIGRATION)
@@ -211,7 +211,7 @@ class EntranceViewModel @Inject constructor(
             }
             needToCreateRootSeed -> {
                 state = state.copy(
-                    userDestinationResult = Resource.Success(UserDestination.KEY_RECOVERY)
+                    userDestinationResult = Resource.Success(UserDestination.KEY_CREATION)
                 )
                 return
             }

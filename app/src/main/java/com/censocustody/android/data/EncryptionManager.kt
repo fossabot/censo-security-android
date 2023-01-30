@@ -22,9 +22,11 @@ import com.censocustody.android.data.models.WalletSigner
 import com.censocustody.android.data.models.approval.InitiationRequest
 import org.web3j.crypto.Hash
 import java.nio.charset.Charset
+import java.security.PublicKey
 import java.security.SecureRandom
 import java.security.Signature
 import javax.crypto.Cipher
+import javax.crypto.KeyAgreement
 import javax.inject.Inject
 
 fun generateEphemeralPrivateKey(): Ed25519PrivateKeyParameters {
@@ -142,6 +144,14 @@ interface EncryptionManager {
     fun saveSentinelData(email: String, cipher: Cipher)
     fun retrieveSentinelData(email: String, cipher: Cipher): String
     fun getSignatureForDeviceSigning(keyName: String) : Signature
+    fun getKeyAgreementForKeyRecovery(keyName: String) : KeyAgreement
+
+    fun decryptDataForKeyAgreement(
+        keyAgreement: KeyAgreement,
+        ephemeralPublicKey: PublicKey,
+        devicePublicKey: ByteArray,
+        cipherText: ByteArray
+    ): ByteArray
 
     //endregion
 }
@@ -611,6 +621,24 @@ class EncryptionManagerImpl @Inject constructor(
         return cryptographyManager.getSignatureForDeviceSigning(keyName)
     }
 
+    override fun getKeyAgreementForKeyRecovery(keyName: String) : KeyAgreement {
+        return cryptographyManager.getKeyAgreementForKeyRecovery(keyName)
+    }
+
+    override fun decryptDataForKeyAgreement(
+        keyAgreement: KeyAgreement,
+        ephemeralPublicKey: PublicKey,
+        devicePublicKey: ByteArray,
+        cipherText: ByteArray
+    ): ByteArray {
+        return cryptographyManager.decryptDataForKeyRecovery(
+            keyAgreement = keyAgreement,
+            devicePublicKey = devicePublicKey,
+            ephemeralPublicKey = ephemeralPublicKey,
+            cipherText = cipherText
+        )
+    }
+
     private fun retrieveStoredKeys(
         json: String,
         cipher: Cipher,
@@ -633,9 +661,9 @@ class EncryptionManagerImpl @Inject constructor(
 
     //region companion
     object Companion {
-        const val BIO_KEY_NAME = "biometric_encryption_key"
-        const val SENTINEL_KEY_NAME = "sentinel_biometry_key"
-        const val ROOT_SEED_KEY_NAME = "root_seed_encryption_key"
+        const val BIO_KEY_NAME = "biometric_encryption_key_5"
+        const val SENTINEL_KEY_NAME = "sentinel_biometry_key_5"
+        const val ROOT_SEED_KEY_NAME = "root_seed_encryption_key_5"
         const val SENTINEL_STATIC_DATA = "sentinel_static_data"
         const val NO_OFFSET_INDEX = 0
         val DATA_CHECK = BaseWrapper.decode("VerificationCheck")

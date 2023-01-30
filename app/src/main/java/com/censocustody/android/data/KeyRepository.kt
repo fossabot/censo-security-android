@@ -9,8 +9,10 @@ import com.censocustody.android.data.models.Chain
 import com.censocustody.android.data.models.VerifyUser
 import com.censocustody.android.data.models.WalletSigner
 import com.censocustody.android.data.models.mapToPublicKeysList
+import java.security.PublicKey
 import java.security.Signature
 import javax.crypto.Cipher
+import javax.crypto.KeyAgreement
 
 interface KeyRepository {
 
@@ -39,6 +41,13 @@ interface KeyRepository {
     suspend fun removeSentinelDataAndKickUserToAppEntrance()
 
     fun validateUserEnteredPhraseAgainstBackendKeys(phrase: String, verifyUser: VerifyUser?) : Boolean
+
+    fun decryptKeyRecoveryData(
+        keyAgreement: KeyAgreement,
+        ephemeralPublicKey: PublicKey,
+        devicePublicKey: ByteArray,
+        cipherText: ByteArray
+    ): ByteArray
 
     suspend fun signPublicKeys(
         publicKeys: List<WalletSigner?>,
@@ -97,6 +106,20 @@ class KeyRepositoryImpl(
         } catch (e: Exception) {
             false
         }
+    }
+
+    override fun decryptKeyRecoveryData(
+        keyAgreement: KeyAgreement,
+        ephemeralPublicKey: PublicKey,
+        devicePublicKey: ByteArray,
+        cipherText: ByteArray
+    ): ByteArray {
+        return encryptionManager.decryptDataForKeyAgreement(
+            keyAgreement = keyAgreement,
+            ephemeralPublicKey = ephemeralPublicKey,
+            devicePublicKey = devicePublicKey,
+            cipherText = cipherText,
+        )
     }
 
     override suspend fun signTimestamp(

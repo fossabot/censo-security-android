@@ -9,12 +9,14 @@ import com.censocustody.android.data.EncryptionManagerImpl.Companion.SENTINEL_KE
 import java.security.InvalidAlgorithmParameterException
 import java.security.Signature
 import javax.crypto.Cipher
+import javax.crypto.KeyAgreement
 
 interface CipherRepository {
     suspend fun getCipherForEncryption(keyName: String): Cipher?
     suspend fun getCipherForBackgroundDecryption(): Cipher?
     suspend fun getCipherForV3RootSeedDecryption(): Cipher?
     suspend fun getSignatureForDeviceSigning(keyName: String): Signature?
+    suspend fun getKeyAgreementForKeyRecovery(keyName: String): KeyAgreement?
 }
 
 class CipherRepositoryImpl(
@@ -64,6 +66,10 @@ class CipherRepositoryImpl(
             handleCipherException(e = e)
             null
         }
+    }
+
+    override suspend fun getKeyAgreementForKeyRecovery(keyName: String): KeyAgreement? {
+        return encryptionManager.getKeyAgreementForKeyRecovery(keyName)
     }
 
     private suspend fun handleCipherException(e: Exception): Cipher? {

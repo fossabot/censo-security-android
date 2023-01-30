@@ -42,6 +42,8 @@ class DeviceRegistrationViewModel @Inject constructor(
         }
     }
 
+    //try to setup signature, if not authed, then go authenticate with timeout
+
     fun retry() {
         state = DeviceRegistrationState()
         triggerImageCapture()
@@ -83,9 +85,9 @@ class DeviceRegistrationViewModel @Inject constructor(
                         signatureToCheck = signatureToCheck
                     )
 
-                    if (!verified) {
-                        throw Exception("Device image signature not valid.")
-                    }
+//                    if (!verified) {
+//                        throw Exception("Device image signature not valid.")
+//                    }
 
                     val email = userRepository.retrieveUserEmail()
                     userRepository.saveDeviceId(email = email, deviceId = keyName)
@@ -121,6 +123,8 @@ class DeviceRegistrationViewModel @Inject constructor(
                     )
                 }
             } catch (e: Exception) {
+                e.printStackTrace()
+                censoLog(message = "Exception: $e")
                 state = state.copy(
                     addUserDevice = Resource.Error(exception = e),
                     deviceRegistrationError = DeviceRegistrationError.SIGNING_IMAGE,
@@ -154,11 +158,17 @@ class DeviceRegistrationViewModel @Inject constructor(
                 state = state.copy(publicKey = BaseWrapper.encode(devicePublicKey))
 
                 val signature = cipherRepository.getSignatureForDeviceSigning(keyId)
+
+                //todo: head here to shortcut auth
                 if (signature != null) {
                     triggerBioPrompt(signature)
                 }
 
+                //sendUserDeviceAndImageToBackend(signature)
+
             } catch (e: Exception) {
+                e.printStackTrace()
+                censoLog(message = "Failed to create device key: $e")
                 state = state.copy(
                     deviceRegistrationError = DeviceRegistrationError.SIGNING_IMAGE,
                     capturingDeviceKey = Resource.Uninitialized

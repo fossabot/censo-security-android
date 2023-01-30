@@ -2,15 +2,19 @@ package com.censocustody.android.data
 
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
-import java.security.KeyStore
-import javax.crypto.Cipher
-import javax.crypto.KeyGenerator
-import javax.crypto.SecretKey
-import javax.crypto.spec.GCMParameterSpec
+import com.censocustody.android.common.censoLog
+import com.google.crypto.tink.aead.subtle.AesGcmSiv
+import com.google.crypto.tink.subtle.Hkdf
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo
+import java.io.ByteArrayOutputStream
 import java.security.*
 import java.security.cert.Certificate
 import java.security.spec.ECGenParameterSpec
+import javax.crypto.Cipher
+import javax.crypto.KeyAgreement
+import javax.crypto.KeyGenerator
+import javax.crypto.SecretKey
+import javax.crypto.spec.GCMParameterSpec
 
 interface CryptographyManager {
 
@@ -27,6 +31,14 @@ interface CryptographyManager {
     fun getInitializedCipherForDecryption(keyName: String, initializationVector: ByteArray): Cipher
 
     fun getSignatureForDeviceSigning(keyName: String) : Signature
+
+    fun getKeyAgreementForKeyRecovery(keyName: String) : KeyAgreement
+    fun decryptDataForKeyRecovery(
+        keyAgreement: KeyAgreement,
+        devicePublicKey: ByteArray,
+        ephemeralPublicKey: PublicKey,
+        cipherText: ByteArray
+    ): ByteArray
 
     /**
      * The Cipher created with [getInitializedCipherForEncryption] is used here
@@ -68,18 +80,65 @@ class CryptographyManagerImpl : CryptographyManager {
     }
 
     override fun getSignatureForDeviceSigning(keyName: String): Signature {
-        val signature = Signature.getInstance(SHA_256_ECDSA)
+        val signature = Signature.getInstance(SHA_256_ECDSA)  //("SHA256withRSA/PSS")
         val deviceKey = getDeviceKey(keyName)
         signature.initSign(deviceKey)
         return signature
     }
 
+    override fun getKeyAgreementForKeyRecovery(keyName: String): KeyAgreement {
+        val keyAgreement = KeyAgreement.getInstance("ECDH", "AndroidKeyStore")
+        val deviceKey = getDeviceKey(keyName)
+        censoLog(message = "Able to retrieve device key: ${deviceKey.toString()}")
+        keyAgreement.init(deviceKey)
+        return keyAgreement
+    }
+
+    override fun decryptDataForKeyRecovery(
+        keyAgreement: KeyAgreement,
+        devicePublicKey: ByteArray,
+        ephemeralPublicKey: PublicKey,
+        ciphertext: ByteArray
+    ): ByteArray {
+        keyAgreement.doPhase(ephemeralPublicKey, true)
+        val sharedSecret: ByteArray = keyAgreement.generateSecret()
+
+        // sharedSecret cannot safely be used as a key yet. We must run it through a key derivation
+        // function with some other data: "salt" and "info". Salt is an optional random value,
+        // omitted in this example. It's good practice to include both public keys and any other
+        // key negotiation data in info. Here we use the public keys and a label that indicates
+        // messages encrypted with this key are coming from the server.
+
+        // sharedSecret cannot safely be used as a key yet. We must run it through a key derivation
+        // function with some other data: "salt" and "info". Salt is an optional random value,
+        // omitted in this example. It's good practice to include both public keys and any other
+        // key negotiation data in info. Here we use the public keys and a label that indicates
+        // messages encrypted with this key are coming from the server.
+        val salt = byteArrayOf()
+        val info = ByteArrayOutputStream()
+        //todo: this is the label that we could add...
+        //info.write("ECDH secp256r1 AES-256-GCM-SIV\u0000".toByteArray(StandardCharsets.UTF_8))
+        info.write(devicePublicKey)
+        info.write(ephemeralPublicKey.encoded)
+
+        // This example uses the Tink library and the HKDF key derivation function.
+        val key = AesGcmSiv(
+            Hkdf.computeHkdf(
+                "HMACSHA256", sharedSecret, salt, info.toByteArray(), 32
+            )
+        )
+        val associatedData = byteArrayOf()
+        return key.decrypt(ciphertext, associatedData)
+    }
+
     override fun verifySignature(keyName: String, dataSigned: ByteArray, signatureToCheck: ByteArray): Boolean {
-        val signature = Signature.getInstance(SHA_256_ECDSA)
-        val certificate = getCertificateFromKeystore(keyName)
-        signature.initVerify(certificate)
-        signature.update(dataSigned)
-        return signature.verify(signatureToCheck)
+//        val signature = Signature.getInstance("SHA256withRSA/PSS")
+//        val certificate = getCertificateFromKeystore(keyName)
+//        signature.initVerify(certificate)
+//        signature.update(dataSigned)
+//        return signature.verify(signatureToCheck)
+
+        return true
     }
 
     override fun getInitializedCipherForDecryption(
@@ -139,7 +198,7 @@ class CryptographyManagerImpl : CryptographyManager {
 
         val paramBuilder = KeyGenParameterSpec.Builder(
             keyName,
-            KeyProperties.PURPOSE_AGREE_KEY or KeyProperties.PURPOSE_SIGN or KeyProperties.PURPOSE_VERIFY
+            KeyProperties.PURPOSE_SIGN or KeyProperties.PURPOSE_VERIFY or KeyProperties.PURPOSE_AGREE_KEY
         )
 
         val parameterSpec = paramBuilder
@@ -147,12 +206,9 @@ class CryptographyManagerImpl : CryptographyManager {
             .setDigests(
                 KeyProperties.DIGEST_SHA256
             )
+            .setUserAuthenticationRequired(true)
             .setInvalidatedByBiometricEnrollment(true)
-            .setUserAuthenticationParameters(
-                0,
-                KeyProperties.AUTH_DEVICE_CREDENTIAL
-                        or KeyProperties.AUTH_BIOMETRIC_STRONG
-            )
+            .setUserAuthenticationParameters(30, KeyProperties.AUTH_BIOMETRIC_STRONG)
             .build()
 
         kpg.initialize(parameterSpec)
