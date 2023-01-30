@@ -11,8 +11,10 @@ data class WalletSigner(
     val signature: String? = null
 )
 
-fun HashMap<String, String>.mapToPublicKeysList() =
-    map {
+fun HashMap<String, String>.mapToPublicKeysList(): List<WalletSigner> {
+    if (this.isEmpty()) return emptyList()
+
+    return map {
         val walletType = when (it.key) {
             BITCOIN_KEY -> Chain.bitcoin
             SOLANA_KEY -> Chain.solana
@@ -25,3 +27,4 @@ fun HashMap<String, String>.mapToPublicKeysList() =
             chain = walletType
         )
     }
+}
