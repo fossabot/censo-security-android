@@ -85,26 +85,19 @@
     <string name="enable_dapp_balance_account_settings_update_approval_header">Enable dApp Access</string>
     <string name="disable_transfer_balance_account_settings_update_approval_header">Disable Whitelist</string>
     <string name="enable_transfer_balance_account_settings_update_approval_header">Enable Whitelist</string>
-    <string name="dapp_book_update_approval_header">Replace dApp Book</string>
     <string name="dapp_transaction_request_approval_header">Execute dApp Transaction</string>
     <string name="login_approval_header">Log In</string>
-    <string name="remove_signers_update_approval_header">Remove User</string>
-    <string name="add_signers_update_approval_header">Add User</string>
     <string name="wallet_config_policy_update_approval_header">Update Administration Policy</string>
     <string name="unknown_approval_header">Unknown</string>
 
-    <string name="conversion_request_approval_header">Convert %1$s %2$s</string>
     <string name="withdrawal_request_approval_header">Send %1$s %2$s</string>
     <string name="bump_fee_request_approval_header">Bump Fee</string>
     <string name="bump_fee_request_approval_subtitle">for sending %1$s %2$s</string>
     <string name="bump_fee_request_approval_details_subtitle">for sending</string>
-    <string name="wrap_conversion_request_approval_header">Swap %1$s %2$s</string>
 
     <string name="whitelisted_addresses_title">Whitelisted Addresses</string>
     <string name="no_whitelisted_addresses">No whitelisted addresses</string>
 
-    <string name="signer_email">User Email</string>
-    <string name="signer_name">User Name</string>
     <string name="vault_approvers">Administrators</string>
     <string name="approvals_required">Approvals Required</string>
 
@@ -125,7 +118,6 @@
     <string name="from_wallet">From Wallet</string>
     <string name="destination">Destination</string>
     <string name="destination_address">Destination Address</string>
-    <string name="swap_for">Swap for</string>
     <string name="nft_name">NFT Name</string>
     <string name="amount">Amount</string>
     <string name="fee">Fee</string>
