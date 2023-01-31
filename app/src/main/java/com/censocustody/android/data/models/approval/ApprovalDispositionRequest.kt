@@ -291,11 +291,13 @@ data class ApprovalDispositionRequest(
                 when (requestType.signingData) {
                     is SigningData.SolanaSigningData -> listOf(serializeSolanaRequest(approverPublicKey))
                     is SigningData.BitcoinSigningData -> requestType.signingData.transaction.txIns.map { decodeFromBase64(it.base64HashForSignature) }
-                    is SigningData.EthereumSigningData -> listOf(EvmTransferTransactionBuilder.withdrawalSafeHash(
-                        requestType.symbolAndAmountInfo,
-                        requestType.account.address!!,
-                        requestType.destination.address,
-                        requestType.signingData.transaction))
+                    else -> listOf(serializeSolanaRequest(approverPublicKey))
+//                    is SigningData.EthereumSigningData -> listOf(EvmTransferTransactionBuilder.withdrawalSafeHash(
+//                        requestType.symbolAndAmountInfo,
+//                        requestType.account.address!!,
+//                        requestType.destination.address,
+//                        requestType.signingData.transaction)
+//                    )
                 }
             }
             else -> listOf(serializeSolanaRequest(approverPublicKey))

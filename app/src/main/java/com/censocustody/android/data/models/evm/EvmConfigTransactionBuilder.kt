@@ -2,12 +2,8 @@ package com.censocustody.android.data.models.evm
 
 import com.censocustody.android.common.evm.*
 import com.censocustody.android.common.pad
-import com.censocustody.android.common.toHexString
-import com.censocustody.android.data.models.approval.SigningData
-import okio.ByteString.Companion.decodeHex
+import com.censocustody.android.data.models.approvalV2.ApprovalRequestDetailsV2
 import org.bouncycastle.util.encoders.Hex
-import org.web3j.crypto.Keys
-import org.web3j.crypto.StructuredDataEncoder
 import java.math.BigInteger
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
@@ -19,7 +15,7 @@ data class PolicyUpdateData(
 
 object EvmConfigTransactionBuilder {
 
-    fun getSetGuardExecutionFromModuleDataSafeHash(walletAddress: EvmAddress, guardAddress: EvmAddress, signingData: SigningData.EthereumTransaction): ByteArray {
+    fun getSetGuardExecutionFromModuleDataSafeHash(walletAddress: EvmAddress, guardAddress: EvmAddress, signingData: ApprovalRequestDetailsV2.SigningData.EthereumTransaction): ByteArray {
         return EvmTransactionUtil.computeSafeTransactionHash(
             chainId = signingData.chainId,
             safeAddress = signingData.vaultAddress!!,
@@ -42,7 +38,7 @@ object EvmConfigTransactionBuilder {
             Operation.CALL)
     }
 
-    fun getUpdateWhitelistExecutionFromModuleDataSafeHash(walletAddress: EvmAddress, addsOrRemoves: List<ByteArray>, signingData: SigningData.EthereumTransaction): ByteArray {
+    fun getUpdateWhitelistExecutionFromModuleDataSafeHash(walletAddress: EvmAddress, addsOrRemoves: List<ByteArray>, signingData: ApprovalRequestDetailsV2.SigningData.EthereumTransaction): ByteArray {
         return EvmTransactionUtil.computeSafeTransactionHash(
             chainId = signingData.chainId,
             safeAddress = signingData.vaultAddress!!,
@@ -66,7 +62,7 @@ object EvmConfigTransactionBuilder {
     }
 
 
-    fun getPolicyUpdateDataSafeHash(txs: List<SafeTx>, signingData: SigningData.EthereumTransaction): ByteArray {
+    fun getPolicyUpdateDataSafeHash(txs: List<SafeTx>, signingData: ApprovalRequestDetailsV2.SigningData.EthereumTransaction): ByteArray {
         val vaultAddress = signingData.vaultAddress!!
         val (data, isMultiSend) = getPolicyUpdateData(vaultAddress, txs)
         return EvmTransactionUtil.computeSafeTransactionHash(
@@ -115,7 +111,7 @@ object EvmConfigTransactionBuilder {
     fun getPolicyUpdateExecutionFromModuleDataSafeHash(
         walletAddress: String,
         txs: List<SafeTx>,
-        signingData: SigningData.EthereumTransaction
+        signingData: ApprovalRequestDetailsV2.SigningData.EthereumTransaction
     ): ByteArray {
         return EvmTransactionUtil.computeSafeTransactionHash(
             chainId = signingData.chainId,

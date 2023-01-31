@@ -2,6 +2,8 @@ package com.censocustody.android.common.evm
 
 import com.censocustody.android.common.pad
 import com.censocustody.android.common.toHexString
+import com.censocustody.android.data.models.approval.BooleanSetting
+import com.censocustody.android.data.models.approvalV2.ApprovalRequestDetailsV2
 import org.web3j.crypto.Hash
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
@@ -29,6 +31,15 @@ class EvmWhitelistHelper(val addresses: List<EvmAddress>, val targetDestinations
     private val currentAddresses = addresses.map { it.lowercase() }
 
     companion object {
+
+        fun getTargetGuardAddress(currentGuardAddress: EvmAddress, whitelistEnabled: Boolean?, dappsEnabled: Boolean?, guardAddresses: List<ApprovalRequestDetailsV2.SigningData.ContractNameAndAddress>): EvmAddress {
+            val currentSetting = getCurrentSettingsForGuardName(
+                guardAddresses.find { it.address.lowercase() == currentGuardAddress.lowercase() }?.name ?: GnosisSafeConstants.censoGuard
+            )
+            val targetSettings = WhitelistSettings(whitelistEnabled ?: currentSetting.whitelistEnabled, dappsEnabled ?: currentSetting.dappsEnabled)
+            return guardAddresses.find { it.name == getGuardNameForTargetSettings(targetSettings) }?.address ?: currentGuardAddress
+
+        }
         fun getCurrentSettingsForGuardName(guardName: String): WhitelistSettings {
             return when (guardName) {
                 GnosisSafeConstants.censoGuard -> WhitelistSettings(whitelistEnabled = false, dappsEnabled = true)

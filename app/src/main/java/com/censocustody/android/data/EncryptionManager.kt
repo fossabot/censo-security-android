@@ -656,6 +656,34 @@ interface Signable {
     fun retrieveSignableData(approverPublicKey: String?): List<ByteArray>
 }
 
+sealed class SignableDataResult {
+    abstract val dataToSign: ByteArray
+    data class Ethereum(
+        override val dataToSign: ByteArray,
+    ): SignableDataResult()
+
+    data class Bitcoin(
+        override val dataToSign: ByteArray
+    ): SignableDataResult()
+
+    data class Polygon(
+        override val dataToSign: ByteArray
+    ): SignableDataResult()
+
+    data class Offchain(
+        val dataToSend: ByteArray,
+        override val dataToSign: ByteArray
+    ): SignableDataResult()
+
+    data class Device(
+        override val dataToSign: ByteArray,
+    ): SignableDataResult()
+}
+
+interface SignableV2 {
+    fun retrieveSignableData(approverPublicKey: String?): List<SignableDataResult>
+}
+
 data class SignedInitiationData(
     val initiatorSignature: String,
     val opAccountSignature: String,

@@ -1,9 +1,7 @@
 package com.censocustody.android.data.models.evm
 
 import com.censocustody.android.common.evm.*
-import com.censocustody.android.data.models.approval.EthTokenType
-import com.censocustody.android.data.models.approval.SigningData
-import com.censocustody.android.data.models.approval.SymbolAndAmountInfo
+import com.censocustody.android.data.models.approvalV2.ApprovalRequestDetailsV2
 import org.bouncycastle.util.encoders.Hex
 import java.math.BigInteger
 import java.nio.ByteBuffer
@@ -42,28 +40,38 @@ object EvmTransferTransactionBuilder {
         return data.array()
     }
 
-    fun withdrawalSafeHash(symbolAndAmountInfo: SymbolAndAmountInfo, walletAddress: EvmAddress, destinationAddress: EvmAddress, ethereumTransaction: SigningData.EthereumTransaction): ByteArray {
-        return symbolAndAmountInfo.symbolInfo.tokenMintAddress?.let { contractAddress ->
+    fun withdrawalSafeHash(symbolInfo: ApprovalRequestDetailsV2.EvmSymbolInfo,
+                           amount: ApprovalRequestDetailsV2.Amount,
+                           walletAddress: EvmAddress,
+                           destinationAddress: EvmAddress,
+                           ethereumTransaction: ApprovalRequestDetailsV2.SigningData.EthereumTransaction): ByteArray {
+        return symbolInfo.tokenInfo?.let { evmTokenInfo ->
+
+            val contractAddress = when (evmTokenInfo) {
+                is ApprovalRequestDetailsV2.EvmTokenInfo.ERC721 -> evmTokenInfo.contractAddress
+                is ApprovalRequestDetailsV2.EvmTokenInfo.ERC1155 -> evmTokenInfo.contractAddress
+                is ApprovalRequestDetailsV2.EvmTokenInfo.ERC20 -> evmTokenInfo.contractAddress
+            }
             EvmTransactionUtil.computeSafeTransactionHash(
                 ethereumTransaction.chainId,
                 walletAddress,
                 contractAddress,
                 BigInteger.ZERO,
-                when (symbolAndAmountInfo.symbolInfo.ethTokenInfo?.tokenType) {
-                    EthTokenType.ERC721 -> EvmTransferTransactionBuilder.erc721WithdrawalTx(
+                when (evmTokenInfo) {
+                    is ApprovalRequestDetailsV2.EvmTokenInfo.ERC721 -> EvmTransferTransactionBuilder.erc721WithdrawalTx(
                         walletAddress,
                         destinationAddress,
-                        BigInteger(symbolAndAmountInfo.symbolInfo.ethTokenInfo.tokenId!!)
+                        BigInteger(evmTokenInfo.tokenId)
                     )
-                    EthTokenType.ERC1155 -> EvmTransferTransactionBuilder.erc1155WithdrawalTx(
+                    is ApprovalRequestDetailsV2.EvmTokenInfo.ERC1155 -> EvmTransferTransactionBuilder.erc1155WithdrawalTx(
                         walletAddress,
                         destinationAddress,
-                        BigInteger(symbolAndAmountInfo.symbolInfo.ethTokenInfo.tokenId!!),
-                        symbolAndAmountInfo.fundamentalAmountAsBigInteger()
+                        BigInteger(evmTokenInfo.tokenId),
+                        amount.fundamentalAmountAsBigInteger()
                     )
-                    else -> EvmTransferTransactionBuilder.erc20WithdrawalTx(
+                    is ApprovalRequestDetailsV2.EvmTokenInfo.ERC20 -> EvmTransferTransactionBuilder.erc20WithdrawalTx(
                         destinationAddress,
-                        symbolAndAmountInfo.fundamentalAmountAsBigInteger()
+                        amount.fundamentalAmountAsBigInteger()
                     )
                 },
                 Operation.CALL,
@@ -79,7 +87,7 @@ object EvmTransferTransactionBuilder {
             ethereumTransaction.chainId,
             walletAddress,
             destinationAddress,
-            symbolAndAmountInfo.fundamentalAmountAsBigInteger(),
+            amount.fundamentalAmountAsBigInteger(),
             ByteArray(0),
             Operation.CALL,
             BigInteger.ZERO,
