@@ -1,7 +1,6 @@
 package com.censocustody.android.presentation.approval_detail
 
 import android.annotation.SuppressLint
-import androidx.biometric.BiometricPrompt
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -35,62 +34,41 @@ import com.censocustody.android.data.models.approval.ApprovalRequest
 import com.censocustody.android.presentation.approvals.ApprovalsViewModel
 import com.censocustody.android.ui.theme.*
 import com.censocustody.android.data.models.approval.ApprovalRequestDetails.*
+import com.censocustody.android.data.models.approvalV2.ApprovalRequestDetailsV2
+import com.censocustody.android.data.models.approvalV2.ApprovalRequestV2
 import com.censocustody.android.presentation.approvals.ApprovalDetailContent
 import com.censocustody.android.presentation.approvals.approval_type_row_items.getApprovalTimerText
 import com.censocustody.android.presentation.approvals.approval_type_row_items.getDialogMessages
 import com.censocustody.android.presentation.components.*
-import com.censocustody.android.presentation.durable_nonce.DurableNonceViewModel
 
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
 fun ApprovalDetailsScreen(
     navController: NavController,
     approvalDetailsViewModel: ApprovalDetailsViewModel = hiltViewModel(),
-    durableNonceViewModel: DurableNonceViewModel = hiltViewModel(),
-    approval: ApprovalRequest?
+    approval: ApprovalRequestV2?
 ) {
     val approvalDetailsState = approvalDetailsViewModel.state
-    val durableNonceState = durableNonceViewModel.state
 
     fun resetDataAfterErrorDismissed() {
         approvalDetailsViewModel.dismissApprovalDispositionError()
-        durableNonceViewModel.resetMultipleAccountsResource()
-        approvalDetailsViewModel.resetMultipleAccounts()
     }
 
     val context = LocalContext.current as FragmentActivity
 
     val promptInfo = BioCryptoUtil.createPromptInfo(context = context)
 
-    fun launchNonceWork() {
-        val nonceAddresses = approvalDetailsState.selectedApproval?.retrieveAccountAddresses()
-        val minimumSlotAddress = approvalDetailsState.selectedApproval?.retrieveAccountAddressesSlot()
-        if (nonceAddresses != null && minimumSlotAddress != null) {
-            durableNonceViewModel.setInitialData(
-                nonceAccountAddresses = nonceAddresses,
-                minimumNonceAccountAddressesSlot = minimumSlotAddress
-            )
-        } else {
-            approvalDetailsViewModel.wipeDataAndKickUserOutToApprovalsScreen()
-        }
-    }
-
     fun retryApprovalDisposition(isApproving: Boolean, isInitiationRequest: Boolean) {
         approvalDetailsViewModel.dismissApprovalDispositionError()
-        durableNonceViewModel.resetMultipleAccountsResource()
-        approvalDetailsViewModel.resetMultipleAccounts()
         approvalDetailsViewModel.setShouldDisplayConfirmDispositionDialog(
             isApproving = isApproving,
-            isInitiationRequest = isInitiationRequest,
-            dialogMessages = approval?.getApprovalRequestType()?.getDialogMessages(
+            dialogMessages = approval?.details?.getDialogMessages(
                 context = context,
                 approvalDisposition = if (isApproving) ApprovalDisposition.APPROVE else ApprovalDisposition.DENY,
-                isInitiationRequest = isInitiationRequest
             )
-                ?: UnknownApprovalType.getDialogMessages(
+                ?: ApprovalRequestDetailsV2.UnknownApprovalType.getDialogMessages(
                     context = context,
                     approvalDisposition = if (isApproving) ApprovalDisposition.APPROVE else ApprovalDisposition.DENY,
-                    isInitiationRequest = isInitiationRequest
                 )
         )
     }
@@ -100,12 +78,7 @@ fun ApprovalDetailsScreen(
         onDispose { approvalDetailsViewModel.onStop() }
     }
 
-    LaunchedEffect(key1 = approvalDetailsState, key2 = durableNonceState) {
-        if (durableNonceState.multipleAccountsResult is Resource.Success) {
-            approvalDetailsViewModel.setMultipleAccounts(durableNonceState.multipleAccounts)
-            durableNonceViewModel.resetState()
-        }
-
+    LaunchedEffect(key1 = approvalDetailsState) {
         if (approvalDetailsState.bioPromptTrigger is Resource.Success) {
             approvalDetailsState.bioPromptTrigger.data?.let {
                 val bioPrompt = BioCryptoUtil.createBioPrompt(
@@ -173,16 +146,14 @@ fun ApprovalDetailsScreen(
             )
         },
         content = {
-            val isInitiationRequest = approval?.isInitiationRequest() == true
+            val isInitiationRequest = false
             ApprovalDetails(
                 onApproveClicked = {
                     approvalDetailsViewModel.setShouldDisplayConfirmDispositionDialog(
                         isApproving = true,
-                        isInitiationRequest = isInitiationRequest,
-                        dialogMessages = approval?.getApprovalRequestType()?.getDialogMessages(
+                        dialogMessages = approval?.details?.getDialogMessages(
                             context = context,
                             approvalDisposition = ApprovalDisposition.APPROVE,
-                            isInitiationRequest = isInitiationRequest
                         )
                             ?: UnknownApprovalType.getDialogMessages(
                                 context = context,
@@ -194,11 +165,9 @@ fun ApprovalDetailsScreen(
                 onDenyClicked = {
                     approvalDetailsViewModel.setShouldDisplayConfirmDispositionDialog(
                         isApproving = false,
-                        isInitiationRequest = isInitiationRequest,
-                        dialogMessages = approval?.getApprovalRequestType()?.getDialogMessages(
+                        dialogMessages = approval?.details?.getDialogMessages(
                             context = context,
                             approvalDisposition = ApprovalDisposition.DENY,
-                            isInitiationRequest = isInitiationRequest
                         )
                             ?: UnknownApprovalType.getDialogMessages(
                                 context = context,
@@ -207,7 +176,7 @@ fun ApprovalDetailsScreen(
                             )
                     )
                 },
-                isLoading = approvalDetailsState.loadingData || durableNonceState.isLoading,
+                isLoading = approvalDetailsState.loadingData,
                 shouldRefreshTimer = approvalDetailsState.shouldRefreshTimers,
                 getSecondsLeftUntilCountdownIsOver = { submitDate: String?, totalTimeInSeconds: Int? ->
                     calculateSecondsLeftUntilCountdownIsOver(
@@ -216,19 +185,19 @@ fun ApprovalDetailsScreen(
                     )
                 },
                 approval = approvalDetailsState.selectedApproval,
-                initiationRequest = approvalDetailsState.selectedApproval?.isInitiationRequest() == true
+                initiationRequest = false
             )
 
             if (approvalDetailsState.shouldDisplayConfirmDisposition != null) {
-                if (approvalDetailsState.selectedApproval?.getApprovalRequestType() is LoginApprovalRequest) {
+                if (approvalDetailsState.selectedApproval?.details is ApprovalRequestDetailsV2.Login) {
                     approvalDetailsViewModel.resetShouldDisplayConfirmDisposition()
-                    launchNonceWork()
+                    approvalDetailsViewModel.triggerBioPrompt()
                 } else {
                     CensoConfirmDispositionAlertDialog(
                         dialogMessages = approvalDetailsState.shouldDisplayConfirmDisposition.dialogMessages,
                         onConfirm = {
                             approvalDetailsViewModel.resetShouldDisplayConfirmDisposition()
-                            launchNonceWork()
+                            approvalDetailsViewModel.triggerBioPrompt()
                         },
                         onDismiss = {
                             approvalDetailsViewModel.resetShouldDisplayConfirmDisposition()
@@ -271,25 +240,6 @@ fun ApprovalDetailsScreen(
                     }
                 )
             }
-
-            if (durableNonceState.multipleAccountsResult is Resource.Error) {
-                val retryData = approvalDetailsState.approvalDispositionState?.approvalRetryData
-
-                CensoErrorScreen(
-                    errorResource = durableNonceState.multipleAccountsResult,
-                    onDismiss = {
-                        resetDataAfterErrorDismissed()
-                    },
-                    onRetry = {
-                        if (retryData != null) {
-                            retryApprovalDisposition(
-                                isApproving = retryData.isApproving,
-                                isInitiationRequest = retryData.isInitiationRequest
-                            )
-                        }
-                    }
-                )
-            }
             //endregion
         }
     )
@@ -318,7 +268,7 @@ fun ApprovalDetails(
     shouldRefreshTimer: Boolean,
     getSecondsLeftUntilCountdownIsOver: (String?, Int?) -> Long?,
     isLoading: Boolean,
-    approval: ApprovalRequest?,
+    approval: ApprovalRequestV2?,
     initiationRequest: Boolean
 ) {
     Column(
@@ -334,17 +284,17 @@ fun ApprovalDetails(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             val requestType = approval?.let { safeApproval ->
-                val type = safeApproval.getApprovalRequestType()
+                val type = safeApproval.details
 
                 //Defensive coding,
                 // we should never have an unknown approval in the details screen
-                if (type != UnknownApprovalType) {
+                if (type != ApprovalRequestDetailsV2.UnknownApprovalType) {
                     ApprovalDetailContent(approval = safeApproval, type = type)
                 }
                 type
             }
 
-            val calculatedTimerSecondsLeft = getSecondsLeftUntilCountdownIsOver(approval?.submitDate, approval?.approvalTimeoutInSeconds)
+            val calculatedTimerSecondsLeft = getSecondsLeftUntilCountdownIsOver(approval?.submitDate, approval?.approvalTimeoutInSeconds?.toInt())
             val timeRemainingInSeconds = if (shouldRefreshTimer) calculatedTimerSecondsLeft else calculatedTimerSecondsLeft
 
             val expiresInText = getApprovalTimerText(
@@ -404,12 +354,12 @@ fun ApprovalStatus(
     denialsReceived: Int,
     expiresIn: String?,
     vaultName: String?,
-    requestType: ApprovalRequestDetails?,
+    requestType: ApprovalRequestDetailsV2?,
     isInitiationRequest: Boolean
 ) {
     val facts = mutableListOf<RowData>()
     vaultName?.let { facts.add(RowData(title = stringResource(R.string.vault_name), value = vaultName)) }
-    val sectionTitle = if (requestType is AcceptVaultInvitation) {
+    val sectionTitle = if (requestType is ApprovalRequestDetailsV2.VaultInvitation) {
         facts.add(RowData(title = stringResource(R.string.invited_by), value = requestedByName))
         facts.add(RowData(title = stringResource(R.string.invited_by_email), value = requestedBy))
         ""

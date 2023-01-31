@@ -8,6 +8,7 @@ import com.censocustody.android.data.BrooklynApiService.Companion.AUTH
 import com.censocustody.android.data.BrooklynApiService.Companion.X_CENSO_ID
 import com.censocustody.android.data.models.*
 import com.censocustody.android.data.models.approval.*
+import com.censocustody.android.data.models.approvalV2.ApprovalDispositionRequestV2
 import com.censocustody.android.data.models.approvalV2.ApprovalRequestV2
 import kotlinx.coroutines.runBlocking
 import okhttp3.*
@@ -87,20 +88,12 @@ interface BrooklynApiService {
         @Path("deviceType") deviceType: String
     ) : RetrofitResponse<Unit>
 
-    @POST("v1/approval-requests/{request_id}/dispositions")
+    @POST("v2/approval-requests/{request_id}/dispositions")
     @Headers(AUTH_REQUIRED)
     suspend fun approveOrDenyDisposition(
         @Path("request_id") requestId: String,
-        @Body registerApprovalDispositionBody: ApprovalDispositionRequest.RegisterApprovalDispositionBody
-    ): RetrofitResponse<ApprovalDispositionRequest.RegisterApprovalDispositionBody>
-
-//    //todo: this is v2
-//    @POST("v2/approval-requests/{request_id}/dispositions")
-//    @Headers(AUTH_REQUIRED)
-//    suspend fun approveOrDenyDispositionV2(
-//        @Path("request_id") requestId: String,
-//        @Body registerApprovalDispositionBody: ApprovalDispositionRequest.RegisterApprovalDispositionBody
-//    ): RetrofitResponse<ApprovalDispositionRequest.RegisterApprovalDispositionBody>
+        @Body registerApprovalDispositionBody: ApprovalDispositionRequestV2.RegisterApprovalDispositionV2Body
+    ): RetrofitResponse<ApprovalDispositionRequestV2.RegisterApprovalDispositionV2Body>
 
     @POST("v1/approval-requests/{request_id}/initiations")
     @Headers(AUTH_REQUIRED)

@@ -24,6 +24,7 @@ data class ApprovalDispositionRequestV2(
     val email: String
 ) : SignableV2 {
 
+    //this should be a suspend function in case we need to do more work here
     override fun retrieveSignableData(): List<SignableDataResult> {
         return when (requestType) {
             is ApprovalRequestDetailsV2.Login ->

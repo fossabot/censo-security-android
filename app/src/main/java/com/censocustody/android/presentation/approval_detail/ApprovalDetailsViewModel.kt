@@ -7,6 +7,7 @@ import com.censocustody.android.data.KeyRepository
 import com.censocustody.android.data.UserRepository
 import com.censocustody.android.data.models.approval.ApprovalRequest
 import com.censocustody.android.data.models.CipherRepository
+import com.censocustody.android.data.models.approvalV2.ApprovalRequestV2
 import com.censocustody.android.presentation.common_approvals.CommonApprovalsViewModel
 import com.censocustody.android.presentation.approval_disposition.ApprovalRetryData
 import com.censocustody.android.presentation.common_approvals.ApprovalsState
@@ -26,7 +27,7 @@ class ApprovalDetailsViewModel @Inject constructor(
     timer = timer
 ) {
     //region Method Overrides
-    override fun handleInitialData(approval: ApprovalRequest) {
+    override fun handleInitialData(approval: ApprovalRequestV2) {
         state = state.copy(selectedApproval = approval)
     }
 
@@ -35,8 +36,7 @@ class ApprovalDetailsViewModel @Inject constructor(
     }
 
     override fun setShouldDisplayConfirmDispositionDialog(
-        approval: ApprovalRequest?,
-        isInitiationRequest: Boolean,
+        approval: ApprovalRequestV2?,
         isApproving: Boolean,
         dialogMessages: Pair<String, String>
     ) {
@@ -50,10 +50,7 @@ class ApprovalDetailsViewModel @Inject constructor(
             shouldDisplayConfirmDisposition = dialogDetails,
             approvalDispositionState = state.approvalDispositionState?.copy(
                 approvalDisposition = Resource.Success(approvalDisposition),
-                approvalRetryData = ApprovalRetryData(
-                    isApproving = isApproving,
-                    isInitiationRequest = isInitiationRequest
-                )
+                approvalRetryData = ApprovalRetryData(isApproving = isApproving)
             )
         )
     }

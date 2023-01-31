@@ -15,6 +15,7 @@ import com.censocustody.android.data.models.approval.*
 import com.censocustody.android.data.models.approval.AccountType.*
 import com.censocustody.android.ui.theme.GreyText
 import com.censocustody.android.data.models.approval.ApprovalRequestDetails.*
+import com.censocustody.android.data.models.approvalV2.ApprovalRequestDetailsV2
 import com.censocustody.android.presentation.components.RowData
 
 fun ApprovalRequestDetails.getHeader(context: Context): String {
@@ -81,6 +82,73 @@ fun ApprovalRequestDetails.getHeader(context: Context): String {
     }
 }
 
+fun ApprovalRequestDetailsV2.getHeader(context: Context): String {
+
+    return "TODO: NEED TO FIX THIS HEADER"
+
+//    return when (this) {
+//        is CreateAddressBookEntry ->
+//            context.getString(R.string.add_address_book_update_approval_header)
+//        is DeleteAddressBookEntry ->
+//            context.getString(R.string.remove_address_book_update_approval_header)
+//        is BalanceAccountAddressWhitelistUpdate ->
+//            context.getString(R.string.balance_account_address_whitelist_update_approval_header)
+//        is WalletCreation ->
+//            if (accountInfo.accountType == BalanceAccount) {
+//                "${context.getString(R.string.add)} ${accountInfo.chain?.label() ?: context.getString(R.string.solana)} ${context.getString(R.string.wallet_title)}"
+//            } else {
+//                context.getString(R.string.balance_account_creation_approval_header)
+//            }
+//        is BalanceAccountNameUpdate ->
+//            context.getString(R.string.balance_account_name_update_approval_header)
+//        is BalanceAccountPolicyUpdate ->
+//            context.getString(R.string.balance_account_policy_update_approval_header)
+//        is BalanceAccountSettingsUpdate -> {
+//            val change = this.changeValue()
+//            if (change is SettingsChange.DAppsEnabled && !change.dappsEnabled) {
+//                context.getString(R.string.disable_dapp_balance_account_settings_update_approval_header)
+//            } else if (change is SettingsChange.DAppsEnabled && change.dappsEnabled) {
+//                context.getString(R.string.enable_dapp_balance_account_settings_update_approval_header)
+//            } else if (change is SettingsChange.WhitelistEnabled && !change.whiteListEnabled) {
+//                context.getString(R.string.disable_transfer_balance_account_settings_update_approval_header)
+//            } else {
+//                context.getString(R.string.enable_transfer_balance_account_settings_update_approval_header)
+//            }
+//        }
+//        is ConversionRequest ->
+//            context.getString(R.string.conversion_request_approval_header, symbolAndAmountInfo.amount, symbolAndAmountInfo.symbolInfo.symbol)
+//        is DAppBookUpdate ->
+//            context.getString(R.string.dapp_book_update_approval_header)
+//        is DAppTransactionRequest ->
+//            context.getString(R.string.dapp_transaction_request_approval_header)
+//        is LoginApprovalRequest ->
+//            context.getString(R.string.login_approval_header)
+//        is SignersUpdate -> {
+//            if (slotUpdateType == SlotUpdateType.Clear) {
+//                context.getString(R.string.remove_signers_update_approval_header)
+//            } else {
+//                context.getString(R.string.add_signers_update_approval_header)
+//            }
+//        }
+//        is AcceptVaultInvitation ->
+//            context.getString(R.string.accept_vault_invitation_approval_header)
+//        is PasswordReset ->
+//            context.getString(R.string.password_reset_approval_header)
+//        is WalletConfigPolicyUpdate ->
+//            context.getString(R.string.wallet_config_policy_update_approval_header)
+//        is WithdrawalRequest ->
+//            if (this.symbolAndAmountInfo.replacementFee == null) {
+//                context.getString(R.string.withdrawal_request_approval_header, symbolAndAmountInfo.amount, symbolAndAmountInfo.symbolInfo.symbol)
+//            } else {
+//                context.getString(R.string.bump_fee_request_approval_header)
+//            }
+//        is WrapConversionRequest ->
+//            context.getString(R.string.wrap_conversion_request_approval_header, symbolAndAmountInfo.amount, symbolAndAmountInfo.symbolInfo.symbol)
+//        else ->
+//            context.getString(R.string.unknown_approval_header)
+//    }
+}
+
 fun ApprovalRequestDetails.getDialogMessages(
     context: Context,
     approvalDisposition: ApprovalDisposition,
@@ -92,7 +160,17 @@ fun ApprovalRequestDetails.getDialogMessages(
     return Pair(mainText, secondaryText)
 }
 
-fun ApprovalRequestDetails.getApprovalRowMetaData(vaultName: String?): ApprovalRowMetaData {
+fun ApprovalRequestDetailsV2.getDialogMessages(
+    context: Context,
+    approvalDisposition: ApprovalDisposition,
+) : Pair<String, String> {
+    val mainText = approvalDisposition.getDialogMessage(context, false)
+    val secondaryText = this.getHeader(context)
+
+    return Pair(mainText, secondaryText)
+}
+
+fun ApprovalRequestDetailsV2.getApprovalRowMetaData(vaultName: String?): ApprovalRowMetaData {
     if (this.isUnknownTypeOrUIUnimplemented()) {
         return ApprovalRowMetaData(
             vaultName = null
@@ -104,12 +182,12 @@ fun ApprovalRequestDetails.getApprovalRowMetaData(vaultName: String?): ApprovalR
     )
 }
 
-fun ApprovalRequestDetails.isUnknownTypeOrUIUnimplemented() =
-    this is UnknownApprovalType || this is DAppBookUpdate
+fun ApprovalRequestDetailsV2.isUnknownTypeOrUIUnimplemented() =
+    this is ApprovalRequestDetailsV2.UnknownApprovalType
 
-fun ApprovalRequestDetails.getRowTitle(vaultName: String?): String? =
+fun ApprovalRequestDetailsV2.getRowTitle(vaultName: String?): String? =
     when (this) {
-        is AcceptVaultInvitation -> null
+        is ApprovalRequestDetailsV2.VaultInvitation -> null
         else -> vaultName
     }
 

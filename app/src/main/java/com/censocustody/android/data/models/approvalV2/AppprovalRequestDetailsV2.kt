@@ -1,5 +1,8 @@
 package com.censocustody.android.data.models.approvalV2
 
+import android.content.Context
+import com.censocustody.android.R
+import com.censocustody.android.common.UriWrapper
 import com.censocustody.android.common.evm.EvmAddress
 import com.censocustody.android.data.models.ApprovalDisposition
 import com.censocustody.android.data.models.Chain
@@ -28,7 +31,26 @@ data class ApprovalRequestV2(
     val details: ApprovalRequestDetailsV2,
     val vaultName: String?,
     val initiationOnly: Boolean = false,
-)
+) {
+    fun approveButtonCaption(context: Context) =
+        if (initiationOnly) {
+            context.getString(R.string.initiate)
+        } else {
+            context.getString(R.string.approve)
+        }
+
+    companion object {
+        fun toJson(approval: ApprovalRequestV2, uriWrapper: UriWrapper): String {
+            val jsonString = ApprovalRequestV2Deserializer().getGson().toJson(approval)
+            return uriWrapper.encode(jsonString)
+        }
+
+        fun fromJson(json: String): ApprovalRequestV2 {
+            val approvalRequestDeserializer = ApprovalRequestV2Deserializer()
+            return approvalRequestDeserializer.toObjectWithParsedDetails(json)
+        }
+    }
+}
 
 sealed class ApprovalRequestDetailsV2 {
     fun toJson(): String =

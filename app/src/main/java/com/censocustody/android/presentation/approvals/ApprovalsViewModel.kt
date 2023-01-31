@@ -30,7 +30,6 @@ class ApprovalsViewModel @Inject constructor(
     //region Method Overrides
     override fun setShouldDisplayConfirmDispositionDialog(
         approval: ApprovalRequestV2?,
-        isInitiationRequest: Boolean,
         isApproving: Boolean,
         dialogMessages: Pair<String, String>,
     ) {
@@ -64,7 +63,6 @@ class ApprovalsViewModel @Inject constructor(
             approvals = emptyList(),
             approvalsResultRequest = Resource.Uninitialized,
             selectedApproval = null,
-            multipleAccounts = null
         )
     }
 

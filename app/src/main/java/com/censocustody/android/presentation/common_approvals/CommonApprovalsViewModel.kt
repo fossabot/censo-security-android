@@ -61,12 +61,7 @@ abstract class  CommonApprovalsViewModel(
         state = state.copy(shouldRefreshTimers = !state.shouldRefreshTimers)
     }
 
-    fun setMultipleAccounts(multipleAccounts: DurableNonceViewModel.MultipleAccounts?) {
-        state = state.copy(multipleAccounts = multipleAccounts)
-        triggerBioPrompt()
-    }
-
-    private fun triggerBioPrompt() {
+    fun triggerBioPrompt() {
         viewModelScope.launch {
             val selectedApproval = state.selectedApproval
 
@@ -127,7 +122,6 @@ abstract class  CommonApprovalsViewModel(
             val approvalDispositionState = retrieveApprovalDispositionFromAPI(
                 approvalDispositionState = state.approvalDispositionState,
                 approval = state.selectedApproval,
-                multipleAccounts = state.multipleAccounts,
                 approvalsRepository = approvalsRepository,
                 cryptoObject = cryptoObject,
             )
@@ -136,18 +130,12 @@ abstract class  CommonApprovalsViewModel(
         }
     }
 
-    //todo: this needs to be done with v2 now
     private suspend fun retrieveApprovalDispositionFromAPI(
         approvalDispositionState: ApprovalDispositionState?,
         approval: ApprovalRequestV2?,
-        multipleAccounts: DurableNonceViewModel.MultipleAccounts?,
         approvalsRepository: ApprovalsRepository,
         cryptoObject: CryptoObject
     ): ApprovalDispositionState? {
-
-        //Data retrieval and checks
-        val nonces = multipleAccounts?.nonces
-            ?: return errorRegisteringResult(approvalDispositionState)
 
         val approvalId = approval?.id ?: ""
         val approvalRequestDetails = approval?.details
@@ -162,7 +150,6 @@ abstract class  CommonApprovalsViewModel(
         val registerApprovalDisposition = RegisterApprovalDisposition(
             approvalDisposition = approvalDisposition,
             approvalRequestType = approvalRequestDetails,
-            nonces = nonces,
         )
 
         val approvalDispositionResponseResource =
@@ -222,10 +209,6 @@ abstract class  CommonApprovalsViewModel(
 
     fun resetPromptTrigger() {
         state = state.copy(bioPromptTrigger = Resource.Uninitialized)
-    }
-
-    fun resetMultipleAccounts() {
-        state = state.copy(multipleAccounts = null)
     }
 
     fun resetShouldDisplayConfirmDisposition() {

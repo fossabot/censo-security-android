@@ -22,7 +22,6 @@ data class ApprovalsState(
     //common state
     val shouldRefreshTimers: Boolean = false,
     val approvalDispositionState: ApprovalDispositionState? = ApprovalDispositionState(),
-    val multipleAccounts: DurableNonceViewModel.MultipleAccounts? = null,
     val shouldDisplayConfirmDisposition: ConfirmDispositionDialogDetails? = null,
     val bioPromptTrigger: Resource<BiometricPrompt.CryptoObject> = Resource.Uninitialized,
     val selectedApproval: ApprovalRequestV2? = null,

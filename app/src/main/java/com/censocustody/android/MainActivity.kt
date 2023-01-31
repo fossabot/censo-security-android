@@ -26,6 +26,7 @@ import com.censocustody.android.common.*
 import com.censocustody.android.common.BioCryptoUtil.NO_CIPHER_CODE
 import com.censocustody.android.data.*
 import com.censocustody.android.data.models.approval.ApprovalRequest
+import com.censocustody.android.data.models.approvalV2.ApprovalRequestV2
 import com.censocustody.android.presentation.Screen
 import com.censocustody.android.presentation.account.AccountScreen
 import com.censocustody.android.presentation.semantic_version_check.EnforceUpdateScreen
@@ -199,7 +200,7 @@ class MainActivity : FragmentActivity() {
                 arguments = listOf(navArgument(Screen.ApprovalDetailRoute.APPROVAL_ARG) { type = NavType.StringType })
             ) { backStackEntry ->
                 val approvalArg = backStackEntry.arguments?.get(Screen.ApprovalDetailRoute.APPROVAL_ARG) as String
-                ApprovalDetailsScreen(navController = navController, approval = ApprovalRequest.fromJson(approvalArg))
+                ApprovalDetailsScreen(navController = navController, approval = ApprovalRequestV2.fromJson(approvalArg))
             }
             composable(
                 route = Screen.ContactCensoRoute.route

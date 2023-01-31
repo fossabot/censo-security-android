@@ -5,10 +5,11 @@ import com.censocustody.android.data.models.ApprovalDisposition
 import com.censocustody.android.data.models.approval.ApprovalDispositionRequest
 import com.censocustody.android.data.models.approval.InitiationRequest
 import com.censocustody.android.data.models.approval.ApprovalRequest
+import com.censocustody.android.data.models.approvalV2.ApprovalDispositionRequestV2
 
 data class ApprovalDispositionState(
     val approvalDisposition: Resource<ApprovalDisposition> = Resource.Uninitialized,
-    val registerApprovalDispositionResult: Resource<ApprovalDispositionRequest.RegisterApprovalDispositionBody> = Resource.Uninitialized,
+    val registerApprovalDispositionResult: Resource<ApprovalDispositionRequestV2.RegisterApprovalDispositionV2Body> = Resource.Uninitialized,
     val initiationDispositionResult: Resource<InitiationRequest.InitiateRequestBody> = Resource.Uninitialized,
     val selectedApproval: ApprovalRequest? = null,
     val approvalRetryData: ApprovalRetryData = ApprovalRetryData()
