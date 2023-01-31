@@ -13,15 +13,8 @@ import com.censocustody.android.data.models.approval.ApprovalSignature
 import com.censocustody.android.data.models.approval.BooleanSetting
 import com.censocustody.android.data.models.evm.EvmConfigTransactionBuilder
 import org.web3j.crypto.Hash
-import com.censocustody.android.data.models.Nonce
-import com.censocustody.android.data.models.approval.ApprovalRequestDetails
-import com.censocustody.android.data.models.approval.PublicKey.Companion.SYSVAR_CLOCK_PUBKEY
-import com.censocustody.android.data.models.approval.TransactionInstruction.Companion.createAdvanceNonceInstruction
-import java.io.ByteArrayOutputStream
 import kotlin.Exception
 import com.censocustody.android.data.models.evm.EvmTransferTransactionBuilder
-import java.security.Signature
-import javax.crypto.Cipher
 import org.bouncycastle.util.encoders.Hex
 
 data class ApprovalDispositionRequestV2(
@@ -31,29 +24,41 @@ data class ApprovalDispositionRequestV2(
     val email: String
 ) : SignableV2 {
 
-
-    override fun retrieveSignableData(approverPublicKey: String?): List<SignableDataResult> {
+    override fun retrieveSignableData(): List<SignableDataResult> {
         return when (requestType) {
             is ApprovalRequestDetailsV2.Login ->
-                listOf(SignableDataResult.Device(requestType.jwtToken.toByteArray(charset = Charsets.UTF_8)))
+                listOf(SignableDataResult.Device(
+                    dataToSign = requestType.jwtToken.toByteArray(charset = Charsets.UTF_8),
+                    dataToSend = requestType.jwtToken.toByteArray(charset = Charsets.UTF_8)
+                ))
 
             is ApprovalRequestDetailsV2.VaultInvitation ->
-                listOf(SignableDataResult.Device(requestType.vaultName.toByteArray(charset = Charsets.UTF_8)))
+                listOf(SignableDataResult.Device(
+                    dataToSend = requestType.vaultName.toByteArray(charset = Charsets.UTF_8),
+                    dataToSign = requestType.vaultName.toByteArray(charset = Charsets.UTF_8)
+                ))
 
             is ApprovalRequestDetailsV2.PasswordReset ->
-                listOf(SignableDataResult.Device(requestId.toByteArray(charset = Charsets.UTF_8)))
+                listOf(SignableDataResult.Device(
+                    dataToSend = requestId.toByteArray(charset = Charsets.UTF_8),
+                    dataToSign = requestId.toByteArray(charset = Charsets.UTF_8)
+                ))
 
             is ApprovalRequestDetailsV2.BitcoinWalletCreation,
             is ApprovalRequestDetailsV2.EthereumWalletCreation,
             is ApprovalRequestDetailsV2.PolygonWalletCreation -> {
                 val dataToSend = requestType.toJson().toByteArray()
-                listOf(SignableDataResult.Offchain(dataToSend, Hash.sha256(dataToSend)))
+                listOf(SignableDataResult.Offchain(
+                    dataToSend = dataToSend,
+                    dataToSign = Hash.sha256(dataToSend)))
             }
 
             is ApprovalRequestDetailsV2.CreateAddressBookEntry,
             is ApprovalRequestDetailsV2.DeleteAddressBookEntry -> {
                 val dataToSend = requestType.toJson().toByteArray()
-                listOf(SignableDataResult.Offchain(dataToSend, Hash.sha256(dataToSend)))
+                listOf(SignableDataResult.Offchain(
+                    dataToSend = dataToSend,
+                    dataToSign = Hash.sha256(dataToSend)))
             }
 
             is ApprovalRequestDetailsV2.BitcoinWithdrawalRequest -> {
@@ -171,6 +176,10 @@ data class ApprovalDispositionRequestV2(
                             Hash.sha256(offchainDataToSend)
                         )
                     ),
+                    SignableDataResult.Offchain(
+                        dataToSend = offchainDataToSend,
+                        dataToSign = Hash.sha256(offchainDataToSend)
+                    )
                 )
             }
             is ApprovalRequestDetailsV2.PolygonTransferPolicyUpdate -> {
@@ -193,8 +202,8 @@ data class ApprovalDispositionRequestV2(
                         )
                     ),
                     SignableDataResult.Offchain(
-                        offchainDataToSend,
-                        Hash.sha256(offchainDataToSend)
+                        dataToSend = offchainDataToSend,
+                        dataToSign = Hash.sha256(offchainDataToSend)
                     )
                 )
             }
@@ -222,8 +231,8 @@ data class ApprovalDispositionRequestV2(
                     }
                 } + listOf(
                     SignableDataResult.Offchain(
-                        offchainDataToSend,
-                        Hash.sha256(offchainDataToSend)
+                        dataToSend = offchainDataToSend,
+                        dataToSign = Hash.sha256(offchainDataToSend)
                     )
                 )
             }
@@ -239,138 +248,29 @@ data class ApprovalDispositionRequestV2(
         val cipher = cryptoObject.cipher
         val signature = cryptoObject.signature
 
-        if (requestType.isDeviceKeyApprovalType()) {
-            if (signature == null) throw Exception("Missing biometry approved signature")
-        } else {
-            if (cipher == null) throw Exception("Missing biometry approved cipher")
-        }
+        val dataToSign = retrieveSignableData()
 
-        val signatureInfo: ApprovalSignature = when (requestType) {
-            is ApprovalRequestDetailsV2.Login, is ApprovalRequestDetailsV2.PasswordReset, is ApprovalRequestDetails.VaultInvitation ->
-                ApprovalSignature.NoChainSignature(
-                    signRequestWithDeviceKey(encryptionManager, signature!!)
+        val signatures =
+            if (requestType.isDeviceKeyApprovalType()) {
+                if (signature == null) throw Exception("Missing biometry approved signature")
+                val deviceKeyDataToSign = dataToSign[0]
+                if (deviceKeyDataToSign !is SignableDataResult.Device) throw Exception("Device key requires offchain data")
+                val signedData =
+                    encryptionManager.signApprovalDispositionForDeviceKey(
+                        email = email, signature = signature, dataToSign = deviceKeyDataToSign
+                    )
+                listOf(signedData)
+            } else {
+                if (cipher == null) throw Exception("Missing biometry approved cipher")
+                encryptionManager.signApprovalDisposition(
+                    email = email, cipher = cipher, dataToSign = dataToSign
                 )
-            is WalletCreation -> getSignatureInfo(requestType.accountInfo.chain ?: Chain.solana, encryptionManager, cipher!!)
-            is CreateAddressBookEntry -> getSignatureInfo(requestType.chain, encryptionManager, cipher!!)
-            is DeleteAddressBookEntry -> getSignatureInfo(requestType.chain, encryptionManager, cipher!!)
-            is WithdrawalRequest -> {
-                when (requestType.signingData) {
-                    is SigningData.BitcoinSigningData ->
-                        ApprovalSignature.BitcoinSignatures(
-                            signatures = signRequestWithBitcoinKey(encryptionManager, cipher!!, requestType.signingData.childKeyIndex).map { it.signature }
-                        )
-                    is SigningData.SolanaSigningData ->
-                        ApprovalSignature.SolanaSignature(
-                            signature = signRequestWithSolanaKey(encryptionManager, cipher!!).signature,
-                            nonce = nonces.first().value,
-                            nonceAccountAddress = requestType.nonceAccountAddresses().first()
-                        )
-                    is SigningData.EthereumSigningData ->
-                        ApprovalSignature.EthereumSignature(
-                            signature = signRequestWithEthereumKey(encryptionManager, cipher!!).signature,
-                        )
-                }
             }
-            else -> ApprovalSignature.SolanaSignature(
-                signature = signRequestWithSolanaKey(encryptionManager, cipher!!).signature,
-                nonce = nonces.first().value,
-                nonceAccountAddress = requestType.nonceAccountAddresses().first()
-            )
-        }
-        
-        return RegisterApprovalDispositionBody(
+
+        return RegisterApprovalDispositionV2Body(
             approvalDisposition = approvalDisposition,
-            signatureInfo = signatureInfo
+            signatures = signatures
         )
-    }
-
-    private fun getSignatureInfo(chain: Chain, encryptionManager: EncryptionManager, cipher: Cipher): ApprovalSignature {
-        return when (chain) {
-            Chain.bitcoin, Chain.ethereum -> ApprovalSignature.NoChainSignature(
-                signRequestWithCensoKey(encryptionManager, cipher)
-            )
-            else -> ApprovalSignature.SolanaSignature(
-                signature = signRequestWithSolanaKey(encryptionManager, cipher).signature,
-                nonce = nonces.first().value,
-                nonceAccountAddress = requestType.nonceAccountAddresses().first()
-            )
-        }
-    }
-
-    private fun signRequestWithDeviceKey(
-        encryptionManager: EncryptionManager,
-        signature: Signature) : SignedPayload {
-        return try {
-            encryptionManager.signApprovalWithDeviceKey(
-                signable = this,
-                email = email,
-                signature = signature
-            )
-        } catch (e: Exception) {
-            throw Exception("Signing with device key failure")
-        }
-    }
-
-    private fun signRequestWithSolanaKey(
-        encryptionManager: EncryptionManager,
-        cipher: Cipher): SignedPayload {
-
-        return try {
-            encryptionManager.signSolanaApprovalDispositionMessage(
-                signable = this,
-                email = email,
-                cipher = cipher
-            )
-        } catch (e: Exception) {
-            throw Exception("Signing with solana key failure")
-        }
-    }
-
-    private fun signRequestWithBitcoinKey(
-        encryptionManager: EncryptionManager,
-        cipher: Cipher,
-        childKeyIndex: Int): List<SignedPayload> {
-
-        return try {
-            encryptionManager.signBitcoinApprovalDispositionMessage(
-                signable = this,
-                cipher = cipher,
-                email = email,
-                childKeyIndex = childKeyIndex
-            )
-        } catch (e: Exception) {
-            throw Exception("Signing data failure")
-        }
-    }
-
-    private fun signRequestWithEthereumKey(
-        encryptionManager: EncryptionManager,
-        cipher: Cipher): SignedPayload {
-
-        return try {
-            encryptionManager.signEthereumApprovalDispositionMessage(
-                signable = this,
-                email = email,
-                cipher = cipher,
-            )
-        } catch (e: Exception) {
-            throw Exception("Signing data failure")
-        }
-    }
-
-    private fun signRequestWithCensoKey(
-        encryptionManager: EncryptionManager,
-        cipher: Cipher): SignedPayload {
-
-        return try {
-            encryptionManager.signCensoApprovalDispositionMessage(
-                signable = this,
-                email = email,
-                cipher = cipher,
-            )
-        } catch (e: Exception) {
-            throw Exception("Signing data failure")
-        }
     }
 
     inner class RegisterApprovalDispositionV2Body(
