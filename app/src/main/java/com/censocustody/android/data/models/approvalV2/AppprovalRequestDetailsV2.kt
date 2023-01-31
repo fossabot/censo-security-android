@@ -183,7 +183,17 @@ sealed class ApprovalRequestDetailsV2 {
         val feeSymbolInfo: EvmSymbolInfo,
         val currentGuardAddress: String,
         val signingData: SigningData.EthereumSigningData
-    ) : ApprovalRequestDetailsV2()
+    ) : ApprovalRequestDetailsV2() {
+        fun changeValue() : ApprovalRequestDetails.SettingsChange? {
+            return if (whitelistEnabled != null && dappsEnabled == null) {
+                ApprovalRequestDetails.SettingsChange.WhitelistEnabled(whiteListEnabled = whitelistEnabled == BooleanSetting.On)
+            } else if (dappsEnabled != null && whitelistEnabled == null) {
+                ApprovalRequestDetails.SettingsChange.DAppsEnabled(dappsEnabled = dappsEnabled == BooleanSetting.On)
+            } else {
+                null
+            }
+        }
+    }
 
     data class PolygonWalletSettingsUpdate(
         val wallet: WalletInfo,
@@ -193,7 +203,17 @@ sealed class ApprovalRequestDetailsV2 {
         val feeSymbolInfo: EvmSymbolInfo,
         val currentGuardAddress: String,
         val signingData: SigningData.PolygonSigningData
-    ) : ApprovalRequestDetailsV2()
+    ) : ApprovalRequestDetailsV2() {
+        fun changeValue() : ApprovalRequestDetails.SettingsChange? {
+            return if (whitelistEnabled != null && dappsEnabled == null) {
+                ApprovalRequestDetails.SettingsChange.WhitelistEnabled(whiteListEnabled = whitelistEnabled == BooleanSetting.On)
+            } else if (dappsEnabled != null && whitelistEnabled == null) {
+                ApprovalRequestDetails.SettingsChange.DAppsEnabled(dappsEnabled = dappsEnabled == BooleanSetting.On)
+            } else {
+                null
+            }
+        }
+    }
 
 
     data class EthereumTransferPolicyUpdate(
