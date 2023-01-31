@@ -176,10 +176,6 @@ data class ApprovalDispositionRequestV2(
                             Hash.sha256(offchainDataToSend)
                         )
                     ),
-                    SignableDataResult.Offchain(
-                        dataToSend = offchainDataToSend,
-                        dataToSign = Hash.sha256(offchainDataToSend)
-                    )
                 )
             }
             is ApprovalRequestDetailsV2.PolygonTransferPolicyUpdate -> {
@@ -201,10 +197,6 @@ data class ApprovalDispositionRequestV2(
                             Hash.sha256(offchainDataToSend)
                         )
                     ),
-                    SignableDataResult.Offchain(
-                        dataToSend = offchainDataToSend,
-                        dataToSign = Hash.sha256(offchainDataToSend)
-                    )
                 )
             }
             is ApprovalRequestDetailsV2.VaultPolicyUpdate -> {
