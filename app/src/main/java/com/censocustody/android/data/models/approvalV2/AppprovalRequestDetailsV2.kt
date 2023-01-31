@@ -430,4 +430,3 @@ sealed class ApprovalRequestDetailsV2 {
 
     }
 }
-
