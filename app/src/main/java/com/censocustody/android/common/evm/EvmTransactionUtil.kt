@@ -1,26 +1,50 @@
-package com.censocustody.android.common
+package com.censocustody.android.common.evm
 
+import com.censocustody.android.common.pad
+import com.censocustody.android.common.toHexString
+import org.bitcoinj.core.Base58
+import org.bouncycastle.util.encoders.Hex
+import org.web3j.crypto.Keys
 import org.web3j.crypto.StructuredDataEncoder
 import java.math.BigInteger
+import java.nio.ByteBuffer
+
+fun ByteBuffer.putPadded(data: ByteArray, padTo: Int = 32) {
+    require(data.size <= padTo)
+    this.put(ByteArray(padTo - data.size))
+    this.put(data)
+}
 
 enum class Operation {
     CALL,
-    DELEGATECALL,
+    DELEGATECALL;
+
+    fun toByteArray(): ByteArray = this.ordinal.toBigInteger().toByteArray()
 }
 
-object EthereumTransactionUtil {
+object EvmTransactionUtil {
+
+    fun getEthereumAddressFromBase58(base58Key: String): String =
+        "0x" + Keys.getAddress(Base58.decode(base58Key).toHexString().slice(2 until 130)).lowercase()
+
+    private fun padHex(hex: String) = if (hex.length % 2 == 1) "0$hex" else hex
+
+    fun normalizeAddress(address: String) = Hex.decode(
+        padHex(address.removePrefix("0x").trimStart('0'))
+    ).pad(20)
+
     fun computeSafeTransactionHash(
         chainId: Long,
         safeAddress: String,
         to: String,
         value: BigInteger,
         data: ByteArray,
-        operation: Operation,
-        safeTxGas: BigInteger,
-        baseGas: BigInteger,
-        gasPrice: BigInteger,
-        gasToken: String,
-        refundReceiver: String,
+        operation: Operation = Operation.CALL,
+        safeTxGas: BigInteger = BigInteger.ZERO,
+        baseGas: BigInteger = BigInteger.ZERO,
+        gasPrice: BigInteger = BigInteger.ZERO,
+        gasToken: String = "0x0",
+        refundReceiver: String = "0x0",
         nonce: BigInteger
     ): ByteArray {
         val encoder = StructuredDataEncoder(

@@ -656,6 +656,104 @@ interface Signable {
     fun retrieveSignableData(approverPublicKey: String?): List<ByteArray>
 }
 
+sealed class SignableDataResult {
+    data class Ethereum(
+        val dataToSign: ByteArray,
+        val offchain: Offchain? = null,
+    ): SignableDataResult() {
+        override fun equals(other: Any?): Boolean {
+            if (this === other) return true
+            if (javaClass != other?.javaClass) return false
+
+            other as Ethereum
+
+            if (!dataToSign.contentEquals(other.dataToSign)) return false
+            if (offchain != other.offchain) return false
+
+            return true
+        }
+
+        override fun hashCode(): Int {
+            var result = dataToSign.contentHashCode()
+            result = 31 * result + (offchain?.hashCode() ?: 0)
+            return result
+        }
+    }
+
+    data class Bitcoin(
+        val dataToSign: List<ByteArray>
+    ): SignableDataResult()
+
+    data class Polygon(
+         val dataToSign: ByteArray
+    ): SignableDataResult() {
+        override fun equals(other: Any?): Boolean {
+            if (this === other) return true
+            if (javaClass != other?.javaClass) return false
+
+            other as Polygon
+
+            if (!dataToSign.contentEquals(other.dataToSign)) return false
+
+            return true
+        }
+
+        override fun hashCode(): Int {
+            return dataToSign.contentHashCode()
+        }
+    }
+
+    data class Offchain(
+        val dataToSend: ByteArray,
+        val dataToSign: ByteArray
+    ): SignableDataResult() {
+        override fun equals(other: Any?): Boolean {
+            if (this === other) return true
+            if (javaClass != other?.javaClass) return false
+
+            other as Offchain
+
+            if (!dataToSend.contentEquals(other.dataToSend)) return false
+            if (!dataToSign.contentEquals(other.dataToSign)) return false
+
+            return true
+        }
+
+        override fun hashCode(): Int {
+            var result = dataToSend.contentHashCode()
+            result = 31 * result + dataToSign.contentHashCode()
+            return result
+        }
+    }
+
+    data class Device(
+        val dataToSend: ByteArray,
+        val dataToSign: ByteArray
+    ): SignableDataResult() {
+        override fun equals(other: Any?): Boolean {
+            if (this === other) return true
+            if (javaClass != other?.javaClass) return false
+
+            other as Device
+
+            if (!dataToSend.contentEquals(other.dataToSend)) return false
+            if (!dataToSign.contentEquals(other.dataToSign)) return false
+
+            return true
+        }
+
+        override fun hashCode(): Int {
+            var result = dataToSend.contentHashCode()
+            result = 31 * result + dataToSign.contentHashCode()
+            return result
+        }
+    }
+}
+
+interface SignableV2 {
+    fun retrieveSignableData(): List<SignableDataResult>
+}
+
 data class SignedInitiationData(
     val initiatorSignature: String,
     val opAccountSignature: String,
