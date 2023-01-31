@@ -2,7 +2,7 @@ package com.censocustody.android.evm
 
 import com.censocustody.android.common.evm.*
 import com.censocustody.android.common.toHexString
-import com.censocustody.android.data.models.approval.SigningData
+import com.censocustody.android.data.models.approvalV2.ApprovalRequestDetailsV2
 import com.censocustody.android.data.models.evm.EvmConfigTransactionBuilder
 import org.bouncycastle.util.encoders.Hex
 import org.junit.Assert.*
@@ -30,7 +30,7 @@ class EvmConfigTransactionBuilderTest {
     private val vaultAddress = Keys.toChecksumAddress("0x6e01af3913026660fcebb93f054345eccd972260")
     private val walletAddress = Keys.toChecksumAddress("0x6e01af3913026660fcebb93f054345eccd972261")
     private val guardAddress = Keys.toChecksumAddress("0x6e01af3913026660fcebb93f054345eccd972262")
-    private val signingData = SigningData.EthereumTransaction(
+    private val signingData = ApprovalRequestDetailsV2.SigningData.EthereumTransaction(
         chainId = 31337,
         safeNonce = 10L,
         vaultAddress = vaultAddress

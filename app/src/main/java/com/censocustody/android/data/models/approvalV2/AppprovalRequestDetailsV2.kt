@@ -1,5 +1,6 @@
 package com.censocustody.android.data.models.approvalV2
 
+import com.censocustody.android.common.UriWrapper
 import com.censocustody.android.common.evm.EvmAddress
 import com.censocustody.android.data.models.ApprovalDisposition
 import com.censocustody.android.data.models.Chain
@@ -28,7 +29,38 @@ data class ApprovalRequestV2(
     val details: ApprovalRequestDetailsV2,
     val vaultName: String?,
     val initiationOnly: Boolean = false,
-)
+) {
+    companion object {
+        fun toJson(approval: ApprovalRequestV2, uriWrapper: UriWrapper): String {
+            val jsonString = GsonBuilder()
+                .excludeFieldsWithModifiers(Modifier.STATIC)
+                .registerTypeAdapterFactory(ApprovalRequestDetailsV2.approvalRequestDetailsV2AdapterFactory)
+                .registerTypeAdapterFactory(onChainPolicyAdapterFactory)
+                .registerTypeAdapterFactory(evmTokenInfoAdapterFactory)
+                .registerTypeAdapterFactory(signingDataAdapterFactory)
+                .registerTypeAdapterFactory(approvalSignatureAdapterFactory)
+                .create()
+                .toJson(approval)
+            return uriWrapper.encode(jsonString)
+        }
+
+        fun fromJson(json: String): ApprovalRequestV2 {
+            val approvalRequestV2Deserializer = ApprovalRequestV2Deserializer()
+            return approvalRequestV2Deserializer.toObjectWithParsedDetails(json)
+        }
+    }
+
+    fun toJson(): String =
+        GsonBuilder()
+            .excludeFieldsWithModifiers(Modifier.STATIC)
+            .registerTypeAdapterFactory(ApprovalRequestDetailsV2.approvalRequestDetailsV2AdapterFactory)
+            .registerTypeAdapterFactory(onChainPolicyAdapterFactory)
+            .registerTypeAdapterFactory(evmTokenInfoAdapterFactory)
+            .registerTypeAdapterFactory(signingDataAdapterFactory)
+            .registerTypeAdapterFactory(approvalSignatureAdapterFactory)
+            .create()
+            .toJson(this)
+}
 
 sealed class ApprovalRequestDetailsV2 {
     fun toJson(): String =
@@ -399,7 +431,3 @@ sealed class ApprovalRequestDetailsV2 {
     }
 }
 
-data class ApprovalDispositionRequestV2(
-    val approvalDisposition: ApprovalDisposition,
-    val signatures: List<ApprovalSignature>
-)
