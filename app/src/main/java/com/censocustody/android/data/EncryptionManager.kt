@@ -751,7 +751,7 @@ sealed class SignableDataResult {
 }
 
 interface SignableV2 {
-    fun retrieveSignableData(): List<SignableDataResult>
+    fun retrieveSignableData(approverPublicKey: String?): List<SignableDataResult>
 }
 
 data class SignedInitiationData(
