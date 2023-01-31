@@ -605,6 +605,7 @@ sealed class SigningData {
     data class EthereumTransaction(
         val chainId: Long,
         val safeNonce: Long,
+        val vaultAddress: String?
     )
 
     data class SolanaSigningData(
