@@ -8,10 +8,12 @@ import com.censocustody.android.data.models.RegisterApprovalDisposition
 import com.censocustody.android.data.models.approval.ApprovalDispositionRequest
 import com.censocustody.android.data.models.approval.InitiationRequest
 import com.censocustody.android.data.models.approval.ApprovalRequest
+import com.censocustody.android.data.models.approvalV2.ApprovalDispositionRequestV2
+import com.censocustody.android.data.models.approvalV2.ApprovalRequestV2
 import javax.inject.Inject
 
 interface ApprovalsRepository {
-    suspend fun getApprovalRequests(): Resource<List<ApprovalRequest?>>
+    suspend fun getApprovalRequests(): Resource<List<ApprovalRequestV2?>>
     suspend fun approveOrDenyDisposition(
         requestId: String,
         registerApprovalDisposition: RegisterApprovalDisposition,
@@ -30,9 +32,10 @@ class ApprovalsRepositoryImpl @Inject constructor(
     private val userRepository: UserRepository
 ) : ApprovalsRepository, BaseRepository() {
 
-    override suspend fun getApprovalRequests(): Resource<List<ApprovalRequest?>> =
+    override suspend fun getApprovalRequests(): Resource<List<ApprovalRequestV2?>> =
         retrieveApiResource { api.getApprovalRequests() }
 
+    //todo: this needs to change ApprovalDispositionRequestV2
     override suspend fun approveOrDenyDisposition(
         requestId: String,
         registerApprovalDisposition: RegisterApprovalDisposition,
@@ -50,23 +53,23 @@ class ApprovalsRepositoryImpl @Inject constructor(
             return Resource.Error(censoError = CensoError.MissingUserEmailError())
         }
 
-        val approvalDispositionRequest = ApprovalDispositionRequest(
+        val approvalDispositionRequestV2 = ApprovalDispositionRequestV2(
             requestId = requestId,
             approvalDisposition = registerApprovalDisposition.approvalDisposition!!,
-            nonces = registerApprovalDisposition.nonces!!,
             email = userEmail,
             requestType = registerApprovalDisposition.approvalRequestType!!
         )
 
         val registerApprovalDispositionBody = try {
-                approvalDispositionRequest.convertToApiBody(encryptionManager, cryptoObject)
+            approvalDispositionRequestV2.convertToApiBody(encryptionManager, cryptoObject)
         } catch (e: Exception) {
             return Resource.Error(censoError = CensoError.SigningDataError())
         }
 
+        //todo: left off here
         return retrieveApiResource {
             api.approveOrDenyDisposition(
-                requestId = approvalDispositionRequest.requestId,
+                requestId = approvalDispositionRequestV2.requestId,
                 registerApprovalDispositionBody = registerApprovalDispositionBody
             )
         }

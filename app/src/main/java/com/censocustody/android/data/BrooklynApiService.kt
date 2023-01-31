@@ -8,6 +8,7 @@ import com.censocustody.android.data.BrooklynApiService.Companion.AUTH
 import com.censocustody.android.data.BrooklynApiService.Companion.X_CENSO_ID
 import com.censocustody.android.data.models.*
 import com.censocustody.android.data.models.approval.*
+import com.censocustody.android.data.models.approvalV2.ApprovalRequestV2
 import kotlinx.coroutines.runBlocking
 import okhttp3.*
 import okhttp3.logging.HttpLoggingInterceptor
@@ -71,9 +72,9 @@ interface BrooklynApiService {
     @Headers(AUTH_REQUIRED)
     suspend fun addWalletSigner(@Body signers: Signers): RetrofitResponse<Signers>
 
-    @GET("v1/approval-requests")
+    @GET("v2/approval-requests")
     @Headers(AUTH_REQUIRED)
-    suspend fun getApprovalRequests(): RetrofitResponse<List<ApprovalRequest?>>
+    suspend fun getApprovalRequests(): RetrofitResponse<List<ApprovalRequestV2?>>
 
     @POST("v1/notification-tokens")
     @Headers(AUTH_REQUIRED)
@@ -92,6 +93,14 @@ interface BrooklynApiService {
         @Path("request_id") requestId: String,
         @Body registerApprovalDispositionBody: ApprovalDispositionRequest.RegisterApprovalDispositionBody
     ): RetrofitResponse<ApprovalDispositionRequest.RegisterApprovalDispositionBody>
+
+//    //todo: this is v2
+//    @POST("v2/approval-requests/{request_id}/dispositions")
+//    @Headers(AUTH_REQUIRED)
+//    suspend fun approveOrDenyDispositionV2(
+//        @Path("request_id") requestId: String,
+//        @Body registerApprovalDispositionBody: ApprovalDispositionRequest.RegisterApprovalDispositionBody
+//    ): RetrofitResponse<ApprovalDispositionRequest.RegisterApprovalDispositionBody>
 
     @POST("v1/approval-requests/{request_id}/initiations")
     @Headers(AUTH_REQUIRED)
