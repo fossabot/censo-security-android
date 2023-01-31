@@ -19,6 +19,7 @@ import com.censocustody.android.data.models.StoredKeyData.Companion.SOLANA_KEY
 import com.censocustody.android.data.models.SupplyDappInstruction
 import com.censocustody.android.data.models.Signers
 import com.censocustody.android.data.models.WalletSigner
+import com.censocustody.android.data.models.approval.ApprovalSignature
 import com.censocustody.android.data.models.approval.InitiationRequest
 import org.web3j.crypto.Hash
 import java.nio.charset.Charset
@@ -111,6 +112,18 @@ interface EncryptionManager {
         signature: Signature,
         email: String
     ) : ByteArray
+
+    fun signApprovalDispositionForDeviceKey(
+        email: String,
+        signature: Signature,
+        dataToSign: SignableDataResult.Device
+    ) : ApprovalSignature.NoChainSignature
+
+    fun signApprovalDisposition(
+        email: String,
+        cipher: Cipher,
+        dataToSign: List<SignableDataResult>
+    ) : List<ApprovalSignature>
     //endregion
 
     //region generic key work
@@ -197,6 +210,69 @@ class EncryptionManagerImpl @Inject constructor(
             data = data,
             keyName = deviceId
         )
+    }
+
+    override fun signApprovalDispositionForDeviceKey(
+        email: String,
+        signature: Signature,
+        dataToSign: SignableDataResult.Device
+    ): ApprovalSignature.NoChainSignature {
+        val signedData = signDataWithDeviceKey(
+            data = dataToSign.dataToSign, signature = signature, email = email
+        )
+
+        return ApprovalSignature.NoChainSignature(
+            signature = BaseWrapper.encodeToBase64(signedData),
+            signedData = BaseWrapper.encodeToBase64(dataToSign.dataToSign)
+        )
+    }
+
+    override fun signApprovalDisposition(
+        email: String,
+        cipher: Cipher,
+        dataToSign: List<SignableDataResult>
+    ): List<ApprovalSignature> {
+        val rootSeed = BaseWrapper.decode(retrieveRootSeed(email = email, cipher = cipher))
+        val keys = createAllKeys(rootSeed)
+        val signatures = mutableListOf<ApprovalSignature>()
+
+        for (signable in dataToSign) {
+            when (signable) {
+                is SignableDataResult.Bitcoin -> {
+                    val bitcoinSignedData = mutableListOf<String>()
+                    for (item in signable.dataToSign) {
+                        val signedData = keys.bitcoinKey.signData(item)
+                        bitcoinSignedData.add(BaseWrapper.encodeToBase64(signedData))
+                    }
+                    signatures.add(
+                        ApprovalSignature.BitcoinSignatures(bitcoinSignedData)
+                    )
+                }
+                is SignableDataResult.Ethereum -> {
+                    val signedData = keys.ethereumKey.signData(signable.dataToSign)
+                    val signature = BaseWrapper.encodeToBase64(signedData)
+                    signatures.add(ApprovalSignature.EthereumSignature(signature))
+                }
+                is SignableDataResult.Offchain -> {
+                    val signedData = keys.censoKey.signData(signable.dataToSign)
+                    val signature = BaseWrapper.encodeToBase64(signedData)
+                    signatures.add(
+                        ApprovalSignature.NoChainSignature(
+                            signedData = BaseWrapper.encodeToBase64(signable.dataToSend),
+                            signature = signature
+                        )
+                    )
+                }
+                is SignableDataResult.Device -> {
+                    //Device key signatures are single access and handled in signApprovalDispositionForDeviceKey
+                }
+                is SignableDataResult.Polygon -> {
+                    //todo: this needs to be done with polygon key. Not currently part of keys.
+                }
+            }
+        }
+
+        return signatures.toList()
     }
 
     override fun signSolanaApprovalDispositionMessage(
@@ -751,7 +827,7 @@ sealed class SignableDataResult {
 }
 
 interface SignableV2 {
-    fun retrieveSignableData(approverPublicKey: String?): List<SignableDataResult>
+    fun retrieveSignableData(): List<SignableDataResult>
 }
 
 data class SignedInitiationData(
