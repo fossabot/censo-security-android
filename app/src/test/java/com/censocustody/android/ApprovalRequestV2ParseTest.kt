@@ -70,6 +70,22 @@ class ParseApprovalRequestV2Types {
         assertNotNull(details.jwtToken)
     }
 
+    @Test
+    fun testUnknownRequest() {
+        val unknownRequest = """
+        {"id":"316d0247-a1cb-47d9-b447-04ba544967e8","submitDate":"2023-01-31T17:04:24.359+00:00","submitterName":"User 1","submitterEmail":"authorized1@org1","approvalTimeoutInSeconds":null,"numberOfDispositionsRequired":1,"numberOfApprovalsReceived":0,"numberOfDeniesReceived":0,"details":{"type":"SomeGarbageRequest","wallet":{"identifier":"98a36396-d4b5-4c7b-9789-a55d8d7e0c40","name":"Ethereum Wallet 1","address":"0xF0e86822Cf7bD35588235C8Eef342767C4d4F2Ec"},"amount":{"value":"1","nativeValue":"1","usdEquivalent":null},"symbolInfo":{"symbol":"GGSG","description":"0x2bddb61d0bf888de57eb5060d7f69317694431ff at ethereum","imageUrl":"https://www.arweave.net/r_K7MRot4iVWht_QKp9wiPpfCvC39bXi9cQsEn0B6WY?ext=jpeg","tokenInfo":{"type":"ERC721","contractAddress":"0x2BDDb61d0bF888De57EB5060d7F69317694431fF","tokenId":"5055"},"nftMetadata":{"name":"Galactic Gecko #5055"}},"fee":{"value":"0.0006353371","nativeValue":"0.0006353371","usdEquivalent":"2.82"},"feeSymbolInfo":{"symbol":"ETH","description":"Ethereum","imageUrl":"https://s3.us-east-1.amazonaws.com/strike-public-assets/logos/ETH.svg"},"destination":{"name":"0x6E01aF3913026660Fcebb93f054345eCCd972251","address":"0x6E01aF3913026660Fcebb93f054345eCCd972251"},"signingData":{"type":"ethereum","transaction":{"safeNonce":3,"chainId":31337,"priorityFee":5000000000,"vaultAddress":null,"contractAddresses":[]}}},"vaultName":"Test Organization 1","initiationOnly":false}
+    """.trimIndent()
+
+        val deserializer = ApprovalRequestV2Deserializer()
+        val unknownApproval = deserializer.toObjectWithParsedDetails(unknownRequest)
+
+        assertEquals(
+            unknownApproval.details::class.java,
+            ApprovalRequestDetailsV2.UnknownApprovalType::class.java
+        )
+
+    }
+
     private fun getFullListOfApprovalItems(): List<ApprovalRequestV2> {
         val deserializer = ApprovalRequestV2Deserializer()
 
@@ -78,110 +94,6 @@ class ParseApprovalRequestV2Types {
             val approval = deserializer.toObjectWithParsedDetails(it)
             allApprovalRequests.add(approval)
         }
-
-
-//        val multiSigWithWalletCreationJson: JsonElement =
-//            JsonParser.parseString(multiSigWithWalletCreationJson.trim())
-//        val multiSigWithWalletCreationApprovalRequest =
-//            deserializer.parseData(multiSigWithWalletCreationJson)
-//        allApprovalRequests.add(multiSigWithWalletCreationApprovalRequest)
-//
-//        val solanaWalletCreationJson: JsonElement =
-//            JsonParser.parseString(solanaWalletCreationJson.trim())
-//        val solanaWalletCreationApprovalRequest =
-//            deserializer.parseData(solanaWalletCreationJson)
-//        allApprovalRequests.add(solanaWalletCreationApprovalRequest)
-//
-//        val bitcoinWalletCreationJson: JsonElement =
-//            JsonParser.parseString(bitcoinWalletCreationJson.trim())
-//        val bitcoinWalletCreationApprovalRequest =
-//            deserializer.parseData(bitcoinWalletCreationJson)
-//        allApprovalRequests.add(bitcoinWalletCreationApprovalRequest)
-//
-//        val ethereumWalletCreationJson: JsonElement =
-//            JsonParser.parseString(ethereumWalletCreationJson.trim())
-//        val ethereumWalletCreationApprovalRequest =
-//            deserializer.parseData(ethereumWalletCreationJson)
-//        allApprovalRequests.add(ethereumWalletCreationApprovalRequest)
-//
-//        val multiSigWithSignersUpdateJson: JsonElement =
-//            JsonParser.parseString(multiSigWithSignersUpdateJson.trim())
-//        val multiSigWithSignersUpdateWalletApproval =
-//            deserializer.parseData(multiSigWithSignersUpdateJson)
-//        allApprovalRequests.add(multiSigWithSignersUpdateWalletApproval)
-//
-//        val signersUpdateRemovalJson: JsonElement =
-//            JsonParser.parseString(signersUpdateRemovalJson.trim())
-//        val signersUpdateRemovalWalletApproval = deserializer.parseData(signersUpdateRemovalJson)
-//        allApprovalRequests.add(signersUpdateRemovalWalletApproval)
-//
-//        val multiSigWithWithdrawalRequestJson: JsonElement =
-//            JsonParser.parseString(multiSigWithWithdrawalRequestJson.trim())
-//        val multiSigWithWithdrawalRequestWalletApproval =
-//            deserializer.parseData(multiSigWithWithdrawalRequestJson)
-//        allApprovalRequests.add(multiSigWithWithdrawalRequestWalletApproval)
-//
-//        val withdrawalRequestJson: JsonElement =
-//            JsonParser.parseString(withdrawalRequestJson.trim())
-//        val withdrawalRequestWalletApproval = deserializer.parseData(withdrawalRequestJson)
-//        allApprovalRequests.add(withdrawalRequestWalletApproval)
-//
-//        val bitcoinWithdrawalRequestJson: JsonElement =
-//            JsonParser.parseString(bitcoinWithdrawalRequestJson.trim())
-//        val bitcoinWithdrawalRequestWalletApproval = deserializer.parseData(bitcoinWithdrawalRequestJson)
-//        allApprovalRequests.add(bitcoinWithdrawalRequestWalletApproval)
-//
-//        val ethereumWithdrawalRequestJson: JsonElement =
-//            JsonParser.parseString(ethereumWithdrawalRequestJson.trim())
-//        val ethereumWithdrawalRequestWalletApproval = deserializer.parseData(ethereumWithdrawalRequestJson)
-//        allApprovalRequests.add(ethereumWithdrawalRequestWalletApproval)
-//
-//        val erc20WithdrawalRequestJson: JsonElement =
-//            JsonParser.parseString(erc20WithdrawalRequestJson.trim())
-//        val erc20WithdrawalRequestWalletApproval = deserializer.parseData(erc20WithdrawalRequestJson)
-//        allApprovalRequests.add(erc20WithdrawalRequestWalletApproval)
-//
-//        val erc721WithdrawalRequestJson: JsonElement =
-//            JsonParser.parseString(erc721WithdrawalRequestJson.trim())
-//        val erc721WithdrawalRequestWalletApproval = deserializer.parseData(erc721WithdrawalRequestJson)
-//        allApprovalRequests.add(erc721WithdrawalRequestWalletApproval)
-//
-//        val erc1155WithdrawalRequestJson: JsonElement =
-//            JsonParser.parseString(erc1155WithdrawalRequestJson.trim())
-//        val erc1155WithdrawalRequestWalletApproval = deserializer.parseData(erc1155WithdrawalRequestJson)
-//        allApprovalRequests.add(erc1155WithdrawalRequestWalletApproval)
-//
-//        val multiSigWithConversionRequestJson: JsonElement =
-//            JsonParser.parseString(multiSigWithConversionRequestJson.trim())
-//        val multiSigWithConversionRequestWalletApproval =
-//            deserializer.parseData(multiSigWithConversionRequestJson)
-//        allApprovalRequests.add(multiSigWithConversionRequestWalletApproval)
-//
-//        val conversionRequestJson: JsonElement =
-//            JsonParser.parseString(conversionRequestJson.trim())
-//        val conversionRequestWalletApproval = deserializer.parseData(conversionRequestJson)
-//        allApprovalRequests.add(conversionRequestWalletApproval)
-//
-//        val multiSignWithDAppRequestJson: JsonElement =
-//            JsonParser.parseString(multiSignWithDAppRequestJson)
-//        val multiSignWithDAppRequestWalletApproval =
-//            deserializer.parseData(multiSignWithDAppRequestJson)
-//        allApprovalRequests.add(multiSignWithDAppRequestWalletApproval)
-//
-//        val dAppJson: JsonElement =
-//            JsonParser.parseString(dappTransactionJson.trim())
-//        val dAppWalletApproval = deserializer.parseData(dAppJson)
-//        allApprovalRequests.add(dAppWalletApproval)
-//
-//        val acceptVaultInvitationJson: JsonElement =
-//            JsonParser.parseString(acceptVaultInvitationJson.trim())
-//        val acceptVaultInvitationApproval = deserializer.parseData(acceptVaultInvitationJson)
-//        allApprovalRequests.add(acceptVaultInvitationApproval)
-//
-//        val passwordResetJson: JsonElement =
-//            JsonParser.parseString(passwordResetJson.trim())
-//        val passwordResetApproval = deserializer.parseData(passwordResetJson)
-//        allApprovalRequests.add(passwordResetApproval)
 
         return allApprovalRequests
     }

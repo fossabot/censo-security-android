@@ -27,6 +27,11 @@ class ApprovalRequestV2Deserializer : JsonDeserializer<ApprovalRequestV2> {
     }
 
     fun toObjectWithParsedDetails(json: String?) : ApprovalRequestV2 {
-        return getGson().fromJson(json, ApprovalRequestV2::class.java)
+        return try {
+            getGson().fromJson(json, ApprovalRequestV2::class.java)
+        } catch (e: Exception) {
+            ApprovalRequestV2("", "", "", "", 0L,
+                details=ApprovalRequestDetailsV2.UnknownApprovalType, vaultName=null)
+        }
     }
 }

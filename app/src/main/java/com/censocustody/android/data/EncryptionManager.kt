@@ -659,6 +659,7 @@ interface Signable {
 sealed class SignableDataResult {
     data class Ethereum(
         val dataToSign: ByteArray,
+        val offchain: Offchain? = null,
     ): SignableDataResult() {
         override fun equals(other: Any?): Boolean {
             if (this === other) return true
@@ -667,12 +668,15 @@ sealed class SignableDataResult {
             other as Ethereum
 
             if (!dataToSign.contentEquals(other.dataToSign)) return false
+            if (offchain != other.offchain) return false
 
             return true
         }
 
         override fun hashCode(): Int {
-            return dataToSign.contentHashCode()
+            var result = dataToSign.contentHashCode()
+            result = 31 * result + (offchain?.hashCode() ?: 0)
+            return result
         }
     }
 

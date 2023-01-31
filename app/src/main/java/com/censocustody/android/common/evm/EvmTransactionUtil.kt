@@ -2,7 +2,9 @@ package com.censocustody.android.common.evm
 
 import com.censocustody.android.common.pad
 import com.censocustody.android.common.toHexString
+import org.bitcoinj.core.Base58
 import org.bouncycastle.util.encoders.Hex
+import org.web3j.crypto.Keys
 import org.web3j.crypto.StructuredDataEncoder
 import java.math.BigInteger
 import java.nio.ByteBuffer
@@ -17,10 +19,13 @@ enum class Operation {
     CALL,
     DELEGATECALL;
 
-    fun toByteArray() = this.ordinal.toBigInteger().toByteArray()
+    fun toByteArray(): ByteArray = this.ordinal.toBigInteger().toByteArray()
 }
 
 object EvmTransactionUtil {
+
+    fun getEthereumAddressFromBase58(base58Key: String): String =
+        "0x" + Keys.getAddress(Base58.decode(base58Key).toHexString().slice(2 until 130)).lowercase()
 
     private fun padHex(hex: String) = if (hex.length % 2 == 1) "0$hex" else hex
 

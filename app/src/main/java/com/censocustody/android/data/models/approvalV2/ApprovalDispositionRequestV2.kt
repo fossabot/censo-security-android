@@ -2,6 +2,7 @@ package com.censocustody.android.data.models.approvalV2
 
 import com.censocustody.android.common.BaseWrapper.decodeFromBase64
 import com.censocustody.android.common.evm.EvmDestination
+import com.censocustody.android.common.evm.EvmTransactionUtil
 import com.censocustody.android.common.evm.EvmWhitelistHelper
 import com.censocustody.android.common.evm.SafeTx
 import com.censocustody.android.data.*
@@ -61,7 +62,7 @@ data class ApprovalDispositionRequestV2(
 
             is ApprovalRequestDetailsV2.EthereumWithdrawalRequest -> {
                 listOf(
-                    SignableDataResult.Polygon(
+                    SignableDataResult.Ethereum(
                         EvmTransferTransactionBuilder.withdrawalSafeHash(
                             requestType.symbolInfo,
                             requestType.amount,
@@ -75,7 +76,7 @@ data class ApprovalDispositionRequestV2(
 
             is ApprovalRequestDetailsV2.PolygonWithdrawalRequest -> {
                 listOf(
-                    SignableDataResult.Ethereum(
+                    SignableDataResult.Polygon(
                         EvmTransferTransactionBuilder.withdrawalSafeHash(
                             requestType.symbolInfo,
                             requestType.amount,
@@ -149,7 +150,10 @@ data class ApprovalDispositionRequestV2(
             }
             is ApprovalRequestDetailsV2.EthereumTransferPolicyUpdate -> {
                 val startingPolicy = SafeTx.Policy(requestType.currentOnChainPolicy.owners, requestType.currentOnChainPolicy.threshold)
-                val targetPolicy = SafeTx.Policy(requestType.approvalPolicy.approvers.map { it.value.publicKey}, requestType.approvalPolicy.approvalsRequired)
+                val targetPolicy = SafeTx.Policy(
+                    requestType.approvalPolicy.approvers.map { EvmTransactionUtil.getEthereumAddressFromBase58(it.value.publicKey) },
+                    requestType.approvalPolicy.approvalsRequired
+                )
                 val offchainDataToSend = requestType.toJson().toByteArray()
                 listOf(
                     SignableDataResult.Ethereum(
@@ -157,17 +161,20 @@ data class ApprovalDispositionRequestV2(
                             requestType.wallet.address,
                             startingPolicy.safeTransactions(targetPolicy).first,
                             requestType.signingData.transaction
+                        ),
+                        offchain = SignableDataResult.Offchain(
+                            offchainDataToSend,
+                            Hash.sha256(offchainDataToSend)
                         )
                     ),
-                    SignableDataResult.Offchain(
-                        offchainDataToSend,
-                        Hash.sha256(offchainDataToSend)
-                    )
                 )
             }
             is ApprovalRequestDetailsV2.PolygonTransferPolicyUpdate -> {
                 val startingPolicy = SafeTx.Policy(requestType.currentOnChainPolicy.owners, requestType.currentOnChainPolicy.threshold)
-                val targetPolicy = SafeTx.Policy(requestType.approvalPolicy.approvers.map { it.value.publicKey}, requestType.approvalPolicy.approvalsRequired)
+                val targetPolicy = SafeTx.Policy(
+                    requestType.approvalPolicy.approvers.map { EvmTransactionUtil.getEthereumAddressFromBase58(it.value.publicKey) },
+                    requestType.approvalPolicy.approvalsRequired
+                )
                 val offchainDataToSend = requestType.toJson().toByteArray()
                 listOf(
                     SignableDataResult.Ethereum(
@@ -175,12 +182,12 @@ data class ApprovalDispositionRequestV2(
                             requestType.wallet.address,
                             startingPolicy.safeTransactions(targetPolicy).first,
                             requestType.signingData.transaction
+                        ),
+                        offchain = SignableDataResult.Offchain(
+                            offchainDataToSend,
+                            Hash.sha256(offchainDataToSend)
                         )
                     ),
-                    SignableDataResult.Offchain(
-                        offchainDataToSend,
-                        Hash.sha256(offchainDataToSend)
-                    )
                 )
             }
             is ApprovalRequestDetailsV2.VaultPolicyUpdate -> {
@@ -192,7 +199,7 @@ data class ApprovalDispositionRequestV2(
                                 .firstOrNull()?.let {
                                 val startingPolicy = SafeTx.Policy(it.owners, it.threshold)
                                 val targetPolicy = SafeTx.Policy(
-                                    requestType.approvalPolicy.approvers.mapNotNull { it.value.publicKeys.find { it.chain == Chain.ethereum }?.key },
+                                    requestType.approvalPolicy.approvers.mapNotNull { it.value.publicKeys.find { it.chain == Chain.ethereum }?.key?.let { EvmTransactionUtil.getEthereumAddressFromBase58(it) } },
                                     requestType.approvalPolicy.approvalsRequired
                                 )
                                 SignableDataResult.Ethereum(
