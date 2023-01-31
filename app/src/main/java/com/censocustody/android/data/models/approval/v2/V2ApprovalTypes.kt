@@ -2,9 +2,7 @@ package com.censocustody.android.data.models.approval.v2
 
 import com.censocustody.android.data.models.ApprovalDisposition
 import com.censocustody.android.data.models.Chain
-import com.censocustody.android.data.models.approval.BooleanSetting
-import com.censocustody.android.data.models.approval.DestinationAddress
-import com.censocustody.android.data.models.approval.TypeFactorySettings
+import com.censocustody.android.data.models.approval.*
 import com.google.gson.GsonBuilder
 import java.lang.reflect.Modifier
 import java.math.BigInteger
@@ -18,58 +16,64 @@ data class ApprovalRequestV2(
     val numberOfDispositionsRequired: Int = 0,
     val numberOfApprovalsReceived: Int = 0,
     val numberOfDeniesReceived: Int = 0,
-    val details: ApprovalRequestDetailsV2,
+    @Transient val details: ApprovalRequestDetailsV2,
     val vaultName: String?,
     val initiationOnly: Boolean = false,
-)
+) {
+    fun unknownApprovalType(): ApprovalRequestV2 {
+        return copy(
+            details = ApprovalRequestDetailsV2.UnknownV2ApprovalType
+        )
+    }
+}
 
 enum class V2ApprovalType(val value: String) {
-    VaultPolicyUpdate("VaultPolicyUpdate"),
-    BitcoinWalletCreation("BitcoinWalletCreation"),
-    EthereumWalletCreation("EthereumWalletCreation"),
-    PolygonWalletCreation("PolygonWalletCreation"),
-    EthereumWalletNameUpdate("EthereumWalletNameUpdate"),
-    PolygonWalletNameUpdate("PolygonWalletNameUpdate"),
-    EthereumWalletWhitelistUpdate("EthereumWalletWhitelistUpdate"),
-    PolygonWalletWhitelistUpdate("PolygonWalletWhitelistUpdate"),
-    EthereumWalletSettingsUpdate("EthereumWalletSettingsUpdate"),
-    PolygonWalletSettingsUpdate("PolygonWalletSettingsUpdate"),
-    EthereumTransferPolicyUpdate("EthereumTransferPolicyUpdate"),
-    PolygonTransferPolicyUpdate("PolygonTransferPolicyUpdate"),
-    CreateAddressBookEntry("CreateAddressBookEntry"),
-    DeleteAddressBookEntry("DeleteAddressBookEntry"),
-    BitcoinWithdrawalRequest("BitcoinWithdrawalRequest"),
-    EthereumWithdrawalRequest("EthereumWithdrawalRequest"),
-    PolygonWithdrawalRequest("PolygonWithdrawalRequest"),
-    PasswordReset("PasswordReset"),
-    Login("Login"),
-    VaultInvitation("VaultInvitation"),
-    Unknown("");
+    VaultPolicyUpdateType("VaultPolicyUpdate"),
+    BitcoinWalletCreationType("BitcoinWalletCreation"),
+    EthereumWalletCreationType("EthereumWalletCreation"),
+    PolygonWalletCreationType("PolygonWalletCreation"),
+    EthereumWalletNameUpdateType("EthereumWalletNameUpdate"),
+    PolygonWalletNameUpdateType("PolygonWalletNameUpdate"),
+    EthereumWalletWhitelistUpdateType("EthereumWalletWhitelistUpdate"),
+    PolygonWalletWhitelistUpdateType("PolygonWalletWhitelistUpdate"),
+    EthereumWalletSettingsUpdateType("EthereumWalletSettingsUpdate"),
+    PolygonWalletSettingsUpdateType("PolygonWalletSettingsUpdate"),
+    EthereumTransferPolicyUpdateType("EthereumTransferPolicyUpdate"),
+    PolygonTransferPolicyUpdateType("PolygonTransferPolicyUpdate"),
+    CreateAddressBookEntryType("CreateAddressBookEntry"),
+    DeleteAddressBookEntryType("DeleteAddressBookEntry"),
+    BitcoinWithdrawalRequestType("BitcoinWithdrawalRequest"),
+    EthereumWithdrawalRequestType("EthereumWithdrawalRequest"),
+    PolygonWithdrawalRequestType("PolygonWithdrawalRequest"),
+    PasswordResetType("PasswordReset"),
+    LoginType("Login"),
+    VaultInvitationType("VaultInvitation"),
+    UnknownType("");
 
     companion object {
         fun fromString(type: String?): V2ApprovalType =
             when (type) {
-                VaultPolicyUpdate.value -> VaultPolicyUpdate
-                BitcoinWalletCreation.value -> BitcoinWalletCreation
-                EthereumWalletCreation.value -> EthereumWalletCreation
-                PolygonWalletCreation.value -> PolygonWalletCreation
-                EthereumWalletNameUpdate.value -> EthereumWalletNameUpdate
-                PolygonWalletNameUpdate.value -> PolygonWalletNameUpdate
-                EthereumWalletWhitelistUpdate.value -> EthereumWalletWhitelistUpdate
-                PolygonWalletWhitelistUpdate.value -> PolygonWalletWhitelistUpdate
-                EthereumWalletSettingsUpdate.value -> EthereumWalletSettingsUpdate
-                PolygonWalletSettingsUpdate.value -> PolygonWalletSettingsUpdate
-                EthereumTransferPolicyUpdate.value -> EthereumTransferPolicyUpdate
-                PolygonTransferPolicyUpdate.value -> PolygonTransferPolicyUpdate
-                CreateAddressBookEntry.value -> CreateAddressBookEntry
-                DeleteAddressBookEntry.value -> DeleteAddressBookEntry
-                BitcoinWithdrawalRequest.value -> BitcoinWithdrawalRequest
-                EthereumWithdrawalRequest.value -> EthereumWithdrawalRequest
-                PolygonWithdrawalRequest.value -> PolygonWithdrawalRequest
-                PasswordReset.value -> PasswordReset
-                Login.value -> Login
-                VaultInvitation.value -> VaultInvitation
-                else -> Unknown
+                VaultPolicyUpdateType.value -> VaultPolicyUpdateType
+                BitcoinWalletCreationType.value -> BitcoinWalletCreationType
+                EthereumWalletCreationType.value -> EthereumWalletCreationType
+                PolygonWalletCreationType.value -> PolygonWalletCreationType
+                EthereumWalletNameUpdateType.value -> EthereumWalletNameUpdateType
+                PolygonWalletNameUpdateType.value -> PolygonWalletNameUpdateType
+                EthereumWalletWhitelistUpdateType.value -> EthereumWalletWhitelistUpdateType
+                PolygonWalletWhitelistUpdateType.value -> PolygonWalletWhitelistUpdateType
+                EthereumWalletSettingsUpdateType.value -> EthereumWalletSettingsUpdateType
+                PolygonWalletSettingsUpdateType.value -> PolygonWalletSettingsUpdateType
+                EthereumTransferPolicyUpdateType.value -> EthereumTransferPolicyUpdateType
+                PolygonTransferPolicyUpdateType.value -> PolygonTransferPolicyUpdateType
+                CreateAddressBookEntryType.value -> CreateAddressBookEntryType
+                DeleteAddressBookEntryType.value -> DeleteAddressBookEntryType
+                BitcoinWithdrawalRequestType.value -> BitcoinWithdrawalRequestType
+                EthereumWithdrawalRequestType.value -> EthereumWithdrawalRequestType
+                PolygonWithdrawalRequestType.value -> PolygonWithdrawalRequestType
+                PasswordResetType.value -> PasswordResetType
+                LoginType.value -> LoginType
+                VaultInvitationType.value -> VaultInvitationType
+                else -> UnknownType
             }
     }
 }
@@ -115,12 +119,14 @@ sealed class ApprovalRequestDetailsV2 {
     }
 
     data class BitcoinWalletCreation(
+        val type: String,
         val identifier: String,
         val name: String,
         val approvalPolicy: WalletApprovalPolicy
     ) : ApprovalRequestDetailsV2()
 
     data class EthereumWalletCreation(
+        val type: String,
         val identifier: String,
         val name: String,
         val approvalPolicy: WalletApprovalPolicy,
@@ -131,6 +137,7 @@ sealed class ApprovalRequestDetailsV2 {
     ) : ApprovalRequestDetailsV2()
 
     data class PolygonWalletCreation(
+        val type: String,
         val identifier: String,
         val name: String,
         val approvalPolicy: WalletApprovalPolicy,
@@ -141,16 +148,19 @@ sealed class ApprovalRequestDetailsV2 {
     ) : ApprovalRequestDetailsV2()
 
     data class EthereumWalletNameUpdate(
+        val type: String,
         val wallet: WalletInfo,
         val newName: String
     ) : ApprovalRequestDetailsV2()
 
     data class PolygonWalletNameUpdate(
+        val type: String,
         val wallet: WalletInfo,
         val newName: String
     ) : ApprovalRequestDetailsV2()
 
     data class EthereumWalletWhitelistUpdate(
+        val type: String,
         val wallet: WalletInfo,
         val destinations: List<Destination>,
         val currentOnChainWhitelist: List<String>,
@@ -160,6 +170,7 @@ sealed class ApprovalRequestDetailsV2 {
     ) : ApprovalRequestDetailsV2()
 
     data class PolygonWalletWhitelistUpdate(
+        val type: String,
         val wallet: WalletInfo,
         val destinations: List<Destination>,
         val currentOnChainWhitelist: List<String>,
@@ -169,6 +180,7 @@ sealed class ApprovalRequestDetailsV2 {
     ) : ApprovalRequestDetailsV2()
 
     data class EthereumWalletSettingsUpdate(
+        val type: String,
         val wallet: WalletInfo,
         val whitelistEnabled: BooleanSetting?,
         val dappsEnabled: BooleanSetting?,
@@ -179,6 +191,7 @@ sealed class ApprovalRequestDetailsV2 {
     ) : ApprovalRequestDetailsV2()
 
     data class PolygonWalletSettingsUpdate(
+        val type: String,
         val wallet: WalletInfo,
         val whitelistEnabled: BooleanSetting?,
         val dappsEnabled: BooleanSetting?,
@@ -189,6 +202,7 @@ sealed class ApprovalRequestDetailsV2 {
     ) : ApprovalRequestDetailsV2()
 
     data class EthereumTransferPolicyUpdate(
+        val type: String,
         val wallet: WalletInfo,
         val currentOnChainPolicy: OnChainPolicy.Ethereum,
         val approvalPolicy: WalletApprovalPolicy,
@@ -198,6 +212,7 @@ sealed class ApprovalRequestDetailsV2 {
     ) : ApprovalRequestDetailsV2()
 
     data class PolygonTransferPolicyUpdate(
+        val type: String,
         val wallet: WalletInfo,
         val currentOnChainPolicy: OnChainPolicy.Polygon,
         val approvalPolicy: WalletApprovalPolicy,
@@ -207,18 +222,21 @@ sealed class ApprovalRequestDetailsV2 {
     ) : ApprovalRequestDetailsV2()
 
     data class CreateAddressBookEntry(
+        val type: String,
         val chain: Chain,
         val address: String,
         val name: String
     ) : ApprovalRequestDetailsV2()
 
     data class DeleteAddressBookEntry(
+        val type: String,
         val chain: Chain,
         val address: String,
         val name: String
     ) : ApprovalRequestDetailsV2()
 
     data class BitcoinWithdrawalRequest(
+        val type: String,
         val wallet: WalletInfo,
         val amount: Amount,
         val symbolInfo: BitcoinSymbolInfo,
@@ -229,6 +247,7 @@ sealed class ApprovalRequestDetailsV2 {
     ) : ApprovalRequestDetailsV2()
 
     data class EthereumWithdrawalRequest(
+        val type: String,
         val wallet: WalletInfo,
         val amount: Amount,
         val symbolInfo: EvmSymbolInfo,
@@ -239,6 +258,7 @@ sealed class ApprovalRequestDetailsV2 {
     ) : ApprovalRequestDetailsV2()
 
     data class PolygonWithdrawalRequest(
+        val type: String,
         val wallet: WalletInfo,
         val amount: Amount,
         val symbolInfo: EvmSymbolInfo,
@@ -249,17 +269,23 @@ sealed class ApprovalRequestDetailsV2 {
     ) : ApprovalRequestDetailsV2()
 
     data class Login(
+        val type: String,
         val jwtToken: String,
         val email: String,
         val name: String,
     ) : ApprovalRequestDetailsV2()
 
-    object PasswordReset : ApprovalRequestDetailsV2()
+    data class PasswordReset(
+        val type: String,
+    ) : ApprovalRequestDetailsV2()
 
     data class VaultInvitation(
+        val type: String,
         val vaultGuid: String,
         val vaultName: String,
     ) : ApprovalRequestDetailsV2()
+
+    object UnknownV2ApprovalType : ApprovalRequestDetailsV2()
 
     data class SampleRequest(
         val type: String = "SampleRequest",

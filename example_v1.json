@@ -1,0 +1,47 @@
+{
+  "id": "7b6a84f6-53cf-42d4-9923-997b26b3afef",
+  "submitDate": "2022-05-10T13:03:58.032+00:00",
+  "submitterName": "Sam Harris",
+  "submitterEmail": "tony@google.com",
+  "approvalTimeoutInSeconds": 1800,
+  "numberOfDispositionsRequired": 1,
+  "numberOfApprovalsReceived": 0,
+  "numberOfDeniesReceived": 0,
+  "details": {
+    "type": "WalletCreation",
+    "accountSlot": 0,
+    "accountInfo": {
+      "identifier": "b0cc02d2-0af4-4736-be6e-d6e0d2fc1271",
+      "name": "SamDev",
+      "accountType": "BalanceAccount",
+      "chain": "ethereum"
+    },
+    "approvalPolicy": {
+      "approvalsRequired": 2,
+      "approvalTimeout": 10800000,
+      "approvers": [
+        {
+          "slotId": 9,
+          "value": {
+            "publicKey": "AithTQwaVwvvamSk15Kon4e8rU1Jw79Wjo5Fop61yUfw",
+            "name": "Zakarie Ortiz",
+            "email": "tony@google.com"
+          }
+        },
+        {
+          "slotId": 10,
+          "value": {
+            "publicKey": "BrEiGBArXzSXkNmyTKiNb754qqqHHYi26Dh4F2ypnJR5",
+            "name": "Sam Harris",
+            "email": "tony@google.com"
+          }
+        }
+      ]
+    },
+    "whitelistEnabled": "Off",
+    "dappsEnabled": "Off",
+    "addressBookSlot": 0,
+    "stakingValidator": null,
+    "signingData": null
+  }
+}
