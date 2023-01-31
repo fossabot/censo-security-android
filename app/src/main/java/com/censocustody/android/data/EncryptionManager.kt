@@ -234,45 +234,33 @@ class EncryptionManagerImpl @Inject constructor(
     ): List<ApprovalSignature> {
         val rootSeed = BaseWrapper.decode(retrieveRootSeed(email = email, cipher = cipher))
         val keys = createAllKeys(rootSeed)
-        val signatures = mutableListOf<ApprovalSignature>()
 
-        for (signable in dataToSign) {
+        return dataToSign.mapNotNull { signable ->
             when (signable) {
                 is SignableDataResult.Bitcoin -> {
-                    val bitcoinSignedData = mutableListOf<String>()
-                    for (item in signable.dataToSign) {
-                        val signedData = keys.bitcoinKey.signData(item)
-                        bitcoinSignedData.add(BaseWrapper.encodeToBase64(signedData))
+                    val bitcoinSignedData = signable.dataToSign.mapNotNull {
+                        val signedData = keys.bitcoinKey.signData(it)
+                        BaseWrapper.encodeToBase64(signedData)
                     }
-                    signatures.add(
-                        ApprovalSignature.BitcoinSignatures(bitcoinSignedData)
-                    )
+                    ApprovalSignature.BitcoinSignatures(bitcoinSignedData)
                 }
                 is SignableDataResult.Ethereum -> {
                     val signedData = keys.ethereumKey.signData(signable.dataToSign)
                     val signature = BaseWrapper.encodeToBase64(signedData)
-                    signatures.add(ApprovalSignature.EthereumSignature(signature))
+                    ApprovalSignature.EthereumSignature(signature)
                 }
                 is SignableDataResult.Offchain -> {
                     val signedData = keys.censoKey.signData(signable.dataToSign)
                     val signature = BaseWrapper.encodeToBase64(signedData)
-                    signatures.add(
-                        ApprovalSignature.NoChainSignature(
-                            signedData = BaseWrapper.encodeToBase64(signable.dataToSend),
-                            signature = signature
-                        )
+                    ApprovalSignature.NoChainSignature(
+                        signedData = BaseWrapper.encodeToBase64(signable.dataToSend),
+                        signature = signature
                     )
                 }
-                is SignableDataResult.Device -> {
-                    //Device key signatures are single access and handled in signApprovalDispositionForDeviceKey
-                }
-                is SignableDataResult.Polygon -> {
-                    //todo: this needs to be done with polygon key. Not currently part of keys.
-                }
+                is SignableDataResult.Device -> null
+                is SignableDataResult.Polygon -> null
             }
         }
-
-        return signatures.toList()
     }
 
     override fun signSolanaApprovalDispositionMessage(
