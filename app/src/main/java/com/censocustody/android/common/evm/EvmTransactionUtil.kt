@@ -17,7 +17,7 @@ enum class Operation {
     CALL,
     DELEGATECALL;
 
-    fun toByteArray() = this.ordinal.toBigInteger().toByteArray()
+    fun toByteArray() : ByteArray = this.ordinal.toBigInteger().toByteArray()
 }
 
 object EvmTransactionUtil {

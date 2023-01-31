@@ -398,8 +398,3 @@ sealed class ApprovalRequestDetailsV2 {
 
     }
 }
-
-data class ApprovalDispositionRequestV2(
-    val approvalDisposition: ApprovalDisposition,
-    val signatures: List<ApprovalSignature>
-)
