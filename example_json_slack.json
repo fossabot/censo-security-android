@@ -1,0 +1,59 @@
+{
+  "id": "1f752fde-e42b-40e2-95cd-0cbd807e2220",
+  "submitDate": "2023-01-13T16:41:36.877+00:00",
+  "submitterName": "User 1",
+  "submitterEmail": "authorized1@org1",
+  "approvalTimeoutInSeconds": 18000,
+  "numberOfDispositionsRequired": 2,
+  "numberOfApprovalsReceived": 1,
+  "numberOfDeniesReceived": 0,
+  "vaultName": "Test Organization 1",
+  "initiationOnly": false,
+  "details": {
+    "type": "SolanaWalletCreation",
+    "accountSlot": 0,
+    "accountInfo": {
+      "identifier": "f4493d20-4183-48e5-9924-1561019aba5b",
+      "name": "Account 1",
+      "accountType": "BalanceAccount",
+      "chain": "solana"
+    },
+    "approvalPolicy": {
+      "approvalsRequired": 1,
+      "approvalTimeout": 3600000,
+      "approvers": [
+        {
+          "slotId": 0,
+          "value": {
+            "publicKey": "89uQgZ25SYExFywtcmxHDegmS3JAE1CtSq8xuz6dduSn",
+            "name": "User 1",
+            "email": "authorized1@org1",
+            "nameHashIsEmpty": false,
+            "jpegThumbnail": "...",
+            "userImageGuid": "2dd0e929-a1a5-4d6d-a22e-2cb623311171"
+          }
+        }
+      ]
+    },
+    "whitelistEnabled": "Off",
+    "dappsEnabled": "Off",
+    "addressBookSlot": 0,
+    "stakingValidator": null,
+    "fee": null,
+    "signingData": {
+      "type": "solana",
+      "feePayer": "9BS6KgtEKFsqrTjBDfN5kvBHMmEDing3ezS6mCwZVfcE",
+      "walletProgramId": "akiePJ4SyQrd5oALGwtiHPo6AAY6ftbugMVCEXSw8c2",
+      "multisigOpAccountAddress": "G9ZM3MsF5ZAa2tuxYujxobB5H4W2h1f9Ft6G2USKCjw2",
+      "walletAddress": "D3UxvdSrGAR53oKWM822C5NaxkjzeP2hfHJLXRgzdvws",
+      "nonceAccountAddresses": [
+        "DvtJCgLzA6zuAwDXeGfcRxDSfaMoCBGFL3ozdhjPKpRw"
+      ],
+      "nonceAccountAddressesSlot": 230,
+      "initiator": "89uQgZ25SYExFywtcmxHDegmS3JAE1CtSq8xuz6dduSn",
+      "strikeFeeAmount": 0,
+      "feeAccountGuidHash": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=",
+      "walletGuidHash": "hPtevNFchjAXl/ilqF9wvZtyM6HhCfj0m62JRq/S0jc="
+    }
+  }
+}
