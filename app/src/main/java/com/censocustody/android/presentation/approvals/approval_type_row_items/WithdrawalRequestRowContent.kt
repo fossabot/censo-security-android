@@ -13,18 +13,9 @@ import com.censocustody.android.data.models.approval.ApprovalRequestDetails
 import com.censocustody.android.presentation.approval_detail.approval_type_detail_items.WithdrawalRequestDetailParameterProvider
 
 @Composable
-fun WithdrawalRequestRowContent(withdrawalRequest: ApprovalRequestDetails.WithdrawalRequest) {
-    val symbolAndAmountInfo = withdrawalRequest.symbolAndAmountInfo
-
-    val header = withdrawalRequest.getHeader(LocalContext.current)
-    val subtitle = if (symbolAndAmountInfo.replacementFee == null) {
-        symbolAndAmountInfo.getUSDEquivalentText(context = LocalContext.current, hideSymbol = true)
-    } else {
-        LocalContext.current.getString(R.string.bump_fee_request_approval_subtitle, symbolAndAmountInfo.amount, symbolAndAmountInfo.symbolInfo.symbol)
-    }
-    val fromAccount = withdrawalRequest.account.name
-    val toAccount = withdrawalRequest.destination.name
-
+fun WithdrawalRequestRowContent(
+    header: String, subtitle: String, fromAccount: String, toAccount: String
+) {
     TransferConversionContent(
         header = header,
         subtitle = subtitle,
@@ -37,5 +28,10 @@ fun WithdrawalRequestRowContent(withdrawalRequest: ApprovalRequestDetails.Withdr
 @Preview
 @Composable
 fun WithdrawalRequestRowContentPreview(@PreviewParameter(WithdrawalRequestDetailParameterProvider::class) request: ApprovalRequestDetails.WithdrawalRequest) {
-    WithdrawalRequestRowContent(request)
+    WithdrawalRequestRowContent(
+        header = "Header",
+        subtitle = "Subtitle",
+        fromAccount = "Main Account",
+        toAccount = "Other Account"
+    )
 }

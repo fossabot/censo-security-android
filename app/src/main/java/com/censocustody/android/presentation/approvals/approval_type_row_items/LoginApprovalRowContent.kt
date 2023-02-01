@@ -11,14 +11,11 @@ import com.censocustody.android.presentation.approval_detail.approval_type_detai
 import com.censocustody.android.presentation.approvals.ApprovalRowContentHeader
 
 @Composable
-fun LoginApprovalRowContent(loginApproval: ApprovalRequestDetails.LoginApprovalRequest) {
-    val header = loginApproval.getHeader(LocalContext.current)
+fun LoginApprovalRowContent(header: String, email: String?) {
     ApprovalRowContentHeader(header = header, bottomSpacing = 8)
 
-    val userEmail : String? = if(loginApproval.email.isNullOrEmpty()) null else loginApproval.email
-
-    if (!userEmail.isNullOrEmpty()) {
-        ApprovalSubtitle(text = userEmail)
+    if (!email.isNullOrEmpty()) {
+        ApprovalSubtitle(text = email)
         Spacer(modifier = Modifier.height(20.dp))
     } else {
         Spacer(modifier = Modifier.height(16.dp))
