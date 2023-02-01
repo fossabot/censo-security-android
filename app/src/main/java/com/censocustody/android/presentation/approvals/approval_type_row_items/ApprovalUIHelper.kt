@@ -1,6 +1,7 @@
 package com.censocustody.android.presentation.approvals.approval_type_row_items
 
 import android.content.Context
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -17,6 +18,10 @@ import com.censocustody.android.ui.theme.GreyText
 import com.censocustody.android.data.models.approval.ApprovalRequestDetails.*
 import com.censocustody.android.data.models.approvalV2.ApprovalRequestDetailsV2
 import com.censocustody.android.presentation.components.RowData
+import java.text.DecimalFormat
+import java.text.DecimalFormatSymbols
+import java.text.NumberFormat
+import java.util.*
 
 fun ApprovalRequestDetails.getHeader(context: Context): String {
     return when (this) {
@@ -351,6 +356,136 @@ fun List<SlotSignerInfo>.retrieveSlotRowData(): MutableList<RowData> {
     return approversList
 }
 
+fun ApprovalRequestDetailsV2.walletCreationAccountName() =
+    when (this) {
+        is ApprovalRequestDetailsV2.BitcoinWalletCreation -> {
+            this.name
+        }
+        is ApprovalRequestDetailsV2.EthereumWalletCreation -> {
+            this.name
+        }
+        is ApprovalRequestDetailsV2.PolygonWalletCreation -> {
+            this.name
+        }
+        else -> ""
+    }
+
+fun ApprovalRequestDetailsV2.walletNameOldAccountName() =
+    when (this) {
+        is ApprovalRequestDetailsV2.EthereumWalletNameUpdate -> {
+            this.wallet.name
+        }
+        is ApprovalRequestDetailsV2.PolygonWalletNameUpdate -> {
+            this.wallet.name
+        }
+        else -> ""
+    }
+
+fun ApprovalRequestDetailsV2.walletNameNewAccountName() =
+    when (this) {
+        is ApprovalRequestDetailsV2.EthereumWalletNameUpdate -> {
+            this.newName
+        }
+        is ApprovalRequestDetailsV2.PolygonWalletNameUpdate -> {
+            this.newName
+        }
+        else -> ""
+    }
+
+fun ApprovalRequestDetailsV2.whitelistUpdateName() =
+    when (this) {
+        is ApprovalRequestDetailsV2.EthereumWalletWhitelistUpdate -> {
+            wallet.name
+        }
+        is ApprovalRequestDetailsV2.PolygonWalletWhitelistUpdate -> {
+            wallet.name
+        }
+        else -> ""
+    }
+
+fun ApprovalRequestDetailsV2.walletSettingsUpdateName() =
+    when (this) {
+        is ApprovalRequestDetailsV2.EthereumWalletSettingsUpdate -> {
+            wallet.name
+        }
+        is ApprovalRequestDetailsV2.PolygonWalletSettingsUpdate -> {
+            wallet.name
+        }
+        else -> ""
+    }
+
+fun ApprovalRequestDetailsV2.withdrawalRequestSubtitle(context: Context): String =
+    when (this) {
+        is ApprovalRequestDetailsV2.BitcoinWithdrawalRequest -> {
+            val symbolAndAmountInfo = symbolInfo
+            if (replacementFee == null) {
+                getUSDEquivalentTextV2(
+                    context = context,
+                    usdEquivalent = amount.usdEquivalent,
+                    hideSymbol = true
+                )
+            } else {
+                context.getString(
+                    R.string.bump_fee_request_approval_subtitle,
+                    amount,
+                    symbolAndAmountInfo.symbol
+                )
+            }
+        }
+        is ApprovalRequestDetailsV2.EthereumWithdrawalRequest -> {
+            getUSDEquivalentTextV2(
+                context = context,
+                usdEquivalent = amount.usdEquivalent,
+                hideSymbol = true
+            )
+        }
+        is ApprovalRequestDetailsV2.PolygonWithdrawalRequest -> {
+            getUSDEquivalentTextV2(
+                context = context,
+                usdEquivalent = amount.usdEquivalent,
+                hideSymbol = true
+            )
+        }
+        else -> ""
+    }
+
+fun ApprovalRequestDetailsV2.withdrawalRequestFromAndToAccount() =
+    when (this) {
+        is ApprovalRequestDetailsV2.BitcoinWithdrawalRequest -> Pair(wallet.name, destination.name)
+        is ApprovalRequestDetailsV2.EthereumWithdrawalRequest -> Pair(wallet.name, destination.name)
+        is ApprovalRequestDetailsV2.PolygonWithdrawalRequest -> Pair(wallet.name, destination.name)
+        else -> Pair("", "")
+    }
+
+
+fun ApprovalRequestDetailsV2.transferPolicyUpdateName() =
+    when (this) {
+        is ApprovalRequestDetailsV2.EthereumTransferPolicyUpdate -> wallet.name
+        is ApprovalRequestDetailsV2.PolygonTransferPolicyUpdate -> wallet.name
+        else -> ""
+    }
+
+fun formattedUSDEquivalentV2(usdEquivalent: String?, hideSymbol: Boolean = true): String {
+    if (usdEquivalent == null) {
+        return ""
+    }
+
+    val decimal = usdEquivalent.toBigDecimal()
+    return usdFormatterV2(hideSymbol).format(decimal)
+}
+
+fun getUSDEquivalentTextV2(context: Context, usdEquivalent: String?, hideSymbol: Boolean = false) =
+    "${formattedUSDEquivalentV2(hideSymbol = hideSymbol, usdEquivalent = usdEquivalent)} ${context.getString(R.string.usd_equivalent)}"
+
+private fun usdFormatterV2(hideSymbol: Boolean = true): DecimalFormat {
+    val formatter = NumberFormat.getCurrencyInstance(Locale.US) as DecimalFormat
+    if (hideSymbol) {
+        val symbols: DecimalFormatSymbols = formatter.decimalFormatSymbols
+        symbols.currencySymbol = ""
+        formatter.decimalFormatSymbols = symbols
+    }
+    return formatter
+}
 
 //MAPPING OLD TYPES TO NEW TYPES FOR WHEN CLAUSES
 //when(this) {
