@@ -139,20 +139,21 @@ class CryptographyManagerImpl : CryptographyManager {
         )
 
         val paramBuilder = KeyGenParameterSpec.Builder(
-            keyName,
-            KeyProperties.PURPOSE_AGREE_KEY or KeyProperties.PURPOSE_SIGN or KeyProperties.PURPOSE_VERIFY
+            keyName, KeyProperties.PURPOSE_SIGN or KeyProperties.PURPOSE_VERIFY
         )
 
-        val parameterSpec = paramBuilder
-            .setAlgorithmParameterSpec(ECGenParameterSpec(SECP_256_R1))
-            .setDigests(
+        paramBuilder.apply {
+            setAlgorithmParameterSpec(ECGenParameterSpec(SECP_256_R1))
+            setDigests(
                 KeyProperties.DIGEST_SHA256
             )
-            .setUserAuthenticationRequired(true)
-            .setUserAuthenticationParameters(5, KeyProperties.AUTH_BIOMETRIC_STRONG)
-            .setRandomizedEncryptionRequired(true)
-            .setIsStrongBoxBacked(!BuildConfig.DEBUG)
-            .build()
+            setUserAuthenticationRequired(true)
+            setInvalidatedByBiometricEnrollment(true)
+            setRandomizedEncryptionRequired(true)
+            setIsStrongBoxBacked(!BuildConfig.DEBUG)
+        }
+
+        val parameterSpec = paramBuilder.build()
 
         kpg.initialize(parameterSpec)
 

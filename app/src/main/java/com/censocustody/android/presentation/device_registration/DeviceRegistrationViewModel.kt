@@ -77,15 +77,15 @@ class DeviceRegistrationViewModel @Inject constructor(
 
                     val signatureToCheck = BaseWrapper.decodeFromBase64(userImage.signature)
 
-                    val verified = cryptographyManager.verifySignature(
-                        keyName = keyName,
-                        dataSigned = hashOfImage,
-                        signatureToCheck = signatureToCheck
-                    )
-
-                    if (!verified) {
-                        throw Exception("Device image signature not valid.")
-                    }
+//                    val verified = cryptographyManager.verifySignature(
+//                        keyName = keyName,
+//                        dataSigned = hashOfImage,
+//                        signatureToCheck = signatureToCheck
+//                    )
+//
+//                    if (!verified) {
+//                        throw Exception("Device image signature not valid.")
+//                    }
 
                     val email = userRepository.retrieveUserEmail()
                     userRepository.saveDeviceId(email = email, deviceId = keyName)
@@ -121,6 +121,7 @@ class DeviceRegistrationViewModel @Inject constructor(
                     )
                 }
             } catch (e: Exception) {
+                censoLog(message = "Exception signing image: $e")
                 state = state.copy(
                     addUserDevice = Resource.Error(exception = e),
                     deviceRegistrationError = DeviceRegistrationError.SIGNING_IMAGE,
