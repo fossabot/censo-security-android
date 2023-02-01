@@ -13,13 +13,11 @@ import com.censocustody.android.presentation.approvals.ApprovalContentHeader
 
 @Composable
 fun BalanceAccountNameUpdateRowContent(
-    accountNameUpdate: ApprovalRequestDetails.BalanceAccountNameUpdate
+    header: String,
+    oldName: String,
+    newName: String
 ) {
-    val header = accountNameUpdate.getHeader(LocalContext.current)
-    val fromAccount = accountNameUpdate.accountInfo.name
-    val toAccount = accountNameUpdate.newAccountName
-
-    val fromToText = buildFromToDisplayText(from = fromAccount, to = toAccount, LocalContext.current)
+    val fromToText = buildFromToDisplayText(from = oldName, to = newName, LocalContext.current)
 
     ApprovalContentHeader(header = header, topSpacing = 16, bottomSpacing = 8)
     ApprovalSubtitle(text = fromToText, fontSize = 20.sp)
