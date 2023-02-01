@@ -8,15 +8,17 @@ import com.censocustody.android.data.models.RegisterApprovalDisposition
 import com.censocustody.android.data.models.approval.ApprovalDispositionRequest
 import com.censocustody.android.data.models.approval.InitiationRequest
 import com.censocustody.android.data.models.approval.ApprovalRequest
+import com.censocustody.android.data.models.approvalV2.ApprovalDispositionRequestV2
+import com.censocustody.android.data.models.approvalV2.ApprovalRequestV2
 import javax.inject.Inject
 
 interface ApprovalsRepository {
-    suspend fun getApprovalRequests(): Resource<List<ApprovalRequest?>>
+    suspend fun getApprovalRequests(): Resource<List<ApprovalRequestV2?>>
     suspend fun approveOrDenyDisposition(
         requestId: String,
         registerApprovalDisposition: RegisterApprovalDisposition,
         cryptoObject: CryptoObject
-    ): Resource<ApprovalDispositionRequest.RegisterApprovalDispositionBody>
+    ): Resource<ApprovalDispositionRequestV2.RegisterApprovalDispositionV2Body>
     suspend fun approveOrDenyInitiation(
         requestId: String,
         initialDisposition: InitiationDisposition,
@@ -30,14 +32,14 @@ class ApprovalsRepositoryImpl @Inject constructor(
     private val userRepository: UserRepository
 ) : ApprovalsRepository, BaseRepository() {
 
-    override suspend fun getApprovalRequests(): Resource<List<ApprovalRequest?>> =
+    override suspend fun getApprovalRequests(): Resource<List<ApprovalRequestV2?>> =
         retrieveApiResource { api.getApprovalRequests() }
 
     override suspend fun approveOrDenyDisposition(
         requestId: String,
         registerApprovalDisposition: RegisterApprovalDisposition,
         cryptoObject: CryptoObject,
-    ): Resource<ApprovalDispositionRequest.RegisterApprovalDispositionBody> {
+    ): Resource<ApprovalDispositionRequestV2.RegisterApprovalDispositionV2Body> {
         // Helper method anyItemNull() will check if any of the disposition properties are null,
         // this allows us to use !! operator later in this method without worrying of NPE
         if (registerApprovalDisposition.anyItemNull()) {
@@ -50,23 +52,22 @@ class ApprovalsRepositoryImpl @Inject constructor(
             return Resource.Error(censoError = CensoError.MissingUserEmailError())
         }
 
-        val approvalDispositionRequest = ApprovalDispositionRequest(
+        val approvalDispositionRequestV2 = ApprovalDispositionRequestV2(
             requestId = requestId,
             approvalDisposition = registerApprovalDisposition.approvalDisposition!!,
-            nonces = registerApprovalDisposition.nonces!!,
             email = userEmail,
             requestType = registerApprovalDisposition.approvalRequestType!!
         )
 
         val registerApprovalDispositionBody = try {
-                approvalDispositionRequest.convertToApiBody(encryptionManager, cryptoObject)
+            approvalDispositionRequestV2.convertToApiBody(encryptionManager, cryptoObject)
         } catch (e: Exception) {
             return Resource.Error(censoError = CensoError.SigningDataError())
         }
 
         return retrieveApiResource {
             api.approveOrDenyDisposition(
-                requestId = approvalDispositionRequest.requestId,
+                requestId = approvalDispositionRequestV2.requestId,
                 registerApprovalDispositionBody = registerApprovalDispositionBody
             )
         }
