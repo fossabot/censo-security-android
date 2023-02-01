@@ -16,6 +16,8 @@ import com.censocustody.android.R
 import com.censocustody.android.common.convertSecondsIntoCountdownText
 import com.censocustody.android.data.models.approval.ApprovalRequestDetails
 import com.censocustody.android.data.models.approval.ApprovalRequest
+import com.censocustody.android.data.models.approvalV2.ApprovalRequestDetailsV2
+import com.censocustody.android.data.models.approvalV2.ApprovalRequestV2
 import com.censocustody.android.presentation.approval_detail.approval_type_detail_items.*
 import com.censocustody.android.presentation.approvals.approval_type_row_items.*
 import com.censocustody.android.ui.theme.*
@@ -142,104 +144,154 @@ fun VaultTitle(
 
 @Composable
 fun ApprovalRowContent(
-    type: ApprovalRequestDetails,
-    approval: ApprovalRequest,
+    type: ApprovalRequestDetailsV2,
+    approval: ApprovalRequestV2,
 ) {
-    when (type) {
-        is ApprovalRequestDetails.WithdrawalRequest ->
-            WithdrawalRequestRowContent(withdrawalRequest = type)
-        is ApprovalRequestDetails.ConversionRequest ->
-            ConversionRequestRowContent(conversionRequest = type)
-        is ApprovalRequestDetails.SignersUpdate ->
-            SignersUpdateRowContent(signersUpdate = type)
-        is ApprovalRequestDetails.WalletCreation ->
-            WalletCreationRowContent(walletCreation = type)
-        is ApprovalRequestDetails.DAppTransactionRequest ->
-            DAppTransactionRowContent(dAppTransactionRequest = type)
-        is ApprovalRequestDetails.LoginApprovalRequest ->
-            LoginApprovalRowContent(loginApproval = type)
-        is ApprovalRequestDetails.CreateAddressBookEntry ->
-            CreateOrUpdateAddressBookEntryRowContent(
-                header = type.getHeader(LocalContext.current),
-                entryName = type.name
-            )
-        is ApprovalRequestDetails.DeleteAddressBookEntry ->
-            CreateOrUpdateAddressBookEntryRowContent(
-                header = type.getHeader(LocalContext.current),
-                entryName = type.name
-            )
-        is ApprovalRequestDetails.BalanceAccountAddressWhitelistUpdate ->
-            BalanceAccountAddressWhitelistUpdateRowContent(accountAddressWhitelistUpdate = type)
-        is ApprovalRequestDetails.BalanceAccountNameUpdate ->
-            BalanceAccountNameUpdateRowContent(accountNameUpdate = type)
-        is ApprovalRequestDetails.BalanceAccountPolicyUpdate ->
-            BalanceAccountPolicyUpdateRowContent(accountPolicyUpdate = type)
-        is ApprovalRequestDetails.BalanceAccountSettingsUpdate ->
-            BalanceAccountSettingsUpdateRowContent(accountSettingsUpdate = type)
-        is ApprovalRequestDetails.DAppBookUpdate -> DAppBookUpdateRowContent()
-        is ApprovalRequestDetails.WalletConfigPolicyUpdate ->
-            WalletConfigPolicyUpdateRowContent(walletConfigPolicyUpdate = type)
-        is ApprovalRequestDetails.WrapConversionRequest ->
-            WrapConversionRequestRowContent(wrapConversionRequest = type)
-        is ApprovalRequestDetails.AcceptVaultInvitation ->
-            AcceptVaultInvitationRowContent(acceptVaultInvitation = type)
-        is ApprovalRequestDetails.PasswordReset ->
-            PasswordResetRowContent(passwordReset = type, email = approval.submitterEmail ?: "")
+    when(type) {
+        is ApprovalRequestDetailsV2.BitcoinWalletCreation -> TODO()
+        is ApprovalRequestDetailsV2.BitcoinWithdrawalRequest -> TODO()
+        is ApprovalRequestDetailsV2.CreateAddressBookEntry -> TODO()
+        is ApprovalRequestDetailsV2.DeleteAddressBookEntry -> TODO()
+        is ApprovalRequestDetailsV2.EthereumTransferPolicyUpdate -> TODO()
+        is ApprovalRequestDetailsV2.EthereumWalletCreation -> TODO()
+        is ApprovalRequestDetailsV2.EthereumWalletNameUpdate -> TODO()
+        is ApprovalRequestDetailsV2.EthereumWalletSettingsUpdate -> TODO()
+        is ApprovalRequestDetailsV2.EthereumWalletWhitelistUpdate -> TODO()
+        is ApprovalRequestDetailsV2.EthereumWithdrawalRequest -> TODO()
+        is ApprovalRequestDetailsV2.Login -> TODO()
+        ApprovalRequestDetailsV2.PasswordReset -> TODO()
+        is ApprovalRequestDetailsV2.PolygonTransferPolicyUpdate -> TODO()
+        is ApprovalRequestDetailsV2.PolygonWalletCreation -> TODO()
+        is ApprovalRequestDetailsV2.PolygonWalletNameUpdate -> TODO()
+        is ApprovalRequestDetailsV2.PolygonWalletSettingsUpdate -> TODO()
+        is ApprovalRequestDetailsV2.PolygonWalletWhitelistUpdate -> TODO()
+        is ApprovalRequestDetailsV2.PolygonWithdrawalRequest -> TODO()
+        ApprovalRequestDetailsV2.UnknownApprovalType -> TODO()
+        is ApprovalRequestDetailsV2.VaultInvitation -> TODO()
+        is ApprovalRequestDetailsV2.VaultPolicyUpdate -> TODO()
         else -> {
             val header = type.getHeader(LocalContext.current)
             Text(text = header)
         }
     }
+
+//    when (type) {
+//        is ApprovalRequestDetails.WithdrawalRequest ->
+//            WithdrawalRequestRowContent(withdrawalRequest = type)
+//        is ApprovalRequestDetails.ConversionRequest ->
+//            ConversionRequestRowContent(conversionRequest = type)
+//        is ApprovalRequestDetails.SignersUpdate ->
+//            SignersUpdateRowContent(signersUpdate = type)
+//        is ApprovalRequestDetails.WalletCreation ->
+//            WalletCreationRowContent(walletCreation = type)
+//        is ApprovalRequestDetails.DAppTransactionRequest ->
+//            DAppTransactionRowContent(dAppTransactionRequest = type)
+//        is ApprovalRequestDetails.LoginApprovalRequest ->
+//            LoginApprovalRowContent(loginApproval = type)
+//        is ApprovalRequestDetails.CreateAddressBookEntry ->
+//            CreateOrUpdateAddressBookEntryRowContent(
+//                header = type.getHeader(LocalContext.current),
+//                entryName = type.name
+//            )
+//        is ApprovalRequestDetails.DeleteAddressBookEntry ->
+//            CreateOrUpdateAddressBookEntryRowContent(
+//                header = type.getHeader(LocalContext.current),
+//                entryName = type.name
+//            )
+//        is ApprovalRequestDetails.BalanceAccountAddressWhitelistUpdate ->
+//            BalanceAccountAddressWhitelistUpdateRowContent(accountAddressWhitelistUpdate = type)
+//        is ApprovalRequestDetails.BalanceAccountNameUpdate ->
+//            BalanceAccountNameUpdateRowContent(accountNameUpdate = type)
+//        is ApprovalRequestDetails.BalanceAccountPolicyUpdate ->
+//            BalanceAccountPolicyUpdateRowContent(accountPolicyUpdate = type)
+//        is ApprovalRequestDetails.BalanceAccountSettingsUpdate ->
+//            BalanceAccountSettingsUpdateRowContent(accountSettingsUpdate = type)
+//        is ApprovalRequestDetails.DAppBookUpdate -> DAppBookUpdateRowContent()
+//        is ApprovalRequestDetails.WalletConfigPolicyUpdate ->
+//            WalletConfigPolicyUpdateRowContent(walletConfigPolicyUpdate = type)
+//        is ApprovalRequestDetails.WrapConversionRequest ->
+//            WrapConversionRequestRowContent(wrapConversionRequest = type)
+//        is ApprovalRequestDetails.AcceptVaultInvitation ->
+//            AcceptVaultInvitationRowContent(acceptVaultInvitation = type)
+//        is ApprovalRequestDetails.PasswordReset ->
+//            PasswordResetRowContent(passwordReset = type, email = approval.submitterEmail ?: "")
+//        else -> {
+//            val header = type.getHeader(LocalContext.current)
+//            Text(text = header)
+//        }
+//    }
 }
 
 @Composable
-fun ApprovalDetailContent(approval: ApprovalRequest, type: ApprovalRequestDetails) {
+fun ApprovalDetailContent(approval: ApprovalRequestV2, type: ApprovalRequestDetailsV2) {
     when (type) {
-        is ApprovalRequestDetails.WalletCreation ->
-            BalanceAccountDetailContent(walletCreation = type, approvalsReceived = approval.numberOfApprovalsReceived.toString())
-        is ApprovalRequestDetails.ConversionRequest ->
-            ConversionDetailContent(conversionRequest = type)
-        is ApprovalRequestDetails.DAppTransactionRequest ->
-            DAppTransactionDetailContent(dAppTransactionRequest = type)
-        is ApprovalRequestDetails.LoginApprovalRequest -> {
-            LoginApprovalDetailContent(loginApproval = type)
-        }
-        is ApprovalRequestDetails.SignersUpdate ->
-            SignersUpdateDetailContent(signersUpdate = type)
-        is ApprovalRequestDetails.WithdrawalRequest ->
-            WithdrawalRequestDetailContent(withdrawalRequest = type)
-        is ApprovalRequestDetails.CreateAddressBookEntry ->
-            CreateOrDeleteAddressBookEntryDetailContent(
-                header = type.getHeader(LocalContext.current),
-                chain = type.chain,
-                entryName = type.name,
-                entryAddress = type.address
-            )
-        is ApprovalRequestDetails.DeleteAddressBookEntry ->
-            CreateOrDeleteAddressBookEntryDetailContent(
-                header = type.getHeader(LocalContext.current),
-                chain = type.chain,
-                entryName = type.name,
-                entryAddress = type.address
-            )
-        is ApprovalRequestDetails.BalanceAccountAddressWhitelistUpdate ->
-            BalanceAccountAddressWhitelistUpdateDetailContent(addressWhitelistUpdate = type)
-        is ApprovalRequestDetails.BalanceAccountNameUpdate ->
-            BalanceAccountNameUpdateDetailContent(accountNameUpdate = type)
-        is ApprovalRequestDetails.BalanceAccountPolicyUpdate ->
-            BalanceAccountPolicyUpdateDetailContent(accountPolicyUpdate = type)
-        is ApprovalRequestDetails.BalanceAccountSettingsUpdate ->
-            BalanceAccountSettingsUpdateDetailContent(accountSettingsUpdate = type)
-        is ApprovalRequestDetails.DAppBookUpdate -> DAppBookUpdateDetailContent()
-        is ApprovalRequestDetails.WalletConfigPolicyUpdate ->
-            WalletConfigPolicyUpdateDetailContent(walletConfigPolicyUpdate = type)
-        is ApprovalRequestDetails.WrapConversionRequest ->
-            WrapConversionRequestDetailContent(wrapConversionRequest = type)
-        is ApprovalRequestDetails.AcceptVaultInvitation ->
-            AcceptVaultInvitationDetailContent(acceptVaultInvitation = type)
-        is ApprovalRequestDetails.PasswordReset ->
-            PasswordResetDetailContent(passwordReset = type)
+        is ApprovalRequestDetailsV2.VaultInvitation -> TODO()
+        is ApprovalRequestDetailsV2.BitcoinWalletCreation -> TODO()
+        is ApprovalRequestDetailsV2.BitcoinWithdrawalRequest -> TODO()
+        is ApprovalRequestDetailsV2.CreateAddressBookEntry -> TODO()
+        is ApprovalRequestDetailsV2.DeleteAddressBookEntry -> TODO()
+        is ApprovalRequestDetailsV2.EthereumTransferPolicyUpdate -> TODO()
+        is ApprovalRequestDetailsV2.EthereumWalletCreation -> TODO()
+        is ApprovalRequestDetailsV2.EthereumWalletNameUpdate -> TODO()
+        is ApprovalRequestDetailsV2.EthereumWalletSettingsUpdate -> TODO()
+        is ApprovalRequestDetailsV2.EthereumWalletWhitelistUpdate -> TODO()
+        is ApprovalRequestDetailsV2.EthereumWithdrawalRequest -> TODO()
+        is ApprovalRequestDetailsV2.Login -> TODO()
+        ApprovalRequestDetailsV2.PasswordReset -> TODO()
+        is ApprovalRequestDetailsV2.PolygonTransferPolicyUpdate -> TODO()
+        is ApprovalRequestDetailsV2.PolygonWalletCreation -> TODO()
+        is ApprovalRequestDetailsV2.PolygonWalletNameUpdate -> TODO()
+        is ApprovalRequestDetailsV2.PolygonWalletSettingsUpdate -> TODO()
+        is ApprovalRequestDetailsV2.PolygonWalletWhitelistUpdate -> TODO()
+        is ApprovalRequestDetailsV2.PolygonWithdrawalRequest -> TODO()
+        ApprovalRequestDetailsV2.UnknownApprovalType -> TODO()
+        is ApprovalRequestDetailsV2.VaultPolicyUpdate -> TODO()
         else -> Text(text = stringResource(R.string.unknown_approval_item))
+
+//        is ApprovalRequestDetails.WalletCreation ->
+//            BalanceAccountDetailContent(walletCreation = type, approvalsReceived = approval.numberOfApprovalsReceived.toString())
+//        is ApprovalRequestDetails.ConversionRequest ->
+//            ConversionDetailContent(conversionRequest = type)
+//        is ApprovalRequestDetails.DAppTransactionRequest ->
+//            DAppTransactionDetailContent(dAppTransactionRequest = type)
+//        is ApprovalRequestDetails.LoginApprovalRequest -> {
+//            LoginApprovalDetailContent(loginApproval = type)
+//        }
+//        is ApprovalRequestDetails.SignersUpdate ->
+//            SignersUpdateDetailContent(signersUpdate = type)
+//        is ApprovalRequestDetails.WithdrawalRequest ->
+//            WithdrawalRequestDetailContent(withdrawalRequest = type)
+//        is ApprovalRequestDetails.CreateAddressBookEntry ->
+//            CreateOrDeleteAddressBookEntryDetailContent(
+//                header = type.getHeader(LocalContext.current),
+//                chain = type.chain,
+//                entryName = type.name,
+//                entryAddress = type.address
+//            )
+//        is ApprovalRequestDetails.DeleteAddressBookEntry ->
+//            CreateOrDeleteAddressBookEntryDetailContent(
+//                header = type.getHeader(LocalContext.current),
+//                chain = type.chain,
+//                entryName = type.name,
+//                entryAddress = type.address
+//            )
+//        is ApprovalRequestDetails.BalanceAccountAddressWhitelistUpdate ->
+//            BalanceAccountAddressWhitelistUpdateDetailContent(addressWhitelistUpdate = type)
+//        is ApprovalRequestDetails.BalanceAccountNameUpdate ->
+//            BalanceAccountNameUpdateDetailContent(accountNameUpdate = type)
+//        is ApprovalRequestDetails.BalanceAccountPolicyUpdate ->
+//            BalanceAccountPolicyUpdateDetailContent(accountPolicyUpdate = type)
+//        is ApprovalRequestDetails.BalanceAccountSettingsUpdate ->
+//            BalanceAccountSettingsUpdateDetailContent(accountSettingsUpdate = type)
+//        is ApprovalRequestDetails.DAppBookUpdate -> DAppBookUpdateDetailContent()
+//        is ApprovalRequestDetails.WalletConfigPolicyUpdate ->
+//            WalletConfigPolicyUpdateDetailContent(walletConfigPolicyUpdate = type)
+//        is ApprovalRequestDetails.WrapConversionRequest ->
+//            WrapConversionRequestDetailContent(wrapConversionRequest = type)
+//        is ApprovalRequestDetails.AcceptVaultInvitation ->
+//            AcceptVaultInvitationDetailContent(acceptVaultInvitation = type)
+//        is ApprovalRequestDetails.PasswordReset ->
+//            PasswordResetDetailContent(passwordReset = type)
     }
 }
 

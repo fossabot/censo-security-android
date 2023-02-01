@@ -15,6 +15,7 @@ import com.censocustody.android.data.models.approval.*
 import com.censocustody.android.data.models.approval.AccountType.*
 import com.censocustody.android.ui.theme.GreyText
 import com.censocustody.android.data.models.approval.ApprovalRequestDetails.*
+import com.censocustody.android.data.models.approvalV2.ApprovalRequestDetailsV2
 import com.censocustody.android.presentation.components.RowData
 
 fun ApprovalRequestDetails.getHeader(context: Context): String {
@@ -81,6 +82,134 @@ fun ApprovalRequestDetails.getHeader(context: Context): String {
     }
 }
 
+fun ApprovalRequestDetailsV2.getHeader(context: Context) =
+
+    when (this) {
+        //WalletConfigPolicyUpdate
+        is ApprovalRequestDetailsV2.VaultPolicyUpdate -> {
+            context.getString(R.string.wallet_config_policy_update_approval_header)
+        }
+        //Wallet Creation
+        is ApprovalRequestDetailsV2.BitcoinWalletCreation,
+        is ApprovalRequestDetailsV2.EthereumWalletCreation,
+        is ApprovalRequestDetailsV2.PolygonWalletCreation -> {
+            context.getString(R.string.balance_account_creation_approval_header)
+            //todo: check if we can re-add this
+//            if (accountInfo.accountType == BalanceAccount) {
+//                "${context.getString(R.string.add)} ${
+//                    accountInfo.chain?.label() ?: context.getString(
+//                        R.string.solana
+//                    )
+//                } ${context.getString(R.string.wallet_title)}"
+//            } else {
+//                context.getString(R.string.balance_account_creation_approval_header)
+//            }
+        }
+        //BalanceAccountNameUpdate
+        is ApprovalRequestDetailsV2.EthereumWalletNameUpdate,
+        is ApprovalRequestDetailsV2.PolygonWalletNameUpdate -> {
+            context.getString(R.string.balance_account_name_update_approval_header)
+        }
+
+        //CreateAddressBookEntry
+        is ApprovalRequestDetailsV2.CreateAddressBookEntry -> {
+            context.getString(R.string.add_address_book_update_approval_header)
+        }
+
+        //DeleteAddressBookEntry
+        is ApprovalRequestDetailsV2.DeleteAddressBookEntry -> {
+            context.getString(R.string.remove_address_book_update_approval_header)
+        }
+
+        //BalanceAccountAddressWhitelistUpdate
+        is ApprovalRequestDetailsV2.EthereumWalletWhitelistUpdate,
+        is ApprovalRequestDetailsV2.PolygonWalletWhitelistUpdate -> {
+            context.getString(R.string.balance_account_address_whitelist_update_approval_header)
+        }
+
+        //BalanceAccountSettingsUpdate
+        is ApprovalRequestDetailsV2.EthereumWalletSettingsUpdate,
+        is ApprovalRequestDetailsV2.PolygonWalletSettingsUpdate -> {
+            val change = when (this) {
+                is ApprovalRequestDetailsV2.EthereumWalletSettingsUpdate -> {
+                    this.changeValue()
+                }
+                is ApprovalRequestDetailsV2.PolygonWalletSettingsUpdate -> {
+                    this.changeValue()
+                }
+                else -> null
+            }
+            if (change is SettingsChange.DAppsEnabled && !change.dappsEnabled) {
+                context.getString(R.string.disable_dapp_balance_account_settings_update_approval_header)
+            } else if (change is SettingsChange.DAppsEnabled && change.dappsEnabled) {
+                context.getString(R.string.enable_dapp_balance_account_settings_update_approval_header)
+            } else if (change is SettingsChange.WhitelistEnabled && !change.whiteListEnabled) {
+                context.getString(R.string.disable_transfer_balance_account_settings_update_approval_header)
+            } else {
+                context.getString(R.string.enable_transfer_balance_account_settings_update_approval_header)
+            }
+        }
+
+        //WithdrawalRequest
+        is ApprovalRequestDetailsV2.BitcoinWithdrawalRequest,
+        is ApprovalRequestDetailsV2.EthereumWithdrawalRequest,
+        is ApprovalRequestDetailsV2.PolygonWithdrawalRequest -> {
+            var replacementFee: ApprovalRequestDetailsV2.Amount? = null
+            var amount: ApprovalRequestDetailsV2.Amount? = null
+            var symbol: String? = null
+
+            when (this) {
+                is ApprovalRequestDetailsV2.BitcoinWithdrawalRequest -> {
+                    replacementFee = this.replacementFee
+                    amount = this.amount
+                    symbol = this.symbolInfo.symbol
+                }
+                is ApprovalRequestDetailsV2.EthereumWithdrawalRequest -> {
+                    replacementFee = this.fee
+                    amount = this.amount
+                    symbol = this.symbolInfo.symbol
+                }
+                is ApprovalRequestDetailsV2.PolygonWithdrawalRequest -> {
+                    replacementFee = this.fee
+                    amount = this.amount
+                    symbol = this.symbolInfo.symbol
+                }
+                else -> null
+            }
+
+            if (replacementFee == null) {
+                context.getString(R.string.withdrawal_request_approval_header, amount, symbol)
+            } else {
+                context.getString(R.string.bump_fee_request_approval_header)
+            }
+        }
+
+        //BalanceAccountPolicyUpdate
+        is ApprovalRequestDetailsV2.EthereumTransferPolicyUpdate,
+        is ApprovalRequestDetailsV2.PolygonTransferPolicyUpdate -> {
+            context.getString(R.string.balance_account_policy_update_approval_header)
+        }
+
+        //LoginApproval
+        is ApprovalRequestDetailsV2.Login -> {
+            context.getString(R.string.login_approval_header)
+        }
+
+        //PasswordReset
+        is ApprovalRequestDetailsV2.PasswordReset -> {
+            context.getString(R.string.password_reset_approval_header)
+        }
+
+        //AcceptVaultInvitation
+        is ApprovalRequestDetailsV2.VaultInvitation -> {
+            context.getString(R.string.accept_vault_invitation_approval_header)
+        }
+        ApprovalRequestDetailsV2.UnknownApprovalType -> {
+            context.getString(R.string.unknown_approval_header)
+        }
+    }
+
+
 fun ApprovalRequestDetails.getDialogMessages(
     context: Context,
     approvalDisposition: ApprovalDisposition,
@@ -92,7 +221,17 @@ fun ApprovalRequestDetails.getDialogMessages(
     return Pair(mainText, secondaryText)
 }
 
-fun ApprovalRequestDetails.getApprovalRowMetaData(vaultName: String?): ApprovalRowMetaData {
+fun ApprovalRequestDetailsV2.getDialogMessages(
+    context: Context,
+    approvalDisposition: ApprovalDisposition,
+) : Pair<String, String> {
+    val mainText = approvalDisposition.getDialogMessage(context, false)
+    val secondaryText = this.getHeader(context)
+
+    return Pair(mainText, secondaryText)
+}
+
+fun ApprovalRequestDetailsV2.getApprovalRowMetaData(vaultName: String?): ApprovalRowMetaData {
     if (this.isUnknownTypeOrUIUnimplemented()) {
         return ApprovalRowMetaData(
             vaultName = null
@@ -104,12 +243,12 @@ fun ApprovalRequestDetails.getApprovalRowMetaData(vaultName: String?): ApprovalR
     )
 }
 
-fun ApprovalRequestDetails.isUnknownTypeOrUIUnimplemented() =
-    this is UnknownApprovalType || this is DAppBookUpdate
+fun ApprovalRequestDetailsV2.isUnknownTypeOrUIUnimplemented() =
+    this is ApprovalRequestDetailsV2.UnknownApprovalType
 
-fun ApprovalRequestDetails.getRowTitle(vaultName: String?): String? =
+fun ApprovalRequestDetailsV2.getRowTitle(vaultName: String?): String? =
     when (this) {
-        is AcceptVaultInvitation -> null
+        is ApprovalRequestDetailsV2.VaultInvitation -> null
         else -> vaultName
     }
 
@@ -212,3 +351,74 @@ fun List<SlotSignerInfo>.retrieveSlotRowData(): MutableList<RowData> {
     return approversList
 }
 
+
+//MAPPING OLD TYPES TO NEW TYPES FOR WHEN CLAUSES
+//when(this) {
+//    //WalletConfigPolicyUpdate
+//    is ApprovalRequestDetailsV2.VaultPolicyUpdate -> {
+//    }
+//    //Wallet Creation
+//    is ApprovalRequestDetailsV2.BitcoinWalletCreation,
+//    is ApprovalRequestDetailsV2.EthereumWalletCreation,
+//    is ApprovalRequestDetailsV2.PolygonWalletCreation -> {
+//
+//    }
+//    //BalanceAccountNameUpdate
+//    is ApprovalRequestDetailsV2.EthereumWalletNameUpdate,
+//    is ApprovalRequestDetailsV2.PolygonWalletNameUpdate -> {
+//
+//    }
+//
+//    //CreateAddressBookEntry
+//    is ApprovalRequestDetailsV2.CreateAddressBookEntry -> {
+//        context.getString(R.string.add_address_book_update_approval_header)
+//    }
+//
+//    //DeleteAddressBookEntry
+//    is ApprovalRequestDetailsV2.DeleteAddressBookEntry -> {
+//        context.getString(R.string.remove_address_book_update_approval_header)
+//    }
+//
+//    //BalanceAccountAddressWhitelistUpdate
+//    is ApprovalRequestDetailsV2.EthereumWalletWhitelistUpdate,
+//    is ApprovalRequestDetailsV2.PolygonWalletWhitelistUpdate -> {
+//        context.getString(R.string.balance_account_address_whitelist_update_approval_header)
+//    }
+//
+//    //BalanceAccountSettingsUpdate
+//    is ApprovalRequestDetailsV2.EthereumWalletSettingsUpdate,
+//    is ApprovalRequestDetailsV2.PolygonWalletSettingsUpdate -> {
+//
+//    }
+//
+//    //WithdrawalRequest
+//    is ApprovalRequestDetailsV2.BitcoinWithdrawalRequest,
+//    is ApprovalRequestDetailsV2.EthereumWithdrawalRequest,
+//    is ApprovalRequestDetailsV2.PolygonWithdrawalRequest -> {
+//
+//    }
+//
+//    //DAppTransactionRequest
+//
+//    //BalanceAccountPolicyUpdate
+//    is ApprovalRequestDetailsV2.EthereumTransferPolicyUpdate,
+//    is ApprovalRequestDetailsV2.PolygonTransferPolicyUpdate -> {
+//
+//    }
+//
+//    //LoginApproval
+//    is ApprovalRequestDetailsV2.Login -> {
+//
+//    }
+//
+//    //PasswordReset
+//    is ApprovalRequestDetailsV2.PasswordReset -> {
+//
+//    }
+//
+//    //AcceptVaultInvitation
+//    is ApprovalRequestDetailsV2.VaultInvitation -> {
+//
+//    }
+//    ApprovalRequestDetailsV2.UnknownApprovalType -> TODO()
+//}
