@@ -163,6 +163,7 @@ class DeviceRegistrationViewModel @Inject constructor(
                     deviceRegistrationError = DeviceRegistrationError.SIGNING_IMAGE,
                     capturingDeviceKey = Resource.Uninitialized
                 )
+                censoLog(message = e.toString())
             }
         }
     }

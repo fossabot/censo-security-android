@@ -40,6 +40,8 @@ data class VerifyUser(
 
         //loop over all chains a user should have, and make sure backend covers them
         for (chain in Chain.values()) {
+            //todo: remove solana chain
+            if (chain.label() == Chain.solana.label()) continue
             if (chain !in chainsSavedOnBackend) {
                 return true
             }
@@ -61,7 +63,6 @@ data class WalletPublicKey(
     fun convertWalletTypeToLocalType() =
         when (chain) {
             Chain.bitcoin -> StoredKeyData.BITCOIN_KEY
-            Chain.solana -> StoredKeyData.SOLANA_KEY
             Chain.ethereum -> StoredKeyData.ETHEREUM_KEY
             Chain.censo -> StoredKeyData.CENSO_KEY
             else -> ""

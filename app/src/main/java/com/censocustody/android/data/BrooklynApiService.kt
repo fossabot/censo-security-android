@@ -10,6 +10,7 @@ import com.censocustody.android.data.models.*
 import com.censocustody.android.data.models.approval.*
 import com.censocustody.android.data.models.approvalV2.ApprovalDispositionRequestV2
 import com.censocustody.android.data.models.approvalV2.ApprovalRequestV2
+import com.censocustody.android.data.models.approvalV2.ApprovalRequestV2Deserializer
 import kotlinx.coroutines.runBlocking
 import okhttp3.*
 import okhttp3.logging.HttpLoggingInterceptor
@@ -37,7 +38,7 @@ interface BrooklynApiService {
             }
 
             val customGson = GsonBuilder()
-                .registerTypeAdapter(ApprovalRequest::class.java, ApprovalRequestDeserializer())
+                .registerTypeAdapter(ApprovalRequestV2::class.java, ApprovalRequestV2Deserializer())
                 .registerTypeAdapterFactory(TypeFactorySettings.approvalSignatureAdapterFactory)
                 .create()
 
@@ -69,7 +70,7 @@ interface BrooklynApiService {
     @Headers(AUTH_REQUIRED)
     suspend fun walletSigners(): RetrofitResponse<List<WalletSigner?>>
 
-    @POST("v3/wallet-signers")
+    @POST("v2/wallet-signers")
     @Headers(AUTH_REQUIRED)
     suspend fun addWalletSigner(@Body signers: Signers): RetrofitResponse<Signers>
 

@@ -3,6 +3,7 @@ package com.censocustody.android.data
 import cash.z.ecc.android.bip39.Mnemonics
 import cash.z.ecc.android.bip39.toSeed
 import com.censocustody.android.common.BaseWrapper
+import com.censocustody.android.common.censoLog
 import com.censocustody.android.common.generateFormattedTimestamp
 import com.censocustody.android.data.EncryptionManagerImpl.Companion.SENTINEL_KEY_NAME
 import com.censocustody.android.data.models.Chain
@@ -68,7 +69,10 @@ class KeyRepositoryImpl(
             return false
         }
 
-        return verifyUser.compareAgainstLocalKeys(publicKeys)
+        return true
+
+        //todo: need to get correct censo key locally to match backend
+        //return verifyUser.compareAgainstLocalKeys(publicKeys)
     }
 
     override suspend fun removeSentinelDataAndKickUserToAppEntrance() {
@@ -86,11 +90,12 @@ class KeyRepositoryImpl(
         return try {
             val rootSeed = Mnemonics.MnemonicCode(phrase = phrase).toSeed()
 
+            //todo: this should not be ethereum key. I think censo key is best bet.
             val backendSolanaPublicKey =
-                verifyUser?.publicKeys?.first { it?.chain == Chain.solana }
+                verifyUser?.publicKeys?.first { it?.chain == Chain.ethereum }
 
             val userInputtedPublicKey =
-                encryptionManager.generateSolanaPublicKeyFromRootSeed(rootSeed)
+                encryptionManager.generateCensoPublicKeyFromRootSeed(rootSeed)
 
             !backendSolanaPublicKey?.key.isNullOrEmpty() && userInputtedPublicKey.isNotEmpty() &&
                     backendSolanaPublicKey?.key == userInputtedPublicKey

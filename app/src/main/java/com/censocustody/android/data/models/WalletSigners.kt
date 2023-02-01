@@ -3,7 +3,6 @@ package com.censocustody.android.data.models
 import com.censocustody.android.data.models.StoredKeyData.Companion.BITCOIN_KEY
 import com.censocustody.android.data.models.StoredKeyData.Companion.CENSO_KEY
 import com.censocustody.android.data.models.StoredKeyData.Companion.ETHEREUM_KEY
-import com.censocustody.android.data.models.StoredKeyData.Companion.SOLANA_KEY
 
 data class WalletSigner(
     val publicKey: String?,
@@ -14,13 +13,12 @@ data class WalletSigner(
 fun HashMap<String, String>.mapToPublicKeysList(): List<WalletSigner> {
     if (this.isEmpty()) return emptyList()
 
-    return map {
+    return mapNotNull {
         val walletType = when (it.key) {
             BITCOIN_KEY -> Chain.bitcoin
-            SOLANA_KEY -> Chain.solana
             ETHEREUM_KEY -> Chain.ethereum
             CENSO_KEY -> Chain.censo
-            else -> throw Exception("Missing chain locally")
+            else -> null
         }
         WalletSigner(
             publicKey = it.value,
