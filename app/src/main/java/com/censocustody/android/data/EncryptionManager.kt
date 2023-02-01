@@ -15,7 +15,6 @@ import com.censocustody.android.data.models.StoredKeyData
 import com.censocustody.android.data.models.StoredKeyData.Companion.BITCOIN_KEY
 import com.censocustody.android.data.models.StoredKeyData.Companion.CENSO_KEY
 import com.censocustody.android.data.models.StoredKeyData.Companion.ETHEREUM_KEY
-import com.censocustody.android.data.models.StoredKeyData.Companion.SOLANA_KEY
 import com.censocustody.android.data.models.SupplyDappInstruction
 import com.censocustody.android.data.models.Signers
 import com.censocustody.android.data.models.WalletSigner
@@ -141,7 +140,7 @@ interface EncryptionManager {
 
     fun saveV3PublicKeys(rootSeed: ByteArray, email: String): HashMap<String, String>
 
-    fun generateSolanaPublicKeyFromRootSeed(rootSeed: ByteArray): String
+    fun generateCensoPublicKeyFromRootSeed(rootSeed: ByteArray): String
     //endregion
 
     //region Work with device keystore
@@ -551,17 +550,25 @@ class EncryptionManagerImpl @Inject constructor(
         )
 
         return hashMapOf(
-            SOLANA_KEY to solanaPublicKey,
             BITCOIN_KEY to bitcoinPublicKey,
             ETHEREUM_KEY to ethereumPublicKey,
             CENSO_KEY to censoPublicKey
         )
     }
 
-    override fun generateSolanaPublicKeyFromRootSeed(rootSeed: ByteArray): String {
+    //todo: need to create correct censo key. Creating wrong one locally.
+    override fun generateCensoPublicKeyFromRootSeed(rootSeed: ByteArray): String {
         val keys = createAllKeys(rootSeed)
 
-        return BaseWrapper.encode(keys.solanaKey.getPublicKeyBytes())
+        val bitcoinPublicKey = keys.bitcoinKey.getBase58ExtendedPublicKey()
+        val ethereumPublicKey = keys.ethereumKey.getBase58UncompressedPublicKey()
+        val censoPublicKey = keys.censoKey.getBase58UncompressedPublicKey()
+
+        censoLog(message = "bitcoin key: $bitcoinPublicKey")
+        censoLog(message = "ethereum key: $ethereumPublicKey")
+        censoLog(message = "censo key: $censoPublicKey")
+
+        return ethereumPublicKey
     }
 
     private fun createV3PublicKeyJson(
@@ -572,7 +579,6 @@ class EncryptionManagerImpl @Inject constructor(
     ): String {
         val mapOfKeys: HashMap<String, String> =
             hashMapOf(
-                SOLANA_KEY to solanaPublicKey,
                 BITCOIN_KEY to bitcoinPublicKey,
                 ETHEREUM_KEY to ethereumPublicKey,
                 CENSO_KEY to censoPublicKey
