@@ -1,8 +1,9 @@
 package com.censocustody.android.data.models.approvalV2
 
+import android.content.Context
+import com.censocustody.android.R
 import com.censocustody.android.common.UriWrapper
 import com.censocustody.android.common.evm.EvmAddress
-import com.censocustody.android.data.models.ApprovalDisposition
 import com.censocustody.android.data.models.Chain
 import com.censocustody.android.data.models.approval.*
 import com.censocustody.android.data.models.approval.ApprovalSignature.Companion.approvalSignatureAdapterFactory
@@ -60,6 +61,13 @@ data class ApprovalRequestV2(
             .registerTypeAdapterFactory(approvalSignatureAdapterFactory)
             .create()
             .toJson(this)
+
+    fun approveButtonCaption(context: Context) =
+        if (initiationOnly) {
+            context.getString(R.string.initiate)
+        } else {
+            context.getString(R.string.approve)
+        }
 }
 
 sealed class ApprovalRequestDetailsV2 {
@@ -193,7 +201,17 @@ sealed class ApprovalRequestDetailsV2 {
         val feeSymbolInfo: EvmSymbolInfo,
         val currentGuardAddress: String,
         val signingData: SigningData.EthereumSigningData
-    ) : ApprovalRequestDetailsV2()
+    ) : ApprovalRequestDetailsV2() {
+        fun changeValue(): ApprovalRequestDetails.SettingsChange? {
+            return if (whitelistEnabled != null && dappsEnabled == null) {
+                ApprovalRequestDetails.SettingsChange.WhitelistEnabled(whiteListEnabled = whitelistEnabled == BooleanSetting.On)
+            } else if (dappsEnabled != null && whitelistEnabled == null) {
+                ApprovalRequestDetails.SettingsChange.DAppsEnabled(dappsEnabled = dappsEnabled == BooleanSetting.On)
+            } else {
+                null
+            }
+        }
+    }
 
     data class PolygonWalletSettingsUpdate(
         val wallet: WalletInfo,
@@ -203,8 +221,17 @@ sealed class ApprovalRequestDetailsV2 {
         val feeSymbolInfo: EvmSymbolInfo,
         val currentGuardAddress: String,
         val signingData: SigningData.PolygonSigningData
-    ) : ApprovalRequestDetailsV2()
-
+    ) : ApprovalRequestDetailsV2() {
+        fun changeValue(): ApprovalRequestDetails.SettingsChange? {
+            return if (whitelistEnabled != null && dappsEnabled == null) {
+                ApprovalRequestDetails.SettingsChange.WhitelistEnabled(whiteListEnabled = whitelistEnabled == BooleanSetting.On)
+            } else if (dappsEnabled != null && whitelistEnabled == null) {
+                ApprovalRequestDetails.SettingsChange.DAppsEnabled(dappsEnabled = dappsEnabled == BooleanSetting.On)
+            } else {
+                null
+            }
+        }
+    }
 
     data class EthereumTransferPolicyUpdate(
         val wallet: WalletInfo,

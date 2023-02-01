@@ -8,6 +8,7 @@ import com.censocustody.android.data.KeyRepository
 import com.censocustody.android.data.UserRepository
 import com.censocustody.android.data.models.approval.ApprovalRequest
 import com.censocustody.android.data.models.CipherRepository
+import com.censocustody.android.data.models.approvalV2.ApprovalRequestV2
 import com.censocustody.android.presentation.common_approvals.CommonApprovalsViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
@@ -28,8 +29,7 @@ class ApprovalsViewModel @Inject constructor(
 ) {
     //region Method Overrides
     override fun setShouldDisplayConfirmDispositionDialog(
-        approval: ApprovalRequest?,
-        isInitiationRequest: Boolean,
+        approval: ApprovalRequestV2?,
         isApproving: Boolean,
         dialogMessages: Pair<String, String>,
     ) {
@@ -63,7 +63,6 @@ class ApprovalsViewModel @Inject constructor(
             approvals = emptyList(),
             approvalsResultRequest = Resource.Uninitialized,
             selectedApproval = null,
-            multipleAccounts = null
         )
     }
 
