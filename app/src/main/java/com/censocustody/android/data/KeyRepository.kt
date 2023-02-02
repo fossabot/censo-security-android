@@ -69,10 +69,7 @@ class KeyRepositoryImpl(
             return false
         }
 
-        return true
-
-        //todo: need to get correct censo key locally to match backend
-        //return verifyUser.compareAgainstLocalKeys(publicKeys)
+        return verifyUser.compareAgainstLocalKeys(publicKeys)
     }
 
     override suspend fun removeSentinelDataAndKickUserToAppEntrance() {
@@ -87,20 +84,18 @@ class KeyRepositoryImpl(
         phrase: String,
         verifyUser: VerifyUser?
     ): Boolean {
-        return try {
+        try {
             val rootSeed = Mnemonics.MnemonicCode(phrase = phrase).toSeed()
 
-            //todo: this should not be ethereum key. I think censo key is best bet.
-            val backendSolanaPublicKey =
-                verifyUser?.publicKeys?.first { it?.chain == Chain.ethereum }
+            val publicKeys = encryptionManager.publicKeysFromRootSeed(rootSeed)
 
-            val userInputtedPublicKey =
-                encryptionManager.generateCensoPublicKeyFromRootSeed(rootSeed)
+            if (publicKeys.isEmpty()) {
+                return false
+            }
 
-            !backendSolanaPublicKey?.key.isNullOrEmpty() && userInputtedPublicKey.isNotEmpty() &&
-                    backendSolanaPublicKey?.key == userInputtedPublicKey
+            return verifyUser?.compareAgainstLocalKeys(publicKeys) == true
         } catch (e: Exception) {
-            false
+            return false
         }
     }
 

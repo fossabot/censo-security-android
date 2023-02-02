@@ -139,8 +139,6 @@ interface EncryptionManager {
     fun retrieveRootSeed(email: String, cipher: Cipher): String
 
     fun saveV3PublicKeys(rootSeed: ByteArray, email: String): HashMap<String, String>
-
-    fun generateCensoPublicKeyFromRootSeed(rootSeed: ByteArray): String
     //endregion
 
     //region Work with device keystore
@@ -154,6 +152,7 @@ interface EncryptionManager {
     fun saveSentinelData(email: String, cipher: Cipher)
     fun retrieveSentinelData(email: String, cipher: Cipher): String
     fun getSignatureForDeviceSigning(keyName: String) : Signature
+    fun publicKeysFromRootSeed(rootSeed: ByteArray): HashMap<String, String>
 
     //endregion
 }
@@ -574,17 +573,6 @@ class EncryptionManagerImpl @Inject constructor(
         )
     }
 
-    //todo: need to create correct censo key. Creating wrong one locally.
-    override fun generateCensoPublicKeyFromRootSeed(rootSeed: ByteArray): String {
-        val keys = createAllKeys(rootSeed)
-
-        val bitcoinPublicKey = keys.bitcoinKey.getBase58ExtendedPublicKey()
-        val ethereumPublicKey = keys.ethereumKey.getBase58UncompressedPublicKey()
-        val censoPublicKey = keys.censoKey.getBase58UncompressedPublicKey()
-
-        return ethereumPublicKey
-    }
-
     private fun createV3PublicKeyJson(
         bitcoinPublicKey: String,
         ethereumPublicKey: String,
@@ -690,23 +678,27 @@ class EncryptionManagerImpl @Inject constructor(
         return cryptographyManager.getSignatureForDeviceSigning(keyName)
     }
 
-    private fun retrieveStoredKeys(
-        json: String,
-        cipher: Cipher,
-    ): HashMap<String, String> {
-        val storedKeyData = StoredKeyData.fromJson(json)
+    override fun publicKeysFromRootSeed(rootSeed: ByteArray): HashMap<String, String> {
+        val keys = createAllKeys(rootSeed)
+        val publicKeys = publicKeys(keys)
 
-        val encryptedKeysData = storedKeyData.encryptedKeysData
-        val decryptedKeyJson = cryptographyManager.decryptData(
-            BaseWrapper.decode(encryptedKeysData),
-            cipher
+        return hashMapOf(
+            BITCOIN_KEY to publicKeys.bitcoinPublicKey,
+            ETHEREUM_KEY to publicKeys.ethereumPublicKey,
+            CENSO_KEY to publicKeys.censoPublicKey
         )
+    }
 
-        //this is coming out as UTF-8 because we cannot store JSON in Base58
-        val keys =
-            StoredKeyData.mapFromJson(String(decryptedKeyJson, charset = Charset.forName("UTF-8")))
+    private fun publicKeys(keys: AllKeys): AllPublicKeys {
+        val bitcoinPublicKey = keys.bitcoinKey.getBase58ExtendedPublicKey()
+        val ethereumPublicKey = keys.ethereumKey.getBase58UncompressedPublicKey()
+        val censoPublicKey = keys.censoKey.getBase58UncompressedPublicKey()
 
-        return keys
+        return AllPublicKeys(
+            bitcoinPublicKey = bitcoinPublicKey,
+            ethereumPublicKey = ethereumPublicKey,
+            censoPublicKey = censoPublicKey
+        )
     }
     //endregion
 
@@ -728,6 +720,12 @@ data class AllKeys(
     val bitcoinKey: Secp256k1HierarchicalKey,
     val ethereumKey: Secp256k1HierarchicalKey,
     val censoKey: Secp256k1HierarchicalKey
+)
+
+data class AllPublicKeys(
+    val bitcoinPublicKey: String,
+    val ethereumPublicKey: String,
+    val censoPublicKey: String
 )
 
 interface Signable {
