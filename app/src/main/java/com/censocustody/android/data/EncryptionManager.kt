@@ -552,13 +552,11 @@ class EncryptionManagerImpl @Inject constructor(
 
     override fun saveV3PublicKeys(rootSeed: ByteArray, email: String): HashMap<String, String> {
         val keys = createAllKeys(rootSeed)
-        val solanaPublicKey = BaseWrapper.encode(keys.solanaKey.getPublicKeyBytes())
         val bitcoinPublicKey = keys.bitcoinKey.getBase58ExtendedPublicKey()
         val ethereumPublicKey = keys.ethereumKey.getBase58UncompressedPublicKey()
         val censoPublicKey = keys.censoKey.getBase58UncompressedPublicKey()
 
         val keyDataAsJson = createV3PublicKeyJson(
-            solanaPublicKey = solanaPublicKey,
             bitcoinPublicKey = bitcoinPublicKey,
             ethereumPublicKey = ethereumPublicKey,
             censoPublicKey = censoPublicKey
@@ -592,7 +590,6 @@ class EncryptionManagerImpl @Inject constructor(
     }
 
     private fun createV3PublicKeyJson(
-        solanaPublicKey: String,
         bitcoinPublicKey: String,
         ethereumPublicKey: String,
         censoPublicKey: String
@@ -610,8 +607,6 @@ class EncryptionManagerImpl @Inject constructor(
     }
 
     private fun createAllKeys(rootSeed: ByteArray): AllKeys {
-        val solanaHierarchicalKey = Ed25519HierarchicalPrivateKey.fromRootSeed(rootSeed)
-
         val bitcoinHierarchicalKey = Secp256k1HierarchicalKey.fromRootSeed(
             rootSeed, Secp256k1HierarchicalKey.bitcoinDerivationPath
         )
@@ -625,7 +620,6 @@ class EncryptionManagerImpl @Inject constructor(
         )
 
         listOf(
-            solanaHierarchicalKey,
             bitcoinHierarchicalKey,
             ethereumHierarchicalKey,
             censoHierarchicalKey
@@ -634,7 +628,6 @@ class EncryptionManagerImpl @Inject constructor(
         }
 
         return AllKeys(
-            solanaKey = solanaHierarchicalKey,
             bitcoinKey = bitcoinHierarchicalKey,
             ethereumKey = ethereumHierarchicalKey,
             censoKey = censoHierarchicalKey
@@ -736,7 +729,6 @@ class EncryptionManagerImpl @Inject constructor(
 }
 
 data class AllKeys(
-    val solanaKey: Ed25519HierarchicalPrivateKey,
     val bitcoinKey: Secp256k1HierarchicalKey,
     val ethereumKey: Secp256k1HierarchicalKey,
     val censoKey: Secp256k1HierarchicalKey
