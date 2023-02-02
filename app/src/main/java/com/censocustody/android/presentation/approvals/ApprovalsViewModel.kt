@@ -3,11 +3,8 @@ package com.censocustody.android.presentation.approvals
 import androidx.lifecycle.viewModelScope
 import com.censocustody.android.common.Resource
 import com.censocustody.android.common.CensoCountDownTimer
-import com.censocustody.android.common.censoLog
 import com.censocustody.android.data.ApprovalsRepository
-import com.censocustody.android.data.KeyRepository
 import com.censocustody.android.data.UserRepository
-import com.censocustody.android.data.models.approval.ApprovalRequest
 import com.censocustody.android.data.models.CipherRepository
 import com.censocustody.android.data.models.approvalV2.ApprovalRequestV2
 import com.censocustody.android.presentation.common_approvals.CommonApprovalsViewModel
@@ -102,7 +99,6 @@ class ApprovalsViewModel @Inject constructor(
                         walletApprovalsResource.data ?: emptyList()
                     }
                     is Resource.Error -> {
-                        censoLog(message = "Error: ${walletApprovalsResource.exception}")
                         cachedApprovals
                     }
                     else -> {

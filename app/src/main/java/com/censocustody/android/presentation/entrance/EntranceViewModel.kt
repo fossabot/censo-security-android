@@ -204,7 +204,7 @@ class EntranceViewModel @Inject constructor(
             }
             needToUpdateKeysSavedOnBackend -> {
                 state = state.copy(
-                    userDestinationResult = Resource.Success(UserDestination.KEY_MANAGEMENT_RECOVERY)
+                    userDestinationResult = Resource.Success(UserDestination.KEY_MIGRATION)
                 )
                 return
             }
@@ -222,7 +222,7 @@ class EntranceViewModel @Inject constructor(
             }
             needToUploadPublicKeyData -> {
                 state = state.copy(
-                    userDestinationResult = Resource.Success(UserDestination.KEY_MANAGEMENT_RECOVERY)
+                    userDestinationResult = Resource.Success(UserDestination.REGENERATION)
                 )
                 return
             }

@@ -92,7 +92,7 @@ fun getSolanaWalletCreationRequest(nonceAccountAddresses: List<String>) : Wallet
             name = "Account 1",
             identifier = "c6055be1-a895-45a6-b0f3-fce261760b89",
             accountType = AccountType.BalanceAccount,
-            chain = Chain.solana,
+            chain = Chain.censo,
             address = null
         ),
         approvalPolicy = ApprovalPolicy(
@@ -403,7 +403,7 @@ fun getUnwrapConversionRequest(nonceAccountAddresses: List<String>) : ApprovalRe
 fun getCreateSolanaAddressBookEntry(nonceAccountAddresses: List<String>): ApprovalRequestDetails {
     return CreateAddressBookEntry(
         type = ApprovalType.CREATE_ADDRESS_BOOK_ENTRY_TYPE.value,
-        chain = Chain.solana,
+        chain = Chain.censo,
         slotId = 0,
         name = "My External Sol address",
         address = "2DQz5vWgs1PKxPDd9YaYKoemgFriRJqoFRniAQ7Wtuva",
@@ -447,7 +447,7 @@ fun getCreateEthereumAddressBookEntry(): ApprovalRequestDetails {
 fun getDeleteSolanaAddressBookEntry(nonceAccountAddresses: List<String>): ApprovalRequestDetails {
     return DeleteAddressBookEntry(
         type = ApprovalType.DELETE_ADDRESS_BOOK_ENTRY_TYPE.value,
-        chain = Chain.solana,
+        chain = Chain.censo,
         slotId = 0,
         name = "My External Sol address",
         address = "2DQz5vWgs1PKxPDd9YaYKoemgFriRJqoFRniAQ7Wtuva",

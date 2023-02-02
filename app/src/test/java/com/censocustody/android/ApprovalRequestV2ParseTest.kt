@@ -1,13 +1,24 @@
 package com.censocustody.android
 
-import com.google.gson.JsonElement
-import com.google.gson.JsonParser
 import com.censocustody.android.data.models.approval.*
 import com.censocustody.android.data.models.approvalV2.ApprovalRequestDetailsV2
 import com.censocustody.android.data.models.approvalV2.ApprovalRequestV2
 import com.censocustody.android.data.models.approvalV2.ApprovalRequestV2Deserializer
 import org.junit.Assert.*
 import org.junit.Test
+
+
+fun getFullListOfApprovalItems(): List<ApprovalRequestV2> {
+    val deserializer = ApprovalRequestV2Deserializer()
+
+    val allApprovalRequests = mutableListOf<ApprovalRequestV2>()
+    exampleRequests.forEach {
+        val approval = deserializer.toObjectWithParsedDetails(it)
+        allApprovalRequests.add(approval)
+    }
+
+    return allApprovalRequests
+}
 
 class ParseApprovalRequestV2Types {
 
@@ -94,17 +105,5 @@ class ParseApprovalRequestV2Types {
         assertNotNull(
             vaultPolicyApproval.details.toJson(),
         )
-    }
-
-    private fun getFullListOfApprovalItems(): List<ApprovalRequestV2> {
-        val deserializer = ApprovalRequestV2Deserializer()
-
-        val allApprovalRequests = mutableListOf<ApprovalRequestV2>()
-        exampleRequests.forEach {
-            val approval = deserializer.toObjectWithParsedDetails(it)
-            allApprovalRequests.add(approval)
-        }
-
-        return allApprovalRequests
     }
 }
