@@ -40,8 +40,6 @@ data class VerifyUser(
 
         //loop over all chains a user should have, and make sure backend covers them
         for (chain in Chain.values()) {
-            //todo: remove solana chain
-            if (chain.label() == Chain.solana.label()) continue
             if (chain !in chainsSavedOnBackend) {
                 return true
             }
