@@ -86,6 +86,16 @@ class ParseApprovalRequestV2Types {
 
     }
 
+    @Test
+    fun testParseVaultPolicy() {
+        val deserializer = ApprovalRequestV2Deserializer()
+        val vaultPolicyApproval = deserializer.toObjectWithParsedDetails(vaultPolicyJson)
+
+        assertNotNull(
+            vaultPolicyApproval.details.toJson(),
+        )
+    }
+
     private fun getFullListOfApprovalItems(): List<ApprovalRequestV2> {
         val deserializer = ApprovalRequestV2Deserializer()
 

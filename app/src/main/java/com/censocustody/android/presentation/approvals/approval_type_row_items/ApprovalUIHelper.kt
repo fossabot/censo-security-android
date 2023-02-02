@@ -160,23 +160,21 @@ fun ApprovalRequestDetailsV2.getHeader(context: Context) =
         is ApprovalRequestDetailsV2.EthereumWithdrawalRequest,
         is ApprovalRequestDetailsV2.PolygonWithdrawalRequest -> {
             var replacementFee: ApprovalRequestDetailsV2.Amount? = null
-            var amount: ApprovalRequestDetailsV2.Amount? = null
+            var amount: String? = null
             var symbol: String? = null
 
             when (this) {
                 is ApprovalRequestDetailsV2.BitcoinWithdrawalRequest -> {
                     replacementFee = this.replacementFee
-                    amount = this.amount
+                    amount = this.amount.value
                     symbol = this.symbolInfo.symbol
                 }
                 is ApprovalRequestDetailsV2.EthereumWithdrawalRequest -> {
-                    replacementFee = this.fee
-                    amount = this.amount
+                    amount = this.amount.value
                     symbol = this.symbolInfo.symbol
                 }
                 is ApprovalRequestDetailsV2.PolygonWithdrawalRequest -> {
-                    replacementFee = this.fee
-                    amount = this.amount
+                    amount = this.amount.value
                     symbol = this.symbolInfo.symbol
                 }
                 else -> null

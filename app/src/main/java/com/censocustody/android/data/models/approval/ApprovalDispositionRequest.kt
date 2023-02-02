@@ -392,6 +392,7 @@ data class ApprovalDispositionRequest(
                     is SigningData.EthereumSigningData ->
                         ApprovalSignature.EthereumSignature(
                             signature = signRequestWithEthereumKey(encryptionManager, cipher!!).signature,
+                            null
                         )
                 }
             }
