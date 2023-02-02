@@ -11,12 +11,10 @@ import androidx.compose.ui.unit.sp
 import com.censocustody.android.common.convertSecondsIntoReadableText
 import com.censocustody.android.common.toWalletName
 import com.censocustody.android.presentation.approvals.ApprovalContentHeader
-import com.censocustody.android.presentation.approvals.approval_type_row_items.retrieveSlotRowData
 import com.censocustody.android.presentation.components.FactRow
 import com.censocustody.android.presentation.components.FactsData
 import com.censocustody.android.R
 import com.censocustody.android.data.models.approvalV2.ApprovalRequestDetailsV2
-import com.censocustody.android.data.models.approvalV2.Slot
 import com.censocustody.android.presentation.approvals.approval_type_row_items.PolicyUpdateUIData
 import com.censocustody.android.presentation.approvals.approval_type_row_items.retrieveSlotSignerRowData
 import com.censocustody.android.presentation.components.RowData
@@ -51,7 +49,7 @@ fun BalanceAccountPolicyUpdateDetailContent(policyUpdateUIData: PolicyUpdateUIDa
 
 fun generateAccountPolicyUpdateRows(
     context: Context,
-    approvalsRequired: Int, approvalTimeout: Long, approvers: List<Slot<ApprovalRequestDetailsV2.Signer>>,
+    approvalsRequired: Int, approvalTimeout: Long, approvers: List<ApprovalRequestDetailsV2.Signer>,
 ) : List<FactsData>{
     val approverRowInfoData = mutableListOf<FactsData>()
     //region Approvals Row

@@ -17,7 +17,6 @@ import com.censocustody.android.data.models.approval.AccountType.*
 import com.censocustody.android.ui.theme.GreyText
 import com.censocustody.android.data.models.approval.ApprovalRequestDetails.*
 import com.censocustody.android.data.models.approvalV2.ApprovalRequestDetailsV2
-import com.censocustody.android.data.models.approvalV2.Slot
 import com.censocustody.android.presentation.approval_detail.approval_type_detail_items.WalletCreationUIData
 import com.censocustody.android.presentation.approval_detail.approval_type_detail_items.WhitelistUpdateUI
 import com.censocustody.android.presentation.approval_detail.approval_type_detail_items.WithdrawalRequestUI
@@ -329,15 +328,15 @@ fun List<DestinationAddress>.retrieveDestinationsRowData() : MutableList<RowData
     return destinationsList
 }
 
-fun List<Slot<ApprovalRequestDetailsV2.VaultSigner>>.retrieveSlotRowData(): MutableList<RowData> {
+fun List<ApprovalRequestDetailsV2.VaultSigner>.retrieveSlotRowData(): MutableList<RowData> {
     val approversList = mutableListOf<RowData>()
     if (isNotEmpty()) {
-        for (approver in this.sortedBy { it.value.name }) {
+        for (approver in this.sortedBy { it.name }) {
             approversList.add(
                 RowData(
-                    title = approver.value.name,
-                    value = approver.value.email,
-                    userImage = approver.value.jpegThumbnail,
+                    title = approver.name,
+                    value = approver.email,
+                    userImage = approver.jpegThumbnail,
                     userRow = true
                 ))
         }
@@ -345,37 +344,21 @@ fun List<Slot<ApprovalRequestDetailsV2.VaultSigner>>.retrieveSlotRowData(): Muta
     return approversList
 }
 
-fun List<Slot<ApprovalRequestDetailsV2.Signer>>.retrieveSlotSignerRowData(): MutableList<RowData> {
+fun List<ApprovalRequestDetailsV2.Signer>.retrieveSlotSignerRowData(): MutableList<RowData> {
     val approversList = mutableListOf<RowData>()
     if (isNotEmpty()) {
-        for (approver in this.sortedBy { it.value.name }) {
+        for (approver in this.sortedBy { it.name }) {
             approversList.add(
                 RowData(
-                    title = approver.value.name,
-                    value = approver.value.email,
-                    userImage = approver.value.jpegThumbnail,
+                    title = approver.name,
+                    value = approver.email,
+                    userImage = approver.jpegThumbnail,
                     userRow = true
                 ))
         }
     }
     return approversList
 }
-
-//fun List<SlotSignerInfo>.retrieveSlotRowData(): MutableList<RowData> {
-//    val approversList = mutableListOf<RowData>()
-//    if (isNotEmpty()) {
-//        for (approver in sortApprovers()) {
-//            approversList.add(
-//                RowData(
-//                    title = approver.value.name,
-//                    value = approver.value.email,
-//                    userImage = approver.value.jpegThumbnail,
-//                    userRow = true
-//                ))
-//        }
-//    }
-//    return approversList
-//}
 
 fun ApprovalRequestDetailsV2.walletCreationAccountName() =
     when (this) {
@@ -629,7 +612,7 @@ private fun usdFormatterV2(hideSymbol: Boolean = true): DecimalFormat {
 data class PolicyUpdateUIData(
     val header: String, val name: String,
     val approvalsRequired: Int, val approvalTimeout: Long,
-    val approvers: List<Slot<ApprovalRequestDetailsV2.Signer>>,
+    val approvers: List<ApprovalRequestDetailsV2.Signer>,
 )
 
 //MAPPING OLD TYPES TO NEW TYPES FOR WHEN CLAUSES
