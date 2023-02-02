@@ -2,7 +2,6 @@ package com.censocustody.android.data.models.approval
 
 import androidx.biometric.BiometricPrompt
 import com.censocustody.android.common.BaseWrapper.decodeFromBase64
-import com.censocustody.android.common.evm.EvmTransactionUtil
 import com.censocustody.android.data.EncryptionManager
 import com.censocustody.android.data.Signable
 import com.censocustody.android.data.SignedPayload
@@ -14,17 +13,12 @@ import com.censocustody.android.data.models.approval.TransactionInstruction.Comp
 import org.web3j.crypto.Hash
 import java.io.ByteArrayOutputStream
 import kotlin.Exception
-import com.censocustody.android.common.evm.Operation
 import com.censocustody.android.data.models.approval.ApprovalRequestDetails.Companion.INVALID_REQUEST_APPROVAL
 import com.censocustody.android.data.models.approval.ApprovalRequestDetails.Companion.UNKNOWN_REQUEST_APPROVAL
 import com.censocustody.android.data.models.approval.ApprovalRequestDetails.*
 import com.censocustody.android.data.models.approval.ApprovalRequestDetails.UnknownApprovalType.isDeviceKeyApprovalType
-import com.censocustody.android.data.models.evm.EvmTransferTransactionBuilder
-import java.nio.ByteBuffer
 import java.security.Signature
 import javax.crypto.Cipher
-import org.bouncycastle.util.encoders.Hex
-import java.math.BigInteger
 
 data class ApprovalDispositionRequest(
     val requestId: String,
@@ -371,7 +365,7 @@ data class ApprovalDispositionRequest(
 
         val signatureInfo: ApprovalSignature = when (requestType) {
             is LoginApprovalRequest, is PasswordReset, is AcceptVaultInvitation ->
-                ApprovalSignature.NoChainSignature(
+                ApprovalSignature.OffChainSignature(
                     signRequestWithDeviceKey(encryptionManager, signature!!)
                 )
             is WalletCreation -> getSignatureInfo(requestType.accountInfo.chain ?: Chain.censo, encryptionManager, cipher!!)
@@ -411,7 +405,7 @@ data class ApprovalDispositionRequest(
 
     private fun getSignatureInfo(chain: Chain, encryptionManager: EncryptionManager, cipher: Cipher): ApprovalSignature {
         return when (chain) {
-            Chain.bitcoin, Chain.ethereum -> ApprovalSignature.NoChainSignature(
+            Chain.bitcoin, Chain.ethereum -> ApprovalSignature.OffChainSignature(
                 signRequestWithCensoKey(encryptionManager, cipher)
             )
             else -> ApprovalSignature.SolanaSignature(

@@ -15,7 +15,7 @@ sealed class ApprovalSignature {
                 BitcoinSignatures::class.java, "bitcoin"
             ).registerSubtype(
                 EthereumSignature::class.java, "ethereum"
-            ).registerSubtype(NoChainSignature::class.java, "nochain")
+            ).registerSubtype(OffChainSignature::class.java, "offchain")
     }
 
     data class SolanaSignature(
@@ -38,7 +38,7 @@ sealed class ApprovalSignature {
         val offchainSignature: ApprovalSignature?,
     ) : ApprovalSignature()
 
-    data class NoChainSignature(
+    data class OffChainSignature(
         val signature: String,
         val signedData: String
     ) : ApprovalSignature() {

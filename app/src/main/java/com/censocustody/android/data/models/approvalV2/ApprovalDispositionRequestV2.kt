@@ -163,7 +163,7 @@ data class ApprovalDispositionRequestV2(
             is ApprovalRequestDetailsV2.EthereumTransferPolicyUpdate -> {
                 val startingPolicy = SafeTx.Policy(requestType.currentOnChainPolicy.owners, requestType.currentOnChainPolicy.threshold)
                 val targetPolicy = SafeTx.Policy(
-                    requestType.approvalPolicy.approvers.map { EvmTransactionUtil.getEthereumAddressFromBase58(it.value.publicKey) },
+                    requestType.approvalPolicy.approvers.map { EvmTransactionUtil.getEthereumAddressFromBase58(it.publicKey) },
                     requestType.approvalPolicy.approvalsRequired
                 )
                 val offchainDataToSend = requestType.toJson().toByteArray()
@@ -184,7 +184,7 @@ data class ApprovalDispositionRequestV2(
             is ApprovalRequestDetailsV2.PolygonTransferPolicyUpdate -> {
                 val startingPolicy = SafeTx.Policy(requestType.currentOnChainPolicy.owners, requestType.currentOnChainPolicy.threshold)
                 val targetPolicy = SafeTx.Policy(
-                    requestType.approvalPolicy.approvers.map { EvmTransactionUtil.getEthereumAddressFromBase58(it.value.publicKey) },
+                    requestType.approvalPolicy.approvers.map { EvmTransactionUtil.getEthereumAddressFromBase58(it.publicKey) },
                     requestType.approvalPolicy.approvalsRequired
                 )
                 val offchainDataToSend = requestType.toJson().toByteArray()
@@ -211,7 +211,7 @@ data class ApprovalDispositionRequestV2(
                                 .firstOrNull()?.let {
                                 val startingPolicy = SafeTx.Policy(it.owners, it.threshold)
                                 val targetPolicy = SafeTx.Policy(
-                                    requestType.approvalPolicy.approvers.mapNotNull { it.value.publicKeys.find { it.chain == Chain.ethereum }?.key?.let { EvmTransactionUtil.getEthereumAddressFromBase58(it) } },
+                                    requestType.approvalPolicy.approvers.mapNotNull { it.publicKeys.find { it.chain == Chain.ethereum }?.key?.let { EvmTransactionUtil.getEthereumAddressFromBase58(it) } },
                                     requestType.approvalPolicy.approvalsRequired
                                 )
                                 SignableDataResult.Ethereum(
