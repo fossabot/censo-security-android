@@ -62,11 +62,14 @@ data class ApprovalDispositionRequestV2(
             }
 
             is ApprovalRequestDetailsV2.BitcoinWithdrawalRequest -> {
-                listOf(SignableDataResult.Bitcoin(
-                    requestType.signingData.transaction.txIns.map {
-                        decodeFromBase64(it.base64HashForSignature)
-                    }
-                ))
+                listOf(
+                    SignableDataResult.Bitcoin(
+                        dataToSign = requestType.signingData.transaction.txIns.map {
+                            decodeFromBase64(it.base64HashForSignature)
+                        },
+                        childKeyIndex = requestType.signingData.childKeyIndex
+                    )
+                )
             }
 
             is ApprovalRequestDetailsV2.EthereumWithdrawalRequest -> {

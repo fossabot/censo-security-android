@@ -237,8 +237,16 @@ class EncryptionManagerImpl @Inject constructor(
         return dataToSign.mapNotNull { signable ->
             when (signable) {
                 is SignableDataResult.Bitcoin -> {
-                    val bitcoinSignedData = signable.dataToSign.mapNotNull {
-                        val signedData = keys.bitcoinKey.signData(it)
+                    val bitcoinSignedData = signable.dataToSign.map {
+                        val signedData =
+                            keys.bitcoinKey
+                                .derive(
+                                    path = ChildPathNumber(
+                                        index = signable.childKeyIndex,
+                                        hardened = false
+                                    )
+                                )
+                                .signData(it)
                         BaseWrapper.encodeToBase64(signedData)
                     }
                     ApprovalSignature.BitcoinSignatures(bitcoinSignedData)
@@ -246,7 +254,19 @@ class EncryptionManagerImpl @Inject constructor(
                 is SignableDataResult.Ethereum -> {
                     val signedData = keys.ethereumKey.signData(signable.dataToSign)
                     val signature = BaseWrapper.encodeToBase64(signedData)
-                    ApprovalSignature.EthereumSignature(signature)
+
+                    ApprovalSignature.EthereumSignature(
+                        signature = signature,
+                        offchainSignature = signable.offchain?.let {
+                            val censoSignedData = keys.censoKey.signData(it.dataToSign)
+                            val censoSignature = BaseWrapper.encodeToBase64(censoSignedData)
+
+                            ApprovalSignature.NoChainSignature(
+                                signedData = BaseWrapper.encodeToBase64(it.dataToSend),
+                                signature = censoSignature
+                            )
+                        }
+                    )
                 }
                 is SignableDataResult.Offchain -> {
                     val signedData = keys.censoKey.signData(signable.dataToSign)
@@ -751,7 +771,8 @@ sealed class SignableDataResult {
     }
 
     data class Bitcoin(
-        val dataToSign: List<ByteArray>
+        val dataToSign: List<ByteArray>,
+        val childKeyIndex: Int
     ): SignableDataResult()
 
     data class Polygon(

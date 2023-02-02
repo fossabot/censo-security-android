@@ -29,7 +29,13 @@ sealed class ApprovalSignature {
     ) : ApprovalSignature()
 
     data class EthereumSignature(
-        val signature: String
+        val signature: String,
+        val offchainSignature: ApprovalSignature?,
+    ) : ApprovalSignature()
+
+    data class PolygonSignature(
+        val signature: String,
+        val offchainSignature: ApprovalSignature?,
     ) : ApprovalSignature()
 
     data class NoChainSignature(
