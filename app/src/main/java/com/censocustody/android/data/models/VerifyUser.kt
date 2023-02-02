@@ -16,10 +16,6 @@ data class VerifyUser(
         }
 
         for (publicKey in publicKeys) {
-            //todo: do not skip this. Waiting for backend to fix on their side for user sharris@blue.rock
-            val type = publicKey?.convertWalletTypeToLocalType()
-            if(type == "censo_key") continue
-
             val publicKeyInMap = hashMap.getOrDefault(publicKey?.convertWalletTypeToLocalType(), "")
             if (publicKeyInMap.isEmpty() || publicKey?.key != publicKeyInMap) {
                 return false

@@ -523,67 +523,55 @@ fun ApprovalRequestDetailsV2.whiteListUpdateUI(context: Context): WhitelistUpdat
     }
 }
 
-//todo: need to figure out fee formatting on withdrawal request. NEEDS FIXING.
-fun ApprovalRequestDetailsV2.withdrawalRequestUIData(context: Context) {
+fun ApprovalRequestDetailsV2.withdrawalRequestUIData(context: Context): WithdrawalRequestUI? {
     val header = getHeader(context)
     val subtitle = withdrawalRequestSubtitle(context)
     val fromAndToAccount = withdrawalRequestFromAndToAccount()
 
-    when (this) {
+    return when (this) {
         is ApprovalRequestDetailsV2.BitcoinWithdrawalRequest -> {
             val address = destination.address
             val nftMetaDataName = null
-            val originalFee = fee.value
-            val newFee = replacementFee?.value ?: ""
-            val replacementFee = replacementFee?.value
 
             WithdrawalRequestUI(
                 header = header, subtitle = subtitle,
                 fromAccount = fromAndToAccount.first,
                 toAccount = fromAndToAccount.second,
-                originalFee = originalFee, newFee = newFee,
-                replacementFee = replacementFee,
+                fee = fee, replacementFee = replacementFee,
                 nftMetadataName = nftMetaDataName,
-                address = address
+                address = address, amount = amount,
+                symbol = symbolInfo.symbol,
             )
         }
         is ApprovalRequestDetailsV2.EthereumWithdrawalRequest -> {
             val address = destination.address
             val nftMetaDataName = symbolInfo.nftMetadata?.name
-            val originalFee = fee.value
-            val newFee = "NEW FEE"
-            val replacementFee = null
 
             WithdrawalRequestUI(
                 header = header, subtitle = subtitle,
                 fromAccount = fromAndToAccount.first,
                 toAccount = fromAndToAccount.second,
-                originalFee = originalFee, newFee = newFee,
-                replacementFee = replacementFee,
+                fee = fee, replacementFee = null,
                 nftMetadataName = nftMetaDataName,
-                address = address
+                address = address, amount = amount,
+                symbol = symbolInfo.symbol, feeSymbol = feeSymbolInfo.symbol
             )
         }
         is ApprovalRequestDetailsV2.PolygonWithdrawalRequest -> {
             val address = destination.address
             val nftMetaDataName = symbolInfo.nftMetadata?.name
-            val originalFee = fee.value
-            val newFee = "NEW FEE"
-            val replacementFee = null
 
             WithdrawalRequestUI(
                 header = header, subtitle = subtitle,
                 fromAccount = fromAndToAccount.first,
                 toAccount = fromAndToAccount.second,
-                originalFee = originalFee, newFee = newFee,
-                replacementFee = replacementFee,
+                fee = fee, replacementFee = null,
                 nftMetadataName = nftMetaDataName,
-                address = address
+                address = address, amount = amount,
+                symbol = symbolInfo.symbol, feeSymbol = feeSymbolInfo.symbol
             )
         }
-        else -> {
-
-        }
+        else -> null
     }
 }
 
@@ -595,6 +583,9 @@ fun formattedUSDEquivalentV2(usdEquivalent: String?, hideSymbol: Boolean = true)
     val decimal = usdEquivalent.toBigDecimal()
     return usdFormatterV2(hideSymbol).format(decimal)
 }
+
+fun ApprovalRequestDetailsV2.Amount.formattedAmountWithSymbol(symbol: String): String =
+    "${formattedAmount(value)} $symbol"
 
 fun getUSDEquivalentTextV2(context: Context, usdEquivalent: String?, hideSymbol: Boolean = false) =
     "${formattedUSDEquivalentV2(hideSymbol = hideSymbol, usdEquivalent = usdEquivalent)} ${context.getString(R.string.usd_equivalent)}"
