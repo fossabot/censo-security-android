@@ -341,17 +341,17 @@ fun ApprovalDetailContent(approval: ApprovalRequestV2, type: ApprovalRequestDeta
             BalanceAccountSettingsUpdateDetailContent(header = header, name = name)
         }
 
-        //WithdrawalRequest: todo: this needs work on fees
         is ApprovalRequestDetailsV2.BitcoinWithdrawalRequest,
         is ApprovalRequestDetailsV2.EthereumWithdrawalRequest,
         is ApprovalRequestDetailsV2.PolygonWithdrawalRequest -> {
-//            val header = type.getHeader(LocalContext.current)
-//            val subtitle = type.withdrawalRequestSubtitle(LocalContext.current)
-//            val fromAndToAccount = type.withdrawalRequestFromAndToAccount()
-//            WithdrawalRequestDetailContent(withdrawalRequest = type)
             val withdrawalRequestUI = type.withdrawalRequestUIData(LocalContext.current)
-            val header = type.getHeader(LocalContext.current)
-            Text(text = header, color = CensoWhite)
+
+            withdrawalRequestUI?.let {
+                WithdrawalRequestDetailContent(withdrawalRequestUI)
+            } ?: run {
+                val header = type.getHeader(LocalContext.current)
+                Text(text = header, color = CensoWhite)
+            }
         }
 
         //BalanceAccountPolicyUpdate

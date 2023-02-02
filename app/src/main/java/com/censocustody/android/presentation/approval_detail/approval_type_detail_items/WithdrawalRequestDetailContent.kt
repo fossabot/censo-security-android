@@ -4,15 +4,11 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.tooling.preview.PreviewParameter
-import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
 import com.censocustody.android.R
 import com.censocustody.android.common.maskAddress
-import com.censocustody.android.data.models.approval.*
+import com.censocustody.android.data.models.approvalV2.ApprovalRequestDetailsV2
 import com.censocustody.android.presentation.approvals.ApprovalContentHeader
 import com.censocustody.android.presentation.approvals.approval_type_row_items.*
 import com.censocustody.android.presentation.components.FactRow
@@ -20,73 +16,56 @@ import com.censocustody.android.presentation.components.FactsData
 import com.censocustody.android.presentation.components.RowData
 
 @Composable
-fun WithdrawalRequestDetailContent(
-    withdrawalRequest: ApprovalRequestDetails.WithdrawalRequest
-) {
-    val symbolAndAmountInfo = withdrawalRequest.symbolAndAmountInfo
-
-    val header = withdrawalRequest.getHeader(LocalContext.current)
-    val subtitle = if (withdrawalRequest.symbolAndAmountInfo.replacementFee == null) {
-        withdrawalRequest.symbolAndAmountInfo.getUSDEquivalentText(
-            context = LocalContext.current,
-            hideSymbol = true
-        )
-    } else {
-        stringResource(R.string.bump_fee_request_approval_details_subtitle)
-    }
-    val fromAccount = withdrawalRequest.account.name
-    val toAccount = withdrawalRequest.destination.name
-    val address = withdrawalRequest.destination.address
-
-    ApprovalContentHeader(header = header, topSpacing = 24, bottomSpacing = 8)
-    ApprovalSubtitle(text = subtitle)
+fun WithdrawalRequestDetailContent(withdrawalRequestUI: WithdrawalRequestUI) {
+    ApprovalContentHeader(header = withdrawalRequestUI.header, topSpacing = 24, bottomSpacing = 8)
+    ApprovalSubtitle(text = withdrawalRequestUI.subtitle)
     Spacer(modifier = Modifier.height(24.dp))
 
     val facts = listOfNotNull(
         RowData(
             title = stringResource(R.string.from_wallet),
-            value = fromAccount,
+            value = withdrawalRequestUI.fromAccount,
         ),
         RowData(
             title = stringResource(R.string.destination),
-            value = toAccount,
+            value = withdrawalRequestUI.toAccount,
         ),
         RowData(
             title = stringResource(R.string.destination_address),
-            value = address.maskAddress(),
+            value = withdrawalRequestUI.address.maskAddress(),
         ),
-        if (symbolAndAmountInfo.symbolInfo.nftMetadata != null) {
+        if (withdrawalRequestUI.nftMetadataName != null) {
             RowData(
                 title = stringResource(R.string.nft_name),
-                value = symbolAndAmountInfo.symbolInfo.nftMetadata.name,
+                value = withdrawalRequestUI.nftMetadataName,
             )
         } else null,
     )
 
-    val feeFacts = if (symbolAndAmountInfo.fee != null && symbolAndAmountInfo.replacementFee != null) {
+    val feeFacts = if (withdrawalRequestUI.replacementFee != null) {
         listOf(
             RowData(
                 title = stringResource(R.string.amount),
-                value = symbolAndAmountInfo.formattedAmountWithSymbol(),
+                value = withdrawalRequestUI.amount.formattedAmountWithSymbol(withdrawalRequestUI.symbol),
             ),
             RowData(
                 title = stringResource(R.string.original_fee),
-                value = symbolAndAmountInfo.fee.formattedAmountWithSymbol(),
+                value = withdrawalRequestUI.fee.formattedAmountWithSymbol(withdrawalRequestUI.symbol),
             ),
             RowData(
                 title = stringResource(R.string.new_fee),
-                value = symbolAndAmountInfo.replacementFee.formattedAmountWithSymbol(),
-            )
-        )
-    } else if (symbolAndAmountInfo.fee != null) {
-        listOf(
-            RowData(
-                title = stringResource(R.string.fee),
-                value = symbolAndAmountInfo.fee.formattedAmountWithSymbol(),
+                value = withdrawalRequestUI.replacementFee.formattedAmountWithSymbol(withdrawalRequestUI.symbol),
             )
         )
     } else {
-        emptyList()
+        listOf(
+            RowData(
+                title = stringResource(R.string.fee),
+                value = withdrawalRequestUI.fee.formattedAmountWithSymbol(
+                    withdrawalRequestUI.feeSymbol ?: withdrawalRequestUI.symbol
+                ),
+            )
+        )
     }
 
     FactRow(factsData = FactsData(facts = facts + feeFacts))
@@ -96,78 +75,8 @@ fun WithdrawalRequestDetailContent(
 data class WithdrawalRequestUI(
     val header: String, val subtitle: String,
     val fromAccount: String, val toAccount: String,
-    val originalFee: String, val newFee: String,
-    val address: String, val replacementFee: String?,
-    val nftMetadataName: String?
+    val amount: ApprovalRequestDetailsV2.Amount,
+    val fee: ApprovalRequestDetailsV2.Amount, val address: String,
+    val replacementFee: ApprovalRequestDetailsV2.Amount? = null,
+    val nftMetadataName: String? = null, val symbol: String, val feeSymbol: String? = null
 )
-
-class WithdrawalRequestDetailParameterProvider : PreviewParameterProvider<ApprovalRequestDetails.WithdrawalRequest> {
-    override val values: Sequence<ApprovalRequestDetails.WithdrawalRequest>
-        get() = sequenceOf(
-            ApprovalRequestDetails.WithdrawalRequest(
-                type = ApprovalType.WITHDRAWAL_TYPE.value,
-                account = AccountInfo(
-                    name = "Wallet 1",
-                    identifier = "5fb4556a-6de5-4a80-ac0e-6def9826384f",
-                    accountType = AccountType.BalanceAccount,
-                    address = "1BvBMSEYstWetqTFn5Au4m4GFg7xJaNVN2"
-                ),
-                symbolAndAmountInfo = SymbolAndAmountInfo(
-                    symbolInfo = SymbolInfo(symbol = "BTC", symbolDescription = "Bitcoin", tokenMintAddress = null),
-                    amount = "1.000000",
-                    nativeAmount = "1.000000",
-                    usdEquivalent = "20000.00",
-                    fee = Fee(
-                        symbolInfo = SymbolInfo(symbol = "BTC", symbolDescription = "Bitcoin", tokenMintAddress = null),
-                        amount = "0.001",
-                        usdEquivalent = "20.00"
-                    )
-                ),
-                destination = DestinationAddress(
-                    name = "Wallet 2",
-                    subName = null,
-                    address = "bc1qar0srrr7xfkvy5l643lydnw9re59gtzzwf5mdq",
-                    tag = null
-                ),
-                signingData = SigningData.BitcoinSigningData(0, BitcoinTransaction(0, emptyList(), emptyList(), 123L))
-            ),
-            ApprovalRequestDetails.WithdrawalRequest(
-                type = ApprovalType.WITHDRAWAL_TYPE.value,
-                account = AccountInfo(
-                    name = "Wallet 1",
-                    identifier = "5fb4556a-6de5-4a80-ac0e-6def9826384f",
-                    accountType = AccountType.BalanceAccount,
-                    address = "1BvBMSEYstWetqTFn5Au4m4GFg7xJaNVN2"
-                ),
-                symbolAndAmountInfo = SymbolAndAmountInfo(
-                    symbolInfo = SymbolInfo(symbol = "BTC", symbolDescription = "Bitcoin", tokenMintAddress = null),
-                    amount = "1.000000",
-                    nativeAmount = "1.000000",
-                    usdEquivalent = "20000.00",
-                    fee = Fee(
-                        symbolInfo = SymbolInfo(symbol = "BTC", symbolDescription = "Bitcoin", tokenMintAddress = null),
-                        amount = "0.001",
-                        usdEquivalent = "20.00"
-                    ),
-                    replacementFee = Fee(
-                        symbolInfo = SymbolInfo(symbol = "BTC", symbolDescription = "Bitcoin", tokenMintAddress = null),
-                        amount = "0.002",
-                        usdEquivalent = "40.00"
-                    )
-                ),
-                destination = DestinationAddress(
-                    name = "Wallet 2",
-                    subName = null,
-                    address = "bc1qar0srrr7xfkvy5l643lydnw9re59gtzzwf5mdq",
-                    tag = null
-                ),
-                signingData = SigningData.BitcoinSigningData(0, BitcoinTransaction(0, emptyList(), emptyList(), 123L))
-            )
-        )
-}
-
-@Preview
-@Composable
-fun WithdrawalRequestDetailContentPreview(@PreviewParameter(WithdrawalRequestDetailParameterProvider::class) request: ApprovalRequestDetails.WithdrawalRequest) {
-    WithdrawalRequestDetailContent(request)
-}
