@@ -51,17 +51,6 @@ data class ApprovalRequestV2(
         }
     }
 
-    fun toJson(): String =
-        GsonBuilder()
-            .excludeFieldsWithModifiers(Modifier.STATIC)
-            .registerTypeAdapterFactory(ApprovalRequestDetailsV2.approvalRequestDetailsV2AdapterFactory)
-            .registerTypeAdapterFactory(onChainPolicyAdapterFactory)
-            .registerTypeAdapterFactory(evmTokenInfoAdapterFactory)
-            .registerTypeAdapterFactory(signingDataAdapterFactory)
-            .registerTypeAdapterFactory(approvalSignatureAdapterFactory)
-            .create()
-            .toJson(this)
-
     fun approveButtonCaption(context: Context) =
         if (initiationOnly) {
             context.getString(R.string.initiate)
@@ -80,7 +69,7 @@ sealed class ApprovalRequestDetailsV2 {
             .registerTypeAdapterFactory(signingDataAdapterFactory)
             .registerTypeAdapterFactory(approvalSignatureAdapterFactory)
             .create()
-            .toJson(this)
+            .toJson(this, ApprovalRequestDetailsV2::class.java)
 
     fun isDeviceKeyApprovalType() =
         this is Login || this is VaultInvitation || this is PasswordReset
@@ -329,11 +318,13 @@ sealed class ApprovalRequestDetailsV2 {
         }
 
         data class Ethereum(
+            val chain: String = "ethereum",
             val owners: List<OwnerAddress>,
             val threshold: Int
         ) : OnChainPolicy()
 
         data class Polygon(
+            val chain: String = "polygon",
             val owners: List<OwnerAddress>,
             val threshold: Int
         ) : OnChainPolicy()
@@ -443,15 +434,18 @@ sealed class ApprovalRequestDetailsV2 {
         )
 
         data class BitcoinSigningData(
+            val type: String = "bitcoin",
             val childKeyIndex: Int,
             val transaction: BitcoinTransaction
         ) : SigningData()
 
         data class EthereumSigningData(
+            val type: String = "ethereum",
             val transaction: EthereumTransaction
         ) : SigningData()
 
         data class PolygonSigningData(
+            val type: String = "polygon",
             val transaction: EthereumTransaction
         ) : SigningData()
 
