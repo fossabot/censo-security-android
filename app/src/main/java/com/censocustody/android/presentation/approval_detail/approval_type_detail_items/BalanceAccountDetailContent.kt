@@ -8,32 +8,26 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.censocustody.android.common.convertSecondsIntoReadableText
-import com.censocustody.android.data.models.approval.ApprovalRequestDetails
 import com.censocustody.android.presentation.approvals.ApprovalContentHeader
-import com.censocustody.android.presentation.approvals.approval_type_row_items.getHeader
-import com.censocustody.android.presentation.approvals.approval_type_row_items.retrieveSlotRowData
 import com.censocustody.android.presentation.components.FactRow
 import com.censocustody.android.presentation.components.FactsData
 import com.censocustody.android.R
+import com.censocustody.android.data.models.approvalV2.ApprovalRequestDetailsV2
+import com.censocustody.android.presentation.approvals.approval_type_row_items.retrieveSlotSignerRowData
 import com.censocustody.android.presentation.components.RowData
 
 @Composable
-fun BalanceAccountDetailContent(
-    walletCreation: ApprovalRequestDetails.WalletCreation,
-    approvalsReceived: String
-) {
-    val header = walletCreation.getHeader(LocalContext.current)
-    val accountName = walletCreation.accountInfo.name
+fun BalanceAccountDetailContent(walletCreationUIData: WalletCreationUIData) {
 
     val approverRowInfoData = generateBalanceAccountDetailRows(
-        walletCreation = walletCreation, approvalsReceived = approvalsReceived, context = LocalContext.current
+        walletCreationUIData = walletCreationUIData, context = LocalContext.current
     )
 
-    ApprovalContentHeader(header = header, topSpacing = 24, bottomSpacing = 8)
+    ApprovalContentHeader(header = walletCreationUIData.header, topSpacing = 24, bottomSpacing = 8)
     Spacer(modifier = Modifier.height(24.dp))
     val factsData = FactsData(
         facts = listOf(
-            RowData(title = stringResource(R.string.wallet_name_title), value = accountName),
+            RowData(title = stringResource(R.string.wallet_name_title), value = walletCreationUIData.name),
         )
     )
     FactRow(factsData = factsData)
@@ -52,8 +46,7 @@ fun BalanceAccountDetailContent(
 }
 
 fun generateBalanceAccountDetailRows(
-    walletCreation: ApprovalRequestDetails.WalletCreation,
-    approvalsReceived: String,
+    walletCreationUIData: WalletCreationUIData,
     context: Context
 ): List<FactsData> {
     val approverRowInfoData = mutableListOf<FactsData>()
@@ -64,12 +57,12 @@ fun generateBalanceAccountDetailRows(
         facts = listOf(
             RowData(
                 title = context.getString(R.string.approvals_required_title),
-                value = "$approvalsReceived ${context.getString(R.string.of)} ${walletCreation.approvalPolicy.approvalsRequired.toInt()}",
+                value = "${walletCreationUIData.approvalsReceived} ${context.getString(R.string.of)} ${walletCreationUIData.walletApprovalPolicy.approvalsRequired}",
             ),
             RowData(
                 title = context.getString(R.string.approval_expiration),
                 value = convertSecondsIntoReadableText(
-                    walletCreation.approvalPolicy.approvalTimeout.toInt(),
+                    walletCreationUIData.walletApprovalPolicy.approvalTimeout.toInt(),
                     context
                 ),
             )
@@ -80,7 +73,7 @@ fun generateBalanceAccountDetailRows(
 
 
     //region Approvers Row
-    val approversList = walletCreation.approvalPolicy.approvers.retrieveSlotRowData()
+    val approversList = walletCreationUIData.walletApprovalPolicy.approvers.retrieveSlotSignerRowData()
     if (approversList.isEmpty()) {
         approversList.add(
             RowData(title = context.getString(R.string.no_approvers_text), value = ""))
@@ -96,3 +89,8 @@ fun generateBalanceAccountDetailRows(
 
     return approverRowInfoData
 }
+
+data class WalletCreationUIData(
+    val header: String, val name: String, val approvalsReceived: String,
+    val walletApprovalPolicy: ApprovalRequestDetailsV2.WalletApprovalPolicy
+)

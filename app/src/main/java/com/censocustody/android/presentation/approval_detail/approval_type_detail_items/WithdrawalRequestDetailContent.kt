@@ -93,6 +93,14 @@ fun WithdrawalRequestDetailContent(
     Spacer(modifier = Modifier.height(28.dp))
 }
 
+data class WithdrawalRequestUI(
+    val header: String, val subtitle: String,
+    val fromAccount: String, val toAccount: String,
+    val originalFee: String, val newFee: String,
+    val address: String, val replacementFee: String?,
+    val nftMetadataName: String?
+)
+
 class WithdrawalRequestDetailParameterProvider : PreviewParameterProvider<ApprovalRequestDetails.WithdrawalRequest> {
     override val values: Sequence<ApprovalRequestDetails.WithdrawalRequest>
         get() = sequenceOf(

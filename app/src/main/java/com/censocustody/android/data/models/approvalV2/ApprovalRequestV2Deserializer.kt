@@ -5,7 +5,7 @@ import com.censocustody.android.data.models.approval.ApprovalSignature
 import java.lang.reflect.Type
 
 class ApprovalRequestV2Deserializer : JsonDeserializer<ApprovalRequestV2> {
-    fun getGson() = GsonBuilder()
+    private fun getGson(): Gson = GsonBuilder()
         .registerTypeAdapterFactory(ApprovalRequestDetailsV2.approvalRequestDetailsV2AdapterFactory)
         .registerTypeAdapterFactory(ApprovalRequestDetailsV2.OnChainPolicy.onChainPolicyAdapterFactory)
         .registerTypeAdapterFactory(ApprovalRequestDetailsV2.EvmTokenInfo.evmTokenInfoAdapterFactory)
