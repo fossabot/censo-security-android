@@ -7,6 +7,9 @@ import com.censocustody.android.data.models.VerifyUser
 import com.censocustody.android.data.models.WalletPublicKey
 import com.censocustody.android.data.models.approval.ApprovalRequest
 import com.censocustody.android.data.models.approval.ApprovalRequestDeserializer
+import com.censocustody.android.data.models.approvalV2.ApprovalRequestDetailsV2
+import com.censocustody.android.data.models.approvalV2.ApprovalRequestV2
+import com.censocustody.android.data.models.approvalV2.ApprovalRequestV2Deserializer
 
 private val deserializer = ApprovalRequestDeserializer()
 
@@ -109,20 +112,14 @@ fun getWalletApprovals() : List<ApprovalRequest> {
     return approvals
 }
 
-fun getLoginApproval() : ApprovalRequest {
-    val loginApprovalRequestType =
-        getLoginApproval("jwttoken")
-
-    return getWalletApprovalRequest(loginApprovalRequestType)
+fun getLoginApprovalV2(): ApprovalRequestV2 {
+    val deserializer = ApprovalRequestV2Deserializer()
+    return deserializer.toObjectWithParsedDetails(exampleRequests[0].trim())
 }
 
-fun getRemoveDAppBookEntryApproval() : ApprovalRequest {
-    val nonceAccountAddresses = listOf(getNonce())
-
-    val removeDAppBookEntryRequestType =
-        getRemoveDAppBookEntry(nonceAccountAddresses)
-
-    return getWalletApprovalRequest(removeDAppBookEntryRequestType)
+fun getEthereumWithdrawalRequestApprovalV2() : ApprovalRequestV2 {
+    return getFullListOfApprovalItems()
+        .first { it.details is ApprovalRequestDetailsV2.EthereumWithdrawalRequest }
 }
 
 fun getMultiSigWalletCreationApprovalRequest(): ApprovalRequest =
@@ -137,7 +134,7 @@ fun getVerifyUser() = VerifyUser(
         id = "crypto",
         name = "cryptology"
     ),
-    publicKeys = listOf(WalletPublicKey(key = ExampleMnemonicAndKeys.PUBLIC_KEY, chain = Chain.solana)),
+    publicKeys = listOf(WalletPublicKey(key = ExampleMnemonicAndKeys.PUBLIC_KEY, chain = Chain.censo)),
     useStaticKey = false,
     deviceKey = ""
 )

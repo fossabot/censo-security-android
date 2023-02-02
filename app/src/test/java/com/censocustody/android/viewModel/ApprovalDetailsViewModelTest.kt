@@ -7,14 +7,13 @@ import com.censocustody.android.*
 import com.censocustody.android.common.Resource
 import com.censocustody.android.common.CensoCountDownTimer
 import com.censocustody.android.data.ApprovalsRepository
-import com.censocustody.android.data.KeyRepository
 import com.censocustody.android.data.SolanaRepository
 import com.censocustody.android.data.UserRepository
 import com.censocustody.android.data.models.ApprovalDisposition
 import com.censocustody.android.data.models.CipherRepository
 import com.censocustody.android.data.models.Nonce
 import com.censocustody.android.data.models.approval.SolanaApprovalRequestDetails
-import com.censocustody.android.data.models.approval.ApprovalRequest
+import com.censocustody.android.data.models.approvalV2.ApprovalRequestV2
 import com.censocustody.android.presentation.approval_detail.ApprovalDetailsViewModel
 import com.censocustody.android.presentation.approval_disposition.ApprovalDispositionState
 import com.censocustody.android.presentation.durable_nonce.DurableNonceViewModel
@@ -67,8 +66,8 @@ class ApprovalDetailsViewModelTest : BaseViewModelTest() {
     //endregion
 
     //region Testing data
-    private val testLoginApproval = getLoginApproval()
-    private val testRemoveDAppBookEntryApproval = getRemoveDAppBookEntryApproval()
+    private val testLoginApproval = getLoginApprovalV2()
+    private val testEthereumWithdrawalApproval = getEthereumWithdrawalRequestApprovalV2()
     private val testMultiSigWalletCreationApprovalRequest =
         getMultiSigWalletCreationApprovalRequest()
 
@@ -138,18 +137,14 @@ class ApprovalDetailsViewModelTest : BaseViewModelTest() {
 
         assertExpectedApprovalInState(expectedApproval = testLoginApproval)
 
-        //Grab data to know if approval is initiation or regular
-        val isInitiationRequest =
-            testLoginApproval.details is SolanaApprovalRequestDetails.MultiSignOpInitiationDetails
 
         //Set isApproving in state
         approvalDetailsViewModel.setShouldDisplayConfirmDispositionDialog(
             isApproving = true,
-            isInitiationRequest = isInitiationRequest,
             dialogMessages = mockMessages,
         )
 
-        assertExpectedDispositionAndExpectedInitiation(ApprovalDisposition.APPROVE, isInitiationRequest)
+        assertExpectedDispositionAndExpectedInitiation(ApprovalDisposition.APPROVE, false)
 
         whenever(cryptoObject.signature).then { signature }
 
@@ -180,22 +175,18 @@ class ApprovalDetailsViewModelTest : BaseViewModelTest() {
         assertApprovalInStateIsNull()
 
         //Set approval in state
-        approvalDetailsViewModel.handleInitialData(testRemoveDAppBookEntryApproval)
+        approvalDetailsViewModel.handleInitialData(testEthereumWithdrawalApproval)
 
-        assertExpectedApprovalInState(expectedApproval = testRemoveDAppBookEntryApproval)
+        assertExpectedApprovalInState(expectedApproval = testEthereumWithdrawalApproval)
 
-        //Grab data to know if approval is initiation or regular
-        val isInitiationRequest =
-            testRemoveDAppBookEntryApproval.details is SolanaApprovalRequestDetails.MultiSignOpInitiationDetails
 
         //Set isApproving in state
         approvalDetailsViewModel.setShouldDisplayConfirmDispositionDialog(
             isApproving = false,
-            isInitiationRequest = isInitiationRequest,
             dialogMessages = mockMessages,
         )
 
-        assertExpectedDispositionAndExpectedInitiation(ApprovalDisposition.DENY, isInitiationRequest)
+        assertExpectedDispositionAndExpectedInitiation(ApprovalDisposition.DENY, false)
 
         triggerRegisterDispositionCallAndAssertNonceDataAndBioPromptState()
 
@@ -204,93 +195,6 @@ class ApprovalDetailsViewModelTest : BaseViewModelTest() {
         assertEquals(true, approvalDetailsViewModel.state.approvalDispositionState?.registerApprovalDispositionResult is Resource.Success)
     }
 
-    /**
-     * Test approving a multi signature approval successfully then the view model should reflect the success in state
-     *
-     * Assertions:
-     * - assert that the approval in state is null
-     * - set approval to state and assert it was set
-     * - assert expected disposition was set in state
-     * - assert that there is no nonce data in state
-     * - set nonce data to trigger disposition call and assert that the nonce data is set
-     * - assert the register disposition result was a success
-     */
-    @Test
-    fun `approve a multi sig approval successfully then view model should reflect the success in state`() = runTest {
-        whenever(approvalsRepository.approveOrDenyInitiation(any(), any(), any())).thenAnswer {
-            Resource.Success(data = null)
-        }
-
-        assertApprovalInStateIsNull()
-
-        //Set approval in state
-        approvalDetailsViewModel.handleInitialData(testMultiSigWalletCreationApprovalRequest)
-
-        assertExpectedApprovalInState(expectedApproval = testMultiSigWalletCreationApprovalRequest)
-
-        //Grab data to know if approval is initiation or regular
-        val isInitiationRequest =
-            testMultiSigWalletCreationApprovalRequest.details is SolanaApprovalRequestDetails.MultiSignOpInitiationDetails
-
-        //Set isApproving in state
-        approvalDetailsViewModel.setShouldDisplayConfirmDispositionDialog(
-            isApproving = true,
-            isInitiationRequest = isInitiationRequest,
-            dialogMessages = mockMessages,
-        )
-
-        assertExpectedDispositionAndExpectedInitiation(ApprovalDisposition.APPROVE, isInitiationRequest)
-
-        triggerRegisterDispositionCallAndAssertNonceDataAndBioPromptState()
-
-        advanceUntilIdle()
-
-        assert(approvalDetailsViewModel.state.approvalDispositionState?.initiationDispositionResult is Resource.Success)
-    }
-
-    /**
-     * Test denying a multi signature approval successfully then the view model should reflect the success in state
-     *
-     * Assertions:
-     * - assert that the approval in state is null
-     * - set approval to state and assert it was set
-     * - assert expected disposition was set in state
-     * - assert that there is no nonce data in state
-     * - set nonce data to trigger disposition call and assert that the nonce data is set
-     * - assert the register disposition result was a success
-     */
-    @Test
-    fun `deny a multi sig approval successfully then view model should reflect the success in state`() = runTest {
-        whenever(approvalsRepository.approveOrDenyInitiation(any(), any(), any())).thenAnswer {
-            Resource.Success(data = null)
-        }
-
-        assertApprovalInStateIsNull()
-
-        //Set approval in state
-        approvalDetailsViewModel.handleInitialData(testMultiSigWalletCreationApprovalRequest)
-
-        assertExpectedApprovalInState(expectedApproval = testMultiSigWalletCreationApprovalRequest)
-
-        //Grab data to know if approval is initiation or regular
-        val isInitiationRequest =
-            testMultiSigWalletCreationApprovalRequest.details is SolanaApprovalRequestDetails.MultiSignOpInitiationDetails
-
-        //Set isApproving in state
-        approvalDetailsViewModel.setShouldDisplayConfirmDispositionDialog(
-            isApproving = false,
-            isInitiationRequest = isInitiationRequest,
-            dialogMessages = mockMessages,
-        )
-
-        assertExpectedDispositionAndExpectedInitiation(ApprovalDisposition.DENY, isInitiationRequest)
-
-        triggerRegisterDispositionCallAndAssertNonceDataAndBioPromptState()
-
-        advanceUntilIdle()
-
-        assertEquals(true, approvalDetailsViewModel.state.approvalDispositionState?.initiationDispositionResult is Resource.Success)
-    }
 
     /**
      * Test denying an approval but api error occurs then view model should hold retry data and reflect error in state
@@ -312,22 +216,17 @@ class ApprovalDetailsViewModelTest : BaseViewModelTest() {
         assertApprovalInStateIsNull()
 
         //Set approval in state
-        approvalDetailsViewModel.handleInitialData(testRemoveDAppBookEntryApproval)
+        approvalDetailsViewModel.handleInitialData(testEthereumWithdrawalApproval)
 
-        assertExpectedApprovalInState(expectedApproval = testRemoveDAppBookEntryApproval)
-
-        //Grab data to know if approval is initiation or regular
-        val isInitiationRequest =
-            testRemoveDAppBookEntryApproval.details is SolanaApprovalRequestDetails.MultiSignOpInitiationDetails
+        assertExpectedApprovalInState(expectedApproval = testEthereumWithdrawalApproval)
 
         //Set isApproving in state
         approvalDetailsViewModel.setShouldDisplayConfirmDispositionDialog(
             isApproving = false,
-            isInitiationRequest = isInitiationRequest,
             dialogMessages = mockMessages,
         )
 
-        assertExpectedDispositionAndExpectedInitiation(ApprovalDisposition.DENY, isInitiationRequest)
+        assertExpectedDispositionAndExpectedInitiation(ApprovalDisposition.DENY, false)
 
         triggerRegisterDispositionCallAndAssertNonceDataAndBioPromptState()
 
@@ -336,53 +235,7 @@ class ApprovalDetailsViewModelTest : BaseViewModelTest() {
         //Assert that the registerDisposition call failed and the retry data holds the disposition and isInitiationRequest data
         assertEquals(true, approvalDetailsViewModel.state.approvalDispositionState?.registerApprovalDispositionResult is Resource.Error)
         assertEquals(false, approvalDetailsViewModel.state.approvalDispositionState?.approvalRetryData?.isApproving)
-        assertEquals(isInitiationRequest, approvalDetailsViewModel.state.approvalDispositionState?.approvalRetryData?.isInitiationRequest)
-    }
-
-    /**
-     * Test approving a multi signature approval but api error occurs then view model should hold retry data and reflect error in state
-     *
-     * Assertions:
-     * - assert there is no approval in state
-     * - set approval and assert it was set
-     * - assert expected disposition was set in state
-     * - assert that there is no nonce data in state
-     * - set nonce data to trigger disposition call and assert that the nonce data is set
-     * - assert the register disposition result is a error and there is retry data in state
-     */
-    @Test
-    fun `approve a multi sig approval but api error occurs then view model should hold retry data and reflect error in state`() = runTest {
-        whenever(approvalsRepository.approveOrDenyInitiation(any(), any(), any())).thenAnswer {
-            Resource.Error(data = null)
-        }
-
-        assertApprovalInStateIsNull()
-
-        //Set approval in state
-        approvalDetailsViewModel.handleInitialData(testMultiSigWalletCreationApprovalRequest)
-
-        assertExpectedApprovalInState(expectedApproval = testMultiSigWalletCreationApprovalRequest)
-
-        //Grab data to know if approval is initiation or regular
-        val isInitiationRequest =
-            testMultiSigWalletCreationApprovalRequest.details is SolanaApprovalRequestDetails.MultiSignOpInitiationDetails
-
-        //Set isApproving in state
-        approvalDetailsViewModel.setShouldDisplayConfirmDispositionDialog(
-            isApproving = true,
-            isInitiationRequest = isInitiationRequest,
-            dialogMessages = mockMessages,
-        )
-
-        assertExpectedDispositionAndExpectedInitiation(ApprovalDisposition.APPROVE, isInitiationRequest)
-
-        triggerRegisterDispositionCallAndAssertNonceDataAndBioPromptState()
-
-        advanceUntilIdle()
-
-        assertEquals(true, approvalDetailsViewModel.state.approvalDispositionState?.initiationDispositionResult is Resource.Error)
-        assertEquals(true, approvalDetailsViewModel.state.approvalDispositionState?.approvalRetryData?.isApproving)
-        assertEquals(isInitiationRequest, approvalDetailsViewModel.state.approvalDispositionState?.approvalRetryData?.isInitiationRequest)
+        assertEquals(false, approvalDetailsViewModel.state.approvalDispositionState?.approvalRetryData?.isInitiationRequest)
     }
 
     /**
@@ -404,9 +257,9 @@ class ApprovalDetailsViewModelTest : BaseViewModelTest() {
 
         assertNull(approvalDetailsViewModel.state.selectedApproval)
 
-        approvalDetailsViewModel.onStart(testRemoveDAppBookEntryApproval)
+        approvalDetailsViewModel.onStart(testEthereumWithdrawalApproval)
 
-        assertEquals(testRemoveDAppBookEntryApproval, approvalDetailsViewModel.state.selectedApproval)
+        assertEquals(testEthereumWithdrawalApproval, approvalDetailsViewModel.state.selectedApproval)
     }
 
     //endregion
@@ -498,7 +351,6 @@ class ApprovalDetailsViewModelTest : BaseViewModelTest() {
 
         approvalDetailsViewModel.setShouldDisplayConfirmDispositionDialog(
             approval = testLoginApproval,
-            isInitiationRequest = false,
             isApproving = true,
             dialogMessages = mockMessages
         )
@@ -515,14 +367,12 @@ class ApprovalDetailsViewModelTest : BaseViewModelTest() {
     //region Helper method
 
     private fun triggerRegisterDispositionCallAndAssertNonceDataAndBioPromptState() = runTest {
-        assertEquals(null, approvalDetailsViewModel.state.multipleAccounts)
         assertTrue(approvalDetailsViewModel.state.bioPromptTrigger is Resource.Uninitialized)
 
-        approvalDetailsViewModel.setMultipleAccounts(testMultipleAccounts)
+        approvalDetailsViewModel.triggerBioPrompt()
 
         advanceUntilIdle()
 
-        assertEquals(testMultipleAccounts, approvalDetailsViewModel.state.multipleAccounts)
         assertTrue(approvalDetailsViewModel.state.bioPromptTrigger is Resource.Success)
 
         whenever(cryptoObject.cipher).then { cipher }
@@ -536,7 +386,7 @@ class ApprovalDetailsViewModelTest : BaseViewModelTest() {
         assertEquals(null, approvalDetailsViewModel.state.selectedApproval)
     }
 
-    private fun assertExpectedApprovalInState(expectedApproval: ApprovalRequest) {
+    private fun assertExpectedApprovalInState(expectedApproval: ApprovalRequestV2) {
         assertEquals(expectedApproval, approvalDetailsViewModel.state.selectedApproval)
     }
 

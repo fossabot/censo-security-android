@@ -78,7 +78,7 @@ class EntranceViewModelTest : BaseViewModelTest() {
     )
 
     private val validSolanaPublicKey = WalletPublicKey(
-        chain = Chain.solana,
+        chain = Chain.censo,
         key = "F7JuLRBbyGAS9nAhDdfNX1LbckBAmCnKMB2xTdZfQS1n"
     )
 
@@ -98,7 +98,7 @@ class EntranceViewModelTest : BaseViewModelTest() {
     )
 
     private val validWalletSigners = listOf(
-        WalletSigner(chain = Chain.solana, publicKey = validSolanaPublicKey.key)
+        WalletSigner(chain = Chain.censo, publicKey = validSolanaPublicKey.key)
     )
 
     private val basicVerifyUserWithValidPublicKey =

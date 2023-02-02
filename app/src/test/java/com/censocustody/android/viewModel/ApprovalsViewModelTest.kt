@@ -9,7 +9,6 @@ import com.censocustody.android.*
 import com.censocustody.android.common.Resource
 import com.censocustody.android.data.*
 import com.censocustody.android.data.models.ApprovalDisposition
-import com.censocustody.android.data.models.Nonce
 import com.censocustody.android.data.models.approval.ApprovalRequest
 import com.censocustody.android.presentation.approvals.ApprovalsViewModel
 import com.censocustody.android.presentation.durable_nonce.DurableNonceViewModel
@@ -17,6 +16,7 @@ import com.censocustody.android.ResourceState.ERROR
 import com.censocustody.android.ResourceState.SUCCESS
 import com.censocustody.android.common.CensoCountDownTimer
 import com.censocustody.android.data.models.CipherRepository
+import com.censocustody.android.data.models.approvalV2.ApprovalRequestV2
 import com.censocustody.android.presentation.approval_disposition.ApprovalDispositionState
 import junit.framework.TestCase.*
 import kotlinx.coroutines.*
@@ -25,6 +25,8 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mock
+import java.security.Signature
+import java.util.UUID
 import javax.crypto.Cipher
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -47,13 +49,13 @@ class ApprovalsViewModelTest : BaseViewModelTest() {
     lateinit var countdownTimer: CensoCountDownTimer
 
     @Mock
-    lateinit var keyRepository: KeyRepository
-
-    @Mock
     lateinit var userRepository: UserRepository
 
     @Mock
     lateinit var cipher: Cipher
+
+    @Mock
+    lateinit var signature: Signature
 
     @Mock
     lateinit var cryptoObject: CryptoObject
@@ -64,20 +66,18 @@ class ApprovalsViewModelTest : BaseViewModelTest() {
     //endregion
 
     //region Testing data
-    private val testApprovals = getWalletApprovals()
-
-    private val testMultiSigWalletCreationApprovalRequest =
-        getMultiSigWalletCreationApprovalRequest()
+    private val testApprovals = getFullListOfApprovalItems()
 
     private val testApprovalsSize = testApprovals.size
     private val testApprovalsFirstIndex = 0
     private val testApprovalsLastIndex = testApprovals.size - 1
 
-    private val testNonce = getNonce()
-
     //These are not used in any way other than to fill method parameters
     private val mockDialogSecondaryMessage = "Send 1000 SOL"
     private val mockDialogMainMessage = "You are about to approve the following request"
+
+    private val validEmail = "sharris@blue.rock"
+    private val validDeviceId = UUID.randomUUID().toString().replace("-", "")
 
     private val mockMessages = Pair(mockDialogMainMessage, mockDialogSecondaryMessage)
     //endregion
@@ -95,9 +95,19 @@ class ApprovalsViewModelTest : BaseViewModelTest() {
             Resource.Success(data = null)
         }
 
+        whenever(userRepository.retrieveUserEmail()).then { validEmail }
+        whenever(userRepository.retrieveUserDeviceId(validEmail)).then { validDeviceId }
+
         whenever(cipherRepository.getCipherForV3RootSeedDecryption()).thenAnswer {
             cipher
         }
+
+        whenever(cipherRepository.getSignatureForDeviceSigning(any())).thenAnswer {
+            signature
+        }
+
+        whenever(cryptoObject.cipher).then { cipher }
+        whenever(cryptoObject.signature).then { signature }
 
         approvalsViewModel =
             ApprovalsViewModel(
@@ -327,7 +337,7 @@ class ApprovalsViewModelTest : BaseViewModelTest() {
         val firstApproval = testApprovals[testApprovalsFirstIndex]
         //region Get 1 approval in state
         whenever(approvalsRepository.getApprovalRequests()).thenAnswer {
-            Resource.Success<List<ApprovalRequest?>>(
+            Resource.Success<List<ApprovalRequestV2?>>(
                 data = listOf(firstApproval)
             )
         }
@@ -335,6 +345,7 @@ class ApprovalsViewModelTest : BaseViewModelTest() {
         assertEquals(true, approvalsViewModel.state.approvals.isEmpty())
 
         approvalsViewModel.refreshData()
+
         advanceUntilIdle()
 
         verify(approvalsRepository, times(1)).getApprovalRequests()
@@ -361,62 +372,13 @@ class ApprovalsViewModelTest : BaseViewModelTest() {
         )
         //endregion
 
-        triggerRegisterDispositionCallAndAssertNonceDataAndBioPromptState()
+        triggerRegisterDispositionCallAndAssertBioPromptState()
 
         //Let the viewModel coroutine finish the register disposition call
         advanceUntilIdle()
 
         //Assert that the disposition was a success
         assertEquals(true, approvalsViewModel.state.approvalDispositionState?.registerApprovalDispositionResult is Resource.Success)
-    }
-
-    @Test
-    fun `register approval initiation disposition successfully then view model should reflect the success in state`() = runTest {
-        val initiationApproval = testMultiSigWalletCreationApprovalRequest
-
-        //region Get 1 approval in state
-        whenever(approvalsRepository.getApprovalRequests()).thenAnswer {
-            Resource.Success<List<ApprovalRequest?>>(
-                data = listOf(initiationApproval)
-            )
-        }
-
-        assertEquals(true, approvalsViewModel.state.approvals.isEmpty())
-
-        approvalsViewModel.refreshData()
-        advanceUntilIdle()
-
-        verify(approvalsRepository, times(1)).getApprovalRequests()
-
-        assertExpectedWalletApprovalsResultAndExpectedApprovalsSize(
-            expectedResourceState = SUCCESS,
-            expectedSize = 1
-        )
-        //endregion
-
-        //region Set first approval as selected approval
-        assertEquals(null, approvalsViewModel.state.selectedApproval)
-
-        //Set approval as selected with isApproving = true
-        approvalsViewModel.setShouldDisplayConfirmDispositionDialog(
-            approval = initiationApproval,
-            isApproving = true,
-            dialogMessages = mockMessages,
-        )
-
-        assertExpectedDispositionAndExpectedSelectedApproval(
-            expectedDisposition = ApprovalDisposition.APPROVE,
-            expectedSelectedApproval = initiationApproval
-        )
-        //endregion
-
-        triggerRegisterDispositionCallAndAssertNonceDataAndBioPromptState()
-
-        //Let the viewModel coroutine finish the register disposition call
-        advanceUntilIdle()
-
-        //Assert that the initiation disposition was a success
-        assertEquals(true, approvalsViewModel.state.approvalDispositionState?.initiationDispositionResult is Resource.Success)
     }
     //endregion
 
@@ -478,7 +440,6 @@ class ApprovalsViewModelTest : BaseViewModelTest() {
 
         approvalsViewModel.setShouldDisplayConfirmDispositionDialog(
             approval = testApproval,
-            isInitiationRequest = false,
             isApproving = true,
             dialogMessages = mockMessages
         )
@@ -495,7 +456,7 @@ class ApprovalsViewModelTest : BaseViewModelTest() {
 
     private suspend fun setupApprovalsRepositoryToReturnApprovalsOnGetApprovals() {
         whenever(approvalsRepository.getApprovalRequests()).thenAnswer {
-            Resource.Success<List<ApprovalRequest?>>(
+            Resource.Success<List<ApprovalRequestV2?>>(
                 data = testApprovals
             )
         }
@@ -507,8 +468,8 @@ class ApprovalsViewModelTest : BaseViewModelTest() {
         }
     }
 
-    private fun triggerRegisterDispositionCallAndAssertNonceDataAndBioPromptState() = runTest {
-        setMultipleAccountsAndAssertNonceDataAndBioPromptState()
+    private fun triggerRegisterDispositionCallAndAssertBioPromptState() = runTest {
+        triggerBioPromptAndCheckBioPromptState()
 
         whenever(cryptoObject.cipher).then { cipher }
 
@@ -541,22 +502,19 @@ class ApprovalsViewModelTest : BaseViewModelTest() {
             expectedSelectedApproval = approvalsViewModel.state.approvals[testApprovalsFirstIndex]
         )
 
-        setMultipleAccountsAndAssertNonceDataAndBioPromptState()
+        triggerBioPromptAndCheckBioPromptState()
     }
 
-    private fun setMultipleAccountsAndAssertNonceDataAndBioPromptState() = runTest {
-        //Assert that there is no nonce data before setting nonce data and that the bio prompt trigger is uninitialized
-        assertEquals(null, approvalsViewModel.state.multipleAccounts)
+    private fun triggerBioPromptAndCheckBioPromptState() = runTest {
+        //Assert that the bio prompt trigger is uninitialized
         assertTrue(approvalsViewModel.state.bioPromptTrigger is Resource.Uninitialized)
 
-        val multipleAccounts = durableNonceViewModel.MultipleAccounts(nonces = listOf(Nonce(testNonce)))
-        approvalsViewModel.setMultipleAccounts(multipleAccounts)
+        approvalsViewModel.triggerBioPrompt()
 
         advanceUntilIdle()
 
-        //Assert nonce data is set and the prompt trigger is success
+        //Assert the prompt trigger is success
         assertTrue(approvalsViewModel.state.bioPromptTrigger is Resource.Success)
-        assertEquals(multipleAccounts, approvalsViewModel.state.multipleAccounts)
     }
 
     private fun assertExpectedWalletApprovalsResultAndExpectedApprovalsSize(expectedResourceState: ResourceState, expectedSize: Int) {
@@ -569,7 +527,7 @@ class ApprovalsViewModelTest : BaseViewModelTest() {
         assertEquals(expectedSize, approvalsViewModel.state.approvals.size)
     }
 
-    private fun assertExpectedDispositionAndExpectedSelectedApproval(expectedDisposition: ApprovalDisposition, expectedSelectedApproval: ApprovalRequest?) {
+    private fun assertExpectedDispositionAndExpectedSelectedApproval(expectedDisposition: ApprovalDisposition, expectedSelectedApproval: ApprovalRequestV2?) {
         assertEquals(expectedSelectedApproval, approvalsViewModel.state.selectedApproval)
         assertEquals(expectedDisposition, approvalsViewModel.state.approvalDispositionState?.approvalDisposition?.data)
 
@@ -584,7 +542,6 @@ class ApprovalsViewModelTest : BaseViewModelTest() {
         assertTrue(approvalsViewModel.state.approvals.isEmpty())
         assertTrue(approvalsViewModel.state.approvalsResultRequest is Resource.Uninitialized)
         assertNull(approvalsViewModel.state.selectedApproval)
-        assertNull(approvalsViewModel.state.multipleAccounts)
     }
 
     //endregion
