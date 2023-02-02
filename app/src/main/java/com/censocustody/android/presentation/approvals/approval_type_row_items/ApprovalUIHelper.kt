@@ -17,6 +17,10 @@ import com.censocustody.android.data.models.approval.AccountType.*
 import com.censocustody.android.ui.theme.GreyText
 import com.censocustody.android.data.models.approval.ApprovalRequestDetails.*
 import com.censocustody.android.data.models.approvalV2.ApprovalRequestDetailsV2
+import com.censocustody.android.data.models.approvalV2.Slot
+import com.censocustody.android.presentation.approval_detail.approval_type_detail_items.WalletCreationUIData
+import com.censocustody.android.presentation.approval_detail.approval_type_detail_items.WhitelistUpdateUI
+import com.censocustody.android.presentation.approval_detail.approval_type_detail_items.WithdrawalRequestUI
 import com.censocustody.android.presentation.components.RowData
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
@@ -33,7 +37,7 @@ fun ApprovalRequestDetails.getHeader(context: Context): String {
             context.getString(R.string.balance_account_address_whitelist_update_approval_header)
         is WalletCreation ->
             if (accountInfo.accountType == BalanceAccount) {
-                "${context.getString(R.string.add)} ${accountInfo.chain?.label() ?: context.getString(R.string.solana)} ${context.getString(R.string.wallet_title)}"
+                "${context.getString(R.string.add)} ${accountInfo.chain?.label() ?: ""} ${context.getString(R.string.wallet_title)}"
             } else {
                 context.getString(R.string.balance_account_creation_approval_header)
             }
@@ -99,16 +103,6 @@ fun ApprovalRequestDetailsV2.getHeader(context: Context) =
         is ApprovalRequestDetailsV2.EthereumWalletCreation,
         is ApprovalRequestDetailsV2.PolygonWalletCreation -> {
             context.getString(R.string.balance_account_creation_approval_header)
-            //todo: check if we can re-add this
-//            if (accountInfo.accountType == BalanceAccount) {
-//                "${context.getString(R.string.add)} ${
-//                    accountInfo.chain?.label() ?: context.getString(
-//                        R.string.solana
-//                    )
-//                } ${context.getString(R.string.wallet_title)}"
-//            } else {
-//                context.getString(R.string.balance_account_creation_approval_header)
-//            }
         }
         //BalanceAccountNameUpdate
         is ApprovalRequestDetailsV2.EthereumWalletNameUpdate,
@@ -320,17 +314,14 @@ fun buildFromToDisplayText(from: String, to: String, context: Context): String {
     return "${from.toWalletName()} ${context.getString(R.string.to).lowercase()} ${to.toWalletName()}"
 }
 
-private fun List<SlotSignerInfo>.sortApprovers() = this.sortedBy { it.value.name }
-private fun List<SlotDestinationInfo>.sortDestinations() = this.sortedBy { it.value.name }
-
-fun List<SlotDestinationInfo>.retrieveDestinationsRowData() : MutableList<RowData> {
+fun List<DestinationAddress>.retrieveDestinationsRowData() : MutableList<RowData> {
     val destinationsList = mutableListOf<RowData>()
     if (isNotEmpty()) {
-        for (destination in sortDestinations()) {
+        for (destination in this.sortedBy { it.name }) {
             destinationsList.add(
                 RowData(
-                    title = destination.value.name,
-                    value = destination.value.address.maskAddress(),
+                    title = destination.name,
+                    value = destination.address.maskAddress(),
                 )
             )
         }
@@ -338,10 +329,10 @@ fun List<SlotDestinationInfo>.retrieveDestinationsRowData() : MutableList<RowDat
     return destinationsList
 }
 
-fun List<SlotSignerInfo>.retrieveSlotRowData(): MutableList<RowData> {
+fun List<Slot<ApprovalRequestDetailsV2.VaultSigner>>.retrieveSlotRowData(): MutableList<RowData> {
     val approversList = mutableListOf<RowData>()
     if (isNotEmpty()) {
-        for (approver in sortApprovers()) {
+        for (approver in this.sortedBy { it.value.name }) {
             approversList.add(
                 RowData(
                     title = approver.value.name,
@@ -353,6 +344,38 @@ fun List<SlotSignerInfo>.retrieveSlotRowData(): MutableList<RowData> {
     }
     return approversList
 }
+
+fun List<Slot<ApprovalRequestDetailsV2.Signer>>.retrieveSlotSignerRowData(): MutableList<RowData> {
+    val approversList = mutableListOf<RowData>()
+    if (isNotEmpty()) {
+        for (approver in this.sortedBy { it.value.name }) {
+            approversList.add(
+                RowData(
+                    title = approver.value.name,
+                    value = approver.value.email,
+                    userImage = approver.value.jpegThumbnail,
+                    userRow = true
+                ))
+        }
+    }
+    return approversList
+}
+
+//fun List<SlotSignerInfo>.retrieveSlotRowData(): MutableList<RowData> {
+//    val approversList = mutableListOf<RowData>()
+//    if (isNotEmpty()) {
+//        for (approver in sortApprovers()) {
+//            approversList.add(
+//                RowData(
+//                    title = approver.value.name,
+//                    value = approver.value.email,
+//                    userImage = approver.value.jpegThumbnail,
+//                    userRow = true
+//                ))
+//        }
+//    }
+//    return approversList
+//}
 
 fun ApprovalRequestDetailsV2.walletCreationAccountName() =
     when (this) {
@@ -463,6 +486,124 @@ fun ApprovalRequestDetailsV2.transferPolicyUpdateName() =
         else -> ""
     }
 
+fun ApprovalRequestDetailsV2.policyUpdateUI(context: Context) : PolicyUpdateUIData? =
+    when(this) {
+        is ApprovalRequestDetailsV2.EthereumTransferPolicyUpdate -> {
+            PolicyUpdateUIData(
+                name = wallet.name,
+                header = getHeader(context),
+                approvalsRequired = approvalPolicy.approvalsRequired,
+                approvalTimeout = approvalPolicy.approvalTimeout,
+                approvers = approvalPolicy.approvers
+            )
+        }
+        is ApprovalRequestDetailsV2.PolygonTransferPolicyUpdate -> {
+            PolicyUpdateUIData(
+                name = wallet.name,
+                header = getHeader(context),
+                approvalsRequired = approvalPolicy.approvalsRequired,
+                approvalTimeout = approvalPolicy.approvalTimeout,
+                approvers = approvalPolicy.approvers
+            )
+        }
+        else -> null
+    }
+
+fun ApprovalRequestDetailsV2.walletApprovalPolicy(): ApprovalRequestDetailsV2.WalletApprovalPolicy? =
+    when (this) {
+        is ApprovalRequestDetailsV2.BitcoinWalletCreation -> approvalPolicy
+        is ApprovalRequestDetailsV2.PolygonWalletCreation -> approvalPolicy
+        is ApprovalRequestDetailsV2.EthereumWalletCreation -> approvalPolicy
+        else -> null
+    }
+
+fun ApprovalRequestDetailsV2.whiteListUpdateUI(context: Context): WhitelistUpdateUI? {
+    val header = getHeader(context)
+    val accountName = whitelistUpdateName()
+
+    return when (this) {
+        is ApprovalRequestDetailsV2.EthereumWalletWhitelistUpdate -> {
+            WhitelistUpdateUI(
+                header = header,
+                name = accountName,
+                destinations = destinations
+            )
+        }
+        is ApprovalRequestDetailsV2.PolygonWalletWhitelistUpdate -> {
+            WhitelistUpdateUI(
+                header = header,
+                name = accountName,
+                destinations = destinations
+            )
+        }
+        else -> null
+    }
+}
+
+//todo: need to figure out fee formatting on withdrawal request. NEEDS FIXING.
+fun ApprovalRequestDetailsV2.withdrawalRequestUIData(context: Context) {
+    val header = getHeader(context)
+    val subtitle = withdrawalRequestSubtitle(context)
+    val fromAndToAccount = withdrawalRequestFromAndToAccount()
+
+    when (this) {
+        is ApprovalRequestDetailsV2.BitcoinWithdrawalRequest -> {
+            val address = destination.address
+            val nftMetaDataName = null
+            val originalFee = fee.value
+            val newFee = replacementFee?.value ?: ""
+            val replacementFee = replacementFee?.value
+
+            WithdrawalRequestUI(
+                header = header, subtitle = subtitle,
+                fromAccount = fromAndToAccount.first,
+                toAccount = fromAndToAccount.second,
+                originalFee = originalFee, newFee = newFee,
+                replacementFee = replacementFee,
+                nftMetadataName = nftMetaDataName,
+                address = address
+            )
+        }
+        is ApprovalRequestDetailsV2.EthereumWithdrawalRequest -> {
+            val address = destination.address
+            val nftMetaDataName = symbolInfo.nftMetadata?.name
+            val originalFee = fee.value
+            val newFee = "NEW FEE"
+            val replacementFee = null
+
+            WithdrawalRequestUI(
+                header = header, subtitle = subtitle,
+                fromAccount = fromAndToAccount.first,
+                toAccount = fromAndToAccount.second,
+                originalFee = originalFee, newFee = newFee,
+                replacementFee = replacementFee,
+                nftMetadataName = nftMetaDataName,
+                address = address
+            )
+        }
+        is ApprovalRequestDetailsV2.PolygonWithdrawalRequest -> {
+            val address = destination.address
+            val nftMetaDataName = symbolInfo.nftMetadata?.name
+            val originalFee = fee.value
+            val newFee = "NEW FEE"
+            val replacementFee = null
+
+            WithdrawalRequestUI(
+                header = header, subtitle = subtitle,
+                fromAccount = fromAndToAccount.first,
+                toAccount = fromAndToAccount.second,
+                originalFee = originalFee, newFee = newFee,
+                replacementFee = replacementFee,
+                nftMetadataName = nftMetaDataName,
+                address = address
+            )
+        }
+        else -> {
+
+        }
+    }
+}
+
 fun formattedUSDEquivalentV2(usdEquivalent: String?, hideSymbol: Boolean = true): String {
     if (usdEquivalent == null) {
         return ""
@@ -484,6 +625,12 @@ private fun usdFormatterV2(hideSymbol: Boolean = true): DecimalFormat {
     }
     return formatter
 }
+
+data class PolicyUpdateUIData(
+    val header: String, val name: String,
+    val approvalsRequired: Int, val approvalTimeout: Long,
+    val approvers: List<Slot<ApprovalRequestDetailsV2.Signer>>,
+)
 
 //MAPPING OLD TYPES TO NEW TYPES FOR WHEN CLAUSES
 //when(this) {

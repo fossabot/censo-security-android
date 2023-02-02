@@ -20,8 +20,8 @@ import com.censocustody.android.presentation.components.RowData
 import com.censocustody.android.ui.theme.GreyText
 
 @Composable
-fun LoginApprovalDetailContent(loginApproval: ApprovalRequestDetails.LoginApprovalRequest) {
-    ApprovalContentHeader(header = loginApproval.getHeader(LocalContext.current), topSpacing = 24, bottomSpacing = 8)
+fun LoginApprovalDetailContent(header: String, name: String, email: String) {
+    ApprovalContentHeader(header = header, topSpacing = 24, bottomSpacing = 8)
     Text(
         "",
         color = GreyText,
@@ -35,12 +35,12 @@ fun LoginApprovalDetailContent(loginApproval: ApprovalRequestDetails.LoginApprov
         facts = listOf(
             RowData(
                 title = stringResource(R.string.login_name),
-                value = loginApproval.name ?: "",
+                value = name,
                 userRow = false
             ),
             RowData(
                 title = stringResource(R.string.login_email),
-                value = loginApproval.email ?: "",
+                value = email,
                 userRow = false
             )
         )
