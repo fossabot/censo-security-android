@@ -264,104 +264,131 @@ fun ApprovalRowContent(
 
 @Composable
 fun ApprovalDetailContent(approval: ApprovalRequestV2, type: ApprovalRequestDetailsV2) {
+
     when (type) {
-//        is ApprovalRequestDetailsV2.VaultInvitation -> TODO()
-//        is ApprovalRequestDetailsV2.BitcoinWalletCreation -> TODO()
-//        is ApprovalRequestDetailsV2.BitcoinWithdrawalRequest -> TODO()
-//        is ApprovalRequestDetailsV2.CreateAddressBookEntry -> TODO()
-//        is ApprovalRequestDetailsV2.DeleteAddressBookEntry -> TODO()
-//        is ApprovalRequestDetailsV2.EthereumTransferPolicyUpdate -> TODO()
-//        is ApprovalRequestDetailsV2.EthereumWalletCreation -> TODO()
-//        is ApprovalRequestDetailsV2.EthereumWalletNameUpdate -> TODO()
-//        is ApprovalRequestDetailsV2.EthereumWalletSettingsUpdate -> TODO()
-//        is ApprovalRequestDetailsV2.EthereumWalletWhitelistUpdate -> TODO()
-//        is ApprovalRequestDetailsV2.EthereumWithdrawalRequest -> TODO()
-//        is ApprovalRequestDetailsV2.Login -> TODO()
-//        ApprovalRequestDetailsV2.PasswordReset -> TODO()
-//        is ApprovalRequestDetailsV2.PolygonTransferPolicyUpdate -> TODO()
-//        is ApprovalRequestDetailsV2.PolygonWalletCreation -> TODO()
-//        is ApprovalRequestDetailsV2.PolygonWalletNameUpdate -> TODO()
-//        is ApprovalRequestDetailsV2.PolygonWalletSettingsUpdate -> TODO()
-//        is ApprovalRequestDetailsV2.PolygonWalletWhitelistUpdate -> TODO()
-//        is ApprovalRequestDetailsV2.PolygonWithdrawalRequest -> TODO()
-//        ApprovalRequestDetailsV2.UnknownApprovalType -> TODO()
-//        is ApprovalRequestDetailsV2.VaultPolicyUpdate -> TODO()
-        else -> Text(text = stringResource(R.string.unknown_approval_item))
+        //WalletConfigPolicyUpdate
+        is ApprovalRequestDetailsV2.VaultPolicyUpdate -> {
+            WalletConfigPolicyUpdateDetailContent(vaultPolicyUpdate = type)
+        }
+        //Wallet Creation
+        is ApprovalRequestDetailsV2.BitcoinWalletCreation,
+        is ApprovalRequestDetailsV2.EthereumWalletCreation,
+        is ApprovalRequestDetailsV2.PolygonWalletCreation -> {
+            val header = type.getHeader(LocalContext.current)
+            val name = type.walletCreationAccountName()
+            val approvalPolicy = type.walletApprovalPolicy()
 
-//        is ApprovalRequestDetails.WalletCreation ->
-//            BalanceAccountDetailContent(walletCreation = type, approvalsReceived = approval.numberOfApprovalsReceived.toString())
-//        is ApprovalRequestDetails.ConversionRequest ->
-//            ConversionDetailContent(conversionRequest = type)
-//        is ApprovalRequestDetails.DAppTransactionRequest ->
-//            DAppTransactionDetailContent(dAppTransactionRequest = type)
-//        is ApprovalRequestDetails.LoginApprovalRequest -> {
-//            LoginApprovalDetailContent(loginApproval = type)
-//        }
-//        is ApprovalRequestDetails.SignersUpdate ->
-//            SignersUpdateDetailContent(signersUpdate = type)
-//        is ApprovalRequestDetails.WithdrawalRequest ->
-//            WithdrawalRequestDetailContent(withdrawalRequest = type)
-//        is ApprovalRequestDetails.CreateAddressBookEntry ->
-//            CreateOrDeleteAddressBookEntryDetailContent(
-//                header = type.getHeader(LocalContext.current),
-//                chain = type.chain,
-//                entryName = type.name,
-//                entryAddress = type.address
-//            )
-//        is ApprovalRequestDetails.DeleteAddressBookEntry ->
-//            CreateOrDeleteAddressBookEntryDetailContent(
-//                header = type.getHeader(LocalContext.current),
-//                chain = type.chain,
-//                entryName = type.name,
-//                entryAddress = type.address
-//            )
-//        is ApprovalRequestDetails.BalanceAccountAddressWhitelistUpdate ->
-//            BalanceAccountAddressWhitelistUpdateDetailContent(addressWhitelistUpdate = type)
-//        is ApprovalRequestDetails.BalanceAccountNameUpdate ->
-//            BalanceAccountNameUpdateDetailContent(accountNameUpdate = type)
-//        is ApprovalRequestDetails.BalanceAccountPolicyUpdate ->
-//            BalanceAccountPolicyUpdateDetailContent(accountPolicyUpdate = type)
-//        is ApprovalRequestDetails.BalanceAccountSettingsUpdate ->
-//            BalanceAccountSettingsUpdateDetailContent(accountSettingsUpdate = type)
-//        is ApprovalRequestDetails.DAppBookUpdate -> DAppBookUpdateDetailContent()
-//        is ApprovalRequestDetails.WalletConfigPolicyUpdate ->
-//            WalletConfigPolicyUpdateDetailContent(walletConfigPolicyUpdate = type)
-//        is ApprovalRequestDetails.WrapConversionRequest ->
-//            WrapConversionRequestDetailContent(wrapConversionRequest = type)
-//        is ApprovalRequestDetails.AcceptVaultInvitation ->
-//            AcceptVaultInvitationDetailContent(acceptVaultInvitation = type)
-//        is ApprovalRequestDetails.PasswordReset ->
-//            PasswordResetDetailContent(passwordReset = type)
-    }
-}
-
-@Composable
-fun DurableNonceErrorDialog(
-    dismissDialog: () -> Unit
-) {
-    AlertDialog(
-        backgroundColor = UnfocusedGrey,
-        onDismissRequest = dismissDialog,
-        title = {
-            Text(
-                text = stringResource(R.string.approval_disposition_error_title),
-                color = CensoWhite,
-                fontSize = 22.sp
-            )
-        },
-        text = {
-            Text(
-                text = stringResource(R.string.default_error_message),
-                color = CensoWhite,
-                fontSize = 16.sp
-            )
-        },
-        confirmButton = {
-            TextButton(
-                onClick = dismissDialog
-            ) {
-                Text(text = stringResource(R.string.ok))
+            approvalPolicy?.let {
+                BalanceAccountDetailContent(
+                    WalletCreationUIData(
+                        header = header, name = name,
+                        approvalsReceived = approval.numberOfApprovalsReceived.toString(),
+                        walletApprovalPolicy = it
+                    )
+                )
+            } ?: run {
+                Text(text = header, color = CensoWhite)
             }
         }
-    )
+        //BalanceAccountNameUpdate
+        is ApprovalRequestDetailsV2.EthereumWalletNameUpdate,
+        is ApprovalRequestDetailsV2.PolygonWalletNameUpdate -> {
+            val header = type.getHeader(LocalContext.current)
+            val oldName = type.walletNameOldAccountName()
+            val newName = type.walletNameNewAccountName()
+            BalanceAccountNameUpdateDetailContent(
+                header = header, oldName = oldName, newName = newName
+            )
+        }
+
+        //CreateAddressBookEntry
+        is ApprovalRequestDetailsV2.CreateAddressBookEntry -> {
+            CreateOrDeleteAddressBookEntryDetailContent(
+                header = type.getHeader(LocalContext.current),
+                chain = type.chain,
+                entryName = type.name,
+                entryAddress = type.address
+            )
+        }
+
+        //DeleteAddressBookEntry
+        is ApprovalRequestDetailsV2.DeleteAddressBookEntry -> {
+            CreateOrDeleteAddressBookEntryDetailContent(
+                header = type.getHeader(LocalContext.current),
+                chain = type.chain,
+                entryName = type.name,
+                entryAddress = type.address
+            )
+        }
+
+        //BalanceAccountAddressWhitelistUpdate
+        is ApprovalRequestDetailsV2.EthereumWalletWhitelistUpdate,
+        is ApprovalRequestDetailsV2.PolygonWalletWhitelistUpdate -> {
+            val whitelistUpdateUI = type.whiteListUpdateUI(LocalContext.current)
+
+            whitelistUpdateUI?.let {
+                BalanceAccountAddressWhitelistUpdateDetailContent(whitelistUpdate = it)
+            } ?: run {
+                Text(type.getHeader(LocalContext.current), color = CensoWhite)
+            }
+        }
+
+        //BalanceAccountSettingsUpdate
+        is ApprovalRequestDetailsV2.EthereumWalletSettingsUpdate,
+        is ApprovalRequestDetailsV2.PolygonWalletSettingsUpdate -> {
+            val header = type.getHeader(LocalContext.current)
+            val name = type.walletSettingsUpdateName()
+            BalanceAccountSettingsUpdateDetailContent(header = header, name = name)
+        }
+
+        //WithdrawalRequest: todo: this needs work on fees
+        is ApprovalRequestDetailsV2.BitcoinWithdrawalRequest,
+        is ApprovalRequestDetailsV2.EthereumWithdrawalRequest,
+        is ApprovalRequestDetailsV2.PolygonWithdrawalRequest -> {
+//            val header = type.getHeader(LocalContext.current)
+//            val subtitle = type.withdrawalRequestSubtitle(LocalContext.current)
+//            val fromAndToAccount = type.withdrawalRequestFromAndToAccount()
+//            WithdrawalRequestDetailContent(withdrawalRequest = type)
+            val withdrawalRequestUI = type.withdrawalRequestUIData(LocalContext.current)
+            val header = type.getHeader(LocalContext.current)
+            Text(text = header, color = CensoWhite)
+        }
+
+        //BalanceAccountPolicyUpdate
+        is ApprovalRequestDetailsV2.EthereumTransferPolicyUpdate,
+        is ApprovalRequestDetailsV2.PolygonTransferPolicyUpdate -> {
+            val policyUpdateUIData = type.policyUpdateUI(LocalContext.current)
+            policyUpdateUIData?.let {
+                BalanceAccountPolicyUpdateDetailContent(policyUpdateUIData = it)
+            } ?: run {
+                val header = type.getHeader(LocalContext.current)
+                Text(text = header, color = CensoWhite)
+            }
+        }
+
+        //LoginApproval
+        is ApprovalRequestDetailsV2.Login -> {
+            LoginApprovalDetailContent(
+                header = type.getHeader(LocalContext.current),
+                email = type.email,
+                name = type.name
+            )
+        }
+
+        //PasswordReset
+        is ApprovalRequestDetailsV2.PasswordReset -> {
+            PasswordResetDetailContent(type.getHeader(LocalContext.current))
+        }
+
+        //AcceptVaultInvitation
+        is ApprovalRequestDetailsV2.VaultInvitation -> {
+            AcceptVaultInvitationDetailContent(type.getHeader(LocalContext.current))
+        }
+
+        //Unknown
+        ApprovalRequestDetailsV2.UnknownApprovalType -> {
+            val header = type.getHeader(LocalContext.current)
+            Text(text = header, color = CensoWhite)
+        }
+    }
 }

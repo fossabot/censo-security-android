@@ -11,10 +11,7 @@ import com.censocustody.android.presentation.approvals.ApprovalRowContentHeader
 import com.censocustody.android.presentation.approvals.approval_type_row_items.getHeader
 
 @Composable
-fun AcceptVaultInvitationDetailContent(
-    acceptVaultInvitation: ApprovalRequestDetails.AcceptVaultInvitation
-) {
-    val header = acceptVaultInvitation.getHeader(LocalContext.current)
+fun AcceptVaultInvitationDetailContent(header: String) {
     ApprovalRowContentHeader(header = header, bottomSpacing = 36)
     Spacer(modifier = Modifier.height(24.dp))
 }

@@ -10,29 +10,31 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.censocustody.android.common.convertSecondsIntoReadableText
 import com.censocustody.android.common.toWalletName
-import com.censocustody.android.data.models.approval.ApprovalRequestDetails
 import com.censocustody.android.presentation.approvals.ApprovalContentHeader
-import com.censocustody.android.presentation.approvals.approval_type_row_items.getHeader
 import com.censocustody.android.presentation.approvals.approval_type_row_items.retrieveSlotRowData
 import com.censocustody.android.presentation.components.FactRow
 import com.censocustody.android.presentation.components.FactsData
 import com.censocustody.android.R
+import com.censocustody.android.data.models.approvalV2.ApprovalRequestDetailsV2
+import com.censocustody.android.data.models.approvalV2.Slot
+import com.censocustody.android.presentation.approvals.approval_type_row_items.PolicyUpdateUIData
+import com.censocustody.android.presentation.approvals.approval_type_row_items.retrieveSlotSignerRowData
 import com.censocustody.android.presentation.components.RowData
 
 @Composable
-fun BalanceAccountPolicyUpdateDetailContent(
-    accountPolicyUpdate: ApprovalRequestDetails.BalanceAccountPolicyUpdate
+fun BalanceAccountPolicyUpdateDetailContent(policyUpdateUIData: PolicyUpdateUIData
 ) {
-    val header = accountPolicyUpdate.getHeader(LocalContext.current)
-
-    ApprovalContentHeader(header = header, topSpacing = 16, bottomSpacing = 8)
-    ApprovalSubtitle(text = accountPolicyUpdate.accountInfo.name.toWalletName(), fontSize = 20.sp)
+    ApprovalContentHeader(header = policyUpdateUIData.header, topSpacing = 16, bottomSpacing = 8)
+    ApprovalSubtitle(text = policyUpdateUIData.name.toWalletName(), fontSize = 20.sp)
 
     Spacer(modifier = Modifier.height(24.dp))
 
     val approverRowInfoData = generateAccountPolicyUpdateRows(
-        accountPolicyUpdate = accountPolicyUpdate,
-        context = LocalContext.current)
+        approvalsRequired = policyUpdateUIData.approvalsRequired,
+        approvalTimeout = policyUpdateUIData.approvalTimeout,
+        approvers = policyUpdateUIData.approvers,
+        context = LocalContext.current
+    )
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -49,7 +51,7 @@ fun BalanceAccountPolicyUpdateDetailContent(
 
 fun generateAccountPolicyUpdateRows(
     context: Context,
-    accountPolicyUpdate: ApprovalRequestDetails.BalanceAccountPolicyUpdate,
+    approvalsRequired: Int, approvalTimeout: Long, approvers: List<Slot<ApprovalRequestDetailsV2.Signer>>,
 ) : List<FactsData>{
     val approverRowInfoData = mutableListOf<FactsData>()
     //region Approvals Row
@@ -58,17 +60,17 @@ fun generateAccountPolicyUpdateRows(
         facts = listOf(
             RowData(
                 title = context.getString(R.string.approvals_required),
-                value = "${accountPolicyUpdate.approvalPolicy.approvalsRequired}"),
+                value = "$approvalsRequired"),
             RowData(
                 title = context. getString(R.string.approval_expiration),
-                value = convertSecondsIntoReadableText(accountPolicyUpdate.approvalPolicy.approvalTimeout.toInt(), context))
+                value = convertSecondsIntoReadableText(approvalTimeout.toInt(), context))
         )
     )
     approverRowInfoData.add(approvalsInfoRow)
     //endregion
 
     //region Approvers Row
-    val approversList = accountPolicyUpdate.approvalPolicy.approvers.retrieveSlotRowData()
+    val approversList = approvers.retrieveSlotSignerRowData()
     if (approversList.isEmpty()) {
         approversList.add(
             RowData(

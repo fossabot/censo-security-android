@@ -44,8 +44,6 @@
     <string name="approval_expired">Expired</string>
     <string name="confirm">Confirm</string>
 
-    <string name="approval_disposition_error_title">Something went wrong</string>
-
     <string name="biometry_disabled_message">You must enable biometric security in your device settings.\n\nIf you already have biometry enabled, you may need to enable a different biometric option to meet the security threshold of the Censo Security App.</string>
     <string name="biometry_unavailable_message">Your device does not support biometric security at the level required for the Censo Security App.</string>
     <string name="biometry_deeplink_device_settings">Biometry Settings</string>
@@ -60,7 +58,6 @@
     <string name="arrow_back_content_des">Arrow Back Icon</string>
 
     <string name="usd_equivalent">USD equivalent</string>
-    <string name="unknown_approval_item">Unknown Approval</string>
     <string name="address">Address</string>
     <string name="chain">Chain</string>
     <string name="to">To</string>
@@ -110,7 +107,7 @@
 
     <string name="name">Name</string>
     <string name="wallet_name_title">Wallet Name</string>
-    <string name="wallet_title">Wallet</string>
+<!--    <string name="wallet_title">Wallet</string>-->
     <string name="approvers">Transfer Approvers</string>
     <string name="details_title">Details</string>
     <string name="status">status</string>
@@ -201,7 +198,6 @@
     <string name="user">User</string>
     <string name="vault">Vault</string>
     <string name="update_biometric_settings">Unable to open biometry settings. Please open device settings.</string>
-    <string name="default_error_message">Unable to retrieve data.\n\nPlease make sure you are connected to internet and try again.</string>
     <string name="key_icon_content_desc">key image</string>
     <string name="censo_maintenance_message">Censo is upgrading its service, we should be back online shortly. Please retry in a few minutes</string>
     <string name="not_connected_to_internet">You don\'t seem to be connected to the internet. Please check your connection and retry</string>
@@ -229,7 +225,6 @@
     <string name="dismiss">Dismiss</string>
 
     <string name="add">Add</string>
-    <string name="solana">Solana</string>
 
     <string name="biometry_changed_key_invalidated">Biometry for device has changed. Key invalidated.</string>
     <string name="foreground_access_app">Biometry is required to access the Censo Security App</string>
@@ -266,4 +261,5 @@
     <string name="explain_photo_permission">Taking a photo is required to use the Censo Security app.</string>
     <string name="camera_permission_request">Camera Permission Request</string>
     <string name="unable_process_image">Unable to process image, please retake image.</string>
+    <string name="wallet_title">Wallet</string>
 </resources>

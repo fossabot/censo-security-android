@@ -11,6 +11,8 @@ import androidx.compose.ui.unit.sp
 import com.censocustody.android.R
 import com.censocustody.android.common.toWalletName
 import com.censocustody.android.data.models.approval.ApprovalRequestDetails
+import com.censocustody.android.data.models.approval.DestinationAddress
+import com.censocustody.android.data.models.approval.WhitelistUpdate
 import com.censocustody.android.presentation.approvals.ApprovalRowContentHeader
 import com.censocustody.android.presentation.approvals.approval_type_row_items.*
 import com.censocustody.android.presentation.components.FactRow
@@ -19,17 +21,15 @@ import com.censocustody.android.presentation.components.RowData
 
 @Composable
 fun BalanceAccountAddressWhitelistUpdateDetailContent(
-    addressWhitelistUpdate: ApprovalRequestDetails.BalanceAccountAddressWhitelistUpdate
+    whitelistUpdate: WhitelistUpdateUI
 ) {
-    val header = addressWhitelistUpdate.getHeader(LocalContext.current)
-
-    ApprovalRowContentHeader(header = header, topSpacing = 16, bottomSpacing = 8)
-    ApprovalSubtitle(text = addressWhitelistUpdate.accountInfo.name.toWalletName(), fontSize = 20.sp)
+    ApprovalRowContentHeader(header = whitelistUpdate.header, topSpacing = 16, bottomSpacing = 8)
+    ApprovalSubtitle(text = whitelistUpdate.name.toWalletName(), fontSize = 20.sp)
     Spacer(modifier = Modifier.height(16.dp))
 
     val destinationsRowInfoData =
         generateBalanceAccountAddressWhitelistUpdateDetailRows(
-            addressWhitelistUpdate,
+            whitelistUpdate.destinations,
             LocalContext.current
         )
 
@@ -39,13 +39,21 @@ fun BalanceAccountAddressWhitelistUpdateDetailContent(
     Spacer(modifier = Modifier.height(28.dp))
 }
 
-fun generateBalanceAccountAddressWhitelistUpdateDetailRows(addressWhitelistUpdate: ApprovalRequestDetails.BalanceAccountAddressWhitelistUpdate, context: Context) : List<FactsData> {
+fun generateBalanceAccountAddressWhitelistUpdateDetailRows(
+    destinations: List<DestinationAddress>,
+    context: Context
+): List<FactsData> {
     val destinationsRowInfoData = mutableListOf<FactsData>()
 
-    val destinationsList = addressWhitelistUpdate.destinations.retrieveDestinationsRowData()
+    val destinationsList = destinations.retrieveDestinationsRowData()
 
     if (destinationsList.isEmpty()) {
-        destinationsList.add(RowData(title = context.getString(R.string.no_whitelisted_addresses), value = ""))
+        destinationsList.add(
+            RowData(
+                title = context.getString(R.string.no_whitelisted_addresses),
+                value = ""
+            )
+        )
     }
 
     val destinationsRow = FactsData(
@@ -56,3 +64,8 @@ fun generateBalanceAccountAddressWhitelistUpdateDetailRows(addressWhitelistUpdat
 
     return destinationsRowInfoData
 }
+
+data class WhitelistUpdateUI(
+    val header: String, val name: String,
+    val destinations: List<DestinationAddress>
+)

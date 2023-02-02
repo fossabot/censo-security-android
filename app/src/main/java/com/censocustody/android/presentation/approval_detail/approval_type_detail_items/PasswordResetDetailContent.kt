@@ -11,10 +11,7 @@ import com.censocustody.android.presentation.approvals.ApprovalRowContentHeader
 import com.censocustody.android.presentation.approvals.approval_type_row_items.getHeader
 
 @Composable
-fun PasswordResetDetailContent(
-    passwordReset: ApprovalRequestDetails.PasswordReset
-) {
-    val header = passwordReset.getHeader(LocalContext.current)
+fun PasswordResetDetailContent(header: String) {
     ApprovalRowContentHeader(header = header, bottomSpacing = 36)
     Spacer(modifier = Modifier.height(24.dp))
 }

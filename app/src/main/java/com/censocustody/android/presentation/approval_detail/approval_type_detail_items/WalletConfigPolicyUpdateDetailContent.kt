@@ -15,17 +15,18 @@ import com.censocustody.android.presentation.approvals.approval_type_row_items.r
 import com.censocustody.android.presentation.components.FactRow
 import com.censocustody.android.presentation.components.FactsData
 import com.censocustody.android.R
+import com.censocustody.android.data.models.approvalV2.ApprovalRequestDetailsV2
 import com.censocustody.android.presentation.components.RowData
 
 @Composable
 fun WalletConfigPolicyUpdateDetailContent(
-    walletConfigPolicyUpdate: ApprovalRequestDetails.WalletConfigPolicyUpdate
+    vaultPolicyUpdate: ApprovalRequestDetailsV2.VaultPolicyUpdate,
 ) {
-    val header = walletConfigPolicyUpdate.getHeader(LocalContext.current)
+    val header = vaultPolicyUpdate.getHeader(LocalContext.current)
     ApprovalContentHeader(header = header, topSpacing = 24, bottomSpacing = 36)
 
     val approverRowInfoData = generateWalletConfigPolicyRows(
-        walletConfigPolicyUpdate = walletConfigPolicyUpdate, context = LocalContext.current)
+        vaultPolicyUpdate = vaultPolicyUpdate, context = LocalContext.current)
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -42,10 +43,10 @@ fun WalletConfigPolicyUpdateDetailContent(
 }
 
 fun generateWalletConfigPolicyRows(
-    walletConfigPolicyUpdate: ApprovalRequestDetails.WalletConfigPolicyUpdate,
+    vaultPolicyUpdate: ApprovalRequestDetailsV2.VaultPolicyUpdate,
     context: Context
 ): List<FactsData> {
-    val approvalsRequired = walletConfigPolicyUpdate.approvalPolicy.approvalsRequired.toInt().toString()
+    val approvalsRequired = vaultPolicyUpdate.approvalPolicy.approvalsRequired.toInt().toString()
 
     val approverRowInfoData = mutableListOf<FactsData>()
 
@@ -59,7 +60,7 @@ fun generateWalletConfigPolicyRows(
             ),
             RowData(
                 title = context.getString(R.string.approval_expiration),
-                value = convertSecondsIntoReadableText(walletConfigPolicyUpdate.approvalPolicy.approvalTimeout.toInt(), context),
+                value = convertSecondsIntoReadableText(vaultPolicyUpdate.approvalPolicy.approvalTimeout.toInt(), context),
             )
         )
     )
@@ -67,7 +68,7 @@ fun generateWalletConfigPolicyRows(
     //endregion
 
     //region Approvers Row
-    val approversList = walletConfigPolicyUpdate.approvalPolicy.approvers.retrieveSlotRowData()
+    val approversList = vaultPolicyUpdate.approvalPolicy.approvers.retrieveSlotRowData()
     if (approversList.isEmpty()) {
         approversList.add(
             RowData(
