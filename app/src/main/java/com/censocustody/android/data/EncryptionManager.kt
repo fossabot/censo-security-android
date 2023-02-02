@@ -116,7 +116,7 @@ interface EncryptionManager {
         email: String,
         signature: Signature,
         dataToSign: SignableDataResult.Device
-    ) : ApprovalSignature.NoChainSignature
+    ) : ApprovalSignature.OffChainSignature
 
     fun signApprovalDisposition(
         email: String,
@@ -215,12 +215,12 @@ class EncryptionManagerImpl @Inject constructor(
         email: String,
         signature: Signature,
         dataToSign: SignableDataResult.Device
-    ): ApprovalSignature.NoChainSignature {
+    ): ApprovalSignature.OffChainSignature {
         val signedData = signDataWithDeviceKey(
             data = dataToSign.dataToSign, signature = signature, email = email
         )
 
-        return ApprovalSignature.NoChainSignature(
+        return ApprovalSignature.OffChainSignature(
             signature = BaseWrapper.encodeToBase64(signedData),
             signedData = BaseWrapper.encodeToBase64(dataToSign.dataToSign)
         )
@@ -261,7 +261,7 @@ class EncryptionManagerImpl @Inject constructor(
                             val censoSignedData = keys.censoKey.signData(it.dataToSign)
                             val censoSignature = BaseWrapper.encodeToBase64(censoSignedData)
 
-                            ApprovalSignature.NoChainSignature(
+                            ApprovalSignature.OffChainSignature(
                                 signedData = BaseWrapper.encodeToBase64(it.dataToSend),
                                 signature = censoSignature
                             )
@@ -271,7 +271,7 @@ class EncryptionManagerImpl @Inject constructor(
                 is SignableDataResult.Offchain -> {
                     val signedData = keys.censoKey.signData(signable.dataToSign)
                     val signature = BaseWrapper.encodeToBase64(signedData)
-                    ApprovalSignature.NoChainSignature(
+                    ApprovalSignature.OffChainSignature(
                         signedData = BaseWrapper.encodeToBase64(signable.dataToSend),
                         signature = signature
                     )
@@ -581,10 +581,6 @@ class EncryptionManagerImpl @Inject constructor(
         val bitcoinPublicKey = keys.bitcoinKey.getBase58ExtendedPublicKey()
         val ethereumPublicKey = keys.ethereumKey.getBase58UncompressedPublicKey()
         val censoPublicKey = keys.censoKey.getBase58UncompressedPublicKey()
-
-        censoLog(message = "bitcoin key: $bitcoinPublicKey")
-        censoLog(message = "ethereum key: $ethereumPublicKey")
-        censoLog(message = "censo key: $censoPublicKey")
 
         return ethereumPublicKey
     }

@@ -278,7 +278,7 @@ class ApprovalRequestSigningTest {
         val apiBody = approvalDispositionRequest.convertToApiBody(mockEncryptionManager, cryptoMock)
         assertEquals(disposition, apiBody.approvalDisposition)
         assertEquals(
-            ApprovalSignature.NoChainSignature(signature = "someSignature", signedData = "somePayload"),
+            ApprovalSignature.OffChainSignature(signature = "someSignature", signedData = "somePayload"),
             apiBody.signatureInfo
         )
 

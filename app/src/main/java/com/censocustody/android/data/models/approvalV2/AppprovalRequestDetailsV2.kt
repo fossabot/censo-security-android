@@ -16,7 +16,6 @@ import java.lang.reflect.Modifier
 import java.math.BigInteger
 
 typealias OwnerAddress = String
-data class Slot<A>(val slotId: Byte, val value: A)
 
 data class ApprovalRequestV2(
     val id: String,
@@ -333,13 +332,13 @@ sealed class ApprovalRequestDetailsV2 {
     data class VaultApprovalPolicy(
         val approvalsRequired: Int,
         val approvalTimeout: Long,
-        val approvers: List<Slot<VaultSigner>>,
+        val approvers: List<VaultSigner>,
     )
 
     data class WalletApprovalPolicy(
         val approvalsRequired: Int,
         val approvalTimeout: Long,
-        val approvers: List<Slot<Signer>>,
+        val approvers: List<Signer>,
     )
 
     data class VaultSigner(

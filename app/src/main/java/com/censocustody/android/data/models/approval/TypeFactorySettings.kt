@@ -16,6 +16,6 @@ class TypeFactorySettings {
         ).registerSubtype(ApprovalSignature.SolanaSignature::class.java, "solana"
         ).registerSubtype(ApprovalSignature.BitcoinSignatures::class.java, "bitcoin"
         ).registerSubtype(ApprovalSignature.EthereumSignature::class.java, "ethereum"
-        ).registerSubtype(ApprovalSignature.NoChainSignature::class.java, "nochain")
+        ).registerSubtype(ApprovalSignature.OffChainSignature::class.java, "offchain")
     }
 }
