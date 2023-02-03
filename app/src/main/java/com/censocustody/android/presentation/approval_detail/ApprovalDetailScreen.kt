@@ -34,6 +34,7 @@ import com.censocustody.android.data.models.approval.ApprovalRequest
 import com.censocustody.android.presentation.approvals.ApprovalsViewModel
 import com.censocustody.android.ui.theme.*
 import com.censocustody.android.data.models.approval.ApprovalRequestDetails.*
+import com.censocustody.android.data.models.approvalV2.ApprovalDispositionRequestV2
 import com.censocustody.android.data.models.approvalV2.ApprovalRequestDetailsV2
 import com.censocustody.android.data.models.approvalV2.ApprovalRequestV2
 import com.censocustody.android.presentation.approvals.ApprovalDetailContent
@@ -211,7 +212,7 @@ fun ApprovalDetailsScreen(
                 val retryData = approvalDetailsState.approvalDispositionState.approvalRetryData
 
                 CensoErrorScreen(
-                    errorResource = approvalDetailsState.approvalDispositionState.registerApprovalDispositionResult as Resource.Error<ApprovalDispositionRequest.RegisterApprovalDispositionBody>,
+                    errorResource = approvalDetailsState.approvalDispositionState.registerApprovalDispositionResult as Resource.Error<ApprovalDispositionRequestV2.RegisterApprovalDispositionV2Body>,
                     onDismiss = {
                         resetDataAfterErrorDismissed()
                     },
