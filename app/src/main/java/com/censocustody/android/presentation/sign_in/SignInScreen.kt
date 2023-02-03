@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import androidx.biometric.BiometricPrompt
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -15,6 +16,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -176,6 +178,21 @@ fun SignInScreen(
                                 errorEnabled = state.emailErrorEnabled,
                                 showDoneAction = false
                             )
+                            //todo: Chat with team about this workaround
+                            if (state.biometricLoginPreviousFailure) {
+                                Spacer(modifier = Modifier.size(16.dp))
+                                Box {
+                                    Text(
+                                        modifier = Modifier
+                                            .clickable { viewModel.skipToPasswordEntry() }
+                                            .padding(horizontal = boxItemsHorizontalPadding),
+                                        text = stringResource(R.string.use_password_sign_in),
+                                        color = CensoTextBlue,
+                                        textAlign = TextAlign.End,
+                                        fontWeight = FontWeight.W400
+                                    )
+                                }
+                            }
                         } else {
                             Text(
                                 modifier = Modifier.padding(horizontal = boxItemsHorizontalPadding),
