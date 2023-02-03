@@ -70,7 +70,7 @@ interface BrooklynApiService {
     @Headers(AUTH_REQUIRED)
     suspend fun walletSigners(): RetrofitResponse<List<WalletSigner?>>
 
-    @POST("v2/wallet-signers")
+    @POST("v3/wallet-signers")
     @Headers(AUTH_REQUIRED)
     suspend fun addWalletSigner(@Body signers: Signers): RetrofitResponse<Signers>
 
