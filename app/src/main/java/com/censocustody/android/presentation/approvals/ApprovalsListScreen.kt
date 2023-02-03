@@ -50,6 +50,7 @@ import com.censocustody.android.data.models.approval.ApprovalDispositionRequest
 import com.censocustody.android.data.models.approval.InitiationRequest
 import com.censocustody.android.data.models.approval.ApprovalRequestDetails.*
 import com.censocustody.android.data.models.approval.ApprovalRequest
+import com.censocustody.android.data.models.approvalV2.ApprovalDispositionRequestV2
 import com.censocustody.android.data.models.approvalV2.ApprovalRequestDetailsV2
 import com.censocustody.android.data.models.approvalV2.ApprovalRequestV2
 import com.censocustody.android.presentation.Screen
@@ -300,7 +301,7 @@ fun ApprovalsListScreen(
 
             if (approvalsState.approvalDispositionState?.registerApprovalDispositionResult is Resource.Error) {
                 CensoErrorScreen(
-                    errorResource = approvalsState.approvalDispositionState.registerApprovalDispositionResult as Resource.Error<ApprovalDispositionRequest.RegisterApprovalDispositionBody>,
+                    errorResource = approvalsState.approvalDispositionState.registerApprovalDispositionResult as Resource.Error<ApprovalDispositionRequestV2.RegisterApprovalDispositionV2Body>,
                     onDismiss = {
                         resetDataAfterErrorDismissed()
                     },
