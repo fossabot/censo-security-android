@@ -19,6 +19,7 @@ import com.censocustody.android.data.models.PushBody
 import kotlinx.coroutines.*
 import java.security.Signature
 import javax.crypto.Cipher
+import kotlin.random.Random
 
 @HiltViewModel
 class SignInViewModel @Inject constructor(
@@ -81,6 +82,10 @@ class SignInViewModel @Inject constructor(
         } else {
             kickOffBiometryLoginOrMoveToPasswordEntry()
         }
+    }
+
+    fun skipToPasswordEntry() {
+        state = state.copy(loginStep = LoginStep.PASSWORD_ENTRY)
     }
 
     fun kickOffBiometryLoginOrMoveToPasswordEntry() {
@@ -201,6 +206,7 @@ class SignInViewModel @Inject constructor(
                     }
                 }
                 is Resource.Error -> {
+                    state = state.copy(biometricLoginPreviousFailure = true)
                     userFailedLogin(resource = loginResource)
                 }
                 else -> {

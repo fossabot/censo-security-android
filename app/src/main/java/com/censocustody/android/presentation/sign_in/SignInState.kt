@@ -20,7 +20,8 @@ data class SignInState(
     val walletSignersResult: Resource<List<WalletSigner?>> = Resource.Uninitialized,
     val triggerBioPrompt: Resource<CryptoObject> = Resource.Uninitialized,
     val bioPromptReason: BioPromptReason = BioPromptReason.UNINITIALIZED,
-    val exitLoginFlow : Resource<Unit> = Resource.Uninitialized
+    val exitLoginFlow : Resource<Unit> = Resource.Uninitialized,
+    val biometricLoginPreviousFailure: Boolean = false
     ) {
     val signInButtonEnabled = email.isNotEmpty() && password.isNotEmpty()
 
