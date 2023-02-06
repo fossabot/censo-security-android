@@ -1,7 +1,6 @@
 package com.censocustody.android.data.models.approvalV2
 
 import com.google.gson.*
-import com.censocustody.android.data.models.approval.ApprovalSignature
 import java.lang.reflect.Type
 
 class ApprovalRequestV2Deserializer : JsonDeserializer<ApprovalRequestV2> {

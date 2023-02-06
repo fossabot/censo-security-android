@@ -9,7 +9,6 @@ import android.os.Build
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.biometric.BiometricPrompt
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -34,7 +33,6 @@ import androidx.core.app.ActivityCompat.shouldShowRequestPermissionRationale
 import androidx.core.content.ContextCompat
 import androidx.core.content.ContextCompat.startActivity
 import androidx.fragment.app.FragmentActivity
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.navigation.NavController
 import com.google.accompanist.swiperefresh.SwipeRefresh
@@ -46,17 +44,12 @@ import com.censocustody.android.common.*
 import com.censocustody.android.common.BioCryptoUtil.NO_CIPHER_CODE
 import com.censocustody.android.data.SharedPrefsHelper
 import com.censocustody.android.data.models.ApprovalDisposition
-import com.censocustody.android.data.models.approval.ApprovalDispositionRequest
-import com.censocustody.android.data.models.approval.InitiationRequest
-import com.censocustody.android.data.models.approval.ApprovalRequestDetails.*
-import com.censocustody.android.data.models.approval.ApprovalRequest
 import com.censocustody.android.data.models.approvalV2.ApprovalDispositionRequestV2
 import com.censocustody.android.data.models.approvalV2.ApprovalRequestDetailsV2
 import com.censocustody.android.data.models.approvalV2.ApprovalRequestV2
 import com.censocustody.android.presentation.Screen
 import com.censocustody.android.presentation.approvals.approval_type_row_items.*
 import com.censocustody.android.presentation.components.*
-import com.censocustody.android.presentation.durable_nonce.DurableNonceViewModel
 import com.censocustody.android.ui.theme.*
 import com.censocustody.android.ui.theme.BackgroundBlack
 
@@ -177,9 +170,7 @@ fun ApprovalsListScreen(
             approvalsViewModel.resetPromptTrigger()
         }
 
-        if (approvalsState.approvalDispositionState?.registerApprovalDispositionResult is Resource.Success ||
-            approvalsState.approvalDispositionState?.initiationDispositionResult is Resource.Success
-        ) {
+        if (approvalsState.approvalDispositionState?.registerApprovalDispositionResult is Resource.Success) {
             approvalsViewModel.wipeDataAfterDispositionSuccess()
         }
     }
@@ -302,16 +293,6 @@ fun ApprovalsListScreen(
             if (approvalsState.approvalDispositionState?.registerApprovalDispositionResult is Resource.Error) {
                 CensoErrorScreen(
                     errorResource = approvalsState.approvalDispositionState.registerApprovalDispositionResult as Resource.Error<ApprovalDispositionRequestV2.RegisterApprovalDispositionV2Body>,
-                    onDismiss = {
-                        resetDataAfterErrorDismissed()
-                    },
-                    onRetry = { retryApprovalDisposition() }
-                )
-            }
-
-            if (approvalsState.approvalDispositionState?.initiationDispositionResult is Resource.Error) {
-                CensoErrorScreen(
-                    errorResource = approvalsState.approvalDispositionState.initiationDispositionResult as Resource.Error<InitiationRequest.InitiateRequestBody>,
                     onDismiss = {
                         resetDataAfterErrorDismissed()
                     },

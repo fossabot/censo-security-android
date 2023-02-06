@@ -2,7 +2,6 @@ package com.censocustody.android.data
 
 import com.google.gson.*
 import com.censocustody.android.BuildConfig
-import com.censocustody.android.common.censoLog
 import com.censocustody.android.data.BaseRepository.Companion.UNAUTHORIZED
 import com.censocustody.android.data.BrooklynApiService.Companion.AUTH
 import com.censocustody.android.data.BrooklynApiService.Companion.X_CENSO_ID
@@ -11,6 +10,7 @@ import com.censocustody.android.data.models.approval.*
 import com.censocustody.android.data.models.approvalV2.ApprovalDispositionRequestV2
 import com.censocustody.android.data.models.approvalV2.ApprovalRequestV2
 import com.censocustody.android.data.models.approvalV2.ApprovalRequestV2Deserializer
+import com.censocustody.android.data.models.approvalV2.TypeFactorySettings
 import kotlinx.coroutines.runBlocking
 import okhttp3.*
 import okhttp3.logging.HttpLoggingInterceptor
@@ -95,14 +95,6 @@ interface BrooklynApiService {
         @Path("request_id") requestId: String,
         @Body registerApprovalDispositionBody: ApprovalDispositionRequestV2.RegisterApprovalDispositionV2Body
     ): RetrofitResponse<ApprovalDispositionRequestV2.RegisterApprovalDispositionV2Body>
-
-    @POST("v1/approval-requests/{request_id}/initiations")
-    @Headers(AUTH_REQUIRED)
-    suspend fun approveOrDenyInitiation(
-        @Path("request_id") requestId: String,
-        @Body initiationRequestBody: InitiationRequest.InitiateRequestBody
-    ) : RetrofitResponse<InitiationRequest.InitiateRequestBody>
-
 }
 
 class AuthInterceptor(private val authProvider: AuthProvider) : Interceptor {

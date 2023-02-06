@@ -27,13 +27,8 @@ import androidx.navigation.NavController
 import com.censocustody.android.R
 import com.censocustody.android.common.*
 import com.censocustody.android.data.models.ApprovalDisposition
-import com.censocustody.android.data.models.approval.ApprovalDispositionRequest
-import com.censocustody.android.data.models.approval.InitiationRequest
-import com.censocustody.android.data.models.approval.ApprovalRequestDetails
-import com.censocustody.android.data.models.approval.ApprovalRequest
 import com.censocustody.android.presentation.approvals.ApprovalsViewModel
 import com.censocustody.android.ui.theme.*
-import com.censocustody.android.data.models.approval.ApprovalRequestDetails.*
 import com.censocustody.android.data.models.approvalV2.ApprovalDispositionRequestV2
 import com.censocustody.android.data.models.approvalV2.ApprovalRequestDetailsV2
 import com.censocustody.android.data.models.approvalV2.ApprovalRequestV2
@@ -108,9 +103,7 @@ fun ApprovalDetailsScreen(
             approvalDetailsViewModel.resetPromptTrigger()
         }
 
-        if (approvalDetailsState.approvalDispositionState?.registerApprovalDispositionResult is Resource.Success
-            || approvalDetailsState.approvalDispositionState?.initiationDispositionResult is Resource.Success
-        ) {
+        if (approvalDetailsState.approvalDispositionState?.registerApprovalDispositionResult is Resource.Success) {
             approvalDetailsViewModel.wipeDataAndKickUserOutToApprovalsScreen()
         }
         if (approvalDetailsState.shouldKickOutUserToApprovalsScreen) {
@@ -156,10 +149,9 @@ fun ApprovalDetailsScreen(
                             context = context,
                             approvalDisposition = ApprovalDisposition.APPROVE,
                         )
-                            ?: UnknownApprovalType.getDialogMessages(
+                            ?: ApprovalRequestDetailsV2.UnknownApprovalType.getDialogMessages(
                                 context = context,
                                 approvalDisposition = ApprovalDisposition.APPROVE,
-                                isInitiationRequest = isInitiationRequest
                             )
                     )
                 },
@@ -170,10 +162,9 @@ fun ApprovalDetailsScreen(
                             context = context,
                             approvalDisposition = ApprovalDisposition.DENY,
                         )
-                            ?: UnknownApprovalType.getDialogMessages(
+                            ?: ApprovalRequestDetailsV2.UnknownApprovalType.getDialogMessages(
                                 context = context,
                                 approvalDisposition = ApprovalDisposition.DENY,
-                                isInitiationRequest = isInitiationRequest
                             )
                     )
                 },
@@ -213,23 +204,6 @@ fun ApprovalDetailsScreen(
 
                 CensoErrorScreen(
                     errorResource = approvalDetailsState.approvalDispositionState.registerApprovalDispositionResult as Resource.Error<ApprovalDispositionRequestV2.RegisterApprovalDispositionV2Body>,
-                    onDismiss = {
-                        resetDataAfterErrorDismissed()
-                    },
-                    onRetry = {
-                        retryApprovalDisposition(
-                            isApproving = retryData.isApproving,
-                            isInitiationRequest = retryData.isInitiationRequest
-                        )
-                    }
-                )
-            }
-
-            if (approvalDetailsState.approvalDispositionState?.initiationDispositionResult is Resource.Error) {
-                val retryData = approvalDetailsState.approvalDispositionState.approvalRetryData
-
-                CensoErrorScreen(
-                    errorResource = approvalDetailsState.approvalDispositionState.initiationDispositionResult as Resource.Error<InitiationRequest.InitiateRequestBody>,
                     onDismiss = {
                         resetDataAfterErrorDismissed()
                     },

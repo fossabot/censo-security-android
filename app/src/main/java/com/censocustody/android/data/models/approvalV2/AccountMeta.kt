@@ -1,4 +1,4 @@
-package com.censocustody.android.data.models.approval
+package com.censocustody.android.data.models.approvalV2
 
 data class AccountMeta(
     val publicKey: PublicKey,

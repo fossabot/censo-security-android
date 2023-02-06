@@ -1,4 +1,4 @@
-package com.censocustody.android.data.models.approval
+package com.censocustody.android.data.models.approvalV2
 
 import com.censocustody.android.data.SignedPayload
 import com.google.gson.typeadapters.RuntimeTypeAdapterFactory

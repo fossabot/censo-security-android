@@ -10,9 +10,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.censocustody.android.R
 import com.censocustody.android.common.toWalletName
-import com.censocustody.android.data.models.approval.ApprovalRequestDetails
-import com.censocustody.android.data.models.approval.DestinationAddress
-import com.censocustody.android.data.models.approval.WhitelistUpdate
+import com.censocustody.android.data.models.approvalV2.ApprovalRequestDetailsV2
 import com.censocustody.android.presentation.approvals.ApprovalRowContentHeader
 import com.censocustody.android.presentation.approvals.approval_type_row_items.*
 import com.censocustody.android.presentation.components.FactRow
@@ -40,7 +38,7 @@ fun BalanceAccountAddressWhitelistUpdateDetailContent(
 }
 
 fun generateBalanceAccountAddressWhitelistUpdateDetailRows(
-    destinations: List<DestinationAddress>,
+    destinations: List<ApprovalRequestDetailsV2.DestinationAddress>,
     context: Context
 ): List<FactsData> {
     val destinationsRowInfoData = mutableListOf<FactsData>()
@@ -67,5 +65,5 @@ fun generateBalanceAccountAddressWhitelistUpdateDetailRows(
 
 data class WhitelistUpdateUI(
     val header: String, val name: String,
-    val destinations: List<DestinationAddress>
+    val destinations: List<ApprovalRequestDetailsV2.DestinationAddress>
 )

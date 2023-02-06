@@ -15,11 +15,9 @@ import com.censocustody.android.data.models.StoredKeyData
 import com.censocustody.android.data.models.StoredKeyData.Companion.BITCOIN_KEY
 import com.censocustody.android.data.models.StoredKeyData.Companion.CENSO_KEY
 import com.censocustody.android.data.models.StoredKeyData.Companion.ETHEREUM_KEY
-import com.censocustody.android.data.models.SupplyDappInstruction
 import com.censocustody.android.data.models.Signers
 import com.censocustody.android.data.models.WalletSigner
-import com.censocustody.android.data.models.approval.ApprovalSignature
-import com.censocustody.android.data.models.approval.InitiationRequest
+import com.censocustody.android.data.models.approvalV2.ApprovalSignature
 import org.web3j.crypto.Hash
 import java.nio.charset.Charset
 import java.security.SecureRandom
@@ -77,14 +75,6 @@ interface EncryptionManager {
         rootSeed: String? = null,
         cipher: Cipher? = null,
     ): SignedPayload
-
-    fun signInitiationRequestData(
-        signable: Signable,
-        email: String,
-        ephemeralPrivateKey: ByteArray,
-        supplyInstructions: List<SupplyDappInstruction>,
-        cipher: Cipher
-    ): SignedInitiationData
 
     fun signDataWithSolanaEncryptedKey(
         data: ByteArray,
@@ -469,71 +459,6 @@ class EncryptionManagerImpl @Inject constructor(
         return BaseWrapper.encodeToBase64(signedData)
     }
 
-    override fun signInitiationRequestData(
-        signable: Signable,
-        email: String,
-        ephemeralPrivateKey: ByteArray,
-        supplyInstructions: List<SupplyDappInstruction>,
-        cipher: Cipher
-    ): SignedInitiationData {
-        val rootSeed = retrieveRootSeed(
-            email = email,
-            cipher = cipher,
-        )
-
-        if (rootSeed.isEmpty()) {
-            throw NoKeyDataException
-        }
-
-        val initiatorSignature = try {
-            signSolanaApprovalDispositionMessage(
-                signable = signable,
-                rootSeed = rootSeed,
-                email = email
-            ).signature
-        } catch (e: Exception) {
-            throw Exception("SIGNING_DATA_FAILURE")
-        }
-
-        val opAccountSignature = try {
-            signSolanaApprovalInitiationMessage(
-                ephemeralPrivateKey = ephemeralPrivateKey,
-                signable = signable,
-                rootSeed = rootSeed,
-                email = email
-            )
-        } catch (e: Exception) {
-            throw Exception("SIGNING_DATA_FAILURE")
-        }
-
-        val supplyDappInstruction =
-            if (supplyInstructions.isNotEmpty()) {
-                val supplyInstructionInitiatorSignatures = supplyInstructions.map { instruction ->
-                    InitiationRequest.SupplyDappInstructionsTxSignature(
-                        nonce = instruction.nonce.value,
-                        nonceAccountAddress = instruction.nonceAccountAddress,
-                        signature = signSolanaApprovalDispositionMessage(
-                            signable = instruction,
-                            rootSeed = rootSeed,
-                            email = email,
-                        ).signature
-                    )
-                }
-
-                InitiationRequest.SupplyDAppInstructions(
-                    supplyInstructionInitiatorSignatures = supplyInstructionInitiatorSignatures
-                )
-            } else {
-                null
-            }
-
-        return SignedInitiationData(
-            supplyDAppInstructions = supplyDappInstruction,
-            initiatorSignature = initiatorSignature,
-            opAccountSignature = opAccountSignature
-        )
-    }
-
     override fun signDataWithSolanaEncryptedKey(
         data: ByteArray,
         userEmail: String,
@@ -830,9 +755,3 @@ sealed class SignableDataResult {
 interface SignableV2 {
     fun retrieveSignableData(): List<SignableDataResult>
 }
-
-data class SignedInitiationData(
-    val initiatorSignature: String,
-    val opAccountSignature: String,
-    val supplyDAppInstructions: InitiationRequest.SupplyDAppInstructions?
-)

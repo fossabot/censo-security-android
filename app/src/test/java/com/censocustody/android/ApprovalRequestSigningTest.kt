@@ -9,6 +9,7 @@ import com.censocustody.android.data.*
 import com.censocustody.android.data.models.ApprovalDisposition
 import com.censocustody.android.data.models.Nonce
 import com.censocustody.android.data.models.approval.*
+import com.censocustody.android.data.models.approvalV2.ApprovalSignature
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Before

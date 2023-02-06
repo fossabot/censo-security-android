@@ -7,6 +7,7 @@ import com.censocustody.android.common.toHexString
 import com.censocustody.android.data.models.ApprovalDisposition
 import com.censocustody.android.data.models.Nonce
 import com.censocustody.android.data.models.approval.*
+import com.censocustody.android.data.models.approvalV2.TypeFactorySettings
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test

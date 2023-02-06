@@ -3,9 +3,7 @@ package com.censocustody.android.presentation.approval_detail
 import com.censocustody.android.common.Resource
 import com.censocustody.android.common.CensoCountDownTimer
 import com.censocustody.android.data.ApprovalsRepository
-import com.censocustody.android.data.KeyRepository
 import com.censocustody.android.data.UserRepository
-import com.censocustody.android.data.models.approval.ApprovalRequest
 import com.censocustody.android.data.models.CipherRepository
 import com.censocustody.android.data.models.approvalV2.ApprovalRequestV2
 import com.censocustody.android.presentation.common_approvals.CommonApprovalsViewModel

@@ -6,11 +6,12 @@ import com.censocustody.android.common.UriWrapper
 import com.censocustody.android.common.evm.EvmAddress
 import com.censocustody.android.data.models.Chain
 import com.censocustody.android.data.models.approval.*
-import com.censocustody.android.data.models.approval.ApprovalSignature.Companion.approvalSignatureAdapterFactory
+import com.censocustody.android.data.models.approvalV2.ApprovalSignature.Companion.approvalSignatureAdapterFactory
 import com.censocustody.android.data.models.approvalV2.ApprovalRequestDetailsV2.EvmTokenInfo.Companion.evmTokenInfoAdapterFactory
 import com.censocustody.android.data.models.approvalV2.ApprovalRequestDetailsV2.OnChainPolicy.Companion.onChainPolicyAdapterFactory
 import com.censocustody.android.data.models.approvalV2.ApprovalRequestDetailsV2.SigningData.Companion.signingDataAdapterFactory
 import com.google.gson.GsonBuilder
+import com.google.gson.annotations.SerializedName
 import com.google.gson.typeadapters.RuntimeTypeAdapterFactory
 import java.lang.reflect.Modifier
 import java.math.BigInteger
@@ -74,49 +75,50 @@ sealed class ApprovalRequestDetailsV2 {
         this is Login || this is VaultInvitation || this is PasswordReset
 
     companion object {
-        val approvalRequestDetailsV2AdapterFactory: RuntimeTypeAdapterFactory<ApprovalRequestDetailsV2> = RuntimeTypeAdapterFactory.of(
-            ApprovalRequestDetailsV2::class.java, "type"
-        ).registerSubtype(
-            VaultPolicyUpdate::class.java, "VaultPolicyUpdate"
-        ).registerSubtype(
-            BitcoinWalletCreation::class.java, "BitcoinWalletCreation"
-        ).registerSubtype(
-            EthereumWalletCreation::class.java, "EthereumWalletCreation"
-        ).registerSubtype(
-            PolygonWalletCreation::class.java, "PolygonWalletCreation"
-        ).registerSubtype(
-            EthereumWalletWhitelistUpdate::class.java, "EthereumWalletWhitelistUpdate"
-        ).registerSubtype(
-            PolygonWalletWhitelistUpdate::class.java, "PolygonWalletWhitelistUpdate"
-        ).registerSubtype(
-            EthereumWalletNameUpdate::class.java, "EthereumWalletNameUpdate"
-        ).registerSubtype(
-            PolygonWalletNameUpdate::class.java, "PolygonWalletNameUpdate"
-        ).registerSubtype(
-            EthereumWalletSettingsUpdate::class.java, "EthereumWalletSettingsUpdate"
-        ).registerSubtype(
-            PolygonWalletSettingsUpdate::class.java, "PolygonWalletSettingsUpdate"
-        ).registerSubtype(
-            EthereumTransferPolicyUpdate::class.java, "EthereumTransferPolicyUpdate"
-        ).registerSubtype(
-            PolygonTransferPolicyUpdate::class.java, "PolygonTransferPolicyUpdate"
-        ).registerSubtype(
-            CreateAddressBookEntry::class.java, "CreateAddressBookEntry"
-        ).registerSubtype(
-            DeleteAddressBookEntry::class.java, "DeleteAddressBookEntry"
-        ).registerSubtype(
-            BitcoinWithdrawalRequest::class.java, "BitcoinWithdrawalRequest"
-        ).registerSubtype(
-            EthereumWithdrawalRequest::class.java, "EthereumWithdrawalRequest"
-        ).registerSubtype(
-            PolygonWithdrawalRequest::class.java, "PolygonWithdrawalRequest"
-        ).registerSubtype(
-            PasswordReset::class.java, "PasswordReset"
-        ).registerSubtype(
-            Login::class.java, "Login"
-        ).registerSubtype(
-            VaultInvitation::class.java, "VaultInvitation"
-        )
+        val approvalRequestDetailsV2AdapterFactory: RuntimeTypeAdapterFactory<ApprovalRequestDetailsV2> =
+            RuntimeTypeAdapterFactory.of(
+                ApprovalRequestDetailsV2::class.java, "type"
+            ).registerSubtype(
+                VaultPolicyUpdate::class.java, "VaultPolicyUpdate"
+            ).registerSubtype(
+                BitcoinWalletCreation::class.java, "BitcoinWalletCreation"
+            ).registerSubtype(
+                EthereumWalletCreation::class.java, "EthereumWalletCreation"
+            ).registerSubtype(
+                PolygonWalletCreation::class.java, "PolygonWalletCreation"
+            ).registerSubtype(
+                EthereumWalletWhitelistUpdate::class.java, "EthereumWalletWhitelistUpdate"
+            ).registerSubtype(
+                PolygonWalletWhitelistUpdate::class.java, "PolygonWalletWhitelistUpdate"
+            ).registerSubtype(
+                EthereumWalletNameUpdate::class.java, "EthereumWalletNameUpdate"
+            ).registerSubtype(
+                PolygonWalletNameUpdate::class.java, "PolygonWalletNameUpdate"
+            ).registerSubtype(
+                EthereumWalletSettingsUpdate::class.java, "EthereumWalletSettingsUpdate"
+            ).registerSubtype(
+                PolygonWalletSettingsUpdate::class.java, "PolygonWalletSettingsUpdate"
+            ).registerSubtype(
+                EthereumTransferPolicyUpdate::class.java, "EthereumTransferPolicyUpdate"
+            ).registerSubtype(
+                PolygonTransferPolicyUpdate::class.java, "PolygonTransferPolicyUpdate"
+            ).registerSubtype(
+                CreateAddressBookEntry::class.java, "CreateAddressBookEntry"
+            ).registerSubtype(
+                DeleteAddressBookEntry::class.java, "DeleteAddressBookEntry"
+            ).registerSubtype(
+                BitcoinWithdrawalRequest::class.java, "BitcoinWithdrawalRequest"
+            ).registerSubtype(
+                EthereumWithdrawalRequest::class.java, "EthereumWithdrawalRequest"
+            ).registerSubtype(
+                PolygonWithdrawalRequest::class.java, "PolygonWithdrawalRequest"
+            ).registerSubtype(
+                PasswordReset::class.java, "PasswordReset"
+            ).registerSubtype(
+                Login::class.java, "Login"
+            ).registerSubtype(
+                VaultInvitation::class.java, "VaultInvitation"
+            )
     }
 
     object UnknownApprovalType : ApprovalRequestDetailsV2()
@@ -190,11 +192,11 @@ sealed class ApprovalRequestDetailsV2 {
         val currentGuardAddress: String,
         val signingData: SigningData.EthereumSigningData
     ) : ApprovalRequestDetailsV2() {
-        fun changeValue(): ApprovalRequestDetails.SettingsChange? {
+        fun changeValue(): SettingsChange? {
             return if (whitelistEnabled != null && dappsEnabled == null) {
-                ApprovalRequestDetails.SettingsChange.WhitelistEnabled(whiteListEnabled = whitelistEnabled == BooleanSetting.On)
+                SettingsChange.WhitelistEnabled(whiteListEnabled = whitelistEnabled == BooleanSetting.On)
             } else if (dappsEnabled != null && whitelistEnabled == null) {
-                ApprovalRequestDetails.SettingsChange.DAppsEnabled(dappsEnabled = dappsEnabled == BooleanSetting.On)
+                SettingsChange.DAppsEnabled(dappsEnabled = dappsEnabled == BooleanSetting.On)
             } else {
                 null
             }
@@ -210,11 +212,11 @@ sealed class ApprovalRequestDetailsV2 {
         val currentGuardAddress: String,
         val signingData: SigningData.PolygonSigningData
     ) : ApprovalRequestDetailsV2() {
-        fun changeValue(): ApprovalRequestDetails.SettingsChange? {
+        fun changeValue(): SettingsChange? {
             return if (whitelistEnabled != null && dappsEnabled == null) {
-                ApprovalRequestDetails.SettingsChange.WhitelistEnabled(whiteListEnabled = whitelistEnabled == BooleanSetting.On)
+                SettingsChange.WhitelistEnabled(whiteListEnabled = whitelistEnabled == BooleanSetting.On)
             } else if (dappsEnabled != null && whitelistEnabled == null) {
-                ApprovalRequestDetails.SettingsChange.DAppsEnabled(dappsEnabled = dappsEnabled == BooleanSetting.On)
+                SettingsChange.DAppsEnabled(dappsEnabled = dappsEnabled == BooleanSetting.On)
             } else {
                 null
             }
@@ -307,13 +309,14 @@ sealed class ApprovalRequestDetailsV2 {
     sealed class OnChainPolicy {
 
         companion object {
-            val onChainPolicyAdapterFactory: RuntimeTypeAdapterFactory<OnChainPolicy> = RuntimeTypeAdapterFactory.of(
-                OnChainPolicy::class.java, "chain"
-            ).registerSubtype(
-                Ethereum::class.java, "ethereum"
-            ).registerSubtype(
-                Polygon::class.java, "polygon"
-            )
+            val onChainPolicyAdapterFactory: RuntimeTypeAdapterFactory<OnChainPolicy> =
+                RuntimeTypeAdapterFactory.of(
+                    OnChainPolicy::class.java, "chain"
+                ).registerSubtype(
+                    Ethereum::class.java, "ethereum"
+                ).registerSubtype(
+                    Polygon::class.java, "polygon"
+                )
         }
 
         data class Ethereum(
@@ -391,16 +394,18 @@ sealed class ApprovalRequestDetailsV2 {
     sealed class EvmTokenInfo {
 
         companion object {
-            val evmTokenInfoAdapterFactory: RuntimeTypeAdapterFactory<EvmTokenInfo> = RuntimeTypeAdapterFactory.of(
-                EvmTokenInfo::class.java, "type"
-            ).registerSubtype(
-                ERC20::class.java, "ERC20"
-            ).registerSubtype(
-                ERC721::class.java, "ERC721"
-            ).registerSubtype(
-                ERC1155::class.java, "ERC1155"
-            )
+            val evmTokenInfoAdapterFactory: RuntimeTypeAdapterFactory<EvmTokenInfo> =
+                RuntimeTypeAdapterFactory.of(
+                    EvmTokenInfo::class.java, "type"
+                ).registerSubtype(
+                    ERC20::class.java, "ERC20"
+                ).registerSubtype(
+                    ERC721::class.java, "ERC721"
+                ).registerSubtype(
+                    ERC1155::class.java, "ERC1155"
+                )
         }
+
         data class ERC20(val contractAddress: String) : EvmTokenInfo()
         data class ERC721(val contractAddress: String, val tokenId: String) : EvmTokenInfo()
         data class ERC1155(val contractAddress: String, val tokenId: String) : EvmTokenInfo()
@@ -425,6 +430,7 @@ sealed class ApprovalRequestDetailsV2 {
             val name: String,
             val address: String
         )
+
         data class EthereumTransaction(
             val chainId: Long,
             val safeNonce: Long,
@@ -449,4 +455,46 @@ sealed class ApprovalRequestDetailsV2 {
         ) : SigningData()
 
     }
+
+    enum class BooleanSetting(val value: String) {
+        @SerializedName("Off")
+        Off("Off"),
+        @SerializedName("On")
+        On("On");
+    }
+
+    data class BitcoinTransaction(
+        val version: Int,
+        val txIns: List<TransactionInput>,
+        val txOuts: List<TransactionOutput>,
+        val totalFee: Long,
+    )
+
+    data class DestinationAddress(
+        val name: String,
+        val subName: String?,
+        val address: String,
+        val tag: String?
+    )
+
+    open class SettingsChange {
+        data class WhitelistEnabled(val whiteListEnabled: Boolean) : SettingsChange()
+        data class DAppsEnabled(val dappsEnabled: Boolean) : SettingsChange()
+    }
+
+    data class TransactionInput(
+        val txId: String,
+        val index: Int,
+        val amount: Long,
+        val inputScriptHex: String,
+        val base64HashForSignature: String,
+    )
+
+    data class TransactionOutput(
+        val index: Int,
+        val amount: Long,
+        val pubKeyScriptHex: String,
+        val address: String,
+        val isChange: Boolean
+    )
 }
