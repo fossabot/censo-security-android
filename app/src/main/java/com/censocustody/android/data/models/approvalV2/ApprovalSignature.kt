@@ -10,19 +10,11 @@ sealed class ApprovalSignature {
             RuntimeTypeAdapterFactory.of(
                 ApprovalSignature::class.java, "type"
             ).registerSubtype(
-                SolanaSignature::class.java, "solana"
-            ).registerSubtype(
                 BitcoinSignatures::class.java, "bitcoin"
             ).registerSubtype(
                 EthereumSignature::class.java, "ethereum"
             ).registerSubtype(OffChainSignature::class.java, "offchain")
     }
-
-    data class SolanaSignature(
-        val signature: String,
-        val nonce: String,
-        val nonceAccountAddress: String,
-    ) : ApprovalSignature()
 
     data class BitcoinSignatures(
         val signatures: List<String>

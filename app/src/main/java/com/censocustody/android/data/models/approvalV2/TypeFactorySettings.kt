@@ -8,8 +8,6 @@ class TypeFactorySettings {
         val approvalSignatureAdapterFactory: RuntimeTypeAdapterFactory<ApprovalSignature> = RuntimeTypeAdapterFactory.of(
             ApprovalSignature::class.java, "type"
         ).registerSubtype(
-            ApprovalSignature.SolanaSignature::class.java, "solana"
-        ).registerSubtype(
             ApprovalSignature.BitcoinSignatures::class.java, "bitcoin"
         ).registerSubtype(
             ApprovalSignature.EthereumSignature::class.java, "ethereum"

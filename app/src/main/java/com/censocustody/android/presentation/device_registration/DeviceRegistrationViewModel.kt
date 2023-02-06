@@ -9,7 +9,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.censocustody.android.common.*
 import com.censocustody.android.data.CryptographyManager
-import com.censocustody.android.data.SharedPrefsHelper
 import com.censocustody.android.data.UserRepository
 import com.censocustody.android.data.models.CipherRepository
 import com.censocustody.android.data.models.DeviceType
@@ -145,7 +144,7 @@ class DeviceRegistrationViewModel @Inject constructor(
 
     fun createKeyForDevice() {
         viewModelScope.launch {
-            val keyId = UUID.randomUUID().toString().replace("-", "")
+            val keyId = cryptographyManager.createDeviceKeyId()
             state = state.copy(keyName = keyId)
             try {
                 val devicePublicKey =

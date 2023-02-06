@@ -15,7 +15,6 @@ import com.censocustody.android.presentation.components.FactRow
 import com.censocustody.android.presentation.components.FactsData
 import com.censocustody.android.R
 import com.censocustody.android.data.models.approvalV2.ApprovalRequestDetailsV2
-import com.censocustody.android.presentation.approvals.approval_type_row_items.PolicyUpdateUIData
 import com.censocustody.android.presentation.approvals.approval_type_row_items.retrieveSlotSignerRowData
 import com.censocustody.android.presentation.components.RowData
 
@@ -90,3 +89,9 @@ fun generateAccountPolicyUpdateRows(
 
     return approverRowInfoData
 }
+
+data class PolicyUpdateUIData(
+    val header: String, val name: String,
+    val approvalsRequired: Int, val approvalTimeout: Long,
+    val approvers: List<ApprovalRequestDetailsV2.Signer>,
+)

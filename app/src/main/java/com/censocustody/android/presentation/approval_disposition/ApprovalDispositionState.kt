@@ -13,7 +13,4 @@ data class ApprovalDispositionState(
 ) {
     val loadingData = registerApprovalDispositionResult is Resource.Loading
 }
-data class ApprovalRetryData(
-    val isApproving: Boolean = false,
-    val isInitiationRequest: Boolean = false
-)
+data class ApprovalRetryData(val isApproving: Boolean = false)

@@ -10,10 +10,12 @@ import androidx.compose.ui.unit.sp
 import com.censocustody.android.R
 import com.censocustody.android.common.convertSecondsIntoCountdownText
 import com.censocustody.android.common.maskAddress
+import com.censocustody.android.common.toVaultName
 import com.censocustody.android.common.toWalletName
 import com.censocustody.android.data.models.ApprovalDisposition
 import com.censocustody.android.ui.theme.GreyText
 import com.censocustody.android.data.models.approvalV2.ApprovalRequestDetailsV2
+import com.censocustody.android.presentation.approval_detail.approval_type_detail_items.PolicyUpdateUIData
 import com.censocustody.android.presentation.approval_detail.approval_type_detail_items.WhitelistUpdateUI
 import com.censocustody.android.presentation.approval_detail.approval_type_detail_items.WithdrawalRequestUI
 import com.censocustody.android.presentation.components.RowData
@@ -147,7 +149,7 @@ fun ApprovalRequestDetailsV2.getDialogMessages(
     return Pair(mainText, secondaryText)
 }
 
-fun ApprovalRequestDetailsV2.getApprovalRowMetaData(vaultName: String?): ApprovalRowMetaData {
+fun ApprovalRequestDetailsV2.getApprovalRowMetaData(vaultName: String?, context: Context): ApprovalRowMetaData {
     if (this.isUnknownTypeOrUIUnimplemented()) {
         return ApprovalRowMetaData(
             vaultName = null
@@ -155,17 +157,17 @@ fun ApprovalRequestDetailsV2.getApprovalRowMetaData(vaultName: String?): Approva
     }
 
     return ApprovalRowMetaData(
-        vaultName = getRowTitle(vaultName)
+        vaultName = getRowTitle(vaultName, context)
     )
 }
 
 fun ApprovalRequestDetailsV2.isUnknownTypeOrUIUnimplemented() =
     this is ApprovalRequestDetailsV2.UnknownApprovalType
 
-fun ApprovalRequestDetailsV2.getRowTitle(vaultName: String?): String? =
+fun ApprovalRequestDetailsV2.getRowTitle(vaultName: String?, context: Context): String? =
     when (this) {
-        is ApprovalRequestDetailsV2.VaultInvitation -> null
-        else -> vaultName
+        is ApprovalRequestDetailsV2.VaultInvitation -> this.vaultName.toVaultName(context)
+        else -> vaultName?.toVaultName(context)
     }
 
 fun ApprovalDisposition.getDialogMessage(context: Context, initiationRequest: Boolean): String {
@@ -535,9 +537,3 @@ private fun usdFormatterV2(hideSymbol: Boolean = true): DecimalFormat {
     }
     return formatter
 }
-
-data class PolicyUpdateUIData(
-    val header: String, val name: String,
-    val approvalsRequired: Int, val approvalTimeout: Long,
-    val approvers: List<ApprovalRequestDetailsV2.Signer>,
-)

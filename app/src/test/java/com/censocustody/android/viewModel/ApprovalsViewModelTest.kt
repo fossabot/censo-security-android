@@ -69,6 +69,7 @@ class ApprovalsViewModelTest : BaseViewModelTest() {
     private val mockDialogMainMessage = "You are about to approve the following request"
 
     private val validEmail = "sharris@blue.rock"
+    //would use the method createDeviceKeyId in the cryptography repository manager
     private val validDeviceId = UUID.randomUUID().toString().replace("-", "")
 
     private val mockMessages = Pair(mockDialogMainMessage, mockDialogSecondaryMessage)

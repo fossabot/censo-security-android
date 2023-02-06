@@ -367,7 +367,8 @@ fun ApprovalsList(
 
                     walletApproval?.let { safeApproval ->
                         val type = safeApproval.details
-                        val rowMetaData = type.getApprovalRowMetaData(safeApproval.vaultName?.toVaultName(context))
+                        val rowMetaData = type.getApprovalRowMetaData(
+                            safeApproval.vaultName, context)
 
                         val calculatedTimerSecondsLeft = getSecondsLeftUntilCountdownIsOver(
                             safeApproval.submitDate,

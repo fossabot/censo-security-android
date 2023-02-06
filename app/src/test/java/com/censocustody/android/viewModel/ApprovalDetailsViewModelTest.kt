@@ -126,7 +126,7 @@ class ApprovalDetailsViewModelTest : BaseViewModelTest() {
             dialogMessages = mockMessages,
         )
 
-        assertExpectedDispositionAndExpectedInitiation(ApprovalDisposition.APPROVE, false)
+        assertExpectedDisposition(ApprovalDisposition.APPROVE)
 
         whenever(cryptoObject.signature).then { signature }
 
@@ -168,7 +168,7 @@ class ApprovalDetailsViewModelTest : BaseViewModelTest() {
             dialogMessages = mockMessages,
         )
 
-        assertExpectedDispositionAndExpectedInitiation(ApprovalDisposition.DENY, false)
+        assertExpectedDisposition(ApprovalDisposition.DENY)
 
         triggerRegisterDispositionCallAndAssertNonceDataAndBioPromptState()
 
@@ -208,7 +208,7 @@ class ApprovalDetailsViewModelTest : BaseViewModelTest() {
             dialogMessages = mockMessages,
         )
 
-        assertExpectedDispositionAndExpectedInitiation(ApprovalDisposition.DENY, false)
+        assertExpectedDisposition(ApprovalDisposition.DENY)
 
         triggerRegisterDispositionCallAndAssertNonceDataAndBioPromptState()
 
@@ -217,7 +217,6 @@ class ApprovalDetailsViewModelTest : BaseViewModelTest() {
         //Assert that the registerDisposition call failed and the retry data holds the disposition and isInitiationRequest data
         assertEquals(true, approvalDetailsViewModel.state.approvalDispositionState?.registerApprovalDispositionResult is Resource.Error)
         assertEquals(false, approvalDetailsViewModel.state.approvalDispositionState?.approvalRetryData?.isApproving)
-        assertEquals(false, approvalDetailsViewModel.state.approvalDispositionState?.approvalRetryData?.isInitiationRequest)
     }
 
     /**
@@ -342,7 +341,6 @@ class ApprovalDetailsViewModelTest : BaseViewModelTest() {
         assertTrue(approvalDetailsViewModel.state.approvalDispositionState?.approvalDisposition is Resource.Success)
         assertEquals(approvalDisposition, approvalDetailsViewModel.state.approvalDispositionState?.approvalDisposition?.data)
         assertTrue(approvalDetailsViewModel.state.approvalDispositionState?.approvalRetryData?.isApproving == true)
-        assertTrue(approvalDetailsViewModel.state.approvalDispositionState?.approvalRetryData?.isInitiationRequest == false)
     }
     //endregion
 
@@ -372,9 +370,8 @@ class ApprovalDetailsViewModelTest : BaseViewModelTest() {
         assertEquals(expectedApproval, approvalDetailsViewModel.state.selectedApproval)
     }
 
-    private fun assertExpectedDispositionAndExpectedInitiation(expectedDisposition: ApprovalDisposition, expectedIsInitiationRequest: Boolean) {
+    private fun assertExpectedDisposition(expectedDisposition: ApprovalDisposition) {
         assertEquals(expectedDisposition, approvalDetailsViewModel.state.approvalDispositionState?.approvalDisposition?.data)
-        assertEquals(expectedIsInitiationRequest, approvalDetailsViewModel.state.approvalDispositionState?.approvalRetryData?.isInitiationRequest)
 
         if (expectedDisposition == ApprovalDisposition.APPROVE) {
             assertEquals(true, approvalDetailsViewModel.state.shouldDisplayConfirmDisposition?.isApproving)
