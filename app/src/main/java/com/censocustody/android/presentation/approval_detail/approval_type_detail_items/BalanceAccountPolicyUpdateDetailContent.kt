@@ -23,7 +23,10 @@ import com.censocustody.android.presentation.components.RowData
 fun BalanceAccountPolicyUpdateDetailContent(policyUpdateUIData: PolicyUpdateUIData
 ) {
     ApprovalContentHeader(header = policyUpdateUIData.header, topSpacing = 16, bottomSpacing = 8)
-    ApprovalSubtitle(text = policyUpdateUIData.name.toWalletName(), fontSize = 20.sp)
+    ApprovalSubtitle(
+        text = policyUpdateUIData.name.toWalletName(LocalContext.current),
+        fontSize = 20.sp
+    )
 
     Spacer(modifier = Modifier.height(24.dp))
 

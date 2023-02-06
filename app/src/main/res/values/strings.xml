@@ -25,7 +25,6 @@
     <string name="approve">Approve</string>
     <string name="deny">Deny</string>
     <string name="more_info">More Info…</string>
-    <string name="equivalent">equivalent</string>
 
     <string name="expires_in">Expires in</string>
     <string name="content_des_back_icon">Back Icon</string>
@@ -33,13 +32,9 @@
     <string name="initiated_by">Initiated By</string>
     <string name="invited_by">Invited By</string>
     <string name="invited_by_email">Invited By Email</string>
-    <string name="no_more_approvals_needed">No more approvals needed</string>
-    <string name="more_approval_needed">more approval needed</string>
-    <string name="more_approvals_needed">more approvals needed</string>
     <string name="nothing_to_approve">Nothing to approve</string>
     <string name="pull_to_refresh">Pull down to refresh approvals</string>
     <string name="content_des_pull_to_refresh_icon">Pull down to refresh icon</string>
-    <string name="auth_flow_exception">Something went wrong, please try again</string>
 
     <string name="approval_expired">Expired</string>
     <string name="confirm">Confirm</string>
@@ -65,12 +60,6 @@
     <string name="approval_expiration">Approval Expiration</string>
     <string name="no_approvers_text">No users may approve requests</string>
     <string name="no_wallet_approvers_text">No wallet approvers</string>
-    <string name="key_pair_generation_failed">Unable to generate key pair for device. Please retry.</string>
-    <string name="decryption_failed">Unable to decrypt data. Please retry.</string>
-    <string name="encryption_failed">Unable to encrypt data. Please retry.</string>
-    <string name="key_regeneration_failed">Unable to regenerate key pair. Please retry.</string>
-    <string name="sign_data_failed">Unable to sign data. Please retry.</string>
-    <string name="verify_key_failed">Unable to verify data. Please retry.</string>
 
     <string name="add_address_book_update_approval_header">Add Address</string>
     <string name="remove_address_book_update_approval_header">Remove Address</string>
@@ -250,4 +239,5 @@
     <string name="camera_permission_request">Camera Permission Request</string>
     <string name="unable_process_image">Unable to process image, please retake image.</string>
     <string name="use_password_sign_in">Use Password For Sign In</string>
+    <string name="wallet">Wallet</string>
 </resources>

@@ -16,6 +16,6 @@ fun WalletCreationRowContent(
     header: String, accountName: String
 ) {
     ApprovalContentHeader(header = header, topSpacing = 16, bottomSpacing = 8)
-    ApprovalSubtitle(text = accountName.toWalletName(), fontSize = 20.sp)
+    ApprovalSubtitle(text = accountName.toWalletName(LocalContext.current), fontSize = 20.sp)
     Spacer(modifier = Modifier.height(20.dp))
 }

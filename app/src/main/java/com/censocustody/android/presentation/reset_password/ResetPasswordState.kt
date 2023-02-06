@@ -9,5 +9,4 @@ data class ResetPasswordState(
     val resetPasswordResult: Resource<String> = Resource.Uninitialized,
 ) {
     val resetButtonEnabled = email.isNotEmpty()
-    fun emailValid() = Patterns.EMAIL_ADDRESS.matcher(email).matches()
 }

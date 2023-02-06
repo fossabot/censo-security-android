@@ -91,17 +91,6 @@ suspend fun ImageCapture.takePhoto(executor: Executor): File {
     }
 }
 
-fun Bitmap.convertToByteArrayWithJPEGCompression(): ByteArray {
-    val stream = ByteArrayOutputStream()
-
-    compress(Bitmap.CompressFormat.JPEG, MAX_QUALITY_JPEG, stream)
-
-    //After we compress the bitmap, recycle it since it will not be used anymore
-    recycle()
-
-    return stream.toByteArray()
-}
-
 /**
  * Rotate an image if required.
  *

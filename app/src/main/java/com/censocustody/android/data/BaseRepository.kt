@@ -2,7 +2,6 @@ package com.censocustody.android.data
 
 import com.censocustody.android.common.Resource
 import com.censocustody.android.common.CensoError
-import com.censocustody.android.common.censoLog
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import retrofit2.Response

@@ -121,7 +121,6 @@ class DeviceRegistrationViewModel @Inject constructor(
                     )
                 }
             } catch (e: Exception) {
-                censoLog(message = "Exception signing image: $e")
                 state = state.copy(
                     addUserDevice = Resource.Error(exception = e),
                     deviceRegistrationError = DeviceRegistrationError.SIGNING_IMAGE,
@@ -164,7 +163,6 @@ class DeviceRegistrationViewModel @Inject constructor(
                     deviceRegistrationError = DeviceRegistrationError.SIGNING_IMAGE,
                     capturingDeviceKey = Resource.Uninitialized
                 )
-                censoLog(message = e.toString())
             }
         }
     }

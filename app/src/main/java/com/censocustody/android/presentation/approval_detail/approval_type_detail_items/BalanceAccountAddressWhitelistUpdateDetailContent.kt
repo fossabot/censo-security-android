@@ -22,7 +22,10 @@ fun BalanceAccountAddressWhitelistUpdateDetailContent(
     whitelistUpdate: WhitelistUpdateUI
 ) {
     ApprovalRowContentHeader(header = whitelistUpdate.header, topSpacing = 16, bottomSpacing = 8)
-    ApprovalSubtitle(text = whitelistUpdate.name.toWalletName(), fontSize = 20.sp)
+    ApprovalSubtitle(
+        text = whitelistUpdate.name.toWalletName(LocalContext.current),
+        fontSize = 20.sp
+    )
     Spacer(modifier = Modifier.height(16.dp))
 
     val destinationsRowInfoData =

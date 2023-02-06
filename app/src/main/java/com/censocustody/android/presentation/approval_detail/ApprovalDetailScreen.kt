@@ -54,7 +54,7 @@ fun ApprovalDetailsScreen(
 
     val promptInfo = BioCryptoUtil.createPromptInfo(context = context)
 
-    fun retryApprovalDisposition(isApproving: Boolean, isInitiationRequest: Boolean) {
+    fun retryApprovalDisposition(isApproving: Boolean) {
         approvalDetailsViewModel.dismissApprovalDispositionError()
         approvalDetailsViewModel.setShouldDisplayConfirmDispositionDialog(
             isApproving = isApproving,
@@ -140,7 +140,6 @@ fun ApprovalDetailsScreen(
             )
         },
         content = {
-            val isInitiationRequest = false
             ApprovalDetails(
                 onApproveClicked = {
                     approvalDetailsViewModel.setShouldDisplayConfirmDispositionDialog(
@@ -208,10 +207,7 @@ fun ApprovalDetailsScreen(
                         resetDataAfterErrorDismissed()
                     },
                     onRetry = {
-                        retryApprovalDisposition(
-                            isApproving = retryData.isApproving,
-                            isInitiationRequest = retryData.isInitiationRequest
-                        )
+                        retryApprovalDisposition(isApproving = retryData.isApproving)
                     }
                 )
             }

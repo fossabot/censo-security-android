@@ -1,6 +1,7 @@
 package com.censocustody.android.presentation.approvals.approval_type_row_items
 
 import android.content.Context
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -101,7 +102,7 @@ fun ApprovalRequestDetailsV2.getHeader(context: Context) =
                     amount = this.amount.value
                     symbol = this.symbolInfo.symbol
                 }
-                else -> null
+                else -> {}
             }
 
             if (replacementFee == null) {
@@ -225,7 +226,7 @@ fun String.nameToInitials() =
     }
 
 fun buildFromToDisplayText(from: String, to: String, context: Context): String {
-    return "${from.toWalletName()} ${context.getString(R.string.to).lowercase()} ${to.toWalletName()}"
+    return "${from.toWalletName(context)} ${context.getString(R.string.to).lowercase()} ${to.toWalletName(context)}"
 }
 
 fun List<ApprovalRequestDetailsV2.DestinationAddress>.retrieveDestinationsRowData() : MutableList<RowData> {
