@@ -7,15 +7,12 @@ import com.censocustody.android.*
 import com.censocustody.android.common.Resource
 import com.censocustody.android.common.CensoCountDownTimer
 import com.censocustody.android.data.ApprovalsRepository
-import com.censocustody.android.data.SolanaRepository
 import com.censocustody.android.data.UserRepository
 import com.censocustody.android.data.models.ApprovalDisposition
 import com.censocustody.android.data.models.CipherRepository
-import com.censocustody.android.data.models.Nonce
 import com.censocustody.android.data.models.approvalV2.ApprovalRequestV2
 import com.censocustody.android.presentation.approval_detail.ApprovalDetailsViewModel
 import com.censocustody.android.presentation.approval_disposition.ApprovalDispositionState
-import com.censocustody.android.presentation.durable_nonce.DurableNonceViewModel
 import junit.framework.TestCase.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -32,12 +29,6 @@ import javax.crypto.Cipher
 class ApprovalDetailsViewModelTest : BaseViewModelTest() {
 
     //region Mocks and testing objects
-    @Mock
-    lateinit var solanaRepository: SolanaRepository
-
-    @Mock
-    lateinit var durableNonceViewModel: DurableNonceViewModel
-
     @Mock
     lateinit var approvalsRepository: ApprovalsRepository
 
@@ -68,8 +59,6 @@ class ApprovalDetailsViewModelTest : BaseViewModelTest() {
     private val testLoginApproval = getLoginApprovalV2()
     private val testEthereumWithdrawalApproval = getEthereumWithdrawalRequestApprovalV2()
 
-    private lateinit var testMultipleAccounts: DurableNonceViewModel.MultipleAccounts
-
     //These are not used in any way other than to fill method parameters
     private val mockDialogSecondaryMessage = "Send 1000 SOL"
     private val mockDialogMainMessage = "You are about to approve the following request"
@@ -94,10 +83,6 @@ class ApprovalDetailsViewModelTest : BaseViewModelTest() {
                 cipherRepository = cipherRepository,
                 timer = countdownTimer
             )
-
-        durableNonceViewModel = DurableNonceViewModel(solanaRepository)
-
-        testMultipleAccounts =  durableNonceViewModel.MultipleAccounts(nonces = listOf(Nonce(getNonce())))
     }
 
     @After

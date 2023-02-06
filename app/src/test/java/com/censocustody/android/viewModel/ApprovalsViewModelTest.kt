@@ -10,7 +10,6 @@ import com.censocustody.android.common.Resource
 import com.censocustody.android.data.*
 import com.censocustody.android.data.models.ApprovalDisposition
 import com.censocustody.android.presentation.approvals.ApprovalsViewModel
-import com.censocustody.android.presentation.durable_nonce.DurableNonceViewModel
 import com.censocustody.android.ResourceState.ERROR
 import com.censocustody.android.ResourceState.SUCCESS
 import com.censocustody.android.common.CensoCountDownTimer
@@ -32,12 +31,6 @@ import javax.crypto.Cipher
 class ApprovalsViewModelTest : BaseViewModelTest() {
 
     //region Mocks and testing objects
-    @Mock
-    lateinit var solanaRepository: SolanaRepository
-
-    @Mock
-    lateinit var durableNonceViewModel: DurableNonceViewModel
-
     @Mock
     lateinit var approvalsRepository: ApprovalsRepository
 
@@ -112,8 +105,6 @@ class ApprovalsViewModelTest : BaseViewModelTest() {
                 cipherRepository = cipherRepository,
                 timer = countdownTimer
             )
-
-        durableNonceViewModel = DurableNonceViewModel(solanaRepository)
     }
 
     @After
