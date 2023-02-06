@@ -1,6 +1,5 @@
 package com.censocustody.android
 
-import com.censocustody.android.data.models.approval.*
 import com.censocustody.android.data.models.approvalV2.ApprovalRequestDetailsV2
 import com.censocustody.android.data.models.approvalV2.ApprovalRequestV2
 import com.censocustody.android.data.models.approvalV2.ApprovalRequestV2Deserializer
@@ -48,7 +47,7 @@ class ParseApprovalRequestV2Types {
         assertNotNull(loginApprovalWalletApproval.details)
 
         val details = loginApprovalWalletApproval.details as ApprovalRequestDetailsV2.Login
-        assertNotEquals(details, ApprovalRequestDetails.UnknownApprovalType)
+        assertNotEquals(details, ApprovalRequestDetailsV2.UnknownApprovalType)
         assertEquals(
             details::class.java,
             ApprovalRequestDetailsV2.Login::class.java

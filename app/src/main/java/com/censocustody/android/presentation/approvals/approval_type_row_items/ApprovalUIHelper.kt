@@ -11,7 +11,6 @@ import com.censocustody.android.common.convertSecondsIntoCountdownText
 import com.censocustody.android.common.maskAddress
 import com.censocustody.android.common.toWalletName
 import com.censocustody.android.data.models.ApprovalDisposition
-import com.censocustody.android.data.models.approval.*
 import com.censocustody.android.ui.theme.GreyText
 import com.censocustody.android.data.models.approvalV2.ApprovalRequestDetailsV2
 import com.censocustody.android.presentation.approval_detail.approval_type_detail_items.WhitelistUpdateUI
@@ -493,6 +492,25 @@ fun ApprovalRequestDetailsV2.withdrawalRequestUIData(context: Context): Withdraw
 
 fun ApprovalRequestDetailsV2.Amount.formattedAmountWithSymbol(symbol: String): String =
     "${formattedAmount(value)} $symbol"
+
+fun formattedAmount(amount: String): String {
+    fun formatSeparator(number: Int): String {
+        return String.format("%,d", number)
+    }
+
+    val split = amount.split(".").toMutableList()
+
+    val wholePart =
+        if (split.isNotEmpty() && split.size > 1) {
+            split.removeAt(0)
+        } else {
+            amount
+        }
+
+    val wholePartString = formatSeparator(wholePart.toInt())
+    split.add(0, wholePartString)
+    return split.joinToString(separator = ".")
+}
 
 
 fun formattedUSDEquivalentV2(usdEquivalent: String?, hideSymbol: Boolean = true): String {

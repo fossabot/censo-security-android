@@ -6,7 +6,6 @@ import com.censocustody.android.data.BaseRepository.Companion.UNAUTHORIZED
 import com.censocustody.android.data.BrooklynApiService.Companion.AUTH
 import com.censocustody.android.data.BrooklynApiService.Companion.X_CENSO_ID
 import com.censocustody.android.data.models.*
-import com.censocustody.android.data.models.approval.*
 import com.censocustody.android.data.models.approvalV2.ApprovalDispositionRequestV2
 import com.censocustody.android.data.models.approvalV2.ApprovalRequestV2
 import com.censocustody.android.data.models.approvalV2.ApprovalRequestV2Deserializer

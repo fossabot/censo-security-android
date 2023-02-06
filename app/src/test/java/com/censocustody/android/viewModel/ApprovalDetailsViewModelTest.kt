@@ -12,7 +12,6 @@ import com.censocustody.android.data.UserRepository
 import com.censocustody.android.data.models.ApprovalDisposition
 import com.censocustody.android.data.models.CipherRepository
 import com.censocustody.android.data.models.Nonce
-import com.censocustody.android.data.models.approval.SolanaApprovalRequestDetails
 import com.censocustody.android.data.models.approvalV2.ApprovalRequestV2
 import com.censocustody.android.presentation.approval_detail.ApprovalDetailsViewModel
 import com.censocustody.android.presentation.approval_disposition.ApprovalDispositionState
@@ -68,8 +67,6 @@ class ApprovalDetailsViewModelTest : BaseViewModelTest() {
     //region Testing data
     private val testLoginApproval = getLoginApprovalV2()
     private val testEthereumWithdrawalApproval = getEthereumWithdrawalRequestApprovalV2()
-    private val testMultiSigWalletCreationApprovalRequest =
-        getMultiSigWalletCreationApprovalRequest()
 
     private lateinit var testMultipleAccounts: DurableNonceViewModel.MultipleAccounts
 

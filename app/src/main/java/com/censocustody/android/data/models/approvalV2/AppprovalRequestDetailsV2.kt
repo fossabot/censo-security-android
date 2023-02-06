@@ -5,7 +5,6 @@ import com.censocustody.android.R
 import com.censocustody.android.common.UriWrapper
 import com.censocustody.android.common.evm.EvmAddress
 import com.censocustody.android.data.models.Chain
-import com.censocustody.android.data.models.approval.*
 import com.censocustody.android.data.models.approvalV2.ApprovalSignature.Companion.approvalSignatureAdapterFactory
 import com.censocustody.android.data.models.approvalV2.ApprovalRequestDetailsV2.EvmTokenInfo.Companion.evmTokenInfoAdapterFactory
 import com.censocustody.android.data.models.approvalV2.ApprovalRequestDetailsV2.OnChainPolicy.Companion.onChainPolicyAdapterFactory

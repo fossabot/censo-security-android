@@ -9,7 +9,6 @@ import com.censocustody.android.*
 import com.censocustody.android.common.Resource
 import com.censocustody.android.data.*
 import com.censocustody.android.data.models.ApprovalDisposition
-import com.censocustody.android.data.models.approval.ApprovalRequest
 import com.censocustody.android.presentation.approvals.ApprovalsViewModel
 import com.censocustody.android.presentation.durable_nonce.DurableNonceViewModel
 import com.censocustody.android.ResourceState.ERROR
@@ -89,9 +88,6 @@ class ApprovalsViewModelTest : BaseViewModelTest() {
         Dispatchers.setMain(dispatcher)
 
         whenever(approvalsRepository.approveOrDenyDisposition(any(), any(), any())).thenAnswer {
-            Resource.Success(data = null)
-        }
-        whenever(approvalsRepository.approveOrDenyInitiation(any(), any(), any())).thenAnswer {
             Resource.Success(data = null)
         }
 
