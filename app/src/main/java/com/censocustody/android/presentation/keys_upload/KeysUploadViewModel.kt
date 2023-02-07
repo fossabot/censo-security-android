@@ -59,7 +59,7 @@ class KeysUploadViewModel @Inject constructor(
             return
         }
 
-        //have no data to migrate kick user out
+        //have no data to upload kick user out
         state = state.copy(kickUserOut = true)
     }
 
@@ -120,7 +120,7 @@ class KeysUploadViewModel @Inject constructor(
     private fun uploadSigners(signature: Signature) {
         viewModelScope.launch {
             //make API call to send up any needed signed keys
-            val walletSigner = keyRepository.migrateSigner(state.walletSigners, signature)
+            val walletSigner = keyRepository.uploadKeys(state.walletSigners, signature)
 
             if (walletSigner is Resource.Success) {
                 state = state.copy(finishedUpload = true)

@@ -226,7 +226,7 @@ class MainActivity : FragmentActivity() {
                 KeyManagementScreen(navController = navController, initialData = KeyManagementInitialData.fromJson(keyInitialDataArg))
             }
             composable(
-                route = Screen.KeyUploadRoute.route,
+                route = Screen.UploadKeysRoute.route,
             ) {
                 KeysUploadScreen(navController = navController)
             }
