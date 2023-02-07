@@ -36,12 +36,6 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideSolanaService(): SolanaApiService {
-        return SolanaApiService.create()
-    }
-
-    @Provides
-    @Singleton
     fun provideSemVersionService(): SemVersionApiService {
         return SemVersionApiService.create()
     }
@@ -85,12 +79,6 @@ object AppModule {
         @ApplicationContext applicationContext: Context
     ): PushRepository {
         return PushRepositoryImpl(api, applicationContext)
-    }
-
-    @Provides
-    @Singleton
-    fun provideSolanaRepository(api: SolanaApiService): SolanaRepository {
-        return SolanaRepositoryImpl(api)
     }
 
     @Provides

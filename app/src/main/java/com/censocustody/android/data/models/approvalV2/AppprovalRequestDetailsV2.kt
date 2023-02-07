@@ -6,11 +6,12 @@ import com.censocustody.android.common.UriWrapper
 import com.censocustody.android.common.evm.EvmAddress
 import com.censocustody.android.data.models.Chain
 import com.censocustody.android.data.models.approval.*
-import com.censocustody.android.data.models.approval.ApprovalSignature.Companion.approvalSignatureAdapterFactory
+import com.censocustody.android.data.models.approvalV2.ApprovalSignature.Companion.approvalSignatureAdapterFactory
 import com.censocustody.android.data.models.approvalV2.ApprovalRequestDetailsV2.EvmTokenInfo.Companion.evmTokenInfoAdapterFactory
 import com.censocustody.android.data.models.approvalV2.ApprovalRequestDetailsV2.OnChainPolicy.Companion.onChainPolicyAdapterFactory
 import com.censocustody.android.data.models.approvalV2.ApprovalRequestDetailsV2.SigningData.Companion.signingDataAdapterFactory
 import com.google.gson.GsonBuilder
+import com.google.gson.annotations.SerializedName
 import com.google.gson.typeadapters.RuntimeTypeAdapterFactory
 import java.lang.reflect.Modifier
 import java.math.BigInteger
@@ -190,11 +191,11 @@ sealed class ApprovalRequestDetailsV2 {
         val currentGuardAddress: String,
         val signingData: SigningData.EthereumSigningData
     ) : ApprovalRequestDetailsV2() {
-        fun changeValue(): ApprovalRequestDetails.SettingsChange? {
+        fun changeValue(): SettingsChange? {
             return if (whitelistEnabled != null && dappsEnabled == null) {
-                ApprovalRequestDetails.SettingsChange.WhitelistEnabled(whiteListEnabled = whitelistEnabled == BooleanSetting.On)
+                SettingsChange.WhitelistEnabled(whiteListEnabled = whitelistEnabled == BooleanSetting.On)
             } else if (dappsEnabled != null && whitelistEnabled == null) {
-                ApprovalRequestDetails.SettingsChange.DAppsEnabled(dappsEnabled = dappsEnabled == BooleanSetting.On)
+                SettingsChange.DAppsEnabled(dappsEnabled = dappsEnabled == BooleanSetting.On)
             } else {
                 null
             }
@@ -210,11 +211,11 @@ sealed class ApprovalRequestDetailsV2 {
         val currentGuardAddress: String,
         val signingData: SigningData.PolygonSigningData
     ) : ApprovalRequestDetailsV2() {
-        fun changeValue(): ApprovalRequestDetails.SettingsChange? {
+        fun changeValue(): SettingsChange? {
             return if (whitelistEnabled != null && dappsEnabled == null) {
-                ApprovalRequestDetails.SettingsChange.WhitelistEnabled(whiteListEnabled = whitelistEnabled == BooleanSetting.On)
+                SettingsChange.WhitelistEnabled(whiteListEnabled = whitelistEnabled == BooleanSetting.On)
             } else if (dappsEnabled != null && whitelistEnabled == null) {
-                ApprovalRequestDetails.SettingsChange.DAppsEnabled(dappsEnabled = dappsEnabled == BooleanSetting.On)
+                SettingsChange.DAppsEnabled(dappsEnabled = dappsEnabled == BooleanSetting.On)
             } else {
                 null
             }
@@ -449,4 +450,47 @@ sealed class ApprovalRequestDetailsV2 {
         ) : SigningData()
 
     }
+
+
+    enum class BooleanSetting(val value: String) {
+        @SerializedName("Off")
+        Off("Off"),
+        @SerializedName("On")
+        On("On");
+    }
+
+    data class BitcoinTransaction(
+        val version: Int,
+        val txIns: List<TransactionInput>,
+        val txOuts: List<TransactionOutput>,
+        val totalFee: Long,
+    )
+
+    data class DestinationAddress(
+        val name: String,
+        val subName: String?,
+        val address: String,
+        val tag: String?
+    )
+
+    open class SettingsChange {
+        data class WhitelistEnabled(val whiteListEnabled: Boolean) : SettingsChange()
+        data class DAppsEnabled(val dappsEnabled: Boolean) : SettingsChange()
+    }
+
+    data class TransactionInput(
+        val txId: String,
+        val index: Int,
+        val amount: Long,
+        val inputScriptHex: String,
+        val base64HashForSignature: String,
+    )
+
+    data class TransactionOutput(
+        val index: Int,
+        val amount: Long,
+        val pubKeyScriptHex: String,
+        val address: String,
+        val isChange: Boolean
+    )
 }

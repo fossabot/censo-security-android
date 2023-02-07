@@ -2,19 +2,12 @@ package com.censocustody.android.presentation.approvals.approval_type_row_items
 
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
-import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import com.censocustody.android.data.models.approval.SymbolAndAmountInfo
 import com.censocustody.android.presentation.approval_detail.approval_type_detail_items.ApprovalSubtitle
 import com.censocustody.android.presentation.approvals.ApprovalContentHeader
 import com.censocustody.android.presentation.components.CensoTagRow
-import com.censocustody.android.ui.theme.MoneyGreen
-import com.censocustody.android.ui.theme.MoneyRed
-import com.censocustody.android.ui.theme.SubtitleGrey
 
 @Composable
 fun TransferConversionContent(
@@ -30,54 +23,5 @@ fun TransferConversionContent(
         text1 = fromText,
         text2 = toText,
         arrowForward = true
-    )
-}
-
-
-@Composable
-fun TransactionContent(
-    header: String,
-    amountText: String,
-    usdEquivalent: String,
-    fromText: String,
-    toText: String,
-    positiveWithdrawal: Boolean
-) {
-    ApprovalContentHeader(header = header)
-    Text(
-        text = amountText,
-        color = if (positiveWithdrawal) MoneyGreen else MoneyRed,
-        textAlign = TextAlign.Center,
-        fontSize = 18.sp,
-        letterSpacing = 0.23.sp
-    )
-    Text(
-        text = usdEquivalent,
-        color = SubtitleGrey,
-        textAlign = TextAlign.Center,
-        fontSize = 14.sp,
-        letterSpacing = 0.23.sp
-    )
-    Spacer(modifier = Modifier.height(8.dp))
-    CensoTagRow(
-        text1 = fromText,
-        text2 = toText,
-        arrowForward = positiveWithdrawal
-    )
-}
-
-@Composable
-fun BalanceChangeRowItem(
-    dappName: String,
-    accountName: String,
-    symbolAndAmountInfo: SymbolAndAmountInfo
-) {
-    return TransactionContent(
-        header = symbolAndAmountInfo.symbolInfo.symbol,
-        amountText = symbolAndAmountInfo.amount,
-        usdEquivalent = symbolAndAmountInfo.formattedUSDEquivalent(),
-        fromText = dappName,
-        toText = accountName,
-        positiveWithdrawal = symbolAndAmountInfo.isAmountPositive()
     )
 }

@@ -36,9 +36,5 @@ sealed class CensoError(val errorCode: Int) {
 
     abstract class ApprovalSigningError(errorCode: Int) : CensoError(errorCode = errorCode)
 
-    class MissingKeyError : ApprovalSigningError(errorCode = 70)
     class MissingUserEmailError : ApprovalSigningError(errorCode = 80)
-    class NotEnoughNonceAccountsError : ApprovalSigningError(errorCode = 90)
-    class MissingApproverKeyError : ApprovalSigningError(errorCode = 100)
-    class MissingSourceKeyError : ApprovalSigningError(errorCode = 110)
 }

@@ -214,6 +214,7 @@ class SignInViewModel @Inject constructor(
                 }
             }
         } catch (e: Exception) {
+            state = state.copy(biometricLoginPreviousFailure = true)
             userFailedLogin(e = e)
         }
     }

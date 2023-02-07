@@ -1,116 +1,12 @@
 package com.censocustody.android
 
-import com.google.gson.JsonParser
 import com.censocustody.android.data.models.Chain
 import com.censocustody.android.data.models.Organization
 import com.censocustody.android.data.models.VerifyUser
 import com.censocustody.android.data.models.WalletPublicKey
-import com.censocustody.android.data.models.approval.ApprovalRequest
-import com.censocustody.android.data.models.approval.ApprovalRequestDeserializer
 import com.censocustody.android.data.models.approvalV2.ApprovalRequestDetailsV2
 import com.censocustody.android.data.models.approvalV2.ApprovalRequestV2
 import com.censocustody.android.data.models.approvalV2.ApprovalRequestV2Deserializer
-
-private val deserializer = ApprovalRequestDeserializer()
-
-fun getWalletApprovals() : List<ApprovalRequest> {
-    val approvals = mutableListOf<ApprovalRequest>()
-
-    val nonceAccountAddresses = listOf(getNonce())
-
-    val signersUpdateRequestType =
-        getSignersUpdateRequest(nonceAccountAddresses)
-    val signersUpdateApproval =
-        getWalletApprovalRequest(signersUpdateRequestType)
-
-    approvals.add(signersUpdateApproval)
-
-    val unwrapConversionRequestType =
-        getUnwrapConversionRequest(nonceAccountAddresses)
-    val unwrapConversionApproval =
-        getWalletApprovalRequest(unwrapConversionRequestType)
-
-    approvals.add(unwrapConversionApproval)
-
-    val createAddressBookEntryRequestType =
-        getCreateSolanaAddressBookEntry(nonceAccountAddresses)
-    val addCreateBookEntryApproval =
-        getWalletApprovalRequest(createAddressBookEntryRequestType)
-
-    approvals.add(addCreateBookEntryApproval)
-
-    val deleteAddressBookEntryRequestType =
-        getDeleteSolanaAddressBookEntry(nonceAccountAddresses)
-    val deleteAddressBookEntryApproval =
-        getWalletApprovalRequest(deleteAddressBookEntryRequestType)
-
-    approvals.add(deleteAddressBookEntryApproval)
-
-    val addDAppBookEntryRequestType =
-        getAddDAppBookEntry(nonceAccountAddresses)
-    val addDAppBookEntryApproval =
-        getWalletApprovalRequest(addDAppBookEntryRequestType)
-
-    approvals.add(addDAppBookEntryApproval)
-
-    val walletConfigPolicyUpdateRequestType =
-        getWalletConfigPolicyUpdate(nonceAccountAddresses)
-    val walletConfigPolicyUpdateApproval =
-        getWalletApprovalRequest(walletConfigPolicyUpdateRequestType)
-
-    approvals.add(walletConfigPolicyUpdateApproval)
-
-    val balanceAccountPolicyUpdateRequestType =
-        getBalanceAccountPolicyUpdate(nonceAccountAddresses)
-    val balanceAccountPolicyUpdateApproval =
-        getWalletApprovalRequest(balanceAccountPolicyUpdateRequestType)
-
-    approvals.add(balanceAccountPolicyUpdateApproval)
-
-    val balanceAccountNameUpdateRequestType =
-        getBalanceAccountNameUpdate(nonceAccountAddresses)
-    val balanceAccountNameUpdateApproval =
-        getWalletApprovalRequest(balanceAccountNameUpdateRequestType)
-
-    approvals.add(balanceAccountNameUpdateApproval)
-
-    val dAppTransactionRequestType =
-        getDAppTransactionRequest(nonceAccountAddresses)
-    val dAppTransactionApproval =
-        getWalletApprovalRequest(dAppTransactionRequestType)
-
-    approvals.add(dAppTransactionApproval)
-
-    val loginApprovalRequestType =
-        getLoginApproval("jwttoken")
-    val loginApproval =
-        getWalletApprovalRequest(loginApprovalRequestType)
-
-    approvals.add(loginApproval)
-
-    val balanceAccountAddressWhitelistUpdateRequestType =
-        getBalanceAccountAddressWhitelistUpdate(nonceAccountAddresses)
-    val balanceAccountAddressWhitelistUpdateApproval =
-        getWalletApprovalRequest(balanceAccountAddressWhitelistUpdateRequestType)
-
-    approvals.add(balanceAccountAddressWhitelistUpdateApproval)
-
-    val balanceAccountSettingsUpdateRequestType =
-        getBalanceAccountSettingsUpdate(nonceAccountAddresses)
-    val balanceAccountSettingsUpdateApproval =
-        getWalletApprovalRequest(balanceAccountSettingsUpdateRequestType)
-
-    approvals.add(balanceAccountSettingsUpdateApproval)
-
-    val removeDAppBookEntryRequestType =
-        getRemoveDAppBookEntry(nonceAccountAddresses)
-    val removeDAppBookEntryApproval =
-        getWalletApprovalRequest(removeDAppBookEntryRequestType)
-
-    approvals.add(removeDAppBookEntryApproval)
-
-    return approvals
-}
 
 fun getLoginApprovalV2(): ApprovalRequestV2 {
     val deserializer = ApprovalRequestV2Deserializer()
@@ -121,9 +17,6 @@ fun getEthereumWithdrawalRequestApprovalV2() : ApprovalRequestV2 {
     return getFullListOfApprovalItems()
         .first { it.details is ApprovalRequestDetailsV2.EthereumWithdrawalRequest }
 }
-
-fun getMultiSigWalletCreationApprovalRequest(): ApprovalRequest =
-    deserializer.parseData(JsonParser.parseString(multiSigWithWalletCreationJson.trim()))
 
 fun getVerifyUser() = VerifyUser(
     fullName = "John Doe",

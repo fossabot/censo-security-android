@@ -45,7 +45,7 @@ android {
         applicationId coreAppId
         minSdk 31
         targetSdk 33
-        versionCode 23
+        versionCode 24
 
         buildConfigField "int", "versionNameMajor", versionNameMajor
         buildConfigField "int", "versionNameMinor", versionNameMinor
@@ -76,10 +76,8 @@ android {
             resValue "string", "app_name", appName
             minifyEnabled true
             buildConfigField "String", "BASE_URL", "\"https://brooklyn.censocustody.com/\""
-            buildConfigField "String", "SOLANA_URL", "\"https://api.mainnet-beta.solana.com\""
             buildConfigField "String", "MIN_VERSION_ENDPOINT", "\"censo-security-app-version.json\""
             buildConfigField "String", "ANCHOR_URL", "\"https://wallet.censocustody.com/\""
-            buildConfigField "String", "SOLANA_COMMITMENT", "\"finalized\""
             resValue "string", "RAYGUN_APP_ID", "\"vuxX53AURVfZS87D1WPqeg\""
             debuggable false
         }
@@ -88,10 +86,8 @@ android {
             applicationIdSuffix ".preprod"
             minifyEnabled true
             buildConfigField "String", "BASE_URL", "\"https://brooklyn-preprod.censocustody.com/\""
-            buildConfigField "String", "SOLANA_URL", "\"https://api.mainnet-beta.solana.com\""
             buildConfigField "String", "MIN_VERSION_ENDPOINT", "\"censo-security-app-version.json\""
             buildConfigField "String", "ANCHOR_URL", "\"https://preprod.censocustody.com/\""
-            buildConfigField "String", "SOLANA_COMMITMENT", "\"finalized\""
             resValue "string", "RAYGUN_APP_ID", "\"CtOnGQjIo1U8dELkoUf0iw\""
             debuggable false
         }
@@ -100,10 +96,8 @@ android {
             applicationIdSuffix ".prerelease"
             minifyEnabled false
             buildConfigField "String", "BASE_URL", "\"https://brooklyn-prerelease.censocustody.com/\""
-            buildConfigField "String", "SOLANA_URL", "\"https://solana-validator-prerelease.censocustody.com\""
             buildConfigField "String", "MIN_VERSION_ENDPOINT", "\"censo-security-app-version-dev.json\""
             buildConfigField "String", "ANCHOR_URL", "\"https://prerelease.censocustody.com/\""
-            buildConfigField "String", "SOLANA_COMMITMENT", "\"confirmed\""
             resValue "string", "RAYGUN_APP_ID", "\"L9T2bPaEjr3Lede3SNpFJw\""
             debuggable false
         }

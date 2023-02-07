@@ -25,7 +25,6 @@
     <string name="approve">Approve</string>
     <string name="deny">Deny</string>
     <string name="more_info">More Info…</string>
-    <string name="equivalent">equivalent</string>
 
     <string name="expires_in">Expires in</string>
     <string name="content_des_back_icon">Back Icon</string>
@@ -33,13 +32,9 @@
     <string name="initiated_by">Initiated By</string>
     <string name="invited_by">Invited By</string>
     <string name="invited_by_email">Invited By Email</string>
-    <string name="no_more_approvals_needed">No more approvals needed</string>
-    <string name="more_approval_needed">more approval needed</string>
-    <string name="more_approvals_needed">more approvals needed</string>
     <string name="nothing_to_approve">Nothing to approve</string>
     <string name="pull_to_refresh">Pull down to refresh approvals</string>
     <string name="content_des_pull_to_refresh_icon">Pull down to refresh icon</string>
-    <string name="auth_flow_exception">Something went wrong, please try again</string>
 
     <string name="approval_expired">Expired</string>
     <string name="confirm">Confirm</string>
@@ -65,12 +60,6 @@
     <string name="approval_expiration">Approval Expiration</string>
     <string name="no_approvers_text">No users may approve requests</string>
     <string name="no_wallet_approvers_text">No wallet approvers</string>
-    <string name="key_pair_generation_failed">Unable to generate key pair for device. Please retry.</string>
-    <string name="decryption_failed">Unable to decrypt data. Please retry.</string>
-    <string name="encryption_failed">Unable to encrypt data. Please retry.</string>
-    <string name="key_regeneration_failed">Unable to regenerate key pair. Please retry.</string>
-    <string name="sign_data_failed">Unable to sign data. Please retry.</string>
-    <string name="verify_key_failed">Unable to verify data. Please retry.</string>
 
     <string name="add_address_book_update_approval_header">Add Address</string>
     <string name="remove_address_book_update_approval_header">Remove Address</string>
@@ -82,25 +71,17 @@
     <string name="enable_dapp_balance_account_settings_update_approval_header">Enable dApp Access</string>
     <string name="disable_transfer_balance_account_settings_update_approval_header">Disable Whitelist</string>
     <string name="enable_transfer_balance_account_settings_update_approval_header">Enable Whitelist</string>
-    <string name="dapp_book_update_approval_header">Replace dApp Book</string>
-    <string name="dapp_transaction_request_approval_header">Execute dApp Transaction</string>
     <string name="login_approval_header">Log In</string>
-    <string name="remove_signers_update_approval_header">Remove User</string>
-    <string name="add_signers_update_approval_header">Add User</string>
     <string name="wallet_config_policy_update_approval_header">Update Administration Policy</string>
     <string name="unknown_approval_header">Unknown</string>
 
-    <string name="conversion_request_approval_header">Convert %1$s %2$s</string>
     <string name="withdrawal_request_approval_header">Send %1$s %2$s</string>
     <string name="bump_fee_request_approval_header">Bump Fee</string>
     <string name="bump_fee_request_approval_subtitle">for sending %1$s %2$s</string>
-    <string name="wrap_conversion_request_approval_header">Swap %1$s %2$s</string>
 
     <string name="whitelisted_addresses_title">Whitelisted Addresses</string>
     <string name="no_whitelisted_addresses">No whitelisted addresses</string>
 
-    <string name="signer_email">User Email</string>
-    <string name="signer_name">User Name</string>
     <string name="vault_approvers">Administrators</string>
     <string name="approvals_required">Approvals Required</string>
 
@@ -121,7 +102,6 @@
     <string name="from_wallet">From Wallet</string>
     <string name="destination">Destination</string>
     <string name="destination_address">Destination Address</string>
-    <string name="swap_for">Swap for</string>
     <string name="nft_name">NFT Name</string>
     <string name="amount">Amount</string>
     <string name="fee">Fee</string>
@@ -223,8 +203,6 @@
     <string name="close_dialog">close dialog</string>
     <string name="dismiss">Dismiss</string>
 
-    <string name="add">Add</string>
-
     <string name="biometry_changed_key_invalidated">Biometry for device has changed. Key invalidated.</string>
     <string name="foreground_access_app">Biometry is required to access the Censo Security App</string>
     <string name="complete_biometry">Complete Biometry</string>
@@ -260,6 +238,6 @@
     <string name="explain_photo_permission">Taking a photo is required to use the Censo Security app.</string>
     <string name="camera_permission_request">Camera Permission Request</string>
     <string name="unable_process_image">Unable to process image, please retake image.</string>
-    <string name="wallet_title">Wallet</string>
     <string name="use_password_sign_in">Use Password For Sign In</string>
+    <string name="wallet">Wallet</string>
 </resources>

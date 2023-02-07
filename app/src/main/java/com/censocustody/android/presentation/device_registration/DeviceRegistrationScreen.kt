@@ -29,7 +29,6 @@ import com.censocustody.android.ui.theme.UnfocusedGrey
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 
-@OptIn(ExperimentalPermissionsApi::class, ExperimentalCoroutinesApi::class)
 @Composable
 fun DeviceRegistrationScreen(
     navController: NavController,
