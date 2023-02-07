@@ -9,13 +9,6 @@ class PhraseException : Exception(NULL_PHRASE_IN_STATE) {
     }
 }
 
-class RecoverKeyException(message: String) : Exception(message) {
-    companion object {
-        const val DEFAULT_KEY_RECOVERY_ERROR = "DEFAULT_KEY_RECOVERY_ERROR"
-        const val MANUALLY_TYPED_PHRASE_IS_INVALID = "Manually typed phrase is invalid"
-    }
-}
-
 class InvalidKeyPhraseException : Exception(INVALID_KEY_PHRASE_ERROR) {
     companion object {
         const val INVALID_KEY_PHRASE_ERROR = "INVALID_KEY_PHRASE_ERROR"

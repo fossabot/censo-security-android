@@ -7,16 +7,12 @@ import com.censocustody.android.*
 import com.censocustody.android.common.Resource
 import com.censocustody.android.common.CensoCountDownTimer
 import com.censocustody.android.data.ApprovalsRepository
-import com.censocustody.android.data.SolanaRepository
 import com.censocustody.android.data.UserRepository
 import com.censocustody.android.data.models.ApprovalDisposition
 import com.censocustody.android.data.models.CipherRepository
-import com.censocustody.android.data.models.Nonce
-import com.censocustody.android.data.models.approval.SolanaApprovalRequestDetails
 import com.censocustody.android.data.models.approvalV2.ApprovalRequestV2
 import com.censocustody.android.presentation.approval_detail.ApprovalDetailsViewModel
 import com.censocustody.android.presentation.approval_disposition.ApprovalDispositionState
-import com.censocustody.android.presentation.durable_nonce.DurableNonceViewModel
 import junit.framework.TestCase.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -33,12 +29,6 @@ import javax.crypto.Cipher
 class ApprovalDetailsViewModelTest : BaseViewModelTest() {
 
     //region Mocks and testing objects
-    @Mock
-    lateinit var solanaRepository: SolanaRepository
-
-    @Mock
-    lateinit var durableNonceViewModel: DurableNonceViewModel
-
     @Mock
     lateinit var approvalsRepository: ApprovalsRepository
 
@@ -68,10 +58,6 @@ class ApprovalDetailsViewModelTest : BaseViewModelTest() {
     //region Testing data
     private val testLoginApproval = getLoginApprovalV2()
     private val testEthereumWithdrawalApproval = getEthereumWithdrawalRequestApprovalV2()
-    private val testMultiSigWalletCreationApprovalRequest =
-        getMultiSigWalletCreationApprovalRequest()
-
-    private lateinit var testMultipleAccounts: DurableNonceViewModel.MultipleAccounts
 
     //These are not used in any way other than to fill method parameters
     private val mockDialogSecondaryMessage = "Send 1000 SOL"
@@ -97,10 +83,6 @@ class ApprovalDetailsViewModelTest : BaseViewModelTest() {
                 cipherRepository = cipherRepository,
                 timer = countdownTimer
             )
-
-        durableNonceViewModel = DurableNonceViewModel(solanaRepository)
-
-        testMultipleAccounts =  durableNonceViewModel.MultipleAccounts(nonces = listOf(Nonce(getNonce())))
     }
 
     @After
@@ -144,7 +126,7 @@ class ApprovalDetailsViewModelTest : BaseViewModelTest() {
             dialogMessages = mockMessages,
         )
 
-        assertExpectedDispositionAndExpectedInitiation(ApprovalDisposition.APPROVE, false)
+        assertExpectedDisposition(ApprovalDisposition.APPROVE)
 
         whenever(cryptoObject.signature).then { signature }
 
@@ -186,7 +168,7 @@ class ApprovalDetailsViewModelTest : BaseViewModelTest() {
             dialogMessages = mockMessages,
         )
 
-        assertExpectedDispositionAndExpectedInitiation(ApprovalDisposition.DENY, false)
+        assertExpectedDisposition(ApprovalDisposition.DENY)
 
         triggerRegisterDispositionCallAndAssertNonceDataAndBioPromptState()
 
@@ -226,7 +208,7 @@ class ApprovalDetailsViewModelTest : BaseViewModelTest() {
             dialogMessages = mockMessages,
         )
 
-        assertExpectedDispositionAndExpectedInitiation(ApprovalDisposition.DENY, false)
+        assertExpectedDisposition(ApprovalDisposition.DENY)
 
         triggerRegisterDispositionCallAndAssertNonceDataAndBioPromptState()
 
@@ -235,7 +217,6 @@ class ApprovalDetailsViewModelTest : BaseViewModelTest() {
         //Assert that the registerDisposition call failed and the retry data holds the disposition and isInitiationRequest data
         assertEquals(true, approvalDetailsViewModel.state.approvalDispositionState?.registerApprovalDispositionResult is Resource.Error)
         assertEquals(false, approvalDetailsViewModel.state.approvalDispositionState?.approvalRetryData?.isApproving)
-        assertEquals(false, approvalDetailsViewModel.state.approvalDispositionState?.approvalRetryData?.isInitiationRequest)
     }
 
     /**
@@ -360,7 +341,6 @@ class ApprovalDetailsViewModelTest : BaseViewModelTest() {
         assertTrue(approvalDetailsViewModel.state.approvalDispositionState?.approvalDisposition is Resource.Success)
         assertEquals(approvalDisposition, approvalDetailsViewModel.state.approvalDispositionState?.approvalDisposition?.data)
         assertTrue(approvalDetailsViewModel.state.approvalDispositionState?.approvalRetryData?.isApproving == true)
-        assertTrue(approvalDetailsViewModel.state.approvalDispositionState?.approvalRetryData?.isInitiationRequest == false)
     }
     //endregion
 
@@ -390,9 +370,8 @@ class ApprovalDetailsViewModelTest : BaseViewModelTest() {
         assertEquals(expectedApproval, approvalDetailsViewModel.state.selectedApproval)
     }
 
-    private fun assertExpectedDispositionAndExpectedInitiation(expectedDisposition: ApprovalDisposition, expectedIsInitiationRequest: Boolean) {
+    private fun assertExpectedDisposition(expectedDisposition: ApprovalDisposition) {
         assertEquals(expectedDisposition, approvalDetailsViewModel.state.approvalDispositionState?.approvalDisposition?.data)
-        assertEquals(expectedIsInitiationRequest, approvalDetailsViewModel.state.approvalDispositionState?.approvalRetryData?.isInitiationRequest)
 
         if (expectedDisposition == ApprovalDisposition.APPROVE) {
             assertEquals(true, approvalDetailsViewModel.state.shouldDisplayConfirmDisposition?.isApproving)

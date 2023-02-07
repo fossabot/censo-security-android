@@ -9,8 +9,6 @@ import com.censocustody.android.common.evm.SafeTx
 import com.censocustody.android.data.*
 import com.censocustody.android.data.models.ApprovalDisposition
 import com.censocustody.android.data.models.Chain
-import com.censocustody.android.data.models.approval.ApprovalSignature
-import com.censocustody.android.data.models.approval.BooleanSetting
 import com.censocustody.android.data.models.evm.EvmConfigTransactionBuilder
 import org.web3j.crypto.Hash
 import kotlin.Exception
@@ -107,8 +105,8 @@ data class ApprovalDispositionRequestV2(
                             requestType.wallet.address,
                             EvmWhitelistHelper.getTargetGuardAddress(
                                 requestType.currentGuardAddress,
-                                requestType.whitelistEnabled?.let { it == BooleanSetting.On },
-                                requestType.dappsEnabled?.let { it == BooleanSetting.On },
+                                requestType.whitelistEnabled?.let { it == ApprovalRequestDetailsV2.BooleanSetting.On },
+                                requestType.dappsEnabled?.let { it == ApprovalRequestDetailsV2.BooleanSetting.On },
                                 requestType.signingData.transaction.contractAddresses
                             ),
                             requestType.signingData.transaction
@@ -123,8 +121,8 @@ data class ApprovalDispositionRequestV2(
                             requestType.wallet.address,
                             EvmWhitelistHelper.getTargetGuardAddress(
                                 requestType.currentGuardAddress,
-                                requestType.whitelistEnabled?.let { it == BooleanSetting.On },
-                                requestType.dappsEnabled?.let { it == BooleanSetting.On },
+                                requestType.whitelistEnabled?.let { it == ApprovalRequestDetailsV2.BooleanSetting.On },
+                                requestType.dappsEnabled?.let { it == ApprovalRequestDetailsV2.BooleanSetting.On },
                                 requestType.signingData.transaction.contractAddresses
                             ),
                             requestType.signingData.transaction
