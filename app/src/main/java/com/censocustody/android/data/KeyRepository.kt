@@ -3,8 +3,10 @@ package com.censocustody.android.data
 import cash.z.ecc.android.bip39.Mnemonics
 import cash.z.ecc.android.bip39.toSeed
 import com.censocustody.android.common.BaseWrapper
+import com.censocustody.android.common.Resource
 import com.censocustody.android.common.generateFormattedTimestamp
 import com.censocustody.android.data.EncryptionManagerImpl.Companion.SENTINEL_KEY_NAME
+import com.censocustody.android.data.models.Signers
 import com.censocustody.android.data.models.VerifyUser
 import com.censocustody.android.data.models.WalletSigner
 import com.censocustody.android.data.models.mapToPublicKeysList
@@ -21,8 +23,11 @@ interface KeyRepository {
     suspend fun generatePhrase(): String
     suspend fun doesUserHaveValidLocalKey(verifyUser: VerifyUser): Boolean
 
+    suspend fun retrieveV3RootSeed(cipher: Cipher): ByteArray?
+    suspend fun haveV3RootSeed() : Boolean
+
     suspend fun saveV3RootKey(mnemonic: Mnemonics.MnemonicCode, cipher: Cipher)
-    suspend fun saveV3PublicKeys(mnemonic: Mnemonics.MnemonicCode) : List<WalletSigner>
+    suspend fun saveV3PublicKeys(rootSeed: ByteArray) : List<WalletSigner>
     suspend fun retrieveV3PublicKeys() : List<WalletSigner>
 
     suspend fun hasV3RootSeedStored() : Boolean
@@ -37,18 +42,27 @@ interface KeyRepository {
 
     suspend fun removeSentinelDataAndKickUserToAppEntrance()
 
-    fun validateUserEnteredPhraseAgainstBackendKeys(phrase: String, verifyUser: VerifyUser?) : Boolean
+    fun validateUserEnteredPhraseAgainstBackendKeys(
+        phrase: String,
+        verifyUser: VerifyUser?
+    ): Boolean
+
+    suspend fun migrateSigner(
+        walletSigners: List<WalletSigner>,
+        signature: Signature
+    ): Resource<Signers>
 
     suspend fun signPublicKeys(
         publicKeys: List<WalletSigner?>,
-        mnemonic: Mnemonics.MnemonicCode
+        rootSeed: ByteArray
     ): List<WalletSigner>
 }
 
 class KeyRepositoryImpl(
     private val encryptionManager: EncryptionManager,
     private val securePreferences: SecurePreferences,
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
+    private val brooklynApiService: BrooklynApiService
 ) : KeyRepository, BaseRepository() {
 
     override suspend fun doesUserHaveValidLocalKey(verifyUser: VerifyUser): Boolean {
@@ -128,10 +142,8 @@ class KeyRepositoryImpl(
         )
     }
 
-    override suspend fun saveV3PublicKeys(mnemonic: Mnemonics.MnemonicCode) : List<WalletSigner> {
+    override suspend fun saveV3PublicKeys(rootSeed: ByteArray): List<WalletSigner> {
         val userEmail = userRepository.retrieveUserEmail()
-
-        val rootSeed = mnemonic.toSeed()
 
         val publicKeys = encryptionManager.saveV3PublicKeys(
             rootSeed = rootSeed,
@@ -146,23 +158,47 @@ class KeyRepositoryImpl(
         return securePreferences.retrieveV3PublicKeys(userEmail).mapToPublicKeysList()
     }
 
+    override suspend fun haveV3RootSeed(): Boolean {
+        val userEmail = userRepository.retrieveUserEmail()
+
+        return securePreferences.hasV3RootSeed(userEmail)
+    }
+
+
     override suspend fun signPublicKeys(
         publicKeys: List<WalletSigner?>,
-        mnemonic: Mnemonics.MnemonicCode
+        rootSeed: ByteArray
     ): List<WalletSigner> {
-        val rootSeed = mnemonic.toSeed()
 
-        val signedKeysToAdd = mutableListOf<WalletSigner>()
-
-        for (key in publicKeys.filterNotNull()) {
-            val signedKey = encryptionManager.signKeyForMigration(
+        return publicKeys.mapNotNull {
+            val signedKey = encryptionManager.signKeysWithCensoKey(
                 rootSeed = rootSeed,
-                publicKey = key.publicKey ?: ""
+                publicKey = it?.publicKey ?: ""
             )
-            signedKeysToAdd.add(key.copy(signature = BaseWrapper.encodeToBase64(signedKey)))
+            it?.copy(signature = BaseWrapper.encodeToBase64(signedKey))
         }
+    }
 
-        return signedKeysToAdd
+    override suspend fun retrieveV3RootSeed(cipher: Cipher): ByteArray? {
+        return try {
+            val userEmail = userRepository.retrieveUserEmail()
+
+            BaseWrapper.decode(
+                encryptionManager.retrieveRootSeed(email = userEmail, cipher = cipher)
+            )
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    override suspend fun migrateSigner(walletSigners: List<WalletSigner>, signature: Signature): Resource<Signers> {
+        val email = userRepository.retrieveUserEmail()
+        val signedData = encryptionManager.signKeysForUpload(email, signature, walletSigners)
+        return retrieveApiResource {
+            brooklynApiService.addWalletSigner(
+                Signers(walletSigners, BaseWrapper.encodeToBase64(signedData))
+            )
+        }
     }
 
     override suspend fun hasV3RootSeedStored(): Boolean {

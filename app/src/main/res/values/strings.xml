@@ -168,7 +168,7 @@
     <string name="something_went_wrong">Something went wrong</string>
     <string name="retry">Retry</string>
     <string name="registering_key_auth">Registering your key with Censo…</string>
-    <string name="migration_loading_text">Migrating your key behind biometry protection…</string>
+    <string name="uploading_key_loading_text">Saving your key behind biometry protection…</string>
     <string name="saving_key_to_device">Saving your key to your device…</string>
     <string name="i_saved_key">I saved the recovery phrase &#10132;</string>
 
@@ -208,8 +208,8 @@
     <string name="complete_biometry">Complete Biometry</string>
     <string name="sentinel_data_invalidated">Biometry for device failed. Please log back into the app.</string>
     <string name="biometry_unavailable">Unable to show biometry to gain access to the app.\n\nPlease authenticate device from lock screen.</string>
-    <string name="need_complete_migration">Migration restarted. Please complete migration to enter app.</string>
-    <string name="initial_migration_message">As we migrate your data behind biometry, you will see several biometry dialogs. Please complete all to gain access to the Censo Security app.</string>
+    <string name="need_complete_key_upload">Key upload restarted. Please finish uploading keys to enter app.</string>
+    <string name="initial_key_upload_message">As we save your data behind biometry, you will see several biometry dialogs. Please complete all to gain access to the Censo Security app.</string>
 
     <string name="reset_password">Reset Password</string>
     <string name="retry_recover_password">Retry</string>

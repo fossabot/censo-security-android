@@ -83,19 +83,40 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideKeyRepository(encryptionManager: EncryptionManager, securePreferences: SecurePreferences, userRepository: UserRepository): KeyRepository {
-        return KeyRepositoryImpl(encryptionManager = encryptionManager, securePreferences = securePreferences, userRepository =  userRepository)
+    fun provideKeyRepository(
+        encryptionManager: EncryptionManager,
+        securePreferences: SecurePreferences,
+        userRepository: UserRepository,
+        brooklynApiService: BrooklynApiService
+    ): KeyRepository {
+        return KeyRepositoryImpl(
+            encryptionManager = encryptionManager,
+            securePreferences = securePreferences,
+            userRepository = userRepository,
+            brooklynApiService = brooklynApiService
+        )
     }
 
     @Provides
     @Singleton
-    fun provideCipherRepository(encryptionManager: EncryptionManager, securePreferences: SecurePreferences, userRepository: UserRepository): CipherRepository {
-        return CipherRepositoryImpl(encryptionManager = encryptionManager, securePreferences = securePreferences, userRepository =  userRepository)
+    fun provideCipherRepository(
+        encryptionManager: EncryptionManager,
+        securePreferences: SecurePreferences,
+        userRepository: UserRepository
+    ): CipherRepository {
+        return CipherRepositoryImpl(
+            encryptionManager = encryptionManager,
+            securePreferences = securePreferences,
+            userRepository = userRepository
+        )
     }
 
     @Provides
     @Singleton
-    fun provideEncryptionManager(securePreferences: SecurePreferences, cryptographyManager: CryptographyManager): EncryptionManager {
+    fun provideEncryptionManager(
+        securePreferences: SecurePreferences,
+        cryptographyManager: CryptographyManager
+    ): EncryptionManager {
         return EncryptionManagerImpl(securePreferences, cryptographyManager)
     }
 
@@ -126,22 +147,6 @@ object AppModule {
     @Provides
     fun provideCryptographyManager(): CryptographyManager {
         return CryptographyManagerImpl()
-    }
-
-    @Provides
-    @Singleton
-    fun provideMigrationRepository(
-        encryptionManager: EncryptionManager,
-        securePreferences: SecurePreferences,
-        userRepository: UserRepository,
-        api: BrooklynApiService
-    ): MigrationRepository {
-        return MigrationRepositoryImpl(
-            encryptionManager = encryptionManager,
-            securePreferences = securePreferences,
-            userRepository = userRepository,
-            api = api
-        )
     }
 
     @Provides

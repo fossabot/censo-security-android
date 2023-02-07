@@ -15,10 +15,7 @@ sealed class Screen(val route: String) {
         const val KEY_MGMT_ARG = "key_mgmt_arg"
     }
     object ResetPasswordRoute : Screen("reset_password_screen")
-    object MigrationRoute : Screen("migration_screen") {
-        const val MIGRATION_ARG = "migration_arg"
-    }
-    object RegenerationRoute : Screen("regeneration_screen")
+    object KeyUploadRoute : Screen("migration_screen")
     object DeviceRegistrationRoute : Screen("device_registration")
 
     fun buildScreenDeepLinkUri() = "$CENSO_CUSTODY_URI${this.route}"

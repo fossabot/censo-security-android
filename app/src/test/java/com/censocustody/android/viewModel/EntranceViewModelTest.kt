@@ -225,7 +225,7 @@ class EntranceViewModelTest : BaseViewModelTest() {
                 .setCensoUser(basicVerifyUserWithNoPublicKeys)
 
             assertTrue(entranceViewModel.state.userDestinationResult is Resource.Success)
-            assertTrue(entranceViewModel.state.userDestinationResult.data == UserDestination.REGENERATION)
+            assertTrue(entranceViewModel.state.userDestinationResult.data == UserDestination.UPLOAD_KEYS)
         }
 
     @Test
