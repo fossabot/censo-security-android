@@ -352,7 +352,7 @@ fun ApprovalsList(
         }
     ) {
         //region Approvals List
-        if (approvalRequests.isNullOrEmpty() && !isRefreshing) {
+        if (approvalRequests.isEmpty() && !isRefreshing) {
             ListDataEmptyState()
         } else {
             LazyColumn(
