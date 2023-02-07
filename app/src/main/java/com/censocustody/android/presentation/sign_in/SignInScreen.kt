@@ -1,10 +1,8 @@
 package com.censocustody.android.presentation.sign_in
 
 import android.annotation.SuppressLint
-import androidx.biometric.BiometricPrompt
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -16,7 +14,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -38,6 +35,17 @@ import com.censocustody.android.presentation.components.SignInTextField
 import com.censocustody.android.presentation.components.SignInTopAppBar
 import com.censocustody.android.presentation.key_management.GradientBackgroundUI
 import com.censocustody.android.ui.theme.*
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.ui.draw.clip
+import org.web3j.abi.datatypes.Bool
 
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @OptIn(ExperimentalComposeUiApi::class)
@@ -178,21 +186,6 @@ fun SignInScreen(
                                 errorEnabled = state.emailErrorEnabled,
                                 showDoneAction = false
                             )
-                            //todo: Chat with team about this workaround
-                            if (state.biometricLoginPreviousFailure) {
-                                Spacer(modifier = Modifier.size(16.dp))
-                                Box {
-                                    Text(
-                                        modifier = Modifier
-                                            .clickable { viewModel.skipToPasswordEntry() }
-                                            .padding(horizontal = boxItemsHorizontalPadding),
-                                        text = stringResource(R.string.use_password_sign_in),
-                                        color = CensoTextBlue,
-                                        textAlign = TextAlign.End,
-                                        fontWeight = FontWeight.W400
-                                    )
-                                }
-                            }
                         } else {
                             Text(
                                 modifier = Modifier.padding(horizontal = boxItemsHorizontalPadding),
@@ -278,27 +271,28 @@ fun SignInScreen(
                     } else {
                         "${errorReason}\n\n${stringResource(R.string.login_failed_message)}"
                     }
-                    
-                    LoginErrorAlertDialog(
+
+                    SignInAlertDialog(
                         title = stringResource(R.string.login_failed_title),
                         confirmText = stringResource(R.string.ok),
                         dismissText = stringResource(id = R.string.cancel),
-                        shouldDisplayDismissButton = false,
-                        onDismiss = viewModel::resetLoginCall,
+                        onCancel = viewModel::resetLoginCall,
+                        onExit = viewModel::resetLoginCall,
                         onConfirm = viewModel::resetLoginCall,
-                        errorReason = errorReason,
-                        errorReasonBackup = stringResource(R.string.login_failed_message)
+                        message = errorReason ?: stringResource(R.string.login_failed_message),
+                        showDismissButton = false
                     )
                 } else {
-                    LoginErrorAlertDialog(
+                    SignInAlertDialog(
                         title = stringResource(R.string.sign_in_error),
                         confirmText = stringResource(R.string.try_again),
-                        dismissText = stringResource(id = R.string.cancel),
-                        shouldDisplayDismissButton = true,
-                        onDismiss = viewModel::resetLoginCall,
+                        dismissText = stringResource(id = R.string.login_with_password),
+                        onCancel = viewModel::skipToPasswordEntry,
+                        onExit = viewModel::resetLoginCall,
                         onConfirm = viewModel::kickOffBiometryLoginOrMoveToPasswordEntry,
-                        errorReason = errorReason,
-                        errorReasonBackup = stringResource(R.string.error_occurred_signature_login)
+                        message = errorReason
+                            ?: stringResource(R.string.error_occurred_signature_login),
+                        showDismissButton = true
                     )
                 }
             }
@@ -308,44 +302,140 @@ fun SignInScreen(
 }
 
 @Composable
-fun LoginErrorAlertDialog(
+fun SignInAlertDialog(
     title: String,
+    message: String,
+    onConfirm: () -> Unit,
+    onCancel: () -> Unit,
     confirmText: String,
     dismissText: String,
-    shouldDisplayDismissButton: Boolean,
-    onDismiss: () -> Unit,
-    onConfirm: () -> Unit,
-    errorReason: String?,
-    errorReasonBackup: String
-) {
-    AlertDialog(
-        backgroundColor = UnfocusedGrey,
-        onDismissRequest = onDismiss,
-        confirmButton = {
-            TextButton(onClick = onConfirm) {
-                Text(text = confirmText, color = CensoWhite)
-            }
-        },
-        dismissButton = {
-            if (shouldDisplayDismissButton) {
-                TextButton(onClick = onDismiss) {
-                    Text(text = dismissText, color = CensoWhite)
+    onExit: () -> Unit,
+    showDismissButton: Boolean
+    ) {
+    val upperInteractionSource = remember { MutableInteractionSource() }
+    Column(
+        Modifier
+            .fillMaxSize()
+            .background(color = Color.Transparent)
+            .padding(4.dp)
+            .clickable(indication = null, interactionSource = upperInteractionSource) { },
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        val innerInteractionSource = remember { MutableInteractionSource() }
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 8.dp)
+                .background(color = Color.Transparent)
+                .border(
+                    width = 1.5.dp,
+                    shape = RoundedCornerShape(16.dp),
+                    color = UnfocusedGrey.copy(alpha = 0.50f),
+                )
+                .zIndex(5.0f)
+                .clickable(indication = null, interactionSource = innerInteractionSource) { },
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(
+                        color = DialogHeaderBlack,
+                        shape = RoundedCornerShape(16.dp, 16.dp, 0.dp, 0.dp),
+                    )
+                    .padding(vertical = 16.dp),
+            ) {
+                Text(
+                    modifier = Modifier
+                        .padding(horizontal = 32.dp)
+                        .align(Alignment.Center),
+                    text = title,
+                    fontWeight = FontWeight.SemiBold,
+                    color = CensoWhite,
+                    fontSize = 24.sp
+                )
+                IconButton(
+                    modifier = Modifier
+                        .align(Alignment.CenterEnd)
+                        .padding(end = 4.dp),
+                    onClick = onExit
+                ) {
+                    Icon(
+                        Icons.Filled.Close,
+                        contentDescription = stringResource(R.string.close_dialog),
+                        tint = CensoWhite
+                    )
                 }
             }
-        },
-        title = {
-            Text(
-                text = title,
-                color = CensoWhite,
-                fontSize = 20.sp
-            )
-        },
-        text = {
-            Text(
-                text = errorReason ?: errorReasonBackup,
-                color = CensoWhite,
-                fontSize = 16.sp
-            )
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.background(
+                    color = DialogMainBackground,
+                    shape = RoundedCornerShape(0.dp, 0.dp, 16.dp, 16.dp),
+                )
+            ) {
+                Spacer(modifier = Modifier.height(24.dp))
+                Text(
+                    modifier = Modifier.padding(horizontal = 48.dp),
+                    text = message,
+                    textAlign = TextAlign.Center,
+                    color = CensoWhite,
+                    fontSize = 20.sp
+                )
+                Spacer(modifier = Modifier.height(40.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceEvenly,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    var modifier: Modifier = if (showDismissButton) Modifier
+                        .clip(RoundedCornerShape(12.dp))
+                        .weight(1.35f)
+                        .fillMaxWidth()
+                    else Modifier
+                        .clip(RoundedCornerShape(36.dp))
+                        .width(72.dp)
+                    var textAlign = if (showDismissButton) TextAlign.Center else TextAlign.Start
+                    if (showDismissButton) {
+                        Spacer(modifier = Modifier.weight(0.20f))
+                        Button(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(12.dp))
+                                .weight(1.35f)
+                                .fillMaxWidth(),
+                            colors = ButtonDefaults.buttonColors(
+                                backgroundColor = CancelButtonGrey
+                            ),
+                            onClick = onCancel
+                        ) {
+                            Text(
+                                modifier = Modifier.padding(vertical = 2.dp),
+                                fontSize = 18.sp,
+                                text = dismissText,
+                                color = CensoWhite,
+                                textAlign = TextAlign.Center
+                            )
+                        }
+                    }
+                    Spacer(modifier = Modifier.weight(0.20f))
+                    Button(
+                        modifier = modifier,
+                        onClick = onConfirm,
+                    ) {
+                        Text(
+                            modifier = Modifier.padding(vertical = 2.dp),
+                            text = confirmText,
+                            fontSize = 18.sp,
+                            color = CensoWhite,
+                            textAlign = textAlign
+                        )
+                    }
+                    Spacer(modifier = Modifier.weight(0.20f))
+                }
+                Spacer(modifier = Modifier.height(32.dp))
+            }
         }
-    )
+    }
 }

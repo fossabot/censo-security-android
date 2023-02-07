@@ -85,7 +85,10 @@ class SignInViewModel @Inject constructor(
     }
 
     fun skipToPasswordEntry() {
-        state = state.copy(loginStep = LoginStep.PASSWORD_ENTRY)
+        state = state.copy(
+            loginStep = LoginStep.PASSWORD_ENTRY,
+            loginResult = Resource.Uninitialized
+        )
     }
 
     fun kickOffBiometryLoginOrMoveToPasswordEntry() {
@@ -206,7 +209,6 @@ class SignInViewModel @Inject constructor(
                     }
                 }
                 is Resource.Error -> {
-                    state = state.copy(biometricLoginPreviousFailure = true)
                     userFailedLogin(resource = loginResource)
                 }
                 else -> {
@@ -214,7 +216,6 @@ class SignInViewModel @Inject constructor(
                 }
             }
         } catch (e: Exception) {
-            state = state.copy(biometricLoginPreviousFailure = true)
             userFailedLogin(e = e)
         }
     }

@@ -21,7 +21,6 @@ data class SignInState(
     val triggerBioPrompt: Resource<CryptoObject> = Resource.Uninitialized,
     val bioPromptReason: BioPromptReason = BioPromptReason.UNINITIALIZED,
     val exitLoginFlow : Resource<Unit> = Resource.Uninitialized,
-    val biometricLoginPreviousFailure: Boolean = false
     ) {
     val signInButtonEnabled = email.isNotEmpty() && password.isNotEmpty()
 
