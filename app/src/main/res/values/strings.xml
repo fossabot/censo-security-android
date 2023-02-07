@@ -238,7 +238,6 @@
     <string name="explain_photo_permission">Taking a photo is required to use the Censo Security app.</string>
     <string name="camera_permission_request">Camera Permission Request</string>
     <string name="unable_process_image">Unable to process image, please retake image.</string>
-    <string name="use_password_sign_in">Use Password For Sign In</string>
     <string name="wallet">Wallet</string>
     <string name="login_with_password">Use Password</string>
 </resources>
