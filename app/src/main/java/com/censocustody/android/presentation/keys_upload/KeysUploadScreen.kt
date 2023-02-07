@@ -14,6 +14,8 @@ import com.censocustody.android.common.Resource
 import com.censocustody.android.common.popUpToTop
 import com.censocustody.android.presentation.Screen
 import com.censocustody.android.R
+import com.censocustody.android.common.BioPromptReason
+import com.censocustody.android.data.BioPromptData
 
 @OptIn(
     androidx.compose.foundation.ExperimentalFoundationApi::class
@@ -63,6 +65,7 @@ fun KeysUploadScreen(
     )
 
     if (state.triggerBioPrompt is Resource.Success) {
+
         val kickOffBioPrompt = {
             state.triggerBioPrompt.data?.let {
                 val promptInfo = BioCryptoUtil.createPromptInfo(context = context)
@@ -98,10 +101,14 @@ fun KeysUploadScreen(
             viewModel.resetPromptTrigger()
         }
 
-        PreBiometryDialog(
-            mainText = stringResource(id = R.string.initial_key_upload_message),
-            onAccept = kickOffBioPrompt
-        )
+        if (state.bioPromptData.bioPromptReason == BioPromptReason.RETRIEVE_V3_ROOT_SEED) {
+            PreBiometryDialog(
+                mainText = stringResource(id = R.string.initial_key_upload_message),
+                onAccept = kickOffBioPrompt
+            )
+        } else {
+            kickOffBioPrompt()
+        }
     }
 
     if (state.showToast is Resource.Success) {
