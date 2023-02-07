@@ -25,7 +25,6 @@ import com.censocustody.android.common.Resource
 import com.censocustody.android.common.*
 import com.censocustody.android.common.BioCryptoUtil.NO_CIPHER_CODE
 import com.censocustody.android.data.*
-import com.censocustody.android.data.models.approval.ApprovalRequest
 import com.censocustody.android.data.models.approvalV2.ApprovalRequestV2
 import com.censocustody.android.presentation.Screen
 import com.censocustody.android.presentation.account.AccountScreen

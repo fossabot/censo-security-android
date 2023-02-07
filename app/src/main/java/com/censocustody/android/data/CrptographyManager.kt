@@ -12,6 +12,7 @@ import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo
 import java.security.*
 import java.security.cert.Certificate
 import java.security.spec.ECGenParameterSpec
+import java.util.UUID
 
 interface CryptographyManager {
 
@@ -38,6 +39,8 @@ interface CryptographyManager {
      * The Cipher created with [getInitializedCipherForDecryption] is used here
      */
     fun decryptData(ciphertext: ByteArray, cipher: Cipher): ByteArray
+
+    fun createDeviceKeyId() : String
 
     fun deleteInvalidatedKey(keyName: String)
     fun deleteKeyIfPresent(keyName: String)
@@ -101,6 +104,9 @@ class CryptographyManagerImpl : CryptographyManager {
     override fun decryptData(ciphertext: ByteArray, cipher: Cipher): ByteArray {
         return cipher.doFinal(ciphertext)
     }
+
+    override fun createDeviceKeyId() =
+        UUID.randomUUID().toString().replace("-", "")
 
     private fun getCipher(): Cipher {
         val transformation = "$ENCRYPTION_ALGORITHM/$ENCRYPTION_BLOCK_MODE/$ENCRYPTION_PADDING"

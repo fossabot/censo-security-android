@@ -9,7 +9,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.censocustody.android.common.*
 import com.censocustody.android.data.CryptographyManager
-import com.censocustody.android.data.SharedPrefsHelper
 import com.censocustody.android.data.UserRepository
 import com.censocustody.android.data.models.CipherRepository
 import com.censocustody.android.data.models.DeviceType
@@ -121,7 +120,6 @@ class DeviceRegistrationViewModel @Inject constructor(
                     )
                 }
             } catch (e: Exception) {
-                censoLog(message = "Exception signing image: $e")
                 state = state.copy(
                     addUserDevice = Resource.Error(exception = e),
                     deviceRegistrationError = DeviceRegistrationError.SIGNING_IMAGE,
@@ -146,7 +144,7 @@ class DeviceRegistrationViewModel @Inject constructor(
 
     fun createKeyForDevice() {
         viewModelScope.launch {
-            val keyId = UUID.randomUUID().toString().replace("-", "")
+            val keyId = cryptographyManager.createDeviceKeyId()
             state = state.copy(keyName = keyId)
             try {
                 val devicePublicKey =
@@ -164,7 +162,6 @@ class DeviceRegistrationViewModel @Inject constructor(
                     deviceRegistrationError = DeviceRegistrationError.SIGNING_IMAGE,
                     capturingDeviceKey = Resource.Uninitialized
                 )
-                censoLog(message = e.toString())
             }
         }
     }

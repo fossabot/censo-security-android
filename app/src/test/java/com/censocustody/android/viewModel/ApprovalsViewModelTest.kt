@@ -9,9 +9,7 @@ import com.censocustody.android.*
 import com.censocustody.android.common.Resource
 import com.censocustody.android.data.*
 import com.censocustody.android.data.models.ApprovalDisposition
-import com.censocustody.android.data.models.approval.ApprovalRequest
 import com.censocustody.android.presentation.approvals.ApprovalsViewModel
-import com.censocustody.android.presentation.durable_nonce.DurableNonceViewModel
 import com.censocustody.android.ResourceState.ERROR
 import com.censocustody.android.ResourceState.SUCCESS
 import com.censocustody.android.common.CensoCountDownTimer
@@ -33,12 +31,6 @@ import javax.crypto.Cipher
 class ApprovalsViewModelTest : BaseViewModelTest() {
 
     //region Mocks and testing objects
-    @Mock
-    lateinit var solanaRepository: SolanaRepository
-
-    @Mock
-    lateinit var durableNonceViewModel: DurableNonceViewModel
-
     @Mock
     lateinit var approvalsRepository: ApprovalsRepository
 
@@ -77,6 +69,7 @@ class ApprovalsViewModelTest : BaseViewModelTest() {
     private val mockDialogMainMessage = "You are about to approve the following request"
 
     private val validEmail = "sharris@blue.rock"
+    //would use the method createDeviceKeyId in the cryptography repository manager
     private val validDeviceId = UUID.randomUUID().toString().replace("-", "")
 
     private val mockMessages = Pair(mockDialogMainMessage, mockDialogSecondaryMessage)
@@ -89,9 +82,6 @@ class ApprovalsViewModelTest : BaseViewModelTest() {
         Dispatchers.setMain(dispatcher)
 
         whenever(approvalsRepository.approveOrDenyDisposition(any(), any(), any())).thenAnswer {
-            Resource.Success(data = null)
-        }
-        whenever(approvalsRepository.approveOrDenyInitiation(any(), any(), any())).thenAnswer {
             Resource.Success(data = null)
         }
 
@@ -116,8 +106,6 @@ class ApprovalsViewModelTest : BaseViewModelTest() {
                 cipherRepository = cipherRepository,
                 timer = countdownTimer
             )
-
-        durableNonceViewModel = DurableNonceViewModel(solanaRepository)
     }
 
     @After

@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.censocustody.android.common.toWalletName
@@ -16,6 +17,6 @@ fun BalanceAccountAddressWhitelistUpdateRowContent(
     accountName: String
 ) {
     ApprovalRowContentHeader(header = header, topSpacing = 16, bottomSpacing = 8)
-    ApprovalSubtitle(text = accountName.toWalletName(), fontSize = 20.sp)
+    ApprovalSubtitle(text = accountName.toWalletName(LocalContext.current), fontSize = 20.sp)
     Spacer(modifier = Modifier.height(20.dp))
 }

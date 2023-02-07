@@ -3,10 +3,8 @@ package com.censocustody.android.data
 import cash.z.ecc.android.bip39.Mnemonics
 import cash.z.ecc.android.bip39.toSeed
 import com.censocustody.android.common.BaseWrapper
-import com.censocustody.android.common.censoLog
 import com.censocustody.android.common.generateFormattedTimestamp
 import com.censocustody.android.data.EncryptionManagerImpl.Companion.SENTINEL_KEY_NAME
-import com.censocustody.android.data.models.Chain
 import com.censocustody.android.data.models.VerifyUser
 import com.censocustody.android.data.models.WalletSigner
 import com.censocustody.android.data.models.mapToPublicKeysList

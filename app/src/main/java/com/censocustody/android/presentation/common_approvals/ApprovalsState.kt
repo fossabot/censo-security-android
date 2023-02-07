@@ -2,10 +2,8 @@ package com.censocustody.android.presentation.common_approvals
 
 import androidx.biometric.BiometricPrompt
 import com.censocustody.android.common.Resource
-import com.censocustody.android.data.models.approval.ApprovalRequest
 import com.censocustody.android.data.models.approvalV2.ApprovalRequestV2
 import com.censocustody.android.presentation.approval_disposition.ApprovalDispositionState
-import com.censocustody.android.presentation.durable_nonce.DurableNonceViewModel
 
 data class ApprovalsState(
 

@@ -21,7 +21,6 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.censocustody.android.common.CrashReportingUtil
-import com.censocustody.android.common.censoLog
 import com.censocustody.android.presentation.approvals.approval_type_row_items.nameToInitials
 import com.censocustody.android.ui.theme.*
 import com.raygun.raygun4android.RaygunClient

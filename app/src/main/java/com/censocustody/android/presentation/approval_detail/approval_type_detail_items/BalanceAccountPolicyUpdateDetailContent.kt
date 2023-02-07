@@ -15,7 +15,6 @@ import com.censocustody.android.presentation.components.FactRow
 import com.censocustody.android.presentation.components.FactsData
 import com.censocustody.android.R
 import com.censocustody.android.data.models.approvalV2.ApprovalRequestDetailsV2
-import com.censocustody.android.presentation.approvals.approval_type_row_items.PolicyUpdateUIData
 import com.censocustody.android.presentation.approvals.approval_type_row_items.retrieveSlotSignerRowData
 import com.censocustody.android.presentation.components.RowData
 
@@ -23,7 +22,7 @@ import com.censocustody.android.presentation.components.RowData
 fun BalanceAccountPolicyUpdateDetailContent(policyUpdateUIData: PolicyUpdateUIData
 ) {
     ApprovalContentHeader(header = policyUpdateUIData.header, topSpacing = 16, bottomSpacing = 8)
-    ApprovalSubtitle(text = policyUpdateUIData.name.toWalletName(), fontSize = 20.sp)
+    ApprovalSubtitle(text = policyUpdateUIData.name.toWalletName(LocalContext.current), fontSize = 20.sp)
 
     Spacer(modifier = Modifier.height(24.dp))
 
@@ -87,3 +86,9 @@ fun generateAccountPolicyUpdateRows(
 
     return approverRowInfoData
 }
+
+data class PolicyUpdateUIData(
+    val header: String, val name: String,
+    val approvalsRequired: Int, val approvalTimeout: Long,
+    val approvers: List<ApprovalRequestDetailsV2.Signer>,
+)
