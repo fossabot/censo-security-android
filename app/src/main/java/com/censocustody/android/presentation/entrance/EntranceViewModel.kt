@@ -170,7 +170,7 @@ class EntranceViewModel @Inject constructor(
         //region Part 1:
         // Check 4 scenarios:
         // 1. User needs to add Sentinel data,
-        // 2. User needs to either migrate data or update backend with a new chain,
+        // 2. User needs to update backend with a new chain
         // 3. User needs to create or recover root seed
         // 4. User has local data save but never uploaded to backend
 
