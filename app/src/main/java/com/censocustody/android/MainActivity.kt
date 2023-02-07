@@ -40,9 +40,7 @@ import com.censocustody.android.presentation.entrance.EntranceScreen
 import com.censocustody.android.presentation.key_creation.KeyCreationScreen
 import com.censocustody.android.presentation.key_management.KeyManagementInitialData
 import com.censocustody.android.presentation.key_management.KeyManagementScreen
-import com.censocustody.android.presentation.migration.VerifyUserInitialData
-import com.censocustody.android.presentation.migration.MigrationScreen
-import com.censocustody.android.presentation.regeneration.RegenerationScreen
+import com.censocustody.android.presentation.keys_upload.KeysUploadScreen
 import com.censocustody.android.presentation.reset_password.ResetPasswordScreen
 import com.censocustody.android.presentation.sign_in.SignInScreen
 import com.censocustody.android.service.MessagingService.Companion.NOTIFICATION_DISPLAYED_KEY
@@ -228,18 +226,9 @@ class MainActivity : FragmentActivity() {
                 KeyManagementScreen(navController = navController, initialData = KeyManagementInitialData.fromJson(keyInitialDataArg))
             }
             composable(
-                route = "${Screen.MigrationRoute.route}/{${Screen.MigrationRoute.MIGRATION_ARG}}",
-                arguments = listOf(navArgument(Screen.MigrationRoute.MIGRATION_ARG) {
-                    type = NavType.StringType
-                })
-            ) { backStackEntry ->
-                val migrationDataInitialArg = backStackEntry.arguments?.get(Screen.MigrationRoute.MIGRATION_ARG) as String
-                MigrationScreen(navController = navController, initialData = VerifyUserInitialData.fromJson(migrationDataInitialArg))
-            }
-            composable(
-                route = Screen.RegenerationRoute.route,
+                route = Screen.KeyUploadRoute.route,
             ) {
-                RegenerationScreen(navController = navController)
+                KeysUploadScreen(navController = navController)
             }
             composable(
                 route = Screen.EnforceUpdateRoute.route

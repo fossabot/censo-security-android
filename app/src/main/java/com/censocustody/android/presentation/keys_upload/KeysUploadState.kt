@@ -1,20 +1,14 @@
-package com.censocustody.android.presentation.migration
+package com.censocustody.android.presentation.keys_upload
 
 import androidx.biometric.BiometricPrompt.CryptoObject
 import com.censocustody.android.common.BioPromptReason
 import com.censocustody.android.common.Resource
 import com.censocustody.android.data.BioPromptData
 import com.censocustody.android.data.models.Signers
-import com.censocustody.android.data.models.VerifyUser
 import com.censocustody.android.data.models.WalletSigner
-import javax.crypto.Cipher
 
-data class MigrationState(
-    //initial data + key management flow data
-    val initialData: VerifyUserInitialData? = null,
-    val verifyUser: VerifyUser? = null,
-
-    val finishedMigration: Boolean = false,
+data class KeysUploadState(
+    val finishedUpload: Boolean = false,
     val walletSigners: List<WalletSigner> = emptyList(),
 
     //API calls

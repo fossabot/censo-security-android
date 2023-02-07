@@ -7,6 +7,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import cash.z.ecc.android.bip39.Mnemonics
+import cash.z.ecc.android.bip39.toSeed
 import com.censocustody.android.common.BioPromptReason
 import com.censocustody.android.common.Resource
 import com.censocustody.android.data.*
@@ -99,7 +100,9 @@ class KeyCreationViewModel @Inject constructor(
                 )
 
                 val walletSigners =
-                    keyRepository.saveV3PublicKeys(mnemonic = Mnemonics.MnemonicCode(phrase = phrase))
+                    keyRepository.saveV3PublicKeys(
+                        rootSeed = Mnemonics.MnemonicCode(phrase = phrase).toSeed()
+                    )
 
                 state = state.copy(walletSigners = walletSigners)
 

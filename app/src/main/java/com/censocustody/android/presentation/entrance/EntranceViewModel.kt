@@ -182,7 +182,7 @@ class EntranceViewModel @Inject constructor(
         //Check 1 SENTINEL: Does this logged in user need to add sentinel data for background biometry
         val needToAddSentinelData = !keyRepository.haveSentinelData()
 
-        //Check 2 MIGRATION/UPDATE: Migration of either v1/v2 data or need to add a new chain to public keys
+        //Check 2 UPLOAD_KEYS: because backed missing one or more. This happens when we have added more keys to app since user initially uploaded keys.
         val needToUpdateKeysSavedOnBackend = userHasUploadedKeysToBackendBefore
                 && userHasV3RootSeedSaved
                 && verifyUser.userNeedsToUpdateKeyRegistration(localPublicKeys)
@@ -191,7 +191,7 @@ class EntranceViewModel @Inject constructor(
         val needToCreateRootSeed = !userHasV3RootSeedSaved && !userHasUploadedKeysToBackendBefore
         val needToRecoverRootSeed = !userHasV3RootSeedSaved && userHasUploadedKeysToBackendBefore
 
-        //Check 4 REGENERATE: User has saved local keys but has not uploaded them to backend (rare, but can happen when a user failed to upload data API call)
+        //Check 4 UPLOAD_KEYS: User has saved local keys but has never uploaded them to backend (rare, but can happen when a user failed to upload data API call)
         val needToUploadPublicKeyData = !userHasUploadedKeysToBackendBefore && userHasV3RootSeedSaved
 
         //DESTINATION: Any when clause will trigger a user navigating to destination
@@ -204,7 +204,7 @@ class EntranceViewModel @Inject constructor(
             }
             needToUpdateKeysSavedOnBackend -> {
                 state = state.copy(
-                    userDestinationResult = Resource.Success(UserDestination.KEY_MIGRATION)
+                    userDestinationResult = Resource.Success(UserDestination.UPLOAD_KEYS)
                 )
                 return
             }
@@ -222,7 +222,7 @@ class EntranceViewModel @Inject constructor(
             }
             needToUploadPublicKeyData -> {
                 state = state.copy(
-                    userDestinationResult = Resource.Success(UserDestination.REGENERATION)
+                    userDestinationResult = Resource.Success(UserDestination.UPLOAD_KEYS)
                 )
                 return
             }
