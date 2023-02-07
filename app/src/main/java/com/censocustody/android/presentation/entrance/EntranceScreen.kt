@@ -21,7 +21,6 @@ import com.censocustody.android.presentation.Screen
 import com.censocustody.android.presentation.components.CensoErrorScreen
 import com.censocustody.android.presentation.key_management.KeyManagementFlow
 import com.censocustody.android.presentation.key_management.KeyManagementInitialData
-import com.censocustody.android.presentation.migration.VerifyUserInitialData
 import com.censocustody.android.ui.theme.BackgroundBlack
 import com.censocustody.android.ui.theme.CensoWhite
 import com.censocustody.android.R
@@ -42,19 +41,7 @@ fun EntranceScreen(
         if (state.userDestinationResult is Resource.Success) {
             val userDestinationRoute = when (state.userDestinationResult.data) {
                 UserDestination.HOME -> Screen.ApprovalListRoute.route
-                UserDestination.KEY_MIGRATION -> {
-                    val migrationInitialData = VerifyUserInitialData(
-                        verifyUserDetails = state.verifyUserResult.data,
-                    )
-
-                    val migrationJson =
-                        VerifyUserInitialData.toJson(
-                            migrationInitialData,
-                            AndroidUriWrapper()
-                        )
-                    "${Screen.MigrationRoute.route}/$migrationJson"
-                }
-                UserDestination.REGENERATION -> Screen.RegenerationRoute.route
+                UserDestination.UPLOAD_KEYS -> Screen.KeyCreationRoute.route
                 UserDestination.KEY_MANAGEMENT_CREATION -> Screen.KeyCreationRoute.route
                 UserDestination.KEY_MANAGEMENT_RECOVERY -> {
 

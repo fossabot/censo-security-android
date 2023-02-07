@@ -1,4 +1,4 @@
-package com.censocustody.android.presentation.migration
+package com.censocustody.android.presentation.keys_upload
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -21,7 +21,7 @@ import com.censocustody.android.ui.theme.UnfocusedGrey
 import com.censocustody.android.R
 
 @Composable
-fun MigrationUI(
+fun KeysUploadUI(
     errorEnabled: Boolean,
     errorMessage: String? = null,
     retry: () -> Unit,
@@ -75,7 +75,7 @@ fun MigrationUI(
                     Spacer(modifier = Modifier.height(36.dp))
                     Text(
                         modifier = Modifier.padding(horizontal = 8.dp),
-                        text = stringResource(R.string.migration_loading_text),
+                        text = stringResource(R.string.uploading_key_loading_text),
                         textAlign = TextAlign.Center,
                         color = CensoWhite,
                         fontSize = 16.sp

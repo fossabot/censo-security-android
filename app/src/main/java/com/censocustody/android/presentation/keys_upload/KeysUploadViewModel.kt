@@ -1,4 +1,4 @@
-package com.censocustody.android.presentation.migration
+package com.censocustody.android.presentation.keys_upload
 
 import androidx.biometric.BiometricPrompt.CryptoObject
 import androidx.compose.runtime.getValue
@@ -9,10 +9,9 @@ import androidx.lifecycle.viewModelScope
 import com.censocustody.android.common.BioCryptoUtil.FAIL_ERROR
 import com.censocustody.android.common.BioPromptReason
 import com.censocustody.android.common.Resource
-import com.censocustody.android.data.BioPromptData
-import com.censocustody.android.data.MigrationRepository
-import com.censocustody.android.data.UserRepository
+import com.censocustody.android.data.*
 import com.censocustody.android.data.models.CipherRepository
+import com.censocustody.android.data.models.mapToPublicKeysList
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import java.security.Signature
@@ -21,50 +20,39 @@ import javax.inject.Inject
 
 /***
  *
+ * User gets here in 2 cases:
+ * Case 1: They failed to upload public keys to backend during key creation
+ * Case 2: We added a new key to codebase, and user has not uploaded it to backend.
+ *
  * Get root seed. Create all data w/ root seed. Send data to backend.
  *
- * Step 1: Get existing root seed: this involves biometry approval
- * Step 2: Save all new data to v3 storage: public keys
- *  - Will require 1 biometry approval
- * Step 3: Send public keys to backend (sign certain ones if needed)
- *  - Depending if backend does not have certain keys, we may need to sign some local keys when sending
- *
- * Kick off by calling retrieveRootSeed()
- *
- * Step 1:
- * retrieveCipherToDecryptV3RootSeed() -> biometryApproved(RETRIEVE_V3_ROOT_SEED) -> retrieveV3RootSeedAndKickOffKeyStorage()
- *
- * Step 2 + 3 same for all migrations:
- * generateAllNecessaryData() -> biometryApproved(SAVE_V3_ROOT_SEED) -> saveRootSeed() -> biometryApproved(SAVE_V3_KEYS) -> savePrivateAndPublicKeys -> makeApiCallToSaveDataWithBackend()
+ * Step 1: Get existing root seed (biometry approval)
+ * Step 2: Save all public keys to storage
+ * Step 3: Sign public keys with device key (biometry approval)
+ * Step 4: Upload signed public keys to backend
  */
 
 @HiltViewModel
-class MigrationViewModel @Inject constructor(
+class KeysUploadViewModel @Inject constructor(
     private val cipherRepository: CipherRepository,
-    private val migrationRepository: MigrationRepository,
-    private val userRepository: UserRepository
+    private val keyRepository: KeyRepository,
+    private val userRepository: UserRepository,
+    private val securePreferences: SecurePreferences
 ) : ViewModel() {
 
-    var state by mutableStateOf(MigrationState())
+    var state by mutableStateOf(KeysUploadState())
         private set
 
     //region VM SETUP
-    fun onStart(initialData: VerifyUserInitialData) {
-        if (state.initialData == null) {
-            state = state.copy(
-                initialData = initialData,
-                verifyUser = initialData.verifyUserDetails,
-                addWalletSigner = Resource.Loading()
-            )
-            viewModelScope.launch {
-                retrieveRootSeed()
-            }
+    fun onStart() {
+        viewModelScope.launch {
+            retrieveRootSeed()
         }
     }
 
     //region Step 1: Get Existing Root Seed
     private suspend fun retrieveRootSeed() {
-        val haveV3RootSeed = migrationRepository.haveV3RootSeed()
+        val haveV3RootSeed = keyRepository.haveV3RootSeed()
 
         if (haveV3RootSeed) {
             retrieveCipherToDecryptV3RootSeed()
@@ -85,7 +73,7 @@ class MigrationViewModel @Inject constructor(
         }
     }
 
-    suspend fun triggerBioPromptForDeviceSignature() {
+    private suspend fun triggerBioPromptForDeviceSignature() {
         val userEmail = userRepository.retrieveUserEmail()
         val deviceKeyId = userRepository.retrieveUserDeviceId(userEmail)
         val signature = cipherRepository.getSignatureForDeviceSigning(deviceKeyId)
@@ -100,14 +88,14 @@ class MigrationViewModel @Inject constructor(
 
     //region Step 2: Save new public keys
     private suspend fun retrieveV3RootSeedAndKickOffKeyStorage(cipher: Cipher) {
-        val rootSeed = migrationRepository.retrieveV3RootSeed(cipher)
+        val rootSeed = keyRepository.retrieveV3RootSeed(cipher)
 
         if (rootSeed == null) {
             state = state.copy(addWalletSigner = Resource.Error())
             return
         }
 
-        migrationRepository.saveV3PublicKeys(rootSeed = rootSeed)
+        keyRepository.saveV3PublicKeys(rootSeed = rootSeed)
         retrieveWalletSignersAndTriggerDeviceSignatureRetrieval(rootSeed = rootSeed)
     }
     //endregion
@@ -115,15 +103,13 @@ class MigrationViewModel @Inject constructor(
 
     //region Step 3: Save all data
     private suspend fun retrieveWalletSignersAndTriggerDeviceSignatureRetrieval(rootSeed: ByteArray) {
-        val verifyUser = state.verifyUser
+        val userEmail = userRepository.retrieveUserEmail()
+        val publicKeysMap = securePreferences.retrieveV3PublicKeys(userEmail)
 
-        if (verifyUser == null) {
-            state = state.copy(addWalletSigner = Resource.Error())
-            return
-        }
-
-        val walletSignersToAdd =
-            migrationRepository.retrieveWalletSignersToUpload(rootSeed)
+        val walletSignersToAdd = keyRepository.signPublicKeys(
+            rootSeed = rootSeed,
+            publicKeys = publicKeysMap.mapToPublicKeysList()
+        )
 
         state = state.copy(walletSigners = walletSignersToAdd)
 
@@ -134,10 +120,10 @@ class MigrationViewModel @Inject constructor(
     private fun uploadSigners(signature: Signature) {
         viewModelScope.launch {
             //make API call to send up any needed signed keys
-            val walletSigner = migrationRepository.migrateSigner(state.walletSigners, signature)
+            val walletSigner = keyRepository.migrateSigner(state.walletSigners, signature)
 
             if (walletSigner is Resource.Success) {
-                state = state.copy(finishedMigration = true)
+                state = state.copy(finishedUpload = true)
             } else if (walletSigner is Resource.Error) {
                 state = state.copy(addWalletSigner = walletSigner)
             }
@@ -184,7 +170,7 @@ class MigrationViewModel @Inject constructor(
     fun resetAddWalletSignerCall() {
         state = state.copy(
             addWalletSigner = Resource.Uninitialized,
-            finishedMigration = false
+            finishedUpload = false
         )
     }
 

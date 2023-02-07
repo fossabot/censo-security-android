@@ -1,47 +1,65 @@
-package com.censocustody.android.presentation.regeneration
+package com.censocustody.android.presentation.keys_upload
 
 import android.widget.Toast
-import androidx.biometric.BiometricPrompt
+import com.censocustody.android.presentation.key_management.PreBiometryDialog
 import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.fragment.app.FragmentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import com.censocustody.android.R
 import com.censocustody.android.common.BioCryptoUtil
+import com.censocustody.android.common.BioCryptoUtil.NO_CIPHER_CODE
 import com.censocustody.android.common.Resource
 import com.censocustody.android.common.popUpToTop
 import com.censocustody.android.presentation.Screen
-import com.censocustody.android.presentation.key_management.PreBiometryDialog
-import com.censocustody.android.presentation.migration.MigrationUI
+import com.censocustody.android.R
+
+@OptIn(
+    androidx.compose.foundation.ExperimentalFoundationApi::class
+)
 
 @Composable
-fun RegenerationScreen(
+fun KeysUploadScreen(
     navController: NavController,
-    viewModel: RegenerationViewModel = hiltViewModel(),
+    viewModel: KeysUploadViewModel = hiltViewModel()
 ) {
     val state = viewModel.state
     val context = LocalContext.current as FragmentActivity
 
+    //region DisposableEffect
     DisposableEffect(key1 = viewModel) {
         viewModel.onStart()
         onDispose { }
     }
+    //endregion
 
+    //region LaunchedEffect
     LaunchedEffect(key1 = state) {
-        if (state.finishedRegeneration) {
+        if (state.finishedUpload) {
             navController.navigate(Screen.ApprovalListRoute.route) {
                 launchSingleTop = true
                 popUpToTop()
             }
+
             viewModel.resetAddWalletSignerCall()
         }
-    }
 
-    MigrationUI(
-        errorEnabled = state.regenerationError is Resource.Success,
-        retry = viewModel::retryRegeneration
+        if (state.kickUserOut) {
+            navController.navigate(Screen.EntranceRoute.route) {
+                launchSingleTop = true
+                popUpToTop()
+            }
+
+            viewModel.resetKickOut()
+        }
+    }
+    //endregion
+
+    //region MAIN UI
+    KeysUploadUI(
+        errorEnabled = state.addWalletSigner is Resource.Error,
+        retry = viewModel::retry
     )
 
     if (state.triggerBioPrompt is Resource.Success) {
@@ -56,9 +74,9 @@ fun RegenerationScreen(
                         } else {
                             BioCryptoUtil.handleBioPromptOnFail(
                                 context = context,
-                                errorCode = BioCryptoUtil.NO_CIPHER_CODE
+                                errorCode = NO_CIPHER_CODE
                             ) {
-                                viewModel.biometryFailed(BioCryptoUtil.NO_CIPHER_CODE)
+                                viewModel.biometryFailed(NO_CIPHER_CODE)
                             }
                         }
                     },
@@ -81,13 +99,14 @@ fun RegenerationScreen(
         }
 
         PreBiometryDialog(
-            mainText = stringResource(id = R.string.initial_migration_message),
+            mainText = stringResource(id = R.string.initial_key_upload_message),
             onAccept = kickOffBioPrompt
         )
     }
 
     if (state.showToast is Resource.Success) {
-        Toast.makeText(context, R.string.need_complete_migration, Toast.LENGTH_LONG).show()
+        Toast.makeText(context, R.string.need_complete_key_upload, Toast.LENGTH_LONG).show()
         viewModel.resetShowToast()
     }
+    //endregion
 }

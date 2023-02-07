@@ -3,7 +3,6 @@ package com.censocustody.android.data
 import cash.z.ecc.android.bip39.Mnemonics
 import com.censocustody.android.common.*
 import com.censocustody.android.common.BaseWrapper
-import com.censocustody.android.common.Ed25519HierarchicalPrivateKey
 import com.censocustody.android.data.EncryptionManagerImpl.Companion.DATA_CHECK
 import org.bouncycastle.crypto.AsymmetricCipherKeyPairGenerator
 import org.bouncycastle.crypto.generators.Ed25519KeyPairGenerator
@@ -38,7 +37,7 @@ data class SignedPayload(
 interface EncryptionManager {
 
     //region sign data
-    fun signKeyForMigration(rootSeed: ByteArray, publicKey: String): ByteArray
+    fun signKeysWithCensoKey(rootSeed: ByteArray, publicKey: String): ByteArray
 
     fun signKeysForUpload(
         email: String,
@@ -103,9 +102,9 @@ class EncryptionManagerImpl @Inject constructor(
 ) : EncryptionManager {
 
     //region interface methods
-    override fun signKeyForMigration(rootSeed: ByteArray, publicKey: String): ByteArray {
-        val solanaHierarchicalKey = Ed25519HierarchicalPrivateKey.fromRootSeed(rootSeed)
-        return solanaHierarchicalKey.signData(BaseWrapper.decode(publicKey))
+    override fun signKeysWithCensoKey(rootSeed: ByteArray, publicKey: String): ByteArray {
+        val keys = createAllKeys(rootSeed)
+        return keys.censoKey.signData(BaseWrapper.decode(publicKey))
     }
 
     override fun signKeysForUpload(

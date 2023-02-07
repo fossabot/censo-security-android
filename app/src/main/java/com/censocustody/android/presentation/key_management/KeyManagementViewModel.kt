@@ -9,12 +9,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.viewModelScope
 import cash.z.ecc.android.bip39.Mnemonics
+import cash.z.ecc.android.bip39.toSeed
 import com.censocustody.android.common.*
 import com.censocustody.android.data.*
 import com.censocustody.android.data.EncryptionManagerImpl.Companion.ROOT_SEED_KEY_NAME
 import com.censocustody.android.data.models.CipherRepository
 import com.censocustody.android.data.models.IndexedPhraseWord
-import com.censocustody.android.data.models.Signers
 import com.censocustody.android.data.models.WalletSigner
 import com.censocustody.android.presentation.key_management.KeyManagementState.Companion.NO_PHRASE_ERROR
 import com.censocustody.android.presentation.key_management.KeyManagementState.Companion.FIRST_WORD_INDEX
@@ -199,7 +199,9 @@ class KeyManagementViewModel @Inject constructor(
                 )
 
                 val walletSigners =
-                    keyRepository.saveV3PublicKeys(mnemonic = Mnemonics.MnemonicCode(phrase = phrase))
+                    keyRepository.saveV3PublicKeys(
+                        rootSeed = Mnemonics.MnemonicCode(phrase = phrase).toSeed()
+                    )
 
                 finalizeKeyCreationOrRecovery(walletSigners = walletSigners)
             } catch (e: Exception) {
