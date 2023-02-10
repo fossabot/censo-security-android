@@ -38,7 +38,7 @@ data class VerifyUser(
         val chainsSavedOnBackend = publicKeys?.mapNotNull { it?.chain } ?: emptyList()
 
         //loop over all chains a user should have, and make sure backend covers them
-        for (chain in Chain.values()) {
+        for (chain in Chain.chainsWithSigningKeys()) {
             if (chain !in chainsSavedOnBackend) {
                 return true
             }
