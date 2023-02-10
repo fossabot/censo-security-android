@@ -149,7 +149,7 @@ fun ApprovalRowContent(
     when (type) {
         //WalletConfigPolicyUpdate
         is ApprovalRequestDetailsV2.VaultPolicyUpdate -> {
-            WalletConfigPolicyUpdateRowContent(header = type.getHeader(LocalContext.current))
+            VaultConfigPolicyUpdateRowContent(header = type.getHeader(LocalContext.current))
         }
         //Wallet Creation
         is ApprovalRequestDetailsV2.BitcoinWalletCreation,
@@ -163,7 +163,7 @@ fun ApprovalRowContent(
         //BalanceAccountNameUpdate
         is ApprovalRequestDetailsV2.EthereumWalletNameUpdate,
         is ApprovalRequestDetailsV2.PolygonWalletNameUpdate -> {
-            BalanceAccountNameUpdateRowContent(
+            WalletNameUpdateRowContent(
                 header = type.getHeader(LocalContext.current),
                 oldName = type.walletNameOldAccountName(),
                 newName = type.walletNameNewAccountName()
@@ -189,7 +189,7 @@ fun ApprovalRowContent(
         //BalanceAccountAddressWhitelistUpdate
         is ApprovalRequestDetailsV2.EthereumWalletWhitelistUpdate,
         is ApprovalRequestDetailsV2.PolygonWalletWhitelistUpdate -> {
-            BalanceAccountAddressWhitelistUpdateRowContent(
+            WalletAddressWhitelistUpdateRowContent(
                 header = type.getHeader(LocalContext.current),
                 accountName = type.whitelistUpdateName()
             )
@@ -198,7 +198,7 @@ fun ApprovalRowContent(
         //BalanceAccountSettingsUpdate
         is ApprovalRequestDetailsV2.EthereumWalletSettingsUpdate,
         is ApprovalRequestDetailsV2.PolygonWalletSettingsUpdate -> {
-            BalanceAccountSettingsUpdateRowContent(
+            WalletSettingsUpdateRowContent(
                 header = type.getHeader(LocalContext.current),
                 name = type.walletSettingsUpdateName()
             )
@@ -220,7 +220,7 @@ fun ApprovalRowContent(
         //BalanceAccountPolicyUpdate
         is ApprovalRequestDetailsV2.EthereumTransferPolicyUpdate,
         is ApprovalRequestDetailsV2.PolygonTransferPolicyUpdate -> {
-            BalanceAccountPolicyUpdateRowContent(
+            WalletPolicyUpdateRowContent(
                 header = type.getHeader(LocalContext.current),
                 name = type.transferPolicyUpdateName()
             )
@@ -263,7 +263,7 @@ fun ApprovalDetailContent(approval: ApprovalRequestV2, type: ApprovalRequestDeta
     when (type) {
         //WalletConfigPolicyUpdate
         is ApprovalRequestDetailsV2.VaultPolicyUpdate -> {
-            WalletConfigPolicyUpdateDetailContent(vaultPolicyUpdate = type)
+            VaultConfigPolicyUpdateDetailContent(vaultPolicyUpdate = type)
         }
         //Wallet Creation
         is ApprovalRequestDetailsV2.BitcoinWalletCreation,
@@ -273,12 +273,13 @@ fun ApprovalDetailContent(approval: ApprovalRequestV2, type: ApprovalRequestDeta
             val approvalPolicy = type.walletApprovalPolicy()
 
             approvalPolicy?.let {
-                BalanceAccountDetailContent(
+                WalletDetailContent(
                     WalletCreationUIData(
                         header = header,
                         name = type.walletCreationAccountName(),
                         approvalsReceived = approval.numberOfApprovalsReceived.toString(),
-                        walletApprovalPolicy = it
+                        walletApprovalPolicy = it,
+                        fee = type.fee()
                     )
                 )
             } ?: run {
@@ -288,7 +289,7 @@ fun ApprovalDetailContent(approval: ApprovalRequestV2, type: ApprovalRequestDeta
         //BalanceAccountNameUpdate
         is ApprovalRequestDetailsV2.EthereumWalletNameUpdate,
         is ApprovalRequestDetailsV2.PolygonWalletNameUpdate -> {
-            BalanceAccountNameUpdateDetailContent(
+            WalletNameUpdateDetailContent(
                 header = type.getHeader(LocalContext.current),
                 oldName = type.walletNameOldAccountName(),
                 newName = type.walletNameNewAccountName()
@@ -321,7 +322,7 @@ fun ApprovalDetailContent(approval: ApprovalRequestV2, type: ApprovalRequestDeta
             val whitelistUpdateUI = type.whiteListUpdateUI(LocalContext.current)
 
             whitelistUpdateUI?.let {
-                BalanceAccountAddressWhitelistUpdateDetailContent(whitelistUpdate = it)
+                WalletAddressWhitelistUpdateDetailContent(whitelistUpdate = it)
             } ?: run {
                 Text(type.getHeader(LocalContext.current), color = CensoWhite)
             }
@@ -330,9 +331,10 @@ fun ApprovalDetailContent(approval: ApprovalRequestV2, type: ApprovalRequestDeta
         //BalanceAccountSettingsUpdate
         is ApprovalRequestDetailsV2.EthereumWalletSettingsUpdate,
         is ApprovalRequestDetailsV2.PolygonWalletSettingsUpdate -> {
-            BalanceAccountSettingsUpdateDetailContent(
+            WalletSettingsUpdateDetailContent(
                 header = type.getHeader(LocalContext.current),
-                name = type.walletSettingsUpdateName()
+                name = type.walletSettingsUpdateName(),
+                fee = type.fee()!!
             )
         }
 
@@ -354,7 +356,7 @@ fun ApprovalDetailContent(approval: ApprovalRequestV2, type: ApprovalRequestDeta
         is ApprovalRequestDetailsV2.PolygonTransferPolicyUpdate -> {
             val policyUpdateUIData = type.policyUpdateUI(LocalContext.current)
             policyUpdateUIData?.let {
-                BalanceAccountPolicyUpdateDetailContent(policyUpdateUIData = it)
+                WalletPolicyUpdateDetailContent(policyUpdateUIData = it)
             } ?: run {
                 Text(
                     text = type.getHeader(LocalContext.current),
