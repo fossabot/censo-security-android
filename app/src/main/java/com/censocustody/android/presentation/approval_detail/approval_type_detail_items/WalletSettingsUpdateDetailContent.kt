@@ -1,4 +1,4 @@
-package com.censocustody.android.presentation.approvals.approval_type_row_items
+package com.censocustody.android.presentation.approval_detail.approval_type_detail_items
 
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
@@ -8,14 +8,21 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.censocustody.android.common.toWalletName
-import com.censocustody.android.presentation.approval_detail.approval_type_detail_items.ApprovalSubtitle
+import com.censocustody.android.data.models.approvalV2.ApprovalRequestDetailsV2
 import com.censocustody.android.presentation.approvals.ApprovalRowContentHeader
+import com.censocustody.android.presentation.components.FactRow
 
 @Composable
-fun BalanceAccountSettingsUpdateRowContent(
-    header: String, name: String
+fun WalletSettingsUpdateDetailContent(
+    header: String, name: String, fee: ApprovalRequestDetailsV2.Amount
 ) {
     ApprovalRowContentHeader(header = header, topSpacing = 16, bottomSpacing = 8)
     ApprovalSubtitle(text = name.toWalletName(LocalContext.current), fontSize = 20.sp)
-    Spacer(modifier = Modifier.height(20.dp))
+    getFeeEstimate(LocalContext.current, fee)?.let { factsData ->
+        Spacer(modifier = Modifier.height(24.dp))
+        FactRow(
+            factsData = factsData
+        )
+    }
+    Spacer(modifier = Modifier.height(28.dp))
 }

@@ -12,11 +12,10 @@ import com.censocustody.android.presentation.approval_detail.approval_type_detai
 import com.censocustody.android.presentation.approvals.ApprovalRowContentHeader
 
 @Composable
-fun BalanceAccountAddressWhitelistUpdateRowContent(
-    header: String,
-    accountName: String
+fun WalletSettingsUpdateRowContent(
+    header: String, name: String
 ) {
     ApprovalRowContentHeader(header = header, topSpacing = 16, bottomSpacing = 8)
-    ApprovalSubtitle(text = accountName.toWalletName(LocalContext.current), fontSize = 20.sp)
+    ApprovalSubtitle(text = name.toWalletName(LocalContext.current), fontSize = 20.sp)
     Spacer(modifier = Modifier.height(20.dp))
 }

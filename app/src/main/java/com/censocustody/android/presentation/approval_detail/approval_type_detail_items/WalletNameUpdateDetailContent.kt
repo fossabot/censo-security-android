@@ -11,7 +11,7 @@ import com.censocustody.android.presentation.approvals.ApprovalContentHeader
 import com.censocustody.android.presentation.approvals.approval_type_row_items.buildFromToDisplayText
 
 @Composable
-fun BalanceAccountNameUpdateDetailContent(header: String, oldName: String, newName: String) {
+fun WalletNameUpdateDetailContent(header: String, oldName: String, newName: String) {
     val fromToText = buildFromToDisplayText(from = oldName, to = newName, LocalContext.current)
 
     ApprovalContentHeader(header = header, topSpacing = 24, bottomSpacing = 36)

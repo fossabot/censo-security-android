@@ -122,10 +122,17 @@ sealed class ApprovalRequestDetailsV2 {
 
     object UnknownApprovalType : ApprovalRequestDetailsV2()
 
+    data class ChainFee(
+        val chain: Chain,
+        val fee: Amount,
+        val feeSymbolInfo: EvmSymbolInfo
+    )
+
     data class VaultPolicyUpdate(
         val approvalPolicy: VaultApprovalPolicy,
         val currentOnChainPolicies: List<OnChainPolicy>,
-        val signingData: List<SigningData>
+        val signingData: List<SigningData>,
+        val chainFees: List<ChainFee>,
     ) : ApprovalRequestDetailsV2()
 
     data class BitcoinWalletCreation(

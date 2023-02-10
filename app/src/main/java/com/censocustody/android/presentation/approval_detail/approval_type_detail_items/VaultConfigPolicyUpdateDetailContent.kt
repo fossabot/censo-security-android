@@ -15,16 +15,17 @@ import com.censocustody.android.presentation.components.FactRow
 import com.censocustody.android.presentation.components.FactsData
 import com.censocustody.android.R
 import com.censocustody.android.data.models.approvalV2.ApprovalRequestDetailsV2
+import com.censocustody.android.presentation.approvals.approval_type_row_items.formattedUsdEquivalentWithSymbol
 import com.censocustody.android.presentation.components.RowData
 
 @Composable
-fun WalletConfigPolicyUpdateDetailContent(
+fun VaultConfigPolicyUpdateDetailContent(
     vaultPolicyUpdate: ApprovalRequestDetailsV2.VaultPolicyUpdate,
 ) {
     val header = vaultPolicyUpdate.getHeader(LocalContext.current)
     ApprovalContentHeader(header = header, topSpacing = 24, bottomSpacing = 36)
 
-    val approverRowInfoData = generateWalletConfigPolicyRows(
+    val approverRowInfoData = generateVaultConfigPolicyRows(
         vaultPolicyUpdate = vaultPolicyUpdate, context = LocalContext.current)
 
     Column(
@@ -41,7 +42,7 @@ fun WalletConfigPolicyUpdateDetailContent(
     Spacer(modifier = Modifier.height(8.dp))
 }
 
-fun generateWalletConfigPolicyRows(
+fun generateVaultConfigPolicyRows(
     vaultPolicyUpdate: ApprovalRequestDetailsV2.VaultPolicyUpdate,
     context: Context
 ): List<FactsData> {
@@ -83,6 +84,19 @@ fun generateWalletConfigPolicyRows(
     )
     approverRowInfoData.add(approverRow)
     //endregion
+    if (vaultPolicyUpdate.chainFees.isNotEmpty()) {
+        approverRowInfoData.add(
+            FactsData(
+                title = context.getString(R.string.fees),
+                facts = vaultPolicyUpdate.chainFees.map {
+                    RowData(
+                        title = "${it.chain.label()} ${context.getString(R.string.fee_estimate)}",
+                        value = it.fee.formattedUsdEquivalentWithSymbol()
+                    )
+                }
+            )
+        )
+    }
 
     return approverRowInfoData
 }

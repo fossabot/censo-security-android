@@ -19,7 +19,7 @@ import com.censocustody.android.presentation.approvals.approval_type_row_items.r
 import com.censocustody.android.presentation.components.RowData
 
 @Composable
-fun BalanceAccountPolicyUpdateDetailContent(policyUpdateUIData: PolicyUpdateUIData
+fun WalletPolicyUpdateDetailContent(policyUpdateUIData: PolicyUpdateUIData
 ) {
     ApprovalContentHeader(header = policyUpdateUIData.header, topSpacing = 16, bottomSpacing = 8)
     ApprovalSubtitle(text = policyUpdateUIData.name.toWalletName(LocalContext.current), fontSize = 20.sp)
@@ -30,7 +30,8 @@ fun BalanceAccountPolicyUpdateDetailContent(policyUpdateUIData: PolicyUpdateUIDa
         approvalsRequired = policyUpdateUIData.approvalsRequired,
         approvalTimeout = policyUpdateUIData.approvalTimeout,
         approvers = policyUpdateUIData.approvers,
-        context = LocalContext.current
+        context = LocalContext.current,
+        fee = policyUpdateUIData.fee
     )
 
     Column(
@@ -48,7 +49,10 @@ fun BalanceAccountPolicyUpdateDetailContent(policyUpdateUIData: PolicyUpdateUIDa
 
 fun generateAccountPolicyUpdateRows(
     context: Context,
-    approvalsRequired: Int, approvalTimeout: Long, approvers: List<ApprovalRequestDetailsV2.Signer>,
+    approvalsRequired: Int,
+    approvalTimeout: Long,
+    approvers: List<ApprovalRequestDetailsV2.Signer>,
+    fee: ApprovalRequestDetailsV2.Amount
 ) : List<FactsData>{
     val approverRowInfoData = mutableListOf<FactsData>()
     //region Approvals Row
@@ -84,6 +88,10 @@ fun generateAccountPolicyUpdateRows(
     approverRowInfoData.add(approverRow)
     //endregion
 
+    getFeeEstimate(context, fee)?.let { factsData ->
+        approverRowInfoData.add(factsData)
+    }
+
     return approverRowInfoData
 }
 
@@ -91,4 +99,5 @@ data class PolicyUpdateUIData(
     val header: String, val name: String,
     val approvalsRequired: Int, val approvalTimeout: Long,
     val approvers: List<ApprovalRequestDetailsV2.Signer>,
+    val fee: ApprovalRequestDetailsV2.Amount
 )

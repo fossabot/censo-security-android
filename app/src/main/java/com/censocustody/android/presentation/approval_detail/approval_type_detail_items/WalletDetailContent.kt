@@ -17,9 +17,9 @@ import com.censocustody.android.presentation.approvals.approval_type_row_items.r
 import com.censocustody.android.presentation.components.RowData
 
 @Composable
-fun BalanceAccountDetailContent(walletCreationUIData: WalletCreationUIData) {
+fun WalletDetailContent(walletCreationUIData: WalletCreationUIData) {
 
-    val approverRowInfoData = generateBalanceAccountDetailRows(
+    val approverRowInfoData = generateWalletDetailRows(
         walletCreationUIData = walletCreationUIData, context = LocalContext.current
     )
 
@@ -41,11 +41,19 @@ fun BalanceAccountDetailContent(walletCreationUIData: WalletCreationUIData) {
             Spacer(modifier = Modifier.height(20.dp))
         }
     }
+    walletCreationUIData.fee?.let { feeAmount ->
+        getFeeEstimate(LocalContext.current, feeAmount)?.let { factsData ->
+            Spacer(modifier = Modifier.height(20.dp))
+            FactRow(
+                factsData = factsData
+            )
+        }
+    }
 
     Spacer(modifier = Modifier.height(28.dp))
 }
 
-fun generateBalanceAccountDetailRows(
+fun generateWalletDetailRows(
     walletCreationUIData: WalletCreationUIData,
     context: Context
 ): List<FactsData> {
@@ -92,5 +100,6 @@ fun generateBalanceAccountDetailRows(
 
 data class WalletCreationUIData(
     val header: String, val name: String, val approvalsReceived: String,
-    val walletApprovalPolicy: ApprovalRequestDetailsV2.WalletApprovalPolicy
+    val walletApprovalPolicy: ApprovalRequestDetailsV2.WalletApprovalPolicy,
+    val fee: ApprovalRequestDetailsV2.Amount?
 )
