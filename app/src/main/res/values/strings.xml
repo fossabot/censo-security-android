@@ -105,6 +105,8 @@
     <string name="nft_name">NFT Name</string>
     <string name="amount">Amount</string>
     <string name="fee">Fee</string>
+    <string name="fees">Fees</string>
+    <string name="fee_estimate">Fee Estimate</string>
     <string name="original_fee">Original Fee</string>
     <string name="new_fee">New Fee</string>
 

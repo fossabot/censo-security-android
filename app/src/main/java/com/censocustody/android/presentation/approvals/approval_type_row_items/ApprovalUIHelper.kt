@@ -397,7 +397,8 @@ fun ApprovalRequestDetailsV2.policyUpdateUI(context: Context) : PolicyUpdateUIDa
                 header = getHeader(context),
                 approvalsRequired = approvalPolicy.approvalsRequired,
                 approvalTimeout = approvalPolicy.approvalTimeout,
-                approvers = approvalPolicy.approvers
+                approvers = approvalPolicy.approvers,
+                fee = fee
             )
         }
         is ApprovalRequestDetailsV2.PolygonTransferPolicyUpdate -> {
@@ -406,7 +407,8 @@ fun ApprovalRequestDetailsV2.policyUpdateUI(context: Context) : PolicyUpdateUIDa
                 header = getHeader(context),
                 approvalsRequired = approvalPolicy.approvalsRequired,
                 approvalTimeout = approvalPolicy.approvalTimeout,
-                approvers = approvalPolicy.approvers
+                approvers = approvalPolicy.approvers,
+                fee = fee
             )
         }
         else -> null
@@ -420,6 +422,19 @@ fun ApprovalRequestDetailsV2.walletApprovalPolicy(): ApprovalRequestDetailsV2.Wa
         else -> null
     }
 
+fun ApprovalRequestDetailsV2.fee(): ApprovalRequestDetailsV2.Amount? =
+    when (this) {
+        is ApprovalRequestDetailsV2.PolygonWalletCreation -> fee
+        is ApprovalRequestDetailsV2.EthereumWalletCreation -> fee
+        is ApprovalRequestDetailsV2.EthereumWalletSettingsUpdate -> fee
+        is ApprovalRequestDetailsV2.PolygonWalletSettingsUpdate -> fee
+        is ApprovalRequestDetailsV2.EthereumWalletWhitelistUpdate -> fee
+        is ApprovalRequestDetailsV2.PolygonWalletWhitelistUpdate -> fee
+        is ApprovalRequestDetailsV2.EthereumTransferPolicyUpdate -> fee
+        is ApprovalRequestDetailsV2.PolygonTransferPolicyUpdate -> fee
+        else -> null
+    }
+
 fun ApprovalRequestDetailsV2.whiteListUpdateUI(context: Context): WhitelistUpdateUI? {
     val header = getHeader(context)
     val accountName = whitelistUpdateName()
@@ -429,14 +444,16 @@ fun ApprovalRequestDetailsV2.whiteListUpdateUI(context: Context): WhitelistUpdat
             WhitelistUpdateUI(
                 header = header,
                 name = accountName,
-                destinations = destinations
+                destinations = destinations,
+                fee = fee
             )
         }
         is ApprovalRequestDetailsV2.PolygonWalletWhitelistUpdate -> {
             WhitelistUpdateUI(
                 header = header,
                 name = accountName,
-                destinations = destinations
+                destinations = destinations,
+                fee = fee
             )
         }
         else -> null
@@ -497,6 +514,9 @@ fun ApprovalRequestDetailsV2.withdrawalRequestUIData(context: Context): Withdraw
 
 fun ApprovalRequestDetailsV2.Amount.formattedAmountWithSymbol(symbol: String): String =
     "${formattedAmount(value)} $symbol"
+
+fun ApprovalRequestDetailsV2.Amount.formattedUsdEquivalentWithSymbol(): String =
+    "${formattedUSDEquivalentV2(usdEquivalent)} USD"
 
 fun formattedAmount(amount: String): String {
     fun formatSeparator(number: Int): String {

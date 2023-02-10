@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.censocustody.android.R
@@ -18,7 +19,7 @@ import com.censocustody.android.presentation.components.FactsData
 import com.censocustody.android.presentation.components.RowData
 
 @Composable
-fun BalanceAccountAddressWhitelistUpdateDetailContent(
+fun WalletAddressWhitelistUpdateDetailContent(
     whitelistUpdate: WhitelistUpdateUI
 ) {
     ApprovalRowContentHeader(header = whitelistUpdate.header, topSpacing = 16, bottomSpacing = 8)
@@ -26,7 +27,7 @@ fun BalanceAccountAddressWhitelistUpdateDetailContent(
     Spacer(modifier = Modifier.height(16.dp))
 
     val destinationsRowInfoData =
-        generateBalanceAccountAddressWhitelistUpdateDetailRows(
+        generateWalletAddressWhitelistUpdateDetailRows(
             whitelistUpdate.destinations,
             LocalContext.current
         )
@@ -34,10 +35,17 @@ fun BalanceAccountAddressWhitelistUpdateDetailContent(
     FactRow(
         factsData = destinationsRowInfoData[0]
     )
+    getFeeEstimate(LocalContext.current, whitelistUpdate.fee)?.let { factsData ->
+        Spacer(modifier = Modifier.height(20.dp))
+        FactRow(
+            factsData = factsData
+        )
+    }
+
     Spacer(modifier = Modifier.height(28.dp))
 }
 
-fun generateBalanceAccountAddressWhitelistUpdateDetailRows(
+fun generateWalletAddressWhitelistUpdateDetailRows(
     destinations: List<ApprovalRequestDetailsV2.DestinationAddress>,
     context: Context
 ): List<FactsData> {
@@ -63,7 +71,22 @@ fun generateBalanceAccountAddressWhitelistUpdateDetailRows(
     return destinationsRowInfoData
 }
 
+fun getFeeEstimate(context: Context, fee: ApprovalRequestDetailsV2.Amount): FactsData? {
+    return fee.usdEquivalent?.let {
+        FactsData(
+            title = context.getString(R.string.fees),
+            listOf(
+                RowData(
+                    title = context.getString(R.string.fee_estimate),
+                    value = fee.formattedUsdEquivalentWithSymbol()
+                )
+            )
+        )
+    }
+}
+
 data class WhitelistUpdateUI(
     val header: String, val name: String,
-    val destinations: List<ApprovalRequestDetailsV2.DestinationAddress>
+    val destinations: List<ApprovalRequestDetailsV2.DestinationAddress>,
+    val fee: ApprovalRequestDetailsV2.Amount
 )

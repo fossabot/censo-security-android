@@ -4,7 +4,7 @@ import androidx.compose.runtime.Composable
 import com.censocustody.android.presentation.approvals.ApprovalRowContentHeader
 
 @Composable
-fun WalletConfigPolicyUpdateRowContent(
+fun VaultConfigPolicyUpdateRowContent(
     header: String
 ) {
     ApprovalRowContentHeader(header = header, topSpacing = 16)

@@ -59,12 +59,19 @@ fun WithdrawalRequestDetailContent(withdrawalRequestUI: WithdrawalRequestUI) {
         )
     } else {
         listOf(
-            RowData(
-                title = stringResource(R.string.fee),
-                value = withdrawalRequestUI.fee.formattedAmountWithSymbol(
-                    withdrawalRequestUI.feeSymbol ?: withdrawalRequestUI.symbol
-                ),
-            )
+            if (withdrawalRequestUI.symbol == "BTC") {
+                RowData(
+                    title = stringResource(R.string.fee),
+                    value = withdrawalRequestUI.fee.formattedAmountWithSymbol(
+                        withdrawalRequestUI.feeSymbol ?: withdrawalRequestUI.symbol
+                    )
+                )
+            } else {
+                RowData(
+                    title = stringResource(R.string.fee_estimate),
+                    value = withdrawalRequestUI.fee.formattedUsdEquivalentWithSymbol()
+                )
+            }
         )
     }
 
