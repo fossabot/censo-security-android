@@ -200,23 +200,7 @@ class EncryptionManagerImpl @Inject constructor(
                     )
                 }
                 is SignableDataResult.Device -> null
-                is SignableDataResult.Polygon -> {
-                    val signedData = keys.ethereumKey.signData(signable.dataToSign)
-                    val signature = BaseWrapper.encodeToBase64(signedData)
-
-                    ApprovalSignature.PolygonSignature(
-                        signature = signature,
-                        offchainSignature = signable.offchain?.let {
-                            val censoSignedData = keys.censoKey.signData(it.dataToSign)
-                            val censoSignature = BaseWrapper.encodeToBase64(censoSignedData)
-
-                            ApprovalSignature.OffChainSignature(
-                                signedData = BaseWrapper.encodeToBase64(it.dataToSend),
-                                signature = censoSignature
-                            )
-                        }
-                    )
-                }
+                is SignableDataResult.Polygon -> null
             }
         }
     }
@@ -437,8 +421,7 @@ sealed class SignableDataResult {
     ): SignableDataResult()
 
     data class Polygon(
-         val dataToSign: ByteArray,
-         val offchain: Offchain? = null,
+         val dataToSign: ByteArray
     ): SignableDataResult() {
         override fun equals(other: Any?): Boolean {
             if (this === other) return true
@@ -447,15 +430,12 @@ sealed class SignableDataResult {
             other as Polygon
 
             if (!dataToSign.contentEquals(other.dataToSign)) return false
-            if (offchain != other.offchain) return false
 
             return true
         }
 
         override fun hashCode(): Int {
-            var result = dataToSign.contentHashCode()
-            result = 31 * result + (offchain?.hashCode() ?: 0)
-            return result
+            return dataToSign.contentHashCode()
         }
     }
 

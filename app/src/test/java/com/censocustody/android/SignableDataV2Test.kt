@@ -90,51 +90,6 @@ class SignableDataV2Test {
     }
 
     @Test
-    fun testPolgygonOps() {
-        val testCases = Gson().fromJson(ClassLoader.getSystemResource("polygon-test-cases.json").readText().trimEnd('\n'), TestCases::class.java).testCases
-
-        testCases.forEach {
-            println(it.request)
-            val details = deserializer.toObjectWithParsedDetails(it.request).details
-            val disposition = ApprovalDispositionRequestV2(
-                "guid",
-                ApprovalDisposition.APPROVE,
-                details,
-                "email"
-            )
-            val ethSignableDataResult = disposition.retrieveSignableData().filterIsInstance<SignableDataResult.Polygon>().first()
-            assertEquals(
-                ethSignableDataResult.dataToSign.toHexString().lowercase(),
-                it.hash
-            )
-            // special cases where there is also offchain
-            when (details) {
-                is ApprovalRequestDetailsV2.PolygonTransferPolicyUpdate -> {
-                    val dataToSend = details.toJson().toByteArray()
-                    assertEquals(
-                        ethSignableDataResult.offchain,
-                        SignableDataResult.Offchain(
-                            dataToSend = dataToSend,
-                            dataToSign = Hash.sha256(dataToSend)
-                        )
-                    )
-                }
-                is ApprovalRequestDetailsV2.VaultPolicyUpdate -> {
-                    val dataToSend = details.toJson().toByteArray()
-                    assertEquals(
-                        disposition.retrieveSignableData().filterIsInstance<SignableDataResult.Offchain>().first(),
-                        SignableDataResult.Offchain(
-                            dataToSend = dataToSend,
-                            dataToSign = Hash.sha256(dataToSend)
-                        )
-                    )
-                }
-                else -> {}
-            }
-        }
-    }
-
-    @Test
     fun testOffchainOps() {
         val testCases = Gson().fromJson(ClassLoader.getSystemResource("offchain-test-cases.json").readText().trimEnd('\n'), TestCases::class.java).testCases
 
