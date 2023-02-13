@@ -7,13 +7,13 @@ enum class Chain {
     bitcoin,
     ethereum,
     polygon,
-    censo;
+    offchain;
 
     fun label(): String {
         return this.name.capitalize(Locale.current)
     }
 
     companion object {
-        fun chainsWithSigningKeys(): List<Chain> = listOf(bitcoin, ethereum, censo)
+        fun chainsWithSigningKeys(): List<Chain> = listOf(bitcoin, ethereum, offchain)
     }
 }

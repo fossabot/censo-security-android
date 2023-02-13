@@ -11,7 +11,7 @@ import org.bouncycastle.crypto.params.Ed25519PrivateKeyParameters
 import com.censocustody.android.data.EncryptionManagerImpl.Companion.SENTINEL_STATIC_DATA
 import com.censocustody.android.data.models.StoredKeyData
 import com.censocustody.android.data.models.StoredKeyData.Companion.BITCOIN_KEY
-import com.censocustody.android.data.models.StoredKeyData.Companion.CENSO_KEY
+import com.censocustody.android.data.models.StoredKeyData.Companion.OFFCHAIN_KEY
 import com.censocustody.android.data.models.StoredKeyData.Companion.ETHEREUM_KEY
 import com.censocustody.android.data.models.Signers
 import com.censocustody.android.data.models.WalletSigner
@@ -244,7 +244,7 @@ class EncryptionManagerImpl @Inject constructor(
         return hashMapOf(
             BITCOIN_KEY to bitcoinPublicKey,
             ETHEREUM_KEY to ethereumPublicKey,
-            CENSO_KEY to censoPublicKey
+            OFFCHAIN_KEY to censoPublicKey
         )
     }
 
@@ -257,7 +257,7 @@ class EncryptionManagerImpl @Inject constructor(
             hashMapOf(
                 BITCOIN_KEY to bitcoinPublicKey,
                 ETHEREUM_KEY to ethereumPublicKey,
-                CENSO_KEY to censoPublicKey
+                OFFCHAIN_KEY to censoPublicKey
             )
 
         return StoredKeyData.mapToJson(
@@ -360,7 +360,7 @@ class EncryptionManagerImpl @Inject constructor(
         return hashMapOf(
             BITCOIN_KEY to publicKeys.bitcoinPublicKey,
             ETHEREUM_KEY to publicKeys.ethereumPublicKey,
-            CENSO_KEY to publicKeys.censoPublicKey
+            OFFCHAIN_KEY to publicKeys.censoPublicKey
         )
     }
 
