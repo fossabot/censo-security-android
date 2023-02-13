@@ -1,10 +1,12 @@
 package com.censocustody.android.data.models.approvalV2
 
 import com.google.gson.*
+import java.lang.reflect.Modifier
 import java.lang.reflect.Type
 
 class ApprovalRequestV2Deserializer : JsonDeserializer<ApprovalRequestV2> {
     private fun getGson(): Gson = GsonBuilder()
+        .excludeFieldsWithModifiers(Modifier.STATIC)
         .registerTypeAdapterFactory(ApprovalRequestDetailsV2.approvalRequestDetailsV2AdapterFactory)
         .registerTypeAdapterFactory(ApprovalRequestDetailsV2.OnChainPolicy.onChainPolicyAdapterFactory)
         .registerTypeAdapterFactory(ApprovalRequestDetailsV2.EvmTokenInfo.evmTokenInfoAdapterFactory)
