@@ -3,6 +3,7 @@ package com.censocustody.android.data
 import cash.z.ecc.android.bip39.Mnemonics
 import cash.z.ecc.android.bip39.toSeed
 import com.censocustody.android.common.BaseWrapper
+import com.censocustody.android.common.KeyStorage
 import com.censocustody.android.common.Resource
 import com.censocustody.android.common.generateFormattedTimestamp
 import com.censocustody.android.data.EncryptionManagerImpl.Companion.SENTINEL_KEY_NAME
@@ -61,6 +62,7 @@ interface KeyRepository {
 class KeyRepositoryImpl(
     private val encryptionManager: EncryptionManager,
     private val securePreferences: SecurePreferences,
+    private val keyStorage: KeyStorage,
     private val userRepository: UserRepository,
     private val brooklynApiService: BrooklynApiService
 ) : KeyRepository, BaseRepository() {
@@ -135,7 +137,7 @@ class KeyRepositoryImpl(
 
         val rootSeed = mnemonic.toSeed()
 
-        encryptionManager.saveV3RootSeed(
+        keyStorage.saveRootSeed(
             rootSeed = rootSeed,
             cipher = cipher,
             email = userEmail
@@ -182,10 +184,7 @@ class KeyRepositoryImpl(
     override suspend fun retrieveV3RootSeed(cipher: Cipher): ByteArray? {
         return try {
             val userEmail = userRepository.retrieveUserEmail()
-
-            BaseWrapper.decode(
-                encryptionManager.retrieveRootSeed(email = userEmail, cipher = cipher)
-            )
+            keyStorage.retrieveRootSeed(email = userEmail, cipher = cipher)
         } catch (e: Exception) {
             null
         }
