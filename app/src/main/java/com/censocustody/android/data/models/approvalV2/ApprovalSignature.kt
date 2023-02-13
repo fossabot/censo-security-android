@@ -13,8 +13,6 @@ sealed class ApprovalSignature {
                 BitcoinSignatures::class.java, "bitcoin"
             ).registerSubtype(
                 EthereumSignature::class.java, "ethereum"
-            ).registerSubtype(
-                PolygonSignature::class.java, "polygon"
             ).registerSubtype(OffChainSignature::class.java, "offchain")
     }
 
