@@ -22,13 +22,6 @@ import java.security.Signature
 import javax.crypto.Cipher
 import javax.inject.Inject
 
-fun generateEphemeralPrivateKey(): Ed25519PrivateKeyParameters {
-    val keyPairGenerator: AsymmetricCipherKeyPairGenerator = Ed25519KeyPairGenerator()
-    keyPairGenerator.init(Ed25519KeyGenerationParameters(SecureRandom()))
-    val keyPair = keyPairGenerator.generateKeyPair()
-    return keyPair.private as Ed25519PrivateKeyParameters
-}
-
 data class SignedPayload(
     val signature: String,
     val payload: String
@@ -68,17 +61,7 @@ interface EncryptionManager {
     fun generatePhrase(): String
     //endregion
 
-    //region save/retrieve key data
-    fun saveV3RootSeed(
-        rootSeed: ByteArray,
-        email: String,
-        cipher: Cipher
-    )
-
-    fun retrieveRootSeed(email: String, cipher: Cipher): String
-
     fun saveV3PublicKeys(rootSeed: ByteArray, email: String): HashMap<String, String>
-    //endregion
 
     //region Work with device keystore
 
@@ -97,8 +80,8 @@ interface EncryptionManager {
 }
 
 class EncryptionManagerImpl @Inject constructor(
-    private val securePreferences: SecurePreferences,
-    private val cryptographyManager: CryptographyManager
+    private val cryptographyManager: CryptographyManager,
+    private val keyStorage: KeyStorage
 ) : EncryptionManager {
 
     //region interface methods
@@ -154,7 +137,7 @@ class EncryptionManagerImpl @Inject constructor(
         cipher: Cipher,
         dataToSign: List<SignableDataResult>
     ): List<ApprovalSignature> {
-        val rootSeed = BaseWrapper.decode(retrieveRootSeed(email = email, cipher = cipher))
+        val rootSeed = keyStorage.retrieveRootSeed(email = email, cipher = cipher)
         val keys = createAllKeys(rootSeed)
 
         return dataToSign.mapNotNull { signable ->
@@ -236,9 +219,8 @@ class EncryptionManagerImpl @Inject constructor(
             censoPublicKey = censoPublicKey
         )
 
-        securePreferences.saveV3PublicKeys(
-            email = email,
-            keyJson = keyDataAsJson
+        keyStorage.savePublicKeys(
+            email = email, keyJson = keyDataAsJson
         )
 
         return hashMapOf(
@@ -293,33 +275,10 @@ class EncryptionManagerImpl @Inject constructor(
         )
     }
 
-    override fun saveV3RootSeed(rootSeed: ByteArray, email: String, cipher: Cipher) {
-        val encryptedRootSeed =
-            cryptographyManager.encryptData(data = BaseWrapper.encode(rootSeed), cipher = cipher)
-
-        securePreferences.saveV3RootSeed(email = email, encryptedData = encryptedRootSeed)
-    }
-
     override fun retrieveSentinelData(email: String, cipher: Cipher): String {
-        val savedSentinelData = securePreferences.retrieveSentinelData(email)
-
-        val decryptedSentinelData = cryptographyManager.decryptData(
-            ciphertext = savedSentinelData.ciphertext,
-            cipher = cipher
-        )
+        val decryptedSentinelData = keyStorage.retrieveSentinelData(email = email, cipher = cipher)
 
         return String(decryptedSentinelData, charset = Charset.forName("UTF-8"))
-    }
-
-    override fun retrieveRootSeed(email: String, cipher: Cipher): String {
-        val savedRootSeedData = securePreferences.retrieveV3RootSeed(email)
-
-        val decryptedRootSeed = cryptographyManager.decryptData(
-            ciphertext = savedRootSeedData.ciphertext,
-            cipher = cipher
-        )
-
-        return String(decryptedRootSeed, charset = Charset.forName("UTF-8"))
     }
 
     override fun getInitializedCipherForEncryption(keyName: String): Cipher {
@@ -332,13 +291,10 @@ class EncryptionManagerImpl @Inject constructor(
         )
     }
 
-    override fun haveSentinelDataStored(email: String) = securePreferences.hasSentinelData(email)
+    override fun haveSentinelDataStored(email: String) = keyStorage.hasSentinelData(email)
 
     override fun saveSentinelData(email: String, cipher: Cipher) {
-        val encryptedSentinelData =
-            cryptographyManager.encryptData(data = SENTINEL_STATIC_DATA, cipher = cipher)
-
-        securePreferences.saveSentinelData(email = email, encryptedData = encryptedSentinelData)
+        keyStorage.saveSentinelData(email = email, cipher = cipher)
     }
 
     override fun deleteBiometryKeyFromKeystore(keyName: String) {
