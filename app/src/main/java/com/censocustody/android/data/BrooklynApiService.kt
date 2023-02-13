@@ -9,7 +9,7 @@ import com.censocustody.android.data.models.*
 import com.censocustody.android.data.models.approvalV2.ApprovalDispositionRequestV2
 import com.censocustody.android.data.models.approvalV2.ApprovalRequestV2
 import com.censocustody.android.data.models.approvalV2.ApprovalRequestV2Deserializer
-import com.censocustody.android.data.models.approvalV2.ApprovalSignature.Companion.approvalSignatureAdapterFactory
+import com.censocustody.android.data.models.approvalV2.TypeFactorySettings
 import kotlinx.coroutines.runBlocking
 import okhttp3.*
 import okhttp3.logging.HttpLoggingInterceptor
@@ -38,7 +38,7 @@ interface BrooklynApiService {
 
             val customGson = GsonBuilder()
                 .registerTypeAdapter(ApprovalRequestV2::class.java, ApprovalRequestV2Deserializer())
-                .registerTypeAdapterFactory(approvalSignatureAdapterFactory)
+                .registerTypeAdapterFactory(TypeFactorySettings.approvalSignatureAdapterFactory)
                 .create()
 
             return Retrofit.Builder()
