@@ -3,6 +3,8 @@ package com.censocustody.android.di
 import android.content.Context
 import com.censocustody.android.common.CensoCountDownTimer
 import com.censocustody.android.common.CensoCountDownTimerImpl
+import com.censocustody.android.common.KeyStorage
+import com.censocustody.android.common.KeyStorageImpl
 import com.censocustody.android.data.*
 import com.censocustody.android.data.UserRepository
 import com.censocustody.android.data.UserRepositoryImpl
@@ -87,13 +89,15 @@ object AppModule {
         encryptionManager: EncryptionManager,
         securePreferences: SecurePreferences,
         userRepository: UserRepository,
-        brooklynApiService: BrooklynApiService
+        brooklynApiService: BrooklynApiService,
+        keyStorage: KeyStorage
     ): KeyRepository {
         return KeyRepositoryImpl(
             encryptionManager = encryptionManager,
             securePreferences = securePreferences,
             userRepository = userRepository,
-            brooklynApiService = brooklynApiService
+            brooklynApiService = brooklynApiService,
+            keyStorage = keyStorage
         )
     }
 
@@ -114,16 +118,31 @@ object AppModule {
     @Provides
     @Singleton
     fun provideEncryptionManager(
-        securePreferences: SecurePreferences,
-        cryptographyManager: CryptographyManager
+        cryptographyManager: CryptographyManager,
+        keyStorage: KeyStorage
     ): EncryptionManager {
-        return EncryptionManagerImpl(securePreferences, cryptographyManager)
+        return EncryptionManagerImpl(
+            cryptographyManager = cryptographyManager,
+            keyStorage = keyStorage
+        )
     }
 
     @Provides
     @Singleton
     fun provideSecurePrefs(@ApplicationContext applicationContext: Context): SecurePreferences {
         return SecurePreferencesImpl(applicationContext)
+    }
+
+    @Provides
+    @Singleton
+    fun provideKeyStorage(
+        cryptographyManager: CryptographyManager,
+        securePreferences: SecurePreferences
+    ): KeyStorage {
+        return KeyStorageImpl(
+            securePreferences = securePreferences,
+            cryptographyManager = cryptographyManager
+        )
     }
 
     @Provides
