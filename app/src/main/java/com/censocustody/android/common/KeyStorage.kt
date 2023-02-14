@@ -42,11 +42,12 @@ class KeyStorageImpl @Inject constructor(
     override fun retrieveRootSeed(email: String, cipher: Cipher): ByteArray {
         val savedRootSeedData = securePreferences.retrieveV3RootSeed(email)
 
-        //todo: Byte array format
-        return cryptographyManager.decryptData(
+        val decryptedRootSeed = cryptographyManager.decryptData(
             ciphertext = savedRootSeedData.ciphertext,
             cipher = cipher
         )
+
+        return BaseWrapper.decode(String(decryptedRootSeed, Charsets.UTF_8))
     }
 
     override fun saveSentinelData(email: String, cipher: Cipher) {
