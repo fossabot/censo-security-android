@@ -16,6 +16,8 @@ import com.censocustody.android.data.models.StoredKeyData.Companion.ETHEREUM_KEY
 import com.censocustody.android.data.models.Signers
 import com.censocustody.android.data.models.WalletSigner
 import com.censocustody.android.data.models.approvalV2.ApprovalSignature
+import com.google.android.gms.common.util.VisibleForTesting
+import java.lang.reflect.Modifier.PRIVATE
 import java.nio.charset.Charset
 import java.security.SecureRandom
 import java.security.Signature
@@ -247,7 +249,8 @@ class EncryptionManagerImpl @Inject constructor(
         )
     }
 
-    private fun createAllKeys(rootSeed: ByteArray): AllKeys {
+    @VisibleForTesting()
+    fun createAllKeys(rootSeed: ByteArray): AllKeys {
         val bitcoinHierarchicalKey = Secp256k1HierarchicalKey.fromRootSeed(
             rootSeed, Secp256k1HierarchicalKey.bitcoinDerivationPath
         )
