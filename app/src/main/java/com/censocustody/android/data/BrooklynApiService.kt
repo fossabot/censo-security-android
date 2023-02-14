@@ -1,9 +1,14 @@
 package com.censocustody.android.data
 
+import android.os.Build
 import com.google.gson.*
 import com.censocustody.android.BuildConfig
+import com.censocustody.android.common.censoLog
 import com.censocustody.android.data.BaseRepository.Companion.UNAUTHORIZED
+import com.censocustody.android.data.BrooklynApiService.Companion.APP_VERSION_HEADER
 import com.censocustody.android.data.BrooklynApiService.Companion.AUTH
+import com.censocustody.android.data.BrooklynApiService.Companion.DEVICE_TYPE_HEADER
+import com.censocustody.android.data.BrooklynApiService.Companion.OS_VERSION_HEADER
 import com.censocustody.android.data.BrooklynApiService.Companion.X_CENSO_ID
 import com.censocustody.android.data.models.*
 import com.censocustody.android.data.models.approvalV2.ApprovalDispositionRequestV2
@@ -26,8 +31,14 @@ interface BrooklynApiService {
         const val AUTH = "Authorization"
         const val AUTH_REQUIRED = "$AUTH: "
         const val X_CENSO_ID = "X-Censo-Device-Identifier"
+
+        const val DEVICE_TYPE_HEADER = "X-Censo-Device-Type"
+        const val APP_VERSION_HEADER = "X-Censo-App-Version"
+        const val OS_VERSION_HEADER = "X-Censo-OS-Version"
+
         fun create(authProvider: AuthProvider): BrooklynApiService {
             val client = OkHttpClient.Builder()
+                .addInterceptor(AnalyticsInterceptor())
                 .addInterceptor(AuthInterceptor(authProvider))
 
             if (BuildConfig.DEBUG) {
@@ -94,6 +105,28 @@ interface BrooklynApiService {
         @Path("request_id") requestId: String,
         @Body registerApprovalDispositionBody: ApprovalDispositionRequestV2.RegisterApprovalDispositionV2Body
     ): RetrofitResponse<ApprovalDispositionRequestV2.RegisterApprovalDispositionV2Body>
+}
+
+class AnalyticsInterceptor : Interceptor {
+    override fun intercept(chain: Interceptor.Chain) =
+        chain.proceed(
+            chain.request().newBuilder()
+                .apply {
+                    addHeader(
+                        DEVICE_TYPE_HEADER,
+                        "Android ${Build.MANUFACTURER} - ${Build.DEVICE} (${Build.MODEL})"
+                    )
+                    addHeader(
+                        APP_VERSION_HEADER,
+                        "${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})"
+                    )
+                    addHeader(
+                        OS_VERSION_HEADER,
+                        "${Build.VERSION.RELEASE} (${Build.VERSION.SDK_INT})"
+                    )
+                }
+                .build()
+        )
 }
 
 class AuthInterceptor(private val authProvider: AuthProvider) : Interceptor {
