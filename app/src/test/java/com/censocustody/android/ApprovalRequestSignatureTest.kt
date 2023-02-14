@@ -3,12 +3,14 @@ package com.censocustody.android
 import cash.z.ecc.android.bip39.Mnemonics
 import cash.z.ecc.android.bip39.toSeed
 import com.censocustody.android.common.BaseWrapper
+import com.censocustody.android.common.ChildPathNumber
 import com.censocustody.android.common.KeyStorage
 import com.censocustody.android.data.*
 import com.censocustody.android.data.models.ApprovalDisposition
 import com.censocustody.android.data.models.approvalV2.ApprovalDispositionRequestV2
 import com.censocustody.android.data.models.approvalV2.ApprovalRequestV2
 import com.censocustody.android.data.models.approvalV2.ApprovalRequestV2Deserializer
+import com.censocustody.android.data.models.approvalV2.ApprovalSignature
 import com.google.gson.Gson
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.whenever
@@ -29,9 +31,11 @@ class ApprovalRequestSignatureTest {
     @Mock
     lateinit var cipher: Cipher
 
-    lateinit var encryptionManager : EncryptionManager
+    lateinit var encryptionManager: EncryptionManagerImpl
 
     lateinit var rootSeed: ByteArray
+
+    lateinit var allKeys: AllKeys
 
     @Before
     fun setUp() {
@@ -46,6 +50,8 @@ class ApprovalRequestSignatureTest {
 
         rootSeed = Mnemonics.MnemonicCode(phrase).toSeed()
 
+        allKeys = encryptionManager.createAllKeys(rootSeed)
+
         whenever(keyStorage.retrieveRootSeed(any(), any())).then {
             BaseWrapper.decode(BaseWrapper.encode(rootSeed))
         }
@@ -59,7 +65,6 @@ class ApprovalRequestSignatureTest {
             val testData = parseTestData(location)
 
             for (testItem in testData) {
-                println(testItem)
 
                 val dispositionRequest =
                     ApprovalDispositionRequestV2(
@@ -77,7 +82,56 @@ class ApprovalRequestSignatureTest {
                     dataToSign = signableData
                 )
 
-                println(signatures)
+                val combinedData = signableData.zip(signatures)
+
+                for (data in combinedData) {
+                    when (val approvalSignature = data.second) {
+                        is ApprovalSignature.PolygonSignature -> {
+                            val polygonSignableData = data.first as SignableDataResult.Polygon
+                            val polygonVerified = allKeys.ethereumKey.verifySignature(
+                                signature = BaseWrapper.decodeFromBase64(approvalSignature.signature),
+                                data = polygonSignableData.dataToSign
+                            )
+                            assert(polygonVerified)
+                        }
+                        is ApprovalSignature.EthereumSignature -> {
+                            val ethereumSignableData = data.first as SignableDataResult.Ethereum
+                            val ethereumVerified = allKeys.ethereumKey.verifySignature(
+                                signature = BaseWrapper.decodeFromBase64(approvalSignature.signature),
+                                data = ethereumSignableData.dataToSign
+                            )
+                            assert(ethereumVerified)
+                        }
+                        is ApprovalSignature.OffChainSignature -> {
+                            val offChainSignableData = data.first as SignableDataResult.Offchain
+                            val polygonVerified = allKeys.censoKey.verifySignature(
+                                signature = BaseWrapper.decodeFromBase64(approvalSignature.signature),
+                                data = offChainSignableData.dataToSign
+                            )
+                            assert(polygonVerified)
+                        }
+                        is ApprovalSignature.BitcoinSignatures -> {
+                            val bitcoinSignableData = data.first as SignableDataResult.Bitcoin
+
+                            val combinedBitcoinData =
+                                bitcoinSignableData.dataToSign.zip(approvalSignature.signatures)
+
+                            for (bitcoinData in combinedBitcoinData) {
+                                val bitcoinVerified = allKeys.bitcoinKey
+                                    .derive(
+                                        path = ChildPathNumber(
+                                            index = bitcoinSignableData.childKeyIndex,
+                                            hardened = false
+                                        )
+                                    ).verifySignature(
+                                        signature = BaseWrapper.decodeFromBase64(bitcoinData.second),
+                                        data = bitcoinData.first
+                                    )
+                                assert(bitcoinVerified)
+                            }
+                        }
+                    }
+                }
             }
         }
     }
