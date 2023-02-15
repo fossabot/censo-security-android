@@ -30,7 +30,7 @@ import com.raygun.raygun4android.RaygunClient
 fun ApprovalRowTitleText(title: String) {
     Text(
         text = title,
-        color = CensoWhite,
+        color = TextBlack,
         fontSize = 22.sp,
         fontWeight = FontWeight.Bold
     )
@@ -40,7 +40,7 @@ fun ApprovalRowTitleText(title: String) {
 fun ApprovalSubtitle(text: String, fontSize: TextUnit = 16.sp) {
     Text(
         text = text,
-        color = SubtitleGrey,
+        color = DarkGreyText,
         textAlign = TextAlign.Center,
         fontSize = fontSize,
         letterSpacing = 0.23.sp
@@ -87,14 +87,14 @@ fun UserInfoRow(
                 modifier = Modifier
                     .padding(horizontal = 8.dp, vertical = 2.dp)
                     .clip(CircleShape)
-                    .background(color = CensoButtonBlue)
+                    .background(color = CensoWhite)
                     .size(56.dp)
             ) {
                 Text(
                     modifier = Modifier.align(Alignment.Center),
                     text = name.nameToInitials(),
                     fontSize = 18.sp,
-                    color = CensoWhite
+                    color = ButtonRed
                 )
             }
         }
@@ -104,7 +104,7 @@ fun UserInfoRow(
         ) {
             Text(
                 text = name,
-                color = CensoWhite,
+                color = TextBlack,
                 fontSize = 18.sp,
                 textAlign = TextAlign.Start,
                 letterSpacing = 0.25.sp,
@@ -113,7 +113,7 @@ fun UserInfoRow(
             Text(
                 text = email,
                 textAlign = TextAlign.Start,
-                color = CensoWhite,
+                color = TextBlack,
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold,
                 letterSpacing = 0.25.sp
@@ -139,7 +139,7 @@ fun ApprovalInfoRow(
         Text(
             modifier = Modifier.padding(start = 16.dp),
             text = title,
-            color = CensoWhite,
+            color = TextBlack,
             fontSize = 16.sp,
             letterSpacing = 0.25.sp,
         )
@@ -150,7 +150,7 @@ fun ApprovalInfoRow(
                 .wrapContentHeight(),
             text = value,
             textAlign = TextAlign.Center,
-            color = CensoWhite,
+            color = TextBlack,
             fontSize = 16.sp,
             fontWeight = FontWeight.Bold,
             letterSpacing = 0.25.sp
@@ -177,12 +177,12 @@ fun String.toBitMap(): Bitmap? {
 fun AccountRow(
     title: String,
     value: String,
-    titleColor: Color = CensoWhite,
+    titleColor: Color,
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(AccountRowBackground)
+            .background(BackgroundLight)
             .padding(vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
@@ -201,7 +201,7 @@ fun AccountRow(
                 .wrapContentHeight(),
             text = value,
             textAlign = TextAlign.Center,
-            color = AccountTextGrey,
+            color = TextBlack,
             fontSize = 16.sp,
             letterSpacing = 0.25.sp
         )

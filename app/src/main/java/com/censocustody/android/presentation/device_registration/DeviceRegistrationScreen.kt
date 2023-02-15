@@ -2,32 +2,32 @@ package com.censocustody.android.presentation.device_registration
 
 import android.content.Context
 import androidx.biometric.BiometricPrompt
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.zIndex
 import androidx.fragment.app.FragmentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.censocustody.android.R
 import com.censocustody.android.common.*
 import com.censocustody.android.presentation.Screen
-import com.censocustody.android.presentation.key_management.GradientBackgroundUI
+import com.censocustody.android.presentation.key_management.BackgroundUI
 import com.censocustody.android.presentation.key_management.SmallAuthFlowButton
-import com.censocustody.android.ui.theme.CensoWhite
-import com.censocustody.android.ui.theme.UnfocusedGrey
-import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import kotlinx.coroutines.ExperimentalCoroutinesApi
+import com.censocustody.android.ui.theme.*
 
 @Composable
 fun DeviceRegistrationScreen(
@@ -135,7 +135,7 @@ fun DeviceRegistrationScreen(
 
     //endregion
 
-    GradientBackgroundUI()
+    BackgroundUI()
     Box(
         modifier = Modifier.fillMaxSize()
     ) {
@@ -152,7 +152,7 @@ fun DeviceRegistrationScreen(
             ) {
                 Text(
                     text = message,
-                    color = CensoWhite,
+                    color = TextBlack,
                     fontSize = 18.sp,
                     textAlign = TextAlign.Center,
                     letterSpacing = 0.23.sp,
@@ -180,11 +180,13 @@ fun DeviceRegistrationScreen(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .padding(horizontal = 8.dp)
+                    .shadow(
+                        elevation = 5.dp,
+                    )
                     .align(Alignment.Center)
-                    .padding(horizontal = 16.dp)
-                    .border(width = 1.5.dp, color = UnfocusedGrey.copy(alpha = 0.50f))
-                    .background(color = Color.Black)
-                    .zIndex(2.5f),
+                    .clip(RoundedCornerShape(4.dp))
+                    .background(color = BackgroundGrey),
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
@@ -194,7 +196,7 @@ fun DeviceRegistrationScreen(
                         modifier = Modifier.padding(horizontal = 16.dp),
                         text = stringResource(R.string.take_photo_description),
                         textAlign = TextAlign.Center,
-                        color = CensoWhite,
+                        color = TextBlack,
                         fontSize = 18.sp
                     )
                     Spacer(modifier = Modifier.height(36.dp))
@@ -211,13 +213,13 @@ fun DeviceRegistrationScreen(
                         modifier = Modifier.padding(horizontal = 8.dp),
                         text = stringResource(R.string.adding_photo_main_message),
                         textAlign = TextAlign.Center,
-                        color = CensoWhite,
+                        color = TextBlack,
                         fontSize = 16.sp
                     )
                     Spacer(modifier = Modifier.height(36.dp))
                     CircularProgressIndicator(
                         modifier = Modifier.size(20.dp),
-                        color = CensoWhite,
+                        color = ButtonRed,
                         strokeWidth = 2.5.dp,
                     )
                     Spacer(modifier = Modifier.height(36.dp))

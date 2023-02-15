@@ -52,7 +52,7 @@ fun ResetPasswordScreen(
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(color = BackgroundBlack)
+                    .background(color = BackgroundWhite)
                     .padding(horizontal = 24.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Top
@@ -61,7 +61,7 @@ fun ResetPasswordScreen(
                     Spacer(modifier = Modifier.height(24.dp))
                     Text(
                         text = stringResource(R.string.reset_pswd_email_sent),
-                        color = CensoWhite,
+                        color = TextBlack,
                         fontSize = 20.sp
                     )
                 }
@@ -71,6 +71,7 @@ fun ResetPasswordScreen(
                     onValueChange = resetPasswordViewModel::updateEmail,
                     keyboardType = KeyboardType.Email,
                     errorEnabled = resetPasswordState.emailErrorEnabled,
+                    placeholder = stringResource(id = R.string.email_hint),
                     errorText =
                     if (resetPasswordState.resetPasswordResult is Resource.Error) {
                         stringResource(R.string.reset_email_error)

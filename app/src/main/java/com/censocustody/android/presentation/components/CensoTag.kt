@@ -19,10 +19,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
-import com.censocustody.android.presentation.approvals.approval_type_row_items.getFullDestinationName
-import com.censocustody.android.ui.theme.SectionBlack
 import com.censocustody.android.ui.theme.CensoWhite
 import com.censocustody.android.R
+import com.censocustody.android.ui.theme.BackgroundDark
+import com.censocustody.android.ui.theme.BackgroundGrey
+import com.censocustody.android.ui.theme.TextBlack
 
 @Composable
 fun CensoTag(
@@ -38,14 +39,14 @@ fun CensoTag(
         if(annotatedText != null) {
             Text(
                 text = annotatedText,
-                color = CensoWhite,
+                color = TextBlack,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.padding(paddingValues = paddingValues)
             )
         } else {
             Text(
                 text = text,
-                color = CensoWhite,
+                color = TextBlack,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.padding(paddingValues = paddingValues)
             )
@@ -69,11 +70,11 @@ fun CensoTagRow(
         val iconRef = createRef()
 
         val censoTagPaddingValues =
-            PaddingValues(top = 12.dp, bottom = 12.dp, start = 12.dp, end = 12.dp)
+            PaddingValues(top = 10.dp, bottom = 10.dp, start = 12.dp, end = 12.dp)
         CensoTag(
             modifier = Modifier
-                .clip(RoundedCornerShape(8.dp))
-                .background(color = SectionBlack)
+                .clip(RoundedCornerShape(4.dp))
+                .background(color = BackgroundDark)
                 .constrainAs(censoTag1Ref) {
                     start.linkTo(parent.start)
                     end.linkTo(iconRef.start, 2.dp)
@@ -103,8 +104,8 @@ fun CensoTagRow(
 
         CensoTag(
             modifier = Modifier
-                .clip(RoundedCornerShape(8.dp))
-                .background(color = SectionBlack)
+                .clip(RoundedCornerShape(4.dp))
+                .background(color = BackgroundDark)
                 .constrainAs(censoTag2Ref) {
                     start.linkTo(iconRef.end, 2.dp)
                     end.linkTo(parent.end)
@@ -118,112 +119,13 @@ fun CensoTagRow(
     }
 }
 
-@Composable
-fun CensoTagLabeledRow(
-    text1: String,
-    text2: String,
-    subText2: String = "",
-    label1: String,
-    label2: String,
-    arrowForward: Boolean
-) {
-    ConstraintLayout(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(start = 16.dp, end = 16.dp)
-    ) {
-        val censoTag1Ref = createRef()
-        val censoTag2Ref = createRef()
-
-        val label1Ref = createRef()
-        val label2Ref = createRef()
-
-        val iconRef = createRef()
-
-        val censoTagPaddingValues =
-            PaddingValues(top = 12.dp, bottom = 12.dp, start = 12.dp, end = 12.dp)
-        CensoTag(
-            modifier = Modifier
-                .clip(RoundedCornerShape(8.dp))
-                .background(color = SectionBlack)
-                .constrainAs(censoTag1Ref) {
-                    start.linkTo(parent.start)
-                    end.linkTo(iconRef.start, 2.dp)
-                    top.linkTo(label1Ref.bottom)
-                    bottom.linkTo(parent.bottom)
-                    width = Dimension.fillToConstraints
-                },
-            text = text1,
-            paddingValues = censoTagPaddingValues
-        )
-
-        Text(
-            modifier = Modifier
-                .constrainAs(label1Ref) {
-                    start.linkTo(parent.start)
-                    end.linkTo(iconRef.start, 2.dp)
-                    top.linkTo(parent.top)
-                    width = Dimension.fillToConstraints
-                }.padding(bottom = 20.dp),
-            text = label1,
-            textAlign = TextAlign.Center,
-            color = CensoWhite
-        )
-
-        Text(
-            modifier = Modifier
-                .constrainAs(label2Ref) {
-                    start.linkTo(iconRef.end)
-                    end.linkTo(parent.end, 2.dp)
-                    top.linkTo(parent.top)
-                    width = Dimension.fillToConstraints
-                }.padding(bottom = 20.dp),
-            text = label2,
-            textAlign = TextAlign.Center,
-            color = CensoWhite
-        )
-
-        val iconArrow = if (arrowForward) Icons.Filled.ArrowForward else Icons.Filled.ArrowBack
-        val iconContentDescription =
-            if (arrowForward) stringResource(R.string.arrow_forward_content_des)
-            else stringResource(R.string.arrow_back_content_des)
-        Icon(
-            modifier = Modifier
-                .size(20.dp)
-                .constrainAs(iconRef) {
-                    centerHorizontallyTo(parent)
-                    centerVerticallyTo(censoTag1Ref)
-                },
-            imageVector = iconArrow,
-            tint = CensoWhite,
-            contentDescription = iconContentDescription
-        )
-
-        CensoTag(
-            modifier = Modifier
-                .clip(RoundedCornerShape(8.dp))
-                .background(color = SectionBlack)
-                .constrainAs(censoTag2Ref) {
-                    start.linkTo(iconRef.end, 2.dp)
-                    end.linkTo(parent.end)
-                    top.linkTo(label2Ref.bottom)
-                    bottom.linkTo(parent.bottom)
-                    width = Dimension.fillToConstraints
-                },
-            text = "",
-            annotatedText = getFullDestinationName(initialValue = text2, subText = subText2),
-            paddingValues = censoTagPaddingValues
-        )
-    }
-}
-
 @Preview(showBackground = true)
 @Composable
 fun CensoTagPreview() {
     CensoTag(
         modifier = Modifier
             .clip(RoundedCornerShape(8.dp))
-            .background(color = SectionBlack),
+            .background(color = BackgroundGrey),
         text = "Tag Example",
         paddingValues = PaddingValues(8.dp)
     )

@@ -9,19 +9,19 @@ import androidx.compose.ui.graphics.Color
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 
 private val DarkColorPalette = darkColors(
-    primary = CensoButtonBlue,
-    primaryVariant = CensoButtonBlue,
-    secondary = Color.Black,
-    background = Color.Black,
-    surface = Color.Black
+    primary = ButtonRed,
+    primaryVariant = ButtonRed,
+    secondary = BackgroundWhite,
+    background = BackgroundWhite,
+    surface = BackgroundWhite
 )
 
 private val LightColorPalette = lightColors(
-    primary = CensoButtonBlue,
-    primaryVariant = CensoButtonBlue,
-    secondary = Color.Black,
-    background = Color.Black,
-    surface = Color.Black
+    primary = ButtonRed,
+    primaryVariant = ButtonRed,
+    secondary = BackgroundWhite,
+    background = BackgroundWhite,
+    surface = BackgroundWhite
 
 
     /* Other default colors to override
@@ -43,7 +43,7 @@ fun CensoMobileTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Compo
     }
 
     val systemUiController = rememberSystemUiController()
-    systemUiController.setSystemBarsColor(color = Color.Black)
+    systemUiController.setSystemBarsColor(color = BackgroundGrey)
 
     MaterialTheme(
         colors = colors,

@@ -18,6 +18,7 @@ import androidx.core.content.ContextCompat.startActivity
 import com.censocustody.android.common.CensoButton
 import com.censocustody.android.ui.theme.CensoWhite
 import com.censocustody.android.R
+import com.censocustody.android.ui.theme.TextBlack
 
 @Composable
 fun BiometryDisabledScreen(message: String, biometryAvailable: Boolean) {
@@ -38,7 +39,7 @@ fun BiometryDisabledScreen(message: String, biometryAvailable: Boolean) {
             lineHeight = 28.sp,
             fontWeight = FontWeight.W500,
             textAlign = TextAlign.Center,
-            color = CensoWhite
+            color = TextBlack
         )
         if (biometryAvailable) {
             val intent = Intent(Settings.ACTION_SECURITY_SETTINGS)

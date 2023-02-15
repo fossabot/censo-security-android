@@ -21,9 +21,10 @@ import com.censocustody.android.presentation.Screen
 import com.censocustody.android.presentation.components.CensoErrorScreen
 import com.censocustody.android.presentation.key_management.KeyManagementFlow
 import com.censocustody.android.presentation.key_management.KeyManagementInitialData
-import com.censocustody.android.ui.theme.BackgroundBlack
+import com.censocustody.android.ui.theme.BackgroundWhite
 import com.censocustody.android.ui.theme.CensoWhite
 import com.censocustody.android.R
+import com.censocustody.android.ui.theme.ButtonRed
 
 @Composable
 fun EntranceScreen(
@@ -81,7 +82,7 @@ fun EntranceScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(color = BackgroundBlack)
+            .background(color = BackgroundWhite)
     ) {
         Image(
             modifier = Modifier
@@ -95,7 +96,7 @@ fun EntranceScreen(
             modifier = Modifier
                 .align(Alignment.Center)
                 .size(60.dp),
-            color = CensoWhite
+            color = ButtonRed
         )
     }
 

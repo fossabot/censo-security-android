@@ -96,7 +96,7 @@ fun KeyCreationFlowUI(
             }
         },
         content = {
-            GradientBackgroundUI()
+            BackgroundUI()
             Box {
                 when (phraseVerificationFlowStep) {
                     KeyCreationFlowStep.COPY_PHRASE_STEP ->

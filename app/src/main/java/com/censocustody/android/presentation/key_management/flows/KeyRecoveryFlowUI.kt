@@ -73,7 +73,7 @@ fun KeyRecoveryFlowUI(
             }
         },
         content = {
-            GradientBackgroundUI()
+            BackgroundUI()
             Box {
                 when (keyRecoveryFlowStep) {
                     KeyRecoveryFlowStep.VERIFY_WORDS_STEP -> VerifyPhraseWordUI(
@@ -87,7 +87,7 @@ fun KeyRecoveryFlowUI(
                         pastedPhrase = pastedPhrase,
                         errorEnabled = false,
                         onPhraseEntryAction = onPhraseEntryAction,
-                        header = stringResource(R.string.confirm_recovery_phrase_header),
+                        header = stringResource(R.string.confirm_recovery_phrase),
                         title = "",
                         message = stringResource(R.string.enter_key_message)
                     )
@@ -96,7 +96,7 @@ fun KeyRecoveryFlowUI(
                         pastedPhrase = pastedPhrase,
                         errorEnabled = true,
                         onPhraseEntryAction = onPhraseEntryAction,
-                        header = stringResource(R.string.confirm_recovery_phrase_header),
+                        header = stringResource(R.string.confirm_recovery_phrase),
                         title = stringResource(R.string.key_not_valid_title),
                         message = stringResource(R.string.key_not_valid_message)
                     )
