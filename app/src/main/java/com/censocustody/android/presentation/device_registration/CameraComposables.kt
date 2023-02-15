@@ -43,8 +43,10 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.foundation.Canvas
 import com.censocustody.android.R
 import com.censocustody.android.common.*
-import com.censocustody.android.ui.theme.CensoButtonBlue
+import com.censocustody.android.ui.theme.BackgroundWhite
+import com.censocustody.android.ui.theme.ButtonRed
 import com.censocustody.android.ui.theme.CensoWhite
+import com.censocustody.android.ui.theme.TextBlack
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.raygun.raygun4android.RaygunClient
 import kotlinx.coroutines.launch
@@ -170,7 +172,7 @@ fun CameraCapture(
             ) {
                 Text(
                     stringResource(R.string.missing_camera_permission),
-                    color = CensoWhite,
+                    color = TextBlack,
                     fontSize = 18.sp,
                     textAlign = TextAlign.Center
                 )
@@ -231,7 +233,7 @@ fun CameraCapture(
                         .align(Alignment.BottomCenter),
                     shape = CircleShape,
                     border = BorderStroke(width = 1.5.dp, color = CensoWhite),
-                    colors = ButtonDefaults.outlinedButtonColors(backgroundColor = CensoButtonBlue)
+                    colors = ButtonDefaults.outlinedButtonColors(backgroundColor = ButtonRed)
                 ) {
                     Icon(
                         modifier = Modifier.size(32.dp),
@@ -304,7 +306,7 @@ fun CameraPreview(
             Modifier
                 .height(cutoffSize)
                 .fillMaxWidth()
-                .background(color = Color.Black)
+                .background(color = BackgroundWhite)
         )
 
         Spacer(
@@ -312,14 +314,13 @@ fun CameraPreview(
             Modifier
                 .height(cutoffSize)
                 .fillMaxWidth()
-                .background(color = Color.Black)
+                .background(color = BackgroundWhite)
         )
     }
 
     Canvas(
         modifier = Modifier
             .fillMaxSize()
-            .graphicsLayer { alpha = .99f }
     ) {
         // Destination
         drawRect(Color.Black.copy(alpha = 0.5f))

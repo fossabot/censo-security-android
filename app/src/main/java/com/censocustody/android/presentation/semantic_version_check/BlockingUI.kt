@@ -21,6 +21,8 @@ import com.censocustody.android.ui.theme.CensoWhite
 import javax.crypto.Cipher
 import com.censocustody.android.common.CensoButton
 import com.censocustody.android.R
+import com.censocustody.android.ui.theme.BackgroundGrey
+import com.censocustody.android.ui.theme.TextBlack
 
 @Composable
 fun BlockingUI(
@@ -61,7 +63,7 @@ fun ForegroundBlockingUI(
         modifier =
         Modifier
             .fillMaxSize()
-            .background(color = Color.Black)
+            .background(color = BackgroundGrey)
             .clickable(
                 indication = null,
                 interactionSource = interactionSource
@@ -79,7 +81,7 @@ fun ForegroundBlockingUI(
                     stringResource(R.string.biometry_unavailable)
                 else stringResource(R.string.foreground_access_app),
                 fontSize = 24.sp,
-                color = CensoWhite,
+                color = TextBlack,
                 textAlign = TextAlign.Center
             )
             Spacer(modifier = Modifier.height(32.dp))
@@ -105,7 +107,7 @@ fun DisabledBiometryUI(biometryStatus: BiometricUtil.Companion.BiometricsStatus?
         modifier =
         Modifier
             .fillMaxSize()
-            .background(color = Color.Black)
+            .background(color = BackgroundGrey)
             .clickable(
                 indication = null,
                 interactionSource = interactionSource

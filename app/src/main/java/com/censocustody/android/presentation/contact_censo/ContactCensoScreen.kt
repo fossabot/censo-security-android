@@ -15,6 +15,7 @@ import androidx.compose.ui.unit.sp
 import com.censocustody.android.ui.theme.CensoTextBlue
 import com.censocustody.android.ui.theme.CensoWhite
 import com.censocustody.android.R
+import com.censocustody.android.ui.theme.TextBlack
 
 @Composable
 fun ContactCensoScreen() {
@@ -29,7 +30,7 @@ fun ContactCensoScreen() {
             text = stringResource(R.string.contact_censo),
             textAlign = TextAlign.Center,
             fontSize = 24.sp,
-            color = CensoWhite
+            color = TextBlack
         )
         Spacer(modifier = Modifier.height(24.dp))
         Text(

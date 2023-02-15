@@ -19,6 +19,7 @@ import androidx.core.content.ContextCompat
 import com.censocustody.android.common.CensoButton
 import com.censocustody.android.ui.theme.CensoWhite
 import com.censocustody.android.R
+import com.censocustody.android.ui.theme.TextBlack
 
 @Composable
 fun EnforceUpdateScreen() {
@@ -33,7 +34,7 @@ fun EnforceUpdateScreen() {
     ) {
         Text(
             text = stringResource(id = R.string.minimum_app_version),
-            color = CensoWhite,
+            color = TextBlack,
             fontSize = 22.sp,
             fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Center

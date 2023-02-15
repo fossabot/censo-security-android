@@ -14,13 +14,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.zIndex
 import com.censocustody.android.R
 import com.censocustody.android.ui.theme.*
 
@@ -35,33 +35,33 @@ fun CensoConfirmDispositionAlertDialog(
         Modifier
             .fillMaxSize()
             .background(color = Color.Transparent)
-            .padding(4.dp)
-            .clickable(indication = null, interactionSource = upperInteractionSource) {  },
-        verticalArrangement = Arrangement.Center,
+            .padding(top = 72.dp, start = 4.dp, end = 4.dp, bottom = 4.dp)
+            .clickable(indication = null, interactionSource = upperInteractionSource) { },
+        verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         val innerInteractionSource = remember { MutableInteractionSource() }
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 8.dp)
-                .background(color = Color.Transparent)
+                .padding(horizontal = 4.dp)
+                .background(color = BackgroundWhite)
                 .border(
-                    width = 1.5.dp,
-                    shape = RoundedCornerShape(16.dp),
-                    color = UnfocusedGrey.copy(alpha = 0.50f),
+                    width = 1.0.dp,
+                    shape = RoundedCornerShape(4.dp),
+                    color = BorderGrey,
                 )
-                .zIndex(5.0f)
-                .clickable(indication = null, interactionSource = innerInteractionSource) {  },
-            verticalArrangement = Arrangement.Center,
+                .shadow(elevation = 5.dp)
+                .clickable(indication = null, interactionSource = innerInteractionSource) { },
+            verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .background(
-                        color = DialogHeaderBlack,
-                        shape = RoundedCornerShape(16.dp, 16.dp, 0.dp, 0.dp),
+                        color = DialogHeaderBackground,
+                        shape = RoundedCornerShape(4.dp, 4.dp, 0.dp, 0.dp),
                     )
                     .padding(vertical = 16.dp),
             ) {
@@ -71,7 +71,7 @@ fun CensoConfirmDispositionAlertDialog(
                         .align(Alignment.Center),
                     text = stringResource(R.string.are_you_sure),
                     fontWeight = FontWeight.SemiBold,
-                    color = CensoWhite,
+                    color = TextBlack,
                     fontSize = 24.sp
                 )
                 IconButton(
@@ -83,7 +83,7 @@ fun CensoConfirmDispositionAlertDialog(
                     Icon(
                         Icons.Filled.Close,
                         contentDescription = stringResource(R.string.close_dialog),
-                        tint = CensoWhite
+                        tint = TextBlack
                     )
                 }
             }
@@ -91,21 +91,21 @@ fun CensoConfirmDispositionAlertDialog(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier.background(
                     color = DialogMainBackground,
-                    shape = RoundedCornerShape(0.dp, 0.dp, 16.dp, 16.dp),
+                    shape = RoundedCornerShape(0.dp, 0.dp, 4.dp, 4.dp),
                 )
             ) {
                 Spacer(modifier = Modifier.height(24.dp))
                 Text(
                     modifier = Modifier.padding(horizontal = 32.dp),
                     text = dialogMessages.first,
-                    color = CensoWhite,
+                    color = TextBlack,
                     fontSize = 20.sp
                 )
                 Spacer(modifier = Modifier.height(12.dp))
                 Text(
                     modifier = Modifier.padding(horizontal = 32.dp),
                     text = dialogMessages.second,
-                    color = CensoWhite,
+                    color = TextBlack,
                     fontSize = 20.sp
                 )
                 Spacer(modifier = Modifier.height(40.dp))
@@ -118,7 +118,8 @@ fun CensoConfirmDispositionAlertDialog(
                     Button(
                         modifier = Modifier
                             .clip(RoundedCornerShape(12.dp))
-                            .weight(1.35f).fillMaxWidth(),
+                            .weight(1.35f)
+                            .fillMaxWidth(),
                         colors = ButtonDefaults.buttonColors(
                             backgroundColor = CancelButtonGrey
                         ),
@@ -136,7 +137,11 @@ fun CensoConfirmDispositionAlertDialog(
                     Button(
                         modifier = Modifier
                             .clip(RoundedCornerShape(12.dp))
-                            .weight(1.35f).fillMaxWidth(),
+                            .weight(1.35f)
+                            .fillMaxWidth(),
+                        colors = ButtonDefaults.buttonColors(
+                            backgroundColor = ApprovalGreen
+                        ),
                         onClick = onConfirm,
                     ) {
                         Text(

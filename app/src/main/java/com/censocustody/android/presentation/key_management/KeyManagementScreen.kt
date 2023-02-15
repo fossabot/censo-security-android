@@ -22,7 +22,9 @@ import com.censocustody.android.presentation.Screen
 import com.censocustody.android.presentation.key_management.KeyManagementState.Companion.INVALID_PHRASE_ERROR
 import com.censocustody.android.presentation.key_management.KeyManagementState.Companion.NO_PHRASE_ERROR
 import com.censocustody.android.presentation.key_management.flows.*
+import com.censocustody.android.ui.theme.BackgroundGrey
 import com.censocustody.android.ui.theme.CensoWhite
+import com.censocustody.android.ui.theme.TextBlack
 import com.censocustody.android.ui.theme.UnfocusedGrey
 
 @Composable
@@ -161,18 +163,18 @@ fun KeyManagementScreen(
 
     if (state.keyRecoveryManualEntryError is Resource.Error) {
         AlertDialog(
-            backgroundColor = UnfocusedGrey,
+            backgroundColor = BackgroundGrey,
             title = {
                 Text(
                     text = stringResource(R.string.key_recovery_failed_title),
-                    color = CensoWhite,
+                    color = TextBlack,
                     fontSize = 20.sp
                 )
             },
             text = {
                 Text(
                     text = stringResource(id = R.string.key_recovery_failed_message),
-                    color = CensoWhite,
+                    color = TextBlack,
                     fontSize = 16.sp
                 )
             },
@@ -180,7 +182,7 @@ fun KeyManagementScreen(
                 TextButton(
                     onClick = { viewModel.resetRecoverManualEntryError() }
                 ) {
-                    Text(text = stringResource(R.string.ok))
+                    Text(text = stringResource(R.string.ok), color = TextBlack)
                 }
             },
             onDismissRequest = {

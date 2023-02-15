@@ -71,6 +71,7 @@ fun AccountScreen(
                 onAppBarIconClick = { navController.navigateUp() },
                 showNavIcon = false,
                 navigationIcon = Icons.Filled.ArrowBack,
+                backgroundColor = BackgroundGrey,
                 navigationIconContentDes = "",
                 actions = {
                     Box(modifier = Modifier
@@ -81,7 +82,7 @@ fun AccountScreen(
                         Text(
                             modifier = Modifier.align(alignment = Alignment.Center),
                             text = stringResource(id = R.string.done),
-                            color = CensoWhite,
+                            color = TextBlack,
                             textAlign = TextAlign.Center
                         )
                     }
@@ -92,7 +93,7 @@ fun AccountScreen(
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(color = BackgroundBlack)
+                    .background(color = BackgroundGrey)
                     .padding(it),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.SpaceBetween
@@ -105,20 +106,22 @@ fun AccountScreen(
                         .verticalScroll(rememberScrollState()),
                     ) {
                     Spacer(modifier = Modifier.height(44.dp))
+                    Divider(modifier = Modifier.height(1.0.dp), color = BorderGrey)
                     AccountRow(
-                        titleColor = CensoWhite,
+                        titleColor = TextBlack,
                         title = stringResource(R.string.email),
                         value = accountState.email
                     )
-                    Divider(modifier = Modifier.height(0.5.dp), color = DividerGrey)
+                    Divider(modifier = Modifier.height(1.0.dp), color = BorderGrey)
                     AccountRow(
-                        titleColor = CensoWhite,
+                        titleColor = TextBlack,
                         title = stringResource(R.string.name),
                         value = accountState.name
                     )
+                    Divider(modifier = Modifier.height(1.0.dp), color = BorderGrey)
                     Spacer(modifier = Modifier.height(64.dp))
                     Text(
-                        color = CensoWhite,
+                        color = TextBlack,
                         textAlign = TextAlign.Center,
                         text = stringResource(R.string.security_notice),
                         letterSpacing = 0.25.sp,
@@ -128,7 +131,7 @@ fun AccountScreen(
                     Spacer(modifier = Modifier.height(16.dp))
                     Text(
                         modifier = Modifier.padding(horizontal = 16.dp),
-                        color = CensoWhite,
+                        color = TextBlack,
                         lineHeight = 20.sp,
                         textAlign = TextAlign.Center,
                         letterSpacing = 0.25.sp,
@@ -154,7 +157,7 @@ fun AccountScreen(
                     ) {
                     Text(
                         text = appVersionText,
-                        color = CensoWhite,
+                        color = TextBlack,
                         letterSpacing = 0.25.sp,
                         fontSize = 14.sp
                     )
@@ -165,13 +168,13 @@ fun AccountScreen(
                             .fillMaxWidth(),
                         onClick = accountViewModel::logout,
                         shape = RoundedCornerShape(8.dp),
-                        colors = ButtonDefaults.buttonColors(backgroundColor = AccountButtonRed),
+                        colors = ButtonDefaults.buttonColors(backgroundColor = ButtonRed),
                         enabled = true
                     ) {
                         Text(
                             modifier = Modifier.padding(all = 4.dp),
                             text = stringResource(id = R.string.sign_out),
-                            color = SignOutRed,
+                            color = CensoWhite,
                             fontSize = 16.sp
                         )
                     }

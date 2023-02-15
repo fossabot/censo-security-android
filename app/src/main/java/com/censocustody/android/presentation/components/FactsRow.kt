@@ -19,14 +19,16 @@ fun FactRow(factsData: FactsData, modifier: Modifier = Modifier, hideFinalDivide
         if(factsData.title.isNotEmpty()) {
             Text(
                 text = factsData.title.uppercase(),
-                color = StatusGreyText,
+                color = DarkGreyText,
                 modifier = Modifier.padding(start = 16.dp, top = 6.dp, bottom = 6.dp),
                 letterSpacing = 0.25.sp
             )
         }
 
         for ((index, fact) in factsData.facts.withIndex()) {
-            val rowBackgroundColor = if (index % 2 == 0) BackgroundLight else BackgroundDark
+            Divider(modifier = Modifier.height(1.0.dp), color = BorderGrey)
+
+            val rowBackgroundColor = if (index % 2 == 0) BackgroundDark else BackgroundLight
             if (fact.userRow) {
                 UserInfoRow(
                     backgroundColor = rowBackgroundColor,
@@ -42,7 +44,7 @@ fun FactRow(factsData: FactsData, modifier: Modifier = Modifier, hideFinalDivide
                 )
             }
             if (!hideFinalDivider) {
-                Divider(modifier = Modifier.height(0.5.dp), color = DividerGrey)
+                Divider(modifier = Modifier.height(1.0.dp), color = BorderGrey)
             }
         }
     }

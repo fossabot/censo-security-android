@@ -7,7 +7,7 @@
     <string name="default_notification_channel_name" translatable="true">Approvals</string>
 
     <string name="sign_in_button">Sign In</string>
-    <string name="email_hint">Email</string>
+    <string name="email_hint">Email Address</string>
     <string name="password_hint">Password</string>
     <string name="hide_password_content_description">hide password</string>
     <string name="show_password_content_description">show password</string>
@@ -123,10 +123,7 @@
 
     <string name="accept_vault_invitation_approval_header">Accept Invitation</string>
     <string name="vault_name">Vault Name</string>
-    <string name="clear">Clear</string>
-
     <string name="password_reset_approval_header">Password Reset</string>
-
     <string name="start_over">Start over</string>
     <string name="copy_key">Copy Recovery Phrase</string>
     <string name="phrase_generated">It\'s time to back up your secret recovery phrase</string>
@@ -144,7 +141,6 @@
     <string name="confirm_recovery_phrase">Confirm recovery phrase</string>
     <string name="all_set">You\'re all set.</string>
     <string name="continue_to_censo">Continue to Censo</string>
-    <string name="confirm_recovery_phrase_header">Confirm recovery phrase</string>
     <string name="paste_phrase">Paste Phrase</string>
     <string name="how_did_you_back_it_up">How did you back it up?</string>
     <string name="time_to_restore_key">It\'s time to restore your private key using your secret recovery phrase</string>

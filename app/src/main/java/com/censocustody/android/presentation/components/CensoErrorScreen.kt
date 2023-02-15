@@ -20,11 +20,8 @@ import androidx.core.content.ContextCompat.startActivity
 import com.censocustody.android.common.CensoButton
 import com.censocustody.android.common.Resource
 import com.censocustody.android.common.CensoError
-import com.censocustody.android.presentation.key_management.GradientBackgroundUI
-import com.censocustody.android.ui.theme.BackgroundBlack
-import com.censocustody.android.ui.theme.CensoTextBlue
-import com.censocustody.android.ui.theme.CensoWhite
 import com.censocustody.android.R
+import com.censocustody.android.ui.theme.*
 
 @Composable
 fun CensoErrorScreen(
@@ -42,11 +39,10 @@ fun CensoErrorScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(BackgroundBlack)
+            .background(BackgroundGrey)
             .clickable { onDismiss() },
         contentAlignment = Alignment.Center
     ) {
-        GradientBackgroundUI()
 
         Column(
             modifier = Modifier.fillMaxSize(),
@@ -56,8 +52,8 @@ fun CensoErrorScreen(
             Text(
                 modifier = Modifier.padding(horizontal = 16.dp),
                 text = displayMessage,
-                color = CensoWhite,
-                fontSize = 16.sp,
+                color = TextBlack,
+                fontSize = 20.sp,
                 textAlign = TextAlign.Center,
                 lineHeight = 24.sp
             )

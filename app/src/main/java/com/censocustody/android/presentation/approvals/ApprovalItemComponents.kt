@@ -3,9 +3,14 @@ package com.censocustody.android.presentation.approvals
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
+import androidx.compose.material.ripple.LocalRippleTheme
+import androidx.compose.material.ripple.RippleAlpha
+import androidx.compose.material.ripple.RippleTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -29,7 +34,7 @@ fun ApprovalItemHeader(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(SectionBlack)
+            .background(Color.White)
             .padding(vertical = 8.dp, horizontal = 8.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
@@ -44,7 +49,7 @@ fun ApprovalItemHeader(
                 modifier = Modifier.weight(2.5f),
                 text = timerText,
                 textAlign = TextAlign.End,
-                color = GreyText
+                color = DarkGreyText
             )
         }
     }
@@ -82,44 +87,59 @@ fun ApprovalButtonRow(
     onMoreInfoClicked: () -> Unit,
     positiveButtonText: String
 ) {
-    Column(modifier = Modifier.background(DetailInfoLightBackground)) {
-        Divider(color = DividerGrey, modifier = Modifier.height(0.5.dp))
+    Column(modifier = Modifier.background(Color.White)) {
+        Divider(color = BorderGrey, modifier = Modifier.height(1.0.dp))
         Row(
             modifier = Modifier.height(IntrinsicSize.Min),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            TextButton(
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(top = 4.dp, bottom = 4.dp),
-                onClick = onApproveClicked) {
-                Text(
-                    positiveButtonText,
-                    color = ApprovalGreen,
-                    fontSize = 17.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    modifier = Modifier.padding(top = 4.dp, bottom = 4.dp),
-                )
+            CompositionLocalProvider(LocalRippleTheme provides CustomRippleTheme) {
+                TextButton(
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(top = 4.dp, bottom = 4.dp),
+                    onClick = onApproveClicked
+                ) {
+                    Text(
+                        positiveButtonText,
+                        color = ApprovalGreen,
+                        fontSize = 17.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        modifier = Modifier.padding(top = 4.dp, bottom = 4.dp),
+                    )
+                }
             }
             Divider(
-                color = DividerGrey,
+                color = BorderGrey,
                 modifier = Modifier
                     .fillMaxHeight()
-                    .width(0.5.dp)
+                    .width(1.0.dp)
             )
-            TextButton(
-                modifier = Modifier
-                    .weight(1f),
-                onClick = onMoreInfoClicked) {
-                Text(
-                    stringResource(R.string.more_info),
-                    color = CensoWhite,
-                    fontSize = 17.sp,
-                    modifier = Modifier.padding(top = 4.dp, bottom = 4.dp),
-                )
+            CompositionLocalProvider(LocalRippleTheme provides CustomRippleTheme) {
+                TextButton(
+                    modifier = Modifier
+                        .weight(1f),
+                    onClick = onMoreInfoClicked
+                ) {
+                    Text(
+                        stringResource(R.string.more_info),
+                        color = TextBlack,
+                        fontSize = 17.sp,
+                        modifier = Modifier.padding(top = 4.dp, bottom = 4.dp),
+                    )
+                }
             }
         }
     }
+}
+
+object CustomRippleTheme : RippleTheme {
+    @Composable
+    override fun defaultColor() = ButtonRed
+
+    @Composable
+    override fun rippleAlpha(): RippleAlpha =
+        RippleAlpha(0.0f, 0.0f, 0.0f, 0.0f)
 }
 
 
@@ -135,7 +155,8 @@ fun VaultTitle(
         Text(
             modifier = Modifier.padding(start = 2.dp),
             text = vaultName,
-            color = CensoWhite
+            color = TextBlack,
+            fontWeight = FontWeight.W400,
         )
     }
 }
@@ -252,7 +273,7 @@ fun ApprovalRowContent(
 
         //Unknown
         ApprovalRequestDetailsV2.UnknownApprovalType -> {
-            Text(text = type.getHeader(LocalContext.current), color = CensoWhite)
+            Text(text = type.getHeader(LocalContext.current), color = TextBlack)
         }
     }
 }
@@ -283,7 +304,7 @@ fun ApprovalDetailContent(approval: ApprovalRequestV2, type: ApprovalRequestDeta
                     )
                 )
             } ?: run {
-                Text(text = header, color = CensoWhite)
+                Text(text = header, color = TextBlack)
             }
         }
         //BalanceAccountNameUpdate
@@ -324,7 +345,7 @@ fun ApprovalDetailContent(approval: ApprovalRequestV2, type: ApprovalRequestDeta
             whitelistUpdateUI?.let {
                 WalletAddressWhitelistUpdateDetailContent(whitelistUpdate = it)
             } ?: run {
-                Text(type.getHeader(LocalContext.current), color = CensoWhite)
+                Text(type.getHeader(LocalContext.current), color = TextBlack)
             }
         }
 
@@ -347,7 +368,7 @@ fun ApprovalDetailContent(approval: ApprovalRequestV2, type: ApprovalRequestDeta
                 WithdrawalRequestDetailContent(withdrawalRequestUI)
             } ?: run {
                 val header = type.getHeader(LocalContext.current)
-                Text(text = header, color = CensoWhite)
+                Text(text = header, color = TextBlack)
             }
         }
 
@@ -360,7 +381,7 @@ fun ApprovalDetailContent(approval: ApprovalRequestV2, type: ApprovalRequestDeta
             } ?: run {
                 Text(
                     text = type.getHeader(LocalContext.current),
-                    color = CensoWhite
+                    color = TextBlack
                 )
             }
         }
@@ -387,7 +408,7 @@ fun ApprovalDetailContent(approval: ApprovalRequestV2, type: ApprovalRequestDeta
         //Unknown
         ApprovalRequestDetailsV2.UnknownApprovalType -> {
             val header = type.getHeader(LocalContext.current)
-            Text(text = header, color = CensoWhite)
+            Text(text = header, color = TextBlack)
         }
     }
 }

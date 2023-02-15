@@ -3,20 +3,20 @@ package com.censocustody.android.presentation.device_registration
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.zIndex
 import com.censocustody.android.R
 import com.censocustody.android.common.CensoButton
-import com.censocustody.android.ui.theme.CensoWhite
-import com.censocustody.android.ui.theme.UnfocusedGrey
+import com.censocustody.android.ui.theme.*
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.PermissionRequired
 import com.google.accompanist.permissions.rememberPermissionState
@@ -52,11 +52,13 @@ private fun Rationale(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
+                .padding(horizontal = 8.dp)
+                .shadow(
+                    elevation = 5.dp,
+                )
                 .align(Alignment.Center)
-                .padding(horizontal = 16.dp)
-                .border(width = 1.5.dp, color = UnfocusedGrey.copy(alpha = 0.50f))
-                .background(color = Color.Black)
-                .zIndex(2.5f),
+                .clip(RoundedCornerShape(4.dp))
+                .background(color = BackgroundGrey),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
@@ -64,7 +66,7 @@ private fun Rationale(
             Text(
                 modifier = Modifier.padding(horizontal = 8.dp),
                 text = stringResource(R.string.camera_permission_request),
-                color = CensoWhite,
+                color = TextBlack,
                 textAlign = TextAlign.Center,
                 fontSize = 20.sp
             )
@@ -72,7 +74,7 @@ private fun Rationale(
             Text(
                 modifier = Modifier.padding(horizontal = 24.dp),
                 text = text,
-                color = CensoWhite,
+                color = TextBlack,
                 textAlign = TextAlign.Center,
                 fontSize = 18.sp
             )

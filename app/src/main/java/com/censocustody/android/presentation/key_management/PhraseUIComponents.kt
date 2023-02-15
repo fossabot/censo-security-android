@@ -22,10 +22,11 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.*
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.layout
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
@@ -38,7 +39,6 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.zIndex
 import com.censocustody.android.R
 import com.censocustody.android.common.CensoButton
 import com.censocustody.android.common.Resource
@@ -53,7 +53,6 @@ import com.censocustody.android.presentation.key_management.flows.KeyRecoveryFlo
 import com.censocustody.android.presentation.key_management.flows.PhraseEntryAction
 import com.censocustody.android.presentation.key_management.flows.PhraseFlowAction
 import com.censocustody.android.ui.theme.*
-import java.lang.Integer.max
 
 object PhraseUICompanion {
     const val FIRST_SPACER_INDEX = 0
@@ -66,26 +65,10 @@ object PhraseUICompanion {
 }
 
 @Composable
-fun GradientBackgroundUI() {
-
-    val configuration = LocalConfiguration.current
-
-    val calculatedRadius = try {
-        max(configuration.screenHeightDp, configuration.screenWidthDp).toFloat()
-    } catch (e: Exception) {
-        null
-    }
-
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .alpha(0.50f)
-            .background(
-                brush = Brush.radialGradient(
-                    colorStops = GradientColors,
-                    radius = calculatedRadius ?: Float.POSITIVE_INFINITY
-                )
-            )
+fun BackgroundUI() {
+    Box(modifier = Modifier
+        .fillMaxSize()
+        .background(color = BackgroundGrey)
     )
 }
 
@@ -122,7 +105,7 @@ fun EntryScreenPhraseUI(
                     modifier = Modifier.size(32.dp),
                     imageVector = Icons.Outlined.AccountCircle,
                     contentDescription = stringResource(id = R.string.content_des_account_icon),
-                    tint = CensoWhite
+                    tint = TextBlack
                 )
             }
         }
@@ -135,7 +118,7 @@ fun EntryScreenPhraseUI(
         Spacer(modifier = Modifier.weight(1.0f))
         Text(
             text = title,
-            color = CensoWhite,
+            color = TextBlack,
             fontSize = 28.sp,
             fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Center,
@@ -144,7 +127,7 @@ fun EntryScreenPhraseUI(
         Spacer(modifier = Modifier.weight(0.8f))
         Text(
             text = subtitle,
-            color = CensoWhite,
+            color = TextBlack,
             fontSize = 18.sp,
             textAlign = TextAlign.Center,
             letterSpacing = 0.23.sp
@@ -211,7 +194,7 @@ fun CopyKeyUI(phrase: String, phraseCopied: Boolean, phraseSaved: Boolean, onNav
                 Spacer(modifier = Modifier.weight(3.0f))
                 Text(
                     text = stringResource(R.string.copy_key_message),
-                    color = CensoWhite,
+                    color = TextBlack,
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Center,
@@ -249,7 +232,7 @@ fun CopyKeyUI(phrase: String, phraseCopied: Boolean, phraseSaved: Boolean, onNav
                     Spacer(modifier = Modifier.weight(0.5f))
                     Text(
                         text = stringResource(R.string.copied_to_clipboard),
-                        color = CensoWhite,
+                        color = TextBlack,
                         fontSize = 18.sp,
                         textAlign = TextAlign.Center,
                         letterSpacing = 0.23.sp
@@ -313,7 +296,7 @@ fun ConfirmKeyUI(
         Spacer(modifier = Modifier.height(24.dp))
         Text(
             text = header,
-            color = CensoWhite,
+            color = TextBlack,
             fontSize = 28.sp,
             fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Center,
@@ -323,7 +306,7 @@ fun ConfirmKeyUI(
             Spacer(modifier = Modifier.height(30.dp))
             Text(
                 text = title,
-                color = CensoWhite,
+                color = TextBlack,
                 fontSize = 18.sp,
                 textAlign = TextAlign.Center,
                 letterSpacing = 0.23.sp
@@ -333,7 +316,7 @@ fun ConfirmKeyUI(
         Text(
             modifier = Modifier.padding(horizontal = 24.dp),
             text = message,
-            color = CensoWhite,
+            color = TextBlack,
             fontSize = 18.sp,
             textAlign = TextAlign.Center,
             letterSpacing = 0.23.sp
@@ -344,13 +327,13 @@ fun ConfirmKeyUI(
             shape = RoundedCornerShape(8.dp),
             visualTransformation = PasswordVisualTransformation(),
             modifier = Modifier
-                .background(color = Color.Black, shape = RoundedCornerShape(8.dp))
+                .background(color = BackgroundWhite, shape = RoundedCornerShape(8.dp))
                 .fillMaxWidth(),
             colors = TextFieldDefaults.outlinedTextFieldColors(
-                focusedBorderColor = if (errorEnabled) Color.Red else CensoButtonBlue,
+                focusedBorderColor = if (errorEnabled) Color.Red else ButtonRed,
                 unfocusedBorderColor = if (errorEnabled) Color.Red else GreyOutline,
                 cursorColor = Color.Transparent,
-                textColor = if (errorEnabled) Color.Red else CensoWhite,
+                textColor = if (errorEnabled) Color.Red else TextBlack,
                 errorBorderColor = Color.Red,
             ),
             value = pastedPhrase,
@@ -414,7 +397,7 @@ fun AllSetUI(
                     Spacer(modifier = Modifier.height(32.dp))
                     Text(
                         text = stringResource(R.string.all_set),
-                        color = CensoWhite,
+                        color = TextBlack,
                         fontSize = 24.sp,
                         fontWeight = FontWeight.Bold,
                         textAlign = TextAlign.Center,
@@ -439,10 +422,12 @@ fun AllSetUI(
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 16.dp)
-                            .border(width = 1.5.dp, color = UnfocusedGrey.copy(alpha = 0.50f))
-                            .background(color = Color.Black)
-                            .zIndex(2.5f),
+                            .padding(horizontal = 8.dp)
+                            .shadow(
+                                elevation = 5.dp,
+                            )
+                            .clip(RoundedCornerShape(4.dp))
+                            .background(color = BackgroundGrey),
                         verticalArrangement = Arrangement.Center,
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
@@ -451,13 +436,13 @@ fun AllSetUI(
                             modifier = Modifier.padding(horizontal = 8.dp),
                             text = loadingText ?: stringResource(R.string.registering_key_auth),
                             textAlign = TextAlign.Center,
-                            color = CensoWhite,
+                            color = TextBlack,
                             fontSize = 16.sp
                         )
                         Spacer(modifier = Modifier.height(36.dp))
                         CircularProgressIndicator(
                             modifier = Modifier.size(20.dp),
-                            color = CensoWhite,
+                            color = ButtonRed,
                             strokeWidth = 2.5.dp,
                         )
                         Spacer(modifier = Modifier.height(36.dp))
@@ -473,7 +458,7 @@ fun AllSetUI(
                     Text(
                         text = allSetState.censoError?.getErrorMessage(context)
                             ?: stringResource(R.string.something_went_wrong),
-                        color = CensoWhite,
+                        color = TextBlack,
                         fontSize = 18.sp,
                         textAlign = TextAlign.Center,
                         letterSpacing = 0.23.sp,
@@ -554,14 +539,14 @@ fun PhraseWords(
             .padding(horizontal = 48.dp)
             .border(width = 1.dp, color = UnfocusedGrey)
             .background(color = Color.Black.copy(alpha = 0.25f))
-            .zIndex(2.5f),
+            .shadow(elevation = 2.5.dp),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         if (phraseWords.isEmpty()) {
             Text(
                 text = stringResource(R.string.phrase_words_empty),
-                color = CensoWhite,
+                color = TextBlack,
                 textAlign = TextAlign.Center,
                 fontSize = 20.sp
             )
@@ -592,7 +577,7 @@ fun PhraseWords(
                     Spacer(modifier = Modifier.width(34.dp))
                     Text(
                         text = indexWord.wordValue,
-                        color = CensoWhite,
+                        color = TextBlack,
                         fontSize = 28.sp,
                         letterSpacing = 0.5.sp
                     )
@@ -661,7 +646,7 @@ fun WriteWordUI(
             )
             Text(
                 text = stringResource(id = R.string.write_each_word_down),
-                color = CensoWhite,
+                color = TextBlack,
                 fontSize = 24.sp,
                 textAlign = TextAlign.Center
             )
@@ -718,11 +703,11 @@ fun WriteWordUI(
                         modifier = Modifier.size(32.dp),
                         imageVector = Icons.Filled.NavigateBefore,
                         contentDescription = stringResource(R.string.previous_icon_content_desc),
-                        tint = CensoWhite
+                        tint = TextBlack
                     )
                     Text(
                         text = stringResource(R.string.previous),
-                        color = CensoWhite,
+                        color = TextBlack,
                         textAlign = TextAlign.Center
                     )
                 }
@@ -737,14 +722,14 @@ fun WriteWordUI(
                 ) {
                     Text(
                         text = stringResource(R.string.next),
-                        color = CensoWhite,
+                        color = TextBlack,
                         textAlign = TextAlign.Center
                     )
                     Icon(
                         modifier = Modifier.size(32.dp),
                         imageVector = Icons.Filled.NavigateNext,
                         contentDescription = stringResource(R.string.next_icon_content_desc),
-                        tint = CensoWhite
+                        tint = TextBlack
                     )
                 }
             }
@@ -809,7 +794,7 @@ fun VerifyPhraseWordUI(
         Text(
             modifier = Modifier.padding(horizontal = 36.dp),
             text = stringResource(R.string.enter_each_word_to_verify),
-            color = SubtitleLightGrey,
+            color = TextBlack,
             fontSize = 18.sp,
             textAlign = TextAlign.Center,
             fontWeight = FontWeight.SemiBold,
@@ -818,14 +803,14 @@ fun VerifyPhraseWordUI(
         Spacer(modifier = Modifier.weight(0.05f))
         Text(
             text = stringResource(R.string.enter_word_number),
-            color = CensoWhite,
+            color = TextBlack,
             fontSize = 18.sp,
             fontWeight = FontWeight.SemiBold,
             letterSpacing = 0.3.sp
         )
         Text(
             text = (wordIndex + 1).toString(),
-            color = CensoWhite,
+            color = TextBlack,
             fontSize = 76.sp
         )
         Spacer(modifier = Modifier.weight(0.1f))
@@ -887,7 +872,7 @@ fun VerifyWordTextField(
         modifier = Modifier
             .fillMaxWidth()
             .background(
-                Color.Black,
+                BackgroundWhite,
                 RoundedCornerShape(8.dp)
             )
             .border(
@@ -900,7 +885,7 @@ fun VerifyWordTextField(
             onPhraseEntryAction(PhraseEntryAction.UpdateWordInput(wordInput = textInput))
         },
         textStyle = LocalTextStyle.current.copy(
-            color = CensoWhite,
+            color = TextBlack,
             textAlign = TextAlign.Center,
             fontSize = 28.sp,
             letterSpacing = 0.75.sp,
@@ -915,7 +900,7 @@ fun VerifyWordTextField(
             onNext = { onPhraseEntryAction(PhraseEntryAction.SubmitWordInput(errorMessage)) }
         ),
         interactionSource = interactionSource,
-        cursorBrush = SolidColor(CensoButtonBlue),
+        cursorBrush = SolidColor(ButtonRed),
         singleLine = singleLine
     ) { innerTextField ->
 
@@ -958,11 +943,11 @@ private fun WordNavigationButtons(
                 modifier = Modifier.padding(horizontal = 0.dp, vertical = 4.dp),
                 imageVector = Icons.Filled.NavigateBefore,
                 contentDescription = stringResource(R.string.previous_icon_content_desc),
-                tint = CensoWhite
+                tint = TextBlack
             )
             Text(
                 text = stringResource(R.string.previous),
-                color = CensoWhite,
+                color = TextBlack,
                 fontSize = 16.sp
             )
         }
@@ -982,14 +967,14 @@ private fun WordNavigationButtons(
         ) {
             Text(
                 text = nextButtonText,
-                color = if (nextButtonEnabled) CensoWhite else GreyText,
+                color = if (nextButtonEnabled) TextBlack else GreyText,
                 fontSize = 16.sp
             )
             Icon(
                 modifier = Modifier.padding(horizontal = 0.dp, vertical = 4.dp),
                 imageVector = Icons.Filled.NavigateNext,
                 contentDescription = nextButtonContentDes,
-                tint = if (nextButtonEnabled) CensoWhite else GreyText
+                tint = if (nextButtonEnabled) TextBlack else GreyText
             )
         }
     }
@@ -1008,10 +993,12 @@ fun PreBiometryDialog(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp)
-                .border(width = 1.5.dp, color = UnfocusedGrey.copy(alpha = 0.50f))
-                .background(color = Color.Black)
-                .zIndex(2.5f),
+                .padding(horizontal = 8.dp)
+                .shadow(
+                    elevation = 5.dp,
+                )
+                .clip(RoundedCornerShape(4.dp))
+                .background(color = BackgroundGrey),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -1020,7 +1007,7 @@ fun PreBiometryDialog(
                 modifier = Modifier.padding(horizontal = 16.dp),
                 text = mainText,
                 textAlign = TextAlign.Center,
-                color = CensoWhite,
+                color = TextBlack,
                 fontSize = 20.sp
             )
             Spacer(modifier = Modifier.height(36.dp))

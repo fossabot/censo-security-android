@@ -16,10 +16,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.censocustody.android.presentation.approvals.ApprovalItemHeader
-import com.censocustody.android.ui.theme.DividerGrey
-import com.censocustody.android.ui.theme.HeaderBlack
-import com.censocustody.android.ui.theme.CensoWhite
 import com.censocustody.android.R
+import com.censocustody.android.ui.theme.*
 
 @Composable
 fun UnknownApprovalItem(
@@ -30,7 +28,7 @@ fun UnknownApprovalItem(
         modifier = Modifier
             .clip(RoundedCornerShape(8.dp))
             .fillMaxWidth()
-            .background(color = HeaderBlack),
+            .background(color = BackgroundGrey),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         ApprovalItemHeader(
@@ -44,7 +42,7 @@ fun UnknownApprovalItem(
                 .padding(top = 16.dp),
             text = stringResource(R.string.unknown_approval_tip),
             textAlign = TextAlign.Center,
-            color = CensoWhite,
+            color = TextBlack,
             fontSize = 16.sp
         )
 
@@ -74,7 +72,7 @@ fun UnknownApprovalButtonRow(
                     modifier = Modifier.padding(top = 4.dp, bottom = 4.dp),
                     text = stringResource(R.string.update_censo),
                     textAlign = TextAlign.Center,
-                    color = CensoWhite,
+                    color = TextBlack,
                     fontSize = 17.sp,
                     fontWeight = FontWeight.SemiBold
                 )
