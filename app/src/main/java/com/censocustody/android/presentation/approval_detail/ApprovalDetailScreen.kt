@@ -17,9 +17,12 @@ import androidx.compose.material.icons.rounded.ArrowBack
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.zIndex
 import androidx.fragment.app.FragmentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
@@ -228,6 +231,7 @@ fun ApprovalDetailsTopAppBar(
         title = stringResource(R.string.details_title),
         onAppBarIconClick = { onAppBarIconClick() },
         navigationIcon = navigationIcon,
+        backgroundColor = BackgroundGrey,
         navigationIconContentDes = navigationIconContentDes
     )
 }
@@ -249,7 +253,7 @@ fun ApprovalDetails(
     ) {
         Column(
             modifier = Modifier
-                .background(BackgroundBlack)
+                .background(BackgroundGrey)
                 .weight(1f)
                 .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally
@@ -289,7 +293,12 @@ fun ApprovalDetails(
         }
 
         Column(
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(color = Color.Transparent)
+                .shadow(5.dp)
+                .background(color = BackgroundGrey)
+                .fillMaxWidth()
         ) {
             ApprovalDetailsButtons(
                 onApproveClicked = { onApproveClicked() },
@@ -309,7 +318,7 @@ fun ApprovalDetails(
         ) {
             CircularProgressIndicator(
                 modifier = Modifier.align(Alignment.Center),
-                color = CensoWhite
+                color = ButtonRed
             )
         }
     }

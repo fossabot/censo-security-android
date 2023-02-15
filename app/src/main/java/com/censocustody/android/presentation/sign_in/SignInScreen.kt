@@ -22,7 +22,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.zIndex
 import androidx.fragment.app.FragmentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
@@ -33,7 +32,6 @@ import com.censocustody.android.common.Resource
 import com.censocustody.android.presentation.Screen
 import com.censocustody.android.presentation.components.SignInTextField
 import com.censocustody.android.presentation.components.SignInTopAppBar
-import com.censocustody.android.presentation.key_management.GradientBackgroundUI
 import com.censocustody.android.ui.theme.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -45,7 +43,7 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.draw.clip
-import org.web3j.abi.datatypes.Bool
+import androidx.compose.ui.draw.shadow
 
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @OptIn(ExperimentalComposeUiApi::class)
@@ -121,7 +119,6 @@ fun SignInScreen(
         },
         content = {
             Box {
-                GradientBackgroundUI()
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.SpaceBetween,
@@ -132,11 +129,11 @@ fun SignInScreen(
                     val passwordVisibility = remember { mutableStateOf(false) }
                     Image(
                         modifier = Modifier.width(200.dp),
-                        painter = painterResource(R.drawable.censo_horizontal_ko),
+                        painter = painterResource(R.drawable.logo_red_black),
                         contentDescription = "",
                         contentScale = ContentScale.FillWidth,
                     )
-                    Spacer(modifier = Modifier.weight(0.75f))
+                    Spacer(modifier = Modifier.weight(1.75f))
                     val headerText =
                         buildAnnotatedString {
                             if (state.loginStep == LoginStep.EMAIL_ENTRY) {
@@ -150,36 +147,26 @@ fun SignInScreen(
                         }
                     Text(
                         text = headerText,
-                        color = CensoWhite,
+                        color = TextBlack,
                         textAlign = TextAlign.Center,
-                        fontSize = 17.sp,
-                        lineHeight = 24.sp,
+                        fontSize = 20.sp,
+                        lineHeight = 28.sp,
                         letterSpacing = 0.25.sp
                     )
-                    Spacer(modifier = Modifier.weight(0.75f))
-
-                    val boxItemsHorizontalPadding = 32.dp
+                    val boxItemsHorizontalPadding = 8.dp
 
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(horizontal = 16.dp)
-                            .border(width = 1.dp, color = UnfocusedGrey.copy(alpha = 0.50f))
-                            .background(color = Color.Black)
-                            .zIndex(2.5f)
                     ) {
                         Spacer(modifier = Modifier.size(20.dp))
                         if (state.loginStep == LoginStep.EMAIL_ENTRY) {
-                            Text(
-                                modifier = Modifier.padding(horizontal = boxItemsHorizontalPadding),
-                                text = stringResource(id = R.string.email_hint),
-                                color = CensoWhite,
-                                fontSize = 18.sp
-                            )
                             Spacer(modifier = Modifier.size(16.dp))
                             SignInTextField(
                                 modifier = Modifier.padding(horizontal = boxItemsHorizontalPadding),
                                 valueText = state.email,
+                                placeholder = stringResource(R.string.email_hint),
                                 onValueChange = viewModel::updateEmail,
                                 onDoneAction = viewModel::signInActionCompleted,
                                 keyboardType = KeyboardType.Email,
@@ -187,16 +174,10 @@ fun SignInScreen(
                                 showDoneAction = false
                             )
                         } else {
-                            Text(
-                                modifier = Modifier.padding(horizontal = boxItemsHorizontalPadding),
-                                text = stringResource(id = R.string.password_hint),
-                                color = CensoWhite,
-                                fontSize = 18.sp
-                            )
-                            Spacer(modifier = Modifier.size(16.dp))
                             SignInTextField(
                                 modifier = Modifier.padding(horizontal = boxItemsHorizontalPadding),
                                 valueText = state.password,
+                                placeholder = stringResource(id = R.string.password_hint),
                                 onValueChange = viewModel::updatePassword,
                                 keyboardType = KeyboardType.Password,
                                 onPasswordClick = {
@@ -215,9 +196,9 @@ fun SignInScreen(
                                 modifier = Modifier
                                     .align(Alignment.CenterEnd)
                                     .clickable { navController.navigate(Screen.ResetPasswordRoute.route) }
-                                    .padding(top = 8.dp, end = 32.dp),
+                                    .padding(top = 8.dp, end = boxItemsHorizontalPadding),
                                 text = stringResource(R.string.reset_password),
-                                color = CensoTextBlue,
+                                color = TextRed,
                                 textAlign = TextAlign.End,
                                 fontWeight = FontWeight.W400
                             )
@@ -326,14 +307,14 @@ fun SignInAlertDialog(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 8.dp)
+                .padding(horizontal = 4.dp)
                 .background(color = Color.Transparent)
                 .border(
-                    width = 1.5.dp,
-                    shape = RoundedCornerShape(16.dp),
-                    color = UnfocusedGrey.copy(alpha = 0.50f),
+                    width = 1.0.dp,
+                    shape = RoundedCornerShape(4.dp),
+                    color = BorderGrey,
                 )
-                .zIndex(5.0f)
+                .shadow(elevation = 2.5.dp)
                 .clickable(indication = null, interactionSource = innerInteractionSource) { },
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
@@ -342,8 +323,8 @@ fun SignInAlertDialog(
                 modifier = Modifier
                     .fillMaxWidth()
                     .background(
-                        color = DialogHeaderBlack,
-                        shape = RoundedCornerShape(16.dp, 16.dp, 0.dp, 0.dp),
+                        color = DialogMainBackground,
+                        shape = RoundedCornerShape(4.dp, 4.dp, 0.dp, 0.dp),
                     )
                     .padding(vertical = 16.dp),
             ) {
@@ -353,7 +334,7 @@ fun SignInAlertDialog(
                         .align(Alignment.Center),
                     text = title,
                     fontWeight = FontWeight.SemiBold,
-                    color = CensoWhite,
+                    color = TextBlack,
                     fontSize = 24.sp
                 )
                 IconButton(
@@ -365,15 +346,16 @@ fun SignInAlertDialog(
                     Icon(
                         Icons.Filled.Close,
                         contentDescription = stringResource(R.string.close_dialog),
-                        tint = CensoWhite
+                        tint = TextBlack
                     )
                 }
             }
+            Divider(thickness = 2.dp, color = BorderGrey)
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier.background(
                     color = DialogMainBackground,
-                    shape = RoundedCornerShape(0.dp, 0.dp, 16.dp, 16.dp),
+                    shape = RoundedCornerShape(0.dp, 0.dp, 4.dp, 4.dp),
                 )
             ) {
                 Spacer(modifier = Modifier.height(24.dp))
@@ -381,7 +363,7 @@ fun SignInAlertDialog(
                     modifier = Modifier.padding(horizontal = 48.dp),
                     text = message,
                     textAlign = TextAlign.Center,
-                    color = CensoWhite,
+                    color = TextBlack,
                     fontSize = 20.sp
                 )
                 Spacer(modifier = Modifier.height(40.dp))
@@ -390,14 +372,14 @@ fun SignInAlertDialog(
                     horizontalArrangement = Arrangement.SpaceEvenly,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    var modifier: Modifier = if (showDismissButton) Modifier
+                    val modifier: Modifier = if (showDismissButton) Modifier
                         .clip(RoundedCornerShape(12.dp))
                         .weight(1.35f)
                         .fillMaxWidth()
                     else Modifier
                         .clip(RoundedCornerShape(36.dp))
                         .width(72.dp)
-                    var textAlign = if (showDismissButton) TextAlign.Center else TextAlign.Start
+                    val textAlign = if (showDismissButton) TextAlign.Center else TextAlign.Start
                     if (showDismissButton) {
                         Spacer(modifier = Modifier.weight(0.20f))
                         Button(

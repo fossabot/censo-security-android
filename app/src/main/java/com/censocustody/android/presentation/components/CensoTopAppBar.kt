@@ -17,8 +17,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.censocustody.android.R
-import com.censocustody.android.ui.theme.BackgroundBlack
-import com.censocustody.android.ui.theme.CensoWhite
+import com.censocustody.android.ui.theme.BackgroundWhite
+import com.censocustody.android.ui.theme.TextBlack
+import com.censocustody.android.ui.theme.TopAppBarText
 
 
 @Composable
@@ -29,8 +30,8 @@ fun SignInTopAppBar(
     TopAppBar(
         modifier = Modifier.fillMaxWidth(),
         backgroundColor = Color.Transparent,
-        contentColor = CensoWhite,
-        elevation = AppBarDefaults.TopAppBarElevation,
+        contentColor = TextBlack,
+        elevation = 0.dp,
     ) {
         Row(
             modifier = Modifier
@@ -44,13 +45,13 @@ fun SignInTopAppBar(
                     modifier = Modifier.size(32.dp),
                     imageVector = Icons.Filled.ChevronLeft,
                     contentDescription = stringResource(R.string.back),
-                    tint = CensoWhite
+                    tint = TextBlack
                 )
                 Text(
                     text = title,
                     textAlign = TextAlign.Start,
                     fontSize = 16.sp,
-                    color = CensoWhite,
+                    color = TextBlack,
                     fontWeight = FontWeight.Bold,
                     maxLines = 1
                 )
@@ -69,8 +70,8 @@ fun AuthTopAppBar(
     TopAppBar(
         modifier = Modifier.fillMaxWidth(),
         backgroundColor = Color.Transparent,
-        contentColor = CensoWhite,
-        elevation = AppBarDefaults.TopAppBarElevation,
+        contentColor = TextBlack,
+        elevation = 0.dp,
     ) {
         Row(
             modifier = Modifier
@@ -84,13 +85,13 @@ fun AuthTopAppBar(
                 modifier = Modifier.size(32.dp),
                 imageVector = Icons.Filled.ChevronLeft,
                 contentDescription = stringResource(R.string.back),
-                tint = CensoWhite
+                tint = TextBlack
             )
             Text(
                 text = title,
                 textAlign = TextAlign.Start,
                 fontSize = 16.sp,
-                color = CensoWhite,
+                color = TextBlack,
                 fontWeight = FontWeight.Bold,
                 maxLines = 1
             )
@@ -106,6 +107,7 @@ fun CenteredTopAppBar(
     navigationIcon: ImageVector,
     navigationIconContentDes: String,
     showNavIcon: Boolean = true,
+    backgroundColor : Color = BackgroundWhite,
     actions: @Composable RowScope.() -> Unit = {}
 ) {
     val appBarHorizontalPadding = 4.dp
@@ -115,9 +117,9 @@ fun CenteredTopAppBar(
 
     TopAppBar(
         modifier = Modifier.fillMaxWidth(),
-        backgroundColor = BackgroundBlack,
-        contentColor = CensoWhite,
-        elevation = AppBarDefaults.TopAppBarElevation,
+        backgroundColor = backgroundColor,
+        contentColor = TextBlack,
+        elevation = 0.dp,
     ) {
         Box(modifier = Modifier.height(56.dp)) {
 
@@ -130,7 +132,7 @@ fun CenteredTopAppBar(
                         Icon(
                             navigationIcon,
                             navigationIconContentDes,
-                            tint = CensoWhite
+                            tint = TextBlack
                         )
                     }
                 }
@@ -156,11 +158,11 @@ fun CenteredTopAppBar(
                     textAlign = TextAlign.Center,
                     maxLines = 1,
                     text = title,
-                    fontWeight = FontWeight.W600,
-                    fontSize = 18.sp,
-                    color = CensoWhite,
+                    fontWeight = FontWeight.W500,
+                    fontSize = 24.sp,
+                    color = TopAppBarText,
                     lineHeight = 10.sp,
-                    letterSpacing = 0.23.sp
+                    letterSpacing = 0.30.sp
                 )
             }
 

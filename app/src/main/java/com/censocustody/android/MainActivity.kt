@@ -44,7 +44,7 @@ import com.censocustody.android.presentation.keys_upload.KeysUploadScreen
 import com.censocustody.android.presentation.reset_password.ResetPasswordScreen
 import com.censocustody.android.presentation.sign_in.SignInScreen
 import com.censocustody.android.service.MessagingService.Companion.NOTIFICATION_DISPLAYED_KEY
-import com.censocustody.android.ui.theme.BackgroundBlack
+import com.censocustody.android.ui.theme.BackgroundWhite
 import com.censocustody.android.ui.theme.CensoMobileTheme
 import com.censocustody.android.presentation.semantic_version_check.BlockingUI
 import dagger.hilt.android.AndroidEntryPoint
@@ -124,7 +124,7 @@ class MainActivity : FragmentActivity() {
             }
 
             CensoMobileTheme {
-                Surface(color = BackgroundBlack) {
+                Surface(color = BackgroundWhite) {
                     //NavHost
                     CensoNavHost(navController = navController)
 

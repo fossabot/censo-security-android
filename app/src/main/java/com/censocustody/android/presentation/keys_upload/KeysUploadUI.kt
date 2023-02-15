@@ -8,17 +8,16 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.zIndex
-import com.censocustody.android.presentation.key_management.GradientBackgroundUI
+import com.censocustody.android.presentation.key_management.BackgroundUI
 import com.censocustody.android.presentation.key_management.SmallAuthFlowButton
-import com.censocustody.android.ui.theme.CensoWhite
-import com.censocustody.android.ui.theme.UnfocusedGrey
 import com.censocustody.android.R
+import com.censocustody.android.ui.theme.*
 
 @Composable
 fun KeysUploadUI(
@@ -27,7 +26,7 @@ fun KeysUploadUI(
     retry: () -> Unit,
 ) {
 
-    GradientBackgroundUI()
+    BackgroundUI()
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -42,7 +41,7 @@ fun KeysUploadUI(
             ) {
                 Text(
                     text = errorMessage ?: stringResource(R.string.something_went_wrong),
-                    color = CensoWhite,
+                    color = TextBlack,
                     fontSize = 18.sp,
                     textAlign = TextAlign.Center,
                     letterSpacing = 0.23.sp,
@@ -67,8 +66,9 @@ fun KeysUploadUI(
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp)
                         .border(width = 1.5.dp, color = UnfocusedGrey.copy(alpha = 0.50f))
-                        .background(color = Color.Black)
-                        .zIndex(2.5f),
+                        .background(color = BackgroundGrey)
+                        .shadow(elevation = 2.5.dp)
+                        .shadow(elevation = 2.5.dp),
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
@@ -77,13 +77,13 @@ fun KeysUploadUI(
                         modifier = Modifier.padding(horizontal = 8.dp),
                         text = stringResource(R.string.uploading_key_loading_text),
                         textAlign = TextAlign.Center,
-                        color = CensoWhite,
+                        color = TextBlack,
                         fontSize = 16.sp
                     )
                     Spacer(modifier = Modifier.height(36.dp))
                     CircularProgressIndicator(
                         modifier = Modifier.size(20.dp),
-                        color = CensoWhite,
+                        color = ButtonRed,
                         strokeWidth = 2.5.dp,
                     )
                     Spacer(modifier = Modifier.height(36.dp))

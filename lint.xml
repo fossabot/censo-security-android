@@ -25,4 +25,7 @@
         <ignore path="**/RuntimeTypeAdapterFactory.java" />
     </issue>
     <issue id="VectorPath" severity="ignore"/>
+    <issue id="VectorRaster">
+        <ignore path="**/res/drawable/logo_red_black.xml**" />
+    </issue>
 </lint>

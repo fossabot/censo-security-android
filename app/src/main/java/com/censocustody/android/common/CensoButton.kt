@@ -1,6 +1,5 @@
 package com.censocustody.android.common
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -10,8 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.censocustody.android.ui.theme.ButtonBorder
-import com.censocustody.android.ui.theme.CensoButtonBlue
+import com.censocustody.android.ui.theme.ButtonRed
 
 @Composable
 fun CensoButton(
@@ -27,12 +25,11 @@ fun CensoButton(
 
     Button(
         modifier = buttonModifier,
-        shape = RoundedCornerShape(12.dp),
-        border = BorderStroke(width = 0.5.dp, color = ButtonBorder),
+        shape = RoundedCornerShape(4.dp),
         contentPadding = contentPadding,
         colors = ButtonDefaults.buttonColors(
-            backgroundColor = CensoButtonBlue,
-            disabledBackgroundColor = CensoButtonBlue,
+            backgroundColor = ButtonRed,
+            disabledBackgroundColor = ButtonRed,
         ),
         enabled = enabled,
         onClick = onClick

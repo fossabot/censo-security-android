@@ -16,11 +16,15 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.AccountCircle
+import androidx.compose.material.icons.rounded.AccountCircle
 import androidx.compose.material.icons.rounded.ArrowDownward
+import androidx.compose.material.icons.rounded.SupervisedUserCircle
+import androidx.compose.material.icons.rounded.VerifiedUser
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
@@ -28,7 +32,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.zIndex
 import androidx.core.app.ActivityCompat.shouldShowRequestPermissionRationale
 import androidx.core.content.ContextCompat
 import androidx.core.content.ContextCompat.startActivity
@@ -51,7 +54,7 @@ import com.censocustody.android.presentation.Screen
 import com.censocustody.android.presentation.approvals.approval_type_row_items.*
 import com.censocustody.android.presentation.components.*
 import com.censocustody.android.ui.theme.*
-import com.censocustody.android.ui.theme.BackgroundBlack
+import com.censocustody.android.ui.theme.BackgroundWhite
 
 @Composable
 fun ApprovalsListScreen(
@@ -195,7 +198,7 @@ fun ApprovalsListScreen(
             ApprovalsListTopAppBar(
                 title = stringResource(id = R.string.approvals),
                 onAppBarIconClick = { navController.navigate(Screen.AccountRoute.route) },
-                navigationIcon = Icons.Outlined.AccountCircle,
+                navigationIcon = Icons.Rounded.AccountCircle,
                 navigationIconContentDes = stringResource(id = R.string.content_des_account_icon)
             )
         },
@@ -314,6 +317,7 @@ fun ApprovalsListTopAppBar(
 ) {
     CenteredTopAppBar(
         title = title,
+        backgroundColor = BackgroundGrey,
         onAppBarIconClick = { onAppBarIconClick() },
         navigationIcon = navigationIcon,
         navigationIconContentDes = navigationIconContentDes,
@@ -344,8 +348,8 @@ fun ApprovalsList(
                 // Enable the scale animation
                 scale = true,
                 // Change the color and shape
-                backgroundColor = Color.Transparent,
-                contentColor = Color.White,
+                backgroundColor = Color.White,
+                contentColor = ButtonRed,
                 largeIndication = true,
                 elevation = 0.dp
             )
@@ -358,12 +362,12 @@ fun ApprovalsList(
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(BackgroundBlack),
+                    .background(BackgroundGrey),
                 contentPadding = PaddingValues(start = 16.dp, end = 16.dp)
             ) {
                 items(approvalRequests.size) { index ->
                     val walletApproval = approvalRequests[index]
-                    Spacer(modifier = Modifier.height(12.dp))
+                    Spacer(modifier = Modifier.height(16.dp))
 
                     walletApproval?.let { safeApproval ->
                         val type = safeApproval.details
@@ -426,7 +430,7 @@ fun ListDataEmptyState() {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(BackgroundBlack)
+            .background(BackgroundGrey)
             .verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
@@ -434,20 +438,20 @@ fun ListDataEmptyState() {
         Spacer(modifier = Modifier.height(48.dp))
         Text(
             text = stringResource(R.string.nothing_to_approve),
-            color = GreyText,
+            color = DarkGreyText,
             fontSize = 32.sp
         )
         Spacer(modifier = Modifier.height(24.dp))
         Text(
             text = stringResource(R.string.pull_to_refresh),
-            color = GreyText,
+            color = DarkGreyText,
             fontSize = 16.sp
         )
         Spacer(modifier = Modifier.height(12.dp))
         Icon(
             imageVector = Icons.Rounded.ArrowDownward,
             contentDescription = stringResource(R.string.content_des_pull_to_refresh_icon),
-            tint = GreyText
+            tint = DarkGreyText
         )
     }
 }
@@ -489,7 +493,7 @@ fun PushNotificationDialog(
                 .clip(RoundedCornerShape(8.dp))
                 .border(width = 1.dp, color = UnfocusedGrey.copy(alpha = 0.50f))
                 .background(color = DialogMainBackground)
-                .zIndex(2.5f),
+                .shadow(elevation = 2.5.dp),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -498,7 +502,7 @@ fun PushNotificationDialog(
                 modifier = Modifier.padding(horizontal = 32.dp),
                 text = text,
                 textAlign = TextAlign.Center,
-                color = CensoWhite,
+                color = TextBlack,
                 fontSize = 20.sp
             )
             Spacer(modifier = Modifier.height(36.dp))
@@ -507,7 +511,7 @@ fun PushNotificationDialog(
                     Text(
                         text = stringResource(id = R.string.skip),
                         fontSize = 18.sp,
-                        color = CensoWhite,
+                        color = TextBlack,
                         textAlign = TextAlign.Center
                     )
                 }
