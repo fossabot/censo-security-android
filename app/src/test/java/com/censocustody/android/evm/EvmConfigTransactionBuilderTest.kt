@@ -33,7 +33,7 @@ class EvmConfigTransactionBuilderTest {
     private val signingData = ApprovalRequestDetailsV2.SigningData.EthereumTransaction(
         chainId = 31337,
         safeNonce = 10L,
-        vaultAddress = vaultAddress
+        vaultAddress = vaultAddress,
     )
 
     @Test
@@ -170,7 +170,7 @@ class EvmConfigTransactionBuilderTest {
         )
         assertEquals(
             "b5818ccdbbd8ea23d2af5d345b4c968d6565ed216349b64818fc977f8d0f66e9",
-            EvmConfigTransactionBuilder.getPolicyUpdateExecutionFromModuleDataSafeHash(walletAddress, txs, signingData).toHexString().lowercase()
+            EvmConfigTransactionBuilder.getPolicyUpdateExecutionFromModuleDataSafeHash(signingData.vaultAddress!!, walletAddress, txs, signingData).toHexString().lowercase()
         )
     }
 
@@ -186,7 +186,7 @@ class EvmConfigTransactionBuilderTest {
         )
         assertEquals(
             "c6e2dd950ce4f5da473e2b303136d00097b95287a9f9c26e7c0f89a5c2e0d017",
-            EvmConfigTransactionBuilder.getPolicyUpdateExecutionFromModuleDataSafeHash(walletAddress, txs, signingData).toHexString().lowercase()
+            EvmConfigTransactionBuilder.getPolicyUpdateExecutionFromModuleDataSafeHash(signingData.vaultAddress!!, walletAddress, txs, signingData).toHexString().lowercase()
         )
     }
 
@@ -202,7 +202,7 @@ class EvmConfigTransactionBuilderTest {
         )
         assertEquals(
             "b2520eb52a950da57d80cb2ddc0f47bb7a5a545c2f6ad30669063823407f1318",
-            EvmConfigTransactionBuilder.getPolicyUpdateExecutionFromModuleDataSafeHash(walletAddress, txs, signingData).toHexString().lowercase()
+            EvmConfigTransactionBuilder.getPolicyUpdateExecutionFromModuleDataSafeHash(signingData.vaultAddress!!, walletAddress, txs, signingData).toHexString().lowercase()
         )
     }
 
@@ -218,7 +218,7 @@ class EvmConfigTransactionBuilderTest {
         )
         assertEquals(
             "a9ff0670e3923384a0ec571acaa7cbdfa664dff96463a9f33b88f41ce3055999",
-            EvmConfigTransactionBuilder.getPolicyUpdateExecutionFromModuleDataSafeHash(walletAddress, txs, signingData).toHexString().lowercase()
+            EvmConfigTransactionBuilder.getPolicyUpdateExecutionFromModuleDataSafeHash(signingData.vaultAddress!!, walletAddress, txs, signingData).toHexString().lowercase()
         )
     }
 
@@ -237,7 +237,7 @@ class EvmConfigTransactionBuilderTest {
         )
         assertEquals(
             "ef3d0fbdefa12a1460200dbf73ea20fc64150f13029153759e593319f993799e",
-            EvmConfigTransactionBuilder.getPolicyUpdateExecutionFromModuleDataSafeHash(walletAddress, txs, signingData).toHexString().lowercase()
+            EvmConfigTransactionBuilder.getPolicyUpdateExecutionFromModuleDataSafeHash(signingData.vaultAddress!!, walletAddress, txs, signingData).toHexString().lowercase()
         )
     }
 }

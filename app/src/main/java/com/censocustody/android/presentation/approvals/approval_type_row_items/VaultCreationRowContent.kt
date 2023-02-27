@@ -8,7 +8,7 @@ import com.censocustody.android.presentation.approval_detail.approval_type_detai
 import com.censocustody.android.presentation.approvals.ApprovalRowContentHeader
 
 @Composable
-fun VaultConfigPolicyUpdateRowContent(
+fun VaultCreationRowContent(
     header: String,
     vaultName: String
 ) {

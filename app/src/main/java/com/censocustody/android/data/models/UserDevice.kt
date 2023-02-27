@@ -9,5 +9,13 @@ data class UserDevice(
 )
 
 enum class DeviceType(val value: String) {
-    @SerializedName("android") ANDROID("android")
+    @SerializedName("android") ANDROID("android"),
+    @SerializedName("ios") IOS("ios");
+
+    fun description(): String {
+        return when (this) {
+            ANDROID ->"Android"
+            IOS -> "iOS"
+        }
+    }
 }

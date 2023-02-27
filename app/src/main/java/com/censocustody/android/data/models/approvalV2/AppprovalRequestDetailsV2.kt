@@ -5,6 +5,7 @@ import com.censocustody.android.R
 import com.censocustody.android.common.UriWrapper
 import com.censocustody.android.common.evm.EvmAddress
 import com.censocustody.android.data.models.Chain
+import com.censocustody.android.data.models.DeviceType
 import com.censocustody.android.data.models.approval.*
 import com.censocustody.android.data.models.approvalV2.ApprovalSignature.Companion.approvalSignatureAdapterFactory
 import com.censocustody.android.data.models.approvalV2.ApprovalRequestDetailsV2.EvmTokenInfo.Companion.evmTokenInfoAdapterFactory
@@ -72,11 +73,17 @@ sealed class ApprovalRequestDetailsV2 {
             .toJson(this, ApprovalRequestDetailsV2::class.java)
 
     fun isDeviceKeyApprovalType() =
-        this is Login || this is VaultInvitation || this is PasswordReset
+        this is Login || this is PasswordReset
 
     companion object {
         val approvalRequestDetailsV2AdapterFactory: RuntimeTypeAdapterFactory<ApprovalRequestDetailsV2> = RuntimeTypeAdapterFactory.of(
             ApprovalRequestDetailsV2::class.java, "type"
+        ).registerSubtype(
+            AddDevice::class.java, "AddDevice"
+        ).registerSubtype(
+            OrgAdminPolicyUpdate::class.java, "OrgAdminPolicyUpdate"
+        ).registerSubtype(
+            VaultCreation::class.java, "VaultCreation"
         ).registerSubtype(
             VaultPolicyUpdate::class.java, "VaultPolicyUpdate"
         ).registerSubtype(
@@ -115,8 +122,6 @@ sealed class ApprovalRequestDetailsV2 {
             PasswordReset::class.java, "PasswordReset"
         ).registerSubtype(
             Login::class.java, "Login"
-        ).registerSubtype(
-            VaultInvitation::class.java, "VaultInvitation"
         )
     }
 
@@ -128,9 +133,33 @@ sealed class ApprovalRequestDetailsV2 {
         val feeSymbolInfo: EvmSymbolInfo
     )
 
+    data class AddDevice(
+        val name: String,
+        val email: String,
+        val jpegThumbnail: String,
+        val deviceGuid: String,
+        val deviceKey: String,
+        val deviceType: DeviceType
+    ) : ApprovalRequestDetailsV2()
+
+    data class OrgAdminPolicyUpdate(
+        val approvalPolicy: VaultApprovalPolicy,
+        val currentOnChainPolicies: List<OnChainPolicy>,
+        val signingData: List<SigningData>,
+        val chainFees: List<ChainFee>,
+    ) : ApprovalRequestDetailsV2()
+
+    data class VaultCreation(
+        val name: String,
+        val approvalPolicy: VaultApprovalPolicy,
+        val signingData: List<SigningData>,
+        val chainFees: List<ChainFee>,
+    ) : ApprovalRequestDetailsV2()
+
     data class VaultPolicyUpdate(
         val approvalPolicy: VaultApprovalPolicy,
         val currentOnChainPolicies: List<OnChainPolicy>,
+        val vaultName: String,
         val signingData: List<SigningData>,
         val chainFees: List<ChainFee>,
     ) : ApprovalRequestDetailsV2()
@@ -299,11 +328,6 @@ sealed class ApprovalRequestDetailsV2 {
 
     object PasswordReset : ApprovalRequestDetailsV2()
 
-    data class VaultInvitation(
-        val vaultGuid: String,
-        val vaultName: String,
-    ) : ApprovalRequestDetailsV2()
-
     data class Signer(
         val name: String,
         val email: String,
@@ -437,6 +461,7 @@ sealed class ApprovalRequestDetailsV2 {
             val chainId: Long,
             val safeNonce: Long,
             val vaultAddress: String?,
+            val orgVaultAddress: String? = null,
             val contractAddresses: List<ContractNameAndAddress> = listOf()
         )
 
