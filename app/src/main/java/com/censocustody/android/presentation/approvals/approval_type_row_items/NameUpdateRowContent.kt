@@ -11,12 +11,13 @@ import com.censocustody.android.presentation.approval_detail.approval_type_detai
 import com.censocustody.android.presentation.approvals.ApprovalContentHeader
 
 @Composable
-fun WalletNameUpdateRowContent(
+fun NameUpdateRowContent(
     header: String,
     oldName: String,
-    newName: String
+    newName: String,
+    isWallet: Boolean
 ) {
-    val fromToText = buildFromToDisplayText(from = oldName, to = newName, LocalContext.current)
+    val fromToText = buildFromToDisplayText(from = oldName, to = newName, LocalContext.current, isWallet)
 
     ApprovalContentHeader(header = header, topSpacing = 16, bottomSpacing = 8)
     ApprovalSubtitle(text = fromToText, fontSize = 20.sp)

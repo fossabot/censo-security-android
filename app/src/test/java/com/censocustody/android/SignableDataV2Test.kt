@@ -94,6 +94,16 @@ class SignableDataV2Test {
                         )
                     )
                 }
+                is ApprovalRequestDetailsV2.VaultNameUpdate -> {
+                    val dataToSend = details.toJson().toByteArray()
+                    assertEquals(
+                        disposition.retrieveSignableData().filterIsInstance<SignableDataResult.Offchain>().first(),
+                        SignableDataResult.Offchain(
+                            dataToSend = dataToSend,
+                            dataToSign = Hash.sha256(dataToSend)
+                        )
+                    )
+                }
                 else -> {}
             }
         }

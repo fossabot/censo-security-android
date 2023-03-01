@@ -240,4 +240,20 @@ class EvmConfigTransactionBuilderTest {
             EvmConfigTransactionBuilder.getPolicyUpdateExecutionFromModuleDataSafeHash(signingData.vaultAddress!!, walletAddress, txs, signingData).toHexString().lowercase()
         )
     }
+
+    @Test
+    fun `test name change`() {
+        val bytes = EvmConfigTransactionBuilder.getNameUpdateExecutionFromModuleData(
+            Keys.toChecksumAddress("0xd104a77e242eb36eb1010a13239153f776ba60a0"), "Secondary"
+        )
+        assertEquals(
+            "468721a7000000000000000000000000d104a77e242eb36eb1010a13239153f776ba60a000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000080000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000243afbdcf46a564b7dfe6c723534a83586e2d207f286faf878844be43d0be84644e25df99900000000000000000000000000000000000000000000000000000000",
+            bytes.toHexString()
+        )
+        assertEquals(
+            "62373bcd98254a756d0a774caf4c541ba07c0f467e14684a0aba83da10620745",
+            EvmConfigTransactionBuilder.getNameUpdateExecutionFromModuleDataSafeHash(signingData.vaultAddress!!, walletAddress, "Secondary", signingData).toHexString().lowercase()
+        )
+    }
+
 }
