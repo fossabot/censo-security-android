@@ -84,6 +84,16 @@ class SignableDataV2Test {
                         )
                     )
                 }
+                is ApprovalRequestDetailsV2.OrgAdminPolicyUpdate -> {
+                    val dataToSend = details.toJson().toByteArray()
+                    assertEquals(
+                        disposition.retrieveSignableData().filterIsInstance<SignableDataResult.Offchain>().first(),
+                        SignableDataResult.Offchain(
+                            dataToSend = dataToSend,
+                            dataToSign = Hash.sha256(dataToSend)
+                        )
+                    )
+                }
                 else -> {}
             }
         }
@@ -120,6 +130,16 @@ class SignableDataV2Test {
                     )
                 }
                 is ApprovalRequestDetailsV2.VaultPolicyUpdate -> {
+                    val dataToSend = details.toJson().toByteArray()
+                    assertEquals(
+                        disposition.retrieveSignableData().filterIsInstance<SignableDataResult.Offchain>().first(),
+                        SignableDataResult.Offchain(
+                            dataToSend = dataToSend,
+                            dataToSign = Hash.sha256(dataToSend)
+                        )
+                    )
+                }
+                is ApprovalRequestDetailsV2.OrgAdminPolicyUpdate -> {
                     val dataToSend = details.toJson().toByteArray()
                     assertEquals(
                         disposition.retrieveSignableData().filterIsInstance<SignableDataResult.Offchain>().first(),
@@ -193,7 +213,6 @@ class SignableDataV2Test {
             val dataToSend = when (request.details) {
                 is ApprovalRequestDetailsV2.Login -> (request.details as ApprovalRequestDetailsV2.Login).jwtToken
                 is ApprovalRequestDetailsV2.PasswordReset -> request.id
-                is ApprovalRequestDetailsV2.VaultInvitation -> (request.details as ApprovalRequestDetailsV2.VaultInvitation).vaultName
                 else -> ""
             }
             assertEquals(

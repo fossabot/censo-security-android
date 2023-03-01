@@ -168,9 +168,21 @@ fun ApprovalRowContent(
 ) {
 
     when (type) {
-        //WalletConfigPolicyUpdate
+        //AddDevice
+        is ApprovalRequestDetailsV2.AddDevice -> {
+            AddDeviceRowContent(header = type.getHeader(LocalContext.current), type.email)
+        }
+        //OrgAdminPolicyUpdate
+        is ApprovalRequestDetailsV2.OrgAdminPolicyUpdate -> {
+            OrgAdminPolicyUpdateRowContent(header = type.getHeader(LocalContext.current))
+        }
+        //VaultPolicyUpdate
+        is ApprovalRequestDetailsV2.VaultCreation -> {
+            VaultCreationRowContent(header = type.getHeader(LocalContext.current), type.name)
+        }
+        //VaultPolicyUpdate
         is ApprovalRequestDetailsV2.VaultPolicyUpdate -> {
-            VaultConfigPolicyUpdateRowContent(header = type.getHeader(LocalContext.current))
+            VaultConfigPolicyUpdateRowContent(header = type.getHeader(LocalContext.current), type.vaultName)
         }
         //Wallet Creation
         is ApprovalRequestDetailsV2.BitcoinWalletCreation,
@@ -263,14 +275,6 @@ fun ApprovalRowContent(
             )
         }
 
-        //AcceptVaultInvitation
-        is ApprovalRequestDetailsV2.VaultInvitation -> {
-            AcceptVaultInvitationRowContent(
-                header = type.getHeader(LocalContext.current),
-                vaultName = type.vaultName
-            )
-        }
-
         //Unknown
         ApprovalRequestDetailsV2.UnknownApprovalType -> {
             Text(text = type.getHeader(LocalContext.current), color = TextBlack)
@@ -282,7 +286,19 @@ fun ApprovalRowContent(
 fun ApprovalDetailContent(approval: ApprovalRequestV2, type: ApprovalRequestDetailsV2) {
 
     when (type) {
-        //WalletConfigPolicyUpdate
+        //AddDevice
+        is ApprovalRequestDetailsV2.AddDevice -> {
+            AddDeviceDetailContent(addDevice = type)
+        }
+        //OrgAdminPolicyUpdate
+        is ApprovalRequestDetailsV2.OrgAdminPolicyUpdate -> {
+            OrgAdminPolicyUpdateDetailContent(orgAdminPolicyUpdate = type)
+        }
+        //VaultPolicyUpdate
+        is ApprovalRequestDetailsV2.VaultCreation -> {
+            VaultCreationDetailContent(vaultCreation = type)
+        }
+        //VaultConfigPolicyUpdate
         is ApprovalRequestDetailsV2.VaultPolicyUpdate -> {
             VaultConfigPolicyUpdateDetailContent(vaultPolicyUpdate = type)
         }
@@ -398,11 +414,6 @@ fun ApprovalDetailContent(approval: ApprovalRequestV2, type: ApprovalRequestDeta
         //PasswordReset
         is ApprovalRequestDetailsV2.PasswordReset -> {
             PasswordResetDetailContent(type.getHeader(LocalContext.current))
-        }
-
-        //AcceptVaultInvitation
-        is ApprovalRequestDetailsV2.VaultInvitation -> {
-            AcceptVaultInvitationDetailContent(type.getHeader(LocalContext.current))
         }
 
         //Unknown
