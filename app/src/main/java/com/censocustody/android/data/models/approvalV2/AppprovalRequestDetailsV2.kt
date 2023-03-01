@@ -87,6 +87,8 @@ sealed class ApprovalRequestDetailsV2 {
         ).registerSubtype(
             VaultPolicyUpdate::class.java, "VaultPolicyUpdate"
         ).registerSubtype(
+            VaultNameUpdate::class.java, "VaultNameUpdate"
+        ).registerSubtype(
             BitcoinWalletCreation::class.java, "BitcoinWalletCreation"
         ).registerSubtype(
             EthereumWalletCreation::class.java, "EthereumWalletCreation"
@@ -162,6 +164,13 @@ sealed class ApprovalRequestDetailsV2 {
         val vaultName: String,
         val signingData: List<SigningData>,
         val chainFees: List<ChainFee>,
+    ) : ApprovalRequestDetailsV2()
+
+    data class VaultNameUpdate(
+        val oldName: String,
+        val newName: String,
+        val signingData: List<SigningData>,
+        val chainFees: List<ChainFee>?
     ) : ApprovalRequestDetailsV2()
 
     data class BitcoinWalletCreation(
