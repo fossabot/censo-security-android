@@ -21,6 +21,9 @@
     <string name="contact_censo">We are unable to verify your key. Please contact Censo directly to resolve this issue.</string>
 
     <string name="approvals">Approvals</string>
+    <string name="user_device">User and Device Info</string>
+    <string name="device_type">Device Type</string>
+    <string name="device_identifier">Device Identifier</string>
     <string name="content_des_account_icon">Account Icon</string>
     <string name="approve">Approve</string>
     <string name="deny">Deny</string>
@@ -30,8 +33,6 @@
     <string name="content_des_back_icon">Back Icon</string>
     <string name="requested_by">Requested By</string>
     <string name="initiated_by">Initiated By</string>
-    <string name="invited_by">Invited By</string>
-    <string name="invited_by_email">Invited By Email</string>
     <string name="nothing_to_approve">Nothing to approve</string>
     <string name="pull_to_refresh">Pull down to refresh approvals</string>
     <string name="content_des_pull_to_refresh_icon">Pull down to refresh icon</string>
@@ -72,7 +73,10 @@
     <string name="disable_transfer_balance_account_settings_update_approval_header">Disable Whitelist</string>
     <string name="enable_transfer_balance_account_settings_update_approval_header">Enable Whitelist</string>
     <string name="login_approval_header">Log In</string>
-    <string name="wallet_config_policy_update_approval_header">Update Administration Policy</string>
+    <string name="org_policy_update_approval_header">Update Org Policy</string>
+    <string name="vault_policy_creation_approval_header">Create Vault</string>
+    <string name="vault_policy_update_approval_header">Update Vault Policy</string>
+    <string name="add_new_device_approval_header">Add New Device</string>
     <string name="unknown_approval_header">Unknown</string>
 
     <string name="withdrawal_request_approval_header">Send %1$s %2$s</string>
@@ -82,7 +86,8 @@
     <string name="whitelisted_addresses_title">Whitelisted Addresses</string>
     <string name="no_whitelisted_addresses">No whitelisted addresses</string>
 
-    <string name="vault_approvers">Administrators</string>
+    <string name="org_admins">Org Administrators</string>
+    <string name="vault_managers">Vault Managers</string>
     <string name="approvals_required">Approvals Required</string>
 
     <string name="name">Name</string>
@@ -121,7 +126,6 @@
     <string name="security_message">To help protect your account\'s security Censo will never request any confidential information in regards to your account (such as password or secret recovery phrase).</string>
     <string name="email">Email</string>
 
-    <string name="accept_vault_invitation_approval_header">Accept Invitation</string>
     <string name="vault_name">Vault Name</string>
     <string name="password_reset_approval_header">Password Reset</string>
     <string name="start_over">Start over</string>

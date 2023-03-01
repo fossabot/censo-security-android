@@ -26,9 +26,21 @@ import java.util.*
 fun ApprovalRequestDetailsV2.getHeader(context: Context) =
 
     when (this) {
-        //WalletConfigPolicyUpdate
+        //AddDevice
+        is ApprovalRequestDetailsV2.AddDevice -> {
+            context.getString(R.string.add_new_device_approval_header)
+        }
+        //OrgAdminPolicyUpdate
+        is ApprovalRequestDetailsV2.OrgAdminPolicyUpdate -> {
+            context.getString(R.string.org_policy_update_approval_header)
+        }
+        //VaultCreation
+        is ApprovalRequestDetailsV2.VaultCreation -> {
+            context.getString(R.string.vault_policy_creation_approval_header)
+        }
+        //VaultConfigPolicyUpdate
         is ApprovalRequestDetailsV2.VaultPolicyUpdate -> {
-            context.getString(R.string.wallet_config_policy_update_approval_header)
+            context.getString(R.string.vault_policy_update_approval_header)
         }
         //Wallet Creation
         is ApprovalRequestDetailsV2.BitcoinWalletCreation,
@@ -129,10 +141,6 @@ fun ApprovalRequestDetailsV2.getHeader(context: Context) =
             context.getString(R.string.password_reset_approval_header)
         }
 
-        //AcceptVaultInvitation
-        is ApprovalRequestDetailsV2.VaultInvitation -> {
-            context.getString(R.string.accept_vault_invitation_approval_header)
-        }
         ApprovalRequestDetailsV2.UnknownApprovalType -> {
             context.getString(R.string.unknown_approval_header)
         }
@@ -168,7 +176,8 @@ fun ApprovalRequestDetailsV2.isUnknownTypeOrUIUnimplemented() =
 
 fun ApprovalRequestDetailsV2.getRowTitle(vaultName: String?, context: Context): String? =
     when (this) {
-        is ApprovalRequestDetailsV2.VaultInvitation -> this.vaultName.toVaultName(context)
+        is ApprovalRequestDetailsV2.VaultCreation -> this.name.toVaultName(context)
+        is ApprovalRequestDetailsV2.VaultPolicyUpdate -> this.vaultName.toVaultName(context)
         else -> vaultName?.toVaultName(context)
     }
 
@@ -248,7 +257,7 @@ fun List<ApprovalRequestDetailsV2.DestinationAddress>.retrieveDestinationsRowDat
     return destinationsList
 }
 
-fun List<ApprovalRequestDetailsV2.VaultSigner>.retrieveSlotRowData(): MutableList<RowData> {
+fun List<ApprovalRequestDetailsV2.VaultSigner>.retrieveRowData(): MutableList<RowData> {
     val approversList = mutableListOf<RowData>()
     if (isNotEmpty()) {
         for (approver in this.sortedBy { it.name }) {
@@ -264,7 +273,7 @@ fun List<ApprovalRequestDetailsV2.VaultSigner>.retrieveSlotRowData(): MutableLis
     return approversList
 }
 
-fun List<ApprovalRequestDetailsV2.Signer>.retrieveSlotSignerRowData(): MutableList<RowData> {
+fun List<ApprovalRequestDetailsV2.Signer>.retrieveSignerRowData(): MutableList<RowData> {
     val approversList = mutableListOf<RowData>()
     if (isNotEmpty()) {
         for (approver in this.sortedBy { it.name }) {
