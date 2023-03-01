@@ -196,10 +196,11 @@ fun ApprovalRowContent(
         //BalanceAccountNameUpdate
         is ApprovalRequestDetailsV2.EthereumWalletNameUpdate,
         is ApprovalRequestDetailsV2.PolygonWalletNameUpdate -> {
-            WalletNameUpdateRowContent(
+            NameUpdateRowContent(
                 header = type.getHeader(LocalContext.current),
                 oldName = type.walletNameOldAccountName(),
-                newName = type.walletNameNewAccountName()
+                newName = type.walletNameNewAccountName(),
+                isWallet = true
             )
         }
 
@@ -275,6 +276,15 @@ fun ApprovalRowContent(
             )
         }
 
+        is ApprovalRequestDetailsV2.VaultNameUpdate -> {
+            NameUpdateRowContent(
+                header = type.getHeader(LocalContext.current),
+                oldName = type.oldName,
+                newName = type.newName,
+                isWallet = false
+            )
+        }
+
         //Unknown
         ApprovalRequestDetailsV2.UnknownApprovalType -> {
             Text(text = type.getHeader(LocalContext.current), color = TextBlack)
@@ -326,10 +336,11 @@ fun ApprovalDetailContent(approval: ApprovalRequestV2, type: ApprovalRequestDeta
         //BalanceAccountNameUpdate
         is ApprovalRequestDetailsV2.EthereumWalletNameUpdate,
         is ApprovalRequestDetailsV2.PolygonWalletNameUpdate -> {
-            WalletNameUpdateDetailContent(
+            NameUpdateDetailContent(
                 header = type.getHeader(LocalContext.current),
                 oldName = type.walletNameOldAccountName(),
-                newName = type.walletNameNewAccountName()
+                newName = type.walletNameNewAccountName(),
+                isWallet = true
             )
         }
 
@@ -414,6 +425,15 @@ fun ApprovalDetailContent(approval: ApprovalRequestV2, type: ApprovalRequestDeta
         //PasswordReset
         is ApprovalRequestDetailsV2.PasswordReset -> {
             PasswordResetDetailContent(type.getHeader(LocalContext.current))
+        }
+
+        is ApprovalRequestDetailsV2.VaultNameUpdate -> {
+            NameUpdateDetailContent(
+                header = type.getHeader(LocalContext.current),
+                oldName = type.oldName,
+                newName = type.newName,
+                isWallet = false
+            )
         }
 
         //Unknown

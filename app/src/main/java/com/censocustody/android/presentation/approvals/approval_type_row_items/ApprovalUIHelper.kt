@@ -51,7 +51,7 @@ fun ApprovalRequestDetailsV2.getHeader(context: Context) =
         //BalanceAccountNameUpdate
         is ApprovalRequestDetailsV2.EthereumWalletNameUpdate,
         is ApprovalRequestDetailsV2.PolygonWalletNameUpdate -> {
-            context.getString(R.string.balance_account_name_update_approval_header)
+            context.getString(R.string.name_update_approval_header)
         }
 
         //CreateAddressBookEntry
@@ -139,6 +139,10 @@ fun ApprovalRequestDetailsV2.getHeader(context: Context) =
         //PasswordReset
         is ApprovalRequestDetailsV2.PasswordReset -> {
             context.getString(R.string.password_reset_approval_header)
+        }
+
+        is ApprovalRequestDetailsV2.VaultNameUpdate -> {
+            context.getString(R.string.name_update_approval_header)
         }
 
         ApprovalRequestDetailsV2.UnknownApprovalType -> {
@@ -238,8 +242,12 @@ fun String.nameToInitials() =
         }
     }
 
-fun buildFromToDisplayText(from: String, to: String, context: Context): String {
-    return "${from.toWalletName(context)} ${context.getString(R.string.to).lowercase()} ${to.toWalletName(context)}"
+fun buildFromToDisplayText(from: String, to: String, context: Context, isWallet: Boolean): String {
+    return if (isWallet) {
+        "${from.toWalletName(context)} ${context.getString(R.string.to).lowercase()} ${to.toWalletName(context)}"
+    } else {
+        "${from.toVaultName(context)} ${context.getString(R.string.to).lowercase()} ${to.toVaultName(context)}"
+    }
 }
 
 fun List<ApprovalRequestDetailsV2.DestinationAddress>.retrieveDestinationsRowData() : MutableList<RowData> {

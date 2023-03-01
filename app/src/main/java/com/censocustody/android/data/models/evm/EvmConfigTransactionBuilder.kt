@@ -4,6 +4,7 @@ import com.censocustody.android.common.evm.*
 import com.censocustody.android.common.pad
 import com.censocustody.android.data.models.approvalV2.ApprovalRequestDetailsV2
 import org.bouncycastle.util.encoders.Hex
+import org.web3j.crypto.Hash
 import java.math.BigInteger
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
@@ -124,6 +125,35 @@ object EvmConfigTransactionBuilder {
         )
     }
 
+    fun getNameUpdateExecutionFromModuleData(
+        safeAddress: String,
+        newName: String
+    ): ByteArray {
+        val data = setNameHash(newName)
+        return execTransactionFromModuleTx(
+            safeAddress,
+            BigInteger.ZERO,
+            data,
+            Operation.CALL
+        )
+    }
+
+    fun getNameUpdateExecutionFromModuleDataSafeHash(
+        verifyingAddress: String,
+        safeAddress: String,
+        newName: String,
+        signingData: ApprovalRequestDetailsV2.SigningData.EthereumTransaction
+    ): ByteArray {
+        return EvmTransactionUtil.computeSafeTransactionHash(
+            chainId = signingData.chainId,
+            safeAddress = verifyingAddress,
+            to = safeAddress,
+            value = BigInteger.ZERO,
+            data = getNameUpdateExecutionFromModuleData(safeAddress, newName),
+            nonce = signingData.safeNonce.toBigInteger()
+        )
+    }
+
     private fun getPolicyChangeDataList(changes: List<SafeTx>): List<ByteArray> {
         return changes.map { change ->
             when (change) {
@@ -140,6 +170,14 @@ object EvmConfigTransactionBuilder {
         val dataBuf = ByteBuffer.allocate(4 + 32)
         dataBuf.put(Hex.decode("e19a9dd9"))
         dataBuf.putPadded(Hex.decode(guardAddress.clean()))
+        return dataBuf.array()
+    }
+
+    private fun setNameHash(name: String): ByteArray {
+        // setNameHash(bytes32)
+        val dataBuf = ByteBuffer.allocate(4 + 32)
+        dataBuf.put(Hex.decode("3afbdcf4"))
+        dataBuf.putPadded(Hash.sha3(name.toByteArray()))
         return dataBuf.array()
     }
 
