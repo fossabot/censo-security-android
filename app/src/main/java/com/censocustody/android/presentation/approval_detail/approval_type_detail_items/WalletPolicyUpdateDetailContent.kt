@@ -15,7 +15,7 @@ import com.censocustody.android.presentation.components.FactRow
 import com.censocustody.android.presentation.components.FactsData
 import com.censocustody.android.R
 import com.censocustody.android.data.models.approvalV2.ApprovalRequestDetailsV2
-import com.censocustody.android.presentation.approvals.approval_type_row_items.retrieveSlotSignerRowData
+import com.censocustody.android.presentation.approvals.approval_type_row_items.retrieveSignerRowData
 import com.censocustody.android.presentation.components.RowData
 
 @Composable
@@ -71,7 +71,7 @@ fun generateAccountPolicyUpdateRows(
     //endregion
 
     //region Approvers Row
-    val approversList = approvers.retrieveSlotSignerRowData()
+    val approversList = approvers.retrieveSignerRowData()
     if (approversList.isEmpty()) {
         approversList.add(
             RowData(

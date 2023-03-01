@@ -339,32 +339,26 @@ fun ApprovalStatus(
 ) {
     val facts = mutableListOf<RowData>()
     vaultName?.let { facts.add(RowData(title = stringResource(R.string.vault_name), value = vaultName)) }
-    val sectionTitle = if (requestType is ApprovalRequestDetailsV2.VaultInvitation) {
-        facts.add(RowData(title = stringResource(R.string.invited_by), value = requestedByName))
-        facts.add(RowData(title = stringResource(R.string.invited_by_email), value = requestedBy))
-        ""
-    } else {
-        facts.add(
-            RowData(
-                title = if (isInitiationRequest) {
-                    stringResource(R.string.initiated_by)
-                } else {
-                    stringResource(R.string.requested_by)
-                },
-                value = requestedBy
-            )
+    val sectionTitle = stringResource(R.string.status)
+    facts.add(
+        RowData(
+            title = if (isInitiationRequest) {
+                stringResource(R.string.initiated_by)
+            } else {
+                stringResource(R.string.requested_by)
+            },
+            value = requestedBy
         )
-        facts.add(
-            RowData(
-                title = stringResource(R.string.approvals_received),
-                value = "$approvalsReceived ${stringResource(id = R.string.of)} $totalApprovals",
-            ))
-        facts.add(RowData(
-            title = stringResource(R.string.denials_received),
-            value = "$denialsReceived ${stringResource(id = R.string.of)} $totalApprovals",
+    )
+    facts.add(
+        RowData(
+            title = stringResource(R.string.approvals_received),
+            value = "$approvalsReceived ${stringResource(id = R.string.of)} $totalApprovals",
         ))
-        stringResource(R.string.status)
-    }
+    facts.add(RowData(
+        title = stringResource(R.string.denials_received),
+        value = "$denialsReceived ${stringResource(id = R.string.of)} $totalApprovals",
+    ))
     expiresIn?.let { facts.add(
         RowData(title = stringResource(R.string.expires_in), value = expiresIn))  }
 
