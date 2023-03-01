@@ -21,5 +21,5 @@ fun getInvalidTestingPhrase() = ExampleMnemonicAndKeys.BAD_MNEMONIC
 
 fun getWalletSigner() = WalletSigner(
     publicKey = ExampleMnemonicAndKeys.PUBLIC_KEY,
-    chain = Chain.censo
+    chain = Chain.offchain
 )

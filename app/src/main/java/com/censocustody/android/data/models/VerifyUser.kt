@@ -61,7 +61,7 @@ data class WalletPublicKey(
         when (chain) {
             Chain.bitcoin -> StoredKeyData.BITCOIN_KEY
             Chain.ethereum -> StoredKeyData.ETHEREUM_KEY
-            Chain.censo -> StoredKeyData.CENSO_KEY
+            Chain.offchain -> StoredKeyData.OFFCHAIN_KEY
             else -> ""
         }
 }
