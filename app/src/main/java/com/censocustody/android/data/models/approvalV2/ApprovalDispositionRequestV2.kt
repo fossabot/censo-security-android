@@ -282,6 +282,39 @@ data class ApprovalDispositionRequestV2(
                     )
                 )
             }
+            is ApprovalRequestDetailsV2.VaultNameUpdate -> {
+                val offchainDataToSend = requestType.toJson().toByteArray()
+                requestType.signingData.mapNotNull { signingData ->
+                    when (signingData) {
+                        is ApprovalRequestDetailsV2.SigningData.EthereumSigningData -> {
+                            SignableDataResult.Ethereum(
+                                EvmConfigTransactionBuilder.getNameUpdateExecutionFromModuleDataSafeHash(
+                                    signingData.transaction.orgVaultAddress!!,
+                                    signingData.transaction.vaultAddress!!,
+                                    requestType.newName,
+                                    signingData.transaction
+                                )
+                            )
+                        }
+                        is ApprovalRequestDetailsV2.SigningData.PolygonSigningData -> {
+                            SignableDataResult.Polygon(
+                                EvmConfigTransactionBuilder.getNameUpdateExecutionFromModuleDataSafeHash(
+                                    signingData.transaction.orgVaultAddress!!,
+                                    signingData.transaction.vaultAddress!!,
+                                    requestType.newName,
+                                    signingData.transaction
+                                )
+                            )
+                        }
+                        else -> null
+                    }
+                } + listOf(
+                    SignableDataResult.Offchain(
+                        dataToSend = offchainDataToSend,
+                        dataToSign = Hash.sha256(offchainDataToSend)
+                    )
+                )
+            }
             else -> listOf()
         }
     }
