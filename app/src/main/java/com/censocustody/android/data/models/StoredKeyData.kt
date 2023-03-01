@@ -28,7 +28,7 @@ data class StoredKeyData(
 
         const val ETHEREUM_KEY = "ethereum_key"
         const val BITCOIN_KEY = "bitcoin_key"
-        const val CENSO_KEY = "censo_key"
+        const val OFFCHAIN_KEY = "offchain_key"
         const val ROOT_SEED = "root_seed"
     }
 }

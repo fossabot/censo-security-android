@@ -1,8 +1,6 @@
 package com.censocustody.android.viewModel
 
 import com.nhaarman.mockitokotlin2.any
-import com.nhaarman.mockitokotlin2.times
-import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
 import com.censocustody.android.*
 import com.censocustody.android.common.BioPromptReason
@@ -69,7 +67,7 @@ class KeyManagementViewModelTest : BaseViewModelTest() {
     private val defaultErrorMessage = "test_err_message"
 
     private val validPublicKey = WalletPublicKey(
-        chain = Chain.censo,
+        chain = Chain.offchain,
         key = "F7JuLRBbyGAS9nAhDdfNX1LbckBAmCnKMB2xTdZfQS1n"
     )
 
