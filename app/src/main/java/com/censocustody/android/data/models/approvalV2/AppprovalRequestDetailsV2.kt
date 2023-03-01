@@ -85,6 +85,12 @@ sealed class ApprovalRequestDetailsV2 {
         ).registerSubtype(
             VaultCreation::class.java, "VaultCreation"
         ).registerSubtype(
+            AddDevice::class.java, "AddDevice"
+        ).registerSubtype(
+            OrgAdminPolicyUpdate::class.java, "OrgAdminPolicyUpdate"
+        ).registerSubtype(
+            VaultCreation::class.java, "VaultCreation"
+        ).registerSubtype(
             VaultPolicyUpdate::class.java, "VaultPolicyUpdate"
         ).registerSubtype(
             VaultNameUpdate::class.java, "VaultNameUpdate"
