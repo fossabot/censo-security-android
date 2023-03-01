@@ -159,6 +159,16 @@ class SignableDataV2Test {
                         )
                     )
                 }
+                is ApprovalRequestDetailsV2.OrgAdminPolicyUpdate -> {
+                    val dataToSend = details.toJson().toByteArray()
+                    assertEquals(
+                        disposition.retrieveSignableData().filterIsInstance<SignableDataResult.Offchain>().first(),
+                        SignableDataResult.Offchain(
+                            dataToSend = dataToSend,
+                            dataToSign = Hash.sha256(dataToSend)
+                        )
+                    )
+                }
                 else -> {}
             }
         }

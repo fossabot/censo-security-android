@@ -50,6 +50,13 @@ data class ApprovalDispositionRequestV2(
                     dataToSign = Hash.sha256(dataToSend)))
             }
 
+            is ApprovalRequestDetailsV2.AddDevice -> {
+                val dataToSend = requestType.toJson().toByteArray()
+                listOf(SignableDataResult.Offchain(
+                    dataToSend = dataToSend,
+                    dataToSign = Hash.sha256(dataToSend)))
+            }
+
             is ApprovalRequestDetailsV2.BitcoinWithdrawalRequest -> {
                 listOf(
                     SignableDataResult.Bitcoin(
