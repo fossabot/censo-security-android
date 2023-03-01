@@ -96,12 +96,12 @@ object EvmConfigTransactionBuilder {
     }
 
     fun getPolicyUpdateExecutionFromModuleData(
-        walletAddress: String,
+        safeAddress: String,
         txs: List<SafeTx>
     ): ByteArray {
-        val (data, isMultiSend) = getPolicyUpdateData(walletAddress, txs)
+        val (data, isMultiSend) = getPolicyUpdateData(safeAddress, txs)
         return execTransactionFromModuleTx(
-            if (isMultiSend) GnosisSafeConstants.multiSendCallOnlyAddress else walletAddress,
+            if (isMultiSend) GnosisSafeConstants.multiSendCallOnlyAddress else safeAddress,
             BigInteger.ZERO,
             data,
             if (isMultiSend) Operation.DELEGATECALL else Operation.CALL
@@ -109,16 +109,17 @@ object EvmConfigTransactionBuilder {
     }
 
     fun getPolicyUpdateExecutionFromModuleDataSafeHash(
-        walletAddress: String,
+        verifyingAddress: String,
+        safeAddress: String,
         txs: List<SafeTx>,
         signingData: ApprovalRequestDetailsV2.SigningData.EthereumTransaction
     ): ByteArray {
         return EvmTransactionUtil.computeSafeTransactionHash(
             chainId = signingData.chainId,
-            safeAddress = signingData.vaultAddress!!,
-            to = walletAddress,
+            safeAddress = verifyingAddress,
+            to = safeAddress,
             value = BigInteger.ZERO,
-            data = getPolicyUpdateExecutionFromModuleData(walletAddress, txs),
+            data = getPolicyUpdateExecutionFromModuleData(safeAddress, txs),
             nonce = signingData.safeNonce.toBigInteger()
         )
     }
