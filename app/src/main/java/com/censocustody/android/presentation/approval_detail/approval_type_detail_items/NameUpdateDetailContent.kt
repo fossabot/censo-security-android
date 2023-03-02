@@ -8,11 +8,12 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.censocustody.android.presentation.approvals.ApprovalContentHeader
+import com.censocustody.android.presentation.approvals.approval_type_row_items.RenameType
 import com.censocustody.android.presentation.approvals.approval_type_row_items.buildFromToDisplayText
 
 @Composable
-fun NameUpdateDetailContent(header: String, oldName: String, newName: String, isWallet: Boolean) {
-    val fromToText = buildFromToDisplayText(from = oldName, to = newName, LocalContext.current, isWallet)
+fun NameUpdateDetailContent(header: String, oldName: String, newName: String, renameType: RenameType) {
+    val fromToText = buildFromToDisplayText(from = oldName, to = newName, LocalContext.current, renameType)
 
     ApprovalContentHeader(header = header, topSpacing = 24, bottomSpacing = 36)
     ApprovalSubtitle(text = fromToText, fontSize = 20.sp)
