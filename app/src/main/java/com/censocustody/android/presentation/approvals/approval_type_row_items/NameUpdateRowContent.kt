@@ -15,9 +15,9 @@ fun NameUpdateRowContent(
     header: String,
     oldName: String,
     newName: String,
-    isWallet: Boolean
+    renameType: RenameType
 ) {
-    val fromToText = buildFromToDisplayText(from = oldName, to = newName, LocalContext.current, isWallet)
+    val fromToText = buildFromToDisplayText(from = oldName, to = newName, LocalContext.current, renameType)
 
     ApprovalContentHeader(header = header, topSpacing = 16, bottomSpacing = 8)
     ApprovalSubtitle(text = fromToText, fontSize = 20.sp)

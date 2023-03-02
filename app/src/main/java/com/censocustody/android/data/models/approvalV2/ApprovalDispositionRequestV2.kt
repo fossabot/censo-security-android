@@ -38,22 +38,12 @@ data class ApprovalDispositionRequestV2(
 
             is ApprovalRequestDetailsV2.BitcoinWalletCreation,
             is ApprovalRequestDetailsV2.EthereumWalletCreation,
-            is ApprovalRequestDetailsV2.PolygonWalletCreation -> {
-                val dataToSend = requestType.toJson().toByteArray()
-                listOf(SignableDataResult.Offchain(
-                    dataToSend = dataToSend,
-                    dataToSign = Hash.sha256(dataToSend)))
-            }
-
+            is ApprovalRequestDetailsV2.PolygonWalletCreation,
+            is ApprovalRequestDetailsV2.VaultCreation,
             is ApprovalRequestDetailsV2.CreateAddressBookEntry,
-            is ApprovalRequestDetailsV2.DeleteAddressBookEntry -> {
-                val dataToSend = requestType.toJson().toByteArray()
-                listOf(SignableDataResult.Offchain(
-                    dataToSend = dataToSend,
-                    dataToSign = Hash.sha256(dataToSend)))
-            }
-
-            is ApprovalRequestDetailsV2.AddDevice -> {
+            is ApprovalRequestDetailsV2.DeleteAddressBookEntry,
+            is ApprovalRequestDetailsV2.AddDevice,
+            is ApprovalRequestDetailsV2.OrgNameUpdate -> {
                 val dataToSend = requestType.toJson().toByteArray()
                 listOf(SignableDataResult.Offchain(
                     dataToSend = dataToSend,
@@ -234,13 +224,6 @@ data class ApprovalDispositionRequestV2(
                         dataToSign = Hash.sha256(offchainDataToSend)
                     )
                 )
-            }
-
-            is ApprovalRequestDetailsV2.VaultCreation -> {
-                val dataToSend = requestType.toJson().toByteArray()
-                listOf(SignableDataResult.Offchain(
-                    dataToSend = dataToSend,
-                    dataToSign = Hash.sha256(dataToSend)))
             }
 
             is ApprovalRequestDetailsV2.VaultPolicyUpdate -> {
