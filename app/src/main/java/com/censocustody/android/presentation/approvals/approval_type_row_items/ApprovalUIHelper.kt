@@ -49,9 +49,11 @@ fun ApprovalRequestDetailsV2.getHeader(context: Context) =
             context.getString(R.string.balance_account_creation_approval_header)
         }
         //BalanceAccountNameUpdate
-        is ApprovalRequestDetailsV2.EthereumWalletNameUpdate,
+        is ApprovalRequestDetailsV2.EthereumWalletNameUpdate -> {
+            context.getString(R.string.ethereum_wallet_name_update_approval_header)
+        }
         is ApprovalRequestDetailsV2.PolygonWalletNameUpdate -> {
-            context.getString(R.string.name_update_approval_header)
+            context.getString(R.string.polygon_wallet_name_update_approval_header)
         }
 
         //CreateAddressBookEntry
@@ -142,7 +144,7 @@ fun ApprovalRequestDetailsV2.getHeader(context: Context) =
         }
 
         is ApprovalRequestDetailsV2.VaultNameUpdate -> {
-            context.getString(R.string.name_update_approval_header)
+            context.getString(R.string.vault_name_update_approval_header)
         }
 
         ApprovalRequestDetailsV2.UnknownApprovalType -> {
