@@ -69,6 +69,7 @@
     <string name="ethereum_wallet_name_update_approval_header">Rename Ethereum Wallet</string>
     <string name="polygon_wallet_name_update_approval_header">Rename Polygon Wallet</string>
     <string name="vault_name_update_approval_header">Rename Vault</string>
+    <string name="org_name_update_approval_header">Rename Organization</string>
     <string name="balance_account_policy_update_approval_header">Update Transfer Approvals</string>
     <string name="disable_dapp_balance_account_settings_update_approval_header">Disable dApp Access</string>
     <string name="enable_dapp_balance_account_settings_update_approval_header">Enable dApp Access</string>

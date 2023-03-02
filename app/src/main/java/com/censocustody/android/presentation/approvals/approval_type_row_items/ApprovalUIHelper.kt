@@ -147,6 +147,10 @@ fun ApprovalRequestDetailsV2.getHeader(context: Context) =
             context.getString(R.string.vault_name_update_approval_header)
         }
 
+        is ApprovalRequestDetailsV2.OrgNameUpdate -> {
+            context.getString(R.string.org_name_update_approval_header)
+        }
+
         ApprovalRequestDetailsV2.UnknownApprovalType -> {
             context.getString(R.string.unknown_approval_header)
         }
@@ -244,11 +248,17 @@ fun String.nameToInitials() =
         }
     }
 
-fun buildFromToDisplayText(from: String, to: String, context: Context, isWallet: Boolean): String {
-    return if (isWallet) {
-        "${from.toWalletName(context)} ${context.getString(R.string.to).lowercase()} ${to.toWalletName(context)}"
-    } else {
-        "${from.toVaultName(context)} ${context.getString(R.string.to).lowercase()} ${to.toVaultName(context)}"
+enum class RenameType {
+    Wallet,
+    Vault,
+    Org
+}
+
+fun buildFromToDisplayText(from: String, to: String, context: Context, renameType: RenameType): String {
+    return when (renameType) {
+        RenameType.Wallet -> "${from.toWalletName(context)} ${context.getString(R.string.to).lowercase()} ${to.toWalletName(context)}"
+        RenameType.Vault -> "${from.toVaultName(context)} ${context.getString(R.string.to).lowercase()} ${to.toVaultName(context)}"
+        RenameType.Org -> "$from ${context.getString(R.string.to).lowercase()} $to"
     }
 }
 
