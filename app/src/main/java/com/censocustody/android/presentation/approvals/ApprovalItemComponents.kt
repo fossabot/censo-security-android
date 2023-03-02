@@ -200,7 +200,7 @@ fun ApprovalRowContent(
                 header = type.getHeader(LocalContext.current),
                 oldName = type.walletNameOldAccountName(),
                 newName = type.walletNameNewAccountName(),
-                isWallet = true
+                renameType = RenameType.Wallet
             )
         }
 
@@ -281,7 +281,16 @@ fun ApprovalRowContent(
                 header = type.getHeader(LocalContext.current),
                 oldName = type.oldName,
                 newName = type.newName,
-                isWallet = false
+                renameType = RenameType.Vault
+            )
+        }
+
+        is ApprovalRequestDetailsV2.OrgNameUpdate -> {
+            NameUpdateRowContent(
+                header = type.getHeader(LocalContext.current),
+                oldName = type.oldName,
+                newName = type.newName,
+                renameType = RenameType.Org
             )
         }
 
@@ -340,7 +349,7 @@ fun ApprovalDetailContent(approval: ApprovalRequestV2, type: ApprovalRequestDeta
                 header = type.getHeader(LocalContext.current),
                 oldName = type.walletNameOldAccountName(),
                 newName = type.walletNameNewAccountName(),
-                isWallet = true
+                renameType = RenameType.Wallet
             )
         }
 
@@ -432,7 +441,16 @@ fun ApprovalDetailContent(approval: ApprovalRequestV2, type: ApprovalRequestDeta
                 header = type.getHeader(LocalContext.current),
                 oldName = type.oldName,
                 newName = type.newName,
-                isWallet = false
+                renameType = RenameType.Vault
+            )
+        }
+
+        is ApprovalRequestDetailsV2.OrgNameUpdate -> {
+            NameUpdateDetailContent(
+                header = type.getHeader(LocalContext.current),
+                oldName = type.oldName,
+                newName = type.newName,
+                renameType = RenameType.Org
             )
         }
 
