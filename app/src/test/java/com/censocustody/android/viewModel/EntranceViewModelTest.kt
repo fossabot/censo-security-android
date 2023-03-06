@@ -74,7 +74,10 @@ class EntranceViewModelTest : BaseViewModelTest() {
         loginName = "jasonson",
         organization = Organization(id = "0987659876", name = "Main Company"),
         publicKeys = emptyList(),
-        deviceKey = devicePublicKey
+        deviceKeyInfo = DeviceKeyInfo(
+            devicePublicKey, true, null
+        ),
+        shardingPolicy = null
     )
 
     private val validSolanaPublicKey = WalletPublicKey(

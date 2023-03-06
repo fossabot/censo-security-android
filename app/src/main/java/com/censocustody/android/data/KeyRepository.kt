@@ -195,7 +195,7 @@ class KeyRepositoryImpl(
         val signedData = encryptionManager.signKeysForUpload(email, signature, walletSigners)
         return retrieveApiResource {
             brooklynApiService.addWalletSigner(
-                Signers(walletSigners, BaseWrapper.encodeToBase64(signedData))
+                Signers(walletSigners, BaseWrapper.encodeToBase64(signedData), share = null)
             )
         }
     }
