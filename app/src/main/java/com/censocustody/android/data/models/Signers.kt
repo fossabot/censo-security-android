@@ -6,7 +6,8 @@ import com.censocustody.android.common.BaseWrapper
 //order of the wallet signers in signers must match how we append bytes of keys together
 data class Signers(
     val signers: List<WalletSigner>,
-    val signature: String
+    val signature: String,
+    val share: Share?
 ) {
     companion object {
         fun retrieveDataToSign(walletSigners: List<WalletSigner>) =
