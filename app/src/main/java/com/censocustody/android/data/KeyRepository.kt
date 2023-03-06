@@ -51,7 +51,7 @@ interface KeyRepository {
     suspend fun uploadKeys(
         walletSigners: List<WalletSigner>,
         signature: Signature
-    ): Resource<Signers>
+    ): Resource<Unit>
 
     suspend fun signPublicKeys(
         publicKeys: List<WalletSigner?>,
@@ -190,7 +190,7 @@ class KeyRepositoryImpl(
         }
     }
 
-    override suspend fun uploadKeys(walletSigners: List<WalletSigner>, signature: Signature): Resource<Signers> {
+    override suspend fun uploadKeys(walletSigners: List<WalletSigner>, signature: Signature): Resource<Unit> {
         val email = userRepository.retrieveUserEmail()
         val signedData = encryptionManager.signKeysForUpload(email, signature, walletSigners)
         return retrieveApiResource {

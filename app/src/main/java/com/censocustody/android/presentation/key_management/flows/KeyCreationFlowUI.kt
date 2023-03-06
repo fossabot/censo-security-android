@@ -29,7 +29,7 @@ fun moveUserToNextCreationScreen(flowStep: KeyCreationFlowStep) =
 
 fun moveUserToPreviousCreationScreen(
     flowStep: KeyCreationFlowStep,
-    addWalletSignerResult: Resource<Signers>) =
+    addWalletSignerResult: Resource<Unit>) =
     when (flowStep) {
         KeyCreationFlowStep.ENTRY_STEP -> KeyCreationFlowStep.UNINITIALIZED
         KeyCreationFlowStep.COPY_PHRASE_STEP,
@@ -66,7 +66,7 @@ fun KeyCreationFlowUI(
     wordInput: String,
     wordVerificationErrorEnabled: Boolean,
     retryKeyCreation: () -> Unit,
-    keyCreationState: Resource<Signers>
+    keyCreationState: Resource<Unit>
 ) {
 
     val screenTitle = when (phraseVerificationFlowStep) {

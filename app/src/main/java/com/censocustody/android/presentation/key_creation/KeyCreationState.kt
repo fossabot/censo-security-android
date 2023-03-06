@@ -17,5 +17,5 @@ data class KeyCreationState(
     val walletSigners: List<WalletSigner> = emptyList(),
 
     //API calls
-    val uploadingKeyProcess: Resource<Signers> = Resource.Uninitialized,
+    val uploadingKeyProcess: Resource<Unit> = Resource.Uninitialized,
 )
