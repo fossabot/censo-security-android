@@ -1,5 +1,17 @@
 package com.censocustody.android.data.models
 
+data class ShardingPolicy(
+    val policyRevisionId: String,
+    val threshold: Int,
+    val admins: List<String>
+)
+
+data class DeviceKeyInfo(
+    val key: String,
+    val approved: Boolean,
+    val bootstrapKey: String?,
+)
+
 data class VerifyUser(
     val fullName: String?,
     val hasApprovalPermission: Boolean?,
@@ -8,7 +20,9 @@ data class VerifyUser(
     val organization: Organization?,
     val publicKeys: List<WalletPublicKey?>?,
     val useStaticKey: Boolean?,
-    val deviceKey: String?
+    val deviceKeyInfo: DeviceKeyInfo?,
+    // if this come back as null, then this is the bootstrap user for the org they belong to.
+    val shardingPolicy: ShardingPolicy?
 ) {
     fun compareAgainstLocalKeys(hashMap: HashMap<String, String>): Boolean {
         if (publicKeys.isNullOrEmpty()) {
