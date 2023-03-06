@@ -12,7 +12,7 @@ data class KeysUploadState(
     val walletSigners: List<WalletSigner> = emptyList(),
 
     //API calls
-    val addWalletSigner: Resource<Signers> = Resource.Uninitialized,
+    val addWalletSigner: Resource<Unit> = Resource.Uninitialized,
 
     //Utility state
     val triggerBioPrompt: Resource<CryptoObject> = Resource.Uninitialized,
