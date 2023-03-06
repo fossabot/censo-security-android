@@ -15,7 +15,7 @@ interface UserRepository {
     suspend fun saveToken(token: String)
     suspend fun verifyUser(): Resource<VerifyUser>
     suspend fun getWalletSigners(): Resource<List<WalletSigner?>>
-    suspend fun addWalletSigner(walletSigners: List<WalletSigner>, signature: Signature): Resource<Signers>
+    suspend fun addWalletSigner(walletSigners: List<WalletSigner>, signature: Signature): Resource<Unit>
     suspend fun userLoggedIn(): Boolean
     suspend fun setUserLoggedIn()
     suspend fun logOut(): Boolean
@@ -30,7 +30,7 @@ interface UserRepository {
     suspend fun saveDeviceId(email: String, deviceId: String)
     suspend fun saveDevicePublicKey(email: String, publicKey: String)
     suspend fun userHasDeviceIdSaved(email: String) : Boolean
-    suspend fun addUserDevice(userDevice: UserDevice) : Resource<UserDevice>
+    suspend fun addUserDevice(userDevice: UserDevice) : Resource<Unit>
     suspend fun retrieveUserDevicePublicKey(email: String) : String
 }
 
@@ -100,7 +100,7 @@ class UserRepositoryImpl(
     override suspend fun getWalletSigners(): Resource<List<WalletSigner?>> =
         retrieveApiResource { api.walletSigners() }
 
-    override suspend fun addWalletSigner(walletSigners: List<WalletSigner>, signature: Signature): Resource<Signers> {
+    override suspend fun addWalletSigner(walletSigners: List<WalletSigner>, signature: Signature): Resource<Unit> {
         val email = retrieveUserEmail()
         val signedData = encryptionManager.signKeysForUpload(email, signature, walletSigners)
         return retrieveApiResource {
@@ -169,7 +169,7 @@ class UserRepositoryImpl(
     }
 
 
-    override suspend fun addUserDevice(userDevice: UserDevice): Resource<UserDevice> {
+    override suspend fun addUserDevice(userDevice: UserDevice): Resource<Unit> {
         return retrieveApiResource {
             api.addUserDevice(userDevice)
         }

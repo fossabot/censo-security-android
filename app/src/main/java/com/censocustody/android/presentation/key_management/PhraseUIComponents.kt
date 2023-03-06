@@ -348,7 +348,7 @@ fun ConfirmKeyUI(
 
 @Composable
 fun AllSetUI(
-    allSetState: Resource<Signers>,
+    allSetState: Resource<Unit>,
     retry: () -> Unit,
     onNavigate: () -> Unit,
     loadingText: String? = null
