@@ -48,7 +48,7 @@ fun KeyRecoveryFlowUI(
     wordInput: String,
     wordVerificationErrorEnabled: Boolean,
     retryKeyRecovery: () -> Unit,
-    keyRecoveryState: Resource<Signers>
+    keyRecoveryState: Resource<Unit>
 ) {
     val screenTitle = when (keyRecoveryFlowStep) {
         KeyRecoveryFlowStep.VERIFY_WORDS_STEP,
