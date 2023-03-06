@@ -1,9 +1,6 @@
 package com.censocustody.android
 
-import com.censocustody.android.data.models.Chain
-import com.censocustody.android.data.models.Organization
-import com.censocustody.android.data.models.VerifyUser
-import com.censocustody.android.data.models.WalletPublicKey
+import com.censocustody.android.data.models.*
 import com.censocustody.android.data.models.approvalV2.ApprovalRequestDetailsV2
 import com.censocustody.android.data.models.approvalV2.ApprovalRequestV2
 import com.censocustody.android.data.models.approvalV2.ApprovalRequestV2Deserializer
@@ -29,7 +26,10 @@ fun getVerifyUser() = VerifyUser(
     ),
     publicKeys = listOf(WalletPublicKey(key = ExampleMnemonicAndKeys.PUBLIC_KEY, chain = Chain.offchain)),
     useStaticKey = false,
-    deviceKey = ""
+    deviceKeyInfo = DeviceKeyInfo(
+        "", false, null
+    ),
+    shardingPolicy = null
 )
 
 class ExampleMnemonicAndKeys {
