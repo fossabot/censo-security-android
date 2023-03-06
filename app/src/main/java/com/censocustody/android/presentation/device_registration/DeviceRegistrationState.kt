@@ -8,7 +8,7 @@ import com.censocustody.android.data.models.UserDevice
 import java.security.Signature
 
 data class DeviceRegistrationState(
-    val addUserDevice: Resource<UserDevice> = Resource.Uninitialized,
+    val addUserDevice: Resource<Unit> = Resource.Uninitialized,
     //User Photo
     val capturingDeviceKey: Resource<Boolean> = Resource.Uninitialized,
     val triggerImageCapture: Resource<Unit> = Resource.Uninitialized,

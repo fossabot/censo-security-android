@@ -74,7 +74,7 @@ interface BrooklynApiService {
 
     @POST("v1/user-devices")
     @Headers(AUTH_REQUIRED)
-    suspend fun addUserDevice(@Body userDevice: UserDevice): RetrofitResponse<UserDevice>
+    suspend fun addUserDevice(@Body userDevice: UserDevice): RetrofitResponse<Unit>
 
     @GET("v1/wallet-signers")
     @Headers(AUTH_REQUIRED)
@@ -82,7 +82,7 @@ interface BrooklynApiService {
 
     @POST("v3/wallet-signers")
     @Headers(AUTH_REQUIRED)
-    suspend fun addWalletSigner(@Body signers: Signers): RetrofitResponse<Signers>
+    suspend fun addWalletSigner(@Body signers: Signers): RetrofitResponse<Unit>
 
     @GET("v2/approval-requests")
     @Headers(AUTH_REQUIRED)
