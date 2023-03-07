@@ -21,14 +21,27 @@ import javax.crypto.KeyAgreement
 import javax.crypto.spec.GCMParameterSpec
 import javax.crypto.spec.SecretKeySpec
 
-class ECIESManager {
+object ECIESManager {
+
+    //region variables
+    private const val CIPHER_INSTANCE_TYPE = "AES/GCM/NoPadding"
+    private const val SECP_256_R1 = "secp256r1"
+    private const val ECDH = "ECDH"
+    private const val EC = "EC"
+    private const val AES = "AES"
+
+    private const val KDF_BYTE_LENGTH = 32
+    private const val PUBLIC_KEY_INDEX = 65
+    private const val IV_SIZE = 16
+    private const val AES_IV_INDEX = 16
+    //endregion
 
     //region public methods
-    fun encryptMessage(textToEncrypt: String, publicKeyBytes: ByteArray): ByteArray {
+    fun encryptMessage(dataToEncrypt: ByteArray, publicKeyBytes: ByteArray): ByteArray {
         val publicKey = getPublicKeyFromBytes(publicKeyBytes)
 
         val ephemeralKeyPair = createECKeyPair()
-        val ephemeralPublicKeyBytes = shortenedDevicePublicKey(ephemeralKeyPair.public.encoded)
+        val ephemeralPublicKeyBytes = extractUncompressedPublicKey(ephemeralKeyPair.public.encoded)
 
         val sharedSecret = createSharedSecret(
             privateKey = ephemeralKeyPair.private,
@@ -43,15 +56,12 @@ class ECIESManager {
         val cipher: Cipher = Cipher.getInstance(CIPHER_INSTANCE_TYPE)
         cipher.init(Cipher.ENCRYPT_MODE, kdfResult.aesKey, kdfResult.ivParameterSpec)
 
-        val cipherResult =
-            cipher.doFinal(
-                textToEncrypt.toByteArray(Charsets.UTF_8)
-            )
+        val cipherResult = cipher.doFinal(dataToEncrypt)
 
         return ephemeralPublicKeyBytes + cipherResult
     }
 
-    fun decryptMessage(cipherData: ByteArray, privateKey: PrivateKey): String {
+    fun decryptMessage(cipherData: ByteArray, privateKey: PrivateKey): ByteArray {
         //Public key is first 65 bytes
         val ephemeralPublicKeyBytes = cipherData.slice(0 until PUBLIC_KEY_INDEX).toByteArray()
 
@@ -72,14 +82,12 @@ class ECIESManager {
 
         val cipher = Cipher.getInstance(CIPHER_INSTANCE_TYPE)
         cipher.init(Cipher.DECRYPT_MODE, kdfResult.aesKey, kdfResult.ivParameterSpec)
-        val cipherResult = cipher.doFinal(encryptedData)
-
-        return String(cipherResult, Charsets.UTF_8)
+        return cipher.doFinal(encryptedData)
     }
     //endregion
 
     //region private helper methods
-    fun shortenedDevicePublicKey(uncompressedPublicKey: ByteArray): ByteArray {
+    fun extractUncompressedPublicKey(uncompressedPublicKey: ByteArray): ByteArray {
         val sequence: ASN1Sequence = DERSequence.getInstance(uncompressedPublicKey)
         val subjectPublicKey: DERBitString = sequence.getObjectAt(1) as DERBitString
         return subjectPublicKey.bytes
@@ -164,19 +172,6 @@ class ECIESManager {
         return keyFactory.generatePrivate(encodedKeySpec) as ECPrivateKey
     }
     //endregion
-
-    companion object {
-        const val CIPHER_INSTANCE_TYPE = "AES/GCM/NoPadding"
-        const val SECP_256_R1 = "secp256r1"
-        const val ECDH = "ECDH"
-        const val EC = "EC"
-        const val AES = "AES"
-
-        const val KDF_BYTE_LENGTH = 32
-        const val PUBLIC_KEY_INDEX = 65
-        const val IV_SIZE = 16
-        const val AES_IV_INDEX = 16
-    }
 }
 
 data class KDFResult(
