@@ -5,20 +5,16 @@ import junit.framework.Assert.assertEquals
 import org.bouncycastle.jce.ECNamedCurveTable
 import org.bouncycastle.jce.provider.BouncyCastleProvider
 import org.junit.Test
+import java.security.KeyPair
 import java.security.KeyPairGenerator
+import javax.crypto.AEADBadTagException
 
 class ECIESTest {
 
     @Test
     fun encryptAndDecryptFlow() {
-        val eciesManager = ECIESManager()
-
-        val kpg = KeyPairGenerator.getInstance(ECIESManager.EC, BouncyCastleProvider())
-        val secp256r1 = ECNamedCurveTable.getParameterSpec(ECIESManager.SECP_256_R1)
-        kpg.initialize(secp256r1)
-
-        val keyPair = kpg.generateKeyPair()
-        val publicKey = eciesManager.shortenedDevicePublicKey(keyPair.public.encoded)
+        val keyPair = createSecp256R1KeyPair()
+        val publicKey = ECIESManager.extractUncompressedPublicKey(keyPair.public.encoded)
 
         val plainTextValues = listOf(
             "Whatsupppppppppp",
@@ -28,17 +24,45 @@ class ECIESTest {
         )
 
         for (plainText in plainTextValues) {
-            val encryptedData = eciesManager.encryptMessage(
-                textToEncrypt = plainText,
+            val encryptedData = ECIESManager.encryptMessage(
+                dataToEncrypt = plainText.toByteArray(Charsets.UTF_8),
                 publicKeyBytes = publicKey
             )
 
-            val decryptedData = eciesManager.decryptMessage(
+            val decryptedData = ECIESManager.decryptMessage(
                 cipherData = encryptedData,
                 privateKey = keyPair.private
             )
 
-            assertEquals(plainText, decryptedData)
+            assertEquals(plainText, String(decryptedData, Charsets.UTF_8))
         }
+    }
+
+    @Test(expected = AEADBadTagException::class)
+    fun cannotDecryptWithWrongKey() {
+        val keyPair = createSecp256R1KeyPair()
+        val publicKey = ECIESManager.extractUncompressedPublicKey(keyPair.public.encoded)
+
+        val otherKeyPair = createSecp256R1KeyPair()
+
+        val plainText = "Whatsupppppppppp"
+
+        val encryptedData = ECIESManager.encryptMessage(
+            dataToEncrypt = plainText.toByteArray(Charsets.UTF_8),
+            publicKeyBytes = publicKey
+        )
+
+        ECIESManager.decryptMessage(
+            cipherData = encryptedData,
+            privateKey = otherKeyPair.private
+        )
+    }
+
+    private fun createSecp256R1KeyPair(): KeyPair {
+        val kpg = KeyPairGenerator.getInstance("EC", BouncyCastleProvider())
+        val secp256r1 = ECNamedCurveTable.getParameterSpec("secp256r1")
+        kpg.initialize(secp256r1)
+
+        return kpg.generateKeyPair()
     }
 }
