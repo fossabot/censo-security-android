@@ -4,11 +4,6 @@ import cash.z.ecc.android.bip39.Mnemonics
 import com.censocustody.android.common.*
 import com.censocustody.android.common.BaseWrapper
 import com.censocustody.android.data.EncryptionManagerImpl.Companion.DATA_CHECK
-import org.bouncycastle.crypto.AsymmetricCipherKeyPairGenerator
-import org.bouncycastle.crypto.generators.Ed25519KeyPairGenerator
-import org.bouncycastle.crypto.params.Ed25519KeyGenerationParameters
-import org.bouncycastle.crypto.params.Ed25519PrivateKeyParameters
-import com.censocustody.android.data.EncryptionManagerImpl.Companion.SENTINEL_STATIC_DATA
 import com.censocustody.android.data.models.StoredKeyData
 import com.censocustody.android.data.models.StoredKeyData.Companion.BITCOIN_KEY
 import com.censocustody.android.data.models.StoredKeyData.Companion.OFFCHAIN_KEY
@@ -17,11 +12,8 @@ import com.censocustody.android.data.models.Signers
 import com.censocustody.android.data.models.WalletSigner
 import com.censocustody.android.data.models.approvalV2.ApprovalSignature
 import com.google.android.gms.common.util.VisibleForTesting
-import java.lang.reflect.Modifier.PRIVATE
 import java.nio.charset.Charset
-import java.security.SecureRandom
 import java.security.Signature
-import javax.crypto.Cipher
 import javax.inject.Inject
 
 data class SignedPayload(
@@ -36,27 +28,23 @@ interface EncryptionManager {
 
     fun signKeysForUpload(
         email: String,
-        signature: Signature,
         walletSigners: List<WalletSigner>
     ): ByteArray
 
     fun signDataWithDeviceKey(
         data: ByteArray,
-        signature: Signature,
         email: String
     ) : ByteArray
 
     fun signApprovalDispositionForDeviceKey(
         email: String,
-        signature: Signature,
         dataToSign: SignableDataResult.Device
     ) : ApprovalSignature.OffChainSignature
 
     fun signApprovalDisposition(
         email: String,
-        cipher: Cipher,
         dataToSign: List<SignableDataResult>
-    ) : List<ApprovalSignature>
+    ): List<ApprovalSignature>
     //endregion
 
     //region generic key work
@@ -70,12 +58,9 @@ interface EncryptionManager {
     fun deleteBiometryKeyFromKeystore(keyName: String)
     fun deleteKeyIfInKeystore(keyName: String)
 
-    fun getInitializedCipherForEncryption(keyName: String): Cipher
-    fun getInitializedCipherForDecryption(keyName: String, initVector: ByteArray): Cipher
     fun haveSentinelDataStored(email: String): Boolean
-    fun saveSentinelData(email: String, cipher: Cipher)
-    fun retrieveSentinelData(email: String, cipher: Cipher): String
-    fun getSignatureForDeviceSigning(keyName: String) : Signature
+    fun saveSentinelData(email: String)
+    fun retrieveSentinelData(email: String): String
     fun publicKeysFromRootSeed(rootSeed: ByteArray): HashMap<String, String>
 
     //endregion
@@ -94,13 +79,11 @@ class EncryptionManagerImpl @Inject constructor(
 
     override fun signKeysForUpload(
         email: String,
-        signature: Signature,
         walletSigners: List<WalletSigner>
     ): ByteArray {
         val dataToSign = Signers.retrieveDataToSign(walletSigners)
 
         return signDataWithDeviceKey(
-            signature = signature,
             data = dataToSign,
             email = email
         )
@@ -108,24 +91,21 @@ class EncryptionManagerImpl @Inject constructor(
 
     override fun signDataWithDeviceKey(
         data: ByteArray,
-        signature: Signature,
         email: String
     ): ByteArray {
         val deviceId = SharedPrefsHelper.retrieveDeviceId(email)
-        return cryptographyManager.signDataWithDeviceKey(
-            signature = signature,
-            data = data,
+        return cryptographyManager.signData(
+            dataToSign = data,
             keyName = deviceId
         )
     }
 
     override fun signApprovalDispositionForDeviceKey(
         email: String,
-        signature: Signature,
         dataToSign: SignableDataResult.Device
     ): ApprovalSignature.OffChainSignature {
         val signedData = signDataWithDeviceKey(
-            data = dataToSign.dataToSign, signature = signature, email = email
+            data = dataToSign.dataToSign, email = email
         )
 
         return ApprovalSignature.OffChainSignature(
@@ -136,10 +116,9 @@ class EncryptionManagerImpl @Inject constructor(
 
     override fun signApprovalDisposition(
         email: String,
-        cipher: Cipher,
         dataToSign: List<SignableDataResult>
     ): List<ApprovalSignature> {
-        val rootSeed = keyStorage.retrieveRootSeed(email = email, cipher = cipher)
+        val rootSeed = keyStorage.retrieveRootSeed(email = email)
         val keys = createAllKeys(rootSeed)
 
         return dataToSign.mapNotNull { signable ->
@@ -278,26 +257,16 @@ class EncryptionManagerImpl @Inject constructor(
         )
     }
 
-    override fun retrieveSentinelData(email: String, cipher: Cipher): String {
-        val decryptedSentinelData = keyStorage.retrieveSentinelData(email = email, cipher = cipher)
+    override fun retrieveSentinelData(email: String): String {
+        val decryptedSentinelData = keyStorage.retrieveSentinelData(email = email)
 
         return String(decryptedSentinelData, charset = Charset.forName("UTF-8"))
     }
 
-    override fun getInitializedCipherForEncryption(keyName: String): Cipher {
-        return cryptographyManager.getInitializedCipherForEncryption(keyName)
-    }
-
-    override fun getInitializedCipherForDecryption(keyName: String, initVector: ByteArray): Cipher {
-        return cryptographyManager.getInitializedCipherForDecryption(
-            keyName = keyName, initializationVector = initVector
-        )
-    }
-
     override fun haveSentinelDataStored(email: String) = keyStorage.hasSentinelData(email)
 
-    override fun saveSentinelData(email: String, cipher: Cipher) {
-        keyStorage.saveSentinelData(email = email, cipher = cipher)
+    override fun saveSentinelData(email: String) {
+        keyStorage.saveSentinelData(email = email)
     }
 
     override fun deleteBiometryKeyFromKeystore(keyName: String) {
@@ -306,10 +275,6 @@ class EncryptionManagerImpl @Inject constructor(
 
     override fun deleteKeyIfInKeystore(keyName: String) {
         cryptographyManager.deleteKeyIfPresent(keyName)
-    }
-
-    override fun getSignatureForDeviceSigning(keyName: String): Signature {
-        return cryptographyManager.getSignatureForDeviceSigning(keyName)
     }
 
     override fun publicKeysFromRootSeed(rootSeed: ByteArray): HashMap<String, String> {

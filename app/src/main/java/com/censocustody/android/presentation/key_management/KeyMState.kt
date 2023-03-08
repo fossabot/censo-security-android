@@ -30,7 +30,7 @@ data class KeyManagementState(
     val finalizeKeyFlow: Resource<Unit> = Resource.Uninitialized,
 
     //Utility state
-    val triggerBioPrompt: Resource<CryptoObject> = Resource.Uninitialized,
+    val triggerBioPrompt: Resource<Unit> = Resource.Uninitialized,
     val bioPromptData: BioPromptData = BioPromptData(BioPromptReason.UNINITIALIZED),
     val showToast: Resource<String> = Resource.Uninitialized,
     val goToAccount: Resource<Boolean> = Resource.Uninitialized,

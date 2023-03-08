@@ -15,7 +15,7 @@ data class DeviceRegistrationState(
     val capturedUserPhoto: Bitmap? = null,
     val keyName: String = "",
     val publicKey: String = "",
-    val triggerBioPrompt: Resource<Signature> = Resource.Uninitialized,
+    val triggerBioPrompt: Resource<Unit> = Resource.Uninitialized,
     val deviceRegistrationError: DeviceRegistrationError = DeviceRegistrationError.NONE,
     val userLoggedIn: Boolean = true
 )

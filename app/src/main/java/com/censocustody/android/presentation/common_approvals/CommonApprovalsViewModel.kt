@@ -72,25 +72,11 @@ abstract class  CommonApprovalsViewModel(
                 return@launch
             }
 
-            if (selectedApproval.details.isDeviceKeyApprovalType()) {
-                val email = userRepository.retrieveUserEmail()
-                val deviceId = userRepository.retrieveUserDeviceId(email)
-                val signature = cipherRepository.getSignatureForDeviceSigning(deviceId)
-                if (signature != null) {
-                    state =
-                        state.copy(bioPromptTrigger = Resource.Success(CryptoObject(signature)))
-                }
-            } else {
-                val cipher = cipherRepository.getCipherForV3RootSeedDecryption()
-                if (cipher != null) {
-                    state =
-                        state.copy(bioPromptTrigger = Resource.Success(CryptoObject(cipher)))
-                }
-            }
+            state = state.copy(bioPromptTrigger = Resource.Success(Unit))
         }
     }
 
-    fun biometryApproved(cryptoObject: CryptoObject) {
+    fun biometryApproved() {
         val selectedApproval = state.selectedApproval
 
         if (selectedApproval == null) {
@@ -101,16 +87,10 @@ abstract class  CommonApprovalsViewModel(
             return
         }
 
-        val isDeviceKeyType = selectedApproval.details.isDeviceKeyApprovalType()
-
-        if (isDeviceKeyType && cryptoObject.signature != null) {
-            registerApprovalDisposition(cryptoObject)
-        } else if (!isDeviceKeyType && cryptoObject.cipher != null) {
-            registerApprovalDisposition(cryptoObject)
-        }
+        registerApprovalDisposition()
     }
 
-    private fun registerApprovalDisposition(cryptoObject: CryptoObject) {
+    private fun registerApprovalDisposition() {
         viewModelScope.launch {
             state = state.copy(
                 approvalDispositionState = state.approvalDispositionState?.copy(
@@ -122,7 +102,6 @@ abstract class  CommonApprovalsViewModel(
                 approvalDispositionState = state.approvalDispositionState,
                 approval = state.selectedApproval,
                 approvalsRepository = approvalsRepository,
-                cryptoObject = cryptoObject,
             )
 
             state = state.copy(approvalDispositionState = approvalDispositionState)
@@ -133,7 +112,6 @@ abstract class  CommonApprovalsViewModel(
         approvalDispositionState: ApprovalDispositionState?,
         approval: ApprovalRequestV2?,
         approvalsRepository: ApprovalsRepository,
-        cryptoObject: CryptoObject
     ): ApprovalDispositionState? {
 
         val approvalId = approval?.id ?: ""
@@ -155,7 +133,6 @@ abstract class  CommonApprovalsViewModel(
             approvalsRepository.approveOrDenyDisposition(
                 requestId = approvalId,
                 registerApprovalDisposition = registerApprovalDisposition,
-                cryptoObject = cryptoObject
             )
 
         return approvalDispositionState.copy(

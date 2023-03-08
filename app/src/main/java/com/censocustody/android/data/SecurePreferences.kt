@@ -17,15 +17,15 @@ interface SecurePreferences {
 
     //v3 storage
     fun clearAllV3KeyData(email: String)
-    fun retrieveV3RootSeed(email: String): EncryptedData
-    fun saveV3RootSeed(email: String, encryptedData: EncryptedData)
+    fun retrieveV3RootSeed(email: String): ByteArray
+    fun saveV3RootSeed(email: String, ciphertext: ByteArray)
     fun saveV3PublicKeys(email: String, keyJson: String)
     fun retrieveV3PublicKeys(email: String): HashMap<String, String>
     fun hasV3RootSeed(email: String) : Boolean
 
     //sentinel data
-    fun retrieveSentinelData(email: String): EncryptedData
-    fun saveSentinelData(email: String, encryptedData: EncryptedData)
+    fun retrieveSentinelData(email: String): ByteArray
+    fun saveSentinelData(email: String, ciphertext: ByteArray)
     fun clearSentinelData(email: String)
     fun hasSentinelData(email: String): Boolean
 
@@ -89,11 +89,11 @@ class SecurePreferencesImpl @Inject constructor(applicationContext: Context) :
             encryptedPrefs = secureSharedPreferences, email = email
         )
 
-    override fun saveV3RootSeed(email: String, encryptedData: EncryptedData) {
+    override fun saveV3RootSeed(email: String, ciphertext: ByteArray) {
         SharedPrefsHelper.saveV3RootSeed(
             email = email,
             encryptedPrefs = secureSharedPreferences,
-            encryptedData = encryptedData
+            ciphertext = ciphertext
         )
     }
 
@@ -119,15 +119,15 @@ class SecurePreferencesImpl @Inject constructor(applicationContext: Context) :
 
     //region Sentinel Data Storage
 
-    override fun saveSentinelData(email: String, encryptedData: EncryptedData) {
+    override fun saveSentinelData(email: String, ciphertext: ByteArray) {
         SharedPrefsHelper.saveSentinelData(
             email = email,
             encryptedPrefs = secureSharedPreferences,
-            encryptedData = encryptedData
+            ciphertext = ciphertext
         )
     }
 
-    override fun retrieveSentinelData(email: String): EncryptedData =
+    override fun retrieveSentinelData(email: String): ByteArray =
         SharedPrefsHelper.retrieveSentinelData(
             encryptedPrefs = secureSharedPreferences, email = email
         )

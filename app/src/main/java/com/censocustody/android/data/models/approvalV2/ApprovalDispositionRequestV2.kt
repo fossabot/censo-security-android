@@ -320,30 +320,21 @@ data class ApprovalDispositionRequestV2(
         return startingPolicy.safeTransactions(targetPolicy).first
     }
 
-    fun convertToApiBody(
-        encryptionManager: EncryptionManager,
-        cryptoObject: BiometricPrompt.CryptoObject
-    ): RegisterApprovalDispositionV2Body {
-
-        val cipher = cryptoObject.cipher
-        val signature = cryptoObject.signature
-
+    fun convertToApiBody(encryptionManager: EncryptionManager): RegisterApprovalDispositionV2Body {
         val dataToSign = retrieveSignableData()
 
         val signatures =
             if (requestType.isDeviceKeyApprovalType()) {
-                if (signature == null) throw Exception("Missing biometry approved signature")
                 val deviceKeyDataToSign = dataToSign[0]
                 if (deviceKeyDataToSign !is SignableDataResult.Device) throw Exception("Device key requires offchain data")
                 val signedData =
                     encryptionManager.signApprovalDispositionForDeviceKey(
-                        email = email, signature = signature, dataToSign = deviceKeyDataToSign
+                        email = email, dataToSign = deviceKeyDataToSign
                     )
                 listOf(signedData)
             } else {
-                if (cipher == null) throw Exception("Missing biometry approved cipher")
                 encryptionManager.signApprovalDisposition(
-                    email = email, cipher = cipher, dataToSign = dataToSign
+                    email = email, dataToSign = dataToSign
                 )
             }
 
