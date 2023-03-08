@@ -11,23 +11,18 @@ import com.censocustody.android.data.models.Signers
 import com.censocustody.android.data.models.VerifyUser
 import com.censocustody.android.data.models.WalletSigner
 import com.censocustody.android.data.models.mapToPublicKeysList
-import java.security.Signature
-import javax.crypto.Cipher
 
 interface KeyRepository {
 
-    suspend fun signTimestamp(
-        timestamp: String,
-        signature: Signature,
-    ): String
+    suspend fun signTimestamp(timestamp: String): String
 
     suspend fun generatePhrase(): String
     suspend fun doesUserHaveValidLocalKey(verifyUser: VerifyUser): Boolean
 
-    suspend fun retrieveV3RootSeed(cipher: Cipher): ByteArray?
+    suspend fun retrieveV3RootSeed(): ByteArray?
     suspend fun haveV3RootSeed() : Boolean
 
-    suspend fun saveV3RootKey(mnemonic: Mnemonics.MnemonicCode, cipher: Cipher)
+    suspend fun saveV3RootKey(mnemonic: Mnemonics.MnemonicCode)
     suspend fun saveV3PublicKeys(rootSeed: ByteArray) : List<WalletSigner>
     suspend fun retrieveV3PublicKeys() : List<WalletSigner>
 
@@ -37,9 +32,9 @@ interface KeyRepository {
 
     suspend fun generateTimestamp() : String
 
-    suspend fun saveSentinelData(cipher: Cipher)
+    suspend fun saveSentinelData()
 
-    suspend fun retrieveSentinelData(cipher: Cipher) : String
+    suspend fun retrieveSentinelData() : String
 
     suspend fun removeSentinelDataAndKickUserToAppEntrance()
 
@@ -48,10 +43,7 @@ interface KeyRepository {
         verifyUser: VerifyUser?
     ): Boolean
 
-    suspend fun uploadKeys(
-        walletSigners: List<WalletSigner>,
-        signature: Signature
-    ): Resource<Unit>
+    suspend fun uploadKeys(walletSigners: List<WalletSigner>): Resource<Unit>
 
     suspend fun signPublicKeys(
         publicKeys: List<WalletSigner?>,
@@ -113,17 +105,13 @@ class KeyRepositoryImpl(
         }
     }
 
-    override suspend fun signTimestamp(
-        timestamp: String,
-        signature: Signature
-    ): String {
+    override suspend fun signTimestamp(timestamp: String): String {
         val userEmail = userRepository.retrieveUserEmail()
 
         val tokenByteArray = timestamp.toByteArray(charset = Charsets.UTF_8)
 
         val signedTimestamp = encryptionManager.signDataWithDeviceKey(
             data = tokenByteArray,
-            signature = signature,
             email = userEmail
         )
 
@@ -132,14 +120,13 @@ class KeyRepositoryImpl(
 
     override suspend fun generatePhrase(): String = encryptionManager.generatePhrase()
 
-    override suspend fun saveV3RootKey(mnemonic: Mnemonics.MnemonicCode, cipher: Cipher) {
+    override suspend fun saveV3RootKey(mnemonic: Mnemonics.MnemonicCode) {
         val userEmail = userRepository.retrieveUserEmail()
 
         val rootSeed = mnemonic.toSeed()
 
         keyStorage.saveRootSeed(
             rootSeed = rootSeed,
-            cipher = cipher,
             email = userEmail
         )
     }
@@ -181,18 +168,18 @@ class KeyRepositoryImpl(
         }
     }
 
-    override suspend fun retrieveV3RootSeed(cipher: Cipher): ByteArray? {
+    override suspend fun retrieveV3RootSeed(): ByteArray? {
         return try {
             val userEmail = userRepository.retrieveUserEmail()
-            keyStorage.retrieveRootSeed(email = userEmail, cipher = cipher)
+            keyStorage.retrieveRootSeed(email = userEmail)
         } catch (e: Exception) {
             null
         }
     }
 
-    override suspend fun uploadKeys(walletSigners: List<WalletSigner>, signature: Signature): Resource<Unit> {
+    override suspend fun uploadKeys(walletSigners: List<WalletSigner>): Resource<Unit> {
         val email = userRepository.retrieveUserEmail()
-        val signedData = encryptionManager.signKeysForUpload(email, signature, walletSigners)
+        val signedData = encryptionManager.signKeysForUpload(email, walletSigners)
         return retrieveApiResource {
             brooklynApiService.addWalletSigner(
                 Signers(walletSigners, BaseWrapper.encodeToBase64(signedData), share = null)
@@ -211,15 +198,15 @@ class KeyRepositoryImpl(
     }
 
     override suspend fun generateTimestamp() = generateFormattedTimestamp()
-    override suspend fun saveSentinelData(cipher: Cipher) {
+    override suspend fun saveSentinelData() {
         val userEmail = userRepository.retrieveUserEmail()
 
-        encryptionManager.saveSentinelData(email = userEmail, cipher = cipher)
+        encryptionManager.saveSentinelData(email = userEmail)
     }
 
-    override suspend fun retrieveSentinelData(cipher: Cipher) : String {
+    override suspend fun retrieveSentinelData() : String {
         val userEmail = userRepository.retrieveUserEmail()
 
-        return encryptionManager.retrieveSentinelData(email = userEmail, cipher = cipher)
+        return encryptionManager.retrieveSentinelData(email = userEmail)
     }
 }

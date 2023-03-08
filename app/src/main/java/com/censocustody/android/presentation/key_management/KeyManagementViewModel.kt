@@ -116,29 +116,27 @@ class KeyManagementViewModel @Inject constructor(
     //region CORE ACTIONS
     fun triggerBioPrompt(inputMethod: PhraseInputMethod? = null) {
         viewModelScope.launch {
-            val cipher = cipherRepository.getCipherForEncryption(ROOT_SEED_KEY_NAME)
             val bioPromptData = BioPromptData(BioPromptReason.SAVE_V3_ROOT_SEED)
 
-            if (cipher != null) {
-                state = when (state.keyManagementFlow) {
-                    KeyManagementFlow.KEY_CREATION -> {
-                        state.copy(
-                            triggerBioPrompt = Resource.Success(CryptoObject(cipher)),
-                            bioPromptData = bioPromptData
-                        )
-                    }
-                    KeyManagementFlow.KEY_RECOVERY -> {
-                        state.copy(
-                            triggerBioPrompt = Resource.Success(CryptoObject(cipher)),
-                            bioPromptData = bioPromptData,
-                            inputMethod = inputMethod ?: PhraseInputMethod.MANUAL
-                        )
-                    }
-                    KeyManagementFlow.UNINITIALIZED -> {
-                        return@launch
-                    }
+            state = when (state.keyManagementFlow) {
+                KeyManagementFlow.KEY_CREATION -> {
+                    state.copy(
+                        triggerBioPrompt = Resource.Success(Unit),
+                        bioPromptData = bioPromptData
+                    )
+                }
+                KeyManagementFlow.KEY_RECOVERY -> {
+                    state.copy(
+                        triggerBioPrompt = Resource.Success(Unit),
+                        bioPromptData = bioPromptData,
+                        inputMethod = inputMethod ?: PhraseInputMethod.MANUAL
+                    )
+                }
+                KeyManagementFlow.UNINITIALIZED -> {
+                    return@launch
                 }
             }
+
         }
     }
 
@@ -146,24 +144,21 @@ class KeyManagementViewModel @Inject constructor(
         viewModelScope.launch {
             val userEmail = userRepository.retrieveUserEmail()
             val deviceKeyId = userRepository.retrieveUserDeviceId(userEmail)
-            val signature = cipherRepository.getSignatureForDeviceSigning(deviceKeyId)
-            if (signature != null) {
-                state =
-                    state.copy(
-                        triggerBioPrompt = Resource.Success(CryptoObject(signature)),
-                        bioPromptData = BioPromptData(BioPromptReason.RETRIEVE_DEVICE_SIGNATURE)
-                    )
-            }
+            state =
+                state.copy(
+                    triggerBioPrompt = Resource.Success(Unit),
+                    bioPromptData = BioPromptData(BioPromptReason.RETRIEVE_DEVICE_SIGNATURE)
+                )
         }
     }
 
-    fun biometryApproved(cryptoObject: CryptoObject) {
-        if (state.bioPromptData.bioPromptReason == BioPromptReason.SAVE_V3_ROOT_SEED && cryptoObject.cipher != null) {
-            saveRootSeed(cryptoObject.cipher!!)
+    fun biometryApproved() {
+        if (state.bioPromptData.bioPromptReason == BioPromptReason.SAVE_V3_ROOT_SEED) {
+            saveRootSeed()
         }
 
-        if (state.bioPromptData.bioPromptReason == BioPromptReason.RETRIEVE_DEVICE_SIGNATURE && cryptoObject.signature != null) {
-            uploadKeys(cryptoObject.signature!!)
+        if (state.bioPromptData.bioPromptReason == BioPromptReason.RETRIEVE_DEVICE_SIGNATURE) {
+            uploadKeys()
         }
     }
 
