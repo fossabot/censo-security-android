@@ -1,6 +1,5 @@
 package com.censocustody.android.presentation.common_approvals
 
-import androidx.biometric.BiometricPrompt
 import com.censocustody.android.common.Resource
 import com.censocustody.android.data.models.approvalV2.ApprovalRequestV2
 import com.censocustody.android.presentation.approval_disposition.ApprovalDispositionState
@@ -21,7 +20,7 @@ data class ApprovalsState(
     val shouldRefreshTimers: Boolean = false,
     val approvalDispositionState: ApprovalDispositionState? = ApprovalDispositionState(),
     val shouldDisplayConfirmDisposition: ConfirmDispositionDialogDetails? = null,
-    val bioPromptTrigger: Resource<BiometricPrompt.CryptoObject> = Resource.Uninitialized,
+    val bioPromptTrigger: Resource<Unit> = Resource.Uninitialized,
     val selectedApproval: ApprovalRequestV2? = null,
 ) {
     val loadingData = approvalsResultRequest is Resource.Loading ||

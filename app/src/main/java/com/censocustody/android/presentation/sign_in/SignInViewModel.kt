@@ -110,7 +110,7 @@ class SignInViewModel @Inject constructor(
         }
     }
 
-    fun biometryApproved(cryptoObject: CryptoObject) {
+    fun biometryApproved() {
         if (state.bioPromptReason == BioPromptReason.SAVE_SENTINEL && cryptoObject.cipher != null) {
             saveSentinelData(cryptoObject.cipher!!)
         }

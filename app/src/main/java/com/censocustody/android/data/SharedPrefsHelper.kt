@@ -38,22 +38,15 @@ object SharedPrefsHelper {
     fun saveSentinelData(
         encryptedPrefs: SharedPreferences,
         email: String,
-        encryptedData: EncryptedData
+        ciphertext: ByteArray
     ) {
-        val initVector =
-            if (encryptedData.initializationVector.isEmpty()) {
-                ""
-            } else {
-                BaseWrapper.encode(encryptedData.initializationVector)
-            }
         val cipherText =
-            if (encryptedData.ciphertext.isEmpty()) {
+            if (ciphertext.isEmpty()) {
                 ""
             } else {
-                BaseWrapper.encode(encryptedData.ciphertext)
+                BaseWrapper.encode(ciphertext)
             }
         val editor = encryptedPrefs.edit()
-        editor.putString("${email.lowercase().trim()}$BGRD_INIT_VECTOR", initVector)
         editor.putString("${email.lowercase().trim()}$BGRD_CIPHER_TEXT", cipherText)
         editor.apply()
     }
@@ -61,16 +54,11 @@ object SharedPrefsHelper {
     fun retrieveSentinelData(
         encryptedPrefs: SharedPreferences,
         email: String
-    ): EncryptedData {
-        val savedInitVector =
-            encryptedPrefs.getString("${email.lowercase().trim()}$BGRD_INIT_VECTOR", "") ?: ""
+    ): ByteArray {
         val cipherText =
             encryptedPrefs.getString("${email.lowercase().trim()}$BGRD_CIPHER_TEXT", "") ?: ""
 
-        return EncryptedData(
-            initializationVector = BaseWrapper.decode(savedInitVector),
-            ciphertext = BaseWrapper.decode(cipherText)
-        )
+        return BaseWrapper.decode(cipherText)
     }
 
     fun clearSentinelData(encryptedPrefs: SharedPreferences, email: String) {
@@ -113,22 +101,15 @@ object SharedPrefsHelper {
     fun saveV3RootSeed(
         encryptedPrefs: SharedPreferences,
         email: String,
-        encryptedData: EncryptedData
+        ciphertext: ByteArray
     ) {
-        val initVector =
-            if (encryptedData.initializationVector.isEmpty()) {
-                ""
-            } else {
-                BaseWrapper.encode(encryptedData.initializationVector)
-            }
         val cipherText =
-            if (encryptedData.ciphertext.isEmpty()) {
+            if (ciphertext.isEmpty()) {
                 ""
             } else {
-                BaseWrapper.encode(encryptedData.ciphertext)
+                BaseWrapper.encode(ciphertext)
             }
         val editor = encryptedPrefs.edit()
-        editor.putString("${email.lowercase().trim()}$V3_ROOT_SEED_INIT_VECTOR", initVector)
         editor.putString("${email.lowercase().trim()}$V3_ROOT_SEED", cipherText)
         editor.apply()
     }
@@ -136,16 +117,11 @@ object SharedPrefsHelper {
     fun retrieveV3RootSeed(
         encryptedPrefs: SharedPreferences,
         email: String
-    ): EncryptedData {
-        val savedInitVector =
-            encryptedPrefs.getString("${email.lowercase().trim()}$V3_ROOT_SEED_INIT_VECTOR", "") ?: ""
+    ): ByteArray {
         val cipherText =
             encryptedPrefs.getString("${email.lowercase().trim()}$V3_ROOT_SEED", "") ?: ""
 
-        return EncryptedData(
-            initializationVector = BaseWrapper.decode(savedInitVector),
-            ciphertext = BaseWrapper.decode(cipherText)
-        )
+        return BaseWrapper.decode(cipherText)
     }
 
     fun hasV3RootSeed(encryptedPrefs: SharedPreferences, email: String): Boolean {

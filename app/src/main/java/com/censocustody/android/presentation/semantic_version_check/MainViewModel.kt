@@ -86,7 +86,7 @@ data class MainViewModel @Inject constructor(
         }
     }
 
-    fun biometryApproved(cipher: Cipher) {
+    fun biometryApproved() {
         viewModelScope.launch {
             if (state.bioPromptReason == BioPromptReason.FOREGROUND_RETRIEVAL) {
                 checkSentinelDataAfterBiometricApproval(cipher)

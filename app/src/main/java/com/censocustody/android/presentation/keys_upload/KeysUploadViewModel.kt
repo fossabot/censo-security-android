@@ -131,7 +131,7 @@ class KeysUploadViewModel @Inject constructor(
     }
 
     //region handle all biometry events
-    fun biometryApproved(cryptoObject: CryptoObject) {
+    fun biometryApproved() {
         viewModelScope.launch {
             if (state.bioPromptData.bioPromptReason == BioPromptReason.RETRIEVE_V3_ROOT_SEED && cryptoObject.cipher != null) {
                 retrieveV3RootSeedAndKickOffKeyStorage(cryptoObject.cipher!!)
