@@ -10,10 +10,12 @@ import com.censocustody.android.presentation.Screen
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Text
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -24,13 +26,10 @@ import androidx.compose.ui.unit.sp
 import androidx.fragment.app.FragmentActivity
 import com.censocustody.android.presentation.key_management.BackgroundUI
 import com.censocustody.android.presentation.key_management.SmallAuthFlowButton
-import com.censocustody.android.ui.theme.CensoWhite
-import com.censocustody.android.ui.theme.UnfocusedGrey
 import com.censocustody.android.R
 import com.censocustody.android.common.BioCryptoUtil
 import com.censocustody.android.presentation.key_management.PreBiometryDialog
-import com.censocustody.android.ui.theme.ButtonRed
-import com.censocustody.android.ui.theme.TextBlack
+import com.censocustody.android.ui.theme.*
 
 @Composable
 fun KeyCreationScreen(
@@ -94,10 +93,12 @@ fun KeyCreationScreen(
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 16.dp)
-                        .border(width = 1.5.dp, color = UnfocusedGrey.copy(alpha = 0.50f))
-                        .background(color = Color.Black)
-                        .shadow(elevation = 2.5.dp),
+                        .padding(horizontal = 8.dp)
+                        .shadow(
+                            elevation = 5.dp,
+                        )
+                        .clip(RoundedCornerShape(4.dp))
+                        .background(color = BackgroundGrey),
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
