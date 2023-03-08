@@ -82,18 +82,7 @@ fun ApprovalDetailsScreen(
             approvalDetailsState.bioPromptTrigger.data?.let {
                 val bioPrompt = BioCryptoUtil.createBioPrompt(
                     fragmentActivity = context,
-                    onSuccess = {
-                        if (it != null) {
-                            approvalDetailsViewModel.biometryApproved(cryptoObject = it)
-                        } else {
-                            BioCryptoUtil.handleBioPromptOnFail(
-                                context = context,
-                                errorCode = BioCryptoUtil.NO_CIPHER_CODE
-                            ) {
-                                resetDataAfterErrorDismissed()
-                            }
-                        }
-                    },
+                    onSuccess = { approvalDetailsViewModel.biometryApproved() },
                     onFail = {
                         BioCryptoUtil.handleBioPromptOnFail(context = context, errorCode = it) {
                             resetDataAfterErrorDismissed()
@@ -101,7 +90,7 @@ fun ApprovalDetailsScreen(
                     }
                 )
 
-                bioPrompt.authenticate(promptInfo, approvalDetailsState.bioPromptTrigger.data)
+                bioPrompt.authenticate(promptInfo)
             }
             approvalDetailsViewModel.resetPromptTrigger()
         }

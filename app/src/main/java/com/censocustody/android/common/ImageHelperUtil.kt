@@ -177,7 +177,6 @@ private fun Bitmap.compressImageToMaxSize(maxSizeBytes: Int): ByteArray {
 fun generateUserImageObject(
     userPhoto: Bitmap,
     keyName: String,
-    signature: Signature,
     cryptographyManager: CryptographyManager
 ): UserImage {
     //Convert bitmap to byteArray
@@ -191,10 +190,9 @@ fun generateUserImageObject(
 
     //Signed byteArray
     val signedImageData =
-        cryptographyManager.signDataWithDeviceKey(
-            data = hash,
+        cryptographyManager.signData(
+            dataToSign = hash,
             keyName = keyName,
-            signature = signature
         )
 
     return UserImage(

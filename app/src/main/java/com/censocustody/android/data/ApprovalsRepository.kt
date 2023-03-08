@@ -13,7 +13,6 @@ interface ApprovalsRepository {
     suspend fun approveOrDenyDisposition(
         requestId: String,
         registerApprovalDisposition: RegisterApprovalDisposition,
-        cryptoObject: CryptoObject
     ): Resource<ApprovalDispositionRequestV2.RegisterApprovalDispositionV2Body>
 }
 
@@ -29,7 +28,6 @@ class ApprovalsRepositoryImpl @Inject constructor(
     override suspend fun approveOrDenyDisposition(
         requestId: String,
         registerApprovalDisposition: RegisterApprovalDisposition,
-        cryptoObject: CryptoObject,
     ): Resource<ApprovalDispositionRequestV2.RegisterApprovalDispositionV2Body> {
         // Helper method anyItemNull() will check if any of the disposition properties are null,
         // this allows us to use !! operator later in this method without worrying of NPE
@@ -51,7 +49,7 @@ class ApprovalsRepositoryImpl @Inject constructor(
         )
 
         val registerApprovalDispositionBody = try {
-            approvalDispositionRequestV2.convertToApiBody(encryptionManager, cryptoObject)
+            approvalDispositionRequestV2.convertToApiBody(encryptionManager)
         } catch (e: Exception) {
             return Resource.Error(censoError = CensoError.SigningDataError())
         }
