@@ -2,16 +2,17 @@ package com.censocustody.android.common
 
 import com.censocustody.android.data.CryptographyManager
 import com.censocustody.android.data.EncryptionManagerImpl
+import com.censocustody.android.data.EncryptionManagerImpl.Companion.ROOT_SEED_KEY_NAME
+import com.censocustody.android.data.EncryptionManagerImpl.Companion.SENTINEL_KEY_NAME
 import com.censocustody.android.data.SecurePreferences
-import javax.crypto.Cipher
 import javax.inject.Inject
 
 interface KeyStorage {
     fun savePublicKeys(email: String, keyJson: String)
-    fun saveRootSeed(email: String, cipher: Cipher, rootSeed: ByteArray)
-    fun retrieveSentinelData(email: String, cipher: Cipher): ByteArray
-    fun retrieveRootSeed(email: String, cipher: Cipher): ByteArray
-    fun saveSentinelData(email: String, cipher: Cipher)
+    fun saveRootSeed(email: String, rootSeed: ByteArray)
+    fun retrieveSentinelData(email: String): ByteArray
+    fun retrieveRootSeed(email: String): ByteArray
+    fun saveSentinelData(email: String)
     fun hasSentinelData(email: String): Boolean
 }
 
@@ -23,41 +24,44 @@ class KeyStorageImpl @Inject constructor(
         securePreferences.saveV3PublicKeys(email = email, keyJson = keyJson)
     }
 
-    override fun saveRootSeed(email: String, cipher: Cipher, rootSeed: ByteArray) {
+    override fun saveRootSeed(email: String, rootSeed: ByteArray) {
         val encryptedRootSeed =
-            cryptographyManager.encryptData(data = BaseWrapper.encode(rootSeed), cipher = cipher)
+            cryptographyManager.encryptDataLocal(
+                keyName = ROOT_SEED_KEY_NAME,
+                plainText = BaseWrapper.encode(rootSeed)
+            )
 
-        securePreferences.saveV3RootSeed(email = email, encryptedData = encryptedRootSeed)
+        securePreferences.saveV3RootSeed(email = email, ciphertext = encryptedRootSeed)
     }
 
-    override fun retrieveSentinelData(email: String, cipher: Cipher): ByteArray {
+    override fun retrieveSentinelData(email: String): ByteArray {
         val savedSentinelData = securePreferences.retrieveSentinelData(email)
 
         return cryptographyManager.decryptData(
-            ciphertext = savedSentinelData.ciphertext,
-            cipher = cipher
+            keyName = SENTINEL_KEY_NAME,
+            ciphertext = savedSentinelData,
         )
     }
 
-    override fun retrieveRootSeed(email: String, cipher: Cipher): ByteArray {
+    override fun retrieveRootSeed(email: String): ByteArray {
         val savedRootSeedData = securePreferences.retrieveV3RootSeed(email)
 
         val decryptedRootSeed = cryptographyManager.decryptData(
-            ciphertext = savedRootSeedData.ciphertext,
-            cipher = cipher
+            keyName = ROOT_SEED_KEY_NAME,
+            ciphertext = savedRootSeedData,
         )
 
         return BaseWrapper.decode(String(decryptedRootSeed, Charsets.UTF_8))
     }
 
-    override fun saveSentinelData(email: String, cipher: Cipher) {
+    override fun saveSentinelData(email: String) {
         val encryptedSentinelData =
-            cryptographyManager.encryptData(
-                data = EncryptionManagerImpl.Companion.SENTINEL_STATIC_DATA,
-                cipher = cipher
+            cryptographyManager.encryptDataLocal(
+                keyName = SENTINEL_KEY_NAME,
+                plainText = EncryptionManagerImpl.Companion.SENTINEL_STATIC_DATA,
             )
 
-        securePreferences.saveSentinelData(email = email, encryptedData = encryptedSentinelData)
+        securePreferences.saveSentinelData(email = email, ciphertext = encryptedSentinelData)
     }
 
     override fun hasSentinelData(email: String) = securePreferences.hasSentinelData(email)

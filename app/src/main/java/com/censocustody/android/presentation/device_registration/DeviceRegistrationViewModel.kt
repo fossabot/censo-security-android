@@ -1,7 +1,6 @@
 package com.censocustody.android.presentation.device_registration
 
 import android.graphics.Bitmap
-import androidx.biometric.BiometricPrompt.CryptoObject
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -9,22 +8,19 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.censocustody.android.common.*
 import com.censocustody.android.data.CryptographyManager
+import com.censocustody.android.data.ECIESManager
 import com.censocustody.android.data.UserRepository
-import com.censocustody.android.data.models.CipherRepository
 import com.censocustody.android.data.models.DeviceType
 import com.censocustody.android.data.models.UserDevice
 import com.raygun.raygun4android.RaygunClient
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
-import java.security.Signature
-import java.util.UUID
 import javax.inject.Inject
 
 
 @HiltViewModel
 class DeviceRegistrationViewModel @Inject constructor(
     private val userRepository: UserRepository,
-    private val cipherRepository: CipherRepository,
     private val cryptographyManager: CryptographyManager
 ) : ViewModel() {
 
@@ -46,8 +42,8 @@ class DeviceRegistrationViewModel @Inject constructor(
         triggerImageCapture()
     }
 
-    fun biometryApproved(cryptoObject: CryptoObject) {
-        sendUserDeviceAndImageToBackend(cryptoObject.signature)
+    fun biometryApproved() {
+        sendUserDeviceAndImageToBackend()
     }
 
     fun biometryFailed() {
@@ -57,16 +53,15 @@ class DeviceRegistrationViewModel @Inject constructor(
         )
     }
 
-    private fun sendUserDeviceAndImageToBackend(signature: Signature?) {
+    private fun sendUserDeviceAndImageToBackend() {
         viewModelScope.launch {
             try {
                 val capturedUserPhoto = state.capturedUserPhoto
                 val keyName = state.keyName
 
-                if (signature != null && capturedUserPhoto != null && keyName.isNotEmpty()) {
+                if (capturedUserPhoto != null && keyName.isNotEmpty()) {
                     val userImage = generateUserImageObject(
                         userPhoto = capturedUserPhoto,
-                        signature = signature,
                         keyName = keyName,
                         cryptographyManager = cryptographyManager
                     )
@@ -129,9 +124,9 @@ class DeviceRegistrationViewModel @Inject constructor(
         }
     }
 
-    private fun triggerBioPrompt(signature: Signature) {
+    private fun triggerBioPrompt() {
         state =
-            state.copy(triggerBioPrompt = Resource.Success(signature))
+            state.copy(triggerBioPrompt = Resource.Success(Unit))
     }
 
 
@@ -147,15 +142,16 @@ class DeviceRegistrationViewModel @Inject constructor(
             val keyId = cryptographyManager.createDeviceKeyId()
             state = state.copy(keyName = keyId)
             try {
-                val devicePublicKey =
-                    cryptographyManager.createPublicDeviceKey(keyName = keyId)
+                val deviceKey =
+                    cryptographyManager.getOrCreateKey(keyName = keyId)
 
-                state = state.copy(publicKey = BaseWrapper.encode(devicePublicKey))
+                val publicKey = cryptographyManager.getPublicKeyFromDeviceKey(keyName = keyId)
+                val compressedPublicKey =
+                    ECIESManager.extractUncompressedPublicKey(publicKey.encoded)
 
-                val signature = cipherRepository.getSignatureForDeviceSigning(keyId)
-                if (signature != null) {
-                    triggerBioPrompt(signature)
-                }
+                state = state.copy(publicKey = BaseWrapper.encode(compressedPublicKey))
+
+                triggerBioPrompt()
 
             } catch (e: Exception) {
                 state = state.copy(

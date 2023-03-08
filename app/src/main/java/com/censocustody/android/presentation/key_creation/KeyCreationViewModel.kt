@@ -46,42 +46,32 @@ class KeyCreationViewModel @Inject constructor(
         triggerBioPromptForRootSeedSave()
     }
 
-    private suspend fun triggerBioPromptForRootSeedSave() {
-        val cipher =
-            cipherRepository.getCipherForEncryption(EncryptionManagerImpl.Companion.ROOT_SEED_KEY_NAME)
+    private fun triggerBioPromptForRootSeedSave() {
         val bioPromptReason = BioPromptReason.SAVE_V3_ROOT_SEED
 
-        if (cipher != null) {
-            state =
-                state.copy(
-                    triggerBioPrompt = Resource.Success(CryptoObject(cipher)),
-                    bioPromptReason = bioPromptReason
-                )
-        }
+        state =
+            state.copy(
+                triggerBioPrompt = Resource.Success(Unit),
+                bioPromptReason = bioPromptReason
+            )
     }
 
-    private suspend fun triggerBioPromptForDeviceSignature() {
-        val userEmail = userRepository.retrieveUserEmail()
-        val deviceKeyId = userRepository.retrieveUserDeviceId(userEmail)
-        val signature = cipherRepository.getSignatureForDeviceSigning(deviceKeyId)
+    private fun triggerBioPromptForDeviceSignature() {
         val bioPromptReason = BioPromptReason.RETRIEVE_DEVICE_SIGNATURE
-        //if signature is null then we wipe all key data and send user to login
-        if (signature != null) {
-            state =
-                state.copy(
-                    triggerBioPrompt = Resource.Success(CryptoObject(signature)),
-                    bioPromptReason = bioPromptReason
-                )
-        }
+        state =
+            state.copy(
+                triggerBioPrompt = Resource.Success(Unit),
+                bioPromptReason = bioPromptReason
+            )
     }
 
-    fun biometryApproved(cryptoObject: CryptoObject) {
-        if (state.bioPromptReason == BioPromptReason.SAVE_V3_ROOT_SEED && cryptoObject.cipher != null) {
-            saveRootSeed(cryptoObject.cipher!!)
+    fun biometryApproved() {
+        if (state.bioPromptReason == BioPromptReason.SAVE_V3_ROOT_SEED) {
+            saveRootSeed()
         }
 
-        if (state.bioPromptReason == BioPromptReason.RETRIEVE_DEVICE_SIGNATURE && cryptoObject.signature != null) {
-            uploadKeys(cryptoObject.signature!!)
+        if (state.bioPromptReason == BioPromptReason.RETRIEVE_DEVICE_SIGNATURE) {
+            uploadKeys()
         }
     }
 
@@ -89,14 +79,13 @@ class KeyCreationViewModel @Inject constructor(
         state = state.copy(uploadingKeyProcess = Resource.Error())
     }
 
-    private fun saveRootSeed(cipher: Cipher) {
+    private fun saveRootSeed() {
         viewModelScope.launch {
             try {
                 val phrase = state.keyGeneratedPhrase ?: throw Exception("Missing Phrase")
 
                 keyRepository.saveV3RootKey(
-                    Mnemonics.MnemonicCode(phrase = phrase),
-                    cipher = cipher
+                    Mnemonics.MnemonicCode(phrase = phrase)
                 )
 
                 val walletSigners =
@@ -115,10 +104,10 @@ class KeyCreationViewModel @Inject constructor(
         }
     }
 
-    private fun uploadKeys(signature: Signature) {
+    private fun uploadKeys() {
         viewModelScope.launch {
             val walletSigners = state.walletSigners
-            val walletSignerResource = userRepository.addWalletSigner(walletSigners, signature)
+            val walletSignerResource = userRepository.addWalletSigner(walletSigners)
 
             state = state.copy(uploadingKeyProcess = walletSignerResource)
         }
