@@ -1,6 +1,5 @@
 package com.censocustody.android.presentation.keys_upload
 
-import androidx.biometric.BiometricPrompt.CryptoObject
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -14,8 +13,6 @@ import com.censocustody.android.data.models.CipherRepository
 import com.censocustody.android.data.models.mapToPublicKeysList
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
-import java.security.Signature
-import javax.crypto.Cipher
 import javax.inject.Inject
 
 /***
@@ -34,7 +31,6 @@ import javax.inject.Inject
 
 @HiltViewModel
 class KeysUploadViewModel @Inject constructor(
-    private val cipherRepository: CipherRepository,
     private val keyRepository: KeyRepository,
     private val userRepository: UserRepository,
     private val securePreferences: SecurePreferences
@@ -63,32 +59,24 @@ class KeysUploadViewModel @Inject constructor(
         state = state.copy(kickUserOut = true)
     }
 
-    private suspend fun retrieveCipherToDecryptV3RootSeed() {
-        val cipher = cipherRepository.getCipherForV3RootSeedDecryption()
-        if (cipher != null) {
-            state = state.copy(
-                triggerBioPrompt = Resource.Success(CryptoObject(cipher)),
-                bioPromptData = BioPromptData(BioPromptReason.RETRIEVE_V3_ROOT_SEED),
-            )
-        }
+    private fun retrieveCipherToDecryptV3RootSeed() {
+        state = state.copy(
+            triggerBioPrompt = Resource.Success(Unit),
+            bioPromptData = BioPromptData(BioPromptReason.RETRIEVE_V3_ROOT_SEED),
+        )
     }
 
-    private suspend fun triggerBioPromptForDeviceSignature() {
-        val userEmail = userRepository.retrieveUserEmail()
-        val deviceKeyId = userRepository.retrieveUserDeviceId(userEmail)
-        val signature = cipherRepository.getSignatureForDeviceSigning(deviceKeyId)
-        if (signature != null) {
-            state =
-                state.copy(
-                    triggerBioPrompt = Resource.Success(CryptoObject(signature)),
-                    bioPromptData = BioPromptData(BioPromptReason.RETRIEVE_DEVICE_SIGNATURE),
-                )
-        }
+    private fun triggerBioPromptForDeviceSignature() {
+        state =
+            state.copy(
+                triggerBioPrompt = Resource.Success(Unit),
+                bioPromptData = BioPromptData(BioPromptReason.RETRIEVE_DEVICE_SIGNATURE),
+            )
     }
 
     //region Step 2: Save new public keys
-    private suspend fun retrieveV3RootSeedAndKickOffKeyStorage(cipher: Cipher) {
-        val rootSeed = keyRepository.retrieveV3RootSeed(cipher)
+    private suspend fun retrieveV3RootSeedAndKickOffKeyStorage() {
+        val rootSeed = keyRepository.retrieveV3RootSeed()
 
         if (rootSeed == null) {
             state = state.copy(addWalletSigner = Resource.Error())
@@ -117,10 +105,10 @@ class KeysUploadViewModel @Inject constructor(
     }
     //endregion
 
-    private fun uploadSigners(signature: Signature) {
+    private fun uploadSigners() {
         viewModelScope.launch {
             //make API call to send up any needed signed keys
-            val walletSigner = keyRepository.uploadKeys(state.walletSigners, signature)
+            val walletSigner = keyRepository.uploadKeys(state.walletSigners)
 
             if (walletSigner is Resource.Success) {
                 state = state.copy(finishedUpload = true)
@@ -133,12 +121,12 @@ class KeysUploadViewModel @Inject constructor(
     //region handle all biometry events
     fun biometryApproved() {
         viewModelScope.launch {
-            if (state.bioPromptData.bioPromptReason == BioPromptReason.RETRIEVE_V3_ROOT_SEED && cryptoObject.cipher != null) {
-                retrieveV3RootSeedAndKickOffKeyStorage(cryptoObject.cipher!!)
+            if (state.bioPromptData.bioPromptReason == BioPromptReason.RETRIEVE_V3_ROOT_SEED) {
+                retrieveV3RootSeedAndKickOffKeyStorage()
             }
 
-            if (state.bioPromptData.bioPromptReason == BioPromptReason.RETRIEVE_DEVICE_SIGNATURE && cryptoObject.signature != null) {
-                uploadSigners(cryptoObject.signature!!)
+            if (state.bioPromptData.bioPromptReason == BioPromptReason.RETRIEVE_DEVICE_SIGNATURE) {
+                uploadSigners()
             }
         }
     }

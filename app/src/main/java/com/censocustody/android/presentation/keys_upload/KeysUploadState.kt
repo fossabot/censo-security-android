@@ -1,10 +1,8 @@
 package com.censocustody.android.presentation.keys_upload
 
-import androidx.biometric.BiometricPrompt.CryptoObject
 import com.censocustody.android.common.BioPromptReason
 import com.censocustody.android.common.Resource
 import com.censocustody.android.data.BioPromptData
-import com.censocustody.android.data.models.Signers
 import com.censocustody.android.data.models.WalletSigner
 
 data class KeysUploadState(
@@ -15,7 +13,7 @@ data class KeysUploadState(
     val addWalletSigner: Resource<Unit> = Resource.Uninitialized,
 
     //Utility state
-    val triggerBioPrompt: Resource<CryptoObject> = Resource.Uninitialized,
+    val triggerBioPrompt: Resource<Unit> = Resource.Uninitialized,
     val bioPromptData: BioPromptData = BioPromptData(BioPromptReason.UNINITIALIZED),
     val bioPromptReason: BioPromptReason = BioPromptReason.UNINITIALIZED,
     val kickUserOut: Boolean = false,

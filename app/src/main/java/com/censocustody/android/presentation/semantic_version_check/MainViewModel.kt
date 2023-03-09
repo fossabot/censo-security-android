@@ -62,43 +62,37 @@ data class MainViewModel @Inject constructor(
         }
     }
 
-    private suspend fun launchBlockingForegroundBiometryRetrieval() {
+    private fun launchBlockingForegroundBiometryRetrieval() {
         state = state.copy(bioPromptTrigger = Resource.Loading())
-        val cipher = cipherRepository.getCipherForBackgroundDecryption()
-        if (cipher != null) {
-            state = state.copy(
-                bioPromptTrigger = Resource.Success(cipher),
-                biometryTooManyAttempts = false,
-                bioPromptReason = BioPromptReason.FOREGROUND_RETRIEVAL
-            )
-        }
+        state = state.copy(
+            bioPromptTrigger = Resource.Success(Unit),
+            biometryTooManyAttempts = false,
+            bioPromptReason = BioPromptReason.FOREGROUND_RETRIEVAL
+        )
     }
 
-    private suspend fun launchBlockingForegroundBiometrySave() {
+    private fun launchBlockingForegroundBiometrySave() {
         state = state.copy(bioPromptTrigger = Resource.Loading())
-        val cipher = cipherRepository.getCipherForEncryption(SENTINEL_KEY_NAME)
-        if (cipher != null) {
-            state = state.copy(
-                bioPromptTrigger = Resource.Success(cipher),
-                biometryTooManyAttempts = false,
-                bioPromptReason = BioPromptReason.FOREGROUND_SAVE
-            )
-        }
+        state = state.copy(
+            bioPromptTrigger = Resource.Success(Unit),
+            biometryTooManyAttempts = false,
+            bioPromptReason = BioPromptReason.FOREGROUND_SAVE
+        )
     }
 
     fun biometryApproved() {
         viewModelScope.launch {
             if (state.bioPromptReason == BioPromptReason.FOREGROUND_RETRIEVAL) {
-                checkSentinelDataAfterBiometricApproval(cipher)
+                checkSentinelDataAfterBiometricApproval()
             } else if (state.bioPromptReason == BioPromptReason.FOREGROUND_SAVE) {
-                saveSentinelDataAfterBiometricApproval(cipher)
+                saveSentinelDataAfterBiometricApproval()
             }
         }
     }
 
-    private suspend fun checkSentinelDataAfterBiometricApproval(cipher: Cipher) {
+    private suspend fun checkSentinelDataAfterBiometricApproval() {
         state = try {
-            val sentinelData = keyRepository.retrieveSentinelData(cipher)
+            val sentinelData = keyRepository.retrieveSentinelData()
             if (sentinelData == SENTINEL_STATIC_DATA) {
                 biometrySuccessfulState()
             } else {
@@ -109,9 +103,9 @@ data class MainViewModel @Inject constructor(
         }
     }
 
-    private suspend fun saveSentinelDataAfterBiometricApproval(cipher: Cipher) {
+    private suspend fun saveSentinelDataAfterBiometricApproval() {
         state = try {
-            keyRepository.saveSentinelData(cipher)
+            keyRepository.saveSentinelData()
             val updatedState = biometrySuccessfulState()
             updatedState.copy(
                 sendUserToEntrance = true
