@@ -67,23 +67,22 @@ fun KeysUploadScreen(
     if (state.triggerBioPrompt is Resource.Success) {
 
         val kickOffBioPrompt = {
-            state.triggerBioPrompt.data?.let {
-                val promptInfo = BioCryptoUtil.createPromptInfo(context = context)
-                val bioPrompt = BioCryptoUtil.createBioPrompt(
-                    fragmentActivity = context,
-                    onSuccess = { viewModel.biometryApproved() },
-                    onFail = { failedReason ->
-                        BioCryptoUtil.handleBioPromptOnFail(
-                            context = context,
-                            errorCode = failedReason
-                        ) {
-                            viewModel.biometryFailed(failedReason)
-                        }
+            val promptInfo = BioCryptoUtil.createPromptInfo(context = context)
+            val bioPrompt = BioCryptoUtil.createBioPrompt(
+                fragmentActivity = context,
+                onSuccess = { viewModel.biometryApproved() },
+                onFail = { failedReason ->
+                    BioCryptoUtil.handleBioPromptOnFail(
+                        context = context,
+                        errorCode = failedReason
+                    ) {
+                        viewModel.biometryFailed(failedReason)
                     }
-                )
+                }
+            )
 
-                bioPrompt.authenticate(promptInfo)
-            }
+            bioPrompt.authenticate(promptInfo)
+
             viewModel.resetPromptTrigger()
         }
 

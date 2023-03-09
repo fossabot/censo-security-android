@@ -79,19 +79,18 @@ fun ApprovalDetailsScreen(
 
     LaunchedEffect(key1 = approvalDetailsState) {
         if (approvalDetailsState.bioPromptTrigger is Resource.Success) {
-            approvalDetailsState.bioPromptTrigger.data?.let {
-                val bioPrompt = BioCryptoUtil.createBioPrompt(
-                    fragmentActivity = context,
-                    onSuccess = { approvalDetailsViewModel.biometryApproved() },
-                    onFail = {
-                        BioCryptoUtil.handleBioPromptOnFail(context = context, errorCode = it) {
-                            resetDataAfterErrorDismissed()
-                        }
+            val bioPrompt = BioCryptoUtil.createBioPrompt(
+                fragmentActivity = context,
+                onSuccess = { approvalDetailsViewModel.biometryApproved() },
+                onFail = {
+                    BioCryptoUtil.handleBioPromptOnFail(context = context, errorCode = it) {
+                        resetDataAfterErrorDismissed()
                     }
-                )
+                }
+            )
 
-                bioPrompt.authenticate(promptInfo)
-            }
+            bioPrompt.authenticate(promptInfo)
+
             approvalDetailsViewModel.resetPromptTrigger()
         }
 
