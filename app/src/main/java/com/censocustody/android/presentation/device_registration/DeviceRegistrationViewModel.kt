@@ -142,8 +142,8 @@ class DeviceRegistrationViewModel @Inject constructor(
             val keyId = cryptographyManager.createDeviceKeyId()
             state = state.copy(keyName = keyId)
             try {
-                val deviceKey =
-                    cryptographyManager.getOrCreateKey(keyName = keyId)
+
+                cryptographyManager.getOrCreateKey(keyName = keyId)
 
                 val publicKey = cryptographyManager.getPublicKeyFromDeviceKey(keyName = keyId)
                 val compressedPublicKey =
