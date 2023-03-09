@@ -146,18 +146,18 @@ object ECIESManager {
     ): ECPoint {
         val c: ECCurve = if (curve.field is ECFieldFp) {
             ECCurve.Fp(
-                (curve.field as ECFieldFp).p, curve.a, curve.b
+                (curve.field as ECFieldFp).p, curve.a, curve.b, null, null
             )
         } else {
             val k = (curve.field as ECFieldF2m).midTermsOfReductionPolynomial
             if (k.size == 3) {
                 ECCurve.F2m(
                     (curve.field as ECFieldF2m).m,
-                    k[2], k[1], k[0], curve.a, curve.b
+                    k[2], k[1], k[0], curve.a, curve.b, null, null
                 )
             } else {
                 ECCurve.F2m(
-                    (curve.field as ECFieldF2m).m, k[0], curve.a, curve.b
+                    (curve.field as ECFieldF2m).m, k[0], curve.a, curve.b, null, null
                 )
             }
         }
