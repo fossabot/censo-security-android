@@ -104,10 +104,8 @@ class MainActivity : FragmentActivity() {
                         }
                     )
 
-                    mainState.bioPromptTrigger.data?.let {
-                        bioPrompt.authenticate(promptInfo)
-                        mainViewModel.setPromptTriggerToLoading()
-                    }
+                    bioPrompt.authenticate(promptInfo)
+                    mainViewModel.setPromptTriggerToLoading()
                 }
             }
 

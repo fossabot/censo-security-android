@@ -71,21 +71,19 @@ fun SignInScreen(
         if (state.triggerBioPrompt is Resource.Success) {
             viewModel.resetPromptTrigger()
 
-            state.triggerBioPrompt.data?.let {
-                val promptInfo = BioCryptoUtil.createPromptInfo(context = context)
+            val promptInfo = BioCryptoUtil.createPromptInfo(context = context)
 
-                val bioPrompt = BioCryptoUtil.createBioPrompt(
-                    fragmentActivity = context,
-                    onSuccess = { viewModel.biometryApproved() },
-                    onFail = {
-                        BioCryptoUtil.handleBioPromptOnFail(context = context, errorCode = it) {
-                            viewModel.biometryFailed()
-                        }
+            val bioPrompt = BioCryptoUtil.createBioPrompt(
+                fragmentActivity = context,
+                onSuccess = { viewModel.biometryApproved() },
+                onFail = {
+                    BioCryptoUtil.handleBioPromptOnFail(context = context, errorCode = it) {
+                        viewModel.biometryFailed()
                     }
-                )
+                }
+            )
 
-                bioPrompt.authenticate(promptInfo)
-            }
+            bioPrompt.authenticate(promptInfo)
         }
     }
     //endregion
