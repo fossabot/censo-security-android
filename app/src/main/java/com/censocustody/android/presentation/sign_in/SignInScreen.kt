@@ -76,18 +76,7 @@ fun SignInScreen(
 
                 val bioPrompt = BioCryptoUtil.createBioPrompt(
                     fragmentActivity = context,
-                    onSuccess = {
-                        if (it != null) {
-                            viewModel.biometryApproved(it)
-                        } else {
-                            BioCryptoUtil.handleBioPromptOnFail(
-                                context = context,
-                                errorCode = BioCryptoUtil.NO_CIPHER_CODE
-                            ) {
-                                viewModel.biometryFailed()
-                            }
-                        }
-                    },
+                    onSuccess = { viewModel.biometryApproved() },
                     onFail = {
                         BioCryptoUtil.handleBioPromptOnFail(context = context, errorCode = it) {
                             viewModel.biometryFailed()
@@ -95,7 +84,7 @@ fun SignInScreen(
                     }
                 )
 
-                bioPrompt.authenticate(promptInfo, state.triggerBioPrompt.data)
+                bioPrompt.authenticate(promptInfo)
             }
         }
     }

@@ -18,7 +18,7 @@ data class SignInState(
     val loginResult: Resource<LoginResponse> = Resource.Uninitialized,
     val verifyUserResult: Resource<VerifyUser> = Resource.Uninitialized,
     val walletSignersResult: Resource<List<WalletSigner?>> = Resource.Uninitialized,
-    val triggerBioPrompt: Resource<CryptoObject> = Resource.Uninitialized,
+    val triggerBioPrompt: Resource<Unit> = Resource.Uninitialized,
     val bioPromptReason: BioPromptReason = BioPromptReason.UNINITIALIZED,
     val exitLoginFlow : Resource<Unit> = Resource.Uninitialized,
     ) {

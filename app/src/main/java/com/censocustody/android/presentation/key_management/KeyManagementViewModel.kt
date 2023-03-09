@@ -142,8 +142,6 @@ class KeyManagementViewModel @Inject constructor(
 
     private fun triggerDeviceSignatureRetrieval() {
         viewModelScope.launch {
-            val userEmail = userRepository.retrieveUserEmail()
-            val deviceKeyId = userRepository.retrieveUserDeviceId(userEmail)
             state =
                 state.copy(
                     triggerBioPrompt = Resource.Success(Unit),
@@ -166,7 +164,7 @@ class KeyManagementViewModel @Inject constructor(
         state = state.copy(finalizeKeyFlow = Resource.Error())
     }
 
-    fun saveRootSeed(cipher: Cipher) {
+    fun saveRootSeed() {
         viewModelScope.launch {
             try {
                 val phrase = when (state.keyManagementFlow) {
@@ -189,8 +187,7 @@ class KeyManagementViewModel @Inject constructor(
                 }
 
                 keyRepository.saveV3RootKey(
-                    Mnemonics.MnemonicCode(phrase = phrase),
-                    cipher = cipher
+                    Mnemonics.MnemonicCode(phrase = phrase)
                 )
 
                 val walletSigners =
@@ -267,10 +264,10 @@ class KeyManagementViewModel @Inject constructor(
         }
     }
 
-    private fun uploadKeys(signature: Signature) {
+    private fun uploadKeys() {
         viewModelScope.launch {
             val walletSignerResource =
-                userRepository.addWalletSigner(state.walletSignersToAdd, signature)
+                userRepository.addWalletSigner(state.walletSignersToAdd)
 
             if (walletSignerResource is Resource.Success) {
                 state =

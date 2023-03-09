@@ -71,18 +71,7 @@ fun KeysUploadScreen(
                 val promptInfo = BioCryptoUtil.createPromptInfo(context = context)
                 val bioPrompt = BioCryptoUtil.createBioPrompt(
                     fragmentActivity = context,
-                    onSuccess = {
-                        if (it?.cipher != null || it?.signature != null) {
-                            viewModel.biometryApproved(it)
-                        } else {
-                            BioCryptoUtil.handleBioPromptOnFail(
-                                context = context,
-                                errorCode = NO_CIPHER_CODE
-                            ) {
-                                viewModel.biometryFailed(NO_CIPHER_CODE)
-                            }
-                        }
-                    },
+                    onSuccess = { viewModel.biometryApproved() },
                     onFail = { failedReason ->
                         BioCryptoUtil.handleBioPromptOnFail(
                             context = context,
@@ -93,10 +82,7 @@ fun KeysUploadScreen(
                     }
                 )
 
-                bioPrompt.authenticate(
-                    promptInfo,
-                    state.triggerBioPrompt.data
-                )
+                bioPrompt.authenticate(promptInfo)
             }
             viewModel.resetPromptTrigger()
         }

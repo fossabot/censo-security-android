@@ -105,10 +105,7 @@ class MainActivity : FragmentActivity() {
                     )
 
                     mainState.bioPromptTrigger.data?.let {
-                        bioPrompt.authenticate(
-                            promptInfo,
-                            BiometricPrompt.CryptoObject(mainState.bioPromptTrigger.data)
-                        )
+                        bioPrompt.authenticate(promptInfo)
                         mainViewModel.setPromptTriggerToLoading()
                     }
                 }
