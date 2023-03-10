@@ -25,6 +25,7 @@ class KeyStorageImpl @Inject constructor(
     }
 
     override fun saveRootSeed(email: String, rootSeed: ByteArray) {
+        cryptographyManager.getOrCreateKey(ROOT_SEED_KEY_NAME)
         val encryptedRootSeed =
             cryptographyManager.encryptDataLocal(
                 keyName = ROOT_SEED_KEY_NAME,
@@ -55,6 +56,7 @@ class KeyStorageImpl @Inject constructor(
     }
 
     override fun saveSentinelData(email: String) {
+        cryptographyManager.getOrCreateKey(SENTINEL_KEY_NAME)
         val encryptedSentinelData =
             cryptographyManager.encryptDataLocal(
                 keyName = SENTINEL_KEY_NAME,
