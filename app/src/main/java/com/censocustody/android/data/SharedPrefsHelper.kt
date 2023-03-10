@@ -69,12 +69,10 @@ object SharedPrefsHelper {
     }
 
     fun hasSentinelData(encryptedPrefs: SharedPreferences, email: String): Boolean {
-        val savedInitVector =
-            encryptedPrefs.getString("${email.lowercase().trim()}$BGRD_INIT_VECTOR", "") ?: ""
         val cipherText =
             encryptedPrefs.getString("${email.lowercase().trim()}$BGRD_CIPHER_TEXT", "") ?: ""
 
-        return savedInitVector.isNotEmpty() && cipherText.isNotEmpty()
+        return cipherText.isNotEmpty()
     }
 
     //endregion
@@ -125,12 +123,10 @@ object SharedPrefsHelper {
     }
 
     fun hasV3RootSeed(encryptedPrefs: SharedPreferences, email: String): Boolean {
-        val savedInitVector =
-            encryptedPrefs.getString("${email.lowercase().trim()}$V3_ROOT_SEED_INIT_VECTOR", "") ?: ""
         val cipherText =
             encryptedPrefs.getString("${email.lowercase().trim()}$V3_ROOT_SEED", "") ?: ""
 
-        return savedInitVector.isNotEmpty() && cipherText.isNotEmpty()
+        return cipherText.isNotEmpty()
     }
 
     fun clearV3RootSeed(encryptedPrefs: SharedPreferences, email: String) {

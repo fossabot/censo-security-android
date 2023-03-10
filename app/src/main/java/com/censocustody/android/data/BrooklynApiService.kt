@@ -3,7 +3,6 @@ package com.censocustody.android.data
 import android.os.Build
 import com.google.gson.*
 import com.censocustody.android.BuildConfig
-import com.censocustody.android.common.censoLog
 import com.censocustody.android.data.BaseRepository.Companion.UNAUTHORIZED
 import com.censocustody.android.data.BrooklynApiService.Companion.APP_VERSION_HEADER
 import com.censocustody.android.data.BrooklynApiService.Companion.AUTH
