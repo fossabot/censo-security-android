@@ -1,7 +1,5 @@
 package com.censocustody.android.presentation.sign_in
 
-import android.util.Log
-import androidx.biometric.BiometricPrompt.CryptoObject
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -12,21 +10,15 @@ import androidx.lifecycle.viewModelScope
 import com.raygun.raygun4android.RaygunClient
 import com.censocustody.android.common.*
 import com.censocustody.android.data.*
-import com.censocustody.android.data.EncryptionManagerImpl.Companion.SENTINEL_KEY_NAME
 import com.censocustody.android.data.NoInternetException.Companion.NO_INTERNET_ERROR
-import com.censocustody.android.data.models.CipherRepository
 import com.censocustody.android.data.models.LoginResponse
 import com.censocustody.android.data.models.PushBody
 import kotlinx.coroutines.*
-import java.security.Signature
-import javax.crypto.Cipher
-import kotlin.random.Random
 
 @HiltViewModel
 class SignInViewModel @Inject constructor(
     private val userRepository: UserRepository,
     private val pushRepository: PushRepository,
-    private val cipherRepository: CipherRepository,
     private val keyRepository: KeyRepository,
     private val censoUserData: CensoUserData
 ) : ViewModel() {

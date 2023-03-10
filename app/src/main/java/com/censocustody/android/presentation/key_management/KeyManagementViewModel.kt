@@ -1,6 +1,5 @@
 package com.censocustody.android.presentation.key_management
 
-import androidx.biometric.BiometricPrompt.CryptoObject
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -12,22 +11,17 @@ import cash.z.ecc.android.bip39.Mnemonics
 import cash.z.ecc.android.bip39.toSeed
 import com.censocustody.android.common.*
 import com.censocustody.android.data.*
-import com.censocustody.android.data.EncryptionManagerImpl.Companion.ROOT_SEED_KEY_NAME
-import com.censocustody.android.data.models.CipherRepository
 import com.censocustody.android.data.models.IndexedPhraseWord
 import com.censocustody.android.data.models.WalletSigner
 import com.censocustody.android.presentation.key_management.KeyManagementState.Companion.NO_PHRASE_ERROR
 import com.censocustody.android.presentation.key_management.KeyManagementState.Companion.FIRST_WORD_INDEX
 import com.censocustody.android.presentation.key_management.flows.*
 import kotlinx.coroutines.*
-import java.security.Signature
-import javax.crypto.Cipher
 
 @HiltViewModel
 class KeyManagementViewModel @Inject constructor(
     private val userRepository: UserRepository,
     private val keyRepository: KeyRepository,
-    private val cipherRepository: CipherRepository,
     private val phraseValidator: PhraseValidator
 ) : ViewModel() {
 

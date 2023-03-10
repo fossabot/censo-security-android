@@ -52,7 +52,7 @@ class ApprovalRequestSignatureTest {
 
         allKeys = encryptionManager.createAllKeys(rootSeed)
 
-        whenever(keyStorage.retrieveRootSeed(any(), any())).then {
+        whenever(keyStorage.retrieveRootSeed(any())).then {
             BaseWrapper.decode(BaseWrapper.encode(rootSeed))
         }
 
@@ -78,7 +78,6 @@ class ApprovalRequestSignatureTest {
 
                 val signatures = encryptionManager.signApprovalDisposition(
                     email = "",
-                    cipher = cipher,
                     dataToSign = signableData
                 )
 
