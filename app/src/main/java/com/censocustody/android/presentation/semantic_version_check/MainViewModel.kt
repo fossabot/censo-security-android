@@ -21,7 +21,6 @@ import javax.inject.Inject
 @HiltViewModel
 data class MainViewModel @Inject constructor(
     private val userRepository: UserRepository,
-    private val cipherRepository: CipherRepository,
     private val keyRepository: KeyRepository
 ) : ViewModel() {
 

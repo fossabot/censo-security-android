@@ -39,15 +39,6 @@ class ApprovalDetailsViewModelTest : BaseViewModelTest() {
     lateinit var userRepository: UserRepository
 
     @Mock
-    lateinit var cipher: Cipher
-
-    @Mock
-    lateinit var signature: Signature
-
-    @Mock
-    lateinit var cryptoObject: CryptoObject
-
-    @Mock
     lateinit var countdownTimer: CensoCountDownTimer
 
     private lateinit var approvalDetailsViewModel: ApprovalDetailsViewModel
@@ -71,10 +62,6 @@ class ApprovalDetailsViewModelTest : BaseViewModelTest() {
     override fun setUp() = runBlocking {
         super.setUp()
         Dispatchers.setMain(dispatcher)
-
-        whenever(cipherRepository.getCipherForV3RootSeedDecryption()).thenAnswer {
-            cipher
-        }
 
         approvalDetailsViewModel =
             ApprovalDetailsViewModel(
@@ -107,8 +94,7 @@ class ApprovalDetailsViewModelTest : BaseViewModelTest() {
     fun `approve an approval successfully then view model should reflect the success in state`() = runTest {
         whenever(userRepository.retrieveUserEmail()).then { "userEmail@ok.com" }
         whenever(userRepository.retrieveUserDeviceId(any())).then { "device_id" }
-        whenever(cipherRepository.getSignatureForDeviceSigning(any())).then { signature }
-        whenever(approvalsRepository.approveOrDenyDisposition(any(), any(), any())).thenAnswer {
+        whenever(approvalsRepository.approveOrDenyDisposition(any(), any())).thenAnswer {
             Resource.Success(data = null)
         }
 
@@ -127,8 +113,6 @@ class ApprovalDetailsViewModelTest : BaseViewModelTest() {
         )
 
         assertExpectedDisposition(ApprovalDisposition.APPROVE)
-
-        whenever(cryptoObject.signature).then { signature }
 
         triggerRegisterDispositionCallAndAssertNonceDataAndBioPromptState()
 
@@ -150,7 +134,7 @@ class ApprovalDetailsViewModelTest : BaseViewModelTest() {
      */
     @Test
     fun `deny an approval successfully then view model should reflect the success in state`() = runTest {
-        whenever(approvalsRepository.approveOrDenyDisposition(any(), any(), any())).thenAnswer {
+        whenever(approvalsRepository.approveOrDenyDisposition(any(), any())).thenAnswer {
             Resource.Success(data = null)
         }
 
@@ -191,7 +175,7 @@ class ApprovalDetailsViewModelTest : BaseViewModelTest() {
      */
     @Test
     fun `deny an approval but api error occurs then view model should hold retry data and reflect error in state`() = runTest {
-        whenever(approvalsRepository.approveOrDenyDisposition(any(), any(), any())).thenAnswer {
+        whenever(approvalsRepository.approveOrDenyDisposition(any(), any())).thenAnswer {
             Resource.Error(data = null)
         }
 
@@ -355,9 +339,7 @@ class ApprovalDetailsViewModelTest : BaseViewModelTest() {
 
         assertTrue(approvalDetailsViewModel.state.bioPromptTrigger is Resource.Success)
 
-        whenever(cryptoObject.cipher).then { cipher }
-
-        approvalDetailsViewModel.biometryApproved(cryptoObject)
+        approvalDetailsViewModel.biometryApproved()
     }
     //endregion
 

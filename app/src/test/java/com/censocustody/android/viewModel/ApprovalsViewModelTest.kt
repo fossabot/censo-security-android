@@ -43,15 +43,6 @@ class ApprovalsViewModelTest : BaseViewModelTest() {
     @Mock
     lateinit var userRepository: UserRepository
 
-    @Mock
-    lateinit var cipher: Cipher
-
-    @Mock
-    lateinit var signature: Signature
-
-    @Mock
-    lateinit var cryptoObject: CryptoObject
-
     private lateinit var approvalsViewModel: ApprovalsViewModel
 
     private val dispatcher = StandardTestDispatcher()
@@ -81,23 +72,12 @@ class ApprovalsViewModelTest : BaseViewModelTest() {
         super.setUp()
         Dispatchers.setMain(dispatcher)
 
-        whenever(approvalsRepository.approveOrDenyDisposition(any(), any(), any())).thenAnswer {
+        whenever(approvalsRepository.approveOrDenyDisposition(any(), any())).thenAnswer {
             Resource.Success(data = null)
         }
 
         whenever(userRepository.retrieveUserEmail()).then { validEmail }
         whenever(userRepository.retrieveUserDeviceId(validEmail)).then { validDeviceId }
-
-        whenever(cipherRepository.getCipherForV3RootSeedDecryption()).thenAnswer {
-            cipher
-        }
-
-        whenever(cipherRepository.getSignatureForDeviceSigning(any())).thenAnswer {
-            signature
-        }
-
-        whenever(cryptoObject.cipher).then { cipher }
-        whenever(cryptoObject.signature).then { signature }
 
         approvalsViewModel =
             ApprovalsViewModel(
@@ -459,10 +439,8 @@ class ApprovalsViewModelTest : BaseViewModelTest() {
     private fun triggerRegisterDispositionCallAndAssertBioPromptState() = runTest {
         triggerBioPromptAndCheckBioPromptState()
 
-        whenever(cryptoObject.cipher).then { cipher }
-
         //Trigger the register disposition call (user triggers this when they give biometry approval)
-        approvalsViewModel.biometryApproved(cryptoObject)
+        approvalsViewModel.biometryApproved()
     }
 
     private suspend fun setApprovalsDataInStateAndAssertStateWasSet() = runTest {
