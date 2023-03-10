@@ -1,5 +1,6 @@
 package com.censocustody.android.presentation.sign_in
 
+import android.util.Log
 import androidx.biometric.BiometricPrompt.CryptoObject
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
