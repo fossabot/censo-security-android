@@ -22,7 +22,6 @@ import com.censocustody.android.presentation.components.CensoErrorScreen
 import com.censocustody.android.presentation.key_management.KeyManagementFlow
 import com.censocustody.android.presentation.key_management.KeyManagementInitialData
 import com.censocustody.android.ui.theme.BackgroundWhite
-import com.censocustody.android.ui.theme.CensoWhite
 import com.censocustody.android.R
 import com.censocustody.android.ui.theme.ButtonRed
 
