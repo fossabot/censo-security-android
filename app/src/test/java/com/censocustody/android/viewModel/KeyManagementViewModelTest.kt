@@ -40,13 +40,7 @@ class KeyManagementViewModelTest : BaseViewModelTest() {
     lateinit var keyRepository: KeyRepository
 
     @Mock
-    lateinit var cipherRepository: CipherRepository
-
-    @Mock
     lateinit var phraseValidator: PhraseValidator
-
-    @Mock
-    lateinit var rootSeedEncryptionCipher: Cipher
 
     private lateinit var keyMgmtViewModel: KeyManagementViewModel
 
@@ -85,16 +79,11 @@ class KeyManagementViewModelTest : BaseViewModelTest() {
             testValidPhrase
         }
 
-        whenever(cipherRepository.getCipherForEncryption(ROOT_SEED_KEY_NAME)).thenAnswer {
-            rootSeedEncryptionCipher
-        }
-
         keyMgmtViewModel =
             KeyManagementViewModel(
                 userRepository = userRepository,
                 keyRepository = keyRepository,
                 phraseValidator = phraseValidator,
-                cipherRepository = cipherRepository
             )
     }
 
@@ -814,7 +803,7 @@ class KeyManagementViewModelTest : BaseViewModelTest() {
         keyMgmtViewModel.onStart(testCreationInitialData)
 
         //should fail early because null phrase has been set
-        keyMgmtViewModel.saveRootSeed(rootSeedEncryptionCipher)
+        keyMgmtViewModel.saveRootSeed()
 
         advanceUntilIdle()
 
@@ -879,7 +868,7 @@ class KeyManagementViewModelTest : BaseViewModelTest() {
     //region Retry methods
     @Test
     fun `after error occurs during key recovery then retrying should trigger bio prompt`() = runTest {
-        whenever(keyRepository.saveV3RootKey(any(), any())).then {
+        whenever(keyRepository.saveV3RootKey(any())).then {
             throw Exception(defaultErrorMessage)
         }
 
@@ -899,7 +888,7 @@ class KeyManagementViewModelTest : BaseViewModelTest() {
         assertTrue(keyMgmtViewModel.state.keyRecoveryManualEntryError is Resource.Uninitialized)
 
         //Attempt to recover the key, an exception will be thrown
-        keyMgmtViewModel.saveRootSeed(rootSeedEncryptionCipher)
+        keyMgmtViewModel.saveRootSeed()
 
         advanceUntilIdle()
 
@@ -982,7 +971,6 @@ class KeyManagementViewModelTest : BaseViewModelTest() {
 
     private fun assertTriggerBioPromptIsSuccessAndHasCipherData() {
         assertTrue(keyMgmtViewModel.state.triggerBioPrompt is Resource.Success)
-        assertEquals(rootSeedEncryptionCipher, keyMgmtViewModel.state.triggerBioPrompt.data?.cipher)
     }
 
     private fun callExitPhraseFlowAndAssertChangesInState() {

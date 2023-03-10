@@ -1,6 +1,5 @@
 package com.censocustody.android.viewModel
 
-import androidx.biometric.BiometricPrompt.CryptoObject
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.times
 import com.nhaarman.mockitokotlin2.verify
@@ -9,7 +8,6 @@ import com.censocustody.android.common.BioPromptReason
 import com.censocustody.android.common.Resource
 import com.censocustody.android.data.*
 import com.censocustody.android.data.EncryptionManagerImpl.Companion.SENTINEL_KEY_NAME
-import com.censocustody.android.data.models.CipherRepository
 import com.censocustody.android.data.models.LoginResponse
 import com.censocustody.android.data.models.PushBody
 import com.censocustody.android.presentation.sign_in.LoginStep
@@ -24,8 +22,6 @@ import org.junit.Before
 import org.junit.Test
 import org.mockito.Mock
 import org.mockito.MockitoAnnotations
-import java.security.Signature
-import javax.crypto.Cipher
 
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -39,9 +35,6 @@ class SignInViewModelTest : BaseViewModelTest() {
     lateinit var keyRepository: KeyRepository
 
     @Mock
-    lateinit var cipherRepository: CipherRepository
-
-    @Mock
     lateinit var userRepository: UserRepository
 
     @Mock
@@ -49,15 +42,6 @@ class SignInViewModelTest : BaseViewModelTest() {
 
     @Mock
     lateinit var censoUserData: CensoUserData
-
-    @Mock
-    lateinit var mockCipher: Cipher
-
-    @Mock
-    lateinit var mockCryptoObject: CryptoObject
-
-    @Mock
-    lateinit var mockSignature: Signature
 
     private val validEmail = "sam@ok.com"
     private val invalidEmail = ""
@@ -78,13 +62,10 @@ class SignInViewModelTest : BaseViewModelTest() {
         MockitoAnnotations.openMocks(this)
 
         whenever(userRepository.retrieveCachedUserEmail()).then { "" }
-        whenever(cipherRepository.getCipherForV3RootSeedDecryption()).then { mockCipher }
         whenever(userRepository.retrieveUserEmail()).then { validEmail }
         whenever(userRepository.retrieveUserDeviceId(any())).then { deviceId }
-        whenever(cipherRepository.getSignatureForDeviceSigning(any())).then { mockSignature }
-        whenever(mockCryptoObject.signature).then { mockSignature }
         whenever(keyRepository.generateTimestamp()).then { timestamp }
-        whenever(keyRepository.signTimestamp(any(), any())).then { signedTimestamp }
+        whenever(keyRepository.signTimestamp(any())).then { signedTimestamp }
 
         whenever(pushRepository.getDeviceId()).then { deviceId }
         whenever(pushRepository.retrievePushToken()).then { pushToken }
@@ -186,7 +167,6 @@ class SignInViewModelTest : BaseViewModelTest() {
         runTest {
             whenever(keyRepository.hasV3RootSeedStored()).then { false }
             whenever(userRepository.userLoggedIn()).then { false }
-            whenever(cipherRepository.getCipherForEncryption(SENTINEL_KEY_NAME)).then { mockCipher }
             whenever(userRepository.loginWithPassword(validEmail, validPassword)).then {
                 Resource.Success(LoginResponse(jwt))
             }
@@ -206,7 +186,6 @@ class SignInViewModelTest : BaseViewModelTest() {
             assertTrue(signInViewModel.state.loginResult is Resource.Success)
             assertEquals(jwt, signInViewModel.state.loginResult.data?.token)
             assertTrue(signInViewModel.state.triggerBioPrompt is Resource.Success)
-            assertEquals(mockCipher, signInViewModel.state.triggerBioPrompt.data?.cipher)
             assertEquals(BioPromptReason.SAVE_SENTINEL, signInViewModel.state.bioPromptReason)
         }
 
@@ -257,7 +236,6 @@ class SignInViewModelTest : BaseViewModelTest() {
         runTest {
             whenever(keyRepository.hasV3RootSeedStored()).then { true }
             whenever(userRepository.userLoggedIn()).then { false }
-            whenever(mockCryptoObject.signature).then { mockSignature }
 
             initVM()
 
@@ -267,26 +245,6 @@ class SignInViewModelTest : BaseViewModelTest() {
             advanceUntilIdle()
 
             assertTrue(signInViewModel.state.triggerBioPrompt is Resource.Success)
-            assertTrue(signInViewModel.state.triggerBioPrompt.data?.signature == mockSignature)
-        }
-
-    @Test
-    fun `valid email with a private key but null cipher does not attempt biometric login`() =
-        runTest {
-            whenever(keyRepository.hasV3RootSeedStored()).then { true }
-            whenever(userRepository.userLoggedIn()).then { false }
-            whenever(cipherRepository.getSignatureForDeviceSigning(any())).then { null }
-            whenever(mockCryptoObject.signature).then { null }
-
-            initVM()
-
-            signInViewModel.updateEmail(validEmail)
-            signInViewModel.signInActionCompleted()
-
-            advanceUntilIdle()
-
-            assertTrue(signInViewModel.state.triggerBioPrompt !is Resource.Success)
-            assertTrue(signInViewModel.state.bioPromptReason == BioPromptReason.UNINITIALIZED)
         }
 
     @Test
@@ -302,7 +260,7 @@ class SignInViewModelTest : BaseViewModelTest() {
 
             advanceUntilIdle()
 
-            signInViewModel.biometryApproved(mockCryptoObject)
+            signInViewModel.biometryApproved()
 
             verify(userRepository, times(1)).loginWithTimestamp(
                 validEmail, timestamp, signedTimestamp
@@ -313,13 +271,11 @@ class SignInViewModelTest : BaseViewModelTest() {
     @Test
     fun `biometry approved during initial login attempts saving sentinel data`() =
         runTest {
-            whenever(cipherRepository.getCipherForEncryption(SENTINEL_KEY_NAME)).then { mockCipher }
             whenever(keyRepository.hasV3RootSeedStored()).then { false }
             whenever(userRepository.userLoggedIn()).then { false }
             whenever(userRepository.loginWithPassword(validEmail, validPassword)).then {
                 Resource.Success(LoginResponse(jwt))
             }
-            whenever(mockCryptoObject.cipher).then { mockCipher }
 
             initVM()
 
@@ -330,9 +286,9 @@ class SignInViewModelTest : BaseViewModelTest() {
 
             advanceUntilIdle()
 
-            signInViewModel.biometryApproved(mockCryptoObject)
+            signInViewModel.biometryApproved()
 
-            verify(keyRepository, times(1)).saveSentinelData(mockCipher)
+            verify(keyRepository, times(1)).saveSentinelData()
             assertTrue(signInViewModel.state.exitLoginFlow is Resource.Success)
         }
 
@@ -353,7 +309,7 @@ class SignInViewModelTest : BaseViewModelTest() {
 
             advanceUntilIdle()
 
-            signInViewModel.biometryApproved(mockCryptoObject)
+            signInViewModel.biometryApproved()
 
             advanceUntilIdle()
 
@@ -364,7 +320,6 @@ class SignInViewModelTest : BaseViewModelTest() {
     @Test
     fun `valid signature based login with no sentinel data triggers sentinel data save`() =
         runTest {
-            whenever(cipherRepository.getCipherForEncryption(SENTINEL_KEY_NAME)).then { mockCipher }
             whenever(keyRepository.haveSentinelData()).then { false }
             whenever(userRepository.userLoggedIn()).then { false }
             whenever(keyRepository.hasV3RootSeedStored()).then { true }
@@ -379,7 +334,7 @@ class SignInViewModelTest : BaseViewModelTest() {
 
             advanceUntilIdle()
 
-            signInViewModel.biometryApproved(mockCryptoObject)
+            signInViewModel.biometryApproved()
 
             advanceUntilIdle()
 
@@ -390,7 +345,6 @@ class SignInViewModelTest : BaseViewModelTest() {
             assertEquals(LoginStep.EMAIL_ENTRY, signInViewModel.state.loginStep)
             assertEquals(validEmail, signInViewModel.state.email)
             assertTrue(signInViewModel.state.triggerBioPrompt is Resource.Success)
-            assertEquals(mockCipher, signInViewModel.state.triggerBioPrompt.data?.cipher)
             assertEquals(BioPromptReason.SAVE_SENTINEL, signInViewModel.state.bioPromptReason)
         }
 
@@ -410,7 +364,7 @@ class SignInViewModelTest : BaseViewModelTest() {
 
             advanceUntilIdle()
 
-            signInViewModel.biometryApproved(mockCryptoObject)
+            signInViewModel.biometryApproved()
 
             advanceUntilIdle()
 
@@ -433,7 +387,7 @@ class SignInViewModelTest : BaseViewModelTest() {
 
             advanceUntilIdle()
 
-            signInViewModel.biometryApproved(mockCryptoObject)
+            signInViewModel.biometryApproved()
 
             advanceUntilIdle()
 
@@ -467,7 +421,6 @@ class SignInViewModelTest : BaseViewModelTest() {
             userRepository = userRepository,
             censoUserData = censoUserData,
             pushRepository = pushRepository,
-            cipherRepository = cipherRepository
         )
     }
 
