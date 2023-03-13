@@ -38,15 +38,22 @@ object SharedPrefsHelper {
     fun saveSentinelData(
         encryptedPrefs: SharedPreferences,
         email: String,
-        ciphertext: ByteArray
+        encryptedData: EncryptedData
     ) {
-        val cipherText =
-            if (ciphertext.isEmpty()) {
+        val initVector =
+            if (encryptedData.initializationVector.isEmpty()) {
                 ""
             } else {
-                BaseWrapper.encode(ciphertext)
+                BaseWrapper.encode(encryptedData.initializationVector)
+            }
+        val cipherText =
+            if (encryptedData.ciphertext.isEmpty()) {
+                ""
+            } else {
+                BaseWrapper.encode(encryptedData.ciphertext)
             }
         val editor = encryptedPrefs.edit()
+        editor.putString("${email.lowercase().trim()}$BGRD_INIT_VECTOR", initVector)
         editor.putString("${email.lowercase().trim()}$BGRD_CIPHER_TEXT", cipherText)
         editor.apply()
     }
@@ -54,11 +61,16 @@ object SharedPrefsHelper {
     fun retrieveSentinelData(
         encryptedPrefs: SharedPreferences,
         email: String
-    ): ByteArray {
+    ): EncryptedData {
+        val savedInitVector =
+            encryptedPrefs.getString("${email.lowercase().trim()}$BGRD_INIT_VECTOR", "") ?: ""
         val cipherText =
             encryptedPrefs.getString("${email.lowercase().trim()}$BGRD_CIPHER_TEXT", "") ?: ""
 
-        return BaseWrapper.decode(cipherText)
+        return EncryptedData(
+            initializationVector = BaseWrapper.decode(savedInitVector),
+            ciphertext = BaseWrapper.decode(cipherText)
+        )
     }
 
     fun clearSentinelData(encryptedPrefs: SharedPreferences, email: String) {
@@ -69,10 +81,12 @@ object SharedPrefsHelper {
     }
 
     fun hasSentinelData(encryptedPrefs: SharedPreferences, email: String): Boolean {
+        val savedInitVector =
+            encryptedPrefs.getString("${email.lowercase().trim()}$BGRD_INIT_VECTOR", "") ?: ""
         val cipherText =
             encryptedPrefs.getString("${email.lowercase().trim()}$BGRD_CIPHER_TEXT", "") ?: ""
 
-        return cipherText.isNotEmpty()
+        return savedInitVector.isNotEmpty() && cipherText.isNotEmpty()
     }
 
     //endregion
