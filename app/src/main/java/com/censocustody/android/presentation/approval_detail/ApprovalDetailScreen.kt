@@ -246,17 +246,6 @@ fun ApprovalDetails(
                 .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            val requestType = approval?.let { safeApproval ->
-                val type = safeApproval.details
-
-                //Defensive coding,
-                // we should never have an unknown approval in the details screen
-                if (type != ApprovalRequestDetailsV2.UnknownApprovalType) {
-                    ApprovalDetailContent(approval = safeApproval, type = type)
-                }
-                type
-            }
-
             val calculatedTimerSecondsLeft = getSecondsLeftUntilCountdownIsOver(approval?.submitDate, approval?.approvalTimeoutInSeconds?.toInt())
             val timeRemainingInSeconds = if (shouldRefreshTimer) calculatedTimerSecondsLeft else calculatedTimerSecondsLeft
 
@@ -267,13 +256,11 @@ fun ApprovalDetails(
 
             ApprovalStatus(
                 requestedBy = approval?.submitterEmail ?: "",
-                requestedByName = approval?.submitterName ?: "",
                 approvalsReceived = approval?.numberOfApprovalsReceived ?: 0,
                 totalApprovals = approval?.numberOfDispositionsRequired ?: 0,
                 denialsReceived = approval?.numberOfDeniesReceived ?: 0,
                 expiresIn = expiresInText,
                 vaultName = approval?.vaultName,
-                requestType = requestType,
                 isInitiationRequest = initiationRequest
             )
             Spacer(modifier = Modifier.height(28.dp))
@@ -316,13 +303,11 @@ fun ApprovalDetails(
 @Composable
 fun ApprovalStatus(
     requestedBy: String,
-    requestedByName: String,
     approvalsReceived: Int,
     totalApprovals: Int,
     denialsReceived: Int,
     expiresIn: String?,
     vaultName: String?,
-    requestType: ApprovalRequestDetailsV2?,
     isInitiationRequest: Boolean
 ) {
     val facts = mutableListOf<RowData>()

@@ -1,6 +1,5 @@
 package com.censocustody.android.presentation.common_approvals
 
-import androidx.biometric.BiometricPrompt.CryptoObject
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -10,9 +9,7 @@ import com.censocustody.android.common.Resource
 import com.censocustody.android.common.CensoCountDownTimer
 import com.censocustody.android.common.CensoCountDownTimerImpl
 import com.censocustody.android.data.ApprovalsRepository
-import com.censocustody.android.data.UserRepository
 import com.censocustody.android.data.models.ApprovalDisposition
-import com.censocustody.android.data.models.CipherRepository
 import com.censocustody.android.data.models.RegisterApprovalDisposition
 import com.censocustody.android.data.models.approvalV2.ApprovalRequestV2
 import com.censocustody.android.presentation.approval_disposition.ApprovalDispositionState
@@ -20,8 +17,6 @@ import kotlinx.coroutines.launch
 
 abstract class  CommonApprovalsViewModel(
     private val approvalsRepository: ApprovalsRepository,
-    private val userRepository: UserRepository,
-    private val cipherRepository: CipherRepository,
     private val timer: CensoCountDownTimer
 ) : ViewModel() {
 

@@ -24,8 +24,8 @@ interface SecurePreferences {
     fun hasV3RootSeed(email: String) : Boolean
 
     //sentinel data
-    fun retrieveSentinelData(email: String): ByteArray
-    fun saveSentinelData(email: String, ciphertext: ByteArray)
+    fun retrieveSentinelData(email: String): EncryptedData
+    fun saveSentinelData(email: String, encryptedData: EncryptedData)
     fun clearSentinelData(email: String)
     fun hasSentinelData(email: String): Boolean
 
@@ -119,15 +119,15 @@ class SecurePreferencesImpl @Inject constructor(applicationContext: Context) :
 
     //region Sentinel Data Storage
 
-    override fun saveSentinelData(email: String, ciphertext: ByteArray) {
+    override fun saveSentinelData(email: String, encryptedData: EncryptedData) {
         SharedPrefsHelper.saveSentinelData(
             email = email,
             encryptedPrefs = secureSharedPreferences,
-            ciphertext = ciphertext
+            encryptedData = encryptedData
         )
     }
 
-    override fun retrieveSentinelData(email: String): ByteArray =
+    override fun retrieveSentinelData(email: String): EncryptedData =
         SharedPrefsHelper.retrieveSentinelData(
             encryptedPrefs = secureSharedPreferences, email = email
         )
