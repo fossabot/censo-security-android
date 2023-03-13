@@ -8,8 +8,6 @@ import com.censocustody.android.common.KeyStorageImpl
 import com.censocustody.android.data.*
 import com.censocustody.android.data.UserRepository
 import com.censocustody.android.data.UserRepositoryImpl
-import com.censocustody.android.data.models.CipherRepository
-import com.censocustody.android.data.models.CipherRepositoryImpl
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -88,30 +86,18 @@ object AppModule {
     fun provideKeyRepository(
         encryptionManager: EncryptionManager,
         securePreferences: SecurePreferences,
+        cryptographyManager: CryptographyManager,
         userRepository: UserRepository,
         brooklynApiService: BrooklynApiService,
         keyStorage: KeyStorage
     ): KeyRepository {
         return KeyRepositoryImpl(
             encryptionManager = encryptionManager,
+            cryptographyManager = cryptographyManager,
             securePreferences = securePreferences,
             userRepository = userRepository,
             brooklynApiService = brooklynApiService,
             keyStorage = keyStorage
-        )
-    }
-
-    @Provides
-    @Singleton
-    fun provideCipherRepository(
-        encryptionManager: EncryptionManager,
-        securePreferences: SecurePreferences,
-        userRepository: UserRepository
-    ): CipherRepository {
-        return CipherRepositoryImpl(
-            encryptionManager = encryptionManager,
-            securePreferences = securePreferences,
-            userRepository = userRepository
         )
     }
 
@@ -137,11 +123,11 @@ object AppModule {
     @Singleton
     fun provideKeyStorage(
         cryptographyManager: CryptographyManager,
-        securePreferences: SecurePreferences
+        securePreferences: SecurePreferences,
     ): KeyStorage {
         return KeyStorageImpl(
             securePreferences = securePreferences,
-            cryptographyManager = cryptographyManager
+            cryptographyManager = cryptographyManager,
         )
     }
 

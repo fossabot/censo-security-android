@@ -14,6 +14,7 @@ import com.censocustody.android.data.NoInternetException.Companion.NO_INTERNET_E
 import com.censocustody.android.data.models.LoginResponse
 import com.censocustody.android.data.models.PushBody
 import kotlinx.coroutines.*
+import javax.crypto.Cipher
 
 @HiltViewModel
 class SignInViewModel @Inject constructor(
@@ -88,7 +89,7 @@ class SignInViewModel @Inject constructor(
         viewModelScope.launch {
             if (keyRepository.hasV3RootSeedStored()) {
                 state = state.copy(
-                    triggerBioPrompt = Resource.Success(Unit),
+                    triggerBioPrompt = Resource.Success(null),
                     bioPromptReason = BioPromptReason.RETURN_LOGIN,
                     loginResult = Resource.Uninitialized
                 )
@@ -98,9 +99,9 @@ class SignInViewModel @Inject constructor(
         }
     }
 
-    fun biometryApproved() {
-        if (state.bioPromptReason == BioPromptReason.SAVE_SENTINEL ) {
-            saveSentinelData()
+    fun biometryApproved(cipher: Cipher?) {
+        if (state.bioPromptReason == BioPromptReason.SAVE_SENTINEL && cipher != null) {
+            saveSentinelData(cipher)
         }
 
         if (state.bioPromptReason == BioPromptReason.RETURN_LOGIN) {
@@ -112,10 +113,10 @@ class SignInViewModel @Inject constructor(
         state = state.copy(loginResult = Resource.Error())
     }
 
-    private fun saveSentinelData() {
+    private fun saveSentinelData(cipher: Cipher) {
         viewModelScope.launch {
             state = try {
-                keyRepository.saveSentinelData()
+                keyRepository.saveSentinelData(cipher)
                 state.copy(exitLoginFlow = Resource.Success(Unit))
             } catch (e: Exception) {
                 keyRepository.removeSentinelDataAndKickUserToAppEntrance()
@@ -229,10 +230,16 @@ class SignInViewModel @Inject constructor(
     }
 
     private fun saveSentinelDataToDevice() {
-        state = state.copy(
-            triggerBioPrompt = Resource.Success(Unit),
-            bioPromptReason = BioPromptReason.SAVE_SENTINEL
-        )
+        viewModelScope.launch {
+            val cipher = keyRepository.getInitializedCipherForSentinelEncryption()
+
+            if (cipher != null) {
+                state = state.copy(
+                    triggerBioPrompt = Resource.Success(cipher),
+                    bioPromptReason = BioPromptReason.SAVE_SENTINEL
+                )
+            }
+        }
     }
 
     private suspend fun handleReturnLoggedInUser() {

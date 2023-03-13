@@ -19,6 +19,7 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mock
+import javax.crypto.Cipher
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class MainViewModelTest : BaseViewModelTest() {
@@ -28,6 +29,9 @@ class MainViewModelTest : BaseViewModelTest() {
 
     @Mock
     lateinit var keyRepository: KeyRepository
+
+    @Mock
+    lateinit var cipher : Cipher
 
     private lateinit var mainViewModel: MainViewModel
 
@@ -56,6 +60,7 @@ class MainViewModelTest : BaseViewModelTest() {
         runTest {
             whenever(userRepository.userLoggedIn()).then { true }
             whenever(keyRepository.haveSentinelData()).then { true }
+            whenever(keyRepository.getInitializedCipherForSentinelDecryption()).then { cipher }
 
             mainViewModel.onForeground(BiometricUtil.Companion.BiometricsStatus.BIOMETRICS_ENABLED)
 
@@ -71,6 +76,7 @@ class MainViewModelTest : BaseViewModelTest() {
         runTest {
             whenever(userRepository.userLoggedIn()).then { true }
             whenever(keyRepository.haveSentinelData()).then { false }
+            whenever(keyRepository.getInitializedCipherForSentinelEncryption()).then { cipher }
 
             mainViewModel.onForeground(BiometricUtil.Companion.BiometricsStatus.BIOMETRICS_ENABLED)
 
@@ -87,13 +93,14 @@ class MainViewModelTest : BaseViewModelTest() {
         runTest {
             whenever(userRepository.userLoggedIn()).then { true }
             whenever(keyRepository.haveSentinelData()).then { true }
-            whenever(keyRepository.retrieveSentinelData()).then { SENTINEL_STATIC_DATA }
+            whenever(keyRepository.getInitializedCipherForSentinelDecryption()).then { cipher }
+            whenever(keyRepository.retrieveSentinelData(cipher)).then { SENTINEL_STATIC_DATA }
 
             mainViewModel.onForeground(BiometricUtil.Companion.BiometricsStatus.BIOMETRICS_ENABLED)
 
             advanceUntilIdle()
 
-            mainViewModel.biometryApproved()
+            mainViewModel.biometryApproved(cipher)
 
             advanceUntilIdle()
 
@@ -106,14 +113,15 @@ class MainViewModelTest : BaseViewModelTest() {
         runTest {
             whenever(userRepository.userLoggedIn()).then { true }
             whenever(keyRepository.haveSentinelData()).then { true }
-            whenever(keyRepository.retrieveSentinelData()).then { "bad data" }
+            whenever(keyRepository.getInitializedCipherForSentinelDecryption()).then { cipher }
+            whenever(keyRepository.retrieveSentinelData(cipher)).then { "bad data" }
 
             mainViewModel.onForeground(BiometricUtil.Companion.BiometricsStatus.BIOMETRICS_ENABLED)
 
 
             advanceUntilIdle()
 
-            mainViewModel.biometryApproved()
+            mainViewModel.biometryApproved(cipher)
 
             advanceUntilIdle()
 
@@ -125,12 +133,13 @@ class MainViewModelTest : BaseViewModelTest() {
         runTest {
             whenever(userRepository.userLoggedIn()).then { true }
             whenever(keyRepository.haveSentinelData()).then { false }
+            whenever(keyRepository.getInitializedCipherForSentinelEncryption()).then { cipher }
 
             mainViewModel.onForeground(BiometricUtil.Companion.BiometricsStatus.BIOMETRICS_ENABLED)
 
             advanceUntilIdle()
 
-            mainViewModel.biometryApproved()
+            mainViewModel.biometryApproved(cipher)
 
             advanceUntilIdle()
 
@@ -143,7 +152,7 @@ class MainViewModelTest : BaseViewModelTest() {
         runTest {
             whenever(userRepository.userLoggedIn()).then { true }
             whenever(keyRepository.haveSentinelData()).then { true }
-            whenever(keyRepository.retrieveSentinelData()).then { SENTINEL_STATIC_DATA }
+            whenever(keyRepository.retrieveSentinelData(cipher)).then { SENTINEL_STATIC_DATA }
 
             mainViewModel.onForeground(BiometricUtil.Companion.BiometricsStatus.BIOMETRICS_ENABLED)
 
@@ -181,7 +190,7 @@ class MainViewModelTest : BaseViewModelTest() {
         runTest {
             whenever(userRepository.userLoggedIn()).then { true }
             whenever(keyRepository.haveSentinelData()).then { true }
-            whenever(keyRepository.retrieveSentinelData()).then { SENTINEL_STATIC_DATA }
+            whenever(keyRepository.retrieveSentinelData(cipher)).then { SENTINEL_STATIC_DATA }
 
             mainViewModel.onForeground(BiometricUtil.Companion.BiometricsStatus.BIOMETRICS_ENABLED)
 
@@ -219,7 +228,8 @@ class MainViewModelTest : BaseViewModelTest() {
         runTest {
             whenever(userRepository.userLoggedIn()).then { true }
             whenever(keyRepository.haveSentinelData()).then { true }
-            whenever(keyRepository.retrieveSentinelData()).then { SENTINEL_STATIC_DATA }
+            whenever(keyRepository.retrieveSentinelData(cipher)).then { SENTINEL_STATIC_DATA }
+            whenever(keyRepository.getInitializedCipherForSentinelDecryption()).then { cipher }
 
             mainViewModel.onForeground(BiometricUtil.Companion.BiometricsStatus.BIOMETRICS_ENABLED)
 
@@ -244,6 +254,7 @@ class MainViewModelTest : BaseViewModelTest() {
         runTest {
             whenever(userRepository.userLoggedIn()).then { true }
             whenever(keyRepository.haveSentinelData()).then { false }
+            whenever(keyRepository.getInitializedCipherForSentinelEncryption()).then { cipher }
 
             mainViewModel.onForeground(BiometricUtil.Companion.BiometricsStatus.BIOMETRICS_ENABLED)
 

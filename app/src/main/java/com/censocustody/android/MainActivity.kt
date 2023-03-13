@@ -92,20 +92,41 @@ class MainActivity : FragmentActivity() {
             LaunchedEffect(key1 = mainState) {
 
                 if (mainState.bioPromptTrigger is Resource.Success) {
+
                     val promptInfo = BioCryptoUtil.createPromptInfo(context = context)
 
                     val bioPrompt = BioCryptoUtil.createBioPrompt(
                         fragmentActivity = this@MainActivity,
-                        onSuccess = { mainViewModel.biometryApproved() },
+                        onSuccess = {
+                            val cipher = it?.cipher
+                            if (cipher != null) {
+                                mainViewModel.biometryApproved(cipher)
+                            } else {
+                                BioCryptoUtil.handleBioPromptOnFail(
+                                    context = context,
+                                    errorCode = NO_CIPHER_CODE
+                                ) {
+                                    mainViewModel.biometryFailed(errorCode = NO_CIPHER_CODE)
+                                }
+                            }
+                        },
                         onFail = {
-                            BioCryptoUtil.handleBioPromptOnFail(context = context, errorCode = it) {
+                            BioCryptoUtil.handleBioPromptOnFail(
+                                context = context,
+                                errorCode = it
+                            ) {
                                 mainViewModel.biometryFailed(errorCode = it)
                             }
                         }
                     )
 
-                    bioPrompt.authenticate(promptInfo)
-                    mainViewModel.setPromptTriggerToLoading()
+                    mainState.bioPromptTrigger.data?.let {
+                        bioPrompt.authenticate(
+                            promptInfo,
+                            BiometricPrompt.CryptoObject(mainState.bioPromptTrigger.data)
+                        )
+                        mainViewModel.setPromptTriggerToLoading()
+                    }
                 }
             }
 
@@ -182,7 +203,7 @@ class MainActivity : FragmentActivity() {
                 route = "${Screen.ApprovalDetailRoute.route}/{${Screen.ApprovalDetailRoute.APPROVAL_ARG}}",
                 arguments = listOf(navArgument(Screen.ApprovalDetailRoute.APPROVAL_ARG) { type = NavType.StringType })
             ) { backStackEntry ->
-                val approvalArg = backStackEntry.arguments?.get(Screen.ApprovalDetailRoute.APPROVAL_ARG) as String
+                val approvalArg = backStackEntry.arguments?.getString(Screen.ApprovalDetailRoute.APPROVAL_ARG) as String
                 ApprovalDetailsScreen(navController = navController, approval = ApprovalRequestV2.fromJson(approvalArg))
             }
             composable(
@@ -208,7 +229,7 @@ class MainActivity : FragmentActivity() {
                     type = NavType.StringType
                 })
             ) { backStackEntry ->
-                val keyInitialDataArg = backStackEntry.arguments?.get(Screen.KeyManagementRoute.KEY_MGMT_ARG) as String
+                val keyInitialDataArg = backStackEntry.arguments?.getString(Screen.KeyManagementRoute.KEY_MGMT_ARG) as String
                 KeyManagementScreen(navController = navController, initialData = KeyManagementInitialData.fromJson(keyInitialDataArg))
             }
             composable(

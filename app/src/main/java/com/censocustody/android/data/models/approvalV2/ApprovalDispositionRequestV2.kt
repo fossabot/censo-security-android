@@ -304,20 +304,20 @@ data class ApprovalDispositionRequestV2(
 
     private fun calculateVaultSafeTxs(currentOwners: List<String>, currentThreshold: Int, targetPolicy: ApprovalRequestDetailsV2.VaultApprovalPolicy): List<SafeTx> {
         val startingPolicy = SafeTx.Policy(currentOwners, currentThreshold)
-        val targetPolicy = SafeTx.Policy(
+        val updatedTargetPolicy = SafeTx.Policy(
             targetPolicy.approvers.mapNotNull { it.publicKeys.find { it.chain == Chain.ethereum }?.key?.let { EvmTransactionUtil.getEthereumAddressFromBase58(it) } },
             targetPolicy.approvalsRequired
         )
-        return startingPolicy.safeTransactions(targetPolicy).first
+        return startingPolicy.safeTransactions(updatedTargetPolicy).first
     }
 
     private fun calculateWalletSafeTxs(currentOwners: List<String>, currentThreshold: Int, targetPolicy: ApprovalRequestDetailsV2.WalletApprovalPolicy): List<SafeTx> {
         val startingPolicy = SafeTx.Policy(currentOwners, currentThreshold)
-        val targetPolicy = SafeTx.Policy(
+        val updatedTargetPolicy = SafeTx.Policy(
             targetPolicy.approvers.map { EvmTransactionUtil.getEthereumAddressFromBase58(it.publicKey) },
             targetPolicy.approvalsRequired
         )
-        return startingPolicy.safeTransactions(targetPolicy).first
+        return startingPolicy.safeTransactions(updatedTargetPolicy).first
     }
 
     fun convertToApiBody(encryptionManager: EncryptionManager): RegisterApprovalDispositionV2Body {
