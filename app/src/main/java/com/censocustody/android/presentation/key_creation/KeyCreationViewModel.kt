@@ -1,6 +1,5 @@
 package com.censocustody.android.presentation.key_creation
 
-import androidx.biometric.BiometricPrompt.CryptoObject
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -11,18 +10,14 @@ import cash.z.ecc.android.bip39.toSeed
 import com.censocustody.android.common.BioPromptReason
 import com.censocustody.android.common.Resource
 import com.censocustody.android.data.*
-import com.censocustody.android.data.models.CipherRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
-import java.security.Signature
-import javax.crypto.Cipher
 import javax.inject.Inject
 
 @HiltViewModel
 class KeyCreationViewModel @Inject constructor(
     private val userRepository: UserRepository,
     private val keyRepository: KeyRepository,
-    private val cipherRepository: CipherRepository,
 ) : ViewModel() {
 
     var state by mutableStateOf(KeyCreationState())

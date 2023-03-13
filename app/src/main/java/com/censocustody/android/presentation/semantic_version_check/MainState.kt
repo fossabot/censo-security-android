@@ -7,7 +7,7 @@ import javax.crypto.Cipher
 
 data class MainState(
     val sendUserToEntrance: Boolean = false,
-    val bioPromptTrigger: Resource<Unit> = Resource.Uninitialized,
+    val bioPromptTrigger: Resource<Cipher> = Resource.Uninitialized,
     val bioPromptReason: BioPromptReason = BioPromptReason.UNINITIALIZED,
     val biometryTooManyAttempts: Boolean = false,
     val biometryStatus: BiometricUtil.Companion.BiometricsStatus? = null,

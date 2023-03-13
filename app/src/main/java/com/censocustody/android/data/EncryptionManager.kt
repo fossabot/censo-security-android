@@ -14,6 +14,7 @@ import com.censocustody.android.data.models.approvalV2.ApprovalSignature
 import com.google.android.gms.common.util.VisibleForTesting
 import java.nio.charset.Charset
 import java.security.Signature
+import javax.crypto.Cipher
 import javax.inject.Inject
 
 data class SignedPayload(
@@ -53,14 +54,7 @@ interface EncryptionManager {
 
     fun saveV3PublicKeys(rootSeed: ByteArray, email: String): HashMap<String, String>
 
-    //region Work with device keystore
-
-    fun deleteBiometryKeyFromKeystore(keyName: String)
-    fun deleteKeyIfInKeystore(keyName: String)
-
     fun haveSentinelDataStored(email: String): Boolean
-    fun saveSentinelData(email: String)
-    fun retrieveSentinelData(email: String): String
     fun publicKeysFromRootSeed(rootSeed: ByteArray): HashMap<String, String>
 
     //endregion
@@ -257,25 +251,7 @@ class EncryptionManagerImpl @Inject constructor(
         )
     }
 
-    override fun retrieveSentinelData(email: String): String {
-        val decryptedSentinelData = keyStorage.retrieveSentinelData(email = email)
-
-        return String(decryptedSentinelData, charset = Charset.forName("UTF-8"))
-    }
-
     override fun haveSentinelDataStored(email: String) = keyStorage.hasSentinelData(email)
-
-    override fun saveSentinelData(email: String) {
-        keyStorage.saveSentinelData(email = email)
-    }
-
-    override fun deleteBiometryKeyFromKeystore(keyName: String) {
-        cryptographyManager.deleteInvalidatedKey(keyName)
-    }
-
-    override fun deleteKeyIfInKeystore(keyName: String) {
-        cryptographyManager.deleteKeyIfPresent(keyName)
-    }
 
     override fun publicKeysFromRootSeed(rootSeed: ByteArray): HashMap<String, String> {
         val keys = createAllKeys(rootSeed)
