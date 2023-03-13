@@ -1,6 +1,7 @@
 package com.censocustody.android.presentation.sign_in
 
 import android.annotation.SuppressLint
+import androidx.biometric.BiometricPrompt
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
@@ -75,7 +76,7 @@ fun SignInScreen(
 
             val bioPrompt = BioCryptoUtil.createBioPrompt(
                 fragmentActivity = context,
-                onSuccess = { viewModel.biometryApproved() },
+                onSuccess = { viewModel.biometryApproved(it?.cipher) },
                 onFail = {
                     BioCryptoUtil.handleBioPromptOnFail(context = context, errorCode = it) {
                         viewModel.biometryFailed()
@@ -83,7 +84,14 @@ fun SignInScreen(
                 }
             )
 
-            bioPrompt.authenticate(promptInfo)
+            if (state.triggerBioPrompt.data != null) {
+                bioPrompt.authenticate(
+                    promptInfo,
+                    BiometricPrompt.CryptoObject(state.triggerBioPrompt.data)
+                )
+            } else {
+                bioPrompt.authenticate(promptInfo)
+            }
         }
     }
     //endregion
