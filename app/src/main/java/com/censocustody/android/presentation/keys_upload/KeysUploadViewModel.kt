@@ -9,7 +9,6 @@ import com.censocustody.android.common.BioCryptoUtil.FAIL_ERROR
 import com.censocustody.android.common.BioPromptReason
 import com.censocustody.android.common.Resource
 import com.censocustody.android.data.*
-import com.censocustody.android.data.models.CipherRepository
 import com.censocustody.android.data.models.mapToPublicKeysList
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch

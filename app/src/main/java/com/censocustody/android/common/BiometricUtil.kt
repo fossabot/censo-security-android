@@ -1,6 +1,7 @@
 package com.censocustody.android.common
 
 import android.content.Context
+import android.content.pm.PackageManager
 import androidx.biometric.BiometricManager
 import androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_STRONG
 
@@ -13,6 +14,15 @@ object BiometricUtil {
     }
 
     fun checkForBiometricFeaturesOnDevice(context: Context): Companion.BiometricsStatus {
+
+        val hasStrongBox = context.packageManager.hasSystemFeature(
+            PackageManager.FEATURE_STRONGBOX_KEYSTORE
+        )
+
+        if (!hasStrongBox) {
+            return Companion.BiometricsStatus.BIOMETRICS_NOT_AVAILABLE
+        }
+
         //Checking the biometric status of the device, if it is enabled, disabled, or not available
         return when (BiometricManager.from(context).canAuthenticate(BIOMETRIC_STRONG)) {
             BiometricManager.BIOMETRIC_SUCCESS -> {

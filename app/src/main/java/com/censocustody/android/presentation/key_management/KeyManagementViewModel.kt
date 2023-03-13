@@ -206,15 +206,15 @@ class KeyManagementViewModel @Inject constructor(
         }
     }
 
-    private suspend fun finalizeKeyCreationOrRecovery(walletSigners: List<WalletSigner>) {
+    private fun finalizeKeyCreationOrRecovery(walletSigners: List<WalletSigner>) {
         when (state.keyManagementFlow) {
-            KeyManagementFlow.KEY_CREATION -> createAndSaveKey(walletSigners)
+            KeyManagementFlow.KEY_CREATION -> createAndSaveKey()
             KeyManagementFlow.KEY_RECOVERY -> recoverKey(walletSigners)
             KeyManagementFlow.UNINITIALIZED -> {}
         }
     }
 
-    suspend fun createAndSaveKey(localKeys: List<WalletSigner>) {
+    fun createAndSaveKey() {
         try {
             //todo: remove this flow now that key creation no longer works with a phrase
 //            val addWalletSignerResource = attemptAddWalletSigner(localKeys)

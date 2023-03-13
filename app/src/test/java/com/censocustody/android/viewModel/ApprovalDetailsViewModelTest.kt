@@ -1,6 +1,5 @@
 package com.censocustody.android.viewModel
 
-import androidx.biometric.BiometricPrompt.CryptoObject
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.whenever
 import com.censocustody.android.*
@@ -9,7 +8,6 @@ import com.censocustody.android.common.CensoCountDownTimer
 import com.censocustody.android.data.ApprovalsRepository
 import com.censocustody.android.data.UserRepository
 import com.censocustody.android.data.models.ApprovalDisposition
-import com.censocustody.android.data.models.CipherRepository
 import com.censocustody.android.data.models.approvalV2.ApprovalRequestV2
 import com.censocustody.android.presentation.approval_detail.ApprovalDetailsViewModel
 import com.censocustody.android.presentation.approval_disposition.ApprovalDispositionState
@@ -22,8 +20,6 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mock
-import java.security.Signature
-import javax.crypto.Cipher
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class ApprovalDetailsViewModelTest : BaseViewModelTest() {
@@ -31,9 +27,6 @@ class ApprovalDetailsViewModelTest : BaseViewModelTest() {
     //region Mocks and testing objects
     @Mock
     lateinit var approvalsRepository: ApprovalsRepository
-
-    @Mock
-    lateinit var cipherRepository: CipherRepository
 
     @Mock
     lateinit var userRepository: UserRepository
@@ -66,8 +59,6 @@ class ApprovalDetailsViewModelTest : BaseViewModelTest() {
         approvalDetailsViewModel =
             ApprovalDetailsViewModel(
                 approvalsRepository = approvalsRepository,
-                userRepository = userRepository,
-                cipherRepository = cipherRepository,
                 timer = countdownTimer
             )
     }

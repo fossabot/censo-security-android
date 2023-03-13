@@ -27,7 +27,7 @@ import com.censocustody.android.ui.theme.TextBlack
 @Composable
 fun BlockingUI(
     blockAppUI: BlockAppUI,
-    bioPromptTrigger: Resource<Unit>,
+    bioPromptTrigger: Resource<Cipher>,
     biometryUnavailable: Boolean,
     biometryStatus: BiometricUtil.Companion.BiometricsStatus?,
     retry: () -> Unit
@@ -53,7 +53,7 @@ fun BlockingUI(
 
 @Composable
 fun ForegroundBlockingUI(
-    bioPromptTrigger: Resource<Unit>,
+    bioPromptTrigger: Resource<Cipher>,
     biometryUnavailable: Boolean,
     retry: () -> Unit
 ) {

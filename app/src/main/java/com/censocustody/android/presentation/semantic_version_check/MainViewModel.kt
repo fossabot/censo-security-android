@@ -1,5 +1,6 @@
 package com.censocustody.android.presentation.semantic_version_check
 
+import androidx.biometric.BiometricPrompt.CryptoObject
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -7,11 +8,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.censocustody.android.common.*
 import com.censocustody.android.common.Resource
-import com.censocustody.android.data.EncryptionManagerImpl.Companion.SENTINEL_KEY_NAME
 import com.censocustody.android.data.EncryptionManagerImpl.Companion.SENTINEL_STATIC_DATA
 import com.censocustody.android.data.KeyRepository
 import com.censocustody.android.data.UserRepository
-import com.censocustody.android.data.models.CipherRepository
 import com.censocustody.android.presentation.Screen
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
@@ -61,37 +60,46 @@ data class MainViewModel @Inject constructor(
         }
     }
 
-    private fun launchBlockingForegroundBiometryRetrieval() {
+    private suspend fun launchBlockingForegroundBiometryRetrieval() {
         state = state.copy(bioPromptTrigger = Resource.Loading())
-        state = state.copy(
-            bioPromptTrigger = Resource.Success(Unit),
-            biometryTooManyAttempts = false,
-            bioPromptReason = BioPromptReason.FOREGROUND_RETRIEVAL
-        )
+        val cipher = keyRepository.getInitializedCipherForSentinelDecryption()
+
+        if (cipher != null) {
+            state = state.copy(
+                bioPromptTrigger = Resource.Success(cipher),
+                biometryTooManyAttempts = false,
+                bioPromptReason = BioPromptReason.FOREGROUND_RETRIEVAL
+            )
+        }
     }
 
     private fun launchBlockingForegroundBiometrySave() {
-        state = state.copy(bioPromptTrigger = Resource.Loading())
-        state = state.copy(
-            bioPromptTrigger = Resource.Success(Unit),
-            biometryTooManyAttempts = false,
-            bioPromptReason = BioPromptReason.FOREGROUND_SAVE
-        )
-    }
-
-    fun biometryApproved() {
         viewModelScope.launch {
-            if (state.bioPromptReason == BioPromptReason.FOREGROUND_RETRIEVAL) {
-                checkSentinelDataAfterBiometricApproval()
-            } else if (state.bioPromptReason == BioPromptReason.FOREGROUND_SAVE) {
-                saveSentinelDataAfterBiometricApproval()
+            state = state.copy(bioPromptTrigger = Resource.Loading())
+            val cipher = keyRepository.getInitializedCipherForSentinelEncryption()
+            if (cipher != null) {
+                state = state.copy(
+                    bioPromptTrigger = Resource.Success(cipher),
+                    biometryTooManyAttempts = false,
+                    bioPromptReason = BioPromptReason.FOREGROUND_SAVE
+                )
             }
         }
     }
 
-    private suspend fun checkSentinelDataAfterBiometricApproval() {
+    fun biometryApproved(cipher: Cipher) {
+        viewModelScope.launch {
+            if (state.bioPromptReason == BioPromptReason.FOREGROUND_RETRIEVAL) {
+                checkSentinelDataAfterBiometricApproval(cipher)
+            } else if (state.bioPromptReason == BioPromptReason.FOREGROUND_SAVE) {
+                saveSentinelDataAfterBiometricApproval(cipher)
+            }
+        }
+    }
+
+    private suspend fun checkSentinelDataAfterBiometricApproval(cipher: Cipher) {
         state = try {
-            val sentinelData = keyRepository.retrieveSentinelData()
+            val sentinelData = keyRepository.retrieveSentinelData(cipher)
             if (sentinelData == SENTINEL_STATIC_DATA) {
                 biometrySuccessfulState()
             } else {
@@ -102,9 +110,9 @@ data class MainViewModel @Inject constructor(
         }
     }
 
-    private suspend fun saveSentinelDataAfterBiometricApproval() {
+    private suspend fun saveSentinelDataAfterBiometricApproval(cipher: Cipher) {
         state = try {
-            keyRepository.saveSentinelData()
+            keyRepository.saveSentinelData(cipher)
             val updatedState = biometrySuccessfulState()
             updatedState.copy(
                 sendUserToEntrance = true

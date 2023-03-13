@@ -22,6 +22,7 @@ import org.junit.Before
 import org.junit.Test
 import org.mockito.Mock
 import org.mockito.MockitoAnnotations
+import javax.crypto.Cipher
 
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -42,6 +43,9 @@ class SignInViewModelTest : BaseViewModelTest() {
 
     @Mock
     lateinit var censoUserData: CensoUserData
+
+    @Mock
+    lateinit var cipher: Cipher
 
     private val validEmail = "sam@ok.com"
     private val invalidEmail = ""
@@ -170,6 +174,7 @@ class SignInViewModelTest : BaseViewModelTest() {
             whenever(userRepository.loginWithPassword(validEmail, validPassword)).then {
                 Resource.Success(LoginResponse(jwt))
             }
+            whenever(keyRepository.getInitializedCipherForSentinelEncryption()).then { cipher }
 
             initVM()
 
@@ -260,7 +265,7 @@ class SignInViewModelTest : BaseViewModelTest() {
 
             advanceUntilIdle()
 
-            signInViewModel.biometryApproved()
+            signInViewModel.biometryApproved(null)
 
             verify(userRepository, times(1)).loginWithTimestamp(
                 validEmail, timestamp, signedTimestamp
@@ -273,6 +278,7 @@ class SignInViewModelTest : BaseViewModelTest() {
         runTest {
             whenever(keyRepository.hasV3RootSeedStored()).then { false }
             whenever(userRepository.userLoggedIn()).then { false }
+            whenever(keyRepository.getInitializedCipherForSentinelEncryption()).then { cipher }
             whenever(userRepository.loginWithPassword(validEmail, validPassword)).then {
                 Resource.Success(LoginResponse(jwt))
             }
@@ -286,9 +292,9 @@ class SignInViewModelTest : BaseViewModelTest() {
 
             advanceUntilIdle()
 
-            signInViewModel.biometryApproved()
+            signInViewModel.biometryApproved(cipher)
 
-            verify(keyRepository, times(1)).saveSentinelData()
+            verify(keyRepository, times(1)).saveSentinelData(cipher)
             assertTrue(signInViewModel.state.exitLoginFlow is Resource.Success)
         }
 
@@ -309,7 +315,7 @@ class SignInViewModelTest : BaseViewModelTest() {
 
             advanceUntilIdle()
 
-            signInViewModel.biometryApproved()
+            signInViewModel.biometryApproved(null)
 
             advanceUntilIdle()
 
@@ -323,6 +329,7 @@ class SignInViewModelTest : BaseViewModelTest() {
             whenever(keyRepository.haveSentinelData()).then { false }
             whenever(userRepository.userLoggedIn()).then { false }
             whenever(keyRepository.hasV3RootSeedStored()).then { true }
+            whenever(keyRepository.getInitializedCipherForSentinelEncryption()).then { cipher }
             whenever(userRepository.loginWithTimestamp(any(), any(), any())).then {
                 Resource.Success(LoginResponse(jwt))
             }
@@ -334,7 +341,7 @@ class SignInViewModelTest : BaseViewModelTest() {
 
             advanceUntilIdle()
 
-            signInViewModel.biometryApproved()
+            signInViewModel.biometryApproved(cipher)
 
             advanceUntilIdle()
 
@@ -364,7 +371,7 @@ class SignInViewModelTest : BaseViewModelTest() {
 
             advanceUntilIdle()
 
-            signInViewModel.biometryApproved()
+            signInViewModel.biometryApproved(null)
 
             advanceUntilIdle()
 
@@ -387,7 +394,7 @@ class SignInViewModelTest : BaseViewModelTest() {
 
             advanceUntilIdle()
 
-            signInViewModel.biometryApproved()
+            signInViewModel.biometryApproved(null)
 
             advanceUntilIdle()
 
