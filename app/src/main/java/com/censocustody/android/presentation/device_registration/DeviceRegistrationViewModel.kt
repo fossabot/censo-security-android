@@ -27,7 +27,9 @@ class DeviceRegistrationViewModel @Inject constructor(
     var state by mutableStateOf(DeviceRegistrationState())
         private set
 
-    fun onStart() {
+    fun onStart(initialData: DeviceRegistrationInitialData) {
+        state = state.copy(verifyUserDetails = initialData.verifyUserDetails)
+
         viewModelScope.launch {
             val isUserLoggedIn = userRepository.userLoggedIn()
 
@@ -43,7 +45,11 @@ class DeviceRegistrationViewModel @Inject constructor(
     }
 
     fun biometryApproved() {
-        sendUserDeviceAndImageToBackend()
+        if (isBootstrapUser()) {
+            sendBootstrapUserToKeyCreation()
+        } else {
+            sendUserDeviceAndImageToBackend()
+        }
     }
 
     fun biometryFailed() {
@@ -57,7 +63,7 @@ class DeviceRegistrationViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 val capturedUserPhoto = state.capturedUserPhoto
-                val keyName = state.keyName
+                val keyName = state.standardKeyName
 
                 if (capturedUserPhoto != null && keyName.isNotEmpty()) {
                     val userImage = generateUserImageObject(
@@ -86,7 +92,7 @@ class DeviceRegistrationViewModel @Inject constructor(
 
                     val userDeviceAdded = userRepository.addUserDevice(
                         UserDevice(
-                            publicKey = state.publicKey,
+                            publicKey = state.standardPublicKey,
                             deviceType = DeviceType.ANDROID,
                             userImage = userImage
                         )
@@ -94,7 +100,7 @@ class DeviceRegistrationViewModel @Inject constructor(
 
                     if (userDeviceAdded is Resource.Success) {
                         userRepository.saveDeviceId(email = email, deviceId = keyName)
-                        userRepository.saveDevicePublicKey(email = email, publicKey = state.publicKey)
+                        userRepository.saveDevicePublicKey(email = email, publicKey = state.standardPublicKey)
 
                         state = state.copy(addUserDevice = userDeviceAdded)
 
@@ -105,6 +111,63 @@ class DeviceRegistrationViewModel @Inject constructor(
                             capturingDeviceKey = Resource.Uninitialized
                         )
                     }
+
+
+                } else {
+                    state = state.copy(
+                        addUserDevice = Resource.Error(exception = Exception("Missing essential data for device registration")),
+                        deviceRegistrationError = DeviceRegistrationError.API,
+                        capturingDeviceKey = Resource.Uninitialized
+                    )
+                }
+            } catch (e: Exception) {
+                state = state.copy(
+                    addUserDevice = Resource.Error(exception = e),
+                    deviceRegistrationError = DeviceRegistrationError.SIGNING_IMAGE,
+                    capturingDeviceKey = Resource.Uninitialized
+                )
+            }
+        }
+    }
+
+    private fun sendBootstrapUserToKeyCreation() {
+        viewModelScope.launch {
+            try {
+                val capturedUserPhoto = state.capturedUserPhoto
+                val keyName = state.standardKeyName
+
+                if (capturedUserPhoto != null && keyName.isNotEmpty()) {
+                    //Get user image all ready
+                    val userImage = generateUserImageObject(
+                        userPhoto = capturedUserPhoto,
+                        keyName = keyName,
+                        cryptographyManager = cryptographyManager
+                    )
+
+                    val imageByteArray = BaseWrapper.decodeFromBase64(userImage.image)
+                    val hashOfImage = hashOfUserImage(imageByteArray)
+
+                    val signatureToCheck = BaseWrapper.decodeFromBase64(userImage.signature)
+
+                    val verified = cryptographyManager.verifySignature(
+                        keyName = keyName,
+                        dataSigned = hashOfImage,
+                        signatureToCheck = signatureToCheck
+                    )
+
+                    if (!verified) {
+                        throw Exception("Device image signature not valid.")
+                    }
+
+                    //Save device id and device key
+                    val email = userRepository.retrieveUserEmail()
+
+                    userRepository.saveDeviceId(email = email, deviceId = keyName)
+                    userRepository.saveDevicePublicKey(email = email, publicKey = state.standardPublicKey)
+                    userRepository.saveBootstrapDeviceId(email = email, deviceId = state.bootstrapKeyName)
+                    userRepository.saveBootstrapDevicePublicKey(email = email, publicKey = state.bootstrapPublicKey)
+
+                    //Send user to the key creation with the image data passed along...
 
 
                 } else {
@@ -137,10 +200,65 @@ class DeviceRegistrationViewModel @Inject constructor(
         )
     }
 
-    fun createKeyForDevice() {
+    fun imageCaptured() {
+        if (state.verifyUserDetails == null) {
+            //todo: we need to pass this here...bail earlier in the flow
+        }
+
+        if (isBootstrapUser()) {
+            //Standard Device Registration
+            createBootstrapKeysForDevice()
+        } else {
+            //Standard Device Registration
+            createStandardKeyForDevice()
+        }
+    }
+
+    fun createBootstrapKeysForDevice() {
+        viewModelScope.launch {
+            val standardKeyId = cryptographyManager.createDeviceKeyId()
+            val bootstrapKeyId = cryptographyManager.createDeviceKeyId()
+
+            state = state.copy(
+                standardKeyName = standardKeyId,
+                bootstrapKeyName = bootstrapKeyId
+            )
+
+            try {
+                cryptographyManager.getOrCreateKey(keyName = standardKeyId)
+                cryptographyManager.getOrCreateKey(keyName = bootstrapKeyId)
+
+                val standardPublicKey =
+                    cryptographyManager.getPublicKeyFromDeviceKey(keyName = standardKeyId)
+                val bootstrapPublicKey =
+                    cryptographyManager.getPublicKeyFromDeviceKey(keyName = bootstrapKeyId)
+
+                val compressedStandardPublicKey =
+                    ECIESManager.extractUncompressedPublicKey(standardPublicKey.encoded)
+
+                val compressedBootstrapPublicKey =
+                    ECIESManager.extractUncompressedPublicKey(bootstrapPublicKey.encoded)
+
+                state = state.copy(
+                    standardPublicKey = BaseWrapper.encode(compressedStandardPublicKey),
+                    bootstrapPublicKey = BaseWrapper.encode(compressedBootstrapPublicKey)
+                )
+
+                triggerBioPrompt()
+
+            } catch (e: Exception) {
+                state = state.copy(
+                    deviceRegistrationError = DeviceRegistrationError.SIGNING_IMAGE,
+                    capturingDeviceKey = Resource.Uninitialized
+                )
+            }
+        }
+    }
+
+    fun createStandardKeyForDevice() {
         viewModelScope.launch {
             val keyId = cryptographyManager.createDeviceKeyId()
-            state = state.copy(keyName = keyId)
+            state = state.copy(standardKeyName = keyId)
             try {
 
                 cryptographyManager.getOrCreateKey(keyName = keyId)
@@ -149,7 +267,7 @@ class DeviceRegistrationViewModel @Inject constructor(
                 val compressedPublicKey =
                     ECIESManager.extractUncompressedPublicKey(publicKey.encoded)
 
-                state = state.copy(publicKey = BaseWrapper.encode(compressedPublicKey))
+                state = state.copy(standardPublicKey = BaseWrapper.encode(compressedPublicKey))
 
                 triggerBioPrompt()
 
@@ -182,6 +300,8 @@ class DeviceRegistrationViewModel @Inject constructor(
             capturingDeviceKey = Resource.Uninitialized
         )
     }
+
+    private fun isBootstrapUser() = state.verifyUserDetails?.shardingPolicy == null
 
     fun resetTriggerImageCapture() {
         state = state.copy(triggerImageCapture = Resource.Uninitialized)

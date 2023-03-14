@@ -20,7 +20,7 @@ object BiometricUtil {
         )
 
         if (!hasStrongBox) {
-            return Companion.BiometricsStatus.BIOMETRICS_NOT_AVAILABLE
+            //return Companion.BiometricsStatus.BIOMETRICS_NOT_AVAILABLE
         }
 
         //Checking the biometric status of the device, if it is enabled, disabled, or not available
