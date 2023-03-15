@@ -3,15 +3,13 @@ package com.censocustody.android.data
 import android.security.keystore.KeyPermanentlyInvalidatedException
 import cash.z.ecc.android.bip39.Mnemonics
 import cash.z.ecc.android.bip39.toSeed
-import com.censocustody.android.common.BaseWrapper
-import com.censocustody.android.common.KeyStorage
-import com.censocustody.android.common.Resource
-import com.censocustody.android.common.generateFormattedTimestamp
+import com.censocustody.android.common.*
 import com.censocustody.android.data.EncryptionManagerImpl.Companion.SENTINEL_KEY_NAME
 import com.censocustody.android.data.models.Signers
 import com.censocustody.android.data.models.VerifyUser
 import com.censocustody.android.data.models.WalletSigner
 import com.censocustody.android.data.models.mapToPublicKeysList
+import com.raygun.raygun4android.RaygunClient
 import java.security.InvalidAlgorithmParameterException
 import javax.crypto.Cipher
 
@@ -37,9 +35,9 @@ interface KeyRepository {
 
     suspend fun saveSentinelData(cipher: Cipher)
     suspend fun retrieveSentinelData(cipher: Cipher) : String
-    suspend fun removeSentinelDataAndKickUserToAppEntrance()
     suspend fun getInitializedCipherForSentinelEncryption(): Cipher?
     suspend fun getInitializedCipherForSentinelDecryption(): Cipher?
+    suspend fun handleKeyInvalidatedException(exception: Exception)
 
     fun validateUserEnteredPhraseAgainstBackendKeys(
         phrase: String,
@@ -82,19 +80,11 @@ class KeyRepositoryImpl(
         return verifyUser.compareAgainstLocalKeys(publicKeys)
     }
 
-    override suspend fun removeSentinelDataAndKickUserToAppEntrance() {
-        val email = userRepository.retrieveUserEmail()
-        cryptographyManager.deleteInvalidatedKey(SENTINEL_KEY_NAME)
-        securePreferences.clearSentinelData(email)
-        userRepository.logOut()
-        userRepository.setInvalidSentinelData()
-    }
-
     override suspend fun getInitializedCipherForSentinelEncryption(): Cipher? {
         return try {
             cryptographyManager.getInitializedCipherForSentinelEncryption()
         } catch (e: Exception) {
-            handleCipherException(e)
+            handleKeyInvalidatedException(e)
             null
         }
     }
@@ -107,7 +97,7 @@ class KeyRepositoryImpl(
                 encryptedData.initializationVector
             )
         } catch (e: Exception) {
-            handleCipherException(e)
+            handleKeyInvalidatedException(e)
             null
         }
     }
@@ -239,22 +229,26 @@ class KeyRepositoryImpl(
         )
     }
 
-    private suspend fun handleCipherException(exception: Exception) {
+    override suspend fun handleKeyInvalidatedException(exception: Exception) {
+        RaygunClient.send(
+            exception,
+            listOf(CrashReportingUtil.MANUALLY_REPORTED_TAG, CrashReportingUtil.KEY_INVALIDATED)
+        )
+
         when (exception) {
             is KeyPermanentlyInvalidatedException,
             is InvalidAlgorithmParameterException,
             is InvalidKeyPhraseException -> {
                 wipeAllDataAfterKeyInvalidatedException()
             }
-            else -> throw  exception
+            else -> throw exception
         }
     }
 
     private suspend fun wipeAllDataAfterKeyInvalidatedException() {
         val email = userRepository.retrieveUserEmail()
-        cryptographyManager.deleteInvalidatedKey(EncryptionManagerImpl.Companion.BIO_KEY_NAME)
-        cryptographyManager.deleteInvalidatedKey(SENTINEL_KEY_NAME)
-        cryptographyManager.deleteInvalidatedKey(EncryptionManagerImpl.Companion.ROOT_SEED_KEY_NAME)
+        cryptographyManager.deleteKeyIfPresent(SENTINEL_KEY_NAME)
+        cryptographyManager.deleteKeyIfPresent(EncryptionManagerImpl.Companion.ROOT_SEED_KEY_NAME)
         securePreferences.clearAllV3KeyData(email)
         securePreferences.clearSentinelData(email)
         deleteDeviceKeyInfoWhenBiometryInvalidated(email)

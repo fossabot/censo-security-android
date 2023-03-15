@@ -8,4 +8,5 @@ object CrashReportingUtil {
     const val FORCE_UPGRADE_TAG = "ForceUpgrade"
     const val IMAGE = "Image"
     const val JWT_TAG = "JWT"
+    const val KEY_INVALIDATED = "KeyInvalidated"
 }

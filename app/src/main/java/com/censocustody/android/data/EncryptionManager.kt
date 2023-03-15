@@ -279,7 +279,6 @@ class EncryptionManagerImpl @Inject constructor(
 
     //region companion
     object Companion {
-        const val BIO_KEY_NAME = "biometric_encryption_key"
         const val SENTINEL_KEY_NAME = "sentinel_biometry_key"
         const val ROOT_SEED_KEY_NAME = "root_seed_encryption_key"
         const val SENTINEL_STATIC_DATA = "sentinel_static_data"

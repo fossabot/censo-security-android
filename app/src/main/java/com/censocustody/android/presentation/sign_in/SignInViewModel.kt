@@ -119,7 +119,7 @@ class SignInViewModel @Inject constructor(
                 keyRepository.saveSentinelData(cipher)
                 state.copy(exitLoginFlow = Resource.Success(Unit))
             } catch (e: Exception) {
-                keyRepository.removeSentinelDataAndKickUserToAppEntrance()
+                keyRepository.handleKeyInvalidatedException(e)
                 SignInState()
             }
         }

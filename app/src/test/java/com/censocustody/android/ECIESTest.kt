@@ -1,13 +1,13 @@
 package com.censocustody.android
 
 import com.censocustody.android.data.ECIESManager
-import junit.framework.Assert.assertEquals
 import org.bouncycastle.jce.ECNamedCurveTable
 import org.bouncycastle.jce.provider.BouncyCastleProvider
 import org.junit.Test
 import java.security.KeyPair
 import java.security.KeyPairGenerator
 import javax.crypto.AEADBadTagException
+import org.junit.Assert.assertEquals
 
 class ECIESTest {
 

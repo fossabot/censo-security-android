@@ -25,7 +25,6 @@ interface UserRepository {
     suspend fun saveUserEmail(email: String)
     suspend fun checkMinimumVersion(): Resource<SemanticVersionResponse>
     suspend fun setKeyInvalidated()
-    suspend fun setInvalidSentinelData()
     suspend fun retrieveUserDeviceId(email: String) : String
     suspend fun saveDeviceId(email: String, deviceId: String)
     suspend fun saveDevicePublicKey(email: String, publicKey: String)
@@ -144,10 +143,6 @@ class UserRepositoryImpl(
 
     override suspend fun setKeyInvalidated() {
         authProvider.setUserState(userState = UserState.INVALIDATED_KEY)
-    }
-
-    override suspend fun setInvalidSentinelData() {
-        authProvider.setUserState(userState = UserState.INVALID_SENTINEL_DATA)
     }
 
     override suspend fun retrieveUserDeviceId(email: String) =
