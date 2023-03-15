@@ -269,18 +269,8 @@ class MainActivity : FragmentActivity() {
                         ).show()
                     }
 
-                    if (userState == UserState.INVALID_SENTINEL_DATA) {
-                        mainViewModel.resetBiometry()
-
-                        Toast.makeText(
-                            context,
-                            getString(R.string.sentinel_data_invalidated),
-                            Toast.LENGTH_LONG
-                        ).show()
-                    }
-
                     if (userState == UserState.REFRESH_TOKEN_EXPIRED
-                        || userState == UserState.INVALIDATED_KEY || userState == UserState.INVALID_SENTINEL_DATA) {
+                        || userState == UserState.INVALIDATED_KEY) {
                         navController.navigate(Screen.EntranceRoute.route) {
                             launchSingleTop = true
                             popUpToTop()
