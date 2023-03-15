@@ -16,13 +16,13 @@ import com.censocustody.android.data.models.WalletSigner
 import com.censocustody.android.data.models.*
 import com.censocustody.android.presentation.entrance.EntranceViewModel
 import com.censocustody.android.presentation.entrance.UserDestination
-import junit.framework.Assert.assertTrue
 import junit.framework.TestCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.*
 import org.junit.After
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mock
