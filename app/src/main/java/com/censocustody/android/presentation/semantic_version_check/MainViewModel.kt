@@ -1,6 +1,5 @@
 package com.censocustody.android.presentation.semantic_version_check
 
-import androidx.biometric.BiometricPrompt.CryptoObject
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -103,10 +102,12 @@ data class MainViewModel @Inject constructor(
             if (sentinelData == SENTINEL_STATIC_DATA) {
                 biometrySuccessfulState()
             } else {
-                handleSentinelDataFailureAndGetFailedState()
+                keyRepository.handleKeyInvalidatedException(Exception("Incorrect sentinel data"))
+                state.copy(bioPromptTrigger = Resource.Error())
             }
         } catch (e: Exception) {
-            handleSentinelDataFailureAndGetFailedState()
+            keyRepository.handleKeyInvalidatedException(e)
+            state.copy(bioPromptTrigger = Resource.Error())
         }
     }
 
@@ -118,7 +119,8 @@ data class MainViewModel @Inject constructor(
                 sendUserToEntrance = true
             )
         } catch (e: Exception) {
-            handleSentinelDataFailureAndGetFailedState()
+            keyRepository.handleKeyInvalidatedException(e)
+            state.copy(bioPromptTrigger = Resource.Error())
         }
     }
 
@@ -129,11 +131,6 @@ data class MainViewModel @Inject constructor(
             } else {
                 state.copy(bioPromptTrigger = Resource.Error())
             }
-    }
-
-    private suspend fun handleSentinelDataFailureAndGetFailedState(): MainState {
-        keyRepository.removeSentinelDataAndKickUserToAppEntrance()
-        return state.copy(bioPromptTrigger = Resource.Error())
     }
 
     fun retryBiometricGate() {

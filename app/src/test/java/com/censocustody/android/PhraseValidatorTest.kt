@@ -1,8 +1,8 @@
 package com.censocustody.android
 
 import com.censocustody.android.data.PhraseValidatorImpl
-import junit.framework.Assert.assertFalse
 import org.junit.Test
+import org.junit.Assert.assertFalse
 
 class PhraseValidatorTest {
 
