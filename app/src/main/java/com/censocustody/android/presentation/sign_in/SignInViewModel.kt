@@ -231,6 +231,11 @@ class SignInViewModel @Inject constructor(
 
     private fun saveSentinelDataToDevice() {
         viewModelScope.launch {
+
+            if (keyRepository.retrieveSentinelId(state.email).isEmpty()) {
+                keyRepository.createSentinelId(state.email)
+            }
+
             val cipher = keyRepository.getInitializedCipherForSentinelEncryption()
 
             if (cipher != null) {

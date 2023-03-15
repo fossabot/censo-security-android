@@ -38,6 +38,9 @@ interface KeyRepository {
     suspend fun getInitializedCipherForSentinelDecryption(): Cipher?
     suspend fun handleKeyInvalidatedException(exception: Exception)
 
+    suspend fun retrieveSentinelId(email: String) : String
+    suspend fun createSentinelId(email: String)
+
     fun validateUserEnteredPhraseAgainstBackendKeys(
         phrase: String,
         verifyUser: VerifyUser?
@@ -246,6 +249,14 @@ class KeyRepositoryImpl(
             }
             else -> throw exception
         }
+    }
+
+    override suspend fun retrieveSentinelId(email: String) =
+        securePreferences.retrieveSentinelId(email)
+
+    override suspend fun createSentinelId(email: String) {
+        val keyId = cryptographyManager.createKeyId()
+        securePreferences.saveSentinelId(email = email, keyId = keyId)
     }
 
     private suspend fun wipeAllDataAfterKeyInvalidatedException() {

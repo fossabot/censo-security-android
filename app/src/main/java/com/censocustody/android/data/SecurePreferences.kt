@@ -23,6 +23,7 @@ interface SecurePreferences {
     fun retrieveV3PublicKeys(email: String): HashMap<String, String>
     fun hasV3RootSeed(email: String) : Boolean
     fun retrieveRootSeedId(email: String) : String
+    fun saveRootSeedId(email: String, keyId: String)
 
     //sentinel data
     fun retrieveSentinelData(email: String): EncryptedData
@@ -30,6 +31,7 @@ interface SecurePreferences {
     fun clearSentinelData(email: String)
     fun hasSentinelData(email: String): Boolean
     fun retrieveSentinelId(email: String) : String
+    fun saveSentinelId(email: String, keyId: String)
 
     //device key data
     fun clearDeviceKeyData(email: String)
@@ -93,6 +95,9 @@ class SecurePreferencesImpl @Inject constructor(applicationContext: Context) :
         )
 
     override fun retrieveRootSeedId(email: String) = SharedPrefsHelper.retrieveRootSeedId(email)
+    override fun saveRootSeedId(email: String, keyId: String) {
+        SharedPrefsHelper.saveRootSeedId(email = email, deviceId = keyId)
+    }
 
     override fun saveV3RootSeed(email: String, ciphertext: ByteArray) {
         SharedPrefsHelper.saveV3RootSeed(
@@ -153,6 +158,9 @@ class SecurePreferencesImpl @Inject constructor(applicationContext: Context) :
         )
 
     override fun retrieveSentinelId(email: String) = SharedPrefsHelper.retrieveSentinelId(email)
+    override fun saveSentinelId(email: String, keyId: String) {
+        SharedPrefsHelper.saveSentinelId(email, deviceId = keyId)
+    }
 
     //endregion
 

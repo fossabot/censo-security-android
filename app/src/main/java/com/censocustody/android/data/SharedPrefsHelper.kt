@@ -264,7 +264,7 @@ object SharedPrefsHelper {
         deviceId: String
     ) {
         val editor = sharedPrefs.edit()
-        editor.putString("${email.lowercase().trim()}$DEVICE_ID", deviceId)
+        editor.putString("${email.lowercase().trim()}$ROOT_SEED_ID", deviceId)
         editor.apply()
     }
 
@@ -273,7 +273,7 @@ object SharedPrefsHelper {
     fun retrieveRootSeedId(
         email: String
     ): String {
-        return sharedPrefs.getString("${email.lowercase().trim()}$DEVICE_ID", "") ?: ""
+        return sharedPrefs.getString("${email.lowercase().trim()}$ROOT_SEED_ID", "") ?: ""
     }
     //endregion
 
