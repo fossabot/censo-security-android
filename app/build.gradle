@@ -45,7 +45,7 @@ android {
         applicationId coreAppId
         minSdk 31
         targetSdk 33
-        versionCode 27
+        versionCode 28
 
         buildConfigField "int", "versionNameMajor", versionNameMajor
         buildConfigField "int", "versionNameMinor", versionNameMinor
@@ -74,7 +74,7 @@ android {
     buildTypes {
         release {
             resValue "string", "app_name", appName
-            minifyEnabled true
+            minifyEnabled false
             buildConfigField "String", "BASE_URL", "\"https://brooklyn.censocustody.com/\""
             buildConfigField "String", "MIN_VERSION_ENDPOINT", "\"censo-security-app-version.json\""
             buildConfigField "String", "ANCHOR_URL", "\"https://wallet.censocustody.com/\""
@@ -84,7 +84,7 @@ android {
         preProd {
             resValue "string", "app_name", "PreProd Censo"
             applicationIdSuffix ".preprod"
-            minifyEnabled true
+            minifyEnabled false
             buildConfigField "String", "BASE_URL", "\"https://brooklyn-preprod.censocustody.com/\""
             buildConfigField "String", "MIN_VERSION_ENDPOINT", "\"censo-security-app-version.json\""
             buildConfigField "String", "ANCHOR_URL", "\"https://preprod.censocustody.com/\""
