@@ -18,7 +18,6 @@ import javax.crypto.spec.GCMParameterSpec
 interface CryptographyManager {
 
     fun createDeviceKeyId(): String
-    fun deleteInvalidatedKey(keyName: String)
     fun deleteKeyIfPresent(keyName: String)
     fun getCertificateFromKeystore(deviceId: String): Certificate
     fun verifySignature(
@@ -44,6 +43,7 @@ interface CryptographyManager {
 class CryptographyManagerImpl : CryptographyManager {
 
     companion object {
+        const val BIOMETRY_TIMEOUT = 5
         const val KEY_SIZE: Int = 256
         const val ANDROID_KEYSTORE = "AndroidKeyStore"
         const val SECP_256_R1 = "secp256r1"
@@ -174,13 +174,13 @@ class CryptographyManagerImpl : CryptographyManager {
             .setRandomizedEncryptionRequired(true)
             .setUserAuthenticationRequired(true)
             .setUserAuthenticationParameters(
-                5, KeyProperties.AUTH_BIOMETRIC_STRONG
+                BIOMETRY_TIMEOUT, KeyProperties.AUTH_BIOMETRIC_STRONG
             )
             .setInvalidatedByBiometricEnrollment(true)
             .setDigests(
                 KeyProperties.DIGEST_SHA256
             )
-            .setIsStrongBoxBacked(!BuildConfig.DEBUG)
+            .setIsStrongBoxBacked(true)
             .build()
 
         kpg.initialize(parameterSpec)
@@ -200,7 +200,7 @@ class CryptographyManagerImpl : CryptographyManager {
             setUserAuthenticationRequired(true)
             setInvalidatedByBiometricEnrollment(true)
             setRandomizedEncryptionRequired(true)
-            setIsStrongBoxBacked(!BuildConfig.DEBUG)
+            setIsStrongBoxBacked(true)
         }
 
         val keyGenParams = paramsBuilder.build()
@@ -210,12 +210,6 @@ class CryptographyManagerImpl : CryptographyManager {
         )
         keyGenerator.init(keyGenParams)
         return keyGenerator.generateKey()
-    }
-
-    override fun deleteInvalidatedKey(keyName: String) {
-        val keyStore = KeyStore.getInstance(ANDROID_KEYSTORE)
-        keyStore.load(null)
-        keyStore.deleteEntry(keyName)
     }
 
     override fun deleteKeyIfPresent(keyName: String) {
