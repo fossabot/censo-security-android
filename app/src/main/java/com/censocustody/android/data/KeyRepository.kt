@@ -4,7 +4,6 @@ import android.security.keystore.KeyPermanentlyInvalidatedException
 import cash.z.ecc.android.bip39.Mnemonics
 import cash.z.ecc.android.bip39.toSeed
 import com.censocustody.android.common.*
-import com.censocustody.android.data.EncryptionManagerImpl.Companion.SENTINEL_KEY_NAME
 import com.censocustody.android.data.models.Signers
 import com.censocustody.android.data.models.VerifyUser
 import com.censocustody.android.data.models.WalletSigner
@@ -82,7 +81,9 @@ class KeyRepositoryImpl(
 
     override suspend fun getInitializedCipherForSentinelEncryption(): Cipher? {
         return try {
-            cryptographyManager.getInitializedCipherForSentinelEncryption()
+            val email = userRepository.retrieveUserEmail()
+            val sentinelKeyId = securePreferences.retrieveSentinelId(email)
+            cryptographyManager.getInitializedCipherForSentinelEncryption(sentinelKeyId)
         } catch (e: Exception) {
             handleKeyInvalidatedException(e)
             null
@@ -93,8 +94,10 @@ class KeyRepositoryImpl(
         return try {
             val email = userRepository.retrieveUserEmail()
             val encryptedData = securePreferences.retrieveSentinelData(email)
+            val sentinelKeyId = securePreferences.retrieveSentinelId(email)
             return cryptographyManager.getInitializedCipherForSentinelDecryption(
-                encryptedData.initializationVector
+                sentinelKeyId = sentinelKeyId,
+                initializationVector = encryptedData.initializationVector
             )
         } catch (e: Exception) {
             handleKeyInvalidatedException(e)
@@ -247,10 +250,8 @@ class KeyRepositoryImpl(
 
     private suspend fun wipeAllDataAfterKeyInvalidatedException() {
         val email = userRepository.retrieveUserEmail()
-        cryptographyManager.deleteKeyIfPresent(SENTINEL_KEY_NAME)
-        cryptographyManager.deleteKeyIfPresent(EncryptionManagerImpl.Companion.ROOT_SEED_KEY_NAME)
-        securePreferences.clearAllV3KeyData(email)
-        securePreferences.clearSentinelData(email)
+        deleteSentinelKeyInfoWhenBiometryInvalidated(email)
+        deleteRootSeedKeyInfoWhenBiometryInvalidated(email)
         deleteDeviceKeyInfoWhenBiometryInvalidated(email)
         userRepository.logOut()
         userRepository.setKeyInvalidated()
@@ -263,5 +264,23 @@ class KeyRepositoryImpl(
             cryptographyManager.deleteKeyIfPresent(deviceId)
         }
         securePreferences.clearDeviceKeyData(email)
+    }
+
+    private fun deleteSentinelKeyInfoWhenBiometryInvalidated(email: String) {
+        val sentinelId = SharedPrefsHelper.retrieveSentinelId(email)
+
+        if (sentinelId.isNotEmpty()) {
+            cryptographyManager.deleteKeyIfPresent(sentinelId)
+        }
+        securePreferences.clearSentinelData(email)
+    }
+
+    private fun deleteRootSeedKeyInfoWhenBiometryInvalidated(email: String) {
+        val rootSeedId = SharedPrefsHelper.retrieveRootSeedId(email)
+
+        if (rootSeedId.isNotEmpty()) {
+            cryptographyManager.deleteKeyIfPresent(rootSeedId)
+        }
+        securePreferences.clearAllV3KeyData(email)
     }
 }

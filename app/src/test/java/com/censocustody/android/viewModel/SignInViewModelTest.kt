@@ -7,7 +7,6 @@ import com.nhaarman.mockitokotlin2.whenever
 import com.censocustody.android.common.BioPromptReason
 import com.censocustody.android.common.Resource
 import com.censocustody.android.data.*
-import com.censocustody.android.data.EncryptionManagerImpl.Companion.SENTINEL_KEY_NAME
 import com.censocustody.android.data.models.LoginResponse
 import com.censocustody.android.data.models.PushBody
 import com.censocustody.android.presentation.sign_in.LoginStep

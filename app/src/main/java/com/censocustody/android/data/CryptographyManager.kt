@@ -2,8 +2,6 @@ package com.censocustody.android.data
 
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
-import com.censocustody.android.BuildConfig
-import com.censocustody.android.data.EncryptionManagerImpl.Companion.SENTINEL_KEY_NAME
 import com.censocustody.android.data.EncryptionManagerImpl.Companion.SENTINEL_STATIC_DATA
 import java.security.KeyStore
 import java.security.*
@@ -17,7 +15,7 @@ import javax.crypto.spec.GCMParameterSpec
 
 interface CryptographyManager {
 
-    fun createDeviceKeyId(): String
+    fun createKeyId(): String
     fun deleteKeyIfPresent(keyName: String)
     fun getCertificateFromKeystore(deviceId: String): Certificate
     fun verifySignature(
@@ -27,7 +25,7 @@ interface CryptographyManager {
     ): Boolean
 
     fun getOrCreateKey(keyName: String): PrivateKey
-    fun getOrCreateSentinelKey(): SecretKey
+    fun getOrCreateSentinelKey(keyName: String): SecretKey
     fun getPublicKeyFromDeviceKey(keyName: String): PublicKey
     fun signData(keyName: String, dataToSign: ByteArray): ByteArray
     fun decryptData(keyName: String, ciphertext: ByteArray): ByteArray
@@ -36,8 +34,11 @@ interface CryptographyManager {
     fun encryptSentinelData(cipher: Cipher) : EncryptedData
     fun decryptSentinelData(ciphertext: ByteArray, cipher: Cipher) : ByteArray
 
-    fun getInitializedCipherForSentinelEncryption(): Cipher
-    fun getInitializedCipherForSentinelDecryption(initializationVector: ByteArray): Cipher
+    fun getInitializedCipherForSentinelEncryption(sentinelKeyId: String): Cipher
+    fun getInitializedCipherForSentinelDecryption(
+        sentinelKeyId: String,
+        initializationVector: ByteArray
+    ): Cipher
 }
 
 class CryptographyManagerImpl : CryptographyManager {
@@ -55,7 +56,7 @@ class CryptographyManagerImpl : CryptographyManager {
         const val ENCRYPTION_ALGORITHM = KeyProperties.KEY_ALGORITHM_AES
     }
 
-    override fun createDeviceKeyId() =
+    override fun createKeyId() =
         UUID.randomUUID().toString().replace("-", "")
 
     override fun signData(keyName: String, dataToSign: ByteArray): ByteArray {
@@ -99,18 +100,19 @@ class CryptographyManagerImpl : CryptographyManager {
         return cipher.doFinal(ciphertext)
     }
 
-    override fun getInitializedCipherForSentinelEncryption(): Cipher {
+    override fun getInitializedCipherForSentinelEncryption(sentinelKeyId: String): Cipher {
         val cipher = getAESCipher()
-        val secretKey = getOrCreateSentinelKey()
+        val secretKey = getOrCreateSentinelKey(sentinelKeyId)
         cipher.init(Cipher.ENCRYPT_MODE, secretKey)
         return cipher
     }
 
     override fun getInitializedCipherForSentinelDecryption(
+        sentinelKeyId: String,
         initializationVector: ByteArray
     ): Cipher {
         val cipher = getAESCipher()
-        val secretKey = getOrCreateSentinelKey()
+        val secretKey = getOrCreateSentinelKey(sentinelKeyId)
         cipher.init(Cipher.DECRYPT_MODE, secretKey, GCMParameterSpec(128, initializationVector))
         return cipher
     }
@@ -127,13 +129,13 @@ class CryptographyManagerImpl : CryptographyManager {
         return signature.verify(signatureToCheck)
     }
 
-    override fun getOrCreateSentinelKey(): SecretKey {
+    override fun getOrCreateSentinelKey(keyName: String): SecretKey {
         val keyStore = KeyStore.getInstance(ANDROID_KEYSTORE)
         keyStore.load(null)
-        val key = keyStore.getKey(SENTINEL_KEY_NAME, null)
+        val key = keyStore.getKey(keyName, null)
         if (key != null) return key as SecretKey
 
-        return createAESKey(SENTINEL_KEY_NAME)
+        return createAESKey(keyName)
     }
 
     override fun getOrCreateKey(keyName: String): PrivateKey {

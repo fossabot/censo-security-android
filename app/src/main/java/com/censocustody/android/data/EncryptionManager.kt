@@ -279,13 +279,9 @@ class EncryptionManagerImpl @Inject constructor(
 
     //region companion
     object Companion {
-        const val SENTINEL_KEY_NAME = "sentinel_biometry_key"
-        const val ROOT_SEED_KEY_NAME = "root_seed_encryption_key"
         const val SENTINEL_STATIC_DATA = "sentinel_static_data"
         const val NO_OFFSET_INDEX = 0
         val DATA_CHECK = BaseWrapper.decode("VerificationCheck")
-
-        val NoKeyDataException = Exception("Unable to retrieve key data")
     }
     //endregion
 }
@@ -301,10 +297,6 @@ data class AllPublicKeys(
     val ethereumPublicKey: String,
     val censoPublicKey: String
 )
-
-interface Signable {
-    fun retrieveSignableData(approverPublicKey: String?): List<ByteArray>
-}
 
 sealed class SignableDataResult {
     data class Ethereum(

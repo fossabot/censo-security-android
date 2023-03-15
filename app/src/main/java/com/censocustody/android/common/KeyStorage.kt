@@ -1,7 +1,6 @@
 package com.censocustody.android.common
 
 import com.censocustody.android.data.*
-import com.censocustody.android.data.EncryptionManagerImpl.Companion.ROOT_SEED_KEY_NAME
 import javax.crypto.Cipher
 import javax.inject.Inject
 
@@ -24,10 +23,11 @@ class KeyStorageImpl @Inject constructor(
     }
 
     override fun saveRootSeed(email: String, rootSeed: ByteArray) {
-        cryptographyManager.getOrCreateKey(ROOT_SEED_KEY_NAME)
+        val rootSeedId = cryptographyManager.createKeyId()
+        cryptographyManager.getOrCreateKey(rootSeedId)
         val encryptedRootSeed =
             cryptographyManager.encryptDataLocal(
-                keyName = ROOT_SEED_KEY_NAME,
+                keyName = rootSeedId,
                 plainText = BaseWrapper.encode(rootSeed)
             )
 
@@ -35,10 +35,11 @@ class KeyStorageImpl @Inject constructor(
     }
 
     override fun retrieveRootSeed(email: String): ByteArray {
+        val rootSeedId = securePreferences.retrieveRootSeedId(email)
         val savedRootSeedData = securePreferences.retrieveV3RootSeed(email)
 
         val decryptedRootSeed = cryptographyManager.decryptData(
-            keyName = ROOT_SEED_KEY_NAME,
+            keyName = rootSeedId,
             ciphertext = savedRootSeedData,
         )
 
@@ -55,7 +56,8 @@ class KeyStorageImpl @Inject constructor(
     }
 
     override fun saveSentinelData(email: String, cipher: Cipher) {
-        cryptographyManager.getOrCreateSentinelKey()
+        val sentinelId = cryptographyManager.createKeyId()
+        cryptographyManager.getOrCreateSentinelKey(sentinelId)
         val encryptedSentinelData =
             cryptographyManager.encryptSentinelData(cipher)
 

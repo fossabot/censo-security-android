@@ -139,7 +139,7 @@ class DeviceRegistrationViewModel @Inject constructor(
 
     fun createKeyForDevice() {
         viewModelScope.launch {
-            val keyId = cryptographyManager.createDeviceKeyId()
+            val keyId = cryptographyManager.createKeyId()
             state = state.copy(keyName = keyId)
             try {
 

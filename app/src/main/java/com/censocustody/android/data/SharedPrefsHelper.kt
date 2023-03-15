@@ -25,6 +25,9 @@ object SharedPrefsHelper {
     private const val V3_ROOT_SEED_INIT_VECTOR = "_v3_root_seed_init_vector"
     private const val V3_PUBLIC_KEYS = "_v3_public_keys_list"
 
+    private const val SENTINEL_ID = "_sentinel_id"
+    private const val ROOT_SEED_ID = "_root_seed_id"
+
     private lateinit var appContext: Context
     private lateinit var sharedPrefs: SharedPreferences
 
@@ -246,6 +249,56 @@ object SharedPrefsHelper {
         email: String
     ): String {
         return sharedPrefs.getString("${email.lowercase().trim()}$DEVICE_PUBLIC_KEY", "") ?: ""
+    }
+    //endregion
+
+    //region root seed id
+    fun clearRootSeedId(email: String) {
+        val editor = sharedPrefs.edit()
+        editor.putString("${email.lowercase().trim()}$ROOT_SEED_ID", "")
+        editor.apply()
+    }
+
+    fun saveRootSeedId(
+        email: String,
+        deviceId: String
+    ) {
+        val editor = sharedPrefs.edit()
+        editor.putString("${email.lowercase().trim()}$DEVICE_ID", deviceId)
+        editor.apply()
+    }
+
+    fun userHasRootSeedIdSaved(email: String) = retrieveDeviceId(email).isNotEmpty()
+
+    fun retrieveRootSeedId(
+        email: String
+    ): String {
+        return sharedPrefs.getString("${email.lowercase().trim()}$DEVICE_ID", "") ?: ""
+    }
+    //endregion
+
+    //region sentinel id
+    fun clearSentinelId(email: String) {
+        val editor = sharedPrefs.edit()
+        editor.putString("${email.lowercase().trim()}$SENTINEL_ID", "")
+        editor.apply()
+    }
+
+    fun saveSentinelId(
+        email: String,
+        deviceId: String
+    ) {
+        val editor = sharedPrefs.edit()
+        editor.putString("${email.lowercase().trim()}$SENTINEL_ID", deviceId)
+        editor.apply()
+    }
+
+    fun userHasSentinelIdSaved(email: String) = retrieveSentinelId(email).isNotEmpty()
+
+    fun retrieveSentinelId(
+        email: String
+    ): String {
+        return sharedPrefs.getString("${email.lowercase().trim()}$SENTINEL_ID", "") ?: ""
     }
     //endregion
 }
