@@ -10,9 +10,14 @@ import java.math.BigInteger
 import java.nio.ByteBuffer
 
 fun ByteBuffer.putPadded(data: ByteArray, padTo: Int = 32) {
-    require(data.size <= padTo)
-    this.put(ByteArray(padTo - data.size))
-    this.put(data)
+    if (data.size == padTo + 1) {
+        require(data[0].compareTo(0) == 0)
+        this.put(data.slice(1 until data.size).toByteArray())
+    } else {
+        require(data.size <= padTo)
+        this.put(ByteArray(padTo - data.size))
+        this.put(data)
+    }
 }
 
 enum class Operation {

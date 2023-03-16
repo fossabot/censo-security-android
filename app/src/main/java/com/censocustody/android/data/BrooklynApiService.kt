@@ -23,6 +23,7 @@ import retrofit2.Response as RetrofitResponse
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.*
 import retrofit2.http.Headers
+import java.time.Duration
 
 interface BrooklynApiService {
 
@@ -40,6 +41,11 @@ interface BrooklynApiService {
             val client = OkHttpClient.Builder()
                 .addInterceptor(AnalyticsInterceptor())
                 .addInterceptor(AuthInterceptor(authProvider))
+                .connectTimeout(Duration.ofSeconds(30))
+                .readTimeout(Duration.ofSeconds(30))
+                .callTimeout(Duration.ofSeconds(30))
+                .writeTimeout(Duration.ofSeconds(30))
+
 
             if (BuildConfig.DEBUG) {
                 val logger =
