@@ -37,6 +37,11 @@ class KeyStorageImpl @Inject constructor(
 
     override fun retrieveRootSeed(email: String): ByteArray {
         val rootSeedId = securePreferences.retrieveRootSeedId(email)
+
+        if (rootSeedId.isEmpty()) {
+            throw MissingKeyIdException()
+        }
+
         val savedRootSeedData = securePreferences.retrieveV3RootSeed(email)
 
         val decryptedRootSeed = cryptographyManager.decryptData(

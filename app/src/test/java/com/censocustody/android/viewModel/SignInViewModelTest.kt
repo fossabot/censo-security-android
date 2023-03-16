@@ -69,6 +69,7 @@ class SignInViewModelTest : BaseViewModelTest() {
         whenever(userRepository.retrieveUserDeviceId(any())).then { deviceId }
         whenever(keyRepository.generateTimestamp()).then { timestamp }
         whenever(keyRepository.signTimestamp(any())).then { signedTimestamp }
+        whenever(keyRepository.retrieveSentinelId(validEmail)).then { "id" }
 
         whenever(pushRepository.getDeviceId()).then { deviceId }
         whenever(pushRepository.retrievePushToken()).then { pushToken }

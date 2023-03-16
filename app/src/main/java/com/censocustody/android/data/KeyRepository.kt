@@ -86,6 +86,11 @@ class KeyRepositoryImpl(
         return try {
             val email = userRepository.retrieveUserEmail()
             val sentinelKeyId = securePreferences.retrieveSentinelId(email)
+
+            if (sentinelKeyId.isEmpty()) {
+                throw MissingKeyIdException()
+            }
+
             cryptographyManager.getInitializedCipherForSentinelEncryption(sentinelKeyId)
         } catch (e: Exception) {
             handleKeyInvalidatedException(e)
@@ -98,6 +103,11 @@ class KeyRepositoryImpl(
             val email = userRepository.retrieveUserEmail()
             val encryptedData = securePreferences.retrieveSentinelData(email)
             val sentinelKeyId = securePreferences.retrieveSentinelId(email)
+
+            if (sentinelKeyId.isEmpty()) {
+                throw MissingKeyIdException()
+            }
+
             return cryptographyManager.getInitializedCipherForSentinelDecryption(
                 sentinelKeyId = sentinelKeyId,
                 initializationVector = encryptedData.initializationVector
@@ -244,7 +254,9 @@ class KeyRepositoryImpl(
         when (exception) {
             is KeyPermanentlyInvalidatedException,
             is InvalidAlgorithmParameterException,
-            is InvalidKeyPhraseException -> {
+            is InvalidKeyPhraseException,
+            is MissingKeyIdException
+            -> {
                 wipeAllDataAfterKeyInvalidatedException()
             }
             else -> throw exception
@@ -295,3 +307,5 @@ class KeyRepositoryImpl(
         securePreferences.clearAllV3KeyData(email)
     }
 }
+
+class MissingKeyIdException : Exception("No id saved for key")
