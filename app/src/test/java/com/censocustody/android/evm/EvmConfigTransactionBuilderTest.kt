@@ -8,6 +8,8 @@ import org.bouncycastle.util.encoders.Hex
 import org.junit.Assert.*
 import org.junit.Test
 import org.web3j.crypto.Keys
+import java.math.BigInteger
+import java.nio.ByteBuffer
 
 class EvmConfigTransactionBuilderTest {
 
@@ -238,6 +240,26 @@ class EvmConfigTransactionBuilderTest {
         assertEquals(
             "ef3d0fbdefa12a1460200dbf73ea20fc64150f13029153759e593319f993799e",
             EvmConfigTransactionBuilder.getPolicyUpdateExecutionFromModuleDataSafeHash(walletAddress, txs, signingData).toHexString().lowercase()
+        )
+    }
+
+    @Test
+    fun `test byte buffer padding`() {
+        val buffer = ByteBuffer.allocate(32)
+
+        val tokenExample = BigInteger("86079789640690024955106506593603932986573109898872916588749045569684965949441")
+
+        buffer.putPadded(tokenExample.toByteArray())
+
+        assertEquals(32, buffer.position())
+
+        val byteArray = buffer.array()
+
+        val tokenExampleByteArray = tokenExample.toByteArray()
+        assert(
+            byteArray.contentEquals(
+                tokenExampleByteArray.slice(1 until tokenExampleByteArray.size).toByteArray()
+            )
         )
     }
 }
