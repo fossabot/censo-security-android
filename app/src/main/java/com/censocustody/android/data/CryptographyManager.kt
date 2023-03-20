@@ -91,7 +91,7 @@ class CryptographyManagerImpl : CryptographyManager {
     }
 
     override fun encryptSentinelData(cipher: Cipher): EncryptedData {
-        val ciphertext = cipher.doFinal(SENTINEL_STATIC_DATA.toByteArray())
+        val ciphertext = cipher.doFinal(SENTINEL_STATIC_DATA.toByteArray(Charsets.UTF_8))
         return EncryptedData(ciphertext, cipher.iv)
     }
 
