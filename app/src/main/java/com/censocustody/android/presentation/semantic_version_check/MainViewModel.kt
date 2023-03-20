@@ -39,8 +39,6 @@ data class MainViewModel @Inject constructor(
 
             if (userLoggedIn && haveSentinelData) {
                 launchBlockingForegroundBiometryRetrieval()
-            } else if (userLoggedIn && !haveSentinelData) {
-                launchBlockingForegroundBiometrySave()
             }
         }
     }
@@ -72,26 +70,10 @@ data class MainViewModel @Inject constructor(
         }
     }
 
-    private fun launchBlockingForegroundBiometrySave() {
-        viewModelScope.launch {
-            state = state.copy(bioPromptTrigger = Resource.Loading())
-            val cipher = keyRepository.getInitializedCipherForSentinelEncryption()
-            if (cipher != null) {
-                state = state.copy(
-                    bioPromptTrigger = Resource.Success(cipher),
-                    biometryTooManyAttempts = false,
-                    bioPromptReason = BioPromptReason.FOREGROUND_SAVE
-                )
-            }
-        }
-    }
-
     fun biometryApproved(cipher: Cipher) {
         viewModelScope.launch {
             if (state.bioPromptReason == BioPromptReason.FOREGROUND_RETRIEVAL) {
                 checkSentinelDataAfterBiometricApproval(cipher)
-            } else if (state.bioPromptReason == BioPromptReason.FOREGROUND_SAVE) {
-                saveSentinelDataAfterBiometricApproval(cipher)
             }
         }
     }
@@ -137,8 +119,6 @@ data class MainViewModel @Inject constructor(
         viewModelScope.launch {
             if (state.bioPromptReason == BioPromptReason.FOREGROUND_RETRIEVAL) {
                 launchBlockingForegroundBiometryRetrieval()
-            } else if (state.bioPromptReason == BioPromptReason.FOREGROUND_SAVE) {
-                launchBlockingForegroundBiometrySave()
             }
         }
     }
