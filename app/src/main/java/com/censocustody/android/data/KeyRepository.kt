@@ -11,7 +11,9 @@ import com.censocustody.android.data.models.WalletSigner
 import com.censocustody.android.data.models.mapToPublicKeysList
 import com.raygun.raygun4android.RaygunClient
 import java.security.InvalidAlgorithmParameterException
+import java.security.KeyStoreException
 import javax.crypto.Cipher
+import javax.crypto.IllegalBlockSizeException
 
 interface KeyRepository {
 
@@ -234,6 +236,11 @@ class KeyRepositoryImpl(
             exception,
             listOf(CrashReportingUtil.MANUALLY_REPORTED_TAG, CrashReportingUtil.KEY_INVALIDATED)
         )
+
+        if (exception.cause is KeyStoreException) {
+            wipeAllDataAfterKeyInvalidatedException()
+            return
+        }
 
         when (exception) {
             is KeyPermanentlyInvalidatedException,

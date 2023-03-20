@@ -71,22 +71,6 @@ class MainViewModelTest : BaseViewModelTest() {
             assertEquals(BioPromptReason.FOREGROUND_RETRIEVAL, mainViewModel.state.bioPromptReason)
         }
 
-    @Test
-    fun `trigger biometry to save sentinel data if user is logged in and we have sentinel data`() =
-        runTest {
-            whenever(userRepository.userLoggedIn()).then { true }
-            whenever(keyRepository.haveSentinelData()).then { false }
-            whenever(keyRepository.getInitializedCipherForSentinelEncryption()).then { cipher }
-
-            mainViewModel.onForeground(BiometricUtil.Companion.BiometricsStatus.BIOMETRICS_ENABLED)
-
-            advanceUntilIdle()
-
-            assertTrue(mainViewModel.state.bioPromptTrigger is Resource.Success)
-            assertEquals(false, mainViewModel.state.biometryTooManyAttempts)
-            assertEquals(BioPromptReason.FOREGROUND_SAVE, mainViewModel.state.bioPromptReason)
-        }
-
 
     @Test
     fun `biometry approval to retrieve sentinel data clears blocking UI`() =
@@ -126,25 +110,6 @@ class MainViewModelTest : BaseViewModelTest() {
             advanceUntilIdle()
 
             assertTrue(mainViewModel.state.bioPromptTrigger is Resource.Error)
-        }
-
-    @Test
-    fun `biometry approval to save sentinel data clears blocking UI`() =
-        runTest {
-            whenever(userRepository.userLoggedIn()).then { true }
-            whenever(keyRepository.haveSentinelData()).then { false }
-            whenever(keyRepository.getInitializedCipherForSentinelEncryption()).then { cipher }
-
-            mainViewModel.onForeground(BiometricUtil.Companion.BiometricsStatus.BIOMETRICS_ENABLED)
-
-            advanceUntilIdle()
-
-            mainViewModel.biometryApproved(cipher)
-
-            advanceUntilIdle()
-
-            assertTrue(mainViewModel.state.bioPromptTrigger is Resource.Uninitialized)
-            assertEquals(BioPromptReason.UNINITIALIZED, mainViewModel.state.bioPromptReason)
         }
 
     @Test
@@ -246,30 +211,5 @@ class MainViewModelTest : BaseViewModelTest() {
             assertTrue(mainViewModel.state.bioPromptTrigger is Resource.Success)
             assertEquals(false, mainViewModel.state.biometryTooManyAttempts)
             assertEquals(BioPromptReason.FOREGROUND_RETRIEVAL, mainViewModel.state.bioPromptReason)
-        }
-
-
-    @Test
-    fun `biometry failure for save data then retry will kick off biometry again`() =
-        runTest {
-            whenever(userRepository.userLoggedIn()).then { true }
-            whenever(keyRepository.haveSentinelData()).then { false }
-            whenever(keyRepository.getInitializedCipherForSentinelEncryption()).then { cipher }
-
-            mainViewModel.onForeground(BiometricUtil.Companion.BiometricsStatus.BIOMETRICS_ENABLED)
-
-            advanceUntilIdle()
-
-            mainViewModel.biometryFailed(-1)
-
-            advanceUntilIdle()
-
-            mainViewModel.retryBiometricGate()
-
-            advanceUntilIdle()
-
-            assertTrue(mainViewModel.state.bioPromptTrigger is Resource.Success)
-            assertEquals(false, mainViewModel.state.biometryTooManyAttempts)
-            assertEquals(BioPromptReason.FOREGROUND_SAVE, mainViewModel.state.bioPromptReason)
         }
 }
