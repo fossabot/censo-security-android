@@ -9,6 +9,7 @@ import com.raygun.raygun4android.RaygunClient
 import com.censocustody.android.BuildConfig
 import com.censocustody.android.common.CrashReportingUtil
 import com.censocustody.android.common.Resource
+import com.censocustody.android.common.censoLog
 import com.censocustody.android.data.*
 import com.censocustody.android.data.models.SemanticVersion
 import com.censocustody.android.data.models.VerifyUser
@@ -167,6 +168,8 @@ class EntranceViewModel @Inject constructor(
     //Part 1: Do we need to update key/sentinel data?
     //Part 2: Is our local key valid? valid/invalid
     private suspend fun determineUserDestination(verifyUser: VerifyUser) {
+        censoLog(message = "Verify user in user destination: $verifyUser")
+        val tempVerifyUser = verifyUser.copy(shardingPolicy = null)
         //region Part 1:
         // Check 4 scenarios:
         // 1. User needs to add Sentinel data,
@@ -209,15 +212,27 @@ class EntranceViewModel @Inject constructor(
                 return
             }
             needToCreateRootSeed -> {
-                state = state.copy(
-                    userDestinationResult = Resource.Success(UserDestination.KEY_MANAGEMENT_CREATION)
-                )
+                state = if (tempVerifyUser.shardingPolicy == null) {
+                    state.copy(
+                        userDestinationResult = Resource.Success(UserDestination.DEVICE_REGISTRATION)
+                    )
+                } else {
+                    state.copy(
+                        userDestinationResult = Resource.Success(UserDestination.KEY_MANAGEMENT_CREATION)
+                    )
+                }
                 return
             }
             needToRecoverRootSeed -> {
-                state = state.copy(
-                    userDestinationResult = Resource.Success(UserDestination.KEY_MANAGEMENT_CREATION),
-                )
+                state = if (tempVerifyUser.shardingPolicy == null) {
+                    state.copy(
+                        userDestinationResult = Resource.Success(UserDestination.DEVICE_REGISTRATION)
+                    )
+                } else {
+                    state.copy(
+                        userDestinationResult = Resource.Success(UserDestination.KEY_MANAGEMENT_CREATION)
+                    )
+                }
                 return
             }
             needToUploadPublicKeyData -> {

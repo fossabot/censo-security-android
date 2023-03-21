@@ -28,7 +28,7 @@ class DeviceRegistrationViewModel @Inject constructor(
         private set
 
     fun onStart(initialData: DeviceRegistrationInitialData) {
-        state = state.copy(verifyUserDetails = initialData.verifyUserDetails)
+        state = state.copy(verifyUserDetails = initialData.verifyUserDetails?.copy(shardingPolicy = null))
 
         viewModelScope.launch {
             val isUserLoggedIn = userRepository.userLoggedIn()

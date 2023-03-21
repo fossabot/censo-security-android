@@ -16,6 +16,7 @@ interface UserRepository {
     suspend fun verifyUser(): Resource<VerifyUser>
     suspend fun getWalletSigners(): Resource<List<WalletSigner?>>
     suspend fun addWalletSigner(walletSigners: List<WalletSigner>): Resource<Unit>
+    suspend fun addBootstrapUser(bootstrapUserDeviceAndSigners: BootstrapUserDeviceAndSigners): Resource<Unit>
     suspend fun userLoggedIn(): Boolean
     suspend fun setUserLoggedIn()
     suspend fun logOut(): Boolean
@@ -109,6 +110,10 @@ class UserRepositoryImpl(
                 Signers(walletSigners, BaseWrapper.encodeToBase64(signedData), share = null)
             )
         }
+    }
+
+    override suspend fun addBootstrapUser(bootstrapUserDeviceAndSigners: BootstrapUserDeviceAndSigners): Resource<Unit> {
+        TODO("Not yet implemented")
     }
 
     override suspend fun retrieveUserEmail(): String {

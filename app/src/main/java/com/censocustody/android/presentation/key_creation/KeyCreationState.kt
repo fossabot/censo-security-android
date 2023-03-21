@@ -19,6 +19,9 @@ data class KeyCreationState(
 
     //API calls
     val uploadingKeyProcess: Resource<Unit> = Resource.Uninitialized,
+
+    val verifyUserDetails: VerifyUser? = null,
+    val userImage: UserImage? = null,
 )
 
 data class KeyCreationInitialData(

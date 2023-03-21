@@ -25,6 +25,13 @@ class KeyCreationViewModel @Inject constructor(
 
     //region VM SETUP
     fun onStart(initialData: KeyCreationInitialData) {
+        if(initialData.verifyUserDetails != null && initialData.userImage != null) {
+            state = state.copy(
+                verifyUserDetails = initialData.verifyUserDetails,
+                userImage = initialData.userImage,
+            )
+        }
+
         viewModelScope.launch {
             createKeyAndStartSaveProcess()
         }
@@ -96,6 +103,14 @@ class KeyCreationViewModel @Inject constructor(
                     uploadingKeyProcess = Resource.Error(exception = e)
                 )
             }
+        }
+    }
+
+
+    private fun uploadBootStrapData() {
+        viewModelScope.launch {
+            val walletSigners = state.walletSigners
+            val bootStrapResource =
         }
     }
 

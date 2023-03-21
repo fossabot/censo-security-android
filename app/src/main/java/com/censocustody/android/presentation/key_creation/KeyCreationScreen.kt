@@ -1,5 +1,6 @@
 package com.censocustody.android.presentation.key_creation
 
+import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.*
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -28,6 +29,7 @@ import com.censocustody.android.presentation.key_management.BackgroundUI
 import com.censocustody.android.presentation.key_management.SmallAuthFlowButton
 import com.censocustody.android.R
 import com.censocustody.android.common.BioCryptoUtil
+import com.censocustody.android.common.censoLog
 import com.censocustody.android.presentation.device_registration.DeviceRegistrationInitialData
 import com.censocustody.android.presentation.key_management.PreBiometryDialog
 import com.censocustody.android.ui.theme.*
@@ -42,6 +44,7 @@ fun KeyCreationScreen(
     val context = LocalContext.current as FragmentActivity
 
     DisposableEffect(key1 = viewModel) {
+        censoLog(message = "Initial data in creation screen: $initialData")
         viewModel.onStart(initialData)
         onDispose {
             viewModel.cleanUp()
