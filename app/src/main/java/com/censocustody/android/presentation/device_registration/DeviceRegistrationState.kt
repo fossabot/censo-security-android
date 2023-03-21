@@ -5,6 +5,7 @@ import com.censocustody.android.common.Resource
 import com.censocustody.android.common.UriWrapper
 import com.censocustody.android.data.models.BootstrapDevice
 import com.censocustody.android.data.models.UserDevice
+import com.censocustody.android.data.models.UserImage
 import com.censocustody.android.data.models.VerifyUser
 import com.google.gson.GsonBuilder
 import java.lang.reflect.Modifier
@@ -27,6 +28,9 @@ data class DeviceRegistrationState(
     val addUserDevice: Resource<Unit> = Resource.Uninitialized,
     val deviceRegistrationError: DeviceRegistrationError = DeviceRegistrationError.NONE,
 
+    //Data needed to set up user for bootstrap device creation
+    val createdBootstrapDeviceData: Resource<Unit> = Resource.Uninitialized,
+
     //Standard device key information
     val standardKeyName: String = "",
     val standardPublicKey: String = "",
@@ -35,9 +39,8 @@ data class DeviceRegistrationState(
     val bootstrapKeyName: String = "",
     val bootstrapPublicKey: String = "",
 
-    //Bootstrap user information
-    val userDevice: UserDevice? = null,
-    val bootstrapDevice: BootstrapDevice? = null,
+    val userImage: UserImage? = null,
+
 )
 
 

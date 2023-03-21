@@ -311,6 +311,10 @@ class DeviceRegistrationViewModel @Inject constructor(
         state = state.copy(capturedUserPhoto = null)
     }
 
+    fun resetCreatedBootstrapTrigger() {
+        state = state.copy(createdBootstrapDeviceData = Resource.Uninitialized)
+    }
+
     fun resetUserDevice() {
         state = state.copy(addUserDevice = Resource.Uninitialized)
     }

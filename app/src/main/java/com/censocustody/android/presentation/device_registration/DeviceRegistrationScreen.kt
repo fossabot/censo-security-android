@@ -25,6 +25,7 @@ import androidx.navigation.NavController
 import com.censocustody.android.R
 import com.censocustody.android.common.*
 import com.censocustody.android.presentation.Screen
+import com.censocustody.android.presentation.key_creation.KeyCreationInitialData
 import com.censocustody.android.presentation.key_management.BackgroundUI
 import com.censocustody.android.presentation.key_management.SmallAuthFlowButton
 import com.censocustody.android.ui.theme.*
@@ -78,6 +79,28 @@ fun DeviceRegistrationScreen(
                 popUpToTop()
             }
             viewModel.resetUserDevice()
+        }
+
+        if (state.createdBootstrapDeviceData is Resource.Success) {
+
+            val keyCreationInitialData = KeyCreationInitialData(
+                verifyUserDetails = state.verifyUserDetails,
+                userImage = state.userImage
+            )
+
+            val keyCreationJson =
+                KeyCreationInitialData.toJson(
+                    keyCreationInitialData,
+                    AndroidUriWrapper()
+                )
+            val route = "${Screen.KeyCreationRoute.route}/$keyCreationJson"
+
+            navController.navigate(route) {
+                launchSingleTop = true
+                popUpToTop()
+            }
+
+            viewModel.resetCreatedBootstrapTrigger()
         }
 
         if (!state.userLoggedIn) {
