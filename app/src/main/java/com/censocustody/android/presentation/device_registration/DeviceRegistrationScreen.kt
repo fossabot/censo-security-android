@@ -32,6 +32,7 @@ import com.censocustody.android.ui.theme.*
 @Composable
 fun DeviceRegistrationScreen(
     navController: NavController,
+    initialData: DeviceRegistrationInitialData,
     viewModel: DeviceRegistrationViewModel = hiltViewModel()
 ) {
 
@@ -65,7 +66,7 @@ fun DeviceRegistrationScreen(
 
     //region Launched Effects
     DisposableEffect(key1 = viewModel) {
-        viewModel.onStart()
+        viewModel.onStart(initialData)
         onDispose { }
     }
 
@@ -113,7 +114,7 @@ fun DeviceRegistrationScreen(
 
             }
             viewModel.resetTriggerImageCapture()
-            viewModel.createKeyForDevice()
+            viewModel.imageCaptured()
         }
     }
 

@@ -20,6 +20,10 @@ object SharedPrefsHelper {
     private const val BGRD_INIT_VECTOR = "_bgrd_init_vector"
     private const val BGRD_CIPHER_TEXT = "_bgrd_cipher_text"
 
+    //Bootstrap Device Data Storage
+    private const val BOOTSTRAP_DEVICE_ID = "bootstrap_device_id"
+    private const val BOOTSTRAP_DEVICE_PUBLIC_KEY = "_bootstrap_device_public_key"
+
     //V3 Key Storage
     private const val V3_ROOT_SEED = "_v3_root_seed"
     private const val V3_ROOT_SEED_INIT_VECTOR = "_v3_root_seed_init_vector"
@@ -246,6 +250,56 @@ object SharedPrefsHelper {
         email: String
     ): String {
         return sharedPrefs.getString("${email.lowercase().trim()}$DEVICE_PUBLIC_KEY", "") ?: ""
+    }
+    //endregion
+
+
+    //region bootstrap device id
+    fun clearBootstrapDeviceId(email: String) {
+        val editor = sharedPrefs.edit()
+        editor.putString("${email.lowercase().trim()}$BOOTSTRAP_DEVICE_ID", "")
+        editor.apply()
+    }
+
+    fun saveBootstrapDeviceId(
+        email: String,
+        deviceId: String
+    ) {
+        val editor = sharedPrefs.edit()
+        editor.putString("${email.lowercase().trim()}$BOOTSTRAP_DEVICE_ID", deviceId)
+        editor.apply()
+    }
+
+    fun userHasBootstrapDeviceIdSaved(email: String) = retrieveBootstrapDeviceId(email).isNotEmpty()
+
+    fun retrieveBootstrapDeviceId(
+        email: String
+    ): String {
+        return sharedPrefs.getString("${email.lowercase().trim()}$BOOTSTRAP_DEVICE_ID", "") ?: ""
+    }
+    //endregion
+
+
+    //region public key for bootstrap device id
+    fun clearDeviceBootstrapPublicKey(email: String) {
+        val editor = sharedPrefs.edit()
+        editor.putString("${email.lowercase().trim()}$BOOTSTRAP_DEVICE_PUBLIC_KEY", "")
+        editor.apply()
+    }
+
+    fun saveBootstrapDevicePublicKey(
+        email: String,
+        publicKey: String
+    ) {
+        val editor = sharedPrefs.edit()
+        editor.putString("${email.lowercase().trim()}$BOOTSTRAP_DEVICE_PUBLIC_KEY", publicKey)
+        editor.apply()
+    }
+
+    fun retrieveBootstrapDevicePublicKey(
+        email: String
+    ): String {
+        return sharedPrefs.getString("${email.lowercase().trim()}$BOOTSTRAP_DEVICE_PUBLIC_KEY", "") ?: ""
     }
     //endregion
 }

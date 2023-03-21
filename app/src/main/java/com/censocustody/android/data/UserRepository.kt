@@ -28,6 +28,8 @@ interface UserRepository {
     suspend fun retrieveUserDeviceId(email: String) : String
     suspend fun saveDeviceId(email: String, deviceId: String)
     suspend fun saveDevicePublicKey(email: String, publicKey: String)
+    suspend fun saveBootstrapDeviceId(email: String, deviceId: String)
+    suspend fun saveBootstrapDevicePublicKey(email: String, publicKey: String)
     suspend fun userHasDeviceIdSaved(email: String) : Boolean
     suspend fun addUserDevice(userDevice: UserDevice) : Resource<Unit>
     suspend fun retrieveUserDevicePublicKey(email: String) : String
@@ -168,5 +170,13 @@ class UserRepositoryImpl(
         return retrieveApiResource {
             api.addUserDevice(userDevice)
         }
+    }
+
+    override suspend fun saveBootstrapDeviceId(email: String, deviceId: String) {
+        SharedPrefsHelper.saveBootstrapDeviceId(email = email, deviceId = deviceId)
+    }
+
+    override suspend fun saveBootstrapDevicePublicKey(email: String, publicKey: String) {
+        SharedPrefsHelper.saveBootstrapDevicePublicKey(email = email, publicKey = publicKey)
     }
 }
