@@ -24,7 +24,7 @@ class KeyCreationViewModel @Inject constructor(
         private set
 
     //region VM SETUP
-    fun onStart() {
+    fun onStart(initialData: KeyCreationInitialData) {
         viewModelScope.launch {
             createKeyAndStartSaveProcess()
         }

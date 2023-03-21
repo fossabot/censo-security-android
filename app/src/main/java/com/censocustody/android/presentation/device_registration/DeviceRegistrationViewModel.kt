@@ -168,8 +168,10 @@ class DeviceRegistrationViewModel @Inject constructor(
                     userRepository.saveBootstrapDevicePublicKey(email = email, publicKey = state.bootstrapPublicKey)
 
                     //Send user to the key creation with the image data passed along...
-
-
+                    state = state.copy(
+                        userImage = userImage,
+                        createdBootstrapDeviceData = Resource.Success(Unit),
+                    )
                 } else {
                     state = state.copy(
                         addUserDevice = Resource.Error(exception = Exception("Missing essential data for device registration")),
@@ -214,7 +216,7 @@ class DeviceRegistrationViewModel @Inject constructor(
         }
     }
 
-    fun createBootstrapKeysForDevice() {
+    private fun createBootstrapKeysForDevice() {
         viewModelScope.launch {
             val standardKeyId = cryptographyManager.createDeviceKeyId()
             val bootstrapKeyId = cryptographyManager.createDeviceKeyId()
@@ -255,7 +257,7 @@ class DeviceRegistrationViewModel @Inject constructor(
         }
     }
 
-    fun createStandardKeyForDevice() {
+    private fun createStandardKeyForDevice() {
         viewModelScope.launch {
             val keyId = cryptographyManager.createDeviceKeyId()
             state = state.copy(standardKeyName = keyId)

@@ -216,7 +216,7 @@ class EntranceViewModel @Inject constructor(
             }
             needToRecoverRootSeed -> {
                 state = state.copy(
-                    userDestinationResult = Resource.Success(UserDestination.KEY_MANAGEMENT_RECOVERY),
+                    userDestinationResult = Resource.Success(UserDestination.KEY_MANAGEMENT_CREATION),
                 )
                 return
             }

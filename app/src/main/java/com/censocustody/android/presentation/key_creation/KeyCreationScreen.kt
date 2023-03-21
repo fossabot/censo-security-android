@@ -28,19 +28,21 @@ import com.censocustody.android.presentation.key_management.BackgroundUI
 import com.censocustody.android.presentation.key_management.SmallAuthFlowButton
 import com.censocustody.android.R
 import com.censocustody.android.common.BioCryptoUtil
+import com.censocustody.android.presentation.device_registration.DeviceRegistrationInitialData
 import com.censocustody.android.presentation.key_management.PreBiometryDialog
 import com.censocustody.android.ui.theme.*
 
 @Composable
 fun KeyCreationScreen(
     navController: NavController,
+    initialData: KeyCreationInitialData,
     viewModel: KeyCreationViewModel = hiltViewModel(),
 ) {
     val state = viewModel.state
     val context = LocalContext.current as FragmentActivity
 
     DisposableEffect(key1 = viewModel) {
-        viewModel.onStart()
+        viewModel.onStart(initialData)
         onDispose {
             viewModel.cleanUp()
         }

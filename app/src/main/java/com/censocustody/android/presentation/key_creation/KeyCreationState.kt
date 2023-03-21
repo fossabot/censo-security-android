@@ -6,7 +6,6 @@ import com.censocustody.android.common.UriWrapper
 import com.censocustody.android.data.models.UserImage
 import com.censocustody.android.data.models.VerifyUser
 import com.censocustody.android.data.models.WalletSigner
-import com.censocustody.android.presentation.device_registration.DeviceRegistrationInitialData
 import com.google.gson.GsonBuilder
 import java.lang.reflect.Modifier
 
@@ -38,11 +37,11 @@ data class KeyCreationInitialData(
             return uriWrapper.encode(jsonString)
         }
 
-        fun fromJson(json: String): DeviceRegistrationInitialData {
+        fun fromJson(json: String): KeyCreationInitialData {
             return GsonBuilder()
                 .excludeFieldsWithModifiers(Modifier.STATIC)
                 .create()
-                .fromJson(json, DeviceRegistrationInitialData::class.java)
+                .fromJson(json, KeyCreationInitialData::class.java)
         }
     }
 }
