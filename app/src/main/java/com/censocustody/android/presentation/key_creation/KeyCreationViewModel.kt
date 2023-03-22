@@ -10,6 +10,7 @@ import cash.z.ecc.android.bip39.toSeed
 import com.censocustody.android.common.BioPromptReason
 import com.censocustody.android.common.Resource
 import com.censocustody.android.data.*
+import com.censocustody.android.data.models.UserImage
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -73,7 +74,11 @@ class KeyCreationViewModel @Inject constructor(
         }
 
         if (state.bioPromptReason == BioPromptReason.RETRIEVE_DEVICE_SIGNATURE) {
-            uploadKeys()
+            if (state.verifyUserDetails != null && state.verifyUserDetails?.shardingPolicy == null && state.userImage != null) {
+                uploadBootStrapData(state.userImage!!)
+            } else {
+                uploadKeys()
+            }
         }
     }
 
@@ -107,11 +112,15 @@ class KeyCreationViewModel @Inject constructor(
     }
 
 
-    private fun uploadBootStrapData() {
+    private fun uploadBootStrapData(userImage: UserImage) {
         viewModelScope.launch {
             val walletSigners = state.walletSigners
 
-            val bootStrapResource = userRepository.addBootstrapUser(walletSigners)
+            val bootStrapResource = userRepository.addBootstrapUser(
+                userImage = userImage, walletSigners = walletSigners
+            )
+
+            state = state.copy(uploadingKeyProcess = bootStrapResource)
         }
     }
 
