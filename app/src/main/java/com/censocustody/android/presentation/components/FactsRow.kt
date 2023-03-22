@@ -9,6 +9,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.censocustody.android.presentation.approval_detail.approval_type_detail_items.ApprovalInfoRow
 import com.censocustody.android.presentation.approval_detail.approval_type_detail_items.UserInfoRow
+import com.censocustody.android.presentation.approval_detail.approval_type_detail_items.UserRoleRow
 import com.censocustody.android.ui.theme.*
 
 @Composable
@@ -36,6 +37,13 @@ fun FactRow(factsData: FactsData, modifier: Modifier = Modifier, hideFinalDivide
                     email = fact.value,
                     image = fact.userImage
                 )
+            } else if (fact.userRoleRow) {
+                UserRoleRow(
+                    backgroundColor = rowBackgroundColor,
+                    name = fact.title,
+                    role = fact.value,
+                    image = fact.userImage
+                )
             } else {
                 ApprovalInfoRow(
                     backgroundColor = rowBackgroundColor,
@@ -59,5 +67,6 @@ data class RowData(
     val title: String,
     val value: String,
     val userImage: String? = null,
-    val userRow: Boolean = false
+    val userRow: Boolean = false,
+    val userRoleRow: Boolean = false
 )
