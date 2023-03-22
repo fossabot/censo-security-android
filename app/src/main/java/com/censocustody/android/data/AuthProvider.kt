@@ -5,7 +5,6 @@ import com.auth0.android.jwt.JWT
 import com.raygun.raygun4android.RaygunClient
 import com.censocustody.android.common.CrashReportingUtil.JWT_TAG
 import com.censocustody.android.common.CrashReportingUtil.MANUALLY_REPORTED_TAG
-import java.util.*
 import kotlin.collections.HashMap
 
 interface AuthProvider {
@@ -22,8 +21,7 @@ interface AuthProvider {
 }
 
 class CensoAuth(
-    val encryptionManager: EncryptionManager,
-    val securePreferences: SecurePreferences
+    private val securePreferences: SecurePreferences
 ) : AuthProvider {
 
     private val listeners: HashMap<String, UserStateListener> = hashMapOf()
@@ -68,19 +66,6 @@ class CensoAuth(
 
         if (token.isEmpty()) {
             throw TokenExpiredException()
-        }
-
-        try {
-            val jwtDecoded = JWT(token)
-
-            val expiresAt = jwtDecoded.expiresAt
-            val currentDate = Date()
-
-            if (currentDate > expiresAt) {
-                throw TokenExpiredException()
-            }
-        } catch (e: Exception) {
-            RaygunClient.send(e, listOf(JWT_TAG, MANUALLY_REPORTED_TAG))
         }
 
         return token
