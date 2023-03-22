@@ -95,6 +95,8 @@ sealed class ApprovalRequestDetailsV2 {
         ).registerSubtype(
             VaultNameUpdate::class.java, "VaultNameUpdate"
         ).registerSubtype(
+            VaultUserRolesUpdate::class.java, "VaultUserRolesUpdate"
+        ).registerSubtype(
             OrgNameUpdate::class.java, "OrgNameUpdate"
         ).registerSubtype(
             BitcoinWalletCreation::class.java, "BitcoinWalletCreation"
@@ -184,6 +186,22 @@ sealed class ApprovalRequestDetailsV2 {
     data class OrgNameUpdate(
         val oldName: String,
         val newName: String,
+    ) : ApprovalRequestDetailsV2()
+
+    enum class VaultUserRoleEnum {
+        Viewer,
+        TransactionSubmitter
+    }
+
+    data class VaultUserRole(
+        val name: String,
+        val email: String,
+        val jpegThumbnail: String?,
+        val role: VaultUserRoleEnum
+    )
+    data class VaultUserRolesUpdate(
+        val vaultName: String,
+        val userRoles: List<VaultUserRole>
     ) : ApprovalRequestDetailsV2()
 
     data class BitcoinWalletCreation(

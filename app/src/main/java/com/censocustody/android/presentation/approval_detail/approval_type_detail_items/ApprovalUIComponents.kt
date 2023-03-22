@@ -62,43 +62,7 @@ fun UserInfoRow(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Start
     ) {
-        var bitmap: Bitmap? = null
-        var haveValidBitmap = false
-        if (!image.isNullOrEmpty()) {
-            bitmap = image.toBitMap()
-
-            if (bitmap != null) {
-                haveValidBitmap = true
-            }
-        }
-
-        if (haveValidBitmap) {
-            Image(
-                bitmap = bitmap!!.asImageBitmap(),
-                contentDescription = "approver image",
-                contentScale = ContentScale.Crop, // crop the image if it's not a square
-                modifier = Modifier
-                    .padding(horizontal = 8.dp, vertical = 2.dp)
-                    .size(56.dp)
-                    .clip(CircleShape) // clip to the circle shape
-            )
-        } else {
-            Box(
-                modifier = Modifier
-                    .padding(horizontal = 8.dp, vertical = 2.dp)
-                    .clip(CircleShape)
-                    .background(color = CensoWhite)
-                    .size(56.dp)
-            ) {
-                Text(
-                    modifier = Modifier.align(Alignment.Center),
-                    text = name.nameToInitials(),
-                    fontSize = 18.sp,
-                    color = ButtonRed
-                )
-            }
-        }
-
+        UserImage(image, name)
         Column(
             modifier = Modifier.padding(horizontal = 16.dp)
         ) {
@@ -119,6 +83,92 @@ fun UserInfoRow(
                 letterSpacing = 0.25.sp
             )
         }
+    }
+}
+
+@Composable
+fun UserImage(image: String?, name: String) {
+    var bitmap: Bitmap? = null
+    var haveValidBitmap = false
+    if (!image.isNullOrEmpty()) {
+        bitmap = image.toBitMap()
+
+        if (bitmap != null) {
+            haveValidBitmap = true
+        }
+    }
+
+    if (haveValidBitmap) {
+        Image(
+            bitmap = bitmap!!.asImageBitmap(),
+            contentDescription = "approver image",
+            contentScale = ContentScale.Crop, // crop the image if it's not a square
+            modifier = Modifier
+                .padding(horizontal = 8.dp, vertical = 2.dp)
+                .size(56.dp)
+                .clip(CircleShape) // clip to the circle shape
+        )
+    } else {
+        Box(
+            modifier = Modifier
+                .padding(horizontal = 8.dp, vertical = 2.dp)
+                .clip(CircleShape)
+                .background(color = CensoWhite)
+                .size(56.dp)
+        ) {
+            Text(
+                modifier = Modifier.align(Alignment.Center),
+                text = name.nameToInitials(),
+                fontSize = 18.sp,
+                color = ButtonRed
+            )
+        }
+    }
+}
+
+@Composable
+fun UserRoleRow(
+    backgroundColor: Color,
+    name: String,
+    role: String,
+    image: String?
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(backgroundColor)
+            .padding(vertical = 14.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Start
+        ) {
+            UserImage(image, name)
+            Column(
+            ) {
+                Text(
+                    text = name,
+                    color = TextBlack,
+                    fontSize = 18.sp,
+                    textAlign = TextAlign.Start,
+                    letterSpacing = 0.25.sp,
+                )
+            }
+        }
+        Text(
+            modifier = Modifier
+                .padding(end = 16.dp)
+                .wrapContentHeight(),
+            text = role,
+            textAlign = TextAlign.Start,
+            color = TextBlack,
+            fontSize = 18.sp,
+            fontWeight = FontWeight.Bold,
+            letterSpacing = 0.25.sp
+        )
     }
 }
 

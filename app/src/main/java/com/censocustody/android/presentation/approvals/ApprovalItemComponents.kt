@@ -294,6 +294,10 @@ fun ApprovalRowContent(
             )
         }
 
+        is ApprovalRequestDetailsV2.VaultUserRolesUpdate -> {
+            VaultUserRolesUpdateRowContent(header = type.getHeader(LocalContext.current), type.vaultName)
+        }
+
         //Unknown
         ApprovalRequestDetailsV2.UnknownApprovalType -> {
             Text(text = type.getHeader(LocalContext.current), color = TextBlack)
@@ -452,6 +456,10 @@ fun ApprovalDetailContent(approval: ApprovalRequestV2, type: ApprovalRequestDeta
                 newName = type.newName,
                 renameType = RenameType.Org
             )
+        }
+
+        is ApprovalRequestDetailsV2.VaultUserRolesUpdate -> {
+            VaultUserRolesUpdateDetailContent(update = type)
         }
 
         //Unknown
