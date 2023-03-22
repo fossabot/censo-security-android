@@ -23,11 +23,8 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideAuthProvider(
-        encryptionManager: EncryptionManager,
-        securePreferences: SecurePreferences
-    ): AuthProvider {
-        return CensoAuth(encryptionManager, securePreferences)
+    fun provideAuthProvider(securePreferences: SecurePreferences): AuthProvider {
+        return CensoAuth(securePreferences)
     }
 
     @Provides
