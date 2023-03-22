@@ -16,7 +16,7 @@ interface UserRepository {
     suspend fun verifyUser(): Resource<VerifyUser>
     suspend fun getWalletSigners(): Resource<List<WalletSigner?>>
     suspend fun addWalletSigner(walletSigners: List<WalletSigner>): Resource<Unit>
-    suspend fun addBootstrapUser(bootstrapUserDeviceAndSigners: BootstrapUserDeviceAndSigners): Resource<Unit>
+    suspend fun addBootstrapUser(userImage: UserImage, walletSigners: List<WalletSigner>): Resource<Unit>
     suspend fun userLoggedIn(): Boolean
     suspend fun setUserLoggedIn()
     suspend fun logOut(): Boolean
@@ -34,6 +34,8 @@ interface UserRepository {
     suspend fun userHasDeviceIdSaved(email: String) : Boolean
     suspend fun addUserDevice(userDevice: UserDevice) : Resource<Unit>
     suspend fun retrieveUserDevicePublicKey(email: String) : String
+
+    suspend fun retrieveBootstrapDevicePublicKey(email: String) : String
 }
 
 class UserRepositoryImpl(
@@ -112,8 +114,45 @@ class UserRepositoryImpl(
         }
     }
 
-    override suspend fun addBootstrapUser(bootstrapUserDeviceAndSigners: BootstrapUserDeviceAndSigners): Resource<Unit> {
-        TODO("Not yet implemented")
+    override suspend fun addBootstrapUser(
+        userImage: UserImage,
+        walletSigners: List<WalletSigner>
+    ): Resource<Unit> {
+        val email = retrieveUserEmail()
+
+        val signedDeviceData = encryptionManager.signKeysForUpload(email, walletSigners)
+        val signedBootstrapData = encryptionManager.signKeysForUpload(email, walletSigners)
+
+        val bootstrapPublicKey = retrieveUserDevicePublicKey(email)
+        val devicePublicKey = retrieveBootstrapDevicePublicKey(email)
+
+        val userDevice = UserDevice(
+            userImage = userImage,
+            deviceType = DeviceType.ANDROID,
+            publicKey = devicePublicKey
+        )
+
+        val bootstrapDevice = BootstrapDevice(
+            publicKey = bootstrapPublicKey,
+            signature = BaseWrapper.encodeToBase64(signedBootstrapData)
+        )
+
+        //todo: talk to Brendan about this
+        val signers = Signers(
+            signers = walletSigners,
+            signature = BaseWrapper.encodeToBase64(signedDeviceData),
+            share = null
+        )
+
+        return retrieveApiResource {
+            api.addBootstrapUserDeviceAndSigners(
+                userDeviceAndSigners = BootstrapUserDeviceAndSigners(
+                    userDevice = userDevice,
+                    bootstrapDevice = bootstrapDevice,
+                    signersInfo = signers
+                )
+            )
+        }
     }
 
     override suspend fun retrieveUserEmail(): String {
@@ -158,9 +197,12 @@ class UserRepositoryImpl(
     override suspend fun userHasDeviceIdSaved(email: String) =
         SharedPrefsHelper.userHasDeviceIdSaved(email)
 
-    override suspend fun retrieveUserDevicePublicKey(email: String): String {
-        return SharedPrefsHelper.retrieveDevicePublicKey(email)
-    }
+    override suspend fun retrieveUserDevicePublicKey(email: String) =
+        SharedPrefsHelper.retrieveDevicePublicKey(email)
+
+    override suspend fun retrieveBootstrapDevicePublicKey(email: String) =
+        SharedPrefsHelper.retrieveBootstrapDevicePublicKey(email)
+
 
     override suspend fun saveDeviceId(email: String, deviceId: String) {
         SharedPrefsHelper.saveDeviceId(email = email, deviceId = deviceId)

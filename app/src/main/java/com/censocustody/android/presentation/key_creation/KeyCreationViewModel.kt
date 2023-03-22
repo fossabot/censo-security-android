@@ -110,7 +110,8 @@ class KeyCreationViewModel @Inject constructor(
     private fun uploadBootStrapData() {
         viewModelScope.launch {
             val walletSigners = state.walletSigners
-            val bootStrapResource =
+
+            val bootStrapResource = userRepository.addBootstrapUser(walletSigners)
         }
     }
 

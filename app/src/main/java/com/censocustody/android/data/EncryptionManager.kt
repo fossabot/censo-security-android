@@ -29,12 +29,13 @@ interface EncryptionManager {
 
     fun signKeysForUpload(
         email: String,
-        walletSigners: List<WalletSigner>
+        walletSigners: List<WalletSigner>,
+        bootstrapSign: Boolean = false
     ): ByteArray
 
     fun signDataWithDeviceKey(
         data: ByteArray,
-        email: String
+        deviceId: String
     ) : ByteArray
 
     fun signApprovalDispositionForDeviceKey(
@@ -73,21 +74,27 @@ class EncryptionManagerImpl @Inject constructor(
 
     override fun signKeysForUpload(
         email: String,
-        walletSigners: List<WalletSigner>
+        walletSigners: List<WalletSigner>,
+        bootstrapSign: Boolean
     ): ByteArray {
         val dataToSign = Signers.retrieveDataToSign(walletSigners)
 
+        val deviceId = if (bootstrapSign) {
+            SharedPrefsHelper.retrieveBootstrapDeviceId(email)
+        } else {
+            SharedPrefsHelper.retrieveDeviceId(email)
+        }
+
         return signDataWithDeviceKey(
             data = dataToSign,
-            email = email
+            deviceId = deviceId
         )
     }
 
     override fun signDataWithDeviceKey(
         data: ByteArray,
-        email: String
+        deviceId: String,
     ): ByteArray {
-        val deviceId = SharedPrefsHelper.retrieveDeviceId(email)
         return cryptographyManager.signData(
             dataToSign = data,
             keyName = deviceId
@@ -98,8 +105,9 @@ class EncryptionManagerImpl @Inject constructor(
         email: String,
         dataToSign: SignableDataResult.Device
     ): ApprovalSignature.OffChainSignature {
+        val deviceId = SharedPrefsHelper.retrieveDeviceId(email)
         val signedData = signDataWithDeviceKey(
-            data = dataToSign.dataToSign, email = email
+            data = dataToSign.dataToSign, deviceId = deviceId
         )
 
         return ApprovalSignature.OffChainSignature(
