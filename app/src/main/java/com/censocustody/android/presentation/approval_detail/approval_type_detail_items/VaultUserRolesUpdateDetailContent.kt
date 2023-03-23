@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.censocustody.android.presentation.approvals.ApprovalContentHeader
@@ -22,7 +23,6 @@ fun VaultUserRolesUpdateDetailContent(
     val header = update.getHeader(LocalContext.current)
     ApprovalContentHeader(header = header, topSpacing = 24, bottomSpacing = 36)
     ApprovalSubtitle(text = update.vaultName.toVaultName(LocalContext.current), fontSize = 20.sp)
-    Spacer(modifier = Modifier.height(24.dp))
 
     FactRow(
         factsData = FactsData(
@@ -30,16 +30,30 @@ fun VaultUserRolesUpdateDetailContent(
             facts = update.userRoles.map { userRole ->
                 RowData(
                     title = userRole.name,
-                    value = LocalContext.current.getString(when (userRole.role) {
+                    value = userRole.email,
+                    userImage = userRole.jpegThumbnail,
+                    userRole = LocalContext.current.getString(when (userRole.role) {
                         ApprovalRequestDetailsV2.VaultUserRoleEnum.Viewer -> R.string.vault_user_role_viewer
                         ApprovalRequestDetailsV2.VaultUserRoleEnum.TransactionSubmitter -> R.string.vault_user_role_transaction_submitter
-                    }),
-                    userImage = userRole.jpegThumbnail,
-                    userRoleRow = true
+                    })
                 )
             }
         )
     )
 
     Spacer(modifier = Modifier.height(8.dp))
+}
+
+@Composable
+@Preview
+fun VaultUserRolesUpdateDetailContentPreview() {
+    VaultUserRolesUpdateDetailContent(
+        ApprovalRequestDetailsV2.VaultUserRolesUpdate(
+            "Main",
+            listOf(
+                ApprovalRequestDetailsV2.VaultUserRole("User 1", "user1@org.com", null, ApprovalRequestDetailsV2.VaultUserRoleEnum.TransactionSubmitter),
+                ApprovalRequestDetailsV2.VaultUserRole("User 2", "user2@org.com", null, ApprovalRequestDetailsV2.VaultUserRoleEnum.Viewer)
+            )
+        )
+    )
 }

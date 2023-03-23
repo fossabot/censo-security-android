@@ -37,11 +37,12 @@ fun FactRow(factsData: FactsData, modifier: Modifier = Modifier, hideFinalDivide
                     email = fact.value,
                     image = fact.userImage
                 )
-            } else if (fact.userRoleRow) {
+            } else if (fact.userRole != null) {
                 UserRoleRow(
                     backgroundColor = rowBackgroundColor,
                     name = fact.title,
-                    role = fact.value,
+                    email = fact.value,
+                    role = fact.userRole,
                     image = fact.userImage
                 )
             } else {
@@ -68,5 +69,5 @@ data class RowData(
     val value: String,
     val userImage: String? = null,
     val userRow: Boolean = false,
-    val userRoleRow: Boolean = false
+    val userRole: String? = null
 )

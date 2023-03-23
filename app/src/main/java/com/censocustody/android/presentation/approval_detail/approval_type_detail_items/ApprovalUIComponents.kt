@@ -130,6 +130,7 @@ fun UserImage(image: String?, name: String) {
 fun UserRoleRow(
     backgroundColor: Color,
     name: String,
+    email: String,
     role: String,
     image: String?
 ) {
@@ -142,7 +143,6 @@ fun UserRoleRow(
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Row(
-            modifier = Modifier.padding(horizontal = 16.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Start
         ) {
@@ -152,20 +152,29 @@ fun UserRoleRow(
                 Text(
                     text = name,
                     color = TextBlack,
-                    fontSize = 18.sp,
+                    fontSize = 14.sp,
                     textAlign = TextAlign.Start,
                     letterSpacing = 0.25.sp,
+                )
+
+                Text(
+                    text = email,
+                    textAlign = TextAlign.Start,
+                    color = TextBlack,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 0.25.sp
                 )
             }
         }
         Text(
             modifier = Modifier
-                .padding(end = 16.dp)
+                .padding(end = 8.dp)
                 .wrapContentHeight(),
             text = role,
-            textAlign = TextAlign.Start,
+            textAlign = TextAlign.End,
             color = TextBlack,
-            fontSize = 18.sp,
+            fontSize = 14.sp,
             fontWeight = FontWeight.Bold,
             letterSpacing = 0.25.sp
         )

@@ -27,7 +27,6 @@ fun VaultConfigPolicyUpdateDetailContent(
     val header = vaultPolicyUpdate.getHeader(LocalContext.current)
     ApprovalContentHeader(header = header, topSpacing = 24, bottomSpacing = 36)
     ApprovalSubtitle(text = vaultPolicyUpdate.vaultName.toVaultName(LocalContext.current), fontSize = 20.sp)
-    Spacer(modifier = Modifier.height(24.dp))
 
     val approverRowInfoData = generatePolicyRows(
         policy = vaultPolicyUpdate.approvalPolicy,
