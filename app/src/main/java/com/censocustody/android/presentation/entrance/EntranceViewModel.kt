@@ -221,15 +221,10 @@ class EntranceViewModel @Inject constructor(
                 return
             }
             needToRecoverRootSeed -> {
-                state = if (verifyUser.shardingPolicy == null) {
+                state =
                     state.copy(
-                        userDestinationResult = Resource.Success(UserDestination.DEVICE_REGISTRATION)
+                        userDestinationResult = Resource.Success(UserDestination.KEY_MANAGEMENT_RECOVERY)
                     )
-                } else {
-                    state.copy(
-                        userDestinationResult = Resource.Success(UserDestination.KEY_MANAGEMENT_CREATION)
-                    )
-                }
                 return
             }
             needToUploadPublicKeyData -> {
