@@ -28,7 +28,7 @@ class DeviceRegistrationViewModel @Inject constructor(
         private set
 
     fun onStart(initialData: DeviceRegistrationInitialData) {
-        state = state.copy(verifyUserDetails = initialData.verifyUserDetails?.copy(shardingPolicy = null))
+        state = state.copy(verifyUserDetails = initialData.verifyUserDetails)
 
         viewModelScope.launch {
             val isUserLoggedIn = userRepository.userLoggedIn()
@@ -174,7 +174,7 @@ class DeviceRegistrationViewModel @Inject constructor(
                     )
                 } else {
                     state = state.copy(
-                        addUserDevice = Resource.Error(exception = Exception("Missing essential data for device registration")),
+                        addUserDevice = Resource.Error(exception = Exception("Missing essential data for bootstrap device registration")),
                         deviceRegistrationError = DeviceRegistrationError.API,
                         capturingDeviceKey = Resource.Uninitialized
                     )
@@ -203,10 +203,6 @@ class DeviceRegistrationViewModel @Inject constructor(
     }
 
     fun imageCaptured() {
-        if (state.verifyUserDetails == null) {
-            //todo: we need to pass this here...bail earlier in the flow
-        }
-
         if (isBootstrapUser()) {
             //Standard Device Registration
             createBootstrapKeysForDevice()

@@ -120,11 +120,19 @@ class UserRepositoryImpl(
     ): Resource<Unit> {
         val email = retrieveUserEmail()
 
-        val signedDeviceData = encryptionManager.signKeysForUpload(email, walletSigners)
-        val signedBootstrapData = encryptionManager.signKeysForUpload(email, walletSigners)
+        val signedDeviceData = encryptionManager.signKeysForUpload(
+            email = email,
+            walletSigners = walletSigners,
+            bootstrapSign = false
+        )
+        val signedBootstrapData = encryptionManager.signKeysForUpload(
+            email = email,
+            walletSigners = walletSigners,
+            bootstrapSign = true
+        )
 
-        val bootstrapPublicKey = retrieveUserDevicePublicKey(email)
-        val devicePublicKey = retrieveBootstrapDevicePublicKey(email)
+        val bootstrapPublicKey = retrieveBootstrapDevicePublicKey(email)
+        val devicePublicKey = retrieveUserDevicePublicKey(email)
 
         val userDevice = UserDevice(
             userImage = userImage,
@@ -137,7 +145,6 @@ class UserRepositoryImpl(
             signature = BaseWrapper.encodeToBase64(signedBootstrapData)
         )
 
-        //todo: talk to Brendan about this
         val signers = Signers(
             signers = walletSigners,
             signature = BaseWrapper.encodeToBase64(signedDeviceData),

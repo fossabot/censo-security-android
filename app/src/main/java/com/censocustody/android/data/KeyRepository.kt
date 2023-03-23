@@ -128,9 +128,11 @@ class KeyRepositoryImpl(
 
         val tokenByteArray = timestamp.toByteArray(charset = Charsets.UTF_8)
 
+        val deviceId = SharedPrefsHelper.retrieveDeviceId(userEmail)
+
         val signedTimestamp = encryptionManager.signDataWithDeviceKey(
             data = tokenByteArray,
-            email = userEmail
+            deviceId = deviceId
         )
 
         return BaseWrapper.encodeToBase64(signedTimestamp)

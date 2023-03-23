@@ -7,7 +7,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import cash.z.ecc.android.bip39.Mnemonics
 import cash.z.ecc.android.bip39.toSeed
-import com.censocustody.android.common.BioPromptReason
 import com.censocustody.android.common.Resource
 import com.censocustody.android.data.*
 import com.censocustody.android.data.models.UserImage
@@ -46,40 +45,15 @@ class KeyCreationViewModel @Inject constructor(
         state = state.copy(uploadingKeyProcess = Resource.Loading())
         val phrase = keyRepository.generatePhrase()
         state = state.copy(keyGeneratedPhrase = phrase)
-        triggerBioPromptForRootSeedSave()
+        triggerBioPromptForAllKeyActivity()
     }
 
-    private fun triggerBioPromptForRootSeedSave() {
-        val bioPromptReason = BioPromptReason.SAVE_V3_ROOT_SEED
-
-        state =
-            state.copy(
-                triggerBioPrompt = Resource.Success(Unit),
-                bioPromptReason = bioPromptReason
-            )
-    }
-
-    private fun triggerBioPromptForDeviceSignature() {
-        val bioPromptReason = BioPromptReason.RETRIEVE_DEVICE_SIGNATURE
-        state =
-            state.copy(
-                triggerBioPrompt = Resource.Success(Unit),
-                bioPromptReason = bioPromptReason
-            )
+    private fun triggerBioPromptForAllKeyActivity() {
+        state = state.copy(triggerBioPrompt = Resource.Success(Unit))
     }
 
     fun biometryApproved() {
-        if (state.bioPromptReason == BioPromptReason.SAVE_V3_ROOT_SEED) {
-            saveRootSeed()
-        }
-
-        if (state.bioPromptReason == BioPromptReason.RETRIEVE_DEVICE_SIGNATURE) {
-            if (state.verifyUserDetails != null && state.verifyUserDetails?.shardingPolicy == null && state.userImage != null) {
-                uploadBootStrapData(state.userImage!!)
-            } else {
-                uploadKeys()
-            }
-        }
+        saveRootSeed()
     }
 
     fun biometryFailed() {
@@ -102,7 +76,11 @@ class KeyCreationViewModel @Inject constructor(
 
                 state = state.copy(walletSigners = walletSigners)
 
-                triggerBioPromptForDeviceSignature()
+                if (state.verifyUserDetails != null && state.verifyUserDetails?.shardingPolicy == null && state.userImage != null) {
+                    uploadBootStrapData(state.userImage!!)
+                } else {
+                    uploadKeys()
+                }
             } catch (e: Exception) {
                 state = state.copy(
                     uploadingKeyProcess = Resource.Error(exception = e)
@@ -111,26 +89,21 @@ class KeyCreationViewModel @Inject constructor(
         }
     }
 
+    private suspend fun uploadBootStrapData(userImage: UserImage) {
+        val walletSigners = state.walletSigners
 
-    private fun uploadBootStrapData(userImage: UserImage) {
-        viewModelScope.launch {
-            val walletSigners = state.walletSigners
+        val bootStrapResource = userRepository.addBootstrapUser(
+            userImage = userImage, walletSigners = walletSigners
+        )
 
-            val bootStrapResource = userRepository.addBootstrapUser(
-                userImage = userImage, walletSigners = walletSigners
-            )
-
-            state = state.copy(uploadingKeyProcess = bootStrapResource)
-        }
+        state = state.copy(uploadingKeyProcess = bootStrapResource)
     }
 
-    private fun uploadKeys() {
-        viewModelScope.launch {
-            val walletSigners = state.walletSigners
-            val walletSignerResource = userRepository.addWalletSigner(walletSigners)
+    private suspend fun uploadKeys() {
+        val walletSigners = state.walletSigners
+        val walletSignerResource = userRepository.addWalletSigner(walletSigners)
 
-            state = state.copy(uploadingKeyProcess = walletSignerResource)
-        }
+        state = state.copy(uploadingKeyProcess = walletSignerResource)
     }
 
     fun retryKeyCreation() {
