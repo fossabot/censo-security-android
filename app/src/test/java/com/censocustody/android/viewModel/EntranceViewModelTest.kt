@@ -217,6 +217,31 @@ class EntranceViewModelTest : BaseViewModelTest() {
         }
 
     @Test
+    fun `if no key is present locally or on backend and no sharding policy then send user to device registration`() =
+        runTest {
+            setupLoggedInUserWithValidEmail()
+            setupUserWithDeviceIdAndPublicKey()
+
+            val verifyUserWithNoShardingPolicy =
+                basicVerifyUserWithNoPublicKeys.copy(shardingPolicy = null)
+
+            whenever(userRepository.verifyUser()).then {
+                Resource.Success(verifyUserWithNoShardingPolicy)
+            }
+
+            whenever(keyRepository.hasV3RootSeedStored()).then { false }
+
+            entranceViewModel.onStart()
+            advanceUntilIdle()
+
+            verify(censoUserData, times(1))
+                .setCensoUser(verifyUserWithNoShardingPolicy)
+
+            assertTrue(entranceViewModel.state.userDestinationResult is Resource.Success)
+            assertTrue(entranceViewModel.state.userDestinationResult.data == UserDestination.DEVICE_REGISTRATION)
+        }
+
+    @Test
     fun `if a key is present locally but a key is not present on backend then send user to key regeneration destination`() =
         runTest {
             setupLoggedInUserWithValidEmail()
