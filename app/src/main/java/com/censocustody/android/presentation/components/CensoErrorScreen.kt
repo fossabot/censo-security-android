@@ -21,6 +21,7 @@ import com.censocustody.android.common.CensoButton
 import com.censocustody.android.common.Resource
 import com.censocustody.android.common.CensoError
 import com.censocustody.android.R
+import com.censocustody.android.common.HELP_URL
 import com.censocustody.android.ui.theme.*
 
 @Composable
@@ -75,7 +76,7 @@ fun CensoErrorScreen(
                     onClick = {
                         val getHelpIntent = Intent(Intent.ACTION_VIEW).apply {
                             data =
-                                Uri.parse("https://help.censo.co")
+                                Uri.parse(HELP_URL)
                         }
                         startActivity(context, getHelpIntent, null)
                     }
