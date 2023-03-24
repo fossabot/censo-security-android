@@ -151,6 +151,10 @@ fun ApprovalRequestDetailsV2.getHeader(context: Context) =
             context.getString(R.string.org_name_update_approval_header)
         }
 
+        is ApprovalRequestDetailsV2.VaultUserRolesUpdate -> {
+            context.getString(R.string.vault_user_roles_update_approval_header)
+        }
+
         ApprovalRequestDetailsV2.UnknownApprovalType -> {
             context.getString(R.string.unknown_approval_header)
         }
