@@ -36,7 +36,7 @@ fun ContactCensoScreen() {
         Text(
             modifier = Modifier
                 .clickable {
-                    localHandler.openUri("https://help.censocustody.com")
+                    localHandler.openUri("https://help.censo.co")
                 }
                 .padding(24.dp),
             text = stringResource(R.string.get_help),
