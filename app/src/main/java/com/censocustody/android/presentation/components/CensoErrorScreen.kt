@@ -75,7 +75,7 @@ fun CensoErrorScreen(
                     onClick = {
                         val getHelpIntent = Intent(Intent.ACTION_VIEW).apply {
                             data =
-                                Uri.parse("https://help.censocustody.com")
+                                Uri.parse("https://help.censo.co")
                         }
                         startActivity(context, getHelpIntent, null)
                     }
