@@ -15,6 +15,7 @@ import androidx.compose.ui.unit.sp
 import com.censocustody.android.ui.theme.CensoTextBlue
 import com.censocustody.android.ui.theme.CensoWhite
 import com.censocustody.android.R
+import com.censocustody.android.common.HELP_URL
 import com.censocustody.android.ui.theme.TextBlack
 
 @Composable
@@ -36,7 +37,7 @@ fun ContactCensoScreen() {
         Text(
             modifier = Modifier
                 .clickable {
-                    localHandler.openUri("https://help.censocustody.com")
+                    localHandler.openUri(HELP_URL)
                 }
                 .padding(24.dp),
             text = stringResource(R.string.get_help),

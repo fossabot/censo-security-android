@@ -25,6 +25,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.censocustody.android.BuildConfig
 import com.censocustody.android.R
+import com.censocustody.android.common.HELP_URL
 import com.censocustody.android.common.Resource
 import com.censocustody.android.common.popUpToTop
 import com.censocustody.android.presentation.Screen
@@ -142,7 +143,7 @@ fun AccountScreen(
                     Text(
                         modifier = Modifier
                             .clickable {
-                                localHandler.openUri("https://help.censocustody.com")
+                                localHandler.openUri(HELP_URL)
                             }
                             .padding(24.dp),
                         text = stringResource(R.string.get_help),
