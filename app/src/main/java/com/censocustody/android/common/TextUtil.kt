@@ -3,6 +3,9 @@ package com.censocustody.android.common
 import android.content.Context
 import com.censocustody.android.R
 
+
+const val HELP_URL = "https://help.censo.co"
+
 fun String.toWalletName(context: Context): String {
     if (this.lowercase().endsWith("wallet")) {
         return this
