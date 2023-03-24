@@ -25,11 +25,11 @@ fun getVerifyUser() = VerifyUser(
         name = "cryptology"
     ),
     publicKeys = listOf(WalletPublicKey(key = ExampleMnemonicAndKeys.PUBLIC_KEY, chain = Chain.offchain)),
-    useStaticKey = false,
     deviceKeyInfo = DeviceKeyInfo(
         "", false, null
     ),
-    shardingPolicy = null
+    shardingPolicy = null,
+    canAddSigners = true
 )
 
 class ExampleMnemonicAndKeys {
