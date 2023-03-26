@@ -1,13 +1,13 @@
 package com.censocustody.android.data.models
 
-data class ShardDatum(
+data class ShardCopy(
     val encryptionPublicKey: String,
     val encryptedData: String,
 )
 
 data class Shard(
     val participantId: String,
-    val shardData: List<ShardDatum>,
+    val shardCopies: List<ShardCopy>,
     val shardId: String? = null,
     val parentShardId: String? = null,
 )

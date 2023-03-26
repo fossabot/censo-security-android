@@ -1,14 +1,14 @@
 package com.censocustody.android.data.models
 
-data class ShardingAdminUser(
+data class ShardingParticipant(
     val participantId: String,
     val devicePublicKeys: List<String>
 )
 
 data class ShardingPolicy(
-    val policyRevisionId: String,
+    val policyRevisionGuid: String,
     val threshold: Int,
-    val admins: List<ShardingAdminUser>
+    val participants: List<ShardingParticipant>
 )
 
 data class DeviceKeyInfo(
