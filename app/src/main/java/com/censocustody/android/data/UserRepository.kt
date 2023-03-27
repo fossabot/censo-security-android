@@ -16,6 +16,7 @@ interface UserRepository {
     suspend fun verifyUser(): Resource<VerifyUser>
     suspend fun getWalletSigners(): Resource<List<WalletSigner?>>
     suspend fun addWalletSigner(walletSigners: List<WalletSigner>): Resource<Unit>
+    suspend fun addBootstrapUser(userImage: UserImage, walletSigners: List<WalletSigner>): Resource<Unit>
     suspend fun userLoggedIn(): Boolean
     suspend fun setUserLoggedIn()
     suspend fun logOut(): Boolean
@@ -28,9 +29,13 @@ interface UserRepository {
     suspend fun retrieveUserDeviceId(email: String) : String
     suspend fun saveDeviceId(email: String, deviceId: String)
     suspend fun saveDevicePublicKey(email: String, publicKey: String)
+    suspend fun saveBootstrapDeviceId(email: String, deviceId: String)
+    suspend fun saveBootstrapDevicePublicKey(email: String, publicKey: String)
     suspend fun userHasDeviceIdSaved(email: String) : Boolean
     suspend fun addUserDevice(userDevice: UserDevice) : Resource<Unit>
     suspend fun retrieveUserDevicePublicKey(email: String) : String
+    suspend fun retrieveBootstrapDevicePublicKey(email: String) : String
+    suspend fun clearPreviousDeviceInfo(email: String)
 }
 
 class UserRepositoryImpl(
@@ -40,6 +45,7 @@ class UserRepositoryImpl(
     private val anchorApiService: AnchorApiService,
     private val versionApiService: SemVersionApiService,
     private val encryptionManager: EncryptionManager,
+    private val cryptographyManager: CryptographyManager,
     private val applicationContext: Context
 ) : UserRepository, BaseRepository() {
 
@@ -109,6 +115,54 @@ class UserRepositoryImpl(
         }
     }
 
+    override suspend fun addBootstrapUser(
+        userImage: UserImage,
+        walletSigners: List<WalletSigner>
+    ): Resource<Unit> {
+        val email = retrieveUserEmail()
+
+        val signedDeviceData = encryptionManager.signKeysForUpload(
+            email = email,
+            walletSigners = walletSigners,
+            bootstrapSign = false
+        )
+        val signedBootstrapData = encryptionManager.signKeysForUpload(
+            email = email,
+            walletSigners = walletSigners,
+            bootstrapSign = true
+        )
+
+        val bootstrapPublicKey = retrieveBootstrapDevicePublicKey(email)
+        val devicePublicKey = retrieveUserDevicePublicKey(email)
+
+        val userDevice = UserDevice(
+            userImage = userImage,
+            deviceType = DeviceType.ANDROID,
+            publicKey = devicePublicKey
+        )
+
+        val bootstrapDevice = BootstrapDevice(
+            publicKey = bootstrapPublicKey,
+            signature = BaseWrapper.encodeToBase64(signedBootstrapData)
+        )
+
+        val signers = Signers(
+            signers = walletSigners,
+            signature = BaseWrapper.encodeToBase64(signedDeviceData),
+            share = null
+        )
+
+        return retrieveApiResource {
+            api.addBootstrapUserDeviceAndSigners(
+                userDeviceAndSigners = BootstrapUserDeviceAndSigners(
+                    userDevice = userDevice,
+                    bootstrapDevice = bootstrapDevice,
+                    signersInfo = signers
+                )
+            )
+        }
+    }
+
     override suspend fun retrieveUserEmail(): String {
         return try {
             authProvider.retrieveUserEmail()
@@ -151,9 +205,32 @@ class UserRepositoryImpl(
     override suspend fun userHasDeviceIdSaved(email: String) =
         SharedPrefsHelper.userHasDeviceIdSaved(email)
 
-    override suspend fun retrieveUserDevicePublicKey(email: String): String {
-        return SharedPrefsHelper.retrieveDevicePublicKey(email)
+    override suspend fun retrieveUserDevicePublicKey(email: String) =
+        SharedPrefsHelper.retrieveDevicePublicKey(email)
+
+    override suspend fun retrieveBootstrapDevicePublicKey(email: String) =
+        SharedPrefsHelper.retrieveBootstrapDevicePublicKey(email)
+
+    override suspend fun clearPreviousDeviceInfo(email: String) {
+        if (SharedPrefsHelper.userHasDeviceIdSaved(email)) {
+            val oldDeviceId = SharedPrefsHelper.retrieveDeviceId(email)
+
+            cryptographyManager.deleteKeyIfPresent(oldDeviceId)
+
+            SharedPrefsHelper.clearDeviceId(email)
+            SharedPrefsHelper.clearDevicePublicKey(email)
+        }
+
+        if (SharedPrefsHelper.userHasBootstrapDeviceIdSaved(email)) {
+            val oldBootstrapDeviceId = SharedPrefsHelper.retrieveBootstrapDeviceId(email)
+
+            cryptographyManager.deleteKeyIfPresent(oldBootstrapDeviceId)
+
+            SharedPrefsHelper.clearBootstrapDeviceId(email)
+            SharedPrefsHelper.clearDeviceBootstrapPublicKey(email)
+        }
     }
+
 
     override suspend fun saveDeviceId(email: String, deviceId: String) {
         SharedPrefsHelper.saveDeviceId(email = email, deviceId = deviceId)
@@ -168,5 +245,13 @@ class UserRepositoryImpl(
         return retrieveApiResource {
             api.addUserDevice(userDevice)
         }
+    }
+
+    override suspend fun saveBootstrapDeviceId(email: String, deviceId: String) {
+        SharedPrefsHelper.saveBootstrapDeviceId(email = email, deviceId = deviceId)
+    }
+
+    override suspend fun saveBootstrapDevicePublicKey(email: String, publicKey: String) {
+        SharedPrefsHelper.saveBootstrapDevicePublicKey(email = email, publicKey = publicKey)
     }
 }

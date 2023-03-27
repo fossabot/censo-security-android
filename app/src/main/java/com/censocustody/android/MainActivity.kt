@@ -35,8 +35,10 @@ import com.censocustody.android.presentation.approvals.ApprovalsListScreen
 import com.censocustody.android.presentation.approvals.ApprovalsViewModel
 import com.censocustody.android.presentation.components.OnLifecycleEvent
 import com.censocustody.android.presentation.contact_censo.ContactCensoScreen
+import com.censocustody.android.presentation.device_registration.DeviceRegistrationInitialData
 import com.censocustody.android.presentation.device_registration.DeviceRegistrationScreen
 import com.censocustody.android.presentation.entrance.EntranceScreen
+import com.censocustody.android.presentation.key_creation.KeyCreationInitialData
 import com.censocustody.android.presentation.key_creation.KeyCreationScreen
 import com.censocustody.android.presentation.key_management.KeyManagementInitialData
 import com.censocustody.android.presentation.key_management.KeyManagementScreen
@@ -219,9 +221,13 @@ class MainActivity : FragmentActivity() {
                 )
             }
             composable(
-                route = Screen.KeyCreationRoute.route
-            ) {
-                KeyCreationScreen(navController = navController)
+                route = "${Screen.KeyCreationRoute.route}/{${Screen.KeyCreationRoute.KEY_CREATION_ARG}}",
+                arguments = listOf(navArgument(Screen.KeyCreationRoute.KEY_CREATION_ARG) {
+                    type = NavType.StringType
+                })
+            ) { backStackEntry ->
+                val keyInitialDataArg = backStackEntry.arguments?.getString(Screen.KeyCreationRoute.KEY_CREATION_ARG) as String
+                KeyCreationScreen(navController = navController, initialData = KeyCreationInitialData.fromJson(keyInitialDataArg))
             }
             composable(
                 route = "${Screen.KeyManagementRoute.route}/{${Screen.KeyManagementRoute.KEY_MGMT_ARG}}",
@@ -248,9 +254,17 @@ class MainActivity : FragmentActivity() {
                 ResetPasswordScreen(navController = navController)
             }
             composable(
-                route = Screen.DeviceRegistrationRoute.route
-            ) {
-                DeviceRegistrationScreen(navController = navController)
+                route = "${Screen.DeviceRegistrationRoute.route}/{${Screen.DeviceRegistrationRoute.DEVICE_REG_ARG}}",
+                arguments = listOf(navArgument(Screen.DeviceRegistrationRoute.DEVICE_REG_ARG) {
+                    type = NavType.StringType
+                })
+            ) { backStackEntry ->
+                val deviceInitialDataArg =
+                    backStackEntry.arguments?.getString(Screen.DeviceRegistrationRoute.DEVICE_REG_ARG) as String
+                DeviceRegistrationScreen(
+                    navController = navController,
+                    initialData = DeviceRegistrationInitialData.fromJson(deviceInitialDataArg)
+                )
             }
         }
     }

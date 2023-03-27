@@ -25,6 +25,7 @@ import androidx.navigation.NavController
 import com.censocustody.android.R
 import com.censocustody.android.common.*
 import com.censocustody.android.presentation.Screen
+import com.censocustody.android.presentation.key_creation.KeyCreationInitialData
 import com.censocustody.android.presentation.key_management.BackgroundUI
 import com.censocustody.android.presentation.key_management.SmallAuthFlowButton
 import com.censocustody.android.ui.theme.*
@@ -32,6 +33,7 @@ import com.censocustody.android.ui.theme.*
 @Composable
 fun DeviceRegistrationScreen(
     navController: NavController,
+    initialData: DeviceRegistrationInitialData,
     viewModel: DeviceRegistrationViewModel = hiltViewModel()
 ) {
 
@@ -46,6 +48,7 @@ fun DeviceRegistrationScreen(
     ) = when (deviceRegistrationError) {
         DeviceRegistrationError.NONE -> context.getString(R.string.image_capture_failed_default_message)
         DeviceRegistrationError.API -> context.getString(R.string.device_registration_api_error)
+        DeviceRegistrationError.BOOTSTRAP -> context.getString(R.string.bootstrap_failure)
         DeviceRegistrationError.IMAGE_CAPTURE -> {
             when (imageCaptureError) {
                 ImageCaptureError.NO_HARDWARE_CAMERA ->
@@ -65,7 +68,7 @@ fun DeviceRegistrationScreen(
 
     //region Launched Effects
     DisposableEffect(key1 = viewModel) {
-        viewModel.onStart()
+        viewModel.onStart(initialData)
         onDispose { }
     }
 
@@ -77,6 +80,28 @@ fun DeviceRegistrationScreen(
                 popUpToTop()
             }
             viewModel.resetUserDevice()
+        }
+
+        if (state.createdBootstrapDeviceData is Resource.Success) {
+
+            val keyCreationInitialData = KeyCreationInitialData(
+                verifyUserDetails = state.verifyUserDetails,
+                userImage = state.userImage
+            )
+
+            val keyCreationJson =
+                KeyCreationInitialData.toJson(
+                    keyCreationInitialData,
+                    AndroidUriWrapper()
+                )
+            val route = "${Screen.KeyCreationRoute.route}/$keyCreationJson"
+
+            navController.navigate(route) {
+                launchSingleTop = true
+                popUpToTop()
+            }
+
+            viewModel.resetCreatedBootstrapTrigger()
         }
 
         if (!state.userLoggedIn) {
@@ -113,7 +138,7 @@ fun DeviceRegistrationScreen(
 
             }
             viewModel.resetTriggerImageCapture()
-            viewModel.createKeyForDevice()
+            viewModel.imageCaptured()
         }
     }
 

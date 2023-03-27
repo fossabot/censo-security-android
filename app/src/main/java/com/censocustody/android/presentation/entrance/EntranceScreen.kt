@@ -23,6 +23,8 @@ import com.censocustody.android.presentation.key_management.KeyManagementFlow
 import com.censocustody.android.presentation.key_management.KeyManagementInitialData
 import com.censocustody.android.ui.theme.BackgroundWhite
 import com.censocustody.android.R
+import com.censocustody.android.presentation.device_registration.DeviceRegistrationInitialData
+import com.censocustody.android.presentation.key_creation.KeyCreationInitialData
 import com.censocustody.android.ui.theme.ButtonRed
 
 @Composable
@@ -42,7 +44,18 @@ fun EntranceScreen(
             val userDestinationRoute = when (state.userDestinationResult.data) {
                 UserDestination.HOME -> Screen.ApprovalListRoute.route
                 UserDestination.UPLOAD_KEYS -> Screen.KeyCreationRoute.route
-                UserDestination.KEY_MANAGEMENT_CREATION -> Screen.KeyCreationRoute.route
+                UserDestination.KEY_MANAGEMENT_CREATION -> {
+                    val keyCreationInitialData = KeyCreationInitialData(
+                        verifyUserDetails = state.verifyUserResult.data,
+                    )
+
+                    val keyCreationJson =
+                        KeyCreationInitialData.toJson(
+                            keyCreationInitialData,
+                            AndroidUriWrapper()
+                        )
+                    "${Screen.KeyCreationRoute.route}/$keyCreationJson"
+                }
                 UserDestination.KEY_MANAGEMENT_RECOVERY -> {
 
                     val flow = when (state.userDestinationResult.data) {
@@ -63,7 +76,18 @@ fun EntranceScreen(
                         )
                     "${Screen.KeyManagementRoute.route}/$keyManagementJson"
                 }
-                UserDestination.DEVICE_REGISTRATION -> Screen.DeviceRegistrationRoute.route
+                UserDestination.DEVICE_REGISTRATION -> {
+                    val deviceRegistrationInitialData = DeviceRegistrationInitialData(
+                        verifyUserDetails = state.verifyUserResult.data,
+                    )
+
+                    val deviceRegistrationJson =
+                        DeviceRegistrationInitialData.toJson(
+                            deviceRegistrationInitialData,
+                            AndroidUriWrapper()
+                        )
+                    "${Screen.DeviceRegistrationRoute.route}/$deviceRegistrationJson"
+                }
                 UserDestination.FORCE_UPDATE -> Screen.EnforceUpdateRoute.route
                 UserDestination.INVALID_KEY -> Screen.ContactCensoRoute.route
                 UserDestination.LOGIN, null -> Screen.SignInRoute.route
