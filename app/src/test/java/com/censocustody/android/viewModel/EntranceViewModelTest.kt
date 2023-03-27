@@ -68,15 +68,18 @@ class EntranceViewModelTest : BaseViewModelTest() {
     val devicePublicKey = "G4JuLGBbyGAS5nAhDdfNX2LbckBAmCnKMB9xTdZfQS7n"
 
     private val exampleShardingPolicy = ShardingPolicy(
-        policyRevisionId = UUID.randomUUID().toString(),
+        policyRevisionGuid = UUID.randomUUID().toString(),
         threshold = 3,
-        admins = listOf("1", "2", "3")
+        participants = listOf(
+            ShardingParticipant(participantId = "1", devicePublicKeys = listOf("4", "5", "6")),
+            ShardingParticipant(participantId = "2", devicePublicKeys = listOf("7", "8", "9")),
+            ShardingParticipant(participantId = "3", devicePublicKeys = listOf("10", "11", "12")),
+        )
     )
 
     private val basicVerifyUserWithNoPublicKeys = VerifyUser(
         fullName = "Jason Jasonson",
         hasApprovalPermission = true,
-        useStaticKey = true,
         id = "09876564534",
         loginName = "jasonson",
         organization = Organization(id = "0987659876", name = "Main Company"),
@@ -84,7 +87,8 @@ class EntranceViewModelTest : BaseViewModelTest() {
         deviceKeyInfo = DeviceKeyInfo(
             devicePublicKey, true, null
         ),
-        shardingPolicy = exampleShardingPolicy
+        shardingPolicy = exampleShardingPolicy,
+        canAddSigners = true
     )
 
     private val validSolanaPublicKey = WalletPublicKey(

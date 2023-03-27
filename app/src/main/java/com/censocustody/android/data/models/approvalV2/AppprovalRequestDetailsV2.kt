@@ -6,6 +6,7 @@ import com.censocustody.android.common.UriWrapper
 import com.censocustody.android.common.evm.EvmAddress
 import com.censocustody.android.data.models.Chain
 import com.censocustody.android.data.models.DeviceType
+import com.censocustody.android.data.models.ShardingPolicy
 import com.censocustody.android.data.models.approval.*
 import com.censocustody.android.data.models.approvalV2.ApprovalSignature.Companion.approvalSignatureAdapterFactory
 import com.censocustody.android.data.models.approvalV2.ApprovalRequestDetailsV2.EvmTokenInfo.Companion.evmTokenInfoAdapterFactory
@@ -145,14 +146,22 @@ sealed class ApprovalRequestDetailsV2 {
         val jpegThumbnail: String,
         val deviceGuid: String,
         val deviceKey: String,
-        val deviceType: DeviceType
+        val deviceType: DeviceType,
+        val currentShardingPolicyRevisionGuid: String?,
+        val targetShardingPolicy: ShardingPolicy?
     ) : ApprovalRequestDetailsV2()
+
+    data class ShardingPolicyChangeInfo(
+        val currentPolicyRevisionGuid: String,
+        val targetPolicy: ShardingPolicy
+    )
 
     data class OrgAdminPolicyUpdate(
         val approvalPolicy: VaultApprovalPolicy,
         val currentOnChainPolicies: List<OnChainPolicy>,
         val signingData: List<SigningData>,
         val chainFees: List<ChainFee>,
+        val shardingPolicyChangeInfo: ShardingPolicyChangeInfo
     ) : ApprovalRequestDetailsV2()
 
     data class VaultCreation(
