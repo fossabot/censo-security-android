@@ -34,8 +34,8 @@ interface UserRepository {
     suspend fun userHasDeviceIdSaved(email: String) : Boolean
     suspend fun addUserDevice(userDevice: UserDevice) : Resource<Unit>
     suspend fun retrieveUserDevicePublicKey(email: String) : String
-
     suspend fun retrieveBootstrapDevicePublicKey(email: String) : String
+    suspend fun clearPreviousDeviceInfo(email: String)
 }
 
 class UserRepositoryImpl(
@@ -45,6 +45,7 @@ class UserRepositoryImpl(
     private val anchorApiService: AnchorApiService,
     private val versionApiService: SemVersionApiService,
     private val encryptionManager: EncryptionManager,
+    private val cryptographyManager: CryptographyManager,
     private val applicationContext: Context
 ) : UserRepository, BaseRepository() {
 
@@ -209,6 +210,26 @@ class UserRepositoryImpl(
 
     override suspend fun retrieveBootstrapDevicePublicKey(email: String) =
         SharedPrefsHelper.retrieveBootstrapDevicePublicKey(email)
+
+    override suspend fun clearPreviousDeviceInfo(email: String) {
+        if (SharedPrefsHelper.userHasDeviceIdSaved(email)) {
+            val oldDeviceId = SharedPrefsHelper.retrieveDeviceId(email)
+
+            cryptographyManager.deleteKeyIfPresent(oldDeviceId)
+
+            SharedPrefsHelper.clearDeviceId(email)
+            SharedPrefsHelper.clearDevicePublicKey(email)
+        }
+
+        if (SharedPrefsHelper.userHasBootstrapDeviceIdSaved(email)) {
+            val oldBootstrapDeviceId = SharedPrefsHelper.retrieveBootstrapDeviceId(email)
+
+            cryptographyManager.deleteKeyIfPresent(oldBootstrapDeviceId)
+
+            SharedPrefsHelper.clearBootstrapDeviceId(email)
+            SharedPrefsHelper.clearDeviceBootstrapPublicKey(email)
+        }
+    }
 
 
     override suspend fun saveDeviceId(email: String, deviceId: String) {

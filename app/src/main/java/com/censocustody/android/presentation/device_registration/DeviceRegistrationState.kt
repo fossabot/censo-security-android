@@ -45,7 +45,7 @@ data class DeviceRegistrationState(
 
 
 enum class DeviceRegistrationError {
-    NONE, API, IMAGE_CAPTURE, SIGNING_IMAGE, BIOMETRY
+    NONE, API, IMAGE_CAPTURE, SIGNING_IMAGE, BIOMETRY, BOOTSTRAP
 }
 
 data class DeviceRegistrationInitialData(

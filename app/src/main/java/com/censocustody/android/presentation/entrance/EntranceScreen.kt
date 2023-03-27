@@ -47,7 +47,6 @@ fun EntranceScreen(
                 UserDestination.KEY_MANAGEMENT_CREATION -> {
                     val keyCreationInitialData = KeyCreationInitialData(
                         verifyUserDetails = state.verifyUserResult.data,
-                        userImage = null
                     )
 
                     val keyCreationJson =

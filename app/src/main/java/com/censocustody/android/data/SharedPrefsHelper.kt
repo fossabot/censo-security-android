@@ -21,7 +21,7 @@ object SharedPrefsHelper {
     private const val BGRD_CIPHER_TEXT = "_bgrd_cipher_text"
 
     //Bootstrap Device Data Storage
-    private const val BOOTSTRAP_DEVICE_ID = "bootstrap_device_id"
+    private const val BOOTSTRAP_DEVICE_ID = "_bootstrap_device_id"
     private const val BOOTSTRAP_DEVICE_PUBLIC_KEY = "_bootstrap_device_public_key"
 
     //V3 Key Storage

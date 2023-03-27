@@ -23,9 +23,10 @@ data class KeyCreationState(
     val userImage: UserImage? = null,
 )
 
+//If user image is filled in, then we are setting up bootstrap user
 data class KeyCreationInitialData(
     val verifyUserDetails: VerifyUser?,
-    val userImage: UserImage?
+    val userImage: UserImage? = null
 ) {
     companion object {
         fun toJson(

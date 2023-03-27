@@ -162,6 +162,9 @@ class DeviceRegistrationViewModel @Inject constructor(
                     //Save device id and device key
                     val email = userRepository.retrieveUserEmail()
 
+                    //in case user was unable to upload previous keys, they will need to redo device image work
+                    userRepository.clearPreviousDeviceInfo(email)
+
                     userRepository.saveDeviceId(email = email, deviceId = keyName)
                     userRepository.saveDevicePublicKey(email = email, publicKey = state.standardPublicKey)
                     userRepository.saveBootstrapDeviceId(email = email, deviceId = state.bootstrapKeyName)
@@ -182,7 +185,7 @@ class DeviceRegistrationViewModel @Inject constructor(
             } catch (e: Exception) {
                 state = state.copy(
                     addUserDevice = Resource.Error(exception = e),
-                    deviceRegistrationError = DeviceRegistrationError.SIGNING_IMAGE,
+                    deviceRegistrationError = DeviceRegistrationError.BOOTSTRAP,
                     capturingDeviceKey = Resource.Uninitialized
                 )
             }

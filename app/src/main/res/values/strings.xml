@@ -244,4 +244,5 @@
     <string name="unable_process_image">Unable to process image, please retake image.</string>
     <string name="wallet">Wallet</string>
     <string name="login_with_password">Use Password</string>
+    <string name="bootstrap_failure">Failed to create initial user information. Please try again.</string>
 </resources>

@@ -48,6 +48,7 @@ fun DeviceRegistrationScreen(
     ) = when (deviceRegistrationError) {
         DeviceRegistrationError.NONE -> context.getString(R.string.image_capture_failed_default_message)
         DeviceRegistrationError.API -> context.getString(R.string.device_registration_api_error)
+        DeviceRegistrationError.BOOTSTRAP -> context.getString(R.string.bootstrap_failure)
         DeviceRegistrationError.IMAGE_CAPTURE -> {
             when (imageCaptureError) {
                 ImageCaptureError.NO_HARDWARE_CAMERA ->
