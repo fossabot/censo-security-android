@@ -14,6 +14,7 @@ import java.math.BigInteger
 import javax.inject.Inject
 
 import java.security.PrivateKey
+import java.util.UUID
 
 data class SignedPayload(
     val signature: String,
@@ -45,6 +46,8 @@ interface EncryptionManager {
         email: String,
         dataToSign: List<SignableDataResult>
     ): List<ApprovalSignature>
+
+    fun createShareForBootstrapUser(email: String, rootSeed: ByteArray) : Share
     //endregion
 
     //region generic key work
@@ -211,13 +214,35 @@ class EncryptionManagerImpl @Inject constructor(
         )
     }
 
-    fun createShare(shardingPolicy: ShardingPolicy, rootSeed: ByteArray): Share {
+    override fun createShareForBootstrapUser(email: String, rootSeed: ByteArray) : Share {
+        val devicePublicKey = SharedPrefsHelper.retrieveDevicePublicKey(email)
+        val bootstrapDevicePublicKey = SharedPrefsHelper.retrieveBootstrapDevicePublicKey(email)
+
+        val deviceShardingParticipant = ShardingParticipant(
+            participantId = devicePublicKey.toParticipantIdAsHexString(),
+            devicePublicKeys = listOf(devicePublicKey)
+        )
+
+        val bootstrapShardingParticipant = ShardingParticipant(
+            participantId = bootstrapDevicePublicKey.toParticipantIdAsHexString(),
+            devicePublicKeys = listOf(bootstrapDevicePublicKey)
+        )
+
+        val shardingPolicy = ShardingPolicy(
+            policyRevisionGuid = UUID.randomUUID().toString(),
+            threshold = 2,
+            participants = listOf(deviceShardingParticipant, bootstrapShardingParticipant)
+        )
+
+        return createShare(shardingPolicy = shardingPolicy, rootSeed = rootSeed)
+    }
+
+    private fun createShare(shardingPolicy: ShardingPolicy, rootSeed: ByteArray): Share {
 
         val participantIdToAdminUserMap = shardingPolicy.participants.associateBy {
             BigInteger(it.participantId, 16)
         }
 
-        //todo: what encoding should I do with this root seed
         val secretSharer = SecretSharer(
             secret = BigInteger(BaseWrapper.encodeToBase64(rootSeed), 16),
             threshold = shardingPolicy.threshold,
