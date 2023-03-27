@@ -49,6 +49,7 @@ object AppModule {
         securePreferences: SecurePreferences,
         semVersionApiService: SemVersionApiService,
         encryptionManager: EncryptionManager,
+        cryptographyManager: CryptographyManager,
         @ApplicationContext applicationContext: Context
     ): UserRepository {
         return UserRepositoryImpl(
@@ -58,6 +59,7 @@ object AppModule {
             securePreferences = securePreferences,
             versionApiService = semVersionApiService,
             applicationContext = applicationContext,
+            cryptographyManager = cryptographyManager,
             encryptionManager = encryptionManager
         )
     }

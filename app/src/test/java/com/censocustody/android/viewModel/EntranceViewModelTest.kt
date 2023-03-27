@@ -27,6 +27,7 @@ import org.junit.Before
 import org.junit.Test
 import org.mockito.Mock
 import org.mockito.MockitoAnnotations
+import java.util.UUID
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class EntranceViewModelTest : BaseViewModelTest() {
@@ -66,6 +67,12 @@ class EntranceViewModelTest : BaseViewModelTest() {
     val deviceId = "9786545254367"
     val devicePublicKey = "G4JuLGBbyGAS5nAhDdfNX2LbckBAmCnKMB9xTdZfQS7n"
 
+    private val exampleShardingPolicy = ShardingPolicy(
+        policyRevisionId = UUID.randomUUID().toString(),
+        threshold = 3,
+        admins = listOf("1", "2", "3")
+    )
+
     private val basicVerifyUserWithNoPublicKeys = VerifyUser(
         fullName = "Jason Jasonson",
         hasApprovalPermission = true,
@@ -77,7 +84,7 @@ class EntranceViewModelTest : BaseViewModelTest() {
         deviceKeyInfo = DeviceKeyInfo(
             devicePublicKey, true, null
         ),
-        shardingPolicy = null
+        shardingPolicy = exampleShardingPolicy
     )
 
     private val validSolanaPublicKey = WalletPublicKey(
@@ -207,6 +214,31 @@ class EntranceViewModelTest : BaseViewModelTest() {
 
             assertTrue(entranceViewModel.state.userDestinationResult is Resource.Success)
             assertTrue(entranceViewModel.state.userDestinationResult.data == UserDestination.KEY_MANAGEMENT_CREATION)
+        }
+
+    @Test
+    fun `if no key is present locally or on backend and no sharding policy then send user to device registration`() =
+        runTest {
+            setupLoggedInUserWithValidEmail()
+            setupUserWithDeviceIdAndPublicKey()
+
+            val verifyUserWithNoShardingPolicy =
+                basicVerifyUserWithNoPublicKeys.copy(shardingPolicy = null)
+
+            whenever(userRepository.verifyUser()).then {
+                Resource.Success(verifyUserWithNoShardingPolicy)
+            }
+
+            whenever(keyRepository.hasV3RootSeedStored()).then { false }
+
+            entranceViewModel.onStart()
+            advanceUntilIdle()
+
+            verify(censoUserData, times(1))
+                .setCensoUser(verifyUserWithNoShardingPolicy)
+
+            assertTrue(entranceViewModel.state.userDestinationResult is Resource.Success)
+            assertTrue(entranceViewModel.state.userDestinationResult.data == UserDestination.DEVICE_REGISTRATION)
         }
 
     @Test

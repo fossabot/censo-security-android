@@ -136,6 +136,7 @@ android {
         warningsAsErrors true
         disable 'GradleDependency'
     }
+    namespace 'com.censocustody.android'
 }
 
 dependencies {
