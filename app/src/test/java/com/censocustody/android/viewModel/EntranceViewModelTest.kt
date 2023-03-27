@@ -68,12 +68,12 @@ class EntranceViewModelTest : BaseViewModelTest() {
     val devicePublicKey = "G4JuLGBbyGAS5nAhDdfNX2LbckBAmCnKMB9xTdZfQS7n"
 
     private val exampleShardingPolicy = ShardingPolicy(
-        policyRevisionId = UUID.randomUUID().toString(),
+        policyRevisionGuid = UUID.randomUUID().toString(),
         threshold = 3,
-        admins = listOf(
-            ShardingAdminUser(participantId = "1", devicePublicKeys = listOf("4", "5", "6")),
-            ShardingAdminUser(participantId = "2", devicePublicKeys = listOf("7", "8", "9")),
-            ShardingAdminUser(participantId = "3", devicePublicKeys = listOf("10", "11", "12")),
+        participants = listOf(
+            ShardingParticipant(participantId = "1", devicePublicKeys = listOf("4", "5", "6")),
+            ShardingParticipant(participantId = "2", devicePublicKeys = listOf("7", "8", "9")),
+            ShardingParticipant(participantId = "3", devicePublicKeys = listOf("10", "11", "12")),
         )
     )
 
