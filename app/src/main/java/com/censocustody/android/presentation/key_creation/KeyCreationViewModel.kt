@@ -90,10 +90,16 @@ class KeyCreationViewModel @Inject constructor(
     }
 
     private suspend fun uploadBootStrapData(userImage: UserImage) {
+        val phrase = state.keyGeneratedPhrase ?: throw Exception("Missing Phrase")
+
+        Mnemonics.MnemonicCode(phrase = phrase).toSeed()
+
         val walletSigners = state.walletSigners
 
         val bootStrapResource = userRepository.addBootstrapUser(
-            userImage = userImage, walletSigners = walletSigners
+            userImage = userImage,
+            walletSigners = walletSigners,
+            rootSeed = Mnemonics.MnemonicCode(phrase = phrase).toSeed()
         )
 
         state = state.copy(uploadingKeyProcess = bootStrapResource)

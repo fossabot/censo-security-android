@@ -16,7 +16,7 @@ interface UserRepository {
     suspend fun verifyUser(): Resource<VerifyUser>
     suspend fun getWalletSigners(): Resource<List<WalletSigner?>>
     suspend fun addWalletSigner(walletSigners: List<WalletSigner>): Resource<Unit>
-    suspend fun addBootstrapUser(userImage: UserImage, walletSigners: List<WalletSigner>): Resource<Unit>
+    suspend fun addBootstrapUser(userImage: UserImage, walletSigners: List<WalletSigner>, rootSeed: ByteArray): Resource<Unit>
     suspend fun userLoggedIn(): Boolean
     suspend fun setUserLoggedIn()
     suspend fun logOut(): Boolean
@@ -117,7 +117,8 @@ class UserRepositoryImpl(
 
     override suspend fun addBootstrapUser(
         userImage: UserImage,
-        walletSigners: List<WalletSigner>
+        walletSigners: List<WalletSigner>,
+        rootSeed: ByteArray
     ): Resource<Unit> {
         val email = retrieveUserEmail()
 
@@ -146,10 +147,15 @@ class UserRepositoryImpl(
             signature = BaseWrapper.encodeToBase64(signedBootstrapData)
         )
 
+        val share = encryptionManager.createShareForBootstrapUser(
+            email = email,
+            rootSeed = rootSeed
+        )
+
         val signers = Signers(
             signers = walletSigners,
             signature = BaseWrapper.encodeToBase64(signedDeviceData),
-            share = null
+            share = share
         )
 
         return retrieveApiResource {
