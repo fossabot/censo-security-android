@@ -1,6 +1,5 @@
 package com.censocustody.android.data.models.approvalV2
 
-import androidx.biometric.BiometricPrompt
 import com.censocustody.android.common.BaseWrapper.decodeFromBase64
 import com.censocustody.android.common.evm.EvmDestination
 import com.censocustody.android.common.evm.EvmTransactionUtil
@@ -9,6 +8,8 @@ import com.censocustody.android.common.evm.SafeTx
 import com.censocustody.android.data.*
 import com.censocustody.android.data.models.ApprovalDisposition
 import com.censocustody.android.data.models.Chain
+import com.censocustody.android.data.models.RecoveryShard
+import com.censocustody.android.data.models.Shard
 import com.censocustody.android.data.models.evm.EvmConfigTransactionBuilder
 import org.web3j.crypto.Hash
 import kotlin.Exception
@@ -347,6 +348,8 @@ data class ApprovalDispositionRequestV2(
 
     inner class RegisterApprovalDispositionV2Body(
         val approvalDisposition: ApprovalDisposition,
-        val signatures: List<ApprovalSignature>
+        val signatures: List<ApprovalSignature>,
+        val shards: List<Shard>? = null,
+        val recoveryShards: List<RecoveryShard>? = null
     )
 }

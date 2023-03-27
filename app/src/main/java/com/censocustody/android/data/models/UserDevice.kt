@@ -5,7 +5,8 @@ import com.google.gson.annotations.SerializedName
 data class UserDevice(
     val publicKey: String,
     val deviceType: DeviceType,
-    val userImage: UserImage
+    val userImage: UserImage,
+    val replacingDeviceIdentifier: String? = null,
 )
 
 enum class DeviceType(val value: String) {

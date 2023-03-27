@@ -114,6 +114,17 @@ interface BrooklynApiService {
         @Path("request_id") requestId: String,
         @Body registerApprovalDispositionBody: ApprovalDispositionRequestV2.RegisterApprovalDispositionV2Body
     ): RetrofitResponse<ApprovalDispositionRequestV2.RegisterApprovalDispositionV2Body>
+
+    @GET("v1/shards")
+    @Headers(AUTH_REQUIRED)
+    suspend fun getShards(
+        @Query("policy-revision-id") policyRevisionId: String,
+        @Query("user-id") userId: String? = null,
+    ): RetrofitResponse<GetShardsResponse>
+
+    @GET("v1/recovery-shards")
+    @Headers(AUTH_REQUIRED)
+    suspend fun getRecoveryShards(): RetrofitResponse<GetRecoveryShardsResponse>
 }
 
 class AnalyticsInterceptor : Interceptor {
