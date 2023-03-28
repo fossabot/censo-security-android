@@ -112,12 +112,13 @@ class UserRepositoryImpl(
     override suspend fun addWalletSigner(
         walletSigners: List<WalletSigner>,
         policy: ShardingPolicy,
-        rootSeed: ByteArray): Resource<Unit> {
+        rootSeed: ByteArray
+    ): Resource<Unit> {
         val email = retrieveUserEmail()
         val signedData = encryptionManager.signKeysForUpload(email, walletSigners)
 
-        val share = encryptionManager.createShareForStandardUser(
-            policy = policy,
+        val share = encryptionManager.createShare(
+            shardingPolicy = policy,
             rootSeed = rootSeed
         )
 
@@ -126,7 +127,8 @@ class UserRepositoryImpl(
                 Signers(
                     signers = walletSigners,
                     signature = BaseWrapper.encodeToBase64(signedData),
-                    share = null)
+                    share = share,
+                )
             )
         }
     }
