@@ -244,7 +244,7 @@ class EncryptionManagerImpl @Inject constructor(
         }
 
         val secretSharer = SecretSharer(
-            secret = BigInteger(BaseWrapper.encodeToBase64(rootSeed), 16),
+            secret = BigInteger(rootSeed.toHexString(), 16),
             threshold = shardingPolicy.threshold,
             participants = participantIdToAdminUserMap.keys.toList()
         )
