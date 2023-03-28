@@ -28,6 +28,7 @@
     <string name="approve">Approve</string>
     <string name="deny">Deny</string>
     <string name="more_info">More Info…</string>
+    <string name="user_info">User Info</string>
 
     <string name="vault_user_roles">User Roles</string>
     <string name="vault_user_role_viewer">Viewer</string>
@@ -85,6 +86,8 @@
     <string name="vault_policy_creation_approval_header">Create Vault</string>
     <string name="vault_policy_update_approval_header">Update Vault Policy</string>
     <string name="add_new_device_approval_header">Add New Device</string>
+    <string name="suspend_user">Suspend User</string>
+    <string name="restore_user">Restore User</string>
     <string name="unknown_approval_header">Unknown</string>
 
     <string name="withdrawal_request_approval_header">Send %1$s %2$s</string>

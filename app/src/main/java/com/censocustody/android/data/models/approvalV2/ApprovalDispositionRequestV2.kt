@@ -45,7 +45,9 @@ data class ApprovalDispositionRequestV2(
             is ApprovalRequestDetailsV2.DeleteAddressBookEntry,
             is ApprovalRequestDetailsV2.AddDevice,
             is ApprovalRequestDetailsV2.OrgNameUpdate,
-            is ApprovalRequestDetailsV2.VaultUserRolesUpdate -> {
+            is ApprovalRequestDetailsV2.VaultUserRolesUpdate,
+            is ApprovalRequestDetailsV2.SuspendUser,
+            is ApprovalRequestDetailsV2.RestoreUser -> {
                 val dataToSend = requestType.toJson().toByteArray()
                 listOf(SignableDataResult.Offchain(
                     dataToSend = dataToSend,

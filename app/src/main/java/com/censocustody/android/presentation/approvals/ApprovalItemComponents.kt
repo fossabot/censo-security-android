@@ -298,6 +298,14 @@ fun ApprovalRowContent(
             VaultUserRolesUpdateRowContent(header = type.getHeader(LocalContext.current), type.vaultName)
         }
 
+        is ApprovalRequestDetailsV2.SuspendUser -> {
+            SuspendUserRowContent(header = type.getHeader(LocalContext.current), type.name)
+        }
+
+        is ApprovalRequestDetailsV2.RestoreUser -> {
+            RestoreUserRowContent(header = type.getHeader(LocalContext.current), type.name)
+        }
+
         //Unknown
         ApprovalRequestDetailsV2.UnknownApprovalType -> {
             Text(text = type.getHeader(LocalContext.current), color = TextBlack)
@@ -460,6 +468,14 @@ fun ApprovalDetailContent(approval: ApprovalRequestV2, type: ApprovalRequestDeta
 
         is ApprovalRequestDetailsV2.VaultUserRolesUpdate -> {
             VaultUserRolesUpdateDetailContent(update = type)
+        }
+
+        is ApprovalRequestDetailsV2.SuspendUser -> {
+            SuspendUserDetailContent(details = type)
+        }
+
+        is ApprovalRequestDetailsV2.RestoreUser -> {
+            RestoreUserDetailContent(details = type)
         }
 
         //Unknown
