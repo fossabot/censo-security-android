@@ -129,6 +129,10 @@ sealed class ApprovalRequestDetailsV2 {
             PasswordReset::class.java, "PasswordReset"
         ).registerSubtype(
             Login::class.java, "Login"
+        ).registerSubtype(
+            SuspendUser::class.java, "SuspendUser"
+        ).registerSubtype(
+            RestoreUser::class.java, "RestoreUser"
         )
     }
 
@@ -370,6 +374,18 @@ sealed class ApprovalRequestDetailsV2 {
     ) : ApprovalRequestDetailsV2()
 
     object PasswordReset : ApprovalRequestDetailsV2()
+
+    data class SuspendUser(
+        val name: String,
+        val email: String,
+        val jpegThumbnail: String?
+    ) : ApprovalRequestDetailsV2()
+
+    data class RestoreUser(
+        val name: String,
+        val email: String,
+        val jpegThumbnail: String?
+    ) : ApprovalRequestDetailsV2()
 
     data class Signer(
         val name: String,
