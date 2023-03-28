@@ -125,12 +125,11 @@ class EntranceViewModelTest : BaseViewModelTest() {
             )
         )
 
-    private val basicVerifyUserWithOnlySolanaPublicKey =
-        basicVerifyUserWithNoPublicKeys.copy(
-            publicKeys = listOf(
-                validSolanaPublicKey,
-            )
-        )
+    private val basicVerifyUserWithNoPublicKeysNotReadyToBeAdded =
+        basicVerifyUserWithNoPublicKeys.copy(canAddSigners = false)
+
+    private val basicVerifyUserWithValidPublicKeysNotReadyToBeAdded =
+        basicVerifyUserWithValidPublicKey.copy(canAddSigners = false)
 
     @Before
     fun setup() = runTest {
@@ -221,6 +220,28 @@ class EntranceViewModelTest : BaseViewModelTest() {
         }
 
     @Test
+    fun `if no key is present locally or on backend but can add signers is false then send user to pending approval`() =
+        runTest {
+            setupLoggedInUserWithValidEmail()
+            setupUserWithDeviceIdAndPublicKey()
+
+            whenever(userRepository.verifyUser()).then {
+                Resource.Success(basicVerifyUserWithNoPublicKeysNotReadyToBeAdded)
+            }
+
+            whenever(keyRepository.hasV3RootSeedStored()).then { false }
+
+            entranceViewModel.onStart()
+            advanceUntilIdle()
+
+            verify(censoUserData, times(1))
+                .setCensoUser(basicVerifyUserWithNoPublicKeysNotReadyToBeAdded)
+
+            assertTrue(entranceViewModel.state.userDestinationResult is Resource.Success)
+            assertTrue(entranceViewModel.state.userDestinationResult.data == UserDestination.PENDING_APPROVAL)
+        }
+
+    @Test
     fun `if no key is present locally or on backend and no sharding policy then send user to device registration`() =
         runTest {
             setupLoggedInUserWithValidEmail()
@@ -287,6 +308,28 @@ class EntranceViewModelTest : BaseViewModelTest() {
 
             assertTrue(entranceViewModel.state.userDestinationResult is Resource.Success)
             assertTrue(entranceViewModel.state.userDestinationResult.data == UserDestination.KEY_MANAGEMENT_RECOVERY)
+        }
+
+    @Test
+    fun `if no key is present locally but a key is present on backend but signers cannot be added then send user to key pending approval`() =
+        runTest {
+            setupLoggedInUserWithValidEmail()
+            setupUserWithDeviceIdAndPublicKey()
+
+            whenever(userRepository.verifyUser()).then {
+                Resource.Success(basicVerifyUserWithValidPublicKeysNotReadyToBeAdded)
+            }
+
+            whenever(keyRepository.hasV3RootSeedStored()).then { false }
+
+            entranceViewModel.onStart()
+            advanceUntilIdle()
+
+            verify(censoUserData, times(1))
+                .setCensoUser(basicVerifyUserWithValidPublicKeysNotReadyToBeAdded)
+
+            assertTrue(entranceViewModel.state.userDestinationResult is Resource.Success)
+            assertTrue(entranceViewModel.state.userDestinationResult.data == UserDestination.PENDING_APPROVAL)
         }
 
     @Test
