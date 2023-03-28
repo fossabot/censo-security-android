@@ -13,7 +13,6 @@ import java.security.spec.ECGenParameterSpec
 import java.security.spec.ECParameterSpec
 import java.security.spec.ECPoint
 import java.security.spec.ECPublicKeySpec
-import java.security.MessageDigest
 
 data class Point(val x: BigInteger, val y: BigInteger) {
     constructor(x: String, y: String) : this(BigInteger(x), BigInteger(y))
@@ -205,16 +204,11 @@ class SecretSharer(val secret: BigInteger, val threshold: Int, val participants:
     }
 }
 
-fun String.toParticipantIdAsBigInteger() = BigInteger(1, EcdsaUtils.getCompressedKeyBytesFromBase58(this, EcdsaUtils.r1Curve))
-
-fun String.toParticipantIdAsHexString() = toParticipantIdAsBigInteger().toByteArrayNoSign(32).toHexString().lowercase()
-
 object EcdsaUtils {
     const val curve = "secp256k1"
     const val r1Curve = "prime256v1"
 
-    private val Algorithm = "SHA256withECDSA"
-    private val keyLength = 64
+    private const val keyLength = 64
     private val bcProvider = BouncyCastleProvider()
 
     fun getCompressedKeyBytesFromBase58(base58Key: String, curveName: String): ByteArray {
@@ -227,7 +221,7 @@ object EcdsaUtils {
         }
     }
 
-    fun getECPublicKey(hexKey: String, curveName: String): ECPublicKey {
+    private fun getECPublicKey(hexKey: String, curveName: String): ECPublicKey {
         // create a public key using the provided hex string and curve name
         val bytes = Hex.decode(hexKey)
         val startingOffset = if (bytes.size == keyLength + 1 && bytes[0].compareTo(4) == 0) 1 else 0
@@ -243,10 +237,6 @@ object EcdsaUtils {
         return KeyFactory.getInstance("EC", bcProvider).generatePublic(pubECSpec) as ECPublicKey
     }
 
-    fun sha256(input: ByteArray): ByteArray {
-        return MessageDigest.getInstance("SHA-256").digest(input)
-    }
-
     fun getECPublicKeyFromBase58(base58Key: String, curveName: String): ECPublicKey {
         val bytes = Base58.decode(base58Key)
         return if (bytes.size == 33 || bytes.size == 32) {
@@ -256,16 +246,9 @@ object EcdsaUtils {
         }
     }
 
-    fun getECPublicKeyFromCompressedBytes(hexKey: String, curveName: String): ECPublicKey {
+    private fun getECPublicKeyFromCompressedBytes(hexKey: String, curveName: String): ECPublicKey {
         val spec = ECNamedCurveTable.getParameterSpec(curveName)
         val pubPoint = spec.curve.decodePoint(Hex.decode(hexKey))
         return getECPublicKey(pubPoint.getEncoded(false).toHexString(), curveName)
     }
-}
-
-fun BigInteger.toByteArrayNoSign(): ByteArray {
-    val byteArray = this.toByteArray()
-    return if (byteArray[0].compareTo(0) == 0) {
-        byteArray.slice(IntRange(1, byteArray.size - 1)).toByteArray()
-    } else byteArray
 }
