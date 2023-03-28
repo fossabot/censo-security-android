@@ -1,7 +1,18 @@
 package com.censocustody.android.common
 
 import com.censocustody.android.common.SecretSharerUtils.dotProduct
+import org.bitcoinj.core.Base58
+import org.bouncycastle.jce.ECNamedCurveTable
 import java.math.BigInteger
+import org.bouncycastle.jce.interfaces.ECPublicKey
+import org.bouncycastle.jce.provider.BouncyCastleProvider
+import org.bouncycastle.util.encoders.Hex
+import java.security.AlgorithmParameters
+import java.security.KeyFactory
+import java.security.spec.ECGenParameterSpec
+import java.security.spec.ECParameterSpec
+import java.security.spec.ECPoint
+import java.security.spec.ECPublicKeySpec
 
 data class Point(val x: BigInteger, val y: BigInteger) {
     constructor(x: String, y: String) : this(BigInteger(x), BigInteger(y))
