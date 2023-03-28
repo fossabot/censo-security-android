@@ -4,18 +4,17 @@ import cash.z.ecc.android.bip39.Mnemonics
 import com.censocustody.android.common.*
 import com.censocustody.android.common.BaseWrapper
 import com.censocustody.android.data.EncryptionManagerImpl.Companion.DATA_CHECK
-import com.censocustody.android.data.models.StoredKeyData
+import com.censocustody.android.data.models.*
 import com.censocustody.android.data.models.StoredKeyData.Companion.BITCOIN_KEY
 import com.censocustody.android.data.models.StoredKeyData.Companion.OFFCHAIN_KEY
 import com.censocustody.android.data.models.StoredKeyData.Companion.ETHEREUM_KEY
-import com.censocustody.android.data.models.Signers
-import com.censocustody.android.data.models.WalletSigner
 import com.censocustody.android.data.models.approvalV2.ApprovalSignature
 import com.google.android.gms.common.util.VisibleForTesting
-import java.nio.charset.Charset
-import java.security.Signature
-import javax.crypto.Cipher
+import java.math.BigInteger
 import javax.inject.Inject
+
+import java.security.PrivateKey
+import java.util.UUID
 
 data class SignedPayload(
     val signature: String,
@@ -47,6 +46,8 @@ interface EncryptionManager {
         email: String,
         dataToSign: List<SignableDataResult>
     ): List<ApprovalSignature>
+
+    fun createShareForBootstrapUser(email: String, rootSeed: ByteArray) : Share
     //endregion
 
     //region generic key work
@@ -210,6 +211,82 @@ class EncryptionManagerImpl @Inject constructor(
             BITCOIN_KEY to bitcoinPublicKey,
             ETHEREUM_KEY to ethereumPublicKey,
             OFFCHAIN_KEY to censoPublicKey
+        )
+    }
+
+    override fun createShareForBootstrapUser(email: String, rootSeed: ByteArray) : Share {
+        val devicePublicKey = SharedPrefsHelper.retrieveDevicePublicKey(email)
+        val bootstrapDevicePublicKey = SharedPrefsHelper.retrieveBootstrapDevicePublicKey(email)
+
+        val deviceShardingParticipant = ShardingParticipant(
+            participantId = devicePublicKey.toParticipantIdAsHexString(),
+            devicePublicKeys = listOf(devicePublicKey)
+        )
+
+        val bootstrapShardingParticipant = ShardingParticipant(
+            participantId = bootstrapDevicePublicKey.toParticipantIdAsHexString(),
+            devicePublicKeys = listOf(bootstrapDevicePublicKey)
+        )
+
+        val shardingPolicy = ShardingPolicy(
+            policyRevisionGuid = UUID.randomUUID().toString(),
+            threshold = 2,
+            participants = listOf(deviceShardingParticipant, bootstrapShardingParticipant)
+        )
+
+        return createShare(shardingPolicy = shardingPolicy, rootSeed = rootSeed)
+    }
+
+    private fun createShare(shardingPolicy: ShardingPolicy, rootSeed: ByteArray): Share {
+
+        val participantIdToAdminUserMap = shardingPolicy.participants.associateBy {
+            BigInteger(it.participantId, 16)
+        }
+
+        val secretSharer = SecretSharer(
+            secret = BigInteger(rootSeed.toHexString(), 16),
+            threshold = shardingPolicy.threshold,
+            participants = participantIdToAdminUserMap.keys.toList()
+        )
+
+        return Share(
+            policyRevisionId = shardingPolicy.policyRevisionGuid,
+            shards = secretSharer.shards.mapNotNull { point ->
+                participantIdToAdminUserMap[point.x]?.let { participant ->
+                    Shard(
+                        participant.participantId,
+                        participant.devicePublicKeys.map { devicePublicKey ->
+                            ShardCopy(
+                                devicePublicKey,
+                                encryptShard(point, devicePublicKey)
+                            )
+                        },
+                    )
+                }
+            }
+        )
+    }
+
+    private fun decryptShard(encryptedShard: String, privateKey: PrivateKey): BigInteger {
+        return BigInteger(
+            1,
+            ECIESManager.decryptMessage(
+                BaseWrapper.decodeFromBase64(encryptedShard),
+                privateKey
+            )
+        )
+    }
+
+    private fun encryptShard(point: Point, base58AdminKey: String): String {
+        return encryptShard(point.y, base58AdminKey)
+    }
+
+    private fun encryptShard(y: BigInteger, base58AdminKey: String): String {
+        return BaseWrapper.encodeToBase64(
+            ECIESManager.encryptMessage(
+                y.toByteArrayNoSign(),
+                EcdsaUtils.getECPublicKeyFromBase58(base58AdminKey, EcdsaUtils.r1Curve).q.getEncoded(false)
+            )
         )
     }
 

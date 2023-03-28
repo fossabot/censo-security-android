@@ -63,7 +63,7 @@ class KeyCreationViewModel @Inject constructor(
     private fun saveRootSeed() {
         viewModelScope.launch {
             try {
-                val phrase = state.keyGeneratedPhrase ?: throw Exception("Missing Phrase")
+                val phrase = state.keyGeneratedPhrase ?: throw Exception("Missing phrase when trying to save keys")
 
                 keyRepository.saveV3RootKey(
                     Mnemonics.MnemonicCode(phrase = phrase)
@@ -90,10 +90,14 @@ class KeyCreationViewModel @Inject constructor(
     }
 
     private suspend fun uploadBootStrapData(userImage: UserImage) {
+        val phrase = state.keyGeneratedPhrase ?: throw Exception("Missing phrase when trying to create bootstrap")
+
         val walletSigners = state.walletSigners
 
         val bootStrapResource = userRepository.addBootstrapUser(
-            userImage = userImage, walletSigners = walletSigners
+            userImage = userImage,
+            walletSigners = walletSigners,
+            rootSeed = Mnemonics.MnemonicCode(phrase = phrase).toSeed()
         )
 
         state = state.copy(uploadingKeyProcess = bootStrapResource)
