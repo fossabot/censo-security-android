@@ -213,6 +213,10 @@ class EntranceViewModel @Inject constructor(
                     state.copy(
                         userDestinationResult = Resource.Success(UserDestination.DEVICE_REGISTRATION)
                     )
+                } else if (!verifyUser.canAddSigners) {
+                    state.copy(
+                        userDestinationResult = Resource.Success(UserDestination.PENDING_APPROVAL)
+                    )
                 } else {
                     state.copy(
                         userDestinationResult = Resource.Success(UserDestination.KEY_MANAGEMENT_CREATION)
@@ -222,9 +226,15 @@ class EntranceViewModel @Inject constructor(
             }
             needToRecoverRootSeed -> {
                 state =
-                    state.copy(
-                        userDestinationResult = Resource.Success(UserDestination.KEY_MANAGEMENT_RECOVERY)
-                    )
+                    if (!verifyUser.canAddSigners) {
+                        state.copy(
+                            userDestinationResult = Resource.Success(UserDestination.PENDING_APPROVAL)
+                        )
+                    } else {
+                        state.copy(
+                            userDestinationResult = Resource.Success(UserDestination.KEY_MANAGEMENT_RECOVERY)
+                        )
+                    }
                 return
             }
             needToUploadPublicKeyData -> {

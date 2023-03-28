@@ -43,6 +43,8 @@ import com.censocustody.android.presentation.key_creation.KeyCreationScreen
 import com.censocustody.android.presentation.key_management.KeyManagementInitialData
 import com.censocustody.android.presentation.key_management.KeyManagementScreen
 import com.censocustody.android.presentation.keys_upload.KeysUploadScreen
+import com.censocustody.android.presentation.pending_approval.PendingApprovalInitialData
+import com.censocustody.android.presentation.pending_approval.PendingApprovalScreen
 import com.censocustody.android.presentation.reset_password.ResetPasswordScreen
 import com.censocustody.android.presentation.sign_in.SignInScreen
 import com.censocustody.android.service.MessagingService.Companion.NOTIFICATION_DISPLAYED_KEY
@@ -265,6 +267,15 @@ class MainActivity : FragmentActivity() {
                     navController = navController,
                     initialData = DeviceRegistrationInitialData.fromJson(deviceInitialDataArg)
                 )
+            }
+            composable(
+                route = "${Screen.PendingApprovalRoute.route}/{${Screen.PendingApprovalRoute.PENDING_APPROVAL_ARG}}",
+                arguments = listOf(navArgument(Screen.PendingApprovalRoute.PENDING_APPROVAL_ARG) {
+                    type = NavType.StringType
+                })
+            ) { backStackEntry ->
+                val pendingInitialDataArg = backStackEntry.arguments?.getString(Screen.PendingApprovalRoute.PENDING_APPROVAL_ARG) as String
+                PendingApprovalScreen(navController = navController, initialData = PendingApprovalInitialData.fromJson(pendingInitialDataArg))
             }
         }
     }

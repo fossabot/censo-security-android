@@ -25,6 +25,7 @@ import com.censocustody.android.ui.theme.BackgroundWhite
 import com.censocustody.android.R
 import com.censocustody.android.presentation.device_registration.DeviceRegistrationInitialData
 import com.censocustody.android.presentation.key_creation.KeyCreationInitialData
+import com.censocustody.android.presentation.pending_approval.PendingApprovalInitialData
 import com.censocustody.android.ui.theme.ButtonRed
 
 @Composable
@@ -55,6 +56,18 @@ fun EntranceScreen(
                             AndroidUriWrapper()
                         )
                     "${Screen.KeyCreationRoute.route}/$keyCreationJson"
+                }
+                UserDestination.PENDING_APPROVAL -> {
+                    val pendingApprovalInitialData = PendingApprovalInitialData(
+                        verifyUserDetails = state.verifyUserResult.data,
+                    )
+
+                    val pendingInitialJson =
+                        PendingApprovalInitialData.toJson(
+                            pendingApprovalInitialData,
+                            AndroidUriWrapper()
+                        )
+                    "${Screen.PendingApprovalRoute.route}/$pendingInitialJson"
                 }
                 UserDestination.KEY_MANAGEMENT_RECOVERY -> {
 
