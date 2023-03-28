@@ -79,7 +79,7 @@ fun PendingApprovalScreen(
                 Spacer(modifier = Modifier.height(36.dp))
                 Text(
                     modifier = Modifier.padding(horizontal = 14.dp),
-                    text = "Waiting for your organization administrators to authorize this device.\n\nPlease check back later.",
+                    text = stringResource(R.string.waiting_for_device_approval),
                     textAlign = TextAlign.Center,
                     color = TextBlack,
                     fontSize = 20.sp
@@ -95,7 +95,7 @@ fun PendingApprovalScreen(
                 Spacer(modifier = Modifier.height(36.dp))
                 Text(
                     modifier = Modifier.padding(horizontal = 16.dp),
-                    text = "Error retrieving user details.",
+                    text = stringResource(R.string.error_retrieving_user),
                     textAlign = TextAlign.Center,
                     color = TextBlack,
                     fontSize = 20.sp
