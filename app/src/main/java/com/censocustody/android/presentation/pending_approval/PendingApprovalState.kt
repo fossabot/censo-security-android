@@ -1,12 +1,14 @@
 package com.censocustody.android.presentation.pending_approval
 
+import com.censocustody.android.common.Resource
 import com.censocustody.android.common.UriWrapper
 import com.censocustody.android.data.models.VerifyUser
 import com.google.gson.GsonBuilder
 import java.lang.reflect.Modifier
 
 data class PendingApprovalState(
-    val verifyUserDetails: VerifyUser? = null,
+    val verifyUserResult: Resource<VerifyUser> = Resource.Uninitialized,
+    val sendUserToEntrance: Resource<Boolean> = Resource.Uninitialized
 )
 
 

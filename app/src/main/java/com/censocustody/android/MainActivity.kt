@@ -269,13 +269,9 @@ class MainActivity : FragmentActivity() {
                 )
             }
             composable(
-                route = "${Screen.PendingApprovalRoute.route}/{${Screen.PendingApprovalRoute.PENDING_APPROVAL_ARG}}",
-                arguments = listOf(navArgument(Screen.PendingApprovalRoute.PENDING_APPROVAL_ARG) {
-                    type = NavType.StringType
-                })
-            ) { backStackEntry ->
-                val pendingInitialDataArg = backStackEntry.arguments?.getString(Screen.PendingApprovalRoute.PENDING_APPROVAL_ARG) as String
-                PendingApprovalScreen(navController = navController, initialData = PendingApprovalInitialData.fromJson(pendingInitialDataArg))
+                route = Screen.PendingApprovalRoute.route
+            ) {
+                PendingApprovalScreen(navController = navController)
             }
         }
     }
