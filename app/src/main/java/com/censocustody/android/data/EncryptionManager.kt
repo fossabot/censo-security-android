@@ -48,6 +48,8 @@ interface EncryptionManager {
     ): List<ApprovalSignature>
 
     fun createShareForBootstrapUser(email: String, rootSeed: ByteArray) : Share
+
+    fun createShareForStandardUser(rootSeed: ByteArray, policy: ShardingPolicy) : Share
     //endregion
 
     //region generic key work
@@ -235,6 +237,13 @@ class EncryptionManagerImpl @Inject constructor(
         )
 
         return createShare(shardingPolicy = shardingPolicy, rootSeed = rootSeed)
+    }
+
+    override fun createShareForStandardUser(
+        rootSeed: ByteArray,
+        policy: ShardingPolicy
+    ): Share {
+        return createShare(shardingPolicy = policy, rootSeed = rootSeed)
     }
 
     private fun createShare(shardingPolicy: ShardingPolicy, rootSeed: ByteArray): Share {

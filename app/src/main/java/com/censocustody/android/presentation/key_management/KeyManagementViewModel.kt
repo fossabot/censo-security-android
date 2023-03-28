@@ -260,19 +260,10 @@ class KeyManagementViewModel @Inject constructor(
 
     private fun uploadKeys() {
         viewModelScope.launch {
-            val walletSignerResource =
-                userRepository.addWalletSigner(state.walletSignersToAdd)
 
-            if (walletSignerResource is Resource.Success) {
-                state =
-                    state.copy(
-                        finalizeKeyFlow = Resource.Success(walletSignerResource.data),
-                    )
-            } else if (walletSignerResource is Resource.Error) {
-                state = state.copy(
-                    finalizeKeyFlow = walletSignerResource
-                )
-            }
+            state = state.copy(
+                finalizeKeyFlow = Resource.Error()
+            )
         }
     }
     //endregion
