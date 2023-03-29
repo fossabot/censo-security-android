@@ -104,8 +104,15 @@ class KeyCreationViewModel @Inject constructor(
     }
 
     private suspend fun uploadKeys() {
+        val phrase = state.keyGeneratedPhrase ?: throw Exception("Missing phrase when trying to upload keys")
+        val shardingPolicy = state.verifyUserDetails?.shardingPolicy ?: throw Exception("Missing sharding policy when trying to upload keys")
+
         val walletSigners = state.walletSigners
-        val walletSignerResource = userRepository.addWalletSigner(walletSigners)
+        val walletSignerResource = userRepository.addWalletSigner(
+            walletSigners = walletSigners,
+            policy = shardingPolicy,
+            rootSeed = Mnemonics.MnemonicCode(phrase = phrase).toSeed()
+        )
 
         state = state.copy(uploadingKeyProcess = walletSignerResource)
     }

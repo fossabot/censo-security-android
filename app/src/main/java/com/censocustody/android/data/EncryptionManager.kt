@@ -48,6 +48,8 @@ interface EncryptionManager {
     ): List<ApprovalSignature>
 
     fun createShareForBootstrapUser(email: String, rootSeed: ByteArray) : Share
+
+    fun createShare(shardingPolicy: ShardingPolicy, rootSeed: ByteArray,) : Share
     //endregion
 
     //region generic key work
@@ -237,7 +239,7 @@ class EncryptionManagerImpl @Inject constructor(
         return createShare(shardingPolicy = shardingPolicy, rootSeed = rootSeed)
     }
 
-    private fun createShare(shardingPolicy: ShardingPolicy, rootSeed: ByteArray): Share {
+    override fun createShare(shardingPolicy: ShardingPolicy, rootSeed: ByteArray): Share {
 
         val participantIdToAdminUserMap = shardingPolicy.participants.associateBy {
             BigInteger(it.participantId, 16)
