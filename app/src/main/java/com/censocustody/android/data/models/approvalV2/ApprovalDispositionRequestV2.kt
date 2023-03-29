@@ -44,6 +44,7 @@ data class ApprovalDispositionRequestV2(
             is ApprovalRequestDetailsV2.CreateAddressBookEntry,
             is ApprovalRequestDetailsV2.DeleteAddressBookEntry,
             is ApprovalRequestDetailsV2.AddDevice,
+            is ApprovalRequestDetailsV2.RemoveDevice,
             is ApprovalRequestDetailsV2.OrgNameUpdate,
             is ApprovalRequestDetailsV2.VaultUserRolesUpdate,
             is ApprovalRequestDetailsV2.SuspendUser,

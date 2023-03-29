@@ -30,6 +30,10 @@ fun ApprovalRequestDetailsV2.getHeader(context: Context) =
         is ApprovalRequestDetailsV2.AddDevice -> {
             context.getString(R.string.add_new_device_approval_header)
         }
+        //RemoveDevice
+        is ApprovalRequestDetailsV2.RemoveDevice -> {
+            context.getString(R.string.remove_device_approval_header)
+        }
         //OrgAdminPolicyUpdate
         is ApprovalRequestDetailsV2.OrgAdminPolicyUpdate -> {
             context.getString(R.string.org_policy_update_approval_header)
