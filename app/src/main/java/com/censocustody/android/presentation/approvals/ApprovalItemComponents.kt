@@ -170,7 +170,10 @@ fun ApprovalRowContent(
     when (type) {
         //AddDevice
         is ApprovalRequestDetailsV2.AddDevice -> {
-            AddDeviceRowContent(header = type.getHeader(LocalContext.current), type.email)
+            AddOrRemoveDeviceRowContent(header = type.getHeader(LocalContext.current), type.email)
+        }
+        is ApprovalRequestDetailsV2.RemoveDevice -> {
+            AddOrRemoveDeviceRowContent(header = type.getHeader(LocalContext.current), type.email)
         }
         //OrgAdminPolicyUpdate
         is ApprovalRequestDetailsV2.OrgAdminPolicyUpdate -> {
@@ -319,7 +322,10 @@ fun ApprovalDetailContent(approval: ApprovalRequestV2, type: ApprovalRequestDeta
     when (type) {
         //AddDevice
         is ApprovalRequestDetailsV2.AddDevice -> {
-            AddDeviceDetailContent(addDevice = type)
+            AddOrRemoveDeviceDetailContent(type.getHeader(LocalContext.current), userDevice = type.toUserDevice())
+        }
+        is ApprovalRequestDetailsV2.RemoveDevice -> {
+            AddOrRemoveDeviceDetailContent(type.getHeader(LocalContext.current), userDevice = type.toUserDevice())
         }
         //OrgAdminPolicyUpdate
         is ApprovalRequestDetailsV2.OrgAdminPolicyUpdate -> {

@@ -82,6 +82,8 @@ sealed class ApprovalRequestDetailsV2 {
         ).registerSubtype(
             AddDevice::class.java, "AddDevice"
         ).registerSubtype(
+            RemoveDevice::class.java, "RemoveDevice"
+        ).registerSubtype(
             OrgAdminPolicyUpdate::class.java, "OrgAdminPolicyUpdate"
         ).registerSubtype(
             VaultCreation::class.java, "VaultCreation"
@@ -153,6 +155,15 @@ sealed class ApprovalRequestDetailsV2 {
         val deviceType: DeviceType,
         val currentShardingPolicyRevisionGuid: String?,
         val targetShardingPolicy: ShardingPolicy?
+    ) : ApprovalRequestDetailsV2()
+
+    data class RemoveDevice(
+        val name: String,
+        val email: String,
+        val jpegThumbnail: String,
+        val deviceGuid: String,
+        val deviceKey: String,
+        val deviceType: DeviceType,
     ) : ApprovalRequestDetailsV2()
 
     data class ShardingPolicyChangeInfo(
