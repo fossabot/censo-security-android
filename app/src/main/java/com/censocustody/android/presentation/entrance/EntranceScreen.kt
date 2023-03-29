@@ -56,6 +56,9 @@ fun EntranceScreen(
                         )
                     "${Screen.KeyCreationRoute.route}/$keyCreationJson"
                 }
+                UserDestination.PENDING_APPROVAL -> {
+                    Screen.PendingApprovalRoute.route
+                }
                 UserDestination.KEY_MANAGEMENT_RECOVERY -> {
 
                     val flow = when (state.userDestinationResult.data) {

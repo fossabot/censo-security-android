@@ -253,4 +253,6 @@
     <string name="wallet">Wallet</string>
     <string name="login_with_password">Use Password</string>
     <string name="bootstrap_failure">Failed to create initial user information. Please try again.</string>
+    <string name="error_retrieving_user">Error retrieving user details.</string>
+    <string name="waiting_for_device_approval">Waiting for your organization administrators to authorize this device.\n\nPlease check back later.</string>
 </resources>

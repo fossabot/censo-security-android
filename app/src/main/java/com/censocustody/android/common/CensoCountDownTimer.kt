@@ -27,5 +27,6 @@ class CensoCountDownTimerImpl : CensoCountDownTimer {
 
     object Companion {
         const val UPDATE_COUNTDOWN = 1000L
+        const val POLL_USER_COUNTDOWN = 5000L
     }
 }
