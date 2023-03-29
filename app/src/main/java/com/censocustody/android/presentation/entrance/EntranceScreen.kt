@@ -19,12 +19,11 @@ import com.censocustody.android.common.Resource
 import com.censocustody.android.common.popUpToTop
 import com.censocustody.android.presentation.Screen
 import com.censocustody.android.presentation.components.CensoErrorScreen
-import com.censocustody.android.presentation.key_management.KeyManagementFlow
-import com.censocustody.android.presentation.key_management.KeyManagementInitialData
 import com.censocustody.android.ui.theme.BackgroundWhite
 import com.censocustody.android.R
 import com.censocustody.android.presentation.device_registration.DeviceRegistrationInitialData
 import com.censocustody.android.presentation.key_creation.KeyCreationInitialData
+import com.censocustody.android.presentation.key_recovery.KeyRecoveryInitialData
 import com.censocustody.android.ui.theme.ButtonRed
 
 @Composable
@@ -60,24 +59,16 @@ fun EntranceScreen(
                     Screen.PendingApprovalRoute.route
                 }
                 UserDestination.KEY_MANAGEMENT_RECOVERY -> {
-
-                    val flow = when (state.userDestinationResult.data) {
-                        UserDestination.KEY_MANAGEMENT_CREATION -> KeyManagementFlow.KEY_CREATION
-                        UserDestination.KEY_MANAGEMENT_RECOVERY -> KeyManagementFlow.KEY_RECOVERY
-                        else -> KeyManagementFlow.KEY_CREATION
-                    }
-
-                    val keyManagementInitialData = KeyManagementInitialData(
+                    val keyRecoveryInitialData = KeyRecoveryInitialData(
                         verifyUserDetails = state.verifyUserResult.data,
-                        flow = flow
                     )
 
-                    val keyManagementJson =
-                        KeyManagementInitialData.toJson(
-                            keyManagementInitialData,
+                    val keyRecoveryJson =
+                        KeyRecoveryInitialData.toJson(
+                            keyRecoveryInitialData,
                             AndroidUriWrapper()
                         )
-                    "${Screen.KeyManagementRoute.route}/$keyManagementJson"
+                    "${Screen.KeyRecoveryRoute.route}/$keyRecoveryJson"
                 }
                 UserDestination.DEVICE_REGISTRATION -> {
                     val deviceRegistrationInitialData = DeviceRegistrationInitialData(

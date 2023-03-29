@@ -140,68 +140,28 @@
 
     <string name="vault_name">Vault Name</string>
     <string name="password_reset_approval_header">Password Reset</string>
-    <string name="start_over">Start over</string>
-    <string name="copy_key">Copy Recovery Phrase</string>
-    <string name="phrase_generated">It\'s time to back up your secret recovery phrase</string>
-    <string name="how_would_you_save_it">How would you like to save it?</string>
-    <string name="password_manager">Password Manager</string>
-    <string name="pen_and_paper">Pen and Paper</string>
-    <string name="copy_private_key">Copy Recovery Phrase</string>
-    <string name="copy_key_message">Copy your recovery phrase to\nyour clipboard</string>
-    <string name="copied_to_clipboard">Copied to your clipboard!\n\nPaste the recovery phrase in your Password Manager and come back here when it\'s saved</string>
-    <string name="enter_key_title">We\'ve cleared your clipboard.</string>
-    <string name="enter_key_message">Open your password manager, copy your recovery phrase, and paste it here.</string>
-    <string name="key_not_valid_title">Uh oh. That phrase is not correct.</string>
-    <string name="key_not_valid_message">You can try again or go back to copy your phrase.</string>
 
-    <string name="confirm_recovery_phrase">Confirm recovery phrase</string>
     <string name="all_set">You\'re all set.</string>
     <string name="continue_to_censo">Continue to Censo</string>
-    <string name="paste_phrase">Paste Phrase</string>
-    <string name="how_did_you_back_it_up">How did you back it up?</string>
-    <string name="time_to_restore_key">It\'s time to restore your private key using your secret recovery phrase</string>
-    <string name="by_keyboard">Enter With Keyboard</string>
 
-    <string name="write_each_word_down">Write each word down\nin order</string>
-    <string name="showing_of_words">Showing %1$s - %2$s of 24</string>
-    <string name="phrase_words_empty">Phrase words were not generated, please start over and try again</string>
-
-    <string name="previous">Previous</string>
-    <string name="previous_icon_content_desc">previous icon</string>
-    <string name="next">Next</string>
-    <string name="next_icon_content_desc">next icon</string>
-    <string name="finish">Finish</string>
-    <string name="finish_icon_content_desc">finish icon</string>
-
-    <string name="saved_the_phrase">I saved the recovery phrase &#10132;</string>
-    <string name="enter_word_number">Enter word #</string>
-    <string name="enter_each_word_to_verify">Enter each word of your recovery phrase to restore your key</string>
-    <string name="that_word_is_not_correct">That word is not correct.</string>
-    <string name="verify_phrase">Verify recovery phrase</string>
-    <string name="do_not_leave_text_field_empty">Please do not leave the text field empty when submitting a word</string>
     <string name="something_went_wrong">Something went wrong</string>
     <string name="retry">Retry</string>
     <string name="registering_key_auth">Registering your key with Censo…</string>
     <string name="uploading_key_loading_text">Saving your key behind biometry protection…</string>
     <string name="saving_key_to_device">Saving your key to your device…</string>
-    <string name="i_saved_key">I saved the recovery phrase &#10132;</string>
 
     <string name="sign_in_subtitle">Sign in with the account you\ncreated on the web</string>
     <string name="back">back</string>
     <string name="user">User</string>
     <string name="vault">Vault</string>
     <string name="update_biometric_settings">Unable to open biometry settings. Please open device settings.</string>
-    <string name="key_icon_content_desc">key image</string>
     <string name="censo_maintenance_message">Censo is upgrading its service, we should be back online shortly. Please retry in a few minutes</string>
     <string name="not_connected_to_internet">You don\'t seem to be connected to the internet. Please check your connection and retry</string>
     <string name="request_timed_out">Your request timed out. Please retry</string>
 
     <string name="minimum_app_version">This version of the Censo Security app is outdated. Please update the app to continue using it.</string>
     <string name="update_app">Update App</string>
-    <string name="key_recovery_failed_message">Key recovery failed. Please try again.</string>
-    <string name="key_recovery_failed_title">Recovery Failed</string>
 
-    <string name="no_phrase_found" type="id">Unable to use current phrase. Please start over.</string>
     <string name="signing_in_as">Signing in as</string>
     <string name="too_many_failed_attempts">Too many failed attempts, please try again later.</string>
     <string name="key_management_bio_canceled">Biometry approval failed. Please try again.</string>
@@ -210,7 +170,6 @@
     <string name="error_occurred_signature_login">An error occurred trying to sign you in</string>
     <string name="try_again">Try Again</string>
 
-    <string name="save_biometry_info">Censo protects your private key using biometric verification.\n\nIf you change the biometry settings on your device, you will need to recover your key from your recovery phrase.</string>
     <string name="save_biometry_info_key_creation">Censo protects your private key using biometric verification.</string>
     <string name="are_you_sure">Are you sure?</string>
     <string name="continue_text">Continue</string>
@@ -228,7 +187,6 @@
     <string name="retry_recover_password">Retry</string>
     <string name="reset_pswd_email_sent">Reset password email sent!</string>
     <string name="reset_email_error">Unable to send reset email. Please try again or reset your password from our website.</string>
-    <string name="invalid_phrase">Invalid phrase entered. Please re-enter phrase.</string>
     <string name="play_store_not_found">Play Store not found on this device.</string>
     <string name="push_notification_never_dialog">Strike Protocols sends you a push notification for every approval.\n\nApprovals are time-sensitive and push notifications help you to respond promptly.</string>
     <string name="skip">Skip</string>

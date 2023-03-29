@@ -1,31 +1,34 @@
-package com.censocustody.android.presentation.key_management
+package com.censocustody.android.presentation.key_recovery
 
-import com.google.gson.GsonBuilder
 import com.censocustody.android.common.UriWrapper
 import com.censocustody.android.data.models.VerifyUser
+import com.google.gson.GsonBuilder
 import java.lang.reflect.Modifier
 
-data class KeyManagementInitialData(
+data class KeyRecoveryState(
+    val verifyUserDetails: VerifyUser? = null
+)
+
+data class KeyRecoveryInitialData(
     val verifyUserDetails: VerifyUser?,
-    val flow: KeyManagementFlow
 ) {
     companion object {
         fun toJson(
-            keyManagementInitialData: KeyManagementInitialData,
+            keyRecoveryInitialData: KeyRecoveryInitialData,
             uriWrapper: UriWrapper
         ): String {
             val jsonString = GsonBuilder()
                 .excludeFieldsWithModifiers(Modifier.STATIC)
                 .create()
-                .toJson(keyManagementInitialData)
+                .toJson(keyRecoveryInitialData)
             return uriWrapper.encode(jsonString)
         }
 
-        fun fromJson(json: String): KeyManagementInitialData {
+        fun fromJson(json: String): KeyRecoveryInitialData {
             return GsonBuilder()
                 .excludeFieldsWithModifiers(Modifier.STATIC)
                 .create()
-                .fromJson(json, KeyManagementInitialData::class.java)
+                .fromJson(json, KeyRecoveryInitialData::class.java)
         }
     }
 }
