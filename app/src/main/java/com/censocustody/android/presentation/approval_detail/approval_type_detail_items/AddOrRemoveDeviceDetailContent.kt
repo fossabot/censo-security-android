@@ -8,7 +8,6 @@ import androidx.compose.ui.unit.dp
 import com.censocustody.android.R
 import com.censocustody.android.data.models.DeviceType
 import com.censocustody.android.presentation.approvals.ApprovalContentHeader
-import com.censocustody.android.presentation.approvals.approval_type_row_items.getHeader
 import com.censocustody.android.presentation.components.FactRow
 import com.censocustody.android.data.models.approvalV2.ApprovalRequestDetailsV2
 import com.censocustody.android.presentation.components.FactsData
@@ -17,7 +16,7 @@ import com.censocustody.android.presentation.components.RowData
 @Composable
 fun AddOrRemoveDeviceDetailContent(
     header: String,
-    userDevice: UserDevice
+    userDevice: UserDeviceUI
 ) {
     ApprovalContentHeader(header = header, topSpacing = 24, bottomSpacing = 36)
 
@@ -46,19 +45,20 @@ fun AddOrRemoveDeviceDetailContent(
     Spacer(modifier = Modifier.height(28.dp))
 }
 
-data class UserDevice(
+data class UserDeviceUI(
     val name: String,
     val email: String,
+
     val jpegThumbnail: String,
     val deviceGuid: String,
     val deviceKey: String,
     val deviceType: DeviceType,
 )
 
-fun ApprovalRequestDetailsV2.AddDevice.toUserDevice(): UserDevice {
-    return(UserDevice(this.name, this.email, this.jpegThumbnail, this.deviceGuid, this.deviceKey, this.deviceType))
+fun ApprovalRequestDetailsV2.AddDevice.toUserDeviceUI(): UserDeviceUI {
+    return(UserDeviceUI(this.name, this.email, this.jpegThumbnail, this.deviceGuid, this.deviceKey, this.deviceType))
 }
 
-fun ApprovalRequestDetailsV2.RemoveDevice.toUserDevice(): UserDevice {
-    return(UserDevice(this.name, this.email, this.jpegThumbnail, this.deviceGuid, this.deviceKey, this.deviceType))
+fun ApprovalRequestDetailsV2.RemoveDevice.toUserDeviceUI(): UserDeviceUI {
+    return(UserDeviceUI(this.name, this.email, this.jpegThumbnail, this.deviceGuid, this.deviceKey, this.deviceType))
 }

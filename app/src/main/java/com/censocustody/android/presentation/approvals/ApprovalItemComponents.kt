@@ -322,10 +322,10 @@ fun ApprovalDetailContent(approval: ApprovalRequestV2, type: ApprovalRequestDeta
     when (type) {
         //AddDevice
         is ApprovalRequestDetailsV2.AddDevice -> {
-            AddOrRemoveDeviceDetailContent(type.getHeader(LocalContext.current), userDevice = type.toUserDevice())
+            AddOrRemoveDeviceDetailContent(type.getHeader(LocalContext.current), userDevice = type.toUserDeviceUI())
         }
         is ApprovalRequestDetailsV2.RemoveDevice -> {
-            AddOrRemoveDeviceDetailContent(type.getHeader(LocalContext.current), userDevice = type.toUserDevice())
+            AddOrRemoveDeviceDetailContent(type.getHeader(LocalContext.current), userDevice = type.toUserDeviceUI())
         }
         //OrgAdminPolicyUpdate
         is ApprovalRequestDetailsV2.OrgAdminPolicyUpdate -> {
