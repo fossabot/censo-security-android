@@ -135,6 +135,8 @@ sealed class ApprovalRequestDetailsV2 {
             SuspendUser::class.java, "SuspendUser"
         ).registerSubtype(
             RestoreUser::class.java, "RestoreUser"
+        ).registerSubtype(
+            EnableRecoveryContract::class.java, "EnableRecoveryContract"
         )
     }
 
@@ -396,6 +398,14 @@ sealed class ApprovalRequestDetailsV2 {
         val name: String,
         val email: String,
         val jpegThumbnail: String?
+    ) : ApprovalRequestDetailsV2()
+
+    data class EnableRecoveryContract(
+        val recoveryThreshold: Int,
+        val recoveryAddresses: List<String>,
+        val orgName: String,
+        val signingData: List<SigningData>,
+        val chainFees: List<ChainFee>,
     ) : ApprovalRequestDetailsV2()
 
     data class Signer(

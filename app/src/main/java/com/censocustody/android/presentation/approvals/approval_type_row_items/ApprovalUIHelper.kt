@@ -167,6 +167,10 @@ fun ApprovalRequestDetailsV2.getHeader(context: Context) =
             context.getString(R.string.restore_user)
         }
 
+        is ApprovalRequestDetailsV2.EnableRecoveryContract -> {
+            "Enable Recovery Policy"
+        }
+
         ApprovalRequestDetailsV2.UnknownApprovalType -> {
             context.getString(R.string.unknown_approval_header)
         }
