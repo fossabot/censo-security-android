@@ -15,7 +15,11 @@ interface UserRepository {
     suspend fun saveToken(token: String)
     suspend fun verifyUser(): Resource<VerifyUser>
     suspend fun getWalletSigners(): Resource<List<WalletSigner?>>
-    suspend fun addWalletSigner(walletSigners: List<WalletSigner>): Resource<Unit>
+    suspend fun addWalletSigner(
+        walletSigners: List<WalletSigner>,
+        policy: ShardingPolicy,
+        rootSeed: ByteArray,
+    ): Resource<Unit>
     suspend fun addBootstrapUser(userImage: UserImage, walletSigners: List<WalletSigner>, rootSeed: ByteArray): Resource<Unit>
     suspend fun userLoggedIn(): Boolean
     suspend fun setUserLoggedIn()
@@ -105,12 +109,26 @@ class UserRepositoryImpl(
     override suspend fun getWalletSigners(): Resource<List<WalletSigner?>> =
         retrieveApiResource { api.walletSigners() }
 
-    override suspend fun addWalletSigner(walletSigners: List<WalletSigner>): Resource<Unit> {
+    override suspend fun addWalletSigner(
+        walletSigners: List<WalletSigner>,
+        policy: ShardingPolicy,
+        rootSeed: ByteArray
+    ): Resource<Unit> {
         val email = retrieveUserEmail()
         val signedData = encryptionManager.signKeysForUpload(email, walletSigners)
+
+        val share = encryptionManager.createShare(
+            shardingPolicy = policy,
+            rootSeed = rootSeed
+        )
+
         return retrieveApiResource {
             api.addWalletSigner(
-                Signers(walletSigners, BaseWrapper.encodeToBase64(signedData), share = null)
+                Signers(
+                    signers = walletSigners,
+                    signature = BaseWrapper.encodeToBase64(signedData),
+                    share = share,
+                )
             )
         }
     }
