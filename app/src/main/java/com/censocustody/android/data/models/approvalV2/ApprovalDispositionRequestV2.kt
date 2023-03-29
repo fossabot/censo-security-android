@@ -302,6 +302,41 @@ data class ApprovalDispositionRequestV2(
                     )
                 )
             }
+            is ApprovalRequestDetailsV2.EnableRecoveryContract -> {
+                val offchainDataToSend = requestType.toJson().toByteArray()
+                requestType.signingData.mapNotNull { signingData ->
+                    when (signingData) {
+                        is ApprovalRequestDetailsV2.SigningData.EthereumSigningData -> {
+                            SignableDataResult.Ethereum(
+                                EvmConfigTransactionBuilder.getEnableRecoveryContractExecutionFromModuleDataSafeHash(
+                                    signingData.transaction.orgVaultAddress!!,
+                                    requestType.recoveryThreshold,
+                                    requestType.recoveryAddresses,
+                                    requestType.orgName,
+                                    signingData.transaction
+                                )
+                            )
+                        }
+                        is ApprovalRequestDetailsV2.SigningData.PolygonSigningData-> {
+                            SignableDataResult.Polygon(
+                                EvmConfigTransactionBuilder.getEnableRecoveryContractExecutionFromModuleDataSafeHash(
+                                    signingData.transaction.orgVaultAddress!!,
+                                    requestType.recoveryThreshold,
+                                    requestType.recoveryAddresses,
+                                    requestType.orgName,
+                                    signingData.transaction
+                                )
+                            )
+                        }
+                        else -> null
+                    }
+                } + listOf(
+                    SignableDataResult.Offchain(
+                        dataToSend = offchainDataToSend,
+                        dataToSign = Hash.sha256(offchainDataToSend)
+                    )
+                )
+            }
             else -> listOf()
         }
     }

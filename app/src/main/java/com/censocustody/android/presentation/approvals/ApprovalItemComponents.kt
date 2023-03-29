@@ -305,6 +305,9 @@ fun ApprovalRowContent(
         is ApprovalRequestDetailsV2.RestoreUser -> {
             RestoreUserRowContent(header = type.getHeader(LocalContext.current), type.name)
         }
+        is ApprovalRequestDetailsV2.EnableRecoveryContract -> {
+            EnableRecoveryContractRowContent(header = type.getHeader(LocalContext.current))
+        }
 
         //Unknown
         ApprovalRequestDetailsV2.UnknownApprovalType -> {
@@ -476,6 +479,10 @@ fun ApprovalDetailContent(approval: ApprovalRequestV2, type: ApprovalRequestDeta
 
         is ApprovalRequestDetailsV2.RestoreUser -> {
             RestoreUserDetailContent(details = type)
+        }
+
+        is ApprovalRequestDetailsV2.EnableRecoveryContract -> {
+            EnableRecoveryContractDetailContent(details = type)
         }
 
         //Unknown
