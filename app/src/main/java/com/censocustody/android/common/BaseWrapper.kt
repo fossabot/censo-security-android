@@ -14,7 +14,9 @@ object BaseWrapper {
         Base64.getDecoder().decode(string)
 }
 
-
+fun BigInteger.toHexString(): String {
+    return this.toByteArrayNoSign().toHexString().lowercase()
+}
 fun ByteArray.toHexString(): String =
     joinToString(separator = "") { eachByte -> "%02x".format(eachByte) }
 

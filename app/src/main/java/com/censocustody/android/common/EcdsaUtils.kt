@@ -2,8 +2,10 @@ package com.censocustody.android.common
 
 import org.bitcoinj.core.Base58
 import org.bouncycastle.jce.ECNamedCurveTable
+import org.bouncycastle.jce.interfaces.ECPrivateKey
 import org.bouncycastle.jce.interfaces.ECPublicKey
 import org.bouncycastle.jce.provider.BouncyCastleProvider
+import org.bouncycastle.jce.spec.ECPrivateKeySpec
 import org.bouncycastle.util.encoders.Hex
 import java.math.BigInteger
 import java.security.AlgorithmParameters
@@ -55,9 +57,38 @@ object EcdsaUtils {
         }
     }
 
+    fun getECPrivateKey(hexKey: String, curveName: String): ECPrivateKey {
+        // create a private key using the provided hex string and curve name
+        val privateKey = Hex.decode(hexKey)
+
+        val factory = KeyFactory.getInstance("EC", bcProvider)
+        val spec = ECNamedCurveTable.getParameterSpec(curveName)
+        val ecPrivateKeySpec = ECPrivateKeySpec(BigInteger(1, privateKey), spec)
+        return factory.generatePrivate(ecPrivateKeySpec) as ECPrivateKey
+    }
+
     private fun getECPublicKeyFromCompressedBytes(hexKey: String, curveName: String): ECPublicKey {
         val spec = ECNamedCurveTable.getParameterSpec(curveName)
         val pubPoint = spec.curve.decodePoint(Hex.decode(hexKey))
         return getECPublicKey(pubPoint.getEncoded(false).toHexString(), curveName)
+    }
+
+    fun derivePublicKeyFromPrivateKey(privateKey: ECPrivateKey): ECPublicKey {
+        val keyFactory = KeyFactory.getInstance("EC", bcProvider)
+        val q = privateKey.parameters.g.multiply(privateKey.d)
+        return keyFactory.generatePublic(
+            org.bouncycastle.jce.spec.ECPublicKeySpec(
+                q,
+                privateKey.parameters
+            )
+        ) as ECPublicKey
+    }
+
+    fun derivePublicKeyFromPrivateKeyAsBase58(privateKey: ECPrivateKey, compressed: Boolean = false): String {
+        return Base58.encode(derivePublicKeyFromPrivateKey(privateKey).q.getEncoded(compressed))
+    }
+
+    fun derivePublicKeyFromPrivateKeyAsHexString(privateKey: ECPrivateKey): String {
+        return derivePublicKeyFromPrivateKey(privateKey).q.getEncoded(false).toHexString()
     }
 }
