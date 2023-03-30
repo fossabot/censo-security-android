@@ -1,6 +1,5 @@
 package com.censocustody.android.data
 
-import androidx.biometric.BiometricPrompt.CryptoObject
 import com.censocustody.android.common.Resource
 import com.censocustody.android.common.CensoError
 import com.censocustody.android.common.toShareUserId
@@ -10,7 +9,6 @@ import com.censocustody.android.data.models.Shard
 import com.censocustody.android.data.models.approvalV2.ApprovalDispositionRequestV2
 import com.censocustody.android.data.models.approvalV2.ApprovalRequestDetailsV2
 import com.censocustody.android.data.models.approvalV2.ApprovalRequestV2
-import retrofit2.Response
 import javax.inject.Inject
 
 interface ApprovalsRepository {
@@ -81,27 +79,28 @@ class ApprovalsRepositoryImpl @Inject constructor(
     private suspend fun retrieveNecessaryShards(
         userEmail: String,
         requestDetails: ApprovalRequestDetailsV2?
-    ) =
+    ): List<Shard> {
         when (requestDetails) {
             is ApprovalRequestDetailsV2.AddDevice -> {
-                if (requestDetails.currentShardingPolicyRevisionGuid != null) {
-                    val shardResponse = getShardsFromAPI(
-                        policyRevisionId = requestDetails.currentShardingPolicyRevisionGuid,
-                        userId = userEmail.toShareUserId()
-                    )
 
-                    if (shardResponse is Resource.Success) {
-                        shardResponse.data?.shards ?: emptyList()
-                    } else {
-                        throw Exception("Failed to retrieve shards")
-                    }
+                if (requestDetails.currentShardingPolicyRevisionGuid == null) return emptyList()
+
+                val shardResponse = getShardsFromAPI(
+                    policyRevisionId = requestDetails.currentShardingPolicyRevisionGuid,
+                    userId = userEmail.toShareUserId()
+                )
+
+                if (shardResponse is Resource.Success) {
+                    return shardResponse.data?.shards ?: emptyList()
                 } else {
-                    emptyList()
+                    throw Exception("Failed to retrieve shards")
                 }
+
             }
             else -> {
-                emptyList()
+                return emptyList()
             }
         }
+    }
 }
 

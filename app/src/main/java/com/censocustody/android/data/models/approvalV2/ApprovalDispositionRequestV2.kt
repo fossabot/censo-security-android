@@ -403,13 +403,16 @@ data class ApprovalDispositionRequestV2(
         )
     }
 
-    private fun updateShards(encryptionManager: EncryptionManager) =
-        when (requestType) {
+    private fun updateShards(encryptionManager: EncryptionManager): List<Shard> {
+        if (shards.isEmpty()) return shards
+
+        return when (requestType) {
             is ApprovalRequestDetailsV2.AddDevice -> {
                 encryptionManager.reEncryptShards(email = email, shards = shards)
             }
             else -> shards
         }
+    }
 
     inner class RegisterApprovalDispositionV2Body(
         val approvalDisposition: ApprovalDisposition,
