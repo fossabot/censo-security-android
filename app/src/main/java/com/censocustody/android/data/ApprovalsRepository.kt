@@ -2,15 +2,11 @@ package com.censocustody.android.data
 
 import com.censocustody.android.common.Resource
 import com.censocustody.android.common.CensoError
-import com.censocustody.android.common.CrashReportingUtil
-import com.censocustody.android.common.toShareUserId
 import com.censocustody.android.data.models.GetShardsResponse
 import com.censocustody.android.data.models.RegisterApprovalDisposition
 import com.censocustody.android.data.models.Shard
 import com.censocustody.android.data.models.approvalV2.ApprovalDispositionRequestV2
-import com.censocustody.android.data.models.approvalV2.ApprovalRequestDetailsV2
 import com.censocustody.android.data.models.approvalV2.ApprovalRequestV2
-import com.raygun.raygun4android.RaygunClient
 import javax.inject.Inject
 
 interface ApprovalsRepository {
@@ -86,4 +82,3 @@ class ApprovalsRepositoryImpl @Inject constructor(
 }
 
 data class Shards(val shards: List<Shard>?)
-
