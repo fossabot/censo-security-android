@@ -37,4 +37,6 @@ sealed class CensoError(val errorCode: Int) {
     abstract class ApprovalSigningError(errorCode: Int) : CensoError(errorCode = errorCode)
 
     class MissingUserEmailError : ApprovalSigningError(errorCode = 80)
+
+    class FailedRetrieveShards : ApprovalDispositionError(errorCode = 90)
 }

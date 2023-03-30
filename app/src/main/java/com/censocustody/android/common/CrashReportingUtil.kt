@@ -9,4 +9,5 @@ object CrashReportingUtil {
     const val IMAGE = "Image"
     const val JWT_TAG = "JWT"
     const val KEY_INVALIDATED = "KeyInvalidated"
+    const val APPROVAL_DISPOSITION = "ApprovalDisposition"
 }

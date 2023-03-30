@@ -8,11 +8,13 @@ import androidx.lifecycle.viewModelScope
 import com.censocustody.android.common.Resource
 import com.censocustody.android.common.CensoCountDownTimer
 import com.censocustody.android.common.CensoCountDownTimerImpl
+import com.censocustody.android.common.CrashReportingUtil
 import com.censocustody.android.data.ApprovalsRepository
 import com.censocustody.android.data.models.ApprovalDisposition
 import com.censocustody.android.data.models.RegisterApprovalDisposition
 import com.censocustody.android.data.models.approvalV2.ApprovalRequestV2
 import com.censocustody.android.presentation.approval_disposition.ApprovalDispositionState
+import com.raygun.raygun4android.RaygunClient
 import kotlinx.coroutines.launch
 
 abstract class  CommonApprovalsViewModel(
@@ -129,6 +131,17 @@ abstract class  CommonApprovalsViewModel(
                 requestId = approvalId,
                 registerApprovalDisposition = registerApprovalDisposition,
             )
+
+        if (approvalDispositionResponseResource is Resource.Error) {
+            RaygunClient.send(
+                approvalDispositionResponseResource.exception
+                    ?: Exception("Approval Disposition Failed"),
+                listOf(
+                    CrashReportingUtil.APPROVAL_DISPOSITION,
+                    CrashReportingUtil.MANUALLY_REPORTED_TAG,
+                )
+            )
+        }
 
         return approvalDispositionState.copy(
             registerApprovalDispositionResult = approvalDispositionResponseResource

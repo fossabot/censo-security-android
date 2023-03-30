@@ -2,6 +2,7 @@ package com.censocustody.android.data
 
 import com.censocustody.android.common.Resource
 import com.censocustody.android.common.CensoError
+import com.censocustody.android.common.CrashReportingUtil
 import com.censocustody.android.common.toShareUserId
 import com.censocustody.android.data.models.GetShardsResponse
 import com.censocustody.android.data.models.RegisterApprovalDisposition
@@ -9,6 +10,7 @@ import com.censocustody.android.data.models.Shard
 import com.censocustody.android.data.models.approvalV2.ApprovalDispositionRequestV2
 import com.censocustody.android.data.models.approvalV2.ApprovalRequestDetailsV2
 import com.censocustody.android.data.models.approvalV2.ApprovalRequestV2
+import com.raygun.raygun4android.RaygunClient
 import javax.inject.Inject
 
 interface ApprovalsRepository {
@@ -41,7 +43,10 @@ class ApprovalsRepositoryImpl @Inject constructor(
         // Helper method anyItemNull() will check if any of the disposition properties are null,
         // this allows us to use !! operator later in this method without worrying of NPE
         if (registerApprovalDisposition.anyItemNull()) {
-            return Resource.Error(censoError = CensoError.DefaultDispositionError())
+            return Resource.Error(
+                exception = Exception("Null data when trying to register disposition"),
+                censoError = CensoError.DefaultDispositionError()
+            )
         }
 
         val userEmail = userRepository.retrieveUserEmail()
@@ -50,10 +55,20 @@ class ApprovalsRepositoryImpl @Inject constructor(
             return Resource.Error(censoError = CensoError.MissingUserEmailError())
         }
 
-        val shards = retrieveNecessaryShards(
-            userEmail = userEmail,
-            requestDetails = registerApprovalDisposition.approvalRequestType
-        )
+        val shards : List<Shard>
+
+        try {
+            shards = retrieveNecessaryShards(
+                userEmail = userEmail,
+                requestDetails = registerApprovalDisposition.approvalRequestType
+            )
+        } catch (e: Exception) {
+            return Resource.Error(
+                exception = e,
+                censoError = CensoError.FailedRetrieveShards()
+            )
+        }
+
         val approvalDispositionRequestV2 = ApprovalDispositionRequestV2(
             requestId = requestId,
             approvalDisposition = registerApprovalDisposition.approvalDisposition!!,
@@ -65,7 +80,10 @@ class ApprovalsRepositoryImpl @Inject constructor(
         val registerApprovalDispositionBody = try {
             approvalDispositionRequestV2.convertToApiBody(encryptionManager)
         } catch (e: Exception) {
-            return Resource.Error(censoError = CensoError.SigningDataError())
+            return Resource.Error(
+                exception = e,
+                censoError = CensoError.SigningDataError()
+            )
         }
 
         return retrieveApiResource {
