@@ -23,6 +23,7 @@ import com.censocustody.android.presentation.key_management.KeyManagementFlow
 import com.censocustody.android.presentation.key_management.KeyManagementInitialData
 import com.censocustody.android.ui.theme.BackgroundWhite
 import com.censocustody.android.R
+import com.censocustody.android.common.censoLog
 import com.censocustody.android.presentation.device_registration.DeviceRegistrationInitialData
 import com.censocustody.android.presentation.key_creation.KeyCreationInitialData
 import com.censocustody.android.ui.theme.ButtonRed
@@ -43,8 +44,8 @@ fun EntranceScreen(
         if (state.userDestinationResult is Resource.Success) {
             val userDestinationRoute = when (state.userDestinationResult.data) {
                 UserDestination.HOME -> Screen.ApprovalListRoute.route
-                UserDestination.UPLOAD_KEYS -> Screen.KeyCreationRoute.route
-                UserDestination.KEY_MANAGEMENT_CREATION -> {
+                UserDestination.KEY_MANAGEMENT_CREATION,
+                UserDestination.UPLOAD_KEYS -> {
                     val keyCreationInitialData = KeyCreationInitialData(
                         verifyUserDetails = state.verifyUserResult.data,
                     )

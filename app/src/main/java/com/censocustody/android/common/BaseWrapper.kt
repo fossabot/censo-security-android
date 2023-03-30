@@ -2,6 +2,7 @@ package com.censocustody.android.common
 
 import org.bitcoinj.core.Base58
 import java.math.BigInteger
+import java.security.MessageDigest
 import java.util.*
 
 object BaseWrapper {
@@ -24,6 +25,15 @@ fun BigInteger.toByteArrayNoSign(): ByteArray {
     } else byteArray
 }
 
+fun String.sha256(): String {
+    return MessageDigest
+        .getInstance("SHA-256")
+        .digest(this.toByteArray())
+        .fold("", { str, it -> str + "%02x".format(it) })
+}
+
 fun String.toParticipantIdAsBigInteger() = BigInteger(1, EcdsaUtils.getCompressedKeyBytesFromBase58(this, EcdsaUtils.r1Curve))
 
 fun String.toParticipantIdAsHexString() = toParticipantIdAsBigInteger().toByteArrayNoSign(32).toHexString().lowercase()
+
+fun String.toShareUserId() = this.sha256()

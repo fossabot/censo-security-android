@@ -3,9 +3,14 @@ package com.censocustody.android.data
 import androidx.biometric.BiometricPrompt.CryptoObject
 import com.censocustody.android.common.Resource
 import com.censocustody.android.common.CensoError
+import com.censocustody.android.common.toShareUserId
+import com.censocustody.android.data.models.GetShardsResponse
 import com.censocustody.android.data.models.RegisterApprovalDisposition
+import com.censocustody.android.data.models.Shard
 import com.censocustody.android.data.models.approvalV2.ApprovalDispositionRequestV2
+import com.censocustody.android.data.models.approvalV2.ApprovalRequestDetailsV2
 import com.censocustody.android.data.models.approvalV2.ApprovalRequestV2
+import retrofit2.Response
 import javax.inject.Inject
 
 interface ApprovalsRepository {
@@ -25,6 +30,12 @@ class ApprovalsRepositoryImpl @Inject constructor(
     override suspend fun getApprovalRequests(): Resource<List<ApprovalRequestV2?>> =
         retrieveApiResource { api.getApprovalRequests() }
 
+    private suspend fun getShardsFromAPI(
+        policyRevisionId: String,
+        userId: String
+    ): Resource<GetShardsResponse> =
+        retrieveApiResource { api.getShards(policyRevisionId = policyRevisionId, userId = userId) }
+
     override suspend fun approveOrDenyDisposition(
         requestId: String,
         registerApprovalDisposition: RegisterApprovalDisposition,
@@ -41,11 +52,16 @@ class ApprovalsRepositoryImpl @Inject constructor(
             return Resource.Error(censoError = CensoError.MissingUserEmailError())
         }
 
+        val shards = retrieveNecessaryShards(
+            userEmail = userEmail,
+            requestDetails = registerApprovalDisposition.approvalRequestType
+        )
         val approvalDispositionRequestV2 = ApprovalDispositionRequestV2(
             requestId = requestId,
             approvalDisposition = registerApprovalDisposition.approvalDisposition!!,
             email = userEmail,
-            requestType = registerApprovalDisposition.approvalRequestType!!
+            requestType = registerApprovalDisposition.approvalRequestType!!,
+            shards = shards
         )
 
         val registerApprovalDispositionBody = try {
@@ -61,4 +77,31 @@ class ApprovalsRepositoryImpl @Inject constructor(
             )
         }
     }
+
+    private suspend fun retrieveNecessaryShards(
+        userEmail: String,
+        requestDetails: ApprovalRequestDetailsV2?
+    ) =
+        when (requestDetails) {
+            is ApprovalRequestDetailsV2.AddDevice -> {
+                if (requestDetails.currentShardingPolicyRevisionGuid != null) {
+                    val shardResponse = getShardsFromAPI(
+                        policyRevisionId = requestDetails.currentShardingPolicyRevisionGuid,
+                        userId = userEmail.toShareUserId()
+                    )
+
+                    if (shardResponse is Resource.Success) {
+                        shardResponse.data?.shards ?: emptyList()
+                    } else {
+                        throw Exception("Failed to retrieve shards")
+                    }
+                } else {
+                    emptyList()
+                }
+            }
+            else -> {
+                emptyList()
+            }
+        }
 }
+

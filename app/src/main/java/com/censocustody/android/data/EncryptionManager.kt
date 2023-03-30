@@ -50,6 +50,8 @@ interface EncryptionManager {
     fun createShareForBootstrapUser(email: String, rootSeed: ByteArray) : Share
 
     fun createShare(shardingPolicy: ShardingPolicy, rootSeed: ByteArray,) : Share
+
+    fun reEncryptShards(email: String, shards: List<Shard>): List<Shard>
     //endregion
 
     //region generic key work
@@ -257,6 +259,37 @@ class EncryptionManagerImpl @Inject constructor(
                 }
             }
         )
+    }
+
+    override fun reEncryptShards(email: String, shards: List<Shard>): List<Shard> {
+        val deviceId = SharedPrefsHelper.retrieveDeviceId(email)
+        val devicePublicKey = SharedPrefsHelper.retrieveDevicePublicKey(email)
+
+        val deviceKey = cryptographyManager.getOrCreateKey(deviceId)
+
+        return shards.map { shard ->
+
+            val shardCopies = shard.shardCopies.map {
+                val decrypted = decryptShard(
+                    encryptedShard = it.encryptedData,
+                    privateKey = deviceKey
+                )
+
+                val encryptedData = encryptShard(decrypted, devicePublicKey)
+
+                ShardCopy(
+                    encryptionPublicKey = devicePublicKey,
+                    encryptedData = encryptedData
+                )
+            }
+
+            Shard(
+                participantId = shard.participantId,
+                shardCopies = shardCopies,
+                shardId = shard.shardId,
+                parentShardId = shard.parentShardId
+            )
+        }
     }
 
     private fun decryptShard(encryptedShard: String, privateKey: PrivateKey): BigInteger {

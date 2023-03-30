@@ -20,7 +20,8 @@ data class ApprovalDispositionRequestV2(
     val requestId: String,
     val approvalDisposition: ApprovalDisposition,
     val requestType: ApprovalRequestDetailsV2,
-    val email: String
+    val email: String,
+    val shards: List<Shard>
 ) : SignableV2 {
 
     override fun retrieveSignableData(): List<SignableDataResult> {
@@ -393,11 +394,22 @@ data class ApprovalDispositionRequestV2(
                 )
             }
 
+        val updatedShards = updateShards(encryptionManager)
+
         return RegisterApprovalDispositionV2Body(
             approvalDisposition = approvalDisposition,
-            signatures = signatures
+            signatures = signatures,
+            shards = updatedShards
         )
     }
+
+    private fun updateShards(encryptionManager: EncryptionManager) =
+        when (requestType) {
+            is ApprovalRequestDetailsV2.AddDevice -> {
+                encryptionManager.reEncryptShards(email = email, shards = shards)
+            }
+            else -> shards
+        }
 
     inner class RegisterApprovalDispositionV2Body(
         val approvalDisposition: ApprovalDisposition,
