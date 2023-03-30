@@ -2,8 +2,10 @@ package com.censocustody.android.data.models.evm
 
 import com.censocustody.android.common.evm.*
 import com.censocustody.android.common.pad
+import com.censocustody.android.data.models.Chain
 import com.censocustody.android.data.models.approvalV2.ApprovalRequestDetailsV2
 import org.bouncycastle.util.encoders.Hex
+import org.web3j.abi.datatypes.generated.Bytes32
 import org.web3j.crypto.Hash
 import java.math.BigInteger
 import java.nio.ByteBuffer
@@ -154,6 +156,68 @@ object EvmConfigTransactionBuilder {
         )
     }
 
+    fun getEnableRecoveryContractExecutionFromModuleDataSafeHash(
+        safeAddress: String,
+        recoveryThreshold: Int,
+        recoveryAddresses: List<String>,
+        orgName: String,
+        signingData: ApprovalRequestDetailsV2.SigningData.EthereumTransaction
+    ): ByteArray {
+        return EvmTransactionUtil.computeSafeTransactionHash(
+            chainId = signingData.chainId,
+            safeAddress = safeAddress,
+            to = safeAddress,
+            value = BigInteger.ZERO,
+            data = enableModuleTx(
+                calculateRecoveryContractAddress(
+                    getContractAddressFromName(signingData.contractAddresses, GnosisSafeConstants.censoRecoveryGuard),
+                    safeAddress,
+                    getContractAddressFromName(signingData.contractAddresses, GnosisSafeConstants.censoRecoveryFallbackHandler),
+                    getContractAddressFromName(signingData.contractAddresses, GnosisSafeConstants.censoSetup),
+                    orgName,
+                    recoveryAddresses,
+                    recoveryThreshold,
+                )
+            ),
+            nonce = signingData.safeNonce.toBigInteger()
+        )
+    }
+
+    private fun getContractAddressFromName(addresses: List<ApprovalRequestDetailsV2.SigningData.ContractNameAndAddress>, name: String): EvmAddress {
+        return addresses.firstOrNull { it.name.lowercase() == name.lowercase() }?.address ?: throw Exception("Address for $name not found")
+    }
+
+    private fun calculateRecoveryContractAddress(guardAddress: EvmAddress, vaultAddress: EvmAddress, fallbackHandlerAddress: EvmAddress, setupAddress: EvmAddress, orgName: String, recoveryAddresses: List<String>, recoveryThreshold: Int): String {
+        val salt = Hash.sha3("Recovery-$orgName".toByteArray())
+
+        // to calculate the address we need to compute exactly what the initializer will be
+        val setupData = censoSetupTx(guardAddress, vaultAddress, fallbackHandlerAddress, salt)
+
+        val initializer = safeSetupTx(
+            recoveryAddresses,
+            recoveryThreshold.toBigInteger(),
+            setupAddress,
+            setupData,
+            fallbackHandlerAddress
+        )
+
+        // the contract address is the last 20 bytes of:
+        //   keccak(0xff + address of contract calling create2 + salt + keccak(bytecode))
+        // in our case, the contract calling create2 is the gnosis safe proxy factory
+        // also, the gnosis safe proxy factory's deployProxyContractWithNonce calculates the salt as:
+        //   keccak(keccak(initializer) + saltNonce)
+        // also, it appends the gnosis safe singleton address (padded to 32 bytes) to the bytecode
+        val result = Hash.sha3(
+            Hex.decode("ff") +
+                    Hex.decode(
+                        GnosisSafeConstants.gnosisSafeProxyFactoryAddress.clean()
+                    ) +
+                    Hash.sha3(Hash.sha3(initializer) + salt) +
+                    Hash.sha3(Hex.decode(GnosisSafeConstants.gnosisSafeProxyBinary.clean() + "000000000000000000000000" + GnosisSafeConstants.gnosisSafeAddress.clean()))
+        )
+        return Hex.toHexString(result.slice(12 until result.size).toByteArray())
+    }
+
     private fun getPolicyChangeDataList(changes: List<SafeTx>): List<ByteArray> {
         return changes.map { change ->
             when (change) {
@@ -272,6 +336,53 @@ object EvmConfigTransactionBuilder {
         ByteBuffer.wrap(valueBytes).order(ByteOrder.BIG_ENDIAN).putInt(data.size)
         buffer.put(valueBytes.pad(32))
         buffer.put(data)
+        return buffer.array()
+    }
+
+    private fun censoSetupTx(guard: EvmAddress, vault: EvmAddress, fallbackHandler: EvmAddress, nameHash: ByteArray): ByteArray {
+        val buffer = ByteBuffer.allocate(4 + 32 * 4)
+        buffer.put(Hex.decode("ed6a2ed6"))
+        buffer.putPadded(Hex.decode(guard.clean()))
+        buffer.putPadded(Hex.decode(vault.clean()))
+        buffer.putPadded(Hex.decode(fallbackHandler.clean()))
+        buffer.putPadded(nameHash)
+        return buffer.array()
+    }
+
+    private fun safeSetupTx(owners: List<EvmAddress>, threshold: BigInteger, to: EvmAddress, data: ByteArray, fallbackHandlerAddress: EvmAddress): ByteArray {
+        val mod = data.size.mod(32)
+        val padding = if (mod > 0) 32 - mod else 0
+        val buffer = ByteBuffer.allocate(4 + 32 * (10 + owners.size) + data.size + padding)
+        buffer.put(Hex.decode("b63e800d"))
+        // offset of _owners array (first part of the tail)
+        buffer.putPadded((BigInteger.valueOf(32) * BigInteger.valueOf(8)).toByteArray())
+        buffer.putPadded(threshold.toByteArray())
+        buffer.putPadded(Hex.decode(to.clean()))
+        // offset of data (second part of the tail)
+        buffer.putPadded((BigInteger.valueOf(32) * BigInteger.valueOf(9L + owners.size)).toByteArray())
+        buffer.putPadded(Hex.decode(fallbackHandlerAddress.clean()))
+        buffer.putPadded(Hex.decode(GnosisSafeConstants.addressZero.clean()))
+        buffer.putPadded(BigInteger.ZERO.toByteArray())
+        buffer.putPadded(Hex.decode(GnosisSafeConstants.addressZero.clean()))
+        // _owners length
+        buffer.putPadded(owners.size.toBigInteger().toByteArray())
+        // _owners
+        owners.forEach { owner ->
+            buffer.putPadded(Hex.decode(owner.clean()))
+        }
+        // data length
+        buffer.putPadded(data.size.toBigInteger().toByteArray())
+        buffer.put(data)
+        if (padding > 0) {
+            buffer.putPadded(ByteArray(0), 32 - mod)
+        }
+        return buffer.array()
+    }
+
+    private fun enableModuleTx(moduleAddress: EvmAddress): ByteArray {
+        val buffer = ByteBuffer.allocate(4 + 32)
+        buffer.put(Hex.decode("610b5925"))
+        buffer.putPadded(Hex.decode(moduleAddress.clean()))
         return buffer.array()
     }
 }
