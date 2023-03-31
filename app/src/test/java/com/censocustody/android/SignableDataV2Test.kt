@@ -25,152 +25,68 @@ class SignableDataV2Test {
     )
 
     @Test
-    fun testLoginOp() {
-        val loginApprovalWalletApproval = deserializer.toObjectWithParsedDetails(exampleRequests[0].trim())
-        val disposition = ApprovalDispositionRequestV2(
-            "guid",
-            ApprovalDisposition.APPROVE,
-            loginApprovalWalletApproval.details,
-            "email"
-        )
-        assertEquals(
-            disposition.retrieveSignableData(),
-            listOf(
-                SignableDataResult.Device(
-                    "*****".toByteArray(),
-                    "*****".toByteArray()
-                )
-            )
-        )
-    }
-
-    @Test
     fun testEthereumOps() {
-        val testCases = Gson().fromJson(ClassLoader.getSystemResource("ethereum-test-cases.json").readText().trimEnd('\n'), TestCases::class.java).testCases
-
-        testCases.forEach {
-            println(it.request)
-            val details = deserializer.toObjectWithParsedDetails(it.request).details
-            val disposition = ApprovalDispositionRequestV2(
-                "guid",
-                ApprovalDisposition.APPROVE,
-                details,
-                "email"
-            )
-            val ethSignableDataResult = disposition.retrieveSignableData().filterIsInstance<SignableDataResult.Ethereum>().first()
-            assertEquals(
-                ethSignableDataResult.dataToSign.toHexString().lowercase(),
-                it.hash
-            )
-            // special cases where there is also offchain
-            when (details) {
-                is ApprovalRequestDetailsV2.EthereumTransferPolicyUpdate -> {
-                    val dataToSend = details.toJson().toByteArray()
-                    assertEquals(
-                        ethSignableDataResult.offchain,
-                        SignableDataResult.Offchain(
-                            dataToSend = dataToSend,
-                            dataToSign = Hash.sha256(dataToSend)
-                        )
-                    )
-                }
-                is ApprovalRequestDetailsV2.VaultPolicyUpdate -> {
-                    val dataToSend = details.toJson().toByteArray()
-                    assertEquals(
-                        disposition.retrieveSignableData().filterIsInstance<SignableDataResult.Offchain>().first(),
-                        SignableDataResult.Offchain(
-                            dataToSend = dataToSend,
-                            dataToSign = Hash.sha256(dataToSend)
-                        )
-                    )
-                }
-                is ApprovalRequestDetailsV2.OrgAdminPolicyUpdate -> {
-                    val dataToSend = details.toJson().toByteArray()
-                    assertEquals(
-                        disposition.retrieveSignableData().filterIsInstance<SignableDataResult.Offchain>().first(),
-                        SignableDataResult.Offchain(
-                            dataToSend = dataToSend,
-                            dataToSign = Hash.sha256(dataToSend)
-                        )
-                    )
-                }
-                is ApprovalRequestDetailsV2.VaultNameUpdate -> {
-                    val dataToSend = details.toJson().toByteArray()
-                    assertEquals(
-                        disposition.retrieveSignableData().filterIsInstance<SignableDataResult.Offchain>().first(),
-                        SignableDataResult.Offchain(
-                            dataToSend = dataToSend,
-                            dataToSign = Hash.sha256(dataToSend)
-                        )
-                    )
-                }
-                else -> {}
-            }
-        }
+        testEvmOps<SignableDataResult.Ethereum>(
+            Gson().fromJson(ClassLoader.getSystemResource("ethereum-test-cases.json").readText().trimEnd('\n'), TestCases::class.java).testCases
+        )
     }
 
     @Test
     fun testPolgygonOps() {
-        val testCases = Gson().fromJson(ClassLoader.getSystemResource("polygon-test-cases.json").readText().trimEnd('\n'), TestCases::class.java).testCases
+        testEvmOps<SignableDataResult.Polygon>(
+            Gson().fromJson(ClassLoader.getSystemResource("polygon-test-cases.json").readText().trimEnd('\n'), TestCases::class.java).testCases
+        )
+    }
 
+    private inline fun <reified T: SignableDataResult.Evm> testEvmOps(testCases: List<TestCase>) {
         testCases.forEach {
             println(it.request)
             val details = deserializer.toObjectWithParsedDetails(it.request).details
-            val disposition = ApprovalDispositionRequestV2(
+            val approval = ApprovalDispositionRequestV2(
                 "guid",
                 ApprovalDisposition.APPROVE,
                 details,
                 "email"
             )
-            val ethSignableDataResult = disposition.retrieveSignableData().filterIsInstance<SignableDataResult.Polygon>().first()
+
+            val ethSignableDataResult = approval.retrieveSignableData().filterIsInstance<T>().first()
             assertEquals(
-                ethSignableDataResult.dataToSign.toHexString().lowercase(),
-                it.hash
+                it.hash,
+                ethSignableDataResult.dataToSign.toHexString().lowercase()
             )
-            // special cases where there is also offchain
-            when (details) {
-                is ApprovalRequestDetailsV2.PolygonTransferPolicyUpdate -> {
-                    val dataToSend = details.toJson().toByteArray()
-                    assertEquals(
-                        ethSignableDataResult.offchain,
-                        SignableDataResult.Offchain(
-                            dataToSend = dataToSend,
-                            dataToSign = Hash.sha256(dataToSend)
-                        )
+
+            val approvalOffchainSignaturePayload = ApprovalDispositionRequestV2.ApprovalRequestDetailsWithDisposition(
+                details,
+                ApprovalDisposition.APPROVE
+            ).toJson().toByteArray()
+            assertEquals(
+                SignableDataResult.Offchain(
+                    dataToSend = approvalOffchainSignaturePayload,
+                    dataToSign = Hash.sha256(approvalOffchainSignaturePayload)
+                ),
+                ethSignableDataResult.offchain
+            )
+
+            val denial = ApprovalDispositionRequestV2(
+                "guid",
+                ApprovalDisposition.DENY,
+                details,
+                "email"
+            )
+            val denialSignableData = denial.retrieveSignableData()
+            val denialOffchainSignaturePayload = ApprovalDispositionRequestV2.ApprovalRequestDetailsWithDisposition(
+                details,
+                ApprovalDisposition.DENY
+            ).toJson().toByteArray()
+            assertEquals(
+                listOf(
+                    SignableDataResult.Offchain(
+                        dataToSend = denialOffchainSignaturePayload,
+                        dataToSign = Hash.sha256(denialOffchainSignaturePayload)
                     )
-                }
-                is ApprovalRequestDetailsV2.VaultPolicyUpdate -> {
-                    val dataToSend = details.toJson().toByteArray()
-                    assertEquals(
-                        disposition.retrieveSignableData().filterIsInstance<SignableDataResult.Offchain>().first(),
-                        SignableDataResult.Offchain(
-                            dataToSend = dataToSend,
-                            dataToSign = Hash.sha256(dataToSend)
-                        )
-                    )
-                }
-                is ApprovalRequestDetailsV2.OrgAdminPolicyUpdate -> {
-                    val dataToSend = details.toJson().toByteArray()
-                    assertEquals(
-                        disposition.retrieveSignableData().filterIsInstance<SignableDataResult.Offchain>().first(),
-                        SignableDataResult.Offchain(
-                            dataToSend = dataToSend,
-                            dataToSign = Hash.sha256(dataToSend)
-                        )
-                    )
-                }
-                is ApprovalRequestDetailsV2.OrgAdminPolicyUpdate -> {
-                    val dataToSend = details.toJson().toByteArray()
-                    assertEquals(
-                        disposition.retrieveSignableData().filterIsInstance<SignableDataResult.Offchain>().first(),
-                        SignableDataResult.Offchain(
-                            dataToSend = dataToSend,
-                            dataToSign = Hash.sha256(dataToSend)
-                        )
-                    )
-                }
-                else -> {}
-            }
+                ),
+                denialSignableData
+            )
         }
     }
 
@@ -181,18 +97,39 @@ class SignableDataV2Test {
         testCases.forEach {
             println(it.request)
             val details = deserializer.toObjectWithParsedDetails(it.request).details
-            val disposition = ApprovalDispositionRequestV2(
+            val approval = ApprovalDispositionRequestV2(
                 "guid",
                 ApprovalDisposition.APPROVE,
                 details,
                 "email"
             )
-            val dataToSend = details.toJson().toByteArray()
+            val approvalDataToSend = ApprovalDispositionRequestV2.ApprovalRequestDetailsWithDisposition(
+                details,
+                ApprovalDisposition.APPROVE
+            ).toJson().toByteArray()
             assertEquals(
-                disposition.retrieveSignableData().filterIsInstance<SignableDataResult.Offchain>().first(),
+                approval.retrieveSignableData().filterIsInstance<SignableDataResult.Offchain>().first(),
                 SignableDataResult.Offchain(
-                    dataToSend = dataToSend,
-                    dataToSign = Hash.sha256(dataToSend)
+                    dataToSend = approvalDataToSend,
+                    dataToSign = Hash.sha256(approvalDataToSend)
+                )
+            )
+
+            val denial = ApprovalDispositionRequestV2(
+                "guid",
+                ApprovalDisposition.DENY,
+                details,
+                "email"
+            )
+            val denialDataToSend = ApprovalDispositionRequestV2.ApprovalRequestDetailsWithDisposition(
+                details,
+                ApprovalDisposition.DENY
+            ).toJson().toByteArray()
+            assertEquals(
+                denial.retrieveSignableData().filterIsInstance<SignableDataResult.Offchain>().first(),
+                SignableDataResult.Offchain(
+                    dataToSend = denialDataToSend,
+                    dataToSign = Hash.sha256(denialDataToSend)
                 )
             )
         }
@@ -204,15 +141,51 @@ class SignableDataV2Test {
 
         testCases.forEach {
             println(it.request)
-            val disposition = ApprovalDispositionRequestV2(
+            val details = deserializer.toObjectWithParsedDetails(it.request).details
+            val approval = ApprovalDispositionRequestV2(
                 "guid",
                 ApprovalDisposition.APPROVE,
-                deserializer.toObjectWithParsedDetails(it.request).details,
+                details,
                 "email"
             )
+            val bitcoinSignableDataResult = approval.retrieveSignableData().filterIsInstance<SignableDataResult.Bitcoin>().first()
+
             assertEquals(
-                disposition.retrieveSignableData().filterIsInstance<SignableDataResult.Bitcoin>().first().dataToSign.map { it.toHexString().lowercase() },
-                it.hashes
+                it.hashes,
+                bitcoinSignableDataResult.dataToSign.map { it.toHexString().lowercase() },
+            )
+
+            val approvalOffchainSignaturePayload = ApprovalDispositionRequestV2.ApprovalRequestDetailsWithDisposition(
+                details,
+                ApprovalDisposition.APPROVE
+            ).toJson().toByteArray()
+            assertEquals(
+                SignableDataResult.Offchain(
+                    dataToSend = approvalOffchainSignaturePayload,
+                    dataToSign = Hash.sha256(approvalOffchainSignaturePayload)
+                ),
+                bitcoinSignableDataResult.offchain
+            )
+
+            val denial = ApprovalDispositionRequestV2(
+                "guid",
+                ApprovalDisposition.DENY,
+                details,
+                "email"
+            )
+            val denialOffchainSignaturePayload = ApprovalDispositionRequestV2.ApprovalRequestDetailsWithDisposition(
+                details,
+                ApprovalDisposition.DENY
+            ).toJson().toByteArray()
+
+            assertEquals(
+                listOf(
+                    SignableDataResult.Offchain(
+                        dataToSend = denialOffchainSignaturePayload,
+                        dataToSign = Hash.sha256(denialOffchainSignaturePayload)
+                    )
+                ),
+                denial.retrieveSignableData()
             )
         }
     }
@@ -224,26 +197,48 @@ class SignableDataV2Test {
         testCases.forEach {
             println(it.request)
             val request = deserializer.toObjectWithParsedDetails(it.request)
-            val disposition = ApprovalDispositionRequestV2(
+
+            val approval = ApprovalDispositionRequestV2(
                 request.id,
                 ApprovalDisposition.APPROVE,
                 request.details,
                 "email"
             )
-            val dataToSend = when (request.details) {
-                is ApprovalRequestDetailsV2.Login -> (request.details as ApprovalRequestDetailsV2.Login).jwtToken
-                is ApprovalRequestDetailsV2.PasswordReset -> request.id
+            val approvalDataToSend = when (request.details) {
+                is ApprovalRequestDetailsV2.Login -> "{\"token\":\"*****\",\"disposition\":\"Approve\"}"
+                is ApprovalRequestDetailsV2.PasswordReset -> "{\"guid\":\"462e6540-7ef0-4efa-b844-532efcfa816d\",\"disposition\":\"Approve\"}"
                 else -> ""
             }
             assertEquals(
-                disposition.retrieveSignableData().filterIsInstance<SignableDataResult.Device>().first(),
-                SignableDataResult.Device(
-                    dataToSend = dataToSend.toByteArray(),
-                    dataToSign = dataToSend.toByteArray()
-                )
+                listOf(
+                    SignableDataResult.Device(
+                        dataToSend = approvalDataToSend.toByteArray(),
+                        dataToSign = approvalDataToSend.toByteArray()
+                    )
+                ),
+                approval.retrieveSignableData()
+            )
+
+            val denial = ApprovalDispositionRequestV2(
+                request.id,
+                ApprovalDisposition.DENY,
+                request.details,
+                "email"
+            )
+            val denialDataToSend = when (request.details) {
+                is ApprovalRequestDetailsV2.Login -> "{\"token\":\"*****\",\"disposition\":\"Deny\"}"
+                is ApprovalRequestDetailsV2.PasswordReset -> "{\"guid\":\"462e6540-7ef0-4efa-b844-532efcfa816d\",\"disposition\":\"Deny\"}"
+                else -> ""
+            }
+            assertEquals(
+                listOf(
+                    SignableDataResult.Device(
+                        dataToSend = denialDataToSend.toByteArray(),
+                        dataToSign = denialDataToSend.toByteArray()
+                    )
+                ),
+                denial.retrieveSignableData()
             )
         }
     }
-
-
 }
