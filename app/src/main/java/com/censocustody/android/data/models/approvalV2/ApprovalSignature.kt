@@ -19,17 +19,18 @@ sealed class ApprovalSignature {
     }
 
     data class BitcoinSignatures(
-        val signatures: List<String>
+        val signatures: List<String>,
+        val offchainSignature: ApprovalSignature
     ) : ApprovalSignature()
 
     data class EthereumSignature(
         val signature: String,
-        val offchainSignature: ApprovalSignature?,
+        val offchainSignature: ApprovalSignature
     ) : ApprovalSignature()
 
     data class PolygonSignature(
         val signature: String,
-        val offchainSignature: ApprovalSignature?,
+        val offchainSignature: ApprovalSignature
     ) : ApprovalSignature()
 
     data class OffChainSignature(
