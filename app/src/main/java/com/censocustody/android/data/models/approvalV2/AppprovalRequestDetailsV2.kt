@@ -12,6 +12,7 @@ import com.censocustody.android.data.models.approvalV2.ApprovalSignature.Compani
 import com.censocustody.android.data.models.approvalV2.ApprovalRequestDetailsV2.EvmTokenInfo.Companion.evmTokenInfoAdapterFactory
 import com.censocustody.android.data.models.approvalV2.ApprovalRequestDetailsV2.OnChainPolicy.Companion.onChainPolicyAdapterFactory
 import com.censocustody.android.data.models.approvalV2.ApprovalRequestDetailsV2.SigningData.Companion.signingDataAdapterFactory
+import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.annotations.SerializedName
 import com.google.gson.typeadapters.RuntimeTypeAdapterFactory
@@ -63,15 +64,7 @@ data class ApprovalRequestV2(
 
 sealed class ApprovalRequestDetailsV2 {
     fun toJson(): String =
-        GsonBuilder()
-            .excludeFieldsWithModifiers(Modifier.STATIC)
-            .registerTypeAdapterFactory(approvalRequestDetailsV2AdapterFactory)
-            .registerTypeAdapterFactory(onChainPolicyAdapterFactory)
-            .registerTypeAdapterFactory(evmTokenInfoAdapterFactory)
-            .registerTypeAdapterFactory(signingDataAdapterFactory)
-            .registerTypeAdapterFactory(approvalSignatureAdapterFactory)
-            .create()
-            .toJson(this, ApprovalRequestDetailsV2::class.java)
+        gsonBuilder.toJson(this, ApprovalRequestDetailsV2::class.java)
 
     fun isDeviceKeyApprovalType() =
         this is Login || this is PasswordReset
@@ -138,6 +131,15 @@ sealed class ApprovalRequestDetailsV2 {
         ).registerSubtype(
             EnableRecoveryContract::class.java, "EnableRecoveryContract"
         )
+
+        val gsonBuilder: Gson = GsonBuilder()
+            .excludeFieldsWithModifiers(Modifier.STATIC)
+            .registerTypeAdapterFactory(approvalRequestDetailsV2AdapterFactory)
+            .registerTypeAdapterFactory(onChainPolicyAdapterFactory)
+            .registerTypeAdapterFactory(evmTokenInfoAdapterFactory)
+            .registerTypeAdapterFactory(signingDataAdapterFactory)
+            .registerTypeAdapterFactory(approvalSignatureAdapterFactory)
+            .create()
     }
 
     object UnknownApprovalType : ApprovalRequestDetailsV2()
