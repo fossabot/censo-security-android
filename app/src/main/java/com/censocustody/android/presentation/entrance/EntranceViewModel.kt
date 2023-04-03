@@ -9,6 +9,7 @@ import com.raygun.raygun4android.RaygunClient
 import com.censocustody.android.BuildConfig
 import com.censocustody.android.common.CrashReportingUtil
 import com.censocustody.android.common.Resource
+import com.censocustody.android.common.censoLog
 import com.censocustody.android.data.*
 import com.censocustody.android.data.models.SemanticVersion
 import com.censocustody.android.data.models.VerifyUser
@@ -170,6 +171,7 @@ class EntranceViewModel @Inject constructor(
     //Part 1: Do we need to update key/sentinel data?
     //Part 2: Is our local key valid? valid/invalid
     private suspend fun determineUserDestination(verifyUser: VerifyUser) {
+        censoLog(message = verifyUser.toString())
         //region Part 1:
         // Check 4 scenarios:
         // 1. User needs to add Sentinel data,
