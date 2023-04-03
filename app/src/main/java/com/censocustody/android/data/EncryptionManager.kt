@@ -52,7 +52,7 @@ interface EncryptionManager {
 
     fun createShare(shardingPolicy: ShardingPolicy, rootSeed: ByteArray,) : Share
 
-    fun reEncryptShards(email: String, shards: List<Shard>): List<Shard>
+    fun reEncryptShards(email: String, shards: List<Shard>): List<RecoveryShard>
     //endregion
 
     //region generic key work
@@ -357,11 +357,14 @@ class EncryptionManagerImpl @Inject constructor(
         return recoverShards(recoveredShards, ancestors)
     }
 
-    override fun reEncryptShards(email: String, shards: List<Shard>): List<Shard> {
+    override fun reEncryptShards(email: String, shards: List<Shard>): List<RecoveryShard> {
         val deviceKeys = getDeviceAndBootstrapKeys(email)
+        val recoveryShards: MutableList<RecoveryShard> =
+            emptyList<RecoveryShard>().toMutableList()
 
-        return shards.map { shard ->
-            val shardCopies = shard.shardCopies.map { shardCopy ->
+        shards.forEach { shard ->
+            shard.shardCopies.forEach { shardCopy ->
+
                 val keyToDecrypt = getCorrectKeyToDecrypt(
                     deviceKey = deviceKeys.standardDeviceKey,
                     bootstrapKey = deviceKeys.bootstrapKey,
@@ -379,19 +382,18 @@ class EncryptionManagerImpl @Inject constructor(
                     base58AdminKey = shardCopy.encryptionPublicKey
                 )
 
-                ShardCopy(
-                    encryptionPublicKey = shardCopy.encryptionPublicKey,
-                    encryptedData = encryptedData
-                )
+                shard.shardId?.let {
+                    recoveryShards.add(
+                        RecoveryShard(
+                            shardId = shard.shardId,
+                            encryptedData = encryptedData
+                        )
+                    )
+                }
             }
-
-            Shard(
-                participantId = shard.participantId,
-                shardCopies = shardCopies,
-                shardId = shard.shardId,
-                parentShardId = shard.parentShardId
-            )
         }
+
+        return recoveryShards
     }
 
     private fun getDeviceAndBootstrapKeys(email: String) : DeviceKeys {

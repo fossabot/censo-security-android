@@ -404,27 +404,8 @@ data class ApprovalDispositionRequestV2(
         if (shards == null || shards.isEmpty()) return null
 
         return when (requestType) {
-            is ApprovalRequestDetailsV2.AddDevice -> {
-                val reEncryptedShards =
-                    encryptionManager.reEncryptShards(email = email, shards = shards)
-
-                val recoveryShards: MutableList<RecoveryShard> =
-                    emptyList<RecoveryShard>().toMutableList()
-
-                reEncryptedShards.forEach { shard ->
-                    shard.shardCopies.forEach { shardCopy ->
-                        shard.shardId?.let {
-                            recoveryShards.add(
-                                RecoveryShard(
-                                    shardId = shard.shardId,
-                                    encryptedData = shardCopy.encryptedData
-                                )
-                            )
-                        }
-                    }
-                }
-                return recoveryShards
-            }
+            is ApprovalRequestDetailsV2.AddDevice ->
+                encryptionManager.reEncryptShards(email = email, shards = shards)
             else -> null
         }
     }
