@@ -5,19 +5,20 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.censocustody.android.common.Resource
-import com.censocustody.android.common.CensoCountDownTimer
-import com.censocustody.android.common.CensoCountDownTimerImpl
-import com.censocustody.android.common.CrashReportingUtil
+import com.censocustody.android.common.*
 import com.censocustody.android.data.ApprovalsRepository
+import com.censocustody.android.data.UserRepository
 import com.censocustody.android.data.models.ApprovalDisposition
 import com.censocustody.android.data.models.RegisterApprovalDisposition
+import com.censocustody.android.data.models.Shard
+import com.censocustody.android.data.models.approvalV2.ApprovalRequestDetailsV2
 import com.censocustody.android.data.models.approvalV2.ApprovalRequestV2
 import com.censocustody.android.presentation.approval_disposition.ApprovalDispositionState
 import com.raygun.raygun4android.RaygunClient
 import kotlinx.coroutines.launch
 
 abstract class  CommonApprovalsViewModel(
+    private val userRepository : UserRepository,
     private val approvalsRepository: ApprovalsRepository,
     private val timer: CensoCountDownTimer
 ) : ViewModel() {
@@ -126,10 +127,29 @@ abstract class  CommonApprovalsViewModel(
             approvalRequestType = approvalRequestDetails,
         )
 
+        val shards = try {
+            retrieveNecessaryShards(
+                requestDetails = approvalRequestDetails
+            )
+        } catch (e: Exception) {
+            RaygunClient.send(
+                e,
+                listOf(
+                    CrashReportingUtil.APPROVAL_DISPOSITION,
+                    CrashReportingUtil.MANUALLY_REPORTED_TAG,
+                    CrashReportingUtil.RETRIEVE_SHARDS
+                )
+            )
+            return approvalDispositionState.copy(
+                registerApprovalDispositionResult = Resource.Error(exception = e)
+            )
+        }
+
         val approvalDispositionResponseResource =
             approvalsRepository.approveOrDenyDisposition(
                 requestId = approvalId,
                 registerApprovalDisposition = registerApprovalDisposition,
+                shards = shards
             )
 
         if (approvalDispositionResponseResource is Resource.Error) {
@@ -147,6 +167,33 @@ abstract class  CommonApprovalsViewModel(
             registerApprovalDispositionResult = approvalDispositionResponseResource
         )
 
+    }
+
+    private suspend fun retrieveNecessaryShards(
+        requestDetails: ApprovalRequestDetailsV2?
+    ): List<Shard>? {
+        when (requestDetails) {
+            is ApprovalRequestDetailsV2.AddDevice -> {
+
+                if (requestDetails.currentShardingPolicyRevisionGuid == null) return null
+
+                val userEmail = userRepository.retrieveUserEmail()
+
+                val shardResponse = approvalsRepository.retrieveShards(
+                    policyRevisionId = requestDetails.currentShardingPolicyRevisionGuid,
+                    userId = userEmail.toShareUserId()
+                )
+
+                if (shardResponse is Resource.Success) {
+                    return shardResponse.data?.shards
+                } else {
+                    throw shardResponse.exception ?: Exception("Failed to retrieve shards")
+                }
+            }
+            else -> {
+                return null
+            }
+        }
     }
 
     private fun errorRegisteringResult(

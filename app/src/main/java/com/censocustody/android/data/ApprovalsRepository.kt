@@ -18,7 +18,10 @@ interface ApprovalsRepository {
     suspend fun approveOrDenyDisposition(
         requestId: String,
         registerApprovalDisposition: RegisterApprovalDisposition,
+        shards: List<Shard>?
     ): Resource<ApprovalDispositionRequestV2.RegisterApprovalDispositionV2Body>
+
+    suspend fun retrieveShards(policyRevisionId: String, userId: String) : Resource<GetShardsResponse>
 }
 
 class ApprovalsRepositoryImpl @Inject constructor(
@@ -30,7 +33,7 @@ class ApprovalsRepositoryImpl @Inject constructor(
     override suspend fun getApprovalRequests(): Resource<List<ApprovalRequestV2?>> =
         retrieveApiResource { api.getApprovalRequests() }
 
-    private suspend fun getShardsFromAPI(
+    override suspend fun retrieveShards(
         policyRevisionId: String,
         userId: String
     ): Resource<GetShardsResponse> =
@@ -39,6 +42,7 @@ class ApprovalsRepositoryImpl @Inject constructor(
     override suspend fun approveOrDenyDisposition(
         requestId: String,
         registerApprovalDisposition: RegisterApprovalDisposition,
+        shards: List<Shard>?
     ): Resource<ApprovalDispositionRequestV2.RegisterApprovalDispositionV2Body> {
         // Helper method anyItemNull() will check if any of the disposition properties are null,
         // this allows us to use !! operator later in this method without worrying of NPE
@@ -53,20 +57,6 @@ class ApprovalsRepositoryImpl @Inject constructor(
 
         if (userEmail.isEmpty()) {
             return Resource.Error(censoError = CensoError.MissingUserEmailError())
-        }
-
-        val shards : List<Shard>
-
-        try {
-            shards = retrieveNecessaryShards(
-                userEmail = userEmail,
-                requestDetails = registerApprovalDisposition.approvalRequestType
-            )
-        } catch (e: Exception) {
-            return Resource.Error(
-                exception = e,
-                censoError = CensoError.FailedRetrieveShards()
-            )
         }
 
         val approvalDispositionRequestV2 = ApprovalDispositionRequestV2(
@@ -91,33 +81,6 @@ class ApprovalsRepositoryImpl @Inject constructor(
                 requestId = approvalDispositionRequestV2.requestId,
                 registerApprovalDispositionBody = registerApprovalDispositionBody
             )
-        }
-    }
-
-    private suspend fun retrieveNecessaryShards(
-        userEmail: String,
-        requestDetails: ApprovalRequestDetailsV2?
-    ): List<Shard> {
-        when (requestDetails) {
-            is ApprovalRequestDetailsV2.AddDevice -> {
-
-                if (requestDetails.currentShardingPolicyRevisionGuid == null) return emptyList()
-
-                val shardResponse = getShardsFromAPI(
-                    policyRevisionId = requestDetails.currentShardingPolicyRevisionGuid,
-                    userId = userEmail.toShareUserId()
-                )
-
-                if (shardResponse is Resource.Success) {
-                    return shardResponse.data?.shards ?: emptyList()
-                } else {
-                    throw Exception("Failed to retrieve shards")
-                }
-
-            }
-            else -> {
-                return emptyList()
-            }
         }
     }
 }

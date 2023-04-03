@@ -3,6 +3,7 @@ package com.censocustody.android.presentation.approval_detail
 import com.censocustody.android.common.Resource
 import com.censocustody.android.common.CensoCountDownTimer
 import com.censocustody.android.data.ApprovalsRepository
+import com.censocustody.android.data.UserRepository
 import com.censocustody.android.data.models.approvalV2.ApprovalRequestV2
 import com.censocustody.android.presentation.common_approvals.CommonApprovalsViewModel
 import com.censocustody.android.presentation.approval_disposition.ApprovalRetryData
@@ -12,10 +13,12 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ApprovalDetailsViewModel @Inject constructor(
+    userRepository: UserRepository,
     approvalsRepository: ApprovalsRepository,
     timer: CensoCountDownTimer,
 ) : CommonApprovalsViewModel(
     approvalsRepository = approvalsRepository,
+    userRepository = userRepository,
     timer = timer
 ) {
     //region Method Overrides
