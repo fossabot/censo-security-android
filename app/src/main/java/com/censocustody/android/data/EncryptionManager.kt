@@ -359,15 +359,35 @@ class EncryptionManagerImpl @Inject constructor(
 
     override fun reEncryptShards(email: String, shards: List<Shard>): List<Shard> {
         val deviceId = SharedPrefsHelper.retrieveDeviceId(email)
+        val bootstrapId =
+            if (SharedPrefsHelper.userHasBootstrapDeviceIdSaved(email)) SharedPrefsHelper.retrieveBootstrapDeviceId(
+                email
+            ) else null
 
         val deviceKey = cryptographyManager.getOrCreateKey(deviceId)
+        val bootStrapKey = if(bootstrapId != null) cryptographyManager.getOrCreateKey(bootstrapId) else null
 
         return shards.map { shard ->
-
             val shardCopies = shard.shardCopies.map { shardCopy ->
+                val keyToDecrypt: PrivateKey = if (bootStrapKey == null) {
+                    deviceKey
+                } else {
+                    val devicePublicKey = SharedPrefsHelper.retrieveDevicePublicKey(email)
+                    val bootstrapPublicKey =
+                        SharedPrefsHelper.retrieveBootstrapDevicePublicKey(email)
+
+                    if (devicePublicKey == shardCopy.encryptionPublicKey) {
+                        deviceKey
+                    } else if (bootstrapPublicKey == shardCopy.encryptionPublicKey) {
+                        bootStrapKey
+                    } else {
+                        throw Exception("Device does not have key to decrypt shard")
+                    }
+                }
+
                 val decrypted = decryptShard(
                     encryptedShard = shardCopy.encryptedData,
-                    privateKey = deviceKey
+                    privateKey = keyToDecrypt
                 )
 
                 val encryptedData = encryptShard(

@@ -177,11 +177,9 @@ abstract class  CommonApprovalsViewModel(
 
                 if (requestDetails.currentShardingPolicyRevisionGuid == null) return null
 
-                val userEmail = userRepository.retrieveUserEmail()
-
                 val shardResponse = approvalsRepository.retrieveShards(
                     policyRevisionId = requestDetails.currentShardingPolicyRevisionGuid,
-                    userId = userEmail.toShareUserId()
+                    userId = requestDetails.email.toShareUserId()
                 )
 
                 if (shardResponse is Resource.Success) {

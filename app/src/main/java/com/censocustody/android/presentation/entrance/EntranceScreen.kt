@@ -23,7 +23,6 @@ import com.censocustody.android.presentation.key_management.KeyManagementFlow
 import com.censocustody.android.presentation.key_management.KeyManagementInitialData
 import com.censocustody.android.ui.theme.BackgroundWhite
 import com.censocustody.android.R
-import com.censocustody.android.common.censoLog
 import com.censocustody.android.presentation.device_registration.DeviceRegistrationInitialData
 import com.censocustody.android.presentation.key_creation.KeyCreationInitialData
 import com.censocustody.android.ui.theme.ButtonRed

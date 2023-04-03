@@ -6,10 +6,7 @@ import com.censocustody.android.common.evm.EvmTransactionUtil
 import com.censocustody.android.common.evm.EvmWhitelistHelper
 import com.censocustody.android.common.evm.SafeTx
 import com.censocustody.android.data.*
-import com.censocustody.android.data.models.ApprovalDisposition
-import com.censocustody.android.data.models.Chain
-import com.censocustody.android.data.models.RecoveryShard
-import com.censocustody.android.data.models.Shard
+import com.censocustody.android.data.models.*
 import com.censocustody.android.data.models.evm.EvmConfigTransactionBuilder
 import org.web3j.crypto.Hash
 import kotlin.Exception
@@ -399,18 +396,36 @@ data class ApprovalDispositionRequestV2(
         return RegisterApprovalDispositionV2Body(
             approvalDisposition = approvalDisposition,
             signatures = signatures,
-            shards = updatedShards
+            recoveryShards = updatedShards,
         )
     }
 
-    private fun updateShards(encryptionManager: EncryptionManager): List<Shard>? {
-        if (shards == null || shards.isEmpty()) return shards
+    private fun updateShards(encryptionManager: EncryptionManager): List<RecoveryShard>? {
+        if (shards == null || shards.isEmpty()) return null
 
         return when (requestType) {
             is ApprovalRequestDetailsV2.AddDevice -> {
-                encryptionManager.reEncryptShards(email = email, shards = shards)
+                val reEncryptedShards =
+                    encryptionManager.reEncryptShards(email = email, shards = shards)
+
+                val recoveryShards: MutableList<RecoveryShard> =
+                    emptyList<RecoveryShard>().toMutableList()
+
+                reEncryptedShards.forEach { shard ->
+                    shard.shardCopies.forEach { shardCopy ->
+                        shard.shardId?.let {
+                            recoveryShards.add(
+                                RecoveryShard(
+                                    shardId = shard.shardId,
+                                    encryptedData = shardCopy.encryptedData
+                                )
+                            )
+                        }
+                    }
+                }
+                return recoveryShards
             }
-            else -> shards
+            else -> null
         }
     }
 
