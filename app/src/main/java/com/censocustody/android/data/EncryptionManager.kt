@@ -358,32 +358,16 @@ class EncryptionManagerImpl @Inject constructor(
     }
 
     override fun reEncryptShards(email: String, shards: List<Shard>): List<Shard> {
-        val deviceId = SharedPrefsHelper.retrieveDeviceId(email)
-        val bootstrapId =
-            if (SharedPrefsHelper.userHasBootstrapDeviceIdSaved(email)) SharedPrefsHelper.retrieveBootstrapDeviceId(
-                email
-            ) else null
-
-        val deviceKey = cryptographyManager.getOrCreateKey(deviceId)
-        val bootStrapKey = if(bootstrapId != null) cryptographyManager.getOrCreateKey(bootstrapId) else null
+        val deviceKeys = getDeviceAndBootstrapKeys(email)
 
         return shards.map { shard ->
             val shardCopies = shard.shardCopies.map { shardCopy ->
-                val keyToDecrypt: PrivateKey = if (bootStrapKey == null) {
-                    deviceKey
-                } else {
-                    val devicePublicKey = SharedPrefsHelper.retrieveDevicePublicKey(email)
-                    val bootstrapPublicKey =
-                        SharedPrefsHelper.retrieveBootstrapDevicePublicKey(email)
-
-                    if (devicePublicKey == shardCopy.encryptionPublicKey) {
-                        deviceKey
-                    } else if (bootstrapPublicKey == shardCopy.encryptionPublicKey) {
-                        bootStrapKey
-                    } else {
-                        throw Exception("Device does not have key to decrypt shard")
-                    }
-                }
+                val keyToDecrypt = getCorrectKeyToDecrypt(
+                    deviceKey = deviceKeys.standardDeviceKey,
+                    bootstrapKey = deviceKeys.bootstrapKey,
+                    email = email,
+                    encryptionPublicKey = shardCopy.encryptionPublicKey
+                )
 
                 val decrypted = decryptShard(
                     encryptedShard = shardCopy.encryptedData,
@@ -407,6 +391,42 @@ class EncryptionManagerImpl @Inject constructor(
                 shardId = shard.shardId,
                 parentShardId = shard.parentShardId
             )
+        }
+    }
+
+    private fun getDeviceAndBootstrapKeys(email: String) : DeviceKeys {
+        val deviceId = SharedPrefsHelper.retrieveDeviceId(email)
+        val bootstrapId =
+            if (SharedPrefsHelper.userHasBootstrapDeviceIdSaved(email)) SharedPrefsHelper.retrieveBootstrapDeviceId(
+                email
+            ) else null
+
+        val deviceKey = cryptographyManager.getOrCreateKey(deviceId)
+        val bootStrapKey =
+            if (bootstrapId != null) cryptographyManager.getOrCreateKey(bootstrapId) else null
+
+        return DeviceKeys(standardDeviceKey = deviceKey, bootstrapKey = bootStrapKey)
+    }
+    private fun getCorrectKeyToDecrypt(
+        deviceKey: PrivateKey,
+        bootstrapKey: PrivateKey?,
+        email: String,
+        encryptionPublicKey: String
+    ): PrivateKey {
+        return if (bootstrapKey == null) {
+            deviceKey
+        } else {
+            val devicePublicKey = SharedPrefsHelper.retrieveDevicePublicKey(email)
+            val bootstrapPublicKey =
+                SharedPrefsHelper.retrieveBootstrapDevicePublicKey(email)
+
+            if (devicePublicKey == encryptionPublicKey) {
+                deviceKey
+            } else if (bootstrapPublicKey == encryptionPublicKey) {
+                bootstrapKey
+            } else {
+                throw Exception("Device does not have key to decrypt shard")
+            }
         }
     }
 
@@ -642,3 +662,8 @@ sealed class SignableDataResult {
 interface SignableV2 {
     fun retrieveSignableData(): List<SignableDataResult>
 }
+
+data class DeviceKeys(
+    val standardDeviceKey: PrivateKey,
+    val bootstrapKey: PrivateKey?
+)
