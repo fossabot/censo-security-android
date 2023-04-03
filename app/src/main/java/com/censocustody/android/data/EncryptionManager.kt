@@ -372,7 +372,6 @@ class EncryptionManagerImpl @Inject constructor(
                     email = email,
                     encryptionPublicKey = shardCopy.encryptionPublicKey
                 )
-
                 val decrypted = decryptShard(
                     encryptedShard = shardCopy.encryptedData,
                     privateKey = keyToDecrypt
