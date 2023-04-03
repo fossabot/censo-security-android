@@ -359,22 +359,24 @@ class EncryptionManagerImpl @Inject constructor(
 
     override fun reEncryptShards(email: String, shards: List<Shard>): List<Shard> {
         val deviceId = SharedPrefsHelper.retrieveDeviceId(email)
-        val devicePublicKey = SharedPrefsHelper.retrieveDevicePublicKey(email)
 
         val deviceKey = cryptographyManager.getOrCreateKey(deviceId)
 
         return shards.map { shard ->
 
-            val shardCopies = shard.shardCopies.map {
+            val shardCopies = shard.shardCopies.map { shardCopy ->
                 val decrypted = decryptShard(
-                    encryptedShard = it.encryptedData,
+                    encryptedShard = shardCopy.encryptedData,
                     privateKey = deviceKey
                 )
 
-                val encryptedData = encryptShard(decrypted, devicePublicKey)
+                val encryptedData = encryptShard(
+                    y = decrypted,
+                    base58AdminKey = shardCopy.encryptionPublicKey
+                )
 
                 ShardCopy(
-                    encryptionPublicKey = devicePublicKey,
+                    encryptionPublicKey = shardCopy.encryptionPublicKey,
                     encryptedData = encryptedData
                 )
             }
