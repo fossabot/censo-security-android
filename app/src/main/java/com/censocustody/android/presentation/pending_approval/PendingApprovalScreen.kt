@@ -19,11 +19,11 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.censocustody.android.R
+import com.censocustody.android.common.BackgroundUI
 import com.censocustody.android.common.CensoButton
 import com.censocustody.android.common.Resource
 import com.censocustody.android.common.popUpToTop
 import com.censocustody.android.presentation.Screen
-import com.censocustody.android.presentation.key_management.BackgroundUI
 import com.censocustody.android.ui.theme.BackgroundGrey
 import com.censocustody.android.ui.theme.ButtonRed
 import com.censocustody.android.ui.theme.CensoWhite

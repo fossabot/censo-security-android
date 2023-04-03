@@ -26,8 +26,6 @@ import com.censocustody.android.R
 import com.censocustody.android.common.*
 import com.censocustody.android.presentation.Screen
 import com.censocustody.android.presentation.key_creation.KeyCreationInitialData
-import com.censocustody.android.presentation.key_management.BackgroundUI
-import com.censocustody.android.presentation.key_management.SmallAuthFlowButton
 import com.censocustody.android.ui.theme.*
 
 @Composable

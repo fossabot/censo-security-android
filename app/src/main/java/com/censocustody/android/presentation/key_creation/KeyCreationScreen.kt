@@ -4,8 +4,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.*
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import com.censocustody.android.common.Resource
-import com.censocustody.android.common.popUpToTop
 import com.censocustody.android.presentation.Screen
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -22,11 +20,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.fragment.app.FragmentActivity
-import com.censocustody.android.presentation.key_management.BackgroundUI
-import com.censocustody.android.presentation.key_management.SmallAuthFlowButton
 import com.censocustody.android.R
-import com.censocustody.android.common.BioCryptoUtil
-import com.censocustody.android.presentation.key_management.PreBiometryDialog
+import com.censocustody.android.common.*
 import com.censocustody.android.ui.theme.*
 
 @Composable
