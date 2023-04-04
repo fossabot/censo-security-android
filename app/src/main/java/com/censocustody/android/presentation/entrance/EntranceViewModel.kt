@@ -128,7 +128,7 @@ class EntranceViewModel @Inject constructor(
         }
     }
 
-    private suspend fun retrieveUserVerifyDetails(checkUserDestinationAfterFinish: Boolean = false) : VerifyUser?{
+    private suspend fun retrieveUserVerifyDetails(checkUserDestinationAfterFinish: Boolean = true) : VerifyUser?{
         val verifyUserDataResource = userRepository.verifyUser()
 
         if (verifyUserDataResource is Resource.Success) {

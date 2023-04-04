@@ -29,9 +29,6 @@ class ApprovalDetailsViewModelTest : BaseViewModelTest() {
     lateinit var approvalsRepository: ApprovalsRepository
 
     @Mock
-    lateinit var userRepository: UserRepository
-
-    @Mock
     lateinit var countdownTimer: CensoCountDownTimer
 
     private lateinit var approvalDetailsViewModel: ApprovalDetailsViewModel
@@ -83,9 +80,7 @@ class ApprovalDetailsViewModelTest : BaseViewModelTest() {
      */
     @Test
     fun `approve an approval successfully then view model should reflect the success in state`() = runTest {
-        whenever(userRepository.retrieveUserEmail()).then { "userEmail@ok.com" }
-        whenever(userRepository.retrieveUserDeviceId(any())).then { "device_id" }
-        whenever(approvalsRepository.approveOrDenyDisposition(any(), any())).thenAnswer {
+        whenever(approvalsRepository.approveOrDenyDisposition(any(), any(), any())).thenAnswer {
             Resource.Success(data = null)
         }
 
@@ -125,7 +120,7 @@ class ApprovalDetailsViewModelTest : BaseViewModelTest() {
      */
     @Test
     fun `deny an approval successfully then view model should reflect the success in state`() = runTest {
-        whenever(approvalsRepository.approveOrDenyDisposition(any(), any())).thenAnswer {
+        whenever(approvalsRepository.approveOrDenyDisposition(any(), any(), any())).thenAnswer {
             Resource.Success(data = null)
         }
 
@@ -166,7 +161,7 @@ class ApprovalDetailsViewModelTest : BaseViewModelTest() {
      */
     @Test
     fun `deny an approval but api error occurs then view model should hold retry data and reflect error in state`() = runTest {
-        whenever(approvalsRepository.approveOrDenyDisposition(any(), any())).thenAnswer {
+        whenever(approvalsRepository.approveOrDenyDisposition(any(), any(), any())).thenAnswer {
             Resource.Error(data = null)
         }
 

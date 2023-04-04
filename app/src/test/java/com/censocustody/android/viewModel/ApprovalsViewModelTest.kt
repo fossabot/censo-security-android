@@ -1,27 +1,30 @@
 package com.censocustody.android.viewModel
 
+import com.censocustody.android.*
+import com.censocustody.android.ResourceState.ERROR
+import com.censocustody.android.ResourceState.SUCCESS
+import com.censocustody.android.common.CensoCountDownTimer
+import com.censocustody.android.common.Resource
+import com.censocustody.android.data.*
+import com.censocustody.android.data.models.ApprovalDisposition
+import com.censocustody.android.data.models.RecoveryShard
+import com.censocustody.android.data.models.approvalV2.ApprovalRequestV2
+import com.censocustody.android.presentation.approval_disposition.ApprovalDispositionState
+import com.censocustody.android.presentation.approvals.ApprovalsViewModel
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.times
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
-import com.censocustody.android.*
-import com.censocustody.android.common.Resource
-import com.censocustody.android.data.*
-import com.censocustody.android.data.models.ApprovalDisposition
-import com.censocustody.android.presentation.approvals.ApprovalsViewModel
-import com.censocustody.android.ResourceState.ERROR
-import com.censocustody.android.ResourceState.SUCCESS
-import com.censocustody.android.common.CensoCountDownTimer
-import com.censocustody.android.data.models.approvalV2.ApprovalRequestV2
-import com.censocustody.android.presentation.approval_disposition.ApprovalDispositionState
 import junit.framework.TestCase.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.test.*
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
+import org.mockito.ArgumentMatchers
 import org.mockito.Mock
-import java.util.UUID
+import java.util.*
+
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class ApprovalsViewModelTest : BaseViewModelTest() {
@@ -32,9 +35,6 @@ class ApprovalsViewModelTest : BaseViewModelTest() {
 
     @Mock
     lateinit var countdownTimer: CensoCountDownTimer
-
-    @Mock
-    lateinit var userRepository: UserRepository
 
     private lateinit var approvalsViewModel: ApprovalsViewModel
 
@@ -65,12 +65,11 @@ class ApprovalsViewModelTest : BaseViewModelTest() {
         super.setUp()
         Dispatchers.setMain(dispatcher)
 
-        whenever(approvalsRepository.approveOrDenyDisposition(any(), any())).thenAnswer {
+        whenever(approvalsRepository.retrieveShards(any(), any())).thenAnswer { emptyList<RecoveryShard>() }
+
+        whenever(approvalsRepository.approveOrDenyDisposition(any(), any(), any())).thenAnswer {//"edeb9c6e-26cd-41aa-81db-850f0a170295"
             Resource.Success(data = null)
         }
-
-        whenever(userRepository.retrieveUserEmail()).then { validEmail }
-        whenever(userRepository.retrieveUserDeviceId(validEmail)).then { validDeviceId }
 
         approvalsViewModel =
             ApprovalsViewModel(

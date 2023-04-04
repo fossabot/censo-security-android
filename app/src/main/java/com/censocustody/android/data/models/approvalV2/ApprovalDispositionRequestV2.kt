@@ -30,7 +30,7 @@ data class ApprovalDispositionRequestV2(
                     }
 
                     is ApprovalRequestDetailsV2.PasswordReset -> {
-                        getPasswordResetSignableData(requestType)
+                        getPasswordResetSignableData()
                     }
 
                     is ApprovalRequestDetailsV2.BitcoinWalletCreation,
@@ -328,7 +328,7 @@ data class ApprovalDispositionRequestV2(
                     }
 
                     is ApprovalRequestDetailsV2.PasswordReset -> {
-                        getPasswordResetSignableData(requestType)
+                        getPasswordResetSignableData()
                     }
 
                     else -> listOf(getApprovalRequestDetailsSignature())
@@ -342,7 +342,7 @@ data class ApprovalDispositionRequestV2(
         return listOf(SignableDataResult.Device(dataToSign = payload, dataToSend = payload))
     }
 
-    private fun getPasswordResetSignableData(approvalRequestDetails: ApprovalRequestDetailsV2.PasswordReset): List<SignableDataResult> {
+    private fun getPasswordResetSignableData(): List<SignableDataResult> {
         val payload = "{\"guid\":\"${requestId}\",\"disposition\":\"${approvalDisposition.value}\"}".toByteArray(charset = Charsets.UTF_8)
         return listOf(SignableDataResult.Device(dataToSign = payload, dataToSend = payload))
     }

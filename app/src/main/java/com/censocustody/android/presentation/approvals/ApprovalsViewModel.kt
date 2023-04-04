@@ -4,7 +4,6 @@ import androidx.lifecycle.viewModelScope
 import com.censocustody.android.common.Resource
 import com.censocustody.android.common.CensoCountDownTimer
 import com.censocustody.android.data.ApprovalsRepository
-import com.censocustody.android.data.UserRepository
 import com.censocustody.android.data.models.approvalV2.ApprovalRequestV2
 import com.censocustody.android.presentation.common_approvals.CommonApprovalsViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -14,12 +13,10 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ApprovalsViewModel @Inject constructor(
-    userRepository: UserRepository,
     private val approvalsRepository: ApprovalsRepository,
     timer: CensoCountDownTimer,
 ) : CommonApprovalsViewModel(
     approvalsRepository = approvalsRepository,
-    userRepository = userRepository,
     timer = timer
 ) {
     //region Method Overrides

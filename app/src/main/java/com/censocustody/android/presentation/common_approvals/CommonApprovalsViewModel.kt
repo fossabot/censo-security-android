@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.censocustody.android.common.*
 import com.censocustody.android.data.ApprovalsRepository
+import com.censocustody.android.data.Shards
 import com.censocustody.android.data.UserRepository
 import com.censocustody.android.data.models.ApprovalDisposition
 import com.censocustody.android.data.models.RegisterApprovalDisposition
@@ -18,7 +19,6 @@ import com.raygun.raygun4android.RaygunClient
 import kotlinx.coroutines.launch
 
 abstract class  CommonApprovalsViewModel(
-    private val userRepository : UserRepository,
     private val approvalsRepository: ApprovalsRepository,
     private val timer: CensoCountDownTimer
 ) : ViewModel() {
@@ -149,7 +149,7 @@ abstract class  CommonApprovalsViewModel(
             approvalsRepository.approveOrDenyDisposition(
                 requestId = approvalId,
                 registerApprovalDisposition = registerApprovalDisposition,
-                shards = shards
+                shards = Shards(shards)
             )
 
         if (approvalDispositionResponseResource is Resource.Error) {
