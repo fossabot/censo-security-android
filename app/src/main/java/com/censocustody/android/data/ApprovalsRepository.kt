@@ -64,7 +64,7 @@ class ApprovalsRepositoryImpl @Inject constructor(
             approvalDisposition = registerApprovalDisposition.approvalDisposition!!,
             email = userEmail,
             requestType = registerApprovalDisposition.approvalRequestType!!,
-            shards = shards?.shards
+            shards = shards.shards
         )
 
         val registerApprovalDispositionBody = try {
