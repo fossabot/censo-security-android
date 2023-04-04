@@ -5,10 +5,7 @@ import cash.z.ecc.android.bip39.Mnemonics
 import cash.z.ecc.android.bip39.toSeed
 import com.censocustody.android.common.*
 import com.censocustody.android.data.EncryptionManagerImpl.Companion.SENTINEL_KEY_NAME
-import com.censocustody.android.data.models.Signers
-import com.censocustody.android.data.models.VerifyUser
-import com.censocustody.android.data.models.WalletSigner
-import com.censocustody.android.data.models.mapToPublicKeysList
+import com.censocustody.android.data.models.*
 import com.raygun.raygun4android.RaygunClient
 import java.security.InvalidAlgorithmParameterException
 import java.security.KeyStoreException
@@ -16,31 +13,23 @@ import javax.crypto.Cipher
 import javax.crypto.IllegalBlockSizeException
 
 interface KeyRepository {
-
     suspend fun signTimestamp(timestamp: String): String
-
     suspend fun generatePhrase(): String
     suspend fun doesUserHaveValidLocalKey(verifyUser: VerifyUser): Boolean
-
     suspend fun retrieveV3RootSeed(): ByteArray?
     suspend fun haveV3RootSeed() : Boolean
-
     suspend fun saveV3RootKey(mnemonic: Mnemonics.MnemonicCode)
     suspend fun saveV3PublicKeys(rootSeed: ByteArray) : List<WalletSigner>
     suspend fun retrieveV3PublicKeys() : List<WalletSigner>
-
     suspend fun hasV3RootSeedStored() : Boolean
-
     suspend fun haveSentinelData() : Boolean
-
     suspend fun generateTimestamp() : String
-
     suspend fun saveSentinelData(cipher: Cipher)
     suspend fun retrieveSentinelData(cipher: Cipher) : String
     suspend fun getInitializedCipherForSentinelEncryption(): Cipher?
     suspend fun getInitializedCipherForSentinelDecryption(): Cipher?
     suspend fun handleKeyInvalidatedException(exception: Exception)
-
+    suspend fun retrieveRecoveryShards(): Resource<GetRecoveryShardsResponse>
     fun validateUserEnteredPhraseAgainstBackendKeys(
         phrase: String,
         verifyUser: VerifyUser?
@@ -253,6 +242,8 @@ class KeyRepositoryImpl(
             else -> throw exception
         }
     }
+    override suspend fun retrieveRecoveryShards() =
+        retrieveApiResource { brooklynApiService.getRecoveryShards() }
 
     private suspend fun wipeAllDataAfterKeyInvalidatedException() {
         val email = userRepository.retrieveUserEmail()
