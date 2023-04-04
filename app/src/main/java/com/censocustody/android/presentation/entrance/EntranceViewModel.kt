@@ -128,11 +128,7 @@ class EntranceViewModel @Inject constructor(
         }
     }
 
-<<<<<<< HEAD
     private suspend fun retrieveUserVerifyDetails(checkUserDestinationAfterFinish: Boolean = true) : VerifyUser?{
-=======
-    private suspend fun retrieveUserVerifyDetails(checkUserDestinationAfterFinish: Boolean = false) : VerifyUser?{
->>>>>>> f1de81f (Need to get verify details everytime before sending user to add device. So add device logic has all info to determine whether a user is bootstrap or not)
         val verifyUserDataResource = userRepository.verifyUser()
 
         if (verifyUserDataResource is Resource.Success) {
