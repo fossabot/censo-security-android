@@ -42,6 +42,8 @@ import com.censocustody.android.presentation.key_creation.KeyCreationInitialData
 import com.censocustody.android.presentation.key_creation.KeyCreationScreen
 import com.censocustody.android.presentation.key_management.KeyManagementInitialData
 import com.censocustody.android.presentation.key_management.KeyManagementScreen
+import com.censocustody.android.presentation.key_recovery.KeyRecoveryInitialData
+import com.censocustody.android.presentation.key_recovery.KeyRecoveryScreen
 import com.censocustody.android.presentation.keys_upload.KeysUploadScreen
 import com.censocustody.android.presentation.pending_approval.PendingApprovalScreen
 import com.censocustody.android.presentation.reset_password.ResetPasswordScreen
@@ -231,13 +233,13 @@ class MainActivity : FragmentActivity() {
                 KeyCreationScreen(navController = navController, initialData = KeyCreationInitialData.fromJson(keyInitialDataArg))
             }
             composable(
-                route = "${Screen.KeyManagementRoute.route}/{${Screen.KeyManagementRoute.KEY_MGMT_ARG}}",
-                arguments = listOf(navArgument(Screen.KeyManagementRoute.KEY_MGMT_ARG) {
+                route = "${Screen.KeyRecoveryRoute.route}/{${Screen.KeyRecoveryRoute.KEY_RECOVERY_ARG}}",
+                arguments = listOf(navArgument(Screen.KeyRecoveryRoute.KEY_RECOVERY_ARG) {
                     type = NavType.StringType
                 })
             ) { backStackEntry ->
-                val keyInitialDataArg = backStackEntry.arguments?.getString(Screen.KeyManagementRoute.KEY_MGMT_ARG) as String
-                KeyManagementScreen(navController = navController, initialData = KeyManagementInitialData.fromJson(keyInitialDataArg))
+                val keyInitialDataArg = backStackEntry.arguments?.getString(Screen.KeyRecoveryRoute.KEY_RECOVERY_ARG) as String
+                KeyRecoveryScreen(navController = navController, initialData = KeyRecoveryInitialData.fromJson(keyInitialDataArg))
             }
             composable(
                 route = Screen.UploadKeysRoute.route,
