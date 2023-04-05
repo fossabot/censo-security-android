@@ -8,11 +8,15 @@ import com.google.gson.GsonBuilder
 import java.lang.reflect.Modifier
 
 data class KeyRecoveryState(
-    val recoverKeyProcess: Resource<Unit> = Resource.Uninitialized,
+    val recoverKeyProcess: Resource<RecoveryError?> = Resource.Uninitialized,
     val verifyUserDetails: VerifyUser? = null,
     val triggerBioPrompt: Resource<Unit> = Resource.Uninitialized,
     val recoverShardsResource: Resource<GetRecoveryShardsResponse> = Resource.Uninitialized,
 )
+
+enum class RecoveryError {
+    FAILED_DECRYPT, INVALID_ROOT_SEED, MISSING_DATA, BIOMETRY_FAILED, FAILED_RETRIEVE_SHARDS
+}
 
 data class KeyRecoveryInitialData(
     val verifyUserDetails: VerifyUser?,

@@ -5,6 +5,8 @@ import androidx.compose.runtime.*
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.Button
+import androidx.compose.material.Text
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -13,8 +15,11 @@ import androidx.fragment.app.FragmentActivity
 import com.censocustody.android.R
 import com.censocustody.android.common.BioCryptoUtil
 import com.censocustody.android.common.Resource
+import com.censocustody.android.common.censoLog
+import com.censocustody.android.presentation.Screen
 import com.censocustody.android.presentation.key_management.BackgroundUI
 import com.censocustody.android.presentation.key_management.PreBiometryDialog
+import com.censocustody.android.ui.theme.TextBlack
 
 @Composable
 fun KeyRecoveryScreen(
@@ -33,6 +38,20 @@ fun KeyRecoveryScreen(
     }
 
     LaunchedEffect(key1 = state) {
+
+        if (state.recoverKeyProcess is Resource.Success) {
+            viewModel.resetKeyProcess()
+
+            navController.navigate(Screen.EntranceRoute.route) {
+                popUpTo(Screen.SignInRoute.route) {
+                    inclusive = true
+                }
+            }
+        }
+
+        if (state.recoverKeyProcess is Resource.Error) {
+            censoLog(message = "Failed to recover root seed: ${state.recoverKeyProcess.data}")
+        }
     }
 
     BackgroundUI()
@@ -40,7 +59,12 @@ fun KeyRecoveryScreen(
         modifier = Modifier
             .fillMaxSize()
             .padding(horizontal = 40.dp)
-    )
+    ) {
+        Text(
+            "Intense techno crypto music noises. Doing intense sharding work over here...",
+            color = TextBlack
+        )
+    }
 
     if (state.triggerBioPrompt is Resource.Success) {
         val kickOffBioPrompt = {
@@ -64,5 +88,19 @@ fun KeyRecoveryScreen(
             mainText = stringResource(id = R.string.save_biometry_info_key_creation),
             onAccept = kickOffBioPrompt
         )
+    }
+
+    if (state.recoverKeyProcess is Resource.Error) {
+        Box(modifier = Modifier.fillMaxSize()) {
+            Column() {
+                Text("Failed to complete recovery: ${state.recoverKeyProcess.data}")
+                Spacer(modifier = Modifier.height(24.dp))
+                Button(onClick = {
+                    viewModel.onStart(initialData)
+                }) {
+                    Text("Go again")
+                }
+            }
+        }
     }
 }
