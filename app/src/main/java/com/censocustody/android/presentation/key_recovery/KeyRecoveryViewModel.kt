@@ -1,6 +1,5 @@
 package com.censocustody.android.presentation.key_recovery
 
-import com.censocustody.android.presentation.key_creation.KeyCreationState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -41,25 +40,70 @@ class KeyRecoveryViewModel @Inject constructor(
     }
 
     private fun decryptShardsAndSaveRootSeed() {
-        //todo: call encryption manager to decrypt shards and reconstruct root seed
+        viewModelScope.launch {
+            val recoveryData = state.recoverShardsResource.data
+            val verifyUserDetails = state.verifyUserDetails
+
+            if (recoveryData == null || verifyUserDetails == null) {
+                state =
+                    state.copy(
+                        recoverKeyProcess = Resource.Error(data = RecoveryError.MISSING_DATA)
+                    )
+                return@launch
+            }
+
+            val rootSeedFromShards = try {
+                keyRepository.recoverRootSeed(
+                    shards = recoveryData.shards,
+                    ancestors = recoveryData.ancestors
+                )
+            } catch (e: Exception) {
+                state =
+                    state.copy(
+                        recoverKeyProcess = Resource.Error(data = RecoveryError.FAILED_DECRYPT)
+                    )
+                return@launch
+            }
+
+            val rootSeedValid = keyRepository.validateRecoveredRootSeed(
+                rootSeed = rootSeedFromShards,
+                verifyUser = verifyUserDetails
+            )
+
+            if (rootSeedValid) {
+                state = state.copy(recoverKeyProcess = Resource.Success(null))
+            } else {
+                state =
+                    state.copy(
+                        recoverKeyProcess = Resource.Error(data = RecoveryError.INVALID_ROOT_SEED)
+                    )
+            }
+        }
     }
 
     fun biometryFailed() {
-        state = state.copy(recoverKeyProcess = Resource.Error())
+        state = state.copy(recoverKeyProcess = Resource.Error(data = RecoveryError.BIOMETRY_FAILED))
     }
 
-    suspend fun retrieveRecoveryShards() {
+    private suspend fun retrieveRecoveryShards() {
         val recoveryShardsResource = keyRepository.retrieveRecoveryShards()
 
         state = state.copy(recoverShardsResource = recoveryShardsResource)
 
         if (recoveryShardsResource is Resource.Success) {
             triggerBioPrompt()
+        } else if (recoveryShardsResource is Resource.Error) {
+            state =
+                state.copy(recoverKeyProcess = Resource.Error(data = RecoveryError.FAILED_RETRIEVE_SHARDS))
         }
     }
 
     fun triggerBioPrompt() {
         state = state.copy(triggerBioPrompt = Resource.Success(Unit))
+    }
+
+    fun resetKeyProcess() {
+        state = state.copy(recoverKeyProcess = Resource.Uninitialized)
     }
 
     fun resetPromptTrigger() {

@@ -35,7 +35,14 @@ interface KeyRepository {
         verifyUser: VerifyUser?
     ): Boolean
 
+    fun validateRecoveredRootSeed(
+        rootSeed: ByteArray,
+        verifyUser: VerifyUser?
+    ): Boolean
+
     suspend fun uploadKeys(walletSigners: List<WalletSigner>): Resource<Unit>
+
+    suspend fun recoverRootSeed(shards: List<Shard>, ancestors: List<AncestorShard>) : ByteArray
 
     suspend fun signPublicKeys(
         publicKeys: List<WalletSigner?>,
@@ -100,6 +107,23 @@ class KeyRepositoryImpl(
         try {
             val rootSeed = Mnemonics.MnemonicCode(phrase = phrase).toSeed()
 
+            val publicKeys = encryptionManager.publicKeysFromRootSeed(rootSeed)
+
+            if (publicKeys.isEmpty()) {
+                return false
+            }
+
+            return verifyUser?.compareAgainstLocalKeys(publicKeys) == true
+        } catch (e: Exception) {
+            return false
+        }
+    }
+
+    override fun validateRecoveredRootSeed(
+        rootSeed: ByteArray,
+        verifyUser: VerifyUser?
+    ): Boolean {
+        try {
             val publicKeys = encryptionManager.publicKeysFromRootSeed(rootSeed)
 
             if (publicKeys.isEmpty()) {
@@ -194,6 +218,19 @@ class KeyRepositoryImpl(
                 Signers(walletSigners, BaseWrapper.encodeToBase64(signedData), share = null)
             )
         }
+    }
+
+    override suspend fun recoverRootSeed(
+        shards: List<Shard>,
+        ancestors: List<AncestorShard>
+    ): ByteArray {
+        val userEmail = userRepository.retrieveUserEmail()
+
+        return encryptionManager.recoverRootSeedFromShards(
+            email = userEmail,
+            shards = shards,
+            ancestors = ancestors
+        )
     }
 
     override suspend fun hasV3RootSeedStored(): Boolean {

@@ -15,6 +15,7 @@ import java.math.BigInteger
 import javax.inject.Inject
 
 import java.security.PrivateKey
+import java.security.PublicKey
 import java.util.UUID
 
 data class SignedPayload(
@@ -53,6 +54,12 @@ interface EncryptionManager {
     fun createShare(shardingPolicy: ShardingPolicy, rootSeed: ByteArray,) : Share
 
     fun reEncryptShards(email: String, shards: List<Shard>): List<RecoveryShard>
+
+    fun recoverRootSeedFromShards(
+        shards: List<Shard>,
+        ancestors: List<AncestorShard>,
+        email: String
+    ): ByteArray
     //endregion
 
     //region generic key work
@@ -305,16 +312,13 @@ class EncryptionManagerImpl @Inject constructor(
         }.flatten()
     }
 
-    fun handleRecoverRootSeed(
+    override fun recoverRootSeedFromShards(
         shards: List<Shard>,
         ancestors: List<AncestorShard>,
-        privateKeys: List<String>
+        email: String
     ): ByteArray {
+        val privateKeyMap = getMapOfDeviceKeys(email = email)
 
-        val privateKeyMap = privateKeys.associate {
-            val ecPrivateKey = EcdsaUtils.getECPrivateKey(it, EcdsaUtils.r1Curve)
-            EcdsaUtils.derivePublicKeyFromPrivateKeyAsBase58(ecPrivateKey, false) to ecPrivateKey
-        }
         val rootSeed = recoverShards(
             shards.mapNotNull {
                 privateKeyMap[it.shardCopies[0].encryptionPublicKey]?.let { privateKey ->
@@ -430,6 +434,26 @@ class EncryptionManagerImpl @Inject constructor(
                 throw Exception("Device does not have key to decrypt shard")
             }
         }
+    }
+
+    private fun getMapOfDeviceKeys(email: String): Map<String, PrivateKey> {
+        val mapOfKeys: MutableMap<String, PrivateKey> = mutableMapOf()
+
+        val deviceId = SharedPrefsHelper.retrieveDeviceId(email = email)
+        val deviceKey = cryptographyManager.getOrCreateKey(deviceId)
+        val devicePublicKey = SharedPrefsHelper.retrieveDevicePublicKey(email)
+
+        mapOfKeys[devicePublicKey] = deviceKey
+
+        if (SharedPrefsHelper.userHasBootstrapDeviceIdSaved(email)) {
+            val bootstrapId = SharedPrefsHelper.retrieveBootstrapDeviceId(email = email)
+            val bootStrapKey = cryptographyManager.getOrCreateKey(bootstrapId)
+            val bootstrapPublicKey = SharedPrefsHelper.retrieveBootstrapDevicePublicKey(email)
+
+            mapOfKeys[bootstrapPublicKey] = bootStrapKey
+        }
+
+        return mapOfKeys.toMap()
     }
 
     private fun decryptShard(encryptedShard: String, privateKey: PrivateKey): BigInteger {
@@ -668,4 +692,8 @@ interface SignableV2 {
 data class DeviceKeys(
     val standardDeviceKey: PrivateKey,
     val bootstrapKey: PrivateKey?
-)
+) {
+    fun toList() =
+        if (bootstrapKey == null) listOf(standardDeviceKey)
+        else listOf(standardDeviceKey, bootstrapKey)
+}
