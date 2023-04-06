@@ -71,7 +71,8 @@ class ApprovalRequestSignatureTest {
                         requestId = UUID.randomUUID().toString().replace("-", ""),
                         approvalDisposition = ApprovalDisposition.APPROVE,
                         requestType = testItem.request.details,
-                        email = ""
+                        email = "",
+                        shards = emptyList()
                     )
 
                 val signableData = dispositionRequest.retrieveSignableData()

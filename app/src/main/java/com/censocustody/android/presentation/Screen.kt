@@ -16,9 +16,7 @@ sealed class Screen(val route: String) {
     object KeyManagementRoute : Screen("key_management_screen") {
         const val KEY_MGMT_ARG = "key_mgmt_arg"
     }
-    object PendingApprovalRoute : Screen("pending_approval_screen") {
-        const val PENDING_APPROVAL_ARG = "pending_approval_arg"
-    }
+    object PendingApprovalRoute : Screen("pending_approval_screen")
     object ResetPasswordRoute : Screen("reset_password_screen")
     object UploadKeysRoute : Screen("upload_keys_screen")
     object DeviceRegistrationRoute : Screen("device_registration_screen") {

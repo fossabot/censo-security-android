@@ -83,14 +83,15 @@ class EntranceViewModel @Inject constructor(
 
     private suspend fun checkIfUserHasDeviceRegistered() {
         val userEmail = userRepository.retrieveUserEmail()
+        val verifyUser = retrieveUserVerifyDetails(checkUserDestinationAfterFinish = false)
+
         if (userRepository.userHasDeviceIdSaved(userEmail)) {
-            val verifyUser = retrieveUserVerifyDetails()
 
             if (verifyUser != null) {
                 val devicePublicKey = userRepository.retrieveUserDevicePublicKey(userEmail)
                 val backendPublicKey = verifyUser.deviceKeyInfo?.key
 
-                if (devicePublicKey.lowercase() == backendPublicKey?.lowercase()) {
+                if (devicePublicKey.lowercase() == backendPublicKey?.lowercase() || verifyUser.deviceKeyInfo == null) {
                     determineUserDestination(verifyUser)
                 } else {
                     //DESTINATION: Send user to device registration
@@ -127,7 +128,7 @@ class EntranceViewModel @Inject constructor(
         }
     }
 
-    private suspend fun retrieveUserVerifyDetails() : VerifyUser?{
+    private suspend fun retrieveUserVerifyDetails(checkUserDestinationAfterFinish: Boolean = true) : VerifyUser?{
         val verifyUserDataResource = userRepository.verifyUser()
 
         if (verifyUserDataResource is Resource.Success) {
@@ -136,7 +137,9 @@ class EntranceViewModel @Inject constructor(
             return if (verifyUser != null) {
                 censoUserData.setCensoUser(verifyUser = verifyUser)
                 state = state.copy(verifyUserResult = verifyUserDataResource)
-                determineUserDestination(verifyUser)
+                if (checkUserDestinationAfterFinish) {
+                    determineUserDestination(verifyUser)
+                }
                 verifyUser
             } else {
                 handleVerifyUserError(verifyUserDataResource)

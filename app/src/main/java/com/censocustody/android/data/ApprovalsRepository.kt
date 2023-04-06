@@ -1,11 +1,16 @@
 package com.censocustody.android.data
 
-import androidx.biometric.BiometricPrompt.CryptoObject
 import com.censocustody.android.common.Resource
 import com.censocustody.android.common.CensoError
+import com.censocustody.android.common.CrashReportingUtil
+import com.censocustody.android.common.toShareUserId
+import com.censocustody.android.data.models.GetShardsResponse
 import com.censocustody.android.data.models.RegisterApprovalDisposition
+import com.censocustody.android.data.models.Shard
 import com.censocustody.android.data.models.approvalV2.ApprovalDispositionRequestV2
+import com.censocustody.android.data.models.approvalV2.ApprovalRequestDetailsV2
 import com.censocustody.android.data.models.approvalV2.ApprovalRequestV2
+import com.raygun.raygun4android.RaygunClient
 import javax.inject.Inject
 
 interface ApprovalsRepository {
@@ -13,7 +18,10 @@ interface ApprovalsRepository {
     suspend fun approveOrDenyDisposition(
         requestId: String,
         registerApprovalDisposition: RegisterApprovalDisposition,
+        shards: Shards
     ): Resource<ApprovalDispositionRequestV2.RegisterApprovalDispositionV2Body>
+
+    suspend fun retrieveShards(policyRevisionId: String, userId: String) : Resource<GetShardsResponse>
 }
 
 class ApprovalsRepositoryImpl @Inject constructor(
@@ -25,14 +33,24 @@ class ApprovalsRepositoryImpl @Inject constructor(
     override suspend fun getApprovalRequests(): Resource<List<ApprovalRequestV2?>> =
         retrieveApiResource { api.getApprovalRequests() }
 
+    override suspend fun retrieveShards(
+        policyRevisionId: String,
+        userId: String
+    ): Resource<GetShardsResponse> =
+        retrieveApiResource { api.getShards(policyRevisionId = policyRevisionId, userId = userId) }
+
     override suspend fun approveOrDenyDisposition(
         requestId: String,
         registerApprovalDisposition: RegisterApprovalDisposition,
+        shards: Shards
     ): Resource<ApprovalDispositionRequestV2.RegisterApprovalDispositionV2Body> {
         // Helper method anyItemNull() will check if any of the disposition properties are null,
         // this allows us to use !! operator later in this method without worrying of NPE
         if (registerApprovalDisposition.anyItemNull()) {
-            return Resource.Error(censoError = CensoError.DefaultDispositionError())
+            return Resource.Error(
+                exception = Exception("Null data when trying to register disposition"),
+                censoError = CensoError.DefaultDispositionError()
+            )
         }
 
         val userEmail = userRepository.retrieveUserEmail()
@@ -45,13 +63,17 @@ class ApprovalsRepositoryImpl @Inject constructor(
             requestId = requestId,
             approvalDisposition = registerApprovalDisposition.approvalDisposition!!,
             email = userEmail,
-            requestType = registerApprovalDisposition.approvalRequestType!!
+            requestType = registerApprovalDisposition.approvalRequestType!!,
+            shards = shards?.shards
         )
 
         val registerApprovalDispositionBody = try {
             approvalDispositionRequestV2.convertToApiBody(encryptionManager)
         } catch (e: Exception) {
-            return Resource.Error(censoError = CensoError.SigningDataError())
+            return Resource.Error(
+                exception = e,
+                censoError = CensoError.SigningDataError()
+            )
         }
 
         return retrieveApiResource {
@@ -62,3 +84,6 @@ class ApprovalsRepositoryImpl @Inject constructor(
         }
     }
 }
+
+data class Shards(val shards: List<Shard>?)
+

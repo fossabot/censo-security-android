@@ -10,6 +10,7 @@ import com.censocustody.android.data.models.StoredKeyData.Companion.OFFCHAIN_KEY
 import com.censocustody.android.data.models.StoredKeyData.Companion.ETHEREUM_KEY
 import com.censocustody.android.data.models.approvalV2.ApprovalSignature
 import com.google.android.gms.common.util.VisibleForTesting
+import org.bouncycastle.util.encoders.Hex
 import java.math.BigInteger
 import javax.inject.Inject
 
@@ -50,6 +51,8 @@ interface EncryptionManager {
     fun createShareForBootstrapUser(email: String, rootSeed: ByteArray) : Share
 
     fun createShare(shardingPolicy: ShardingPolicy, rootSeed: ByteArray,) : Share
+
+    fun reEncryptShards(email: String, shards: List<Shard>): List<RecoveryShard>
     //endregion
 
     //region generic key work
@@ -257,6 +260,176 @@ class EncryptionManagerImpl @Inject constructor(
                 }
             }
         )
+    }
+
+    private fun handleReshare(
+        shards: List<Shard>,
+        shardingPolicyChangeInfo: ShardingPolicyChangeInfo,
+        privateKeys: List<String>
+    ): List<Shard> {
+
+        val participantIdToAdminUserMap =
+            shardingPolicyChangeInfo.targetPolicy.participants.associateBy {
+                BigInteger(it.participantId, 16)
+            }
+        val privateKeyMap = privateKeys.associate {
+            val ecPrivateKey = EcdsaUtils.getECPrivateKey(it, EcdsaUtils.r1Curve)
+            EcdsaUtils.derivePublicKeyFromPrivateKeyAsBase58(ecPrivateKey, false) to ecPrivateKey
+        }
+
+        return shards.map { shard ->
+            val secretSharer = SecretSharer(
+                decryptShard(
+                    shard.shardCopies[0].encryptedData,
+                    privateKeyMap[shard.shardCopies[0].encryptionPublicKey]!!
+                ),
+                shardingPolicyChangeInfo.targetPolicy.threshold,
+                participantIdToAdminUserMap.keys.toList()
+            )
+            secretSharer.shards.mapNotNull { point ->
+                participantIdToAdminUserMap[point.x]?.let { participant ->
+                    Shard(
+                        participant.participantId,
+                        participant.devicePublicKeys.map { devicePublicKey ->
+                            ShardCopy(
+                                devicePublicKey,
+                                encryptShard(point, devicePublicKey)
+                            )
+                        },
+                        parentShardId = shard.shardId
+                    )
+                } ?: run {
+                    null
+                }
+            }
+        }.flatten()
+    }
+
+    fun handleRecoverRootSeed(
+        shards: List<Shard>,
+        ancestors: List<AncestorShard>,
+        privateKeys: List<String>
+    ): ByteArray {
+
+        val privateKeyMap = privateKeys.associate {
+            val ecPrivateKey = EcdsaUtils.getECPrivateKey(it, EcdsaUtils.r1Curve)
+            EcdsaUtils.derivePublicKeyFromPrivateKeyAsBase58(ecPrivateKey, false) to ecPrivateKey
+        }
+        val rootSeed = recoverShards(
+            shards.mapNotNull {
+                privateKeyMap[it.shardCopies[0].encryptionPublicKey]?.let { privateKey ->
+                    ShardEntry(
+                        it.shardId!!,
+                        BigInteger(it.participantId, 16),
+                        it.parentShardId,
+                        decryptShard(it.shardCopies[0].encryptedData, privateKey)
+                    )
+                }
+            },
+            ancestors.associateBy { it.shardId }
+        )[0].shard!!.toByteArrayNoSign(64)
+
+        return rootSeed
+    }
+
+    private fun recoverShards(
+        shards: List<ShardEntry>,
+        ancestors: Map<String, AncestorShard>
+    ): List<ShardEntry> {
+        if (shards.size <= 1) {
+            return shards
+        }
+
+        val recoveredShards = shards.groupBy { it.parentId }.map { (key, shards) ->
+            val secret = SecretSharerUtils.recoverSecret(
+                shards.map { Point(it.participantId, it.shard!!) },
+                ORDER
+            )
+            key?.let { ancestors[key] }?.let { parent ->
+                ShardEntry(
+                    parent.shardId,
+                    BigInteger(1, Hex.decode(parent.participantId)),
+                    parent.parentShardId,
+                    secret
+                )
+            } ?: ShardEntry(null, BigInteger.ZERO, null, secret)
+        }
+        return recoverShards(recoveredShards, ancestors)
+    }
+
+    override fun reEncryptShards(email: String, shards: List<Shard>): List<RecoveryShard> {
+        val deviceKeys = getDeviceAndBootstrapKeys(email)
+        val recoveryShards: MutableList<RecoveryShard> =
+            emptyList<RecoveryShard>().toMutableList()
+
+        shards.forEach { shard ->
+            shard.shardCopies.forEach { shardCopy ->
+
+                val keyToDecrypt = getCorrectKeyToDecrypt(
+                    deviceKey = deviceKeys.standardDeviceKey,
+                    bootstrapKey = deviceKeys.bootstrapKey,
+                    email = email,
+                    encryptionPublicKey = shardCopy.encryptionPublicKey
+                )
+
+                val decrypted = decryptShard(
+                    encryptedShard = shardCopy.encryptedData,
+                    privateKey = keyToDecrypt
+                )
+
+                val encryptedData = encryptShard(
+                    y = decrypted,
+                    base58AdminKey = shardCopy.encryptionPublicKey
+                )
+
+                shard.shardId?.let {
+                    recoveryShards.add(
+                        RecoveryShard(
+                            shardId = shard.shardId,
+                            encryptedData = encryptedData
+                        )
+                    )
+                }
+            }
+        }
+
+        return recoveryShards
+    }
+
+    private fun getDeviceAndBootstrapKeys(email: String) : DeviceKeys {
+        val deviceId = SharedPrefsHelper.retrieveDeviceId(email)
+        val bootstrapId =
+            if (SharedPrefsHelper.userHasBootstrapDeviceIdSaved(email)) SharedPrefsHelper.retrieveBootstrapDeviceId(
+                email
+            ) else null
+
+        val deviceKey = cryptographyManager.getOrCreateKey(deviceId)
+        val bootStrapKey =
+            if (bootstrapId != null) cryptographyManager.getOrCreateKey(bootstrapId) else null
+
+        return DeviceKeys(standardDeviceKey = deviceKey, bootstrapKey = bootStrapKey)
+    }
+    private fun getCorrectKeyToDecrypt(
+        deviceKey: PrivateKey,
+        bootstrapKey: PrivateKey?,
+        email: String,
+        encryptionPublicKey: String
+    ): PrivateKey {
+        return if (bootstrapKey == null) {
+            deviceKey
+        } else {
+            val devicePublicKey = SharedPrefsHelper.retrieveDevicePublicKey(email)
+            val bootstrapPublicKey =
+                SharedPrefsHelper.retrieveBootstrapDevicePublicKey(email)
+
+            if (devicePublicKey == encryptionPublicKey) {
+                deviceKey
+            } else if (bootstrapPublicKey == encryptionPublicKey) {
+                bootstrapKey
+            } else {
+                throw Exception("Device does not have key to decrypt shard")
+            }
+        }
     }
 
     private fun decryptShard(encryptedShard: String, privateKey: PrivateKey): BigInteger {
@@ -491,3 +664,8 @@ sealed class SignableDataResult {
 interface SignableV2 {
     fun retrieveSignableData(): List<SignableDataResult>
 }
+
+data class DeviceKeys(
+    val standardDeviceKey: PrivateKey,
+    val bootstrapKey: PrivateKey?
+)
