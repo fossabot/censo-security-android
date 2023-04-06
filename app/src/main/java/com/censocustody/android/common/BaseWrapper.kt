@@ -34,7 +34,18 @@ fun String.sha256(): String {
         .fold("", { str, it -> str + "%02x".format(it) })
 }
 
-fun String.toParticipantIdAsBigInteger() = BigInteger(1, EcdsaUtils.getCompressedKeyBytesFromBase58(this, EcdsaUtils.r1Curve))
+fun String.toParticipantIdAsBigInteger(): BigInteger {
+    val bytes = Base58.decode(this)
+    return BigInteger(
+        1,
+        when (bytes.size) {
+            32 -> bytes
+            64 -> bytes.slice(0..31).toByteArray()
+            33, 65 -> bytes.slice(1..32).toByteArray()
+            else -> throw Exception(":Invalid key")
+        }
+    )
+}
 
 fun String.toParticipantIdAsHexString() = toParticipantIdAsBigInteger().toByteArrayNoSign(32).toHexString().lowercase()
 

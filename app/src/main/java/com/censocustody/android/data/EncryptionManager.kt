@@ -15,7 +15,6 @@ import java.math.BigInteger
 import javax.inject.Inject
 
 import java.security.PrivateKey
-import java.security.PublicKey
 import java.util.UUID
 
 data class SignedPayload(
@@ -270,19 +269,17 @@ class EncryptionManagerImpl @Inject constructor(
     }
 
     private fun handleReshare(
+        email: String,
         shards: List<Shard>,
         shardingPolicyChangeInfo: ShardingPolicyChangeInfo,
-        privateKeys: List<String>
     ): List<Shard> {
 
         val participantIdToAdminUserMap =
             shardingPolicyChangeInfo.targetPolicy.participants.associateBy {
                 BigInteger(it.participantId, 16)
             }
-        val privateKeyMap = privateKeys.associate {
-            val ecPrivateKey = EcdsaUtils.getECPrivateKey(it, EcdsaUtils.r1Curve)
-            EcdsaUtils.derivePublicKeyFromPrivateKeyAsBase58(ecPrivateKey, false) to ecPrivateKey
-        }
+
+        val privateKeyMap = getMapOfDeviceKeys(email = email)
 
         return shards.map { shard ->
             val secretSharer = SecretSharer(
@@ -558,8 +555,6 @@ class EncryptionManagerImpl @Inject constructor(
         const val SENTINEL_STATIC_DATA = "sentinel_static_data"
         const val NO_OFFSET_INDEX = 0
         val DATA_CHECK = BaseWrapper.decode("VerificationCheck")
-
-        val NoKeyDataException = Exception("Unable to retrieve key data")
     }
     //endregion
 }
@@ -692,8 +687,4 @@ interface SignableV2 {
 data class DeviceKeys(
     val standardDeviceKey: PrivateKey,
     val bootstrapKey: PrivateKey?
-) {
-    fun toList() =
-        if (bootstrapKey == null) listOf(standardDeviceKey)
-        else listOf(standardDeviceKey, bootstrapKey)
-}
+)
