@@ -41,7 +41,7 @@ class KeyRecoveryViewModel @Inject constructor(
 
     private fun decryptShardsAndSaveRootSeed() {
         viewModelScope.launch {
-            val recoveryData = state.recoverShardsResource.data
+            val recoveryData = state.recoverShardsData
             val verifyUserDetails = state.verifyUserDetails
 
             if (recoveryData == null || verifyUserDetails == null) {
@@ -122,16 +122,27 @@ class KeyRecoveryViewModel @Inject constructor(
         state = state.copy(recoverKeyProcess = Resource.Error(data = RecoveryError.BIOMETRY_FAILED))
     }
 
+    fun retry() {
+        viewModelScope.launch {
+            retrieveRecoveryShards()
+        }
+    }
+
     private suspend fun retrieveRecoveryShards() {
         val recoveryShardsResource = keyRepository.retrieveRecoveryShards()
 
-        state = state.copy(recoverShardsResource = recoveryShardsResource)
-
         if (recoveryShardsResource is Resource.Success) {
+            state = state.copy(
+                recoverShardsData = recoveryShardsResource.data
+            )
             triggerBioPrompt()
         } else if (recoveryShardsResource is Resource.Error) {
             state =
-                state.copy(recoverKeyProcess = Resource.Error(data = RecoveryError.FAILED_RETRIEVE_SHARDS))
+                state.copy(
+                    recoverKeyProcess = Resource.Error(
+                        data = RecoveryError.FAILED_RETRIEVE_SHARDS
+                    )
+                )
         }
     }
 

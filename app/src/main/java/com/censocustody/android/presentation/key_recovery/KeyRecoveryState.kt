@@ -11,7 +11,7 @@ data class KeyRecoveryState(
     val recoverKeyProcess: Resource<RecoveryError?> = Resource.Uninitialized,
     val verifyUserDetails: VerifyUser? = null,
     val triggerBioPrompt: Resource<Unit> = Resource.Uninitialized,
-    val recoverShardsResource: Resource<GetRecoveryShardsResponse> = Resource.Uninitialized,
+    val recoverShardsData: GetRecoveryShardsResponse? = null,
 )
 
 enum class RecoveryError {

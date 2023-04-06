@@ -6,10 +6,6 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.censocustody.android.common.*
-import com.censocustody.android.common.Resource
-import com.censocustody.android.common.CensoCountDownTimer
-import com.censocustody.android.common.CensoCountDownTimerImpl
-import com.censocustody.android.common.CrashReportingUtil
 import com.censocustody.android.data.ApprovalsRepository
 import com.censocustody.android.data.Shards
 import com.censocustody.android.data.models.ApprovalDisposition

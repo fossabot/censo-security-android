@@ -258,4 +258,5 @@
     <string name="waiting_for_device_approval">Waiting for your organization administrators to authorize this device.\n\nPlease check back later.</string>
     <string name="recovery_threshold">Recovery Threshold</string>
     <string name="recovery_address">Recovery Address</string>
+    <string name="recovery_failure">Failed to complete recovery. Please try again or contact Censo Support.</string>
 </resources>
