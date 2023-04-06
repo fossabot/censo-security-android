@@ -11,4 +11,5 @@ object CrashReportingUtil {
     const val KEY_INVALIDATED = "KeyInvalidated"
     const val APPROVAL_DISPOSITION = "ApprovalDisposition"
     const val RETRIEVE_SHARDS = "RetrieveShards"
+    const val RECOVER_KEY = "RecoverKey"
 }

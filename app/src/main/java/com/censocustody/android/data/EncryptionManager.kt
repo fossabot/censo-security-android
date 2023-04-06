@@ -52,7 +52,13 @@ interface EncryptionManager {
 
     fun createShare(shardingPolicy: ShardingPolicy, rootSeed: ByteArray,) : Share
 
-    fun reEncryptShards(email: String, shards: List<Shard>): List<RecoveryShard>
+    fun reEncryptShards(email: String, shards: List<Shard>, targetDevicePublicKey: String): List<RecoveryShard>
+
+    fun recoverRootSeedFromShards(
+        shards: List<Shard>,
+        ancestors: List<AncestorShard>,
+        email: String
+    ): ByteArray
     //endregion
 
     //region generic key work
@@ -263,19 +269,17 @@ class EncryptionManagerImpl @Inject constructor(
     }
 
     private fun handleReshare(
+        email: String,
         shards: List<Shard>,
         shardingPolicyChangeInfo: ShardingPolicyChangeInfo,
-        privateKeys: List<String>
     ): List<Shard> {
 
         val participantIdToAdminUserMap =
             shardingPolicyChangeInfo.targetPolicy.participants.associateBy {
                 BigInteger(it.participantId, 16)
             }
-        val privateKeyMap = privateKeys.associate {
-            val ecPrivateKey = EcdsaUtils.getECPrivateKey(it, EcdsaUtils.r1Curve)
-            EcdsaUtils.derivePublicKeyFromPrivateKeyAsBase58(ecPrivateKey, false) to ecPrivateKey
-        }
+
+        val privateKeyMap = getMapOfDeviceKeys(email = email)
 
         return shards.map { shard ->
             val secretSharer = SecretSharer(
@@ -305,17 +309,14 @@ class EncryptionManagerImpl @Inject constructor(
         }.flatten()
     }
 
-    fun handleRecoverRootSeed(
+    override fun recoverRootSeedFromShards(
         shards: List<Shard>,
         ancestors: List<AncestorShard>,
-        privateKeys: List<String>
+        email: String
     ): ByteArray {
+        val privateKeyMap = getMapOfDeviceKeys(email = email)
 
-        val privateKeyMap = privateKeys.associate {
-            val ecPrivateKey = EcdsaUtils.getECPrivateKey(it, EcdsaUtils.r1Curve)
-            EcdsaUtils.derivePublicKeyFromPrivateKeyAsBase58(ecPrivateKey, false) to ecPrivateKey
-        }
-        val rootSeed = recoverShards(
+        val shardEntries = recoverShards(
             shards.mapNotNull {
                 privateKeyMap[it.shardCopies[0].encryptionPublicKey]?.let { privateKey ->
                     ShardEntry(
@@ -327,9 +328,10 @@ class EncryptionManagerImpl @Inject constructor(
                 }
             },
             ancestors.associateBy { it.shardId }
-        )[0].shard!!.toByteArrayNoSign(64)
+        )
 
-        return rootSeed
+        return shardEntries.firstOrNull()?.shard?.toByteArrayNoSign(64)
+            ?: throw Exception("No ShardEntry created when trying to recover seed.")
     }
 
     private fun recoverShards(
@@ -357,7 +359,7 @@ class EncryptionManagerImpl @Inject constructor(
         return recoverShards(recoveredShards, ancestors)
     }
 
-    override fun reEncryptShards(email: String, shards: List<Shard>): List<RecoveryShard> {
+    override fun reEncryptShards(email: String, shards: List<Shard>, targetDevicePublicKey: String): List<RecoveryShard> {
         val deviceKeys = getDeviceAndBootstrapKeys(email)
         val recoveryShards: MutableList<RecoveryShard> =
             emptyList<RecoveryShard>().toMutableList()
@@ -371,7 +373,6 @@ class EncryptionManagerImpl @Inject constructor(
                     email = email,
                     encryptionPublicKey = shardCopy.encryptionPublicKey
                 )
-
                 val decrypted = decryptShard(
                     encryptedShard = shardCopy.encryptedData,
                     privateKey = keyToDecrypt
@@ -379,7 +380,7 @@ class EncryptionManagerImpl @Inject constructor(
 
                 val encryptedData = encryptShard(
                     y = decrypted,
-                    base58AdminKey = shardCopy.encryptionPublicKey
+                    base58AdminKey = targetDevicePublicKey
                 )
 
                 shard.shardId?.let {
@@ -430,6 +431,26 @@ class EncryptionManagerImpl @Inject constructor(
                 throw Exception("Device does not have key to decrypt shard")
             }
         }
+    }
+
+    private fun getMapOfDeviceKeys(email: String): Map<String, PrivateKey> {
+        val mapOfKeys: MutableMap<String, PrivateKey> = mutableMapOf()
+
+        val deviceId = SharedPrefsHelper.retrieveDeviceId(email = email)
+        val deviceKey = cryptographyManager.getOrCreateKey(deviceId)
+        val devicePublicKey = SharedPrefsHelper.retrieveDevicePublicKey(email)
+
+        mapOfKeys[devicePublicKey] = deviceKey
+
+        if (SharedPrefsHelper.userHasBootstrapDeviceIdSaved(email)) {
+            val bootstrapId = SharedPrefsHelper.retrieveBootstrapDeviceId(email = email)
+            val bootStrapKey = cryptographyManager.getOrCreateKey(bootstrapId)
+            val bootstrapPublicKey = SharedPrefsHelper.retrieveBootstrapDevicePublicKey(email)
+
+            mapOfKeys[bootstrapPublicKey] = bootStrapKey
+        }
+
+        return mapOfKeys.toMap()
     }
 
     private fun decryptShard(encryptedShard: String, privateKey: PrivateKey): BigInteger {
@@ -534,8 +555,6 @@ class EncryptionManagerImpl @Inject constructor(
         const val SENTINEL_STATIC_DATA = "sentinel_static_data"
         const val NO_OFFSET_INDEX = 0
         val DATA_CHECK = BaseWrapper.decode("VerificationCheck")
-
-        val NoKeyDataException = Exception("Unable to retrieve key data")
     }
     //endregion
 }
@@ -592,8 +611,8 @@ sealed class SignableDataResult {
     ): SignableDataResult()
 
     data class Polygon(
-         override val dataToSign: ByteArray,
-         override val offchain: Offchain,
+        override val dataToSign: ByteArray,
+        override val offchain: Offchain,
     ): SignableDataResult(), Evm {
         override fun equals(other: Any?): Boolean {
             if (this === other) return true

@@ -8,7 +8,6 @@ import androidx.lifecycle.viewModelScope
 import com.censocustody.android.common.*
 import com.censocustody.android.data.ApprovalsRepository
 import com.censocustody.android.data.Shards
-import com.censocustody.android.data.UserRepository
 import com.censocustody.android.data.models.ApprovalDisposition
 import com.censocustody.android.data.models.RegisterApprovalDisposition
 import com.censocustody.android.data.models.Shard
