@@ -6,10 +6,7 @@ import com.censocustody.android.common.evm.EvmTransactionUtil
 import com.censocustody.android.common.evm.EvmWhitelistHelper
 import com.censocustody.android.common.evm.SafeTx
 import com.censocustody.android.data.*
-import com.censocustody.android.data.models.ApprovalDisposition
-import com.censocustody.android.data.models.Chain
-import com.censocustody.android.data.models.RecoveryShard
-import com.censocustody.android.data.models.Shard
+import com.censocustody.android.data.models.*
 import com.censocustody.android.data.models.evm.EvmConfigTransactionBuilder
 import org.web3j.crypto.Hash
 import kotlin.Exception
@@ -20,7 +17,8 @@ data class ApprovalDispositionRequestV2(
     val requestId: String,
     val approvalDisposition: ApprovalDisposition,
     val requestType: ApprovalRequestDetailsV2,
-    val email: String
+    val email: String,
+    val shards: List<Shard>?
 ) : SignableV2 {
 
     override fun retrieveSignableData(): List<SignableDataResult> {
@@ -32,7 +30,7 @@ data class ApprovalDispositionRequestV2(
                     }
 
                     is ApprovalRequestDetailsV2.PasswordReset -> {
-                        getPasswordResetSignableData(requestType)
+                        getPasswordResetSignableData()
                     }
 
                     is ApprovalRequestDetailsV2.BitcoinWalletCreation,
@@ -330,7 +328,7 @@ data class ApprovalDispositionRequestV2(
                     }
 
                     is ApprovalRequestDetailsV2.PasswordReset -> {
-                        getPasswordResetSignableData(requestType)
+                        getPasswordResetSignableData()
                     }
 
                     else -> listOf(getApprovalRequestDetailsSignature())
@@ -344,7 +342,7 @@ data class ApprovalDispositionRequestV2(
         return listOf(SignableDataResult.Device(dataToSign = payload, dataToSend = payload))
     }
 
-    private fun getPasswordResetSignableData(approvalRequestDetails: ApprovalRequestDetailsV2.PasswordReset): List<SignableDataResult> {
+    private fun getPasswordResetSignableData(): List<SignableDataResult> {
         val payload = "{\"guid\":\"${requestId}\",\"disposition\":\"${approvalDisposition.value}\"}".toByteArray(charset = Charsets.UTF_8)
         return listOf(SignableDataResult.Device(dataToSign = payload, dataToSend = payload))
     }
@@ -393,10 +391,23 @@ data class ApprovalDispositionRequestV2(
                 )
             }
 
+        val updatedShards = updateShards(encryptionManager)
+
         return RegisterApprovalDispositionV2Body(
             approvalDisposition = approvalDisposition,
-            signatures = signatures
+            signatures = signatures,
+            recoveryShards = updatedShards,
         )
+    }
+
+    private fun updateShards(encryptionManager: EncryptionManager): List<RecoveryShard>? {
+        if (shards == null || shards.isEmpty()) return null
+
+        return when (requestType) {
+            is ApprovalRequestDetailsV2.AddDevice ->
+                encryptionManager.reEncryptShards(email = email, shards = shards)
+            else -> null
+        }
     }
 
     inner class RegisterApprovalDispositionV2Body(

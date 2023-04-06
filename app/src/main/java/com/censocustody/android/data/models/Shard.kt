@@ -1,5 +1,8 @@
 package com.censocustody.android.data.models
 
+import com.censocustody.android.common.toHexString
+import java.math.BigInteger
+
 data class ShardCopy(
     val encryptionPublicKey: String,
     val encryptedData: String,
@@ -10,6 +13,11 @@ data class Shard(
     val shardCopies: List<ShardCopy>,
     val shardId: String? = null,
     val parentShardId: String? = null,
+)
+
+data class ShardingPolicyChangeInfo(
+    val currentPolicyRevisionGuid: String,
+    val targetPolicy: ShardingPolicy
 )
 
 data class RecoveryShard(
@@ -27,6 +35,17 @@ data class AncestorShard(
     val participantId: String,
     val parentShardId: String? = null
 )
+
+data class ShardEntry(
+    val id: String?,
+    val participantId: BigInteger,
+    val parentId: String?,
+    val shard: BigInteger?
+) {
+    override fun toString(): String {
+        return "ShardEntry(id=$id, participantId=${participantId.toHexString()}, parentId=$parentId, shard=${shard!!.toHexString()})"
+    }
+}
 
 data class GetShardsResponse(
     val shards: List<Shard>

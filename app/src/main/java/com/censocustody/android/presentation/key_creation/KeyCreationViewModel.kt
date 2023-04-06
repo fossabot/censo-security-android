@@ -25,11 +25,13 @@ class KeyCreationViewModel @Inject constructor(
 
     //region VM SETUP
     fun onStart(initialData: KeyCreationInitialData) {
-        if(initialData.verifyUserDetails != null && initialData.userImage != null) {
+        if (initialData.verifyUserDetails != null && initialData.userImage != null) {
             state = state.copy(
                 verifyUserDetails = initialData.verifyUserDetails,
                 userImage = initialData.userImage,
             )
+        } else if (initialData.verifyUserDetails != null) {
+            state = state.copy(verifyUserDetails = initialData.verifyUserDetails)
         }
 
         viewModelScope.launch {
