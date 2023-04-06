@@ -55,7 +55,7 @@ import java.io.File
 @Composable
 fun CaptureUserImageContent(
     modifier: Modifier = Modifier,
-    onImageCaptureSuccess: (Bitmap) -> Unit,
+    onImageCaptureSuccess: (Bitmap, String) -> Unit,
     onImageCaptureError: (Exception) -> Unit
 ) {
     val context = LocalContext.current
@@ -104,7 +104,7 @@ fun CaptureUserImageContent(
                 CensoButton(
                     onClick = {
                         if(userImageBitmap != null) {
-                            onImageCaptureSuccess(userImageBitmap)
+                            onImageCaptureSuccess(userImageBitmap, imageFile?.absolutePath ?: "")
                         } else {
                             Toast.makeText(
                                 context,

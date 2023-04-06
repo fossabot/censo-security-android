@@ -1,5 +1,7 @@
 package com.censocustody.android.presentation.key_creation
 
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -7,9 +9,13 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import cash.z.ecc.android.bip39.Mnemonics
 import cash.z.ecc.android.bip39.toSeed
+import com.censocustody.android.common.BaseWrapper
 import com.censocustody.android.common.Resource
+import com.censocustody.android.common.generateUserImageObject
+import com.censocustody.android.common.hashOfUserImage
 import com.censocustody.android.data.*
 import com.censocustody.android.data.models.UserImage
+import com.censocustody.android.data.models.VerifyUser
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -18,20 +24,23 @@ import javax.inject.Inject
 class KeyCreationViewModel @Inject constructor(
     private val userRepository: UserRepository,
     private val keyRepository: KeyRepository,
+    private val cryptographyManager: CryptographyManager
 ) : ViewModel() {
 
     var state by mutableStateOf(KeyCreationState())
         private set
 
     //region VM SETUP
-    fun onStart(initialData: KeyCreationInitialData) {
-        if (initialData.verifyUserDetails != null && initialData.userImage != null) {
+    fun onStart(verifyUser: VerifyUser?, bitmap: Bitmap?) {
+        if (verifyUser != null && bitmap != null) {
             state = state.copy(
-                verifyUserDetails = initialData.verifyUserDetails,
-                userImage = initialData.userImage,
+                verifyUserDetails = verifyUser,
+                bitmap = bitmap,
             )
-        } else if (initialData.verifyUserDetails != null) {
-            state = state.copy(verifyUserDetails = initialData.verifyUserDetails)
+        } else if (verifyUser != null) {
+            state = state.copy(
+                verifyUserDetails = verifyUser
+            )
         }
 
         viewModelScope.launch {
@@ -78,8 +87,8 @@ class KeyCreationViewModel @Inject constructor(
 
                 state = state.copy(walletSigners = walletSigners)
 
-                if (state.verifyUserDetails != null && state.verifyUserDetails?.shardingPolicy == null && state.userImage != null) {
-                    uploadBootStrapData(state.userImage!!)
+                if (state.verifyUserDetails != null && state.verifyUserDetails?.shardingPolicy == null && state.bitmap != null) {
+                    uploadBootStrapData(state.bitmap!!)
                 } else {
                     uploadKeys()
                 }
@@ -91,7 +100,33 @@ class KeyCreationViewModel @Inject constructor(
         }
     }
 
-    private suspend fun uploadBootStrapData(userImage: UserImage) {
+    private suspend fun uploadBootStrapData(bitmap: Bitmap) {
+        val userEmail = userRepository.retrieveUserEmail()
+        val deviceId = SharedPrefsHelper.retrieveDeviceId(email = userEmail)
+
+        //Get user image all ready
+        val userImage = generateUserImageObject(
+            userPhoto = bitmap,
+            keyName = deviceId,
+            cryptographyManager = cryptographyManager
+        )
+
+        val imageByteArray = BaseWrapper.decodeFromBase64(userImage.image)
+        val hashOfImage = hashOfUserImage(imageByteArray)
+
+        val signatureToCheck = BaseWrapper.decodeFromBase64(userImage.signature)
+
+        val verified = cryptographyManager.verifySignature(
+            keyName = deviceId,
+            dataSigned = hashOfImage,
+            signatureToCheck = signatureToCheck
+        )
+
+        if (!verified) {
+            throw Exception("Device image signature not valid.")
+        }
+
+
         val phrase = state.keyGeneratedPhrase ?: throw Exception("Missing phrase when trying to create bootstrap")
 
         val walletSigners = state.walletSigners

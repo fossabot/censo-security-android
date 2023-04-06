@@ -1,5 +1,6 @@
 package com.censocustody.android.presentation.key_creation
 
+import android.graphics.Bitmap
 import com.censocustody.android.common.BioPromptReason
 import com.censocustody.android.common.Resource
 import com.censocustody.android.common.UriWrapper
@@ -20,13 +21,13 @@ data class KeyCreationState(
     val uploadingKeyProcess: Resource<Unit> = Resource.Uninitialized,
 
     val verifyUserDetails: VerifyUser? = null,
-    val userImage: UserImage? = null,
+    val bitmap: Bitmap? = null,
 )
 
 //If user image is filled in, then we are setting up bootstrap user
 data class KeyCreationInitialData(
     val verifyUserDetails: VerifyUser?,
-    val userImage: UserImage? = null
+    val fileUrl : String = ""
 ) {
     companion object {
         fun toJson(

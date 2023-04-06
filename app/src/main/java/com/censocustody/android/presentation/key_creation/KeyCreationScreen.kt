@@ -1,11 +1,11 @@
 package com.censocustody.android.presentation.key_creation
 
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.*
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import com.censocustody.android.common.Resource
-import com.censocustody.android.common.popUpToTop
 import com.censocustody.android.presentation.Screen
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -25,9 +25,11 @@ import androidx.fragment.app.FragmentActivity
 import com.censocustody.android.presentation.key_management.BackgroundUI
 import com.censocustody.android.presentation.key_management.SmallAuthFlowButton
 import com.censocustody.android.R
-import com.censocustody.android.common.BioCryptoUtil
+import com.censocustody.android.common.*
 import com.censocustody.android.presentation.key_management.PreBiometryDialog
 import com.censocustody.android.ui.theme.*
+import com.raygun.raygun4android.RaygunClient
+import java.io.File
 
 @Composable
 fun KeyCreationScreen(
@@ -39,7 +41,19 @@ fun KeyCreationScreen(
     val context = LocalContext.current as FragmentActivity
 
     DisposableEffect(key1 = viewModel) {
-        viewModel.onStart(initialData)
+
+        val bitmap = if (initialData.fileUrl.isNotEmpty()) {
+            val bitmap = BitmapFactory.decodeFile(initialData.fileUrl);
+            rotateImageIfRequired(
+                context = context,
+                image = bitmap,
+                imageFile = File(initialData.fileUrl)
+            )
+        } else {
+            null
+        }
+
+        viewModel.onStart(initialData.verifyUserDetails, bitmap = bitmap)
         onDispose {
             viewModel.cleanUp()
         }
@@ -143,5 +157,27 @@ fun KeyCreationScreen(
             mainText = stringResource(id = R.string.save_biometry_info_key_creation),
             onAccept = kickOffBioPrompt
         )
+    }
+
+    fun cropAndRotateImage(imageUrl: String): Bitmap? {
+        var userImageBitmap: Bitmap?
+        return try {
+            userImageBitmap = BitmapFactory.decodeFile(imageUrl)
+            if (userImageBitmap != null) {
+                userImageBitmap = rotateImageIfRequired(context, userImageBitmap, File(imageUrl))
+                squareCropImage(userImageBitmap)
+            } else {
+                null
+            }
+        } catch (e: Exception) {
+            RaygunClient.send(
+                e,
+                listOf(
+                    CrashReportingUtil.MANUALLY_REPORTED_TAG,
+                    CrashReportingUtil.IMAGE
+                )
+            )
+            null
+        }
     }
 }

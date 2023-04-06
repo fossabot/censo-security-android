@@ -86,7 +86,7 @@ fun DeviceRegistrationScreen(
 
             val keyCreationInitialData = KeyCreationInitialData(
                 verifyUserDetails = state.verifyUserDetails,
-                userImage = state.userImage
+                fileUrl = state.fileUrl
             )
 
             val keyCreationJson =
@@ -178,8 +178,8 @@ fun DeviceRegistrationScreen(
 
         } else if (state.triggerImageCapture is Resource.Loading) {
             CaptureUserImageContent(
-                onImageCaptureSuccess = { bitmap ->
-                    viewModel.capturedUserPhotoSuccess(bitmap)
+                onImageCaptureSuccess = { bitmap, fileUrl ->
+                    viewModel.capturedUserPhotoSuccess(bitmap, fileUrl)
                 },
                 onImageCaptureError = {
                     viewModel.capturedUserPhotoError(it)
