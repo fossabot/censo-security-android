@@ -13,8 +13,8 @@ sealed class Screen(val route: String) {
     object KeyCreationRoute : Screen("key_creation_screen")  {
         const val KEY_CREATION_ARG = "key_creation_arg"
     }
-    object KeyManagementRoute : Screen("key_management_screen") {
-        const val KEY_MGMT_ARG = "key_mgmt_arg"
+    object KeyRecoveryRoute : Screen("key_recovery_screen") {
+        const val KEY_RECOVERY_ARG = "key_recovery_arg"
     }
     object PendingApprovalRoute : Screen("pending_approval_screen")
     object ResetPasswordRoute : Screen("reset_password_screen")

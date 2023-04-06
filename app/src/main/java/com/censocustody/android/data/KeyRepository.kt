@@ -5,10 +5,7 @@ import cash.z.ecc.android.bip39.Mnemonics
 import cash.z.ecc.android.bip39.toSeed
 import com.censocustody.android.common.*
 import com.censocustody.android.data.EncryptionManagerImpl.Companion.SENTINEL_KEY_NAME
-import com.censocustody.android.data.models.Signers
-import com.censocustody.android.data.models.VerifyUser
-import com.censocustody.android.data.models.WalletSigner
-import com.censocustody.android.data.models.mapToPublicKeysList
+import com.censocustody.android.data.models.*
 import com.raygun.raygun4android.RaygunClient
 import java.security.InvalidAlgorithmParameterException
 import java.security.KeyStoreException
@@ -16,37 +13,36 @@ import javax.crypto.Cipher
 import javax.crypto.IllegalBlockSizeException
 
 interface KeyRepository {
-
     suspend fun signTimestamp(timestamp: String): String
-
     suspend fun generatePhrase(): String
     suspend fun doesUserHaveValidLocalKey(verifyUser: VerifyUser): Boolean
-
     suspend fun retrieveV3RootSeed(): ByteArray?
     suspend fun haveV3RootSeed() : Boolean
-
-    suspend fun saveV3RootKey(mnemonic: Mnemonics.MnemonicCode)
+    suspend fun saveV3RootKey(mnemonic: Mnemonics.MnemonicCode?, rootSeed: ByteArray? = null)
     suspend fun saveV3PublicKeys(rootSeed: ByteArray) : List<WalletSigner>
     suspend fun retrieveV3PublicKeys() : List<WalletSigner>
-
     suspend fun hasV3RootSeedStored() : Boolean
-
     suspend fun haveSentinelData() : Boolean
-
     suspend fun generateTimestamp() : String
-
     suspend fun saveSentinelData(cipher: Cipher)
     suspend fun retrieveSentinelData(cipher: Cipher) : String
     suspend fun getInitializedCipherForSentinelEncryption(): Cipher?
     suspend fun getInitializedCipherForSentinelDecryption(): Cipher?
     suspend fun handleKeyInvalidatedException(exception: Exception)
-
+    suspend fun retrieveRecoveryShards(): Resource<GetRecoveryShardsResponse>
     fun validateUserEnteredPhraseAgainstBackendKeys(
         phrase: String,
         verifyUser: VerifyUser?
     ): Boolean
 
+    fun validateRecoveredRootSeed(
+        rootSeed: ByteArray,
+        verifyUser: VerifyUser?
+    ): Boolean
+
     suspend fun uploadKeys(walletSigners: List<WalletSigner>): Resource<Unit>
+
+    suspend fun recoverRootSeed(shards: List<Shard>, ancestors: List<AncestorShard>) : ByteArray
 
     suspend fun signPublicKeys(
         publicKeys: List<WalletSigner?>,
@@ -123,6 +119,29 @@ class KeyRepositoryImpl(
         }
     }
 
+    override fun validateRecoveredRootSeed(
+        rootSeed: ByteArray,
+        verifyUser: VerifyUser?
+    ): Boolean {
+        try {
+            val publicKeys = encryptionManager.publicKeysFromRootSeed(rootSeed)
+
+            if (publicKeys.isEmpty()) {
+                return false
+            }
+
+            return verifyUser?.compareAgainstLocalKeys(publicKeys) == true
+        } catch (e: Exception) {
+            RaygunClient.send(
+                e, listOf(
+                    CrashReportingUtil.RECOVER_KEY,
+                    CrashReportingUtil.MANUALLY_REPORTED_TAG
+                )
+            )
+            return false
+        }
+    }
+
     override suspend fun signTimestamp(timestamp: String): String {
         val userEmail = userRepository.retrieveUserEmail()
 
@@ -140,13 +159,11 @@ class KeyRepositoryImpl(
 
     override suspend fun generatePhrase(): String = encryptionManager.generatePhrase()
 
-    override suspend fun saveV3RootKey(mnemonic: Mnemonics.MnemonicCode) {
+    override suspend fun saveV3RootKey(mnemonic: Mnemonics.MnemonicCode?, rootSeed: ByteArray?) {
         val userEmail = userRepository.retrieveUserEmail()
 
-        val rootSeed = mnemonic.toSeed()
-
         keyStorage.saveRootSeed(
-            rootSeed = rootSeed,
+            rootSeed = rootSeed ?: mnemonic?.toSeed() ?: throw Exception("Must pass one non null version of root seed"),
             email = userEmail
         )
     }
@@ -207,6 +224,19 @@ class KeyRepositoryImpl(
         }
     }
 
+    override suspend fun recoverRootSeed(
+        shards: List<Shard>,
+        ancestors: List<AncestorShard>
+    ): ByteArray {
+        val userEmail = userRepository.retrieveUserEmail()
+
+        return encryptionManager.recoverRootSeedFromShards(
+            email = userEmail,
+            shards = shards,
+            ancestors = ancestors
+        )
+    }
+
     override suspend fun hasV3RootSeedStored(): Boolean {
         val userEmail = userRepository.retrieveUserEmail()
         return securePreferences.hasV3RootSeed(userEmail)
@@ -253,6 +283,8 @@ class KeyRepositoryImpl(
             else -> throw exception
         }
     }
+    override suspend fun retrieveRecoveryShards() =
+        retrieveApiResource { brooklynApiService.getRecoveryShards() }
 
     private suspend fun wipeAllDataAfterKeyInvalidatedException() {
         val email = userRepository.retrieveUserEmail()

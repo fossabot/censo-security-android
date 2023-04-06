@@ -163,14 +163,6 @@ object ECIESManager {
         }
         return c.decodePoint(encoded)
     }
-
-    private fun ecPrivateKeyFromBytes(privateKeyBytes: ByteArray): ECPrivateKey {
-        val encodedKeySpec = PKCS8EncodedKeySpec(privateKeyBytes)
-
-        val keyFactory = KeyFactory.getInstance("EC", BouncyCastleProvider())
-
-        return keyFactory.generatePrivate(encodedKeySpec) as ECPrivateKey
-    }
     //endregion
 }
 

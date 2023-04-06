@@ -254,6 +254,10 @@ fun ApprovalDetails(
                 timeRemainingInSeconds = timeRemainingInSeconds
             )
 
+            approval?.let {
+                ApprovalDetailContent(approval = it, type = it.details)
+            }
+
             ApprovalStatus(
                 requestedBy = approval?.submitterEmail ?: "",
                 approvalsReceived = approval?.numberOfApprovalsReceived ?: 0,
@@ -264,7 +268,6 @@ fun ApprovalDetails(
                 isInitiationRequest = initiationRequest
             )
             Spacer(modifier = Modifier.height(28.dp))
-
         }
 
         Column(
