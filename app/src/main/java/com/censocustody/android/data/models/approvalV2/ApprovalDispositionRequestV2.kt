@@ -405,7 +405,7 @@ data class ApprovalDispositionRequestV2(
 
         return when (requestType) {
             is ApprovalRequestDetailsV2.AddDevice ->
-                encryptionManager.reEncryptShards(email = email, shards = shards)
+                encryptionManager.reEncryptShards(email = email, shards = shards, publicKey = requestType.deviceKey)
             else -> null
         }
     }

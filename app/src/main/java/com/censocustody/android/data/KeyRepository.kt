@@ -18,7 +18,7 @@ interface KeyRepository {
     suspend fun doesUserHaveValidLocalKey(verifyUser: VerifyUser): Boolean
     suspend fun retrieveV3RootSeed(): ByteArray?
     suspend fun haveV3RootSeed() : Boolean
-    suspend fun saveV3RootKey(mnemonic: Mnemonics.MnemonicCode)
+    suspend fun saveV3RootKey(mnemonic: Mnemonics.MnemonicCode?, rootSeed: ByteArray? = null)
     suspend fun saveV3PublicKeys(rootSeed: ByteArray) : List<WalletSigner>
     suspend fun retrieveV3PublicKeys() : List<WalletSigner>
     suspend fun hasV3RootSeedStored() : Boolean
@@ -153,13 +153,11 @@ class KeyRepositoryImpl(
 
     override suspend fun generatePhrase(): String = encryptionManager.generatePhrase()
 
-    override suspend fun saveV3RootKey(mnemonic: Mnemonics.MnemonicCode) {
+    override suspend fun saveV3RootKey(mnemonic: Mnemonics.MnemonicCode?, rootSeed: ByteArray?) {
         val userEmail = userRepository.retrieveUserEmail()
 
-        val rootSeed = mnemonic.toSeed()
-
         keyStorage.saveRootSeed(
-            rootSeed = rootSeed,
+            rootSeed = rootSeed ?: mnemonic?.toSeed() ?: throw Exception("Must pass one non null version of root seed"),
             email = userEmail
         )
     }

@@ -7,13 +7,13 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.censocustody.android.common.Resource
 import com.censocustody.android.data.*
+import com.censocustody.android.data.models.GetRecoveryShardsResponse
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class KeyRecoveryViewModel @Inject constructor(
-    private val userRepository: UserRepository,
     private val keyRepository: KeyRepository,
 ) : ViewModel() {
 
@@ -52,32 +52,69 @@ class KeyRecoveryViewModel @Inject constructor(
                 return@launch
             }
 
-            val rootSeedFromShards = try {
-                keyRepository.recoverRootSeed(
-                    shards = recoveryData.shards,
-                    ancestors = recoveryData.ancestors
-                )
-            } catch (e: Exception) {
-                state =
-                    state.copy(
-                        recoverKeyProcess = Resource.Error(data = RecoveryError.FAILED_DECRYPT)
-                    )
-                return@launch
-            }
+            val rootSeedFromShards = recoverRootSeedFromShards(recoveryData) ?: return@launch
 
             val rootSeedValid = keyRepository.validateRecoveredRootSeed(
                 rootSeed = rootSeedFromShards,
                 verifyUser = verifyUserDetails
             )
 
-            if (rootSeedValid) {
-                state = state.copy(recoverKeyProcess = Resource.Success(null))
-            } else {
-                state =
+            state = if (rootSeedValid) {
+                val savedSeed = saveRootSeed(rootSeedFromShards)
+
+                if (savedSeed) {
+                    state.copy(recoverKeyProcess = Resource.Success(null))
+                } else {
                     state.copy(
                         recoverKeyProcess = Resource.Error(data = RecoveryError.INVALID_ROOT_SEED)
                     )
+                }
+
+            } else {
+                state.copy(
+                    recoverKeyProcess = Resource.Error(data = RecoveryError.INVALID_ROOT_SEED)
+                )
             }
+        }
+    }
+
+    private suspend fun recoverRootSeedFromShards(recoveryData: GetRecoveryShardsResponse): ByteArray? {
+        return try {
+            keyRepository.recoverRootSeed(
+                shards = recoveryData.shards,
+                ancestors = recoveryData.ancestors
+            )
+        } catch (e: Exception) {
+            state =
+                state.copy(
+                    recoverKeyProcess = Resource.Error(
+                        data = RecoveryError.FAILED_DECRYPT,
+                        exception = e
+                    )
+                )
+            null
+        }
+    }
+
+    private suspend fun saveRootSeed(rootSeed: ByteArray): Boolean {
+        return try {
+            keyRepository.saveV3RootKey(
+                rootSeed = rootSeed,
+                mnemonic = null
+            )
+
+            keyRepository.saveV3PublicKeys(
+                rootSeed = rootSeed
+            )
+            true
+        } catch (e: Exception) {
+            state = state.copy(
+                recoverKeyProcess = Resource.Error(
+                    data = RecoveryError.SAVE_FAILED,
+                    exception = e
+                )
+            )
+            false
         }
     }
 

@@ -53,7 +53,7 @@ interface EncryptionManager {
 
     fun createShare(shardingPolicy: ShardingPolicy, rootSeed: ByteArray,) : Share
 
-    fun reEncryptShards(email: String, shards: List<Shard>): List<RecoveryShard>
+    fun reEncryptShards(email: String, shards: List<Shard>, publicKey: String): List<RecoveryShard>
 
     fun recoverRootSeedFromShards(
         shards: List<Shard>,
@@ -361,7 +361,7 @@ class EncryptionManagerImpl @Inject constructor(
         return recoverShards(recoveredShards, ancestors)
     }
 
-    override fun reEncryptShards(email: String, shards: List<Shard>): List<RecoveryShard> {
+    override fun reEncryptShards(email: String, shards: List<Shard>, publicKey: String): List<RecoveryShard> {
         val deviceKeys = getDeviceAndBootstrapKeys(email)
         val recoveryShards: MutableList<RecoveryShard> =
             emptyList<RecoveryShard>().toMutableList()
@@ -383,7 +383,7 @@ class EncryptionManagerImpl @Inject constructor(
 
                 val encryptedData = encryptShard(
                     y = decrypted,
-                    base58AdminKey = shardCopy.encryptionPublicKey
+                    base58AdminKey = publicKey
                 )
 
                 shard.shardId?.let {
