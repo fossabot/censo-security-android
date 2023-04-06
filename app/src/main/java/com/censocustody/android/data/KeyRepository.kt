@@ -132,6 +132,12 @@ class KeyRepositoryImpl(
 
             return verifyUser?.compareAgainstLocalKeys(publicKeys) == true
         } catch (e: Exception) {
+            RaygunClient.send(
+                e, listOf(
+                    CrashReportingUtil.RECOVER_KEY,
+                    CrashReportingUtil.MANUALLY_REPORTED_TAG
+                )
+            )
             return false
         }
     }

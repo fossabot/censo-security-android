@@ -5,9 +5,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.censocustody.android.common.CrashReportingUtil
 import com.censocustody.android.common.Resource
 import com.censocustody.android.data.*
 import com.censocustody.android.data.models.GetRecoveryShardsResponse
+import com.raygun.raygun4android.RaygunClient
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -85,6 +87,12 @@ class KeyRecoveryViewModel @Inject constructor(
                 ancestors = recoveryData.ancestors
             )
         } catch (e: Exception) {
+            RaygunClient.send(
+                e, listOf(
+                    CrashReportingUtil.RECOVER_KEY,
+                    CrashReportingUtil.MANUALLY_REPORTED_TAG
+                )
+            )
             state =
                 state.copy(
                     recoverKeyProcess = Resource.Error(
@@ -108,6 +116,12 @@ class KeyRecoveryViewModel @Inject constructor(
             )
             true
         } catch (e: Exception) {
+            RaygunClient.send(
+                e, listOf(
+                    CrashReportingUtil.RECOVER_KEY,
+                    CrashReportingUtil.MANUALLY_REPORTED_TAG
+                )
+            )
             state = state.copy(
                 recoverKeyProcess = Resource.Error(
                     data = RecoveryError.SAVE_FAILED,
@@ -137,6 +151,13 @@ class KeyRecoveryViewModel @Inject constructor(
             )
             triggerBioPrompt()
         } else if (recoveryShardsResource is Resource.Error) {
+            RaygunClient.send(
+                recoveryShardsResource.exception
+                    ?: Exception("Failed retrieving recovery shards from API"), listOf(
+                    CrashReportingUtil.RECOVER_KEY,
+                    CrashReportingUtil.MANUALLY_REPORTED_TAG
+                )
+            )
             state =
                 state.copy(
                     recoverKeyProcess = Resource.Error(

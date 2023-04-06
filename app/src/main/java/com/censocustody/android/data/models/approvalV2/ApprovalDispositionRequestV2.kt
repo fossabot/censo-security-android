@@ -408,7 +408,7 @@ data class ApprovalDispositionRequestV2(
                 encryptionManager.reEncryptShards(
                     email = email,
                     shards = shards,
-                    publicKey = requestType.deviceKey
+                    targetDevicePublicKey = requestType.deviceKey
                 )
             else -> null
         }

@@ -52,7 +52,7 @@ interface EncryptionManager {
 
     fun createShare(shardingPolicy: ShardingPolicy, rootSeed: ByteArray,) : Share
 
-    fun reEncryptShards(email: String, shards: List<Shard>, publicKey: String): List<RecoveryShard>
+    fun reEncryptShards(email: String, shards: List<Shard>, targetDevicePublicKey: String): List<RecoveryShard>
 
     fun recoverRootSeedFromShards(
         shards: List<Shard>,
@@ -316,7 +316,7 @@ class EncryptionManagerImpl @Inject constructor(
     ): ByteArray {
         val privateKeyMap = getMapOfDeviceKeys(email = email)
 
-        val rootSeed = recoverShards(
+        val shardEntries = recoverShards(
             shards.mapNotNull {
                 privateKeyMap[it.shardCopies[0].encryptionPublicKey]?.let { privateKey ->
                     ShardEntry(
@@ -328,9 +328,10 @@ class EncryptionManagerImpl @Inject constructor(
                 }
             },
             ancestors.associateBy { it.shardId }
-        )[0].shard!!.toByteArrayNoSign(64)
+        )
 
-        return rootSeed
+        return shardEntries.firstOrNull()?.shard?.toByteArrayNoSign(64)
+            ?: throw Exception("No ShardEntry created when trying to recover seed.")
     }
 
     private fun recoverShards(
@@ -358,7 +359,7 @@ class EncryptionManagerImpl @Inject constructor(
         return recoverShards(recoveredShards, ancestors)
     }
 
-    override fun reEncryptShards(email: String, shards: List<Shard>, publicKey: String): List<RecoveryShard> {
+    override fun reEncryptShards(email: String, shards: List<Shard>, targetDevicePublicKey: String): List<RecoveryShard> {
         val deviceKeys = getDeviceAndBootstrapKeys(email)
         val recoveryShards: MutableList<RecoveryShard> =
             emptyList<RecoveryShard>().toMutableList()
@@ -379,7 +380,7 @@ class EncryptionManagerImpl @Inject constructor(
 
                 val encryptedData = encryptShard(
                     y = decrypted,
-                    base58AdminKey = publicKey
+                    base58AdminKey = targetDevicePublicKey
                 )
 
                 shard.shardId?.let {
