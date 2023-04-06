@@ -6,7 +6,9 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Button
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Text
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -15,11 +17,10 @@ import androidx.fragment.app.FragmentActivity
 import com.censocustody.android.R
 import com.censocustody.android.common.BioCryptoUtil
 import com.censocustody.android.common.Resource
-import com.censocustody.android.common.censoLog
 import com.censocustody.android.presentation.Screen
 import com.censocustody.android.presentation.key_management.BackgroundUI
 import com.censocustody.android.presentation.key_management.PreBiometryDialog
-import com.censocustody.android.ui.theme.TextBlack
+import com.censocustody.android.ui.theme.ButtonRed
 
 @Composable
 fun KeyRecoveryScreen(
@@ -48,21 +49,18 @@ fun KeyRecoveryScreen(
                 }
             }
         }
-
-        if (state.recoverKeyProcess is Resource.Error) {
-            censoLog(message = "Failed to recover root seed: ${state.recoverKeyProcess.data}")
-        }
     }
 
     BackgroundUI()
     Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(horizontal = 40.dp)
+        modifier = Modifier.fillMaxSize()
     ) {
-        Text(
-            "Intense techno crypto music noises. Doing intense sharding work over here...",
-            color = TextBlack
+        CircularProgressIndicator(
+            modifier = Modifier
+                .size(20.dp)
+                .align(alignment = Alignment.Center),
+            color = ButtonRed,
+            strokeWidth = 2.5.dp,
         )
     }
 
@@ -92,13 +90,13 @@ fun KeyRecoveryScreen(
 
     if (state.recoverKeyProcess is Resource.Error) {
         Box(modifier = Modifier.fillMaxSize()) {
-            Column() {
+            Column(modifier = Modifier.align(Alignment.Center)) {
                 Text("Failed to complete recovery: ${state.recoverKeyProcess.data}")
                 Spacer(modifier = Modifier.height(24.dp))
                 Button(onClick = {
                     viewModel.onStart(initialData)
                 }) {
-                    Text("Go again")
+                    Text("Try Again")
                 }
             }
         }
