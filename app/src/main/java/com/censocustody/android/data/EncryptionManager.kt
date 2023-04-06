@@ -15,7 +15,6 @@ import java.math.BigInteger
 import javax.inject.Inject
 
 import java.security.PrivateKey
-import java.security.PublicKey
 import java.util.UUID
 
 data class SignedPayload(

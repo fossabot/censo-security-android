@@ -868,7 +868,7 @@ class KeyManagementViewModelTest : BaseViewModelTest() {
     //region Retry methods
     @Test
     fun `after error occurs during key recovery then retrying should trigger bio prompt`() = runTest {
-        whenever(keyRepository.saveV3RootKey(any())).then {
+        whenever(keyRepository.saveV3RootKey(any(), any())).then {
             throw Exception(defaultErrorMessage)
         }
 
