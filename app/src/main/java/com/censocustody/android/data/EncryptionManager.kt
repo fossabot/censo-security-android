@@ -288,29 +288,34 @@ class EncryptionManagerImpl @Inject constructor(
 
         val privateKeyMap = getMapOfDeviceKeys(email = email)
 
-        return shards.map { shard ->
-            val secretSharer = SecretSharer(
-                decryptShard(
-                    shard.shardCopies[0].encryptedData,
-                    privateKeyMap[shard.shardCopies[0].encryptionPublicKey]!!
-                ),
-                shardingPolicyChangeInfo.targetPolicy.threshold,
-                participantIdToAdminUserMap.keys.toList()
-            )
-            secretSharer.shards.mapNotNull { point ->
-                participantIdToAdminUserMap[point.x]?.let { participant ->
-                    Shard(
-                        participant.participantId,
-                        participant.devicePublicKeys.map { devicePublicKey ->
-                            ShardCopy(
-                                devicePublicKey,
-                                encryptShard(point, devicePublicKey)
-                            )
-                        },
-                        parentShardId = shard.shardId
-                    )
-                } ?: run {
-                    null
+        return shards.mapNotNull { shard ->
+            val keyToDecrypt = privateKeyMap[shard.shardCopies.firstOrNull()?.encryptionPublicKey]
+
+            keyToDecrypt?.let {
+                val secretSharer = SecretSharer(
+                    decryptShard(
+                        shard.shardCopies[0].encryptedData,
+                        it
+                    ),
+                    shardingPolicyChangeInfo.targetPolicy.threshold,
+                    participantIdToAdminUserMap.keys.toList()
+                )
+
+                secretSharer.shards.mapNotNull { point ->
+                    participantIdToAdminUserMap[point.x]?.let { participant ->
+                        Shard(
+                            participant.participantId,
+                            participant.devicePublicKeys.map { devicePublicKey ->
+                                ShardCopy(
+                                    devicePublicKey,
+                                    encryptShard(point, devicePublicKey)
+                                )
+                            },
+                            parentShardId = shard.shardId
+                        )
+                    } ?: run {
+                        null
+                    }
                 }
             }
         }.flatten()
