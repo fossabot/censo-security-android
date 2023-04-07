@@ -54,6 +54,7 @@ abstract class BaseRepository {
 
     companion object {
         const val MAINTENANCE_CODE = 418
+        const val CONFLICT_CODE = 409
         const val TIMEOUT_CODE = 408
         const val BAD_REQUEST_CODE = 400
         const val NO_CODE = -1
