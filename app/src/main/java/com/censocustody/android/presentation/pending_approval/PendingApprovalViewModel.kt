@@ -7,8 +7,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.censocustody.android.common.CensoCountDownTimer
 import com.censocustody.android.common.CensoCountDownTimerImpl
+import com.censocustody.android.common.CensoError
 import com.censocustody.android.common.Resource
 import com.censocustody.android.data.*
+import com.censocustody.android.data.BaseRepository.Companion.CONFLICT_CODE
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -55,7 +57,13 @@ class PendingApprovalViewModel @Inject constructor(
                     }
 
                 } else if (verifyUserDataResource is Resource.Error) {
-                    state = state.copy(verifyUserResult = verifyUserDataResource)
+                    state = if (verifyUserDataResource.censoError is CensoError.DefaultApiError
+                        && verifyUserDataResource.censoError.statusCode == CONFLICT_CODE
+                    ) {
+                        state.copy(sendUserToEntrance = Resource.Success(true))
+                    } else {
+                        state.copy(verifyUserResult = verifyUserDataResource)
+                    }
                 }
             }
         }
