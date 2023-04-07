@@ -8,6 +8,7 @@ import com.censocustody.android.data.models.*
 import com.censocustody.android.data.models.StoredKeyData.Companion.BITCOIN_KEY
 import com.censocustody.android.data.models.StoredKeyData.Companion.OFFCHAIN_KEY
 import com.censocustody.android.data.models.StoredKeyData.Companion.ETHEREUM_KEY
+import com.censocustody.android.data.models.approvalV2.ApprovalRequestDetailsV2
 import com.censocustody.android.data.models.approvalV2.ApprovalSignature
 import com.google.android.gms.common.util.VisibleForTesting
 import org.bouncycastle.util.encoders.Hex
@@ -59,6 +60,12 @@ interface EncryptionManager {
         ancestors: List<AncestorShard>,
         email: String
     ): ByteArray
+
+    fun handleReshare(
+        email: String,
+        shards: List<Shard>,
+        shardingPolicyChangeInfo: ApprovalRequestDetailsV2.ShardingPolicyChangeInfo,
+    ): List<Shard>
     //endregion
 
     //region generic key work
@@ -268,10 +275,10 @@ class EncryptionManagerImpl @Inject constructor(
         )
     }
 
-    private fun handleReshare(
+    override fun handleReshare(
         email: String,
         shards: List<Shard>,
-        shardingPolicyChangeInfo: ShardingPolicyChangeInfo,
+        shardingPolicyChangeInfo: ApprovalRequestDetailsV2.ShardingPolicyChangeInfo,
     ): List<Shard> {
 
         val participantIdToAdminUserMap =
