@@ -136,29 +136,7 @@ class DeviceRegistrationViewModel @Inject constructor(
                 val capturedUserPhoto = state.capturedUserPhoto
                 val keyName = state.standardKeyName
 
-                if (capturedUserPhoto != null && keyName.isNotEmpty()) {
-                    //Get user image all ready
-                    val userImage = generateUserImageObject(
-                        userPhoto = capturedUserPhoto,
-                        keyName = keyName,
-                        cryptographyManager = cryptographyManager
-                    )
-
-                    val imageByteArray = BaseWrapper.decodeFromBase64(userImage.image)
-                    val hashOfImage = hashOfUserImage(imageByteArray)
-
-                    val signatureToCheck = BaseWrapper.decodeFromBase64(userImage.signature)
-
-                    val verified = cryptographyManager.verifySignature(
-                        keyName = keyName,
-                        dataSigned = hashOfImage,
-                        signatureToCheck = signatureToCheck
-                    )
-
-                    if (!verified) {
-                        throw Exception("Device image signature not valid.")
-                    }
-
+                if (capturedUserPhoto != null && state.fileUrl.isNotEmpty() && keyName.isNotEmpty()) {
                     //Save device id and device key
                     val email = userRepository.retrieveUserEmail()
 
@@ -172,7 +150,6 @@ class DeviceRegistrationViewModel @Inject constructor(
 
                     //Send user to the key creation with the image data passed along...
                     state = state.copy(
-                        userImage = userImage,
                         createdBootstrapDeviceData = Resource.Success(Unit),
                     )
                 } else {
@@ -281,9 +258,10 @@ class DeviceRegistrationViewModel @Inject constructor(
         }
     }
 
-    fun capturedUserPhotoSuccess(userPhoto: Bitmap) {
+    fun capturedUserPhotoSuccess(userPhoto: Bitmap, fileUrl: String) {
         state = state.copy(
             capturedUserPhoto = userPhoto,
+            fileUrl = fileUrl,
             triggerImageCapture = Resource.Success(Unit)
         )
     }
