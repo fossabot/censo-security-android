@@ -8,6 +8,7 @@ import com.censocustody.android.data.models.*
 import com.censocustody.android.data.models.StoredKeyData.Companion.BITCOIN_KEY
 import com.censocustody.android.data.models.StoredKeyData.Companion.OFFCHAIN_KEY
 import com.censocustody.android.data.models.StoredKeyData.Companion.ETHEREUM_KEY
+import com.censocustody.android.data.models.approvalV2.ApprovalRequestDetailsV2
 import com.censocustody.android.data.models.approvalV2.ApprovalSignature
 import com.google.android.gms.common.util.VisibleForTesting
 import org.bouncycastle.util.encoders.Hex
@@ -59,6 +60,12 @@ interface EncryptionManager {
         ancestors: List<AncestorShard>,
         email: String
     ): ByteArray
+
+    fun handleReshare(
+        email: String,
+        shards: List<Shard>,
+        targetPolicy: ShardingPolicy,
+    ): List<Shard>
     //endregion
 
     //region generic key work
@@ -268,42 +275,47 @@ class EncryptionManagerImpl @Inject constructor(
         )
     }
 
-    private fun handleReshare(
+    override fun handleReshare(
         email: String,
         shards: List<Shard>,
-        shardingPolicyChangeInfo: ShardingPolicyChangeInfo,
+        targetPolicy: ShardingPolicy
     ): List<Shard> {
 
         val participantIdToAdminUserMap =
-            shardingPolicyChangeInfo.targetPolicy.participants.associateBy {
+            targetPolicy.participants.associateBy {
                 BigInteger(it.participantId, 16)
             }
 
         val privateKeyMap = getMapOfDeviceKeys(email = email)
 
-        return shards.map { shard ->
-            val secretSharer = SecretSharer(
-                decryptShard(
-                    shard.shardCopies[0].encryptedData,
-                    privateKeyMap[shard.shardCopies[0].encryptionPublicKey]!!
-                ),
-                shardingPolicyChangeInfo.targetPolicy.threshold,
-                participantIdToAdminUserMap.keys.toList()
-            )
-            secretSharer.shards.mapNotNull { point ->
-                participantIdToAdminUserMap[point.x]?.let { participant ->
-                    Shard(
-                        participant.participantId,
-                        participant.devicePublicKeys.map { devicePublicKey ->
-                            ShardCopy(
-                                devicePublicKey,
-                                encryptShard(point, devicePublicKey)
-                            )
-                        },
-                        parentShardId = shard.shardId
-                    )
-                } ?: run {
-                    null
+        return shards.mapNotNull { shard ->
+            val keyToDecrypt = privateKeyMap[shard.shardCopies.firstOrNull()?.encryptionPublicKey]
+
+            keyToDecrypt?.let {
+                val secretSharer = SecretSharer(
+                    decryptShard(
+                        shard.shardCopies[0].encryptedData,
+                        it
+                    ),
+                    targetPolicy.threshold,
+                    participantIdToAdminUserMap.keys.toList()
+                )
+
+                secretSharer.shards.mapNotNull { point ->
+                    participantIdToAdminUserMap[point.x]?.let { participant ->
+                        Shard(
+                            participant.participantId,
+                            participant.devicePublicKeys.map { devicePublicKey ->
+                                ShardCopy(
+                                    devicePublicKey,
+                                    encryptShard(point, devicePublicKey)
+                                )
+                            },
+                            parentShardId = shard.shardId
+                        )
+                    } ?: run {
+                        null
+                    }
                 }
             }
         }.flatten()

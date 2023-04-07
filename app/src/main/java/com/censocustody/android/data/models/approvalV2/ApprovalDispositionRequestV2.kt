@@ -391,16 +391,18 @@ data class ApprovalDispositionRequestV2(
                 )
             }
 
-        val updatedShards = updateShards(encryptionManager)
+        val recoveryShards = recoverShards(encryptionManager)
+        val shards = reshareShards(encryptionManager)
 
         return RegisterApprovalDispositionV2Body(
             approvalDisposition = approvalDisposition,
             signatures = signatures,
-            recoveryShards = updatedShards,
+            recoveryShards = recoveryShards,
+            shards = shards
         )
     }
 
-    private fun updateShards(encryptionManager: EncryptionManager): List<RecoveryShard>? {
+    private fun recoverShards(encryptionManager: EncryptionManager): List<RecoveryShard>? {
         if (shards == null || shards.isEmpty()) return null
 
         return when (requestType) {
@@ -410,6 +412,29 @@ data class ApprovalDispositionRequestV2(
                     shards = shards,
                     targetDevicePublicKey = requestType.deviceKey
                 )
+            else -> null
+        }
+    }
+
+    private fun reshareShards(encryptionManager: EncryptionManager): List<Shard>? {
+        if (shards == null || shards.isEmpty()) return null
+
+        return when (requestType) {
+            is ApprovalRequestDetailsV2.OrgAdminPolicyUpdate ->
+                encryptionManager.handleReshare(
+                    email = email,
+                    shards = shards,
+                    requestType.shardingPolicyChangeInfo.targetPolicy
+                )
+            is ApprovalRequestDetailsV2.AddDevice -> {
+                requestType.targetShardingPolicy?.let {
+                    encryptionManager.handleReshare(
+                        email = email,
+                        shards = shards,
+                        requestType.targetShardingPolicy
+                    )
+                }
+            }
             else -> null
         }
     }

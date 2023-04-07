@@ -17,7 +17,7 @@ interface ApprovalsRepository {
         shards: Shards
     ): Resource<ApprovalDispositionRequestV2.RegisterApprovalDispositionV2Body>
 
-    suspend fun retrieveShards(policyRevisionId: String, userId: String) : Resource<GetShardsResponse>
+    suspend fun retrieveShards(policyRevisionId: String, userId: String? = null) : Resource<GetShardsResponse>
 }
 
 class ApprovalsRepositoryImpl @Inject constructor(
@@ -31,7 +31,7 @@ class ApprovalsRepositoryImpl @Inject constructor(
 
     override suspend fun retrieveShards(
         policyRevisionId: String,
-        userId: String
+        userId: String?
     ): Resource<GetShardsResponse> =
         retrieveApiResource { api.getShards(policyRevisionId = policyRevisionId, userId = userId) }
 

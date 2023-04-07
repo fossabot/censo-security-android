@@ -184,9 +184,22 @@ abstract class  CommonApprovalsViewModel(
                 if (shardResponse is Resource.Success) {
                     return shardResponse.data?.shards
                 } else {
-                    throw shardResponse.exception ?: Exception("Failed to retrieve shards")
+                    throw shardResponse.exception ?: Exception("Failed to retrieve add device shards")
                 }
             }
+
+            is ApprovalRequestDetailsV2.OrgAdminPolicyUpdate -> {
+                val shardResponse = approvalsRepository.retrieveShards(
+                    policyRevisionId = requestDetails.shardingPolicyChangeInfo.currentPolicyRevisionGuid,
+                )
+
+                if (shardResponse is Resource.Success) {
+                    return shardResponse.data?.shards
+                } else {
+                    throw shardResponse.exception ?: Exception("Failed to retrieve org policy shards")
+                }
+            }
+
             else -> {
                 return null
             }
