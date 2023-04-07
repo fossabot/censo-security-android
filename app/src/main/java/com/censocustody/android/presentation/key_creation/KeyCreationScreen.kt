@@ -37,23 +37,41 @@ fun KeyCreationScreen(
     initialData: KeyCreationInitialData,
     viewModel: KeyCreationViewModel = hiltViewModel(),
 ) {
+
     val state = viewModel.state
     val context = LocalContext.current as FragmentActivity
 
+    fun cropAndRotateImage(imageUrl: String): Bitmap? {
+        var userImageBitmap: Bitmap?
+        return try {
+            userImageBitmap = BitmapFactory.decodeFile(imageUrl)
+            if (userImageBitmap != null) {
+                userImageBitmap = rotateImageIfRequired(context, userImageBitmap, File(imageUrl))
+                squareCropImage(userImageBitmap)
+            } else {
+                null
+            }
+        } catch (e: Exception) {
+            RaygunClient.send(
+                e,
+                listOf(
+                    CrashReportingUtil.MANUALLY_REPORTED_TAG,
+                    CrashReportingUtil.IMAGE
+                )
+            )
+            null
+        }
+    }
+
     DisposableEffect(key1 = viewModel) {
 
-        val bitmap = if (initialData.fileUrl.isNotEmpty()) {
-            val bitmap = BitmapFactory.decodeFile(initialData.fileUrl);
-            rotateImageIfRequired(
-                context = context,
-                image = bitmap,
-                imageFile = File(initialData.fileUrl)
-            )
+        val bitmap = if (initialData.bootstrapUserDeviceImageURI.isNotEmpty()) {
+            cropAndRotateImage(initialData.bootstrapUserDeviceImageURI)
         } else {
             null
         }
 
-        viewModel.onStart(initialData.verifyUserDetails, bitmap = bitmap)
+        viewModel.onStart(initialData.verifyUserDetails, bootstrapUserDeviceImage = bitmap)
         onDispose {
             viewModel.cleanUp()
         }
@@ -157,27 +175,5 @@ fun KeyCreationScreen(
             mainText = stringResource(id = R.string.save_biometry_info_key_creation),
             onAccept = kickOffBioPrompt
         )
-    }
-
-    fun cropAndRotateImage(imageUrl: String): Bitmap? {
-        var userImageBitmap: Bitmap?
-        return try {
-            userImageBitmap = BitmapFactory.decodeFile(imageUrl)
-            if (userImageBitmap != null) {
-                userImageBitmap = rotateImageIfRequired(context, userImageBitmap, File(imageUrl))
-                squareCropImage(userImageBitmap)
-            } else {
-                null
-            }
-        } catch (e: Exception) {
-            RaygunClient.send(
-                e,
-                listOf(
-                    CrashReportingUtil.MANUALLY_REPORTED_TAG,
-                    CrashReportingUtil.IMAGE
-                )
-            )
-            null
-        }
     }
 }

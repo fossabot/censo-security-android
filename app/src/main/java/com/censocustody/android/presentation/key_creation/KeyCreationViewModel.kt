@@ -31,11 +31,11 @@ class KeyCreationViewModel @Inject constructor(
         private set
 
     //region VM SETUP
-    fun onStart(verifyUser: VerifyUser?, bitmap: Bitmap?) {
-        if (verifyUser != null && bitmap != null) {
+    fun onStart(verifyUser: VerifyUser?, bootstrapUserDeviceImage: Bitmap?) {
+        if (verifyUser != null && bootstrapUserDeviceImage != null) {
             state = state.copy(
                 verifyUserDetails = verifyUser,
-                bitmap = bitmap,
+                bootstrapUserDeviceImage = bootstrapUserDeviceImage,
             )
         } else if (verifyUser != null) {
             state = state.copy(
@@ -87,8 +87,8 @@ class KeyCreationViewModel @Inject constructor(
 
                 state = state.copy(walletSigners = walletSigners)
 
-                if (state.verifyUserDetails != null && state.verifyUserDetails?.shardingPolicy == null && state.bitmap != null) {
-                    uploadBootStrapData(state.bitmap!!)
+                if (state.verifyUserDetails != null && state.verifyUserDetails?.shardingPolicy == null && state.bootstrapUserDeviceImage != null) {
+                    uploadBootStrapData(state.bootstrapUserDeviceImage!!)
                 } else {
                     uploadKeys()
                 }

@@ -1,10 +1,7 @@
 package com.censocustody.android.presentation.device_registration
 
 import android.content.Context
-import androidx.biometric.BiometricPrompt
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
@@ -13,7 +10,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -86,7 +82,7 @@ fun DeviceRegistrationScreen(
 
             val keyCreationInitialData = KeyCreationInitialData(
                 verifyUserDetails = state.verifyUserDetails,
-                fileUrl = state.fileUrl
+                bootstrapUserDeviceImageURI = state.fileUrl
             )
 
             val keyCreationJson =
