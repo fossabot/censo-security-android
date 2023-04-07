@@ -23,6 +23,7 @@ data class DeviceRegistrationState(
     //Image Data
     val triggerImageCapture: Resource<Unit> = Resource.Uninitialized,
     val capturedUserPhoto: Bitmap? = null,
+    val fileUrl: String = "",
 
     //API call to add standard device key
     val addUserDevice: Resource<Unit> = Resource.Uninitialized,
