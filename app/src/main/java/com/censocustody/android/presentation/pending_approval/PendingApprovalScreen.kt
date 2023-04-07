@@ -1,10 +1,14 @@
 package com.censocustody.android.presentation.pending_approval
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.AccountCircle
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -23,12 +27,14 @@ import com.censocustody.android.common.CensoButton
 import com.censocustody.android.common.Resource
 import com.censocustody.android.common.popUpToTop
 import com.censocustody.android.presentation.Screen
+import com.censocustody.android.presentation.approvals.NavIconTopBar
 import com.censocustody.android.presentation.key_management.BackgroundUI
 import com.censocustody.android.ui.theme.BackgroundGrey
 import com.censocustody.android.ui.theme.ButtonRed
 import com.censocustody.android.ui.theme.CensoWhite
 import com.censocustody.android.ui.theme.TextBlack
 
+@SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
 fun PendingApprovalScreen(
     navController: NavController,
@@ -55,65 +61,75 @@ fun PendingApprovalScreen(
         }
     }
 
-    BackgroundUI()
-
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(horizontal = 12.dp)
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .align(Alignment.Center)
-                .padding(horizontal = 8.dp)
-                .shadow(
-                    elevation = 5.dp,
-                )
-                .clip(RoundedCornerShape(4.dp))
-                .background(color = BackgroundGrey),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            if (state.verifyUserResult !is Resource.Error) {
-                Spacer(modifier = Modifier.height(36.dp))
-                Text(
-                    modifier = Modifier.padding(horizontal = 14.dp),
-                    text = stringResource(R.string.waiting_for_device_approval),
-                    textAlign = TextAlign.Center,
-                    color = TextBlack,
-                    fontSize = 20.sp
-                )
-                Spacer(modifier = Modifier.height(36.dp))
-                CircularProgressIndicator(
-                    modifier = Modifier.size(44.dp),
-                    color = ButtonRed,
-                    strokeWidth = 5.dp,
-                )
-                Spacer(modifier = Modifier.height(36.dp))
-            } else {
-                Spacer(modifier = Modifier.height(36.dp))
-                Text(
-                    modifier = Modifier.padding(horizontal = 16.dp),
-                    text = stringResource(R.string.error_retrieving_user),
-                    textAlign = TextAlign.Center,
-                    color = TextBlack,
-                    fontSize = 20.sp
-                )
-                Spacer(modifier = Modifier.height(36.dp))
-                CensoButton(
-                    contentPadding = PaddingValues(horizontal = 24.dp, vertical = 8.dp),
-                    onClick = viewModel::resetVerifyUserResult,
+    Scaffold(
+        topBar = {
+            NavIconTopBar(
+                title = stringResource(R.string.pending_approval),
+                onAppBarIconClick = { navController.navigate(Screen.AccountRoute.route) },
+                navigationIcon = Icons.Rounded.AccountCircle,
+                navigationIconContentDes = stringResource(id = R.string.content_des_account_icon)
+            )
+        },
+        content = { _ ->
+            BackgroundUI()
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .align(Alignment.Center)
+                        .padding(horizontal = 8.dp)
+                        .shadow(
+                            elevation = 5.dp,
+                        )
+                        .clip(RoundedCornerShape(4.dp))
+                        .background(color = BackgroundGrey),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Text(
-                        text = stringResource(id = R.string.try_again),
-                        fontSize = 18.sp,
-                        color = CensoWhite,
-                        textAlign = TextAlign.Center
-                    )
+                    if (state.verifyUserResult !is Resource.Error) {
+                        Spacer(modifier = Modifier.height(36.dp))
+                        Text(
+                            modifier = Modifier.padding(horizontal = 14.dp),
+                            text = stringResource(R.string.waiting_for_device_approval),
+                            textAlign = TextAlign.Center,
+                            color = TextBlack,
+                            fontSize = 20.sp
+                        )
+                        Spacer(modifier = Modifier.height(36.dp))
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(44.dp),
+                            color = ButtonRed,
+                            strokeWidth = 5.dp,
+                        )
+                        Spacer(modifier = Modifier.height(36.dp))
+                    } else {
+                        Spacer(modifier = Modifier.height(36.dp))
+                        Text(
+                            modifier = Modifier.padding(horizontal = 16.dp),
+                            text = stringResource(R.string.error_retrieving_user),
+                            textAlign = TextAlign.Center,
+                            color = TextBlack,
+                            fontSize = 20.sp
+                        )
+                        Spacer(modifier = Modifier.height(36.dp))
+                        CensoButton(
+                            contentPadding = PaddingValues(horizontal = 24.dp, vertical = 8.dp),
+                            onClick = viewModel::resetVerifyUserResult,
+                        ) {
+                            Text(
+                                text = stringResource(id = R.string.try_again),
+                                fontSize = 18.sp,
+                                color = CensoWhite,
+                                textAlign = TextAlign.Center
+                            )
+                        }
+                        Spacer(modifier = Modifier.height(36.dp))
+                    }
                 }
-                Spacer(modifier = Modifier.height(36.dp))
             }
         }
-    }
+    )
 }

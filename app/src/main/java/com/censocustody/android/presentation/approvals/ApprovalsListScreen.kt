@@ -15,11 +15,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.AccountCircle
 import androidx.compose.material.icons.rounded.AccountCircle
 import androidx.compose.material.icons.rounded.ArrowDownward
-import androidx.compose.material.icons.rounded.SupervisedUserCircle
-import androidx.compose.material.icons.rounded.VerifiedUser
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -44,7 +41,6 @@ import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import com.raygun.raygun4android.RaygunClient
 import com.censocustody.android.R
 import com.censocustody.android.common.*
-import com.censocustody.android.common.BioCryptoUtil.NO_CIPHER_CODE
 import com.censocustody.android.data.SharedPrefsHelper
 import com.censocustody.android.data.models.ApprovalDisposition
 import com.censocustody.android.data.models.approvalV2.ApprovalDispositionRequestV2
@@ -54,7 +50,6 @@ import com.censocustody.android.presentation.Screen
 import com.censocustody.android.presentation.approvals.approval_type_row_items.*
 import com.censocustody.android.presentation.components.*
 import com.censocustody.android.ui.theme.*
-import com.censocustody.android.ui.theme.BackgroundWhite
 
 @Composable
 fun ApprovalsListScreen(
@@ -183,7 +178,7 @@ fun ApprovalsListScreen(
         scaffoldState = scaffoldState,
         snackbarHost = { scaffoldState.snackbarHostState },
         topBar = {
-            ApprovalsListTopAppBar(
+            NavIconTopBar(
                 title = stringResource(id = R.string.approvals),
                 onAppBarIconClick = { navController.navigate(Screen.AccountRoute.route) },
                 navigationIcon = Icons.Rounded.AccountCircle,
@@ -297,7 +292,7 @@ fun ApprovalsListScreen(
 
 //region Screen Composables
 @Composable
-fun ApprovalsListTopAppBar(
+fun NavIconTopBar(
     title: String,
     onAppBarIconClick: () -> Unit,
     navigationIcon: ImageVector,
