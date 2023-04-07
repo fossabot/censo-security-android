@@ -13,8 +13,8 @@ def final appName = 'Censo Custody'
 def final coreAppId = "com.censocustody.android"
 
 String versionNameMajor = 1
-String versionNameMinor = 0
-String versionNamePatch = 4
+String versionNameMinor = 1
+String versionNamePatch = 0
 
 android {
     Boolean signBuild = false
@@ -45,7 +45,7 @@ android {
         applicationId coreAppId
         minSdk 31
         targetSdk 33
-        versionCode 35
+        versionCode 40
 
         buildConfigField "int", "versionNameMajor", versionNameMajor
         buildConfigField "int", "versionNameMinor", versionNameMinor
