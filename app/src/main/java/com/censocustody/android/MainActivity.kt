@@ -53,7 +53,9 @@ import com.censocustody.android.ui.theme.BackgroundWhite
 import com.censocustody.android.ui.theme.CensoMobileTheme
 import com.censocustody.android.presentation.semantic_version_check.BlockingUI
 import dagger.hilt.android.AndroidEntryPoint
+import java.util.*
 import javax.inject.Inject
+import kotlin.concurrent.timerTask
 
 @AndroidEntryPoint
 class MainActivity : FragmentActivity() {
@@ -174,7 +176,8 @@ class MainActivity : FragmentActivity() {
                         bioPromptTrigger = mainState.bioPromptTrigger,
                         biometryUnavailable = mainState.biometryTooManyAttempts,
                         biometryStatus = mainState.biometryStatus,
-                        retry = mainViewModel::retryBiometricGate
+                        retry = mainViewModel::retryBiometricGate,
+                        resetRequired = mainState.resetRequired
                     )
                 }
             }
@@ -280,7 +283,20 @@ class MainActivity : FragmentActivity() {
     private fun setupUserStateListener(navController: NavController, context: Context) =
         object : UserStateListener {
             override fun onUserStateChanged(userState: UserState) {
+                censoLog(message = "On user state changed: $userState")
+
                 runOnUiThread {
+                    if (userState == UserState.RESET_DEVICE) {
+                        mainViewModel.resetRequired()
+                        censoLog(message = "Receiving reset device user state...")
+
+                        Toast.makeText(
+                            context,
+                            "Must Reset Phone To Access Key",
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
+
                     if (userState == UserState.INVALIDATED_KEY) {
                         mainViewModel.resetBiometry()
 

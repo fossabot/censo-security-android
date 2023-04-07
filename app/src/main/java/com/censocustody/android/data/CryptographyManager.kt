@@ -2,18 +2,24 @@ package com.censocustody.android.data
 
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
+import androidx.compose.ui.text.toLowerCase
 import com.censocustody.android.BuildConfig
+import com.censocustody.android.common.censoLog
 import com.censocustody.android.data.EncryptionManagerImpl.Companion.SENTINEL_KEY_NAME
 import com.censocustody.android.data.EncryptionManagerImpl.Companion.SENTINEL_STATIC_DATA
 import java.security.KeyStore
 import java.security.*
 import java.security.cert.Certificate
 import java.security.spec.ECGenParameterSpec
-import java.util.UUID
+import java.util.*
 import javax.crypto.Cipher
 import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
 import javax.crypto.spec.GCMParameterSpec
+import kotlin.concurrent.timer
+import kotlin.concurrent.timerTask
+
+class ResetDeviceForKeyAccessException : Exception("Could not access device key")
 
 interface CryptographyManager {
 
@@ -27,7 +33,7 @@ interface CryptographyManager {
     ): Boolean
 
     fun getOrCreateKey(keyName: String): PrivateKey
-    fun getOrCreateSentinelKey(): SecretKey
+    fun getOrCreateSentinelKey(email: String): SecretKey
     fun getPublicKeyFromDeviceKey(keyName: String): PublicKey
     fun signData(keyName: String, dataToSign: ByteArray): ByteArray
     fun decryptData(keyName: String, ciphertext: ByteArray): ByteArray
@@ -36,8 +42,8 @@ interface CryptographyManager {
     fun encryptSentinelData(cipher: Cipher) : EncryptedData
     fun decryptSentinelData(ciphertext: ByteArray, cipher: Cipher) : ByteArray
 
-    fun getInitializedCipherForSentinelEncryption(): Cipher
-    fun getInitializedCipherForSentinelDecryption(initializationVector: ByteArray): Cipher
+    fun getInitializedCipherForSentinelEncryption(email: String): Cipher
+    fun getInitializedCipherForSentinelDecryption(email: String, initializationVector: ByteArray, failedToAccessKey: () -> Unit): Cipher
 }
 
 class CryptographyManagerImpl : CryptographyManager {
@@ -63,7 +69,8 @@ class CryptographyManagerImpl : CryptographyManager {
         val signature = Signature.getInstance(SHA_256_ECDSA)
         signature.initSign(key)
         signature.update(dataToSign)
-        return signature.sign()
+        val signedData =  signature.sign()
+        return signedData
     }
 
     override fun decryptData(keyName: String, ciphertext: ByteArray): ByteArray {
@@ -96,22 +103,43 @@ class CryptographyManagerImpl : CryptographyManager {
     }
 
     override fun decryptSentinelData(ciphertext: ByteArray, cipher: Cipher): ByteArray {
-        return cipher.doFinal(ciphertext)
+        val decryptedData = cipher.doFinal(ciphertext)
+        return decryptedData
     }
 
-    override fun getInitializedCipherForSentinelEncryption(): Cipher {
+    override fun getInitializedCipherForSentinelEncryption(email: String): Cipher {
+//        val timer = Timer()
+//        timer.schedule(timerTask {
+//            throw ResetDeviceForKeyAccessException()
+//        }, 5000)
         val cipher = getAESCipher()
-        val secretKey = getOrCreateSentinelKey()
+        val secretKey = getOrCreateSentinelKey(email)
         cipher.init(Cipher.ENCRYPT_MODE, secretKey)
+        //timer.cancel()
         return cipher
     }
 
     override fun getInitializedCipherForSentinelDecryption(
-        initializationVector: ByteArray
+        email: String,
+        initializationVector: ByteArray,
+        failedToAccessKey: () -> Unit
     ): Cipher {
+        censoLog(message = "Trying to get sentinel key for $email")
         val cipher = getAESCipher()
-        val secretKey = getOrCreateSentinelKey()
+        censoLog(message = "Got cipher: $cipher")
+        val secretKey = getOrCreateSentinelKey(email)
+        censoLog(message = "Retrieved key: $secretKey")
+
+        val timer = Timer()
+        timer.schedule(timerTask {
+            failedToAccessKey()
+        }, 5000)
+
         cipher.init(Cipher.DECRYPT_MODE, secretKey, GCMParameterSpec(128, initializationVector))
+
+        timer.cancel()
+
+        censoLog(message = "Initialized key: $secretKey")
         return cipher
     }
 
@@ -124,16 +152,17 @@ class CryptographyManagerImpl : CryptographyManager {
         val certificate = getCertificateFromKeystore(keyName)
         signature.initVerify(certificate)
         signature.update(dataSigned)
-        return signature.verify(signatureToCheck)
+        val verified = signature.verify(signatureToCheck)
+        return verified
     }
 
-    override fun getOrCreateSentinelKey(): SecretKey {
+    override fun getOrCreateSentinelKey(email: String): SecretKey {
         val keyStore = KeyStore.getInstance(ANDROID_KEYSTORE)
         keyStore.load(null)
-        val key = keyStore.getKey(SENTINEL_KEY_NAME, null)
+        val key = keyStore.getKey("${email.lowercase().trim()}_$SENTINEL_KEY_NAME", null)
         if (key != null) return key as SecretKey
-
-        return createAESKey(SENTINEL_KEY_NAME)
+        val newKey = createAESKey(SENTINEL_KEY_NAME)
+        return newKey
     }
 
     override fun getOrCreateKey(keyName: String): PrivateKey {

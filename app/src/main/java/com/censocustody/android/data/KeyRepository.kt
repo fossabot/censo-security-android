@@ -9,6 +9,7 @@ import com.censocustody.android.data.models.*
 import com.raygun.raygun4android.RaygunClient
 import java.security.InvalidAlgorithmParameterException
 import java.security.KeyStoreException
+import javax.crypto.AEADBadTagException
 import javax.crypto.Cipher
 import javax.crypto.IllegalBlockSizeException
 
@@ -80,7 +81,8 @@ class KeyRepositoryImpl(
 
     override suspend fun getInitializedCipherForSentinelEncryption(): Cipher? {
         return try {
-            cryptographyManager.getInitializedCipherForSentinelEncryption()
+            val userEmail = userRepository.retrieveUserEmail()
+            cryptographyManager.getInitializedCipherForSentinelEncryption(userEmail)
         } catch (e: Exception) {
             handleKeyInvalidatedException(e)
             null
@@ -92,8 +94,12 @@ class KeyRepositoryImpl(
             val email = userRepository.retrieveUserEmail()
             val encryptedData = securePreferences.retrieveSentinelData(email)
             return cryptographyManager.getInitializedCipherForSentinelDecryption(
+                email,
                 encryptedData.initializationVector
-            )
+            ) {
+                censoLog(message = "Failing to get key...")
+                userRepository.setKeyInvalidated(UserState.RESET_DEVICE)
+            }
         } catch (e: Exception) {
             handleKeyInvalidatedException(e)
             null
@@ -255,12 +261,17 @@ class KeyRepositoryImpl(
     }
 
     override suspend fun retrieveSentinelData(cipher: Cipher) : String {
-        val userEmail = userRepository.retrieveUserEmail()
+        return try {
+            val userEmail = userRepository.retrieveUserEmail()
 
-        return String(
-            keyStorage.retrieveSentinelData(email = userEmail, cipher = cipher),
-            Charsets.UTF_8
-        )
+            String(
+                keyStorage.retrieveSentinelData(email = userEmail, cipher = cipher),
+                Charsets.UTF_8
+            )
+        } catch (e: Exception) {
+            handleKeyInvalidatedException(e)
+            ""
+        }
     }
 
     override suspend fun handleKeyInvalidatedException(exception: Exception) {
@@ -275,6 +286,8 @@ class KeyRepositoryImpl(
         }
 
         when (exception) {
+            is IncorrectSentinelException,
+            is AEADBadTagException,
             is KeyPermanentlyInvalidatedException,
             is InvalidAlgorithmParameterException,
             is InvalidKeyPhraseException -> {

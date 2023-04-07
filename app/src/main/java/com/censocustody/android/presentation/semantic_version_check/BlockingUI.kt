@@ -30,6 +30,7 @@ fun BlockingUI(
     bioPromptTrigger: Resource<Cipher>,
     biometryUnavailable: Boolean,
     biometryStatus: BiometricUtil.Companion.BiometricsStatus?,
+    resetRequired: Boolean,
     retry: () -> Unit
 ) {
     when (blockAppUI) {
@@ -42,7 +43,8 @@ fun BlockingUI(
             ForegroundBlockingUI(
                 bioPromptTrigger = bioPromptTrigger,
                 biometryUnavailable = biometryUnavailable,
-                retry = retry
+                retry = retry,
+                resetRequired = resetRequired
             )
         }
         BlockAppUI.NONE -> {
@@ -55,6 +57,7 @@ fun BlockingUI(
 fun ForegroundBlockingUI(
     bioPromptTrigger: Resource<Cipher>,
     biometryUnavailable: Boolean,
+    resetRequired: Boolean,
     retry: () -> Unit
 ) {
     val interactionSource = remember { MutableInteractionSource() }
@@ -77,9 +80,13 @@ fun ForegroundBlockingUI(
             Text(
                 modifier = Modifier
                     .padding(top = 124.dp, start = 48.dp, end = 48.dp),
-                text = if (biometryUnavailable)
+                text = if (resetRequired) {
+                    "Must reset device to access biometry."
+                } else if (biometryUnavailable) {
                     stringResource(R.string.biometry_unavailable)
-                else stringResource(R.string.foreground_access_app),
+                } else {
+                    stringResource(R.string.foreground_access_app)
+                },
                 fontSize = 24.sp,
                 color = TextBlack,
                 textAlign = TextAlign.Center

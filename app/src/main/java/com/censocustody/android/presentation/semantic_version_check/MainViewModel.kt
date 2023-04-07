@@ -8,10 +8,12 @@ import androidx.lifecycle.viewModelScope
 import com.censocustody.android.common.*
 import com.censocustody.android.common.Resource
 import com.censocustody.android.data.EncryptionManagerImpl.Companion.SENTINEL_STATIC_DATA
+import com.censocustody.android.data.IncorrectSentinelException
 import com.censocustody.android.data.KeyRepository
 import com.censocustody.android.data.UserRepository
 import com.censocustody.android.presentation.Screen
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import javax.crypto.Cipher
 import javax.inject.Inject
@@ -26,7 +28,7 @@ data class MainViewModel @Inject constructor(
         private set
 
     fun onForeground(biometricCapability: BiometricUtil.Companion.BiometricsStatus) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             state = state.copy(biometryStatus = biometricCapability)
 
             val userLoggedIn = userRepository.userLoggedIn()
@@ -84,7 +86,7 @@ data class MainViewModel @Inject constructor(
             if (sentinelData == SENTINEL_STATIC_DATA) {
                 biometrySuccessfulState()
             } else {
-                keyRepository.handleKeyInvalidatedException(Exception("Incorrect sentinel data"))
+                keyRepository.handleKeyInvalidatedException(IncorrectSentinelException())
                 state.copy(bioPromptTrigger = Resource.Error())
             }
         } catch (e: Exception) {
@@ -116,7 +118,7 @@ data class MainViewModel @Inject constructor(
     }
 
     fun retryBiometricGate() {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             if (state.bioPromptReason == BioPromptReason.FOREGROUND_RETRIEVAL) {
                 launchBlockingForegroundBiometryRetrieval()
             }
@@ -146,6 +148,10 @@ data class MainViewModel @Inject constructor(
 
     fun resetBiometry() {
         state = biometrySuccessfulState()
+    }
+
+    fun resetRequired() {
+        state = state.copy(resetRequired = true)
     }
 
     companion object {

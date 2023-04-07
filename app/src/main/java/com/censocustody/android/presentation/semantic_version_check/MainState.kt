@@ -12,7 +12,8 @@ data class MainState(
     val biometryTooManyAttempts: Boolean = false,
     val biometryStatus: BiometricUtil.Companion.BiometricsStatus? = null,
     val currentDestination: String? = null,
-    val blockAppUI: BlockAppUI = BlockAppUI.NONE
+    val blockAppUI: BlockAppUI = BlockAppUI.NONE,
+    val resetRequired : Boolean = false
 )
 
 enum class BlockAppUI {

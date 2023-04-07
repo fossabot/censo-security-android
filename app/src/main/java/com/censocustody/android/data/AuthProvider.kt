@@ -119,6 +119,7 @@ class CensoAuth(
     }
 }
 
+class IncorrectSentinelException : Exception("Incorrect sentinel data")
 class TokenExpiredException : Exception("Token No Longer Valid")
 class MissingDeviceIdException : Exception("No Device Id Found For Email")
 
@@ -127,5 +128,5 @@ interface UserStateListener {
 }
 
 enum class UserState {
-    REFRESH_TOKEN_EXPIRED, INVALIDATED_KEY
+    REFRESH_TOKEN_EXPIRED, INVALIDATED_KEY, RESET_DEVICE
 }

@@ -29,7 +29,7 @@ interface UserRepository {
     fun retrieveCachedUserEmail(): String
     suspend fun saveUserEmail(email: String)
     suspend fun checkMinimumVersion(): Resource<SemanticVersionResponse>
-    suspend fun setKeyInvalidated()
+    fun setKeyInvalidated(userState: UserState = UserState.INVALIDATED_KEY)
     suspend fun retrieveUserDeviceId(email: String) : String
     suspend fun saveDeviceId(email: String, deviceId: String)
     suspend fun saveDevicePublicKey(email: String, publicKey: String)
@@ -219,8 +219,9 @@ class UserRepositoryImpl(
         }
     }
 
-    override suspend fun setKeyInvalidated() {
-        authProvider.setUserState(userState = UserState.INVALIDATED_KEY)
+    override fun setKeyInvalidated(userState: UserState) {
+        censoLog(message = "Setting user state to: $userState")
+        authProvider.setUserState(userState = userState)
     }
 
     override suspend fun retrieveUserDeviceId(email: String) =
