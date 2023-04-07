@@ -64,7 +64,7 @@ interface EncryptionManager {
     fun handleReshare(
         email: String,
         shards: List<Shard>,
-        shardingPolicyChangeInfo: ApprovalRequestDetailsV2.ShardingPolicyChangeInfo,
+        targetPolicy: ShardingPolicy,
     ): List<Shard>
     //endregion
 
@@ -278,11 +278,11 @@ class EncryptionManagerImpl @Inject constructor(
     override fun handleReshare(
         email: String,
         shards: List<Shard>,
-        shardingPolicyChangeInfo: ApprovalRequestDetailsV2.ShardingPolicyChangeInfo,
+        targetPolicy: ShardingPolicy
     ): List<Shard> {
 
         val participantIdToAdminUserMap =
-            shardingPolicyChangeInfo.targetPolicy.participants.associateBy {
+            targetPolicy.participants.associateBy {
                 BigInteger(it.participantId, 16)
             }
 
@@ -297,7 +297,7 @@ class EncryptionManagerImpl @Inject constructor(
                         shard.shardCopies[0].encryptedData,
                         it
                     ),
-                    shardingPolicyChangeInfo.targetPolicy.threshold,
+                    targetPolicy.threshold,
                     participantIdToAdminUserMap.keys.toList()
                 )
 

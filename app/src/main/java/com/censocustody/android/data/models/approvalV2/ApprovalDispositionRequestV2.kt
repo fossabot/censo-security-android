@@ -424,8 +424,17 @@ data class ApprovalDispositionRequestV2(
                 encryptionManager.handleReshare(
                     email = email,
                     shards = shards,
-                    requestType.shardingPolicyChangeInfo
+                    requestType.shardingPolicyChangeInfo.targetPolicy
                 )
+            is ApprovalRequestDetailsV2.AddDevice -> {
+                requestType.targetShardingPolicy?.let {
+                    encryptionManager.handleReshare(
+                        email = email,
+                        shards = shards,
+                        requestType.targetShardingPolicy
+                    )
+                }
+            }
             else -> null
         }
     }
