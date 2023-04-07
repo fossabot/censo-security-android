@@ -15,11 +15,6 @@ data class Shard(
     val parentShardId: String? = null,
 )
 
-data class ShardingPolicyChangeInfo(
-    val currentPolicyRevisionGuid: String,
-    val targetPolicy: ShardingPolicy
-)
-
 data class RecoveryShard(
     val shardId: String,
     val encryptedData: String,
