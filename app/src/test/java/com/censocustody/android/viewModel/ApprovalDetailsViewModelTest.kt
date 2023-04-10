@@ -6,6 +6,7 @@ import com.censocustody.android.*
 import com.censocustody.android.common.Resource
 import com.censocustody.android.common.CensoCountDownTimer
 import com.censocustody.android.data.ApprovalsRepository
+import com.censocustody.android.data.KeyRepository
 import com.censocustody.android.data.UserRepository
 import com.censocustody.android.data.models.ApprovalDisposition
 import com.censocustody.android.data.models.approvalV2.ApprovalRequestV2
@@ -27,6 +28,9 @@ class ApprovalDetailsViewModelTest : BaseViewModelTest() {
     //region Mocks and testing objects
     @Mock
     lateinit var approvalsRepository: ApprovalsRepository
+
+    @Mock
+    lateinit var keyRepository: KeyRepository
 
     @Mock
     lateinit var countdownTimer: CensoCountDownTimer
@@ -56,6 +60,7 @@ class ApprovalDetailsViewModelTest : BaseViewModelTest() {
         approvalDetailsViewModel =
             ApprovalDetailsViewModel(
                 approvalsRepository = approvalsRepository,
+                keyRepository = keyRepository,
                 timer = countdownTimer
             )
     }
