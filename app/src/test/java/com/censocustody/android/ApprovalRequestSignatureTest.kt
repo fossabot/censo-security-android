@@ -72,7 +72,8 @@ class ApprovalRequestSignatureTest {
                         approvalDisposition = ApprovalDisposition.APPROVE,
                         requestType = testItem.request.details,
                         email = "",
-                        shards = emptyList()
+                        recoveryShards = emptyList(),
+                        reShareShards = emptyList()
                     )
 
                 val signableData = dispositionRequest.retrieveSignableData()

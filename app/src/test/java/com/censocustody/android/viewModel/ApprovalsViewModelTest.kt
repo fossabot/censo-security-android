@@ -67,7 +67,7 @@ class ApprovalsViewModelTest : BaseViewModelTest() {
 
         whenever(approvalsRepository.retrieveShards(any(), any())).thenAnswer { emptyList<RecoveryShard>() }
 
-        whenever(approvalsRepository.approveOrDenyDisposition(any(), any(), any())).thenAnswer {//"edeb9c6e-26cd-41aa-81db-850f0a170295"
+        whenever(approvalsRepository.approveOrDenyDisposition(any(), any(), any(), any())).thenAnswer {//"edeb9c6e-26cd-41aa-81db-850f0a170295"
             Resource.Success(data = null)
         }
 
