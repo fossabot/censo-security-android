@@ -126,8 +126,26 @@ abstract class  CommonApprovalsViewModel(
             approvalRequestType = approvalRequestDetails,
         )
 
-        val shards = try {
-            retrieveNecessaryShards(
+        val recoveryShards = try {
+            retrieveRecoveryShards(
+                requestDetails = approvalRequestDetails
+            )
+        } catch (e: Exception) {
+            RaygunClient.send(
+                e,
+                listOf(
+                    CrashReportingUtil.APPROVAL_DISPOSITION,
+                    CrashReportingUtil.MANUALLY_REPORTED_TAG,
+                    CrashReportingUtil.RETRIEVE_SHARDS
+                )
+            )
+            return approvalDispositionState.copy(
+                registerApprovalDispositionResult = Resource.Error(exception = e)
+            )
+        }
+
+        val reshareShards = try {
+            retrieveReshareShards(
                 requestDetails = approvalRequestDetails
             )
         } catch (e: Exception) {
@@ -148,7 +166,8 @@ abstract class  CommonApprovalsViewModel(
             approvalsRepository.approveOrDenyDisposition(
                 requestId = approvalId,
                 registerApprovalDisposition = registerApprovalDisposition,
-                shards = Shards(shards)
+                recoveryShards = Shards(recoveryShards),
+                reshareShards = Shards(reshareShards)
             )
 
         if (approvalDispositionResponseResource is Resource.Error) {
@@ -168,7 +187,7 @@ abstract class  CommonApprovalsViewModel(
 
     }
 
-    private suspend fun retrieveNecessaryShards(
+    private suspend fun retrieveRecoveryShards(
         requestDetails: ApprovalRequestDetailsV2?
     ): List<Shard>? {
         when (requestDetails) {
@@ -184,25 +203,38 @@ abstract class  CommonApprovalsViewModel(
                 if (shardResponse is Resource.Success) {
                     return shardResponse.data?.shards
                 } else {
-                    throw shardResponse.exception ?: Exception("Failed to retrieve add device shards")
+                    throw shardResponse.exception ?: Exception("Failed to retrieve recovery shards")
                 }
             }
-
-            is ApprovalRequestDetailsV2.OrgAdminPolicyUpdate -> {
-                val shardResponse = approvalsRepository.retrieveShards(
-                    policyRevisionId = requestDetails.shardingPolicyChangeInfo.currentPolicyRevisionGuid,
-                )
-
-                if (shardResponse is Resource.Success) {
-                    return shardResponse.data?.shards
-                } else {
-                    throw shardResponse.exception ?: Exception("Failed to retrieve org policy shards")
-                }
-            }
-
             else -> {
                 return null
             }
+        }
+    }
+
+    private suspend fun retrieveReshareShards(
+        requestDetails: ApprovalRequestDetailsV2?
+    ): List<Shard>? {
+        val policyId = when (requestDetails) {
+            is ApprovalRequestDetailsV2.AddDevice ->
+                requestDetails.targetShardingPolicy?.let {
+                    requestDetails.currentShardingPolicyRevisionGuid
+                }
+
+            is ApprovalRequestDetailsV2.OrgAdminPolicyUpdate ->
+                requestDetails.shardingPolicyChangeInfo.currentPolicyRevisionGuid
+
+            else -> null
+        } ?: return null
+
+        val shardResponse = approvalsRepository.retrieveShards(
+            policyRevisionId = policyId,
+        )
+
+        if (shardResponse is Resource.Success) {
+            return shardResponse.data?.shards
+        } else {
+            throw shardResponse.exception ?: Exception("Failed to retrieve re-share shards")
         }
     }
 

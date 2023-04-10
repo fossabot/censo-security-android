@@ -14,7 +14,8 @@ interface ApprovalsRepository {
     suspend fun approveOrDenyDisposition(
         requestId: String,
         registerApprovalDisposition: RegisterApprovalDisposition,
-        shards: Shards
+        recoveryShards: Shards,
+        reshareShards: Shards
     ): Resource<ApprovalDispositionRequestV2.RegisterApprovalDispositionV2Body>
 
     suspend fun retrieveShards(policyRevisionId: String, userId: String? = null) : Resource<GetShardsResponse>
@@ -38,7 +39,8 @@ class ApprovalsRepositoryImpl @Inject constructor(
     override suspend fun approveOrDenyDisposition(
         requestId: String,
         registerApprovalDisposition: RegisterApprovalDisposition,
-        shards: Shards
+        recoveryShards: Shards,
+        reshareShards: Shards
     ): Resource<ApprovalDispositionRequestV2.RegisterApprovalDispositionV2Body> {
         // Helper method anyItemNull() will check if any of the disposition properties are null,
         // this allows us to use !! operator later in this method without worrying of NPE
@@ -60,7 +62,8 @@ class ApprovalsRepositoryImpl @Inject constructor(
             approvalDisposition = registerApprovalDisposition.approvalDisposition!!,
             email = userEmail,
             requestType = registerApprovalDisposition.approvalRequestType!!,
-            shards = shards.shards
+            recoveryShards = recoveryShards.shards,
+            reShareShards = reshareShards.shards
         )
 
         val registerApprovalDispositionBody = try {

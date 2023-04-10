@@ -18,7 +18,8 @@ data class ApprovalDispositionRequestV2(
     val approvalDisposition: ApprovalDisposition,
     val requestType: ApprovalRequestDetailsV2,
     val email: String,
-    val shards: List<Shard>?
+    val reShareShards: List<Shard>?,
+    val recoveryShards: List<Shard>?
 ) : SignableV2 {
 
     override fun retrieveSignableData(): List<SignableDataResult> {
@@ -403,13 +404,13 @@ data class ApprovalDispositionRequestV2(
     }
 
     private fun recoverShards(encryptionManager: EncryptionManager): List<RecoveryShard>? {
-        if (shards == null || shards.isEmpty()) return null
+        if (recoveryShards == null || recoveryShards.isEmpty()) return null
 
         return when (requestType) {
             is ApprovalRequestDetailsV2.AddDevice ->
                 encryptionManager.reEncryptShards(
                     email = email,
-                    shards = shards,
+                    shards = recoveryShards,
                     targetDevicePublicKey = requestType.deviceKey
                 )
             else -> null
@@ -417,20 +418,20 @@ data class ApprovalDispositionRequestV2(
     }
 
     private fun reshareShards(encryptionManager: EncryptionManager): List<Shard>? {
-        if (shards == null || shards.isEmpty()) return null
+        if (reShareShards == null || reShareShards.isEmpty()) return null
 
         return when (requestType) {
             is ApprovalRequestDetailsV2.OrgAdminPolicyUpdate ->
                 encryptionManager.handleReshare(
                     email = email,
-                    shards = shards,
+                    shards = reShareShards,
                     requestType.shardingPolicyChangeInfo.targetPolicy
                 )
             is ApprovalRequestDetailsV2.AddDevice -> {
                 requestType.targetShardingPolicy?.let {
                     encryptionManager.handleReshare(
                         email = email,
-                        shards = shards,
+                        shards = reShareShards,
                         requestType.targetShardingPolicy
                     )
                 }

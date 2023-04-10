@@ -47,6 +47,7 @@ class SignableDataV2Test {
                 ApprovalDisposition.APPROVE,
                 details,
                 "email",
+                emptyList(),
                 emptyList()
             )
 
@@ -73,6 +74,7 @@ class SignableDataV2Test {
                 ApprovalDisposition.DENY,
                 details,
                 "email",
+                emptyList(),
                 emptyList()
             )
             val denialSignableData = denial.retrieveSignableData()
@@ -104,6 +106,7 @@ class SignableDataV2Test {
                 ApprovalDisposition.APPROVE,
                 details,
                 "email",
+                emptyList(),
                 emptyList()
             )
             val approvalDataToSend = ApprovalDispositionRequestV2.ApprovalRequestDetailsWithDisposition(
@@ -123,6 +126,7 @@ class SignableDataV2Test {
                 ApprovalDisposition.DENY,
                 details,
                 "email",
+                emptyList(),
                 emptyList()
             )
             val denialDataToSend = ApprovalDispositionRequestV2.ApprovalRequestDetailsWithDisposition(
@@ -151,6 +155,7 @@ class SignableDataV2Test {
                 ApprovalDisposition.APPROVE,
                 details,
                 "email",
+                emptyList(),
                 emptyList()
             )
             val bitcoinSignableDataResult = approval.retrieveSignableData().filterIsInstance<SignableDataResult.Bitcoin>().first()
@@ -177,6 +182,7 @@ class SignableDataV2Test {
                 ApprovalDisposition.DENY,
                 details,
                 "email",
+                emptyList(),
                 emptyList()
             )
             val denialOffchainSignaturePayload = ApprovalDispositionRequestV2.ApprovalRequestDetailsWithDisposition(
@@ -209,6 +215,7 @@ class SignableDataV2Test {
                 ApprovalDisposition.APPROVE,
                 request.details,
                 "email",
+                emptyList(),
                 emptyList()
             )
             val approvalDataToSend = when (request.details) {
@@ -231,6 +238,7 @@ class SignableDataV2Test {
                 ApprovalDisposition.DENY,
                 request.details,
                 "email",
+                emptyList(),
                 emptyList()
             )
             val denialDataToSend = when (request.details) {

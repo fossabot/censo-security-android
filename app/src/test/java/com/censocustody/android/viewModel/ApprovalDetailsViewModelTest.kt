@@ -80,7 +80,7 @@ class ApprovalDetailsViewModelTest : BaseViewModelTest() {
      */
     @Test
     fun `approve an approval successfully then view model should reflect the success in state`() = runTest {
-        whenever(approvalsRepository.approveOrDenyDisposition(any(), any(), any())).thenAnswer {
+        whenever(approvalsRepository.approveOrDenyDisposition(any(), any(), any(), any())).thenAnswer {
             Resource.Success(data = null)
         }
 
@@ -120,7 +120,7 @@ class ApprovalDetailsViewModelTest : BaseViewModelTest() {
      */
     @Test
     fun `deny an approval successfully then view model should reflect the success in state`() = runTest {
-        whenever(approvalsRepository.approveOrDenyDisposition(any(), any(), any())).thenAnswer {
+        whenever(approvalsRepository.approveOrDenyDisposition(any(), any(), any(), any())).thenAnswer {
             Resource.Success(data = null)
         }
 
@@ -161,7 +161,7 @@ class ApprovalDetailsViewModelTest : BaseViewModelTest() {
      */
     @Test
     fun `deny an approval but api error occurs then view model should hold retry data and reflect error in state`() = runTest {
-        whenever(approvalsRepository.approveOrDenyDisposition(any(), any(), any())).thenAnswer {
+        whenever(approvalsRepository.approveOrDenyDisposition(any(), any(), any(), any())).thenAnswer {
             Resource.Error(data = null)
         }
 
