@@ -267,7 +267,7 @@ class EntranceViewModelTest : BaseViewModelTest() {
         }
 
     @Test
-    fun `if a key is present locally but a key is not present on backend then send user to key regeneration destination`() =
+    fun `if a key is present locally but a key is not present on backend then send user to key recovery`() =
         runTest {
             setupLoggedInUserWithValidEmail()
             setupUserWithDeviceIdAndPublicKey()
@@ -285,7 +285,7 @@ class EntranceViewModelTest : BaseViewModelTest() {
                 .setCensoUser(basicVerifyUserWithNoPublicKeys)
 
             assertTrue(entranceViewModel.state.userDestinationResult is Resource.Success)
-            assertTrue(entranceViewModel.state.userDestinationResult.data == UserDestination.UPLOAD_KEYS)
+            assertTrue(entranceViewModel.state.userDestinationResult.data == UserDestination.KEY_MANAGEMENT_CREATION)
         }
 
     @Test
