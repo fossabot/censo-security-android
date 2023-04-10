@@ -216,22 +216,15 @@ abstract class  CommonApprovalsViewModel(
         requestDetails: ApprovalRequestDetailsV2?
     ): List<Shard>? {
         val policyId = when (requestDetails) {
-            is ApprovalRequestDetailsV2.AddDevice -> {
-
-                if (requestDetails.targetShardingPolicy == null) {
-                    null
-                } else {
+            is ApprovalRequestDetailsV2.AddDevice ->
+                requestDetails.targetShardingPolicy?.let {
                     requestDetails.currentShardingPolicyRevisionGuid
                 }
-            }
 
-            is ApprovalRequestDetailsV2.OrgAdminPolicyUpdate -> {
+            is ApprovalRequestDetailsV2.OrgAdminPolicyUpdate ->
                 requestDetails.shardingPolicyChangeInfo.currentPolicyRevisionGuid
-            }
 
-            else -> {
-                null
-            }
+            else -> null
         } ?: return null
 
         val shardResponse = approvalsRepository.retrieveShards(
