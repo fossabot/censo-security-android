@@ -90,7 +90,7 @@ class KeyCreationViewModel @Inject constructor(
                 if (state.verifyUserDetails != null && state.verifyUserDetails?.shardingPolicy == null && state.bootstrapUserDeviceImage != null) {
                     uploadBootStrapData(state.bootstrapUserDeviceImage!!)
                 } else {
-                    uploadKeys()
+                    uploadStandardKeys()
                 }
             } catch (e: Exception) {
                 state = state.copy(
@@ -102,12 +102,13 @@ class KeyCreationViewModel @Inject constructor(
 
     private suspend fun uploadBootStrapData(bitmap: Bitmap) {
         val userEmail = userRepository.retrieveUserEmail()
-        val deviceId = SharedPrefsHelper.retrieveDeviceId(email = userEmail)
+
+        val keys = createBootstrapKeysForDevice()
 
         //Get user image all ready
         val userImage = generateUserImageObject(
             userPhoto = bitmap,
-            keyName = deviceId,
+            keyName = keys.standardDevicePublicKey,
             cryptographyManager = cryptographyManager
         )
 
@@ -117,7 +118,7 @@ class KeyCreationViewModel @Inject constructor(
         val signatureToCheck = BaseWrapper.decodeFromBase64(userImage.signature)
 
         val verified = cryptographyManager.verifySignature(
-            keyName = deviceId,
+            keyName = keys.standardDevicePublicKey,
             dataSigned = hashOfImage,
             signatureToCheck = signatureToCheck
         )
@@ -126,7 +127,6 @@ class KeyCreationViewModel @Inject constructor(
             throw Exception("Device image signature not valid.")
         }
 
-
         val phrase = state.keyGeneratedPhrase ?: throw Exception("Missing phrase when trying to create bootstrap")
 
         val walletSigners = state.walletSigners
@@ -134,21 +134,63 @@ class KeyCreationViewModel @Inject constructor(
         val bootStrapResource = userRepository.addBootstrapUser(
             userImage = userImage,
             walletSigners = walletSigners,
-            rootSeed = Mnemonics.MnemonicCode(phrase = phrase).toSeed()
+            rootSeed = Mnemonics.MnemonicCode(phrase = phrase).toSeed(),
+            deviceKey = keys.standardDevicePublicKey,
+            bootstrapKey = keys.bootstrapPublicKey
         )
+
+        if (bootStrapResource is Resource.Success) {
+            userRepository.clearPreviousDeviceInfo(userEmail)
+
+            userRepository.saveDevicePublicKey(
+                email = userEmail,
+                publicKey = keys.standardDevicePublicKey
+            )
+            userRepository.saveBootstrapDevicePublicKey(
+                email = userEmail,
+                publicKey = keys.bootstrapPublicKey
+            )
+        }
 
         state = state.copy(uploadingKeyProcess = bootStrapResource)
     }
 
-    private suspend fun uploadKeys() {
+    private fun createBootstrapKeysForDevice(): DevicePublicKeys {
+        val standardKeyId = cryptographyManager.createDeviceKeyId()
+        val bootstrapKeyId = cryptographyManager.createDeviceKeyId()
+
+        cryptographyManager.getOrCreateKey(keyName = standardKeyId)
+        cryptographyManager.getOrCreateKey(keyName = bootstrapKeyId)
+
+        val standardPublicKey =
+            cryptographyManager.getPublicKeyFromDeviceKey(keyName = standardKeyId)
+        val bootstrapPublicKey =
+            cryptographyManager.getPublicKeyFromDeviceKey(keyName = bootstrapKeyId)
+
+        val compressedStandardPublicKey =
+            ECIESManager.extractUncompressedPublicKey(standardPublicKey.encoded)
+
+        val compressedBootstrapPublicKey =
+            ECIESManager.extractUncompressedPublicKey(bootstrapPublicKey.encoded)
+
+        return DevicePublicKeys(
+            standardDevicePublicKey = BaseWrapper.encode(compressedStandardPublicKey),
+            bootstrapPublicKey = BaseWrapper.encode(compressedBootstrapPublicKey)
+        )
+    }
+
+    private suspend fun uploadStandardKeys() {
         val phrase = state.keyGeneratedPhrase ?: throw Exception("Missing phrase when trying to upload keys")
         val shardingPolicy = state.verifyUserDetails?.shardingPolicy ?: throw Exception("Missing sharding policy when trying to upload keys")
+        val email = userRepository.retrieveUserEmail()
+        val deviceId = userRepository.retrieveUserDeviceId(email)
 
         val walletSigners = state.walletSigners
         val walletSignerResource = userRepository.addWalletSigner(
             walletSigners = walletSigners,
             policy = shardingPolicy,
-            rootSeed = Mnemonics.MnemonicCode(phrase = phrase).toSeed()
+            rootSeed = Mnemonics.MnemonicCode(phrase = phrase).toSeed(),
+            deviceId = deviceId
         )
 
         state = state.copy(uploadingKeyProcess = walletSignerResource)

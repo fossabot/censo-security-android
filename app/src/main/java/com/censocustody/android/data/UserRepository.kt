@@ -3,11 +3,9 @@ package com.censocustody.android.data
 import android.annotation.SuppressLint
 import android.content.Context
 import android.provider.Settings
-import androidx.biometric.BiometricPrompt.CryptoObject
 import com.censocustody.android.common.*
 import com.censocustody.android.data.models.*
 import okhttp3.ResponseBody
-import java.security.Signature
 
 interface UserRepository {
     suspend fun loginWithPassword(email: String, password: String): Resource<LoginResponse>
@@ -19,8 +17,15 @@ interface UserRepository {
         walletSigners: List<WalletSigner>,
         policy: ShardingPolicy?,
         rootSeed: ByteArray?,
+        deviceId: String
     ): Resource<Unit>
-    suspend fun addBootstrapUser(userImage: UserImage, walletSigners: List<WalletSigner>, rootSeed: ByteArray): Resource<Unit>
+    suspend fun addBootstrapUser(
+        userImage: UserImage,
+        walletSigners: List<WalletSigner>,
+        rootSeed: ByteArray,
+        bootstrapKey: String,
+        deviceKey: String
+    ): Resource<Unit>
     suspend fun userLoggedIn(): Boolean
     suspend fun setUserLoggedIn()
     suspend fun logOut(): Boolean
@@ -31,9 +36,7 @@ interface UserRepository {
     suspend fun checkMinimumVersion(): Resource<SemanticVersionResponse>
     suspend fun setKeyInvalidated()
     suspend fun retrieveUserDeviceId(email: String) : String
-    suspend fun saveDeviceId(email: String, deviceId: String)
     suspend fun saveDevicePublicKey(email: String, publicKey: String)
-    suspend fun saveBootstrapDeviceId(email: String, deviceId: String)
     suspend fun saveBootstrapDevicePublicKey(email: String, publicKey: String)
     suspend fun userHasDeviceIdSaved(email: String) : Boolean
     suspend fun addUserDevice(userDevice: UserDevice) : Resource<Unit>
@@ -112,10 +115,15 @@ class UserRepositoryImpl(
     override suspend fun addWalletSigner(
         walletSigners: List<WalletSigner>,
         policy: ShardingPolicy?,
-        rootSeed: ByteArray?
+        rootSeed: ByteArray?,
+        deviceId: String
     ): Resource<Unit> {
         val email = retrieveUserEmail()
-        val signedData = encryptionManager.signKeysForUpload(email, walletSigners)
+        val signedData = encryptionManager.signKeysForUpload(
+            email = email,
+            walletSigners = walletSigners,
+            deviceId = deviceId
+        )
 
         val share: Share? = policy?.let { _ ->
             rootSeed?.let { _ ->
@@ -140,32 +148,31 @@ class UserRepositoryImpl(
     override suspend fun addBootstrapUser(
         userImage: UserImage,
         walletSigners: List<WalletSigner>,
-        rootSeed: ByteArray
+        rootSeed: ByteArray,
+        bootstrapKey: String,
+        deviceKey: String
     ): Resource<Unit> {
         val email = retrieveUserEmail()
 
         val signedDeviceData = encryptionManager.signKeysForUpload(
             email = email,
             walletSigners = walletSigners,
-            bootstrapSign = false
+            deviceId = deviceKey,
         )
         val signedBootstrapData = encryptionManager.signKeysForUpload(
             email = email,
             walletSigners = walletSigners,
-            bootstrapSign = true
+            deviceId = bootstrapKey,
         )
-
-        val bootstrapPublicKey = retrieveBootstrapDevicePublicKey(email)
-        val devicePublicKey = retrieveUserDevicePublicKey(email)
 
         val userDevice = UserDevice(
             userImage = userImage,
             deviceType = DeviceType.ANDROID,
-            publicKey = devicePublicKey
+            publicKey = deviceKey
         )
 
         val bootstrapDevice = BootstrapDevice(
-            publicKey = bootstrapPublicKey,
+            publicKey = bootstrapKey,
             signature = BaseWrapper.encodeToBase64(signedBootstrapData)
         )
 
@@ -228,10 +235,10 @@ class UserRepositoryImpl(
     }
 
     override suspend fun retrieveUserDeviceId(email: String) =
-        SharedPrefsHelper.retrieveDeviceId(email)
+        SharedPrefsHelper.retrieveDevicePublicKey(email)
 
     override suspend fun userHasDeviceIdSaved(email: String) =
-        SharedPrefsHelper.userHasDeviceIdSaved(email)
+        SharedPrefsHelper.userHasDeviceKey(email)
 
     override suspend fun retrieveUserDevicePublicKey(email: String) =
         SharedPrefsHelper.retrieveDevicePublicKey(email)
@@ -240,28 +247,21 @@ class UserRepositoryImpl(
         SharedPrefsHelper.retrieveBootstrapDevicePublicKey(email)
 
     override suspend fun clearPreviousDeviceInfo(email: String) {
-        if (SharedPrefsHelper.userHasDeviceIdSaved(email)) {
-            val oldDeviceId = SharedPrefsHelper.retrieveDeviceId(email)
+        if (SharedPrefsHelper.userHasDeviceKey(email)) {
+            val oldDeviceId = SharedPrefsHelper.retrieveDevicePublicKey(email)
 
             cryptographyManager.deleteKeyIfPresent(oldDeviceId)
 
-            SharedPrefsHelper.clearDeviceId(email)
             SharedPrefsHelper.clearDevicePublicKey(email)
         }
 
-        if (SharedPrefsHelper.userHasBootstrapDeviceIdSaved(email)) {
-            val oldBootstrapDeviceId = SharedPrefsHelper.retrieveBootstrapDeviceId(email)
+        if (SharedPrefsHelper.userHasBootstrapDeviceKey(email)) {
+            val oldBootstrapDeviceId = SharedPrefsHelper.retrieveBootstrapDevicePublicKey(email)
 
             cryptographyManager.deleteKeyIfPresent(oldBootstrapDeviceId)
 
-            SharedPrefsHelper.clearBootstrapDeviceId(email)
             SharedPrefsHelper.clearDeviceBootstrapPublicKey(email)
         }
-    }
-
-
-    override suspend fun saveDeviceId(email: String, deviceId: String) {
-        SharedPrefsHelper.saveDeviceId(email = email, deviceId = deviceId)
     }
 
     override suspend fun saveDevicePublicKey(email: String, publicKey: String) {
@@ -273,10 +273,6 @@ class UserRepositoryImpl(
         return retrieveApiResource {
             api.addUserDevice(userDevice)
         }
-    }
-
-    override suspend fun saveBootstrapDeviceId(email: String, deviceId: String) {
-        SharedPrefsHelper.saveBootstrapDeviceId(email = email, deviceId = deviceId)
     }
 
     override suspend fun saveBootstrapDevicePublicKey(email: String, publicKey: String) {

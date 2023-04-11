@@ -8,7 +8,6 @@ import com.censocustody.android.data.models.*
 import com.censocustody.android.data.models.StoredKeyData.Companion.BITCOIN_KEY
 import com.censocustody.android.data.models.StoredKeyData.Companion.OFFCHAIN_KEY
 import com.censocustody.android.data.models.StoredKeyData.Companion.ETHEREUM_KEY
-import com.censocustody.android.data.models.approvalV2.ApprovalRequestDetailsV2
 import com.censocustody.android.data.models.approvalV2.ApprovalSignature
 import com.google.android.gms.common.util.VisibleForTesting
 import org.bouncycastle.util.encoders.Hex
@@ -31,7 +30,7 @@ interface EncryptionManager {
     fun signKeysForUpload(
         email: String,
         walletSigners: List<WalletSigner>,
-        bootstrapSign: Boolean = false
+        deviceId: String
     ): ByteArray
 
     fun signDataWithDeviceKey(
@@ -94,15 +93,9 @@ class EncryptionManagerImpl @Inject constructor(
     override fun signKeysForUpload(
         email: String,
         walletSigners: List<WalletSigner>,
-        bootstrapSign: Boolean
+        deviceId: String
     ): ByteArray {
         val dataToSign = Signers.retrieveDataToSign(walletSigners)
-
-        val deviceId = if (bootstrapSign) {
-            SharedPrefsHelper.retrieveBootstrapDeviceId(email)
-        } else {
-            SharedPrefsHelper.retrieveDeviceId(email)
-        }
 
         return signDataWithDeviceKey(
             data = dataToSign,
@@ -124,7 +117,7 @@ class EncryptionManagerImpl @Inject constructor(
         email: String,
         dataToSign: SignableDataResult.Device
     ): ApprovalSignature.OffChainSignature {
-        val deviceId = SharedPrefsHelper.retrieveDeviceId(email)
+        val deviceId = SharedPrefsHelper.retrieveDevicePublicKey(email)
         val signedData = signDataWithDeviceKey(
             data = dataToSign.dataToSign, deviceId = deviceId
         )
@@ -410,15 +403,15 @@ class EncryptionManagerImpl @Inject constructor(
     }
 
     private fun getDeviceAndBootstrapKeys(email: String) : DeviceKeys {
-        val deviceId = SharedPrefsHelper.retrieveDeviceId(email)
-        val bootstrapId =
-            if (SharedPrefsHelper.userHasBootstrapDeviceIdSaved(email)) SharedPrefsHelper.retrieveBootstrapDeviceId(
+        val devicePublicKey = SharedPrefsHelper.retrieveDevicePublicKey(email)
+        val bootstrapPublicKey =
+            if (SharedPrefsHelper.userHasBootstrapDeviceKey(email)) SharedPrefsHelper.retrieveBootstrapDevicePublicKey(
                 email
             ) else null
 
-        val deviceKey = cryptographyManager.getOrCreateKey(deviceId)
+        val deviceKey = cryptographyManager.getOrCreateKey(devicePublicKey)
         val bootStrapKey =
-            if (bootstrapId != null) cryptographyManager.getOrCreateKey(bootstrapId) else null
+            if (bootstrapPublicKey != null) cryptographyManager.getOrCreateKey(bootstrapPublicKey) else null
 
         return DeviceKeys(standardDeviceKey = deviceKey, bootstrapKey = bootStrapKey)
     }
@@ -448,16 +441,15 @@ class EncryptionManagerImpl @Inject constructor(
     private fun getMapOfDeviceKeys(email: String): Map<String, PrivateKey> {
         val mapOfKeys: MutableMap<String, PrivateKey> = mutableMapOf()
 
-        val deviceId = SharedPrefsHelper.retrieveDeviceId(email = email)
+        val deviceId = SharedPrefsHelper.retrieveDevicePublicKey(email = email)
         val deviceKey = cryptographyManager.getOrCreateKey(deviceId)
         val devicePublicKey = SharedPrefsHelper.retrieveDevicePublicKey(email)
 
         mapOfKeys[devicePublicKey] = deviceKey
 
-        if (SharedPrefsHelper.userHasBootstrapDeviceIdSaved(email)) {
-            val bootstrapId = SharedPrefsHelper.retrieveBootstrapDeviceId(email = email)
-            val bootStrapKey = cryptographyManager.getOrCreateKey(bootstrapId)
-            val bootstrapPublicKey = SharedPrefsHelper.retrieveBootstrapDevicePublicKey(email)
+        if (SharedPrefsHelper.userHasBootstrapDeviceKey(email)) {
+            val bootstrapPublicKey = SharedPrefsHelper.retrieveBootstrapDevicePublicKey(email = email)
+            val bootStrapKey = cryptographyManager.getOrCreateKey(bootstrapPublicKey)
 
             mapOfKeys[bootstrapPublicKey] = bootStrapKey
         }
@@ -699,4 +691,9 @@ interface SignableV2 {
 data class DeviceKeys(
     val standardDeviceKey: PrivateKey,
     val bootstrapKey: PrivateKey?
+)
+
+data class DevicePublicKeys(
+    val standardDevicePublicKey: String,
+    val bootstrapPublicKey: String
 )

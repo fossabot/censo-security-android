@@ -30,6 +30,16 @@ class DeviceRegistrationViewModel @Inject constructor(
     fun onStart(initialData: DeviceRegistrationInitialData) {
         state = state.copy(verifyUserDetails = initialData.verifyUserDetails)
 
+        if (initialData.verifyUserDetails == null) {
+            state = state.copy(kickUserToEntrance = true)
+            RaygunClient.send(
+                Exception("Missing verify user when entering device registration"), listOf(
+                    CrashReportingUtil.MANUALLY_REPORTED_TAG
+                )
+            )
+            return
+        }
+
         viewModelScope.launch {
             val isUserLoggedIn = userRepository.userLoggedIn()
 
@@ -45,9 +55,7 @@ class DeviceRegistrationViewModel @Inject constructor(
     }
 
     fun biometryApproved() {
-        if (isBootstrapUser()) {
-            sendBootstrapUserToKeyCreation()
-        } else {
+        if (!isBootstrapUser()) {
             sendUserDeviceAndImageToBackend()
         }
     }
@@ -88,7 +96,6 @@ class DeviceRegistrationViewModel @Inject constructor(
                     }
 
                     val email = userRepository.retrieveUserEmail()
-                    userRepository.saveDeviceId(email = email, deviceId = keyName)
 
                     val userDeviceAdded = userRepository.addUserDevice(
                         UserDevice(
@@ -99,7 +106,6 @@ class DeviceRegistrationViewModel @Inject constructor(
                     )
 
                     if (userDeviceAdded is Resource.Success) {
-                        userRepository.saveDeviceId(email = email, deviceId = keyName)
                         userRepository.saveDevicePublicKey(email = email, publicKey = state.standardPublicKey)
 
                         state = state.copy(addUserDevice = userDeviceAdded)
@@ -131,41 +137,17 @@ class DeviceRegistrationViewModel @Inject constructor(
     }
 
     private fun sendBootstrapUserToKeyCreation() {
-        viewModelScope.launch {
-            try {
-                val capturedUserPhoto = state.capturedUserPhoto
-                val keyName = state.standardKeyName
-
-                if (capturedUserPhoto != null && state.fileUrl.isNotEmpty() && keyName.isNotEmpty()) {
-                    //Save device id and device key
-                    val email = userRepository.retrieveUserEmail()
-
-                    //in case user was unable to upload previous keys, they will need to redo device image work
-                    userRepository.clearPreviousDeviceInfo(email)
-
-                    userRepository.saveDeviceId(email = email, deviceId = keyName)
-                    userRepository.saveDevicePublicKey(email = email, publicKey = state.standardPublicKey)
-                    userRepository.saveBootstrapDeviceId(email = email, deviceId = state.bootstrapKeyName)
-                    userRepository.saveBootstrapDevicePublicKey(email = email, publicKey = state.bootstrapPublicKey)
-
-                    //Send user to the key creation with the image data passed along...
-                    state = state.copy(
-                        createdBootstrapDeviceData = Resource.Success(Unit),
-                    )
-                } else {
-                    state = state.copy(
-                        addUserDevice = Resource.Error(exception = Exception("Missing essential data for bootstrap device registration")),
-                        deviceRegistrationError = DeviceRegistrationError.API,
-                        capturingDeviceKey = Resource.Uninitialized
-                    )
-                }
-            } catch (e: Exception) {
-                state = state.copy(
-                    addUserDevice = Resource.Error(exception = e),
-                    deviceRegistrationError = DeviceRegistrationError.BOOTSTRAP,
-                    capturingDeviceKey = Resource.Uninitialized
-                )
-            }
+        state = if (state.capturedUserPhoto != null && state.fileUrl.isNotEmpty()) {
+            //Send user to the key creation with the image data passed along...
+            state.copy(
+                createdBootstrapDeviceData = Resource.Success(Unit),
+            )
+        } else {
+            state.copy(
+                addUserDevice = Resource.Error(exception = Exception("Missing essential data for bootstrap device registration")),
+                deviceRegistrationError = DeviceRegistrationError.API,
+                capturingDeviceKey = Resource.Uninitialized
+            )
         }
     }
 
@@ -184,52 +166,9 @@ class DeviceRegistrationViewModel @Inject constructor(
 
     fun imageCaptured() {
         if (isBootstrapUser()) {
-            //Standard Device Registration
-            createBootstrapKeysForDevice()
+            sendBootstrapUserToKeyCreation()
         } else {
-            //Standard Device Registration
             createStandardKeyForDevice()
-        }
-    }
-
-    private fun createBootstrapKeysForDevice() {
-        viewModelScope.launch {
-            val standardKeyId = cryptographyManager.createDeviceKeyId()
-            val bootstrapKeyId = cryptographyManager.createDeviceKeyId()
-
-            state = state.copy(
-                standardKeyName = standardKeyId,
-                bootstrapKeyName = bootstrapKeyId
-            )
-
-            try {
-                cryptographyManager.getOrCreateKey(keyName = standardKeyId)
-                cryptographyManager.getOrCreateKey(keyName = bootstrapKeyId)
-
-                val standardPublicKey =
-                    cryptographyManager.getPublicKeyFromDeviceKey(keyName = standardKeyId)
-                val bootstrapPublicKey =
-                    cryptographyManager.getPublicKeyFromDeviceKey(keyName = bootstrapKeyId)
-
-                val compressedStandardPublicKey =
-                    ECIESManager.extractUncompressedPublicKey(standardPublicKey.encoded)
-
-                val compressedBootstrapPublicKey =
-                    ECIESManager.extractUncompressedPublicKey(bootstrapPublicKey.encoded)
-
-                state = state.copy(
-                    standardPublicKey = BaseWrapper.encode(compressedStandardPublicKey),
-                    bootstrapPublicKey = BaseWrapper.encode(compressedBootstrapPublicKey)
-                )
-
-                triggerBioPrompt()
-
-            } catch (e: Exception) {
-                state = state.copy(
-                    deviceRegistrationError = DeviceRegistrationError.SIGNING_IMAGE,
-                    capturingDeviceKey = Resource.Uninitialized
-                )
-            }
         }
     }
 
@@ -280,7 +219,7 @@ class DeviceRegistrationViewModel @Inject constructor(
         )
     }
 
-    private fun isBootstrapUser() = state.verifyUserDetails?.shardingPolicy == null
+    private fun isBootstrapUser() = state.verifyUserDetails != null && state.verifyUserDetails?.shardingPolicy == null
 
     fun resetTriggerImageCapture() {
         state = state.copy(triggerImageCapture = Resource.Uninitialized)
@@ -305,6 +244,12 @@ class DeviceRegistrationViewModel @Inject constructor(
     fun resetErrorState() {
         state = state.copy(
             deviceRegistrationError = DeviceRegistrationError.NONE,
+        )
+    }
+
+    fun resetKickUserOut() {
+        state = state.copy(
+            kickUserToEntrance = false
         )
     }
 

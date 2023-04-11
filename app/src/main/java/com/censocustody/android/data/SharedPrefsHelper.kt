@@ -13,7 +13,6 @@ object SharedPrefsHelper {
     private const val USER_LOGGED_IN = "skipped_login"
     private const val USER_EMAIL = "user_email"
     private const val USER_TOKEN = "user_token"
-    private const val DEVICE_ID = "_device_id"
     private const val DEVICE_PUBLIC_KEY = "_device_public_key"
 
     //Sentinel Data Storage
@@ -21,7 +20,6 @@ object SharedPrefsHelper {
     private const val BGRD_CIPHER_TEXT = "_bgrd_cipher_text"
 
     //Bootstrap Device Data Storage
-    private const val BOOTSTRAP_DEVICE_ID = "_bootstrap_device_id"
     private const val BOOTSTRAP_DEVICE_PUBLIC_KEY = "_bootstrap_device_public_key"
 
     //V3 Key Storage
@@ -205,31 +203,6 @@ object SharedPrefsHelper {
     }
     //endregion
 
-    //region device id
-    fun clearDeviceId(email: String) {
-        val editor = sharedPrefs.edit()
-        editor.putString("${email.lowercase().trim()}$DEVICE_ID", "")
-        editor.apply()
-    }
-
-    fun saveDeviceId(
-        email: String,
-        deviceId: String
-    ) {
-        val editor = sharedPrefs.edit()
-        editor.putString("${email.lowercase().trim()}$DEVICE_ID", deviceId)
-        editor.apply()
-    }
-
-    fun userHasDeviceIdSaved(email: String) = retrieveDeviceId(email).isNotEmpty()
-
-    fun retrieveDeviceId(
-        email: String
-    ): String {
-        return sharedPrefs.getString("${email.lowercase().trim()}$DEVICE_ID", "") ?: ""
-    }
-    //endregion
-
     //region public key for device id
     fun clearDevicePublicKey(email: String) {
         val editor = sharedPrefs.edit()
@@ -251,34 +224,10 @@ object SharedPrefsHelper {
     ): String {
         return sharedPrefs.getString("${email.lowercase().trim()}$DEVICE_PUBLIC_KEY", "") ?: ""
     }
+
+    fun userHasDeviceKey(email: String) = retrieveDevicePublicKey(email).isNotEmpty()
+
     //endregion
-
-
-    //region bootstrap device id
-    fun clearBootstrapDeviceId(email: String) {
-        val editor = sharedPrefs.edit()
-        editor.putString("${email.lowercase().trim()}$BOOTSTRAP_DEVICE_ID", "")
-        editor.apply()
-    }
-
-    fun saveBootstrapDeviceId(
-        email: String,
-        deviceId: String
-    ) {
-        val editor = sharedPrefs.edit()
-        editor.putString("${email.lowercase().trim()}$BOOTSTRAP_DEVICE_ID", deviceId)
-        editor.apply()
-    }
-
-    fun userHasBootstrapDeviceIdSaved(email: String) = retrieveBootstrapDeviceId(email).isNotEmpty()
-
-    fun retrieveBootstrapDeviceId(
-        email: String
-    ): String {
-        return sharedPrefs.getString("${email.lowercase().trim()}$BOOTSTRAP_DEVICE_ID", "") ?: ""
-    }
-    //endregion
-
 
     //region public key for bootstrap device id
     fun clearDeviceBootstrapPublicKey(email: String) {
@@ -301,5 +250,7 @@ object SharedPrefsHelper {
     ): String {
         return sharedPrefs.getString("${email.lowercase().trim()}$BOOTSTRAP_DEVICE_PUBLIC_KEY", "") ?: ""
     }
+
+    fun userHasBootstrapDeviceKey(email: String) = retrieveBootstrapDevicePublicKey(email).isNotEmpty()
     //endregion
 }

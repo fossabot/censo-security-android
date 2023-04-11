@@ -88,7 +88,7 @@ class CensoAuth(
 
     override suspend fun retrieveDeviceId(): String {
         val email = retrieveUserEmail()
-        return SharedPrefsHelper.retrieveDeviceId(email)
+        return SharedPrefsHelper.retrieveDevicePublicKey(email)
     }
 
     override suspend fun signOut() {

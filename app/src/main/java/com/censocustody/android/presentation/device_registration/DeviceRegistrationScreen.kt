@@ -78,6 +78,14 @@ fun DeviceRegistrationScreen(
             viewModel.resetUserDevice()
         }
 
+        if (state.kickUserToEntrance) {
+            navController.navigate(Screen.EntranceRoute.route) {
+                launchSingleTop = true
+                popUpToTop()
+            }
+            viewModel.resetKickUserOut()
+        }
+
         if (state.createdBootstrapDeviceData is Resource.Success) {
 
             val keyCreationInitialData = KeyCreationInitialData(

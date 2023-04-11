@@ -150,8 +150,8 @@ class SecurePreferencesImpl @Inject constructor(applicationContext: Context) :
 
     //region Device Key Data
     override fun clearDeviceKeyData(email: String) {
-        SharedPrefsHelper.clearDeviceId(email)
         SharedPrefsHelper.clearDevicePublicKey(email)
+        SharedPrefsHelper.clearDeviceBootstrapPublicKey(email)
     }
     //endregion
 

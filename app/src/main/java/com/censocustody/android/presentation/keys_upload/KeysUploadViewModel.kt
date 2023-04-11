@@ -94,9 +94,12 @@ class KeysUploadViewModel @Inject constructor(
     //endregion
 
     private suspend fun uploadSigners() {
+        val email = userRepository.retrieveUserEmail()
+        val deviceId = userRepository.retrieveUserDeviceId(email)
         //make API call to send up any needed signed keys
         val walletSigner = userRepository.addWalletSigner(
             walletSigners = state.walletSigners,
+            deviceId = deviceId,
             rootSeed = null,
             policy = null
         )

@@ -10,7 +10,6 @@ import com.raygun.raygun4android.RaygunClient
 import java.security.InvalidAlgorithmParameterException
 import java.security.KeyStoreException
 import javax.crypto.Cipher
-import javax.crypto.IllegalBlockSizeException
 
 interface KeyRepository {
     suspend fun signTimestamp(timestamp: String): String
@@ -147,11 +146,11 @@ class KeyRepositoryImpl(
 
         val tokenByteArray = timestamp.toByteArray(charset = Charsets.UTF_8)
 
-        val deviceId = SharedPrefsHelper.retrieveDeviceId(userEmail)
+        val devicePublicKey = SharedPrefsHelper.retrieveDevicePublicKey(userEmail)
 
         val signedTimestamp = encryptionManager.signDataWithDeviceKey(
             data = tokenByteArray,
-            deviceId = deviceId
+            deviceId = devicePublicKey
         )
 
         return BaseWrapper.encodeToBase64(signedTimestamp)
@@ -207,14 +206,13 @@ class KeyRepositoryImpl(
 
     override suspend fun removeBootstrapDeviceData() {
         val email = userRepository.retrieveUserEmail()
-        val haveBootstrapData = SharedPrefsHelper.userHasBootstrapDeviceIdSaved(email)
+        val haveBootstrapData = SharedPrefsHelper.userHasBootstrapDeviceKey(email)
 
         if (haveBootstrapData) {
-            val deviceId = SharedPrefsHelper.retrieveBootstrapDeviceId(email)
+            val deviceId = SharedPrefsHelper.retrieveBootstrapDevicePublicKey(email)
 
             cryptographyManager.deleteKeyIfPresent(deviceId)
 
-            SharedPrefsHelper.clearBootstrapDeviceId(email)
             SharedPrefsHelper.clearDeviceBootstrapPublicKey(email)
         }
     }
@@ -302,11 +300,18 @@ class KeyRepositoryImpl(
     }
 
     private fun deleteDeviceKeyInfoWhenBiometryInvalidated(email: String) {
-        val deviceId = SharedPrefsHelper.retrieveDeviceId(email)
+        val deviceId = SharedPrefsHelper.retrieveDevicePublicKey(email)
 
         if (deviceId.isNotEmpty()) {
             cryptographyManager.deleteKeyIfPresent(deviceId)
         }
+
+        val bootstrapId = SharedPrefsHelper.retrieveBootstrapDevicePublicKey(email)
+
+        if (bootstrapId.isNotEmpty()) {
+            cryptographyManager.deleteKeyIfPresent(deviceId)
+        }
+
         securePreferences.clearDeviceKeyData(email)
     }
 }
