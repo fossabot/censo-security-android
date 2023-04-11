@@ -577,6 +577,7 @@ sealed class ApprovalRequestDetailsV2 {
         val version: Int,
         val txIns: List<TransactionInput>,
         val txOuts: List<TransactionOutput>,
+        val feePerVByte: Long,
         val totalFee: Long,
     )
 
