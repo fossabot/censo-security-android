@@ -3,6 +3,7 @@ package com.censocustody.android.presentation.key_creation
 import android.graphics.Bitmap
 import com.censocustody.android.common.Resource
 import com.censocustody.android.common.UriWrapper
+import com.censocustody.android.data.models.UserImage
 import com.censocustody.android.data.models.VerifyUser
 import com.censocustody.android.data.models.WalletSigner
 import com.google.gson.GsonBuilder
@@ -20,6 +21,8 @@ data class KeyCreationState(
 
     val verifyUserDetails: VerifyUser? = null,
     val bootstrapUserDeviceImage: Bitmap? = null,
+
+    val userImage: UserImage? = null
 )
 
 //If user image is filled in, then we are setting up bootstrap user

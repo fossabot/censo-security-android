@@ -48,9 +48,11 @@ interface EncryptionManager {
         dataToSign: List<SignableDataResult>
     ): List<ApprovalSignature>
 
-    fun createShareForBootstrapUser(email: String, rootSeed: ByteArray) : Share
+    fun createShareForBootstrapUser(
+        email: String, rootSeed: ByteArray,
+        devicePublicKey: String, bootstrapPublicKey: String) : Share
 
-    fun createShare(shardingPolicy: ShardingPolicy, rootSeed: ByteArray,) : Share
+    fun createShare(shardingPolicy: ShardingPolicy, rootSeed: ByteArray): Share
 
     fun reEncryptShards(email: String, shards: List<Shard>, targetDevicePublicKey: String): List<RecoveryShard>
 
@@ -215,18 +217,20 @@ class EncryptionManagerImpl @Inject constructor(
         )
     }
 
-    override fun createShareForBootstrapUser(email: String, rootSeed: ByteArray) : Share {
-        val devicePublicKey = SharedPrefsHelper.retrieveDevicePublicKey(email)
-        val bootstrapDevicePublicKey = SharedPrefsHelper.retrieveBootstrapDevicePublicKey(email)
-
+    override fun createShareForBootstrapUser(
+        email: String,
+        rootSeed: ByteArray,
+        devicePublicKey: String,
+        bootstrapPublicKey: String
+    ): Share {
         val deviceShardingParticipant = ShardingParticipant(
             participantId = devicePublicKey.toParticipantIdAsHexString(),
             devicePublicKeys = listOf(devicePublicKey)
         )
 
         val bootstrapShardingParticipant = ShardingParticipant(
-            participantId = bootstrapDevicePublicKey.toParticipantIdAsHexString(),
-            devicePublicKeys = listOf(bootstrapDevicePublicKey)
+            participantId = bootstrapPublicKey.toParticipantIdAsHexString(),
+            devicePublicKeys = listOf(bootstrapPublicKey)
         )
 
         val shardingPolicy = ShardingPolicy(

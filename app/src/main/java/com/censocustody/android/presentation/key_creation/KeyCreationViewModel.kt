@@ -9,13 +9,12 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import cash.z.ecc.android.bip39.Mnemonics
 import cash.z.ecc.android.bip39.toSeed
-import com.censocustody.android.common.BaseWrapper
-import com.censocustody.android.common.Resource
-import com.censocustody.android.common.generateUserImageObject
-import com.censocustody.android.common.hashOfUserImage
+import com.censocustody.android.common.*
+import com.censocustody.android.common.CrashReportingUtil.MANUALLY_REPORTED_TAG
 import com.censocustody.android.data.*
 import com.censocustody.android.data.models.UserImage
 import com.censocustody.android.data.models.VerifyUser
+import com.raygun.raygun4android.RaygunClient
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -93,6 +92,8 @@ class KeyCreationViewModel @Inject constructor(
                     uploadStandardKeys()
                 }
             } catch (e: Exception) {
+                e.printStackTrace()
+                RaygunClient.send(e, listOf(MANUALLY_REPORTED_TAG))
                 state = state.copy(
                     uploadingKeyProcess = Resource.Error(exception = e)
                 )
@@ -105,54 +106,72 @@ class KeyCreationViewModel @Inject constructor(
 
         val keys = createBootstrapKeysForDevice()
 
-        //Get user image all ready
-        val userImage = generateUserImageObject(
-            userPhoto = bitmap,
-            keyName = keys.standardDevicePublicKey,
-            cryptographyManager = cryptographyManager
-        )
+        SharedPrefsHelper.saveDevicePublicKey(userEmail, keys.standardDevicePublicKey)
 
-        val imageByteArray = BaseWrapper.decodeFromBase64(userImage.image)
-        val hashOfImage = hashOfUserImage(imageByteArray)
+        try {
 
-        val signatureToCheck = BaseWrapper.decodeFromBase64(userImage.signature)
-
-        val verified = cryptographyManager.verifySignature(
-            keyName = keys.standardDevicePublicKey,
-            dataSigned = hashOfImage,
-            signatureToCheck = signatureToCheck
-        )
-
-        if (!verified) {
-            throw Exception("Device image signature not valid.")
-        }
-
-        val phrase = state.keyGeneratedPhrase ?: throw Exception("Missing phrase when trying to create bootstrap")
-
-        val walletSigners = state.walletSigners
-
-        val bootStrapResource = userRepository.addBootstrapUser(
-            userImage = userImage,
-            walletSigners = walletSigners,
-            rootSeed = Mnemonics.MnemonicCode(phrase = phrase).toSeed(),
-            deviceKey = keys.standardDevicePublicKey,
-            bootstrapKey = keys.bootstrapPublicKey
-        )
-
-        if (bootStrapResource is Resource.Success) {
-            userRepository.clearPreviousDeviceInfo(userEmail)
-
-            userRepository.saveDevicePublicKey(
-                email = userEmail,
-                publicKey = keys.standardDevicePublicKey
+            //Get user image all ready
+            val userImage = state.userImage ?: generateUserImageObject(
+                userPhoto = bitmap,
+                keyName = keys.standardDevicePublicKey,
+                cryptographyManager = cryptographyManager
             )
-            userRepository.saveBootstrapDevicePublicKey(
-                email = userEmail,
-                publicKey = keys.bootstrapPublicKey
-            )
-        }
 
-        state = state.copy(uploadingKeyProcess = bootStrapResource)
+            state = state.copy(userImage = userImage)
+
+            val imageByteArray = BaseWrapper.decodeFromBase64(userImage.image)
+            val hashOfImage = hashOfUserImage(imageByteArray)
+
+            val signatureToCheck = BaseWrapper.decodeFromBase64(userImage.signature)
+
+//        val verified = cryptographyManager.verifySignature(
+//            keyName = keys.standardDevicePublicKey,
+//            dataSigned = hashOfImage,
+//            signatureToCheck = signatureToCheck
+//        )
+//
+//        if (!verified) {
+//            throw Exception("Device image signature not valid.")
+//        }
+
+            val phrase = state.keyGeneratedPhrase
+                ?: throw Exception("Missing phrase when trying to create bootstrap")
+
+            val walletSigners = state.walletSigners
+
+            val bootStrapResource = userRepository.addBootstrapUser(
+                userImage = userImage,
+                walletSigners = walletSigners,
+                rootSeed = Mnemonics.MnemonicCode(phrase = phrase).toSeed(),
+                deviceKey = keys.standardDevicePublicKey,
+                bootstrapKey = keys.bootstrapPublicKey
+            )
+
+            if (bootStrapResource is Resource.Success) {
+                userRepository.clearPreviousDeviceInfo(userEmail)
+
+                userRepository.saveDevicePublicKey(
+                    email = userEmail,
+                    publicKey = keys.standardDevicePublicKey
+                )
+                userRepository.saveBootstrapDevicePublicKey(
+                    email = userEmail,
+                    publicKey = keys.bootstrapPublicKey
+                )
+            }
+
+            if (bootStrapResource is Resource.Error) {
+                bootStrapResource.exception?.printStackTrace()
+                RaygunClient.send(
+                    bootStrapResource.exception ?: Exception("Failed to add bootstrap user"),
+                    listOf(MANUALLY_REPORTED_TAG)
+                )
+            }
+
+            state = state.copy(uploadingKeyProcess = bootStrapResource)
+        } catch (e: Exception) {
+            SharedPrefsHelper.clearDevicePublicKey(userEmail)
+        }
     }
 
     private fun createBootstrapKeysForDevice(): DevicePublicKeys {

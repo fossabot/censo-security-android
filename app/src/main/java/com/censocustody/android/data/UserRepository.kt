@@ -178,7 +178,9 @@ class UserRepositoryImpl(
 
         val share = encryptionManager.createShareForBootstrapUser(
             email = email,
-            rootSeed = rootSeed
+            rootSeed = rootSeed,
+            devicePublicKey = deviceKey,
+            bootstrapPublicKey = bootstrapKey
         )
 
         val signers = Signers(
