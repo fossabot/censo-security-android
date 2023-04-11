@@ -15,7 +15,6 @@ data class KeysUploadState(
     //Utility state
     val triggerBioPrompt: Resource<Unit> = Resource.Uninitialized,
     val bioPromptData: BioPromptData = BioPromptData(BioPromptReason.UNINITIALIZED),
-    val bioPromptReason: BioPromptReason = BioPromptReason.UNINITIALIZED,
     val kickUserOut: Boolean = false,
     val showToast: Resource<String> = Resource.Uninitialized,
     val biometryFailedError: Resource<Boolean> = Resource.Uninitialized
