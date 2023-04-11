@@ -15,6 +15,7 @@ data class DeviceRegistrationState(
     //Initial state
     val userLoggedIn: Boolean = true,
     val isBootstrapUser: Boolean = false,
+    val verifyUser: VerifyUser? = null,
 
     //Util state
     val capturingDeviceKey: Resource<Boolean> = Resource.Uninitialized,
@@ -39,7 +40,8 @@ data class DeviceRegistrationState(
 
     val userImage: UserImage? = null,
 
-    val kickUserToEntrance : Boolean = false
+    val kickUserToEntrance : Boolean = false,
+    val createdBootstrapDeviceData: Resource<Unit> = Resource.Uninitialized,
 )
 
 
@@ -48,6 +50,7 @@ enum class DeviceRegistrationError {
 }
 
 data class DeviceRegistrationInitialData(
+    val verifyUser: VerifyUser?,
     val bootstrapUser: Boolean
 ) {
     companion object {

@@ -28,7 +28,10 @@ class DeviceRegistrationViewModel @Inject constructor(
         private set
 
     fun onStart(initialData: DeviceRegistrationInitialData) {
-        state = state.copy(isBootstrapUser = initialData.bootstrapUser)
+        state = state.copy(
+            isBootstrapUser = initialData.bootstrapUser,
+            verifyUser = initialData.verifyUser
+        )
 
         viewModelScope.launch {
             val isUserLoggedIn = userRepository.userLoggedIn()
@@ -162,7 +165,7 @@ class DeviceRegistrationViewModel @Inject constructor(
 
                     //Send user to the key creation with the image data passed along...
                     state = state.copy(
-                        addUserDevice = Resource.Success(Unit),
+                        createdBootstrapDeviceData = Resource.Success(Unit),
                     )
                 } else {
                     state = state.copy(

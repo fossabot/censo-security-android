@@ -74,6 +74,7 @@ fun EntranceScreen(
                 UserDestination.DEVICE_REGISTRATION -> {
                     val deviceRegistrationInitialData = DeviceRegistrationInitialData(
                         bootstrapUser = state.verifyUserResult.data != null && state.verifyUserResult.data.shardingPolicy == null,
+                        verifyUser = state.verifyUserResult.data
                     )
 
                     val deviceRegistrationJson =

@@ -70,28 +70,31 @@ fun DeviceRegistrationScreen(
 
     LaunchedEffect(key1 = state) {
 
-        if (state.addUserDevice is Resource.Success) {
+        if (!state.userLoggedIn || state.kickUserToEntrance || state.addUserDevice is Resource.Success) {
             navController.navigate(Screen.EntranceRoute.route) {
                 launchSingleTop = true
                 popUpToTop()
             }
             viewModel.resetUserDevice()
-        }
-
-        if (state.kickUserToEntrance) {
-            navController.navigate(Screen.EntranceRoute.route) {
-                launchSingleTop = true
-                popUpToTop()
-            }
             viewModel.resetKickUserOut()
+            viewModel.resetUserLoggedIn()
         }
 
-        if (!state.userLoggedIn) {
-            navController.navigate(Screen.EntranceRoute.route) {
-                launchSingleTop = true
-                popUpToTop()
-            }
-            viewModel.resetUserLoggedIn()
+        if (state.createdBootstrapDeviceData is Resource.Success) {
+
+            val keyCreationInitialData = KeyCreationInitialData(
+                verifyUserDetails = state.verifyUser,
+                bootstrapUserDeviceImageURI = state.fileUrl
+            )
+
+            val keyCreationJson =
+                KeyCreationInitialData.toJson(
+                    keyCreationInitialData,
+                    AndroidUriWrapper()
+                )
+            val route = "${Screen.KeyCreationRoute.route}/$keyCreationJson"
+
+            navController.navigate(route)
         }
 
         if (state.triggerBioPrompt is Resource.Success) {
