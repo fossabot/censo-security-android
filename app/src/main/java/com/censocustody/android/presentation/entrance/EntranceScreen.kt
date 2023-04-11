@@ -42,8 +42,8 @@ fun EntranceScreen(
         if (state.userDestinationResult is Resource.Success) {
             val userDestinationRoute = when (state.userDestinationResult.data) {
                 UserDestination.HOME -> Screen.ApprovalListRoute.route
-                UserDestination.KEY_MANAGEMENT_CREATION,
-                UserDestination.UPLOAD_KEYS -> {
+                UserDestination.UPLOAD_KEYS -> Screen.UploadKeysRoute.route
+                UserDestination.KEY_MANAGEMENT_CREATION -> {
                     val keyCreationInitialData = KeyCreationInitialData(
                         verifyUserDetails = state.verifyUserResult.data,
                     )

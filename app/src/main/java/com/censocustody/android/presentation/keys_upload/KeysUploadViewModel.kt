@@ -16,15 +16,13 @@ import javax.inject.Inject
 
 /***
  *
- * User gets here in 2 cases:
- * Case 1: They failed to upload public keys to backend during key creation
- * Case 2: We added a new key to codebase, and user has not uploaded it to backend.
+ * User gets here: We added a new key to codebase, and user has not uploaded it to backend.
  *
  * Get root seed. Create all data w/ root seed. Send data to backend.
  *
  * Step 1: Get existing root seed (biometry approval)
  * Step 2: Save all public keys to storage
- * Step 3: Sign public keys with device key (biometry approval)
+ * Step 3: Sign public keys with device key
  * Step 4: Upload signed public keys to backend
  */
 
@@ -61,16 +59,7 @@ class KeysUploadViewModel @Inject constructor(
     private fun retrieveCipherToDecryptV3RootSeed() {
         state = state.copy(
             triggerBioPrompt = Resource.Success(Unit),
-            bioPromptData = BioPromptData(BioPromptReason.RETRIEVE_V3_ROOT_SEED),
         )
-    }
-
-    private fun triggerBioPromptForDeviceSignature() {
-        state =
-            state.copy(
-                triggerBioPrompt = Resource.Success(Unit),
-                bioPromptData = BioPromptData(BioPromptReason.RETRIEVE_DEVICE_SIGNATURE),
-            )
     }
 
     //region Step 2: Save new public keys
@@ -100,36 +89,30 @@ class KeysUploadViewModel @Inject constructor(
 
         state = state.copy(walletSigners = walletSignersToAdd)
 
-        triggerBioPromptForDeviceSignature()
+        uploadSigners()
     }
     //endregion
 
-    private fun uploadSigners() {
-        viewModelScope.launch {
-            //make API call to send up any needed signed keys
-            val walletSigner = keyRepository.uploadKeys(state.walletSigners)
+    private suspend fun uploadSigners() {
+        //make API call to send up any needed signed keys
+        val walletSigner = userRepository.addWalletSigner(
+            walletSigners = state.walletSigners,
+            rootSeed = null,
+            policy = null
+        )
 
-            if (walletSigner is Resource.Success) {
-                state = state.copy(finishedUpload = true)
-            } else if (walletSigner is Resource.Error) {
-                state = state.copy(addWalletSigner = walletSigner)
-            }
+        if (walletSigner is Resource.Success) {
+            state = state.copy(finishedUpload = true)
+        } else if (walletSigner is Resource.Error) {
+            state = state.copy(addWalletSigner = walletSigner)
         }
     }
 
-    //region handle all biometry events
     fun biometryApproved() {
         viewModelScope.launch {
-            if (state.bioPromptData.bioPromptReason == BioPromptReason.RETRIEVE_V3_ROOT_SEED) {
-                retrieveV3RootSeedAndKickOffKeyStorage()
-            }
-
-            if (state.bioPromptData.bioPromptReason == BioPromptReason.RETRIEVE_DEVICE_SIGNATURE) {
-                uploadSigners()
-            }
+            retrieveV3RootSeedAndKickOffKeyStorage()
         }
     }
-    //endregion
 
     //region utility
     fun retry() {

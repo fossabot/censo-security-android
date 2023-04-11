@@ -40,8 +40,6 @@ interface KeyRepository {
         verifyUser: VerifyUser?
     ): Boolean
 
-    suspend fun uploadKeys(walletSigners: List<WalletSigner>): Resource<Unit>
-
     suspend fun recoverRootSeed(shards: List<Shard>, ancestors: List<AncestorShard>) : ByteArray
 
     suspend fun signPublicKeys(
@@ -227,16 +225,6 @@ class KeyRepositoryImpl(
             keyStorage.retrieveRootSeed(email = userEmail)
         } catch (e: Exception) {
             null
-        }
-    }
-
-    override suspend fun uploadKeys(walletSigners: List<WalletSigner>): Resource<Unit> {
-        val email = userRepository.retrieveUserEmail()
-        val signedData = encryptionManager.signKeysForUpload(email, walletSigners)
-        return retrieveApiResource {
-            brooklynApiService.addWalletSigner(
-                Signers(walletSigners, BaseWrapper.encodeToBase64(signedData), share = null)
-            )
         }
     }
 

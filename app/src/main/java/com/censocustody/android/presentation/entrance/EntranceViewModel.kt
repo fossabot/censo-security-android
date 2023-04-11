@@ -191,11 +191,8 @@ class EntranceViewModel @Inject constructor(
                 && verifyUser.userNeedsToUpdateKeyRegistration(localPublicKeys)
 
         //Check 3 CREATE/RECOVER: This user does not have a local private key and needs to either create a key or recover a key
-        val needToCreateRootSeed = !userHasV3RootSeedSaved && !userHasUploadedKeysToBackendBefore
+        val needToCreateRootSeed = !userHasUploadedKeysToBackendBefore
         val needToRecoverRootSeed = !userHasV3RootSeedSaved && userHasUploadedKeysToBackendBefore
-
-        //Check 4 UPLOAD_KEYS: User has saved local keys but has never uploaded them to backend (rare, but can happen when a user failed to upload data API call)
-        val needToUploadPublicKeyData = !userHasUploadedKeysToBackendBefore && userHasV3RootSeedSaved
 
         //DESTINATION: Any when clause will trigger a user navigating to destination
         when {
@@ -238,12 +235,6 @@ class EntranceViewModel @Inject constructor(
                             userDestinationResult = Resource.Success(UserDestination.KEY_MANAGEMENT_RECOVERY)
                         )
                     }
-                return
-            }
-            needToUploadPublicKeyData -> {
-                state = state.copy(
-                    userDestinationResult = Resource.Success(UserDestination.UPLOAD_KEYS)
-                )
                 return
             }
         }
