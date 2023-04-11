@@ -34,6 +34,9 @@ class ApprovalsViewModelTest : BaseViewModelTest() {
     lateinit var approvalsRepository: ApprovalsRepository
 
     @Mock
+    lateinit var keyRepository: KeyRepository
+
+    @Mock
     lateinit var countdownTimer: CensoCountDownTimer
 
     private lateinit var approvalsViewModel: ApprovalsViewModel
@@ -74,6 +77,7 @@ class ApprovalsViewModelTest : BaseViewModelTest() {
         approvalsViewModel =
             ApprovalsViewModel(
                 approvalsRepository = approvalsRepository,
+                keyRepository = keyRepository,
                 timer = countdownTimer
             )
     }

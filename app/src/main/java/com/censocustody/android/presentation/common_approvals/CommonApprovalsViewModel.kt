@@ -7,10 +7,13 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.censocustody.android.common.*
 import com.censocustody.android.data.ApprovalsRepository
+import com.censocustody.android.data.KeyRepository
 import com.censocustody.android.data.Shards
+import com.censocustody.android.data.SharedPrefsHelper
 import com.censocustody.android.data.models.ApprovalDisposition
 import com.censocustody.android.data.models.RegisterApprovalDisposition
 import com.censocustody.android.data.models.Shard
+import com.censocustody.android.data.models.approvalV2.ApprovalDispositionRequestV2
 import com.censocustody.android.data.models.approvalV2.ApprovalRequestDetailsV2
 import com.censocustody.android.data.models.approvalV2.ApprovalRequestV2
 import com.censocustody.android.presentation.approval_disposition.ApprovalDispositionState
@@ -19,6 +22,7 @@ import kotlinx.coroutines.launch
 
 abstract class  CommonApprovalsViewModel(
     private val approvalsRepository: ApprovalsRepository,
+    private val keyRepository: KeyRepository,
     private val timer: CensoCountDownTimer
 ) : ViewModel() {
 
@@ -181,12 +185,27 @@ abstract class  CommonApprovalsViewModel(
             )
         }
 
+        removeBootstrapDeviceIfNeeded(
+            registerApproval = registerApprovalDisposition,
+            approvalDispositionResponseResource = approvalDispositionResponseResource
+        )
+
         return approvalDispositionState.copy(
             registerApprovalDispositionResult = approvalDispositionResponseResource
         )
 
     }
 
+    private suspend fun removeBootstrapDeviceIfNeeded(
+        registerApproval: RegisterApprovalDisposition,
+        approvalDispositionResponseResource: Resource<ApprovalDispositionRequestV2.RegisterApprovalDispositionV2Body>
+    ) {
+        if (approvalDispositionResponseResource is Resource.Success &&
+            registerApproval.approvalRequestType is ApprovalRequestDetailsV2.OrgAdminPolicyUpdate
+        ) {
+            keyRepository.removeBootstrapDeviceData()
+        }
+    }
     private suspend fun retrieveRecoveryShards(
         requestDetails: ApprovalRequestDetailsV2?
     ): List<Shard>? {
