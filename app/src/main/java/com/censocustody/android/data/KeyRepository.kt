@@ -48,6 +48,8 @@ interface KeyRepository {
         publicKeys: List<WalletSigner?>,
         rootSeed: ByteArray
     ): List<WalletSigner>
+
+    suspend fun removeBootstrapDeviceData()
 }
 
 class KeyRepositoryImpl(
@@ -202,6 +204,20 @@ class KeyRepositoryImpl(
                 publicKey = it?.publicKey ?: ""
             )
             it?.copy(signature = BaseWrapper.encodeToBase64(signedKey))
+        }
+    }
+
+    override suspend fun removeBootstrapDeviceData() {
+        val email = userRepository.retrieveUserEmail()
+        val haveBootstrapData = SharedPrefsHelper.userHasBootstrapDeviceIdSaved(email)
+
+        if (haveBootstrapData) {
+            val deviceId = SharedPrefsHelper.retrieveBootstrapDeviceId(email)
+
+            cryptographyManager.deleteKeyIfPresent(deviceId)
+
+            SharedPrefsHelper.clearBootstrapDeviceId(email)
+            SharedPrefsHelper.clearDeviceBootstrapPublicKey(email)
         }
     }
 
