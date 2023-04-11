@@ -14,7 +14,7 @@ data class DeviceRegistrationState(
 
     //Initial state
     val userLoggedIn: Boolean = true,
-    val verifyUserDetails: VerifyUser? = null,
+    val isBootstrapUser: Boolean = false,
 
     //Util state
     val capturingDeviceKey: Resource<Boolean> = Resource.Uninitialized,
@@ -29,9 +29,6 @@ data class DeviceRegistrationState(
     val addUserDevice: Resource<Unit> = Resource.Uninitialized,
     val deviceRegistrationError: DeviceRegistrationError = DeviceRegistrationError.NONE,
 
-    //Data needed to set up user for bootstrap device creation
-    val createdBootstrapDeviceData: Resource<Unit> = Resource.Uninitialized,
-
     //Standard device key information
     val standardKeyName: String = "",
     val standardPublicKey: String = "",
@@ -42,6 +39,7 @@ data class DeviceRegistrationState(
 
     val userImage: UserImage? = null,
 
+    val kickUserToEntrance : Boolean = false
 )
 
 
@@ -50,7 +48,7 @@ enum class DeviceRegistrationError {
 }
 
 data class DeviceRegistrationInitialData(
-    val verifyUserDetails: VerifyUser?,
+    val bootstrapUser: Boolean
 ) {
     companion object {
         fun toJson(

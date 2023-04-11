@@ -28,7 +28,7 @@ class DeviceRegistrationViewModel @Inject constructor(
         private set
 
     fun onStart(initialData: DeviceRegistrationInitialData) {
-        state = state.copy(verifyUserDetails = initialData.verifyUserDetails)
+        state = state.copy(isBootstrapUser = initialData.bootstrapUser)
 
         viewModelScope.launch {
             val isUserLoggedIn = userRepository.userLoggedIn()
@@ -45,7 +45,7 @@ class DeviceRegistrationViewModel @Inject constructor(
     }
 
     fun biometryApproved() {
-        if (isBootstrapUser()) {
+        if (state.isBootstrapUser) {
             sendBootstrapUserToKeyCreation()
         } else {
             sendUserDeviceAndImageToBackend()
@@ -100,7 +100,10 @@ class DeviceRegistrationViewModel @Inject constructor(
 
                     if (userDeviceAdded is Resource.Success) {
                         userRepository.saveDeviceId(email = email, deviceId = keyName)
-                        userRepository.saveDevicePublicKey(email = email, publicKey = state.standardPublicKey)
+                        userRepository.saveDevicePublicKey(
+                            email = email,
+                            publicKey = state.standardPublicKey
+                        )
 
                         state = state.copy(addUserDevice = userDeviceAdded)
 
@@ -144,13 +147,22 @@ class DeviceRegistrationViewModel @Inject constructor(
                     userRepository.clearPreviousDeviceInfo(email)
 
                     userRepository.saveDeviceId(email = email, deviceId = keyName)
-                    userRepository.saveDevicePublicKey(email = email, publicKey = state.standardPublicKey)
-                    userRepository.saveBootstrapDeviceId(email = email, deviceId = state.bootstrapKeyName)
-                    userRepository.saveBootstrapDevicePublicKey(email = email, publicKey = state.bootstrapPublicKey)
+                    userRepository.saveDevicePublicKey(
+                        email = email,
+                        publicKey = state.standardPublicKey
+                    )
+                    userRepository.saveBootstrapDeviceId(
+                        email = email,
+                        deviceId = state.bootstrapKeyName
+                    )
+                    userRepository.saveBootstrapDevicePublicKey(
+                        email = email,
+                        publicKey = state.bootstrapPublicKey
+                    )
 
                     //Send user to the key creation with the image data passed along...
                     state = state.copy(
-                        createdBootstrapDeviceData = Resource.Success(Unit),
+                        addUserDevice = Resource.Success(Unit),
                     )
                 } else {
                     state = state.copy(
@@ -183,7 +195,7 @@ class DeviceRegistrationViewModel @Inject constructor(
     }
 
     fun imageCaptured() {
-        if (isBootstrapUser()) {
+        if (state.isBootstrapUser) {
             //Standard Device Registration
             createBootstrapKeysForDevice()
         } else {
@@ -280,18 +292,12 @@ class DeviceRegistrationViewModel @Inject constructor(
         )
     }
 
-    private fun isBootstrapUser() = state.verifyUserDetails?.shardingPolicy == null
-
     fun resetTriggerImageCapture() {
         state = state.copy(triggerImageCapture = Resource.Uninitialized)
     }
 
     fun resetCapturedUserPhoto() {
         state = state.copy(capturedUserPhoto = null)
-    }
-
-    fun resetCreatedBootstrapTrigger() {
-        state = state.copy(createdBootstrapDeviceData = Resource.Uninitialized)
     }
 
     fun resetUserDevice() {
@@ -305,6 +311,12 @@ class DeviceRegistrationViewModel @Inject constructor(
     fun resetErrorState() {
         state = state.copy(
             deviceRegistrationError = DeviceRegistrationError.NONE,
+        )
+    }
+
+    fun resetKickUserOut() {
+        state = state.copy(
+            kickUserToEntrance = false
         )
     }
 

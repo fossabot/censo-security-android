@@ -78,26 +78,12 @@ fun DeviceRegistrationScreen(
             viewModel.resetUserDevice()
         }
 
-        if (state.createdBootstrapDeviceData is Resource.Success) {
-
-            val keyCreationInitialData = KeyCreationInitialData(
-                verifyUserDetails = state.verifyUserDetails,
-                bootstrapUserDeviceImageURI = state.fileUrl
-            )
-
-            val keyCreationJson =
-                KeyCreationInitialData.toJson(
-                    keyCreationInitialData,
-                    AndroidUriWrapper()
-                )
-            val route = "${Screen.KeyCreationRoute.route}/$keyCreationJson"
-
-            navController.navigate(route) {
+        if (state.kickUserToEntrance) {
+            navController.navigate(Screen.EntranceRoute.route) {
                 launchSingleTop = true
                 popUpToTop()
             }
-
-            viewModel.resetCreatedBootstrapTrigger()
+            viewModel.resetKickUserOut()
         }
 
         if (!state.userLoggedIn) {
