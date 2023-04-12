@@ -28,6 +28,13 @@ class DeviceRegistrationViewModel @Inject constructor(
         private set
 
     fun onStart(initialData: DeviceRegistrationInitialData) {
+        if (initialData.verifyUser == null) {
+            state = state.copy(
+                kickUserToEntrance = true
+            )
+            return
+        }
+
         state = state.copy(
             isBootstrapUser = initialData.bootstrapUser,
             verifyUser = initialData.verifyUser

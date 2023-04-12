@@ -285,7 +285,7 @@ class KeyRepositoryImpl(
             is InvalidKeyPhraseException -> {
                 wipeAllDataAfterKeyInvalidatedException()
             }
-            else -> throw exception
+            else -> {}
         }
     }
     override suspend fun retrieveRecoveryShards() =
