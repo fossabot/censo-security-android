@@ -91,7 +91,7 @@ class EntranceViewModel @Inject constructor(
                 val devicePublicKey = userRepository.retrieveUserDevicePublicKey(userEmail)
                 val backendPublicKey = verifyUser.deviceKeyInfo?.key
 
-                if (devicePublicKey.lowercase() == backendPublicKey?.lowercase() || verifyUser.deviceKeyInfo == null) {
+                if (devicePublicKey.lowercase() == backendPublicKey?.lowercase()) {
                     determineUserDestination(verifyUser)
                 } else {
                     //DESTINATION: Send user to device registration

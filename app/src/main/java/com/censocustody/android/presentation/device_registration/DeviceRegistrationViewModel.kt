@@ -28,7 +28,24 @@ class DeviceRegistrationViewModel @Inject constructor(
         private set
 
     fun onStart(initialData: DeviceRegistrationInitialData) {
-        state = state.copy(verifyUserDetails = initialData.verifyUserDetails)
+        if (initialData.verifyUser == null) {
+            state = state.copy(
+                kickUserToEntrance = true
+            )
+            RaygunClient.send(
+                Exception("Missing verify user data when entering device registration flow"),
+                listOf(
+                    CrashReportingUtil.MANUALLY_REPORTED_TAG,
+                    CrashReportingUtil.DEVICE_REGISTRATION
+                )
+            )
+            return
+        }
+
+        state = state.copy(
+            isBootstrapUser = initialData.bootstrapUser,
+            verifyUser = initialData.verifyUser
+        )
 
         viewModelScope.launch {
             val isUserLoggedIn = userRepository.userLoggedIn()
@@ -45,7 +62,7 @@ class DeviceRegistrationViewModel @Inject constructor(
     }
 
     fun biometryApproved() {
-        if (isBootstrapUser()) {
+        if (state.isBootstrapUser) {
             sendBootstrapUserToKeyCreation()
         } else {
             sendUserDeviceAndImageToBackend()
@@ -100,11 +117,21 @@ class DeviceRegistrationViewModel @Inject constructor(
 
                     if (userDeviceAdded is Resource.Success) {
                         userRepository.saveDeviceId(email = email, deviceId = keyName)
-                        userRepository.saveDevicePublicKey(email = email, publicKey = state.standardPublicKey)
+                        userRepository.saveDevicePublicKey(
+                            email = email,
+                            publicKey = state.standardPublicKey
+                        )
 
                         state = state.copy(addUserDevice = userDeviceAdded)
 
                     } else if (userDeviceAdded is Resource.Error) {
+                        RaygunClient.send(
+                            userDeviceAdded.exception ?: Exception("Failed to add user device"),
+                            listOf(
+                                CrashReportingUtil.MANUALLY_REPORTED_TAG,
+                                CrashReportingUtil.DEVICE_REGISTRATION
+                            )
+                        )
                         state = state.copy(
                             addUserDevice = userDeviceAdded,
                             deviceRegistrationError = DeviceRegistrationError.API,
@@ -114,6 +141,13 @@ class DeviceRegistrationViewModel @Inject constructor(
 
 
                 } else {
+                    RaygunClient.send(
+                        Exception("Missing essential data for device registration"),
+                        listOf(
+                            CrashReportingUtil.MANUALLY_REPORTED_TAG,
+                            CrashReportingUtil.DEVICE_REGISTRATION
+                        )
+                    )
                     state = state.copy(
                         addUserDevice = Resource.Error(exception = Exception("Missing essential data for device registration")),
                         deviceRegistrationError = DeviceRegistrationError.API,
@@ -121,6 +155,13 @@ class DeviceRegistrationViewModel @Inject constructor(
                     )
                 }
             } catch (e: Exception) {
+                RaygunClient.send(
+                    e,
+                    listOf(
+                        CrashReportingUtil.MANUALLY_REPORTED_TAG,
+                        CrashReportingUtil.DEVICE_REGISTRATION
+                    )
+                )
                 state = state.copy(
                     addUserDevice = Resource.Error(exception = e),
                     deviceRegistrationError = DeviceRegistrationError.SIGNING_IMAGE,
@@ -144,15 +185,31 @@ class DeviceRegistrationViewModel @Inject constructor(
                     userRepository.clearPreviousDeviceInfo(email)
 
                     userRepository.saveDeviceId(email = email, deviceId = keyName)
-                    userRepository.saveDevicePublicKey(email = email, publicKey = state.standardPublicKey)
-                    userRepository.saveBootstrapDeviceId(email = email, deviceId = state.bootstrapKeyName)
-                    userRepository.saveBootstrapDevicePublicKey(email = email, publicKey = state.bootstrapPublicKey)
+                    userRepository.saveDevicePublicKey(
+                        email = email,
+                        publicKey = state.standardPublicKey
+                    )
+                    userRepository.saveBootstrapDeviceId(
+                        email = email,
+                        deviceId = state.bootstrapKeyName
+                    )
+                    userRepository.saveBootstrapDevicePublicKey(
+                        email = email,
+                        publicKey = state.bootstrapPublicKey
+                    )
 
                     //Send user to the key creation with the image data passed along...
                     state = state.copy(
                         createdBootstrapDeviceData = Resource.Success(Unit),
                     )
                 } else {
+                    RaygunClient.send(
+                        Exception("Missing essential data for bootstrap device registration"),
+                        listOf(
+                            CrashReportingUtil.MANUALLY_REPORTED_TAG,
+                            CrashReportingUtil.DEVICE_REGISTRATION
+                        )
+                    )
                     state = state.copy(
                         addUserDevice = Resource.Error(exception = Exception("Missing essential data for bootstrap device registration")),
                         deviceRegistrationError = DeviceRegistrationError.API,
@@ -160,6 +217,13 @@ class DeviceRegistrationViewModel @Inject constructor(
                     )
                 }
             } catch (e: Exception) {
+                RaygunClient.send(
+                    e,
+                    listOf(
+                        CrashReportingUtil.MANUALLY_REPORTED_TAG,
+                        CrashReportingUtil.DEVICE_REGISTRATION
+                    )
+                )
                 state = state.copy(
                     addUserDevice = Resource.Error(exception = e),
                     deviceRegistrationError = DeviceRegistrationError.BOOTSTRAP,
@@ -183,7 +247,7 @@ class DeviceRegistrationViewModel @Inject constructor(
     }
 
     fun imageCaptured() {
-        if (isBootstrapUser()) {
+        if (state.isBootstrapUser) {
             //Standard Device Registration
             createBootstrapKeysForDevice()
         } else {
@@ -225,6 +289,13 @@ class DeviceRegistrationViewModel @Inject constructor(
                 triggerBioPrompt()
 
             } catch (e: Exception) {
+                RaygunClient.send(
+                    e,
+                    listOf(
+                        CrashReportingUtil.MANUALLY_REPORTED_TAG,
+                        CrashReportingUtil.DEVICE_REGISTRATION
+                    )
+                )
                 state = state.copy(
                     deviceRegistrationError = DeviceRegistrationError.SIGNING_IMAGE,
                     capturingDeviceKey = Resource.Uninitialized
@@ -250,6 +321,13 @@ class DeviceRegistrationViewModel @Inject constructor(
                 triggerBioPrompt()
 
             } catch (e: Exception) {
+                RaygunClient.send(
+                    e,
+                    listOf(
+                        CrashReportingUtil.MANUALLY_REPORTED_TAG,
+                        CrashReportingUtil.DEVICE_REGISTRATION
+                    )
+                )
                 state = state.copy(
                     deviceRegistrationError = DeviceRegistrationError.SIGNING_IMAGE,
                     capturingDeviceKey = Resource.Uninitialized
@@ -280,18 +358,12 @@ class DeviceRegistrationViewModel @Inject constructor(
         )
     }
 
-    private fun isBootstrapUser() = state.verifyUserDetails?.shardingPolicy == null
-
     fun resetTriggerImageCapture() {
         state = state.copy(triggerImageCapture = Resource.Uninitialized)
     }
 
     fun resetCapturedUserPhoto() {
         state = state.copy(capturedUserPhoto = null)
-    }
-
-    fun resetCreatedBootstrapTrigger() {
-        state = state.copy(createdBootstrapDeviceData = Resource.Uninitialized)
     }
 
     fun resetUserDevice() {
@@ -305,6 +377,12 @@ class DeviceRegistrationViewModel @Inject constructor(
     fun resetErrorState() {
         state = state.copy(
             deviceRegistrationError = DeviceRegistrationError.NONE,
+        )
+    }
+
+    fun resetKickUserOut() {
+        state = state.copy(
+            kickUserToEntrance = false
         )
     }
 

@@ -12,4 +12,6 @@ object CrashReportingUtil {
     const val APPROVAL_DISPOSITION = "ApprovalDisposition"
     const val RETRIEVE_SHARDS = "RetrieveShards"
     const val RECOVER_KEY = "RecoverKey"
+    const val KEY_CREATION = "KeyCreation"
+    const val DEVICE_REGISTRATION = "DeviceRegistration"
 }
