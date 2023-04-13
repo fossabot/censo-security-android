@@ -2,9 +2,12 @@ package com.censocustody.android.common
 
 import android.content.Context
 import com.censocustody.android.R
+import com.censocustody.android.data.EncryptionManagerImpl.Companion.SENTINEL_KEY_NAME
 
 
 const val HELP_URL = "https://help.censo.co"
+
+fun String.emailToSentinelKeyId() = "${this}_$SENTINEL_KEY_NAME"
 
 fun String.toWalletName(context: Context): String {
     if (this.lowercase().endsWith("wallet")) {

@@ -9,13 +9,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import cash.z.ecc.android.bip39.Mnemonics
 import cash.z.ecc.android.bip39.toSeed
-import com.censocustody.android.common.BaseWrapper
-import com.censocustody.android.common.Resource
-import com.censocustody.android.common.generateUserImageObject
-import com.censocustody.android.common.hashOfUserImage
+import com.censocustody.android.common.*
 import com.censocustody.android.data.*
 import com.censocustody.android.data.models.UserImage
 import com.censocustody.android.data.models.VerifyUser
+import com.raygun.raygun4android.RaygunClient
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -93,6 +91,13 @@ class KeyCreationViewModel @Inject constructor(
                     uploadKeys()
                 }
             } catch (e: Exception) {
+                RaygunClient.send(
+                    e,
+                    listOf(
+                        CrashReportingUtil.MANUALLY_REPORTED_TAG,
+                        CrashReportingUtil.KEY_CREATION
+                    )
+                )
                 state = state.copy(
                     uploadingKeyProcess = Resource.Error(exception = e)
                 )
@@ -137,6 +142,16 @@ class KeyCreationViewModel @Inject constructor(
             rootSeed = Mnemonics.MnemonicCode(phrase = phrase).toSeed()
         )
 
+        if (bootStrapResource is Resource.Error) {
+            RaygunClient.send(
+                bootStrapResource.exception ?: Exception("Failed to upload bootstrap data"),
+                listOf(
+                    CrashReportingUtil.MANUALLY_REPORTED_TAG,
+                    CrashReportingUtil.KEY_CREATION
+                )
+            )
+        }
+
         state = state.copy(uploadingKeyProcess = bootStrapResource)
     }
 
@@ -150,6 +165,16 @@ class KeyCreationViewModel @Inject constructor(
             policy = shardingPolicy,
             rootSeed = Mnemonics.MnemonicCode(phrase = phrase).toSeed()
         )
+
+        if (walletSignerResource is Resource.Error) {
+            RaygunClient.send(
+                walletSignerResource.exception ?: Exception("Failed to upload device data"),
+                listOf(
+                    CrashReportingUtil.MANUALLY_REPORTED_TAG,
+                    CrashReportingUtil.KEY_CREATION
+                )
+            )
+        }
 
         state = state.copy(uploadingKeyProcess = walletSignerResource)
     }

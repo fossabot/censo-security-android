@@ -2,8 +2,7 @@ package com.censocustody.android.data
 
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
-import com.censocustody.android.BuildConfig
-import com.censocustody.android.data.EncryptionManagerImpl.Companion.SENTINEL_KEY_NAME
+import com.censocustody.android.common.emailToSentinelKeyId
 import com.censocustody.android.data.EncryptionManagerImpl.Companion.SENTINEL_STATIC_DATA
 import java.security.KeyStore
 import java.security.*
@@ -27,7 +26,7 @@ interface CryptographyManager {
     ): Boolean
 
     fun getOrCreateKey(keyName: String): PrivateKey
-    fun getOrCreateSentinelKey(): SecretKey
+    fun getOrCreateSentinelKey(email: String): SecretKey
     fun getPublicKeyFromDeviceKey(keyName: String): PublicKey
     fun signData(keyName: String, dataToSign: ByteArray): ByteArray
     fun decryptData(keyName: String, ciphertext: ByteArray): ByteArray
@@ -36,8 +35,8 @@ interface CryptographyManager {
     fun encryptSentinelData(cipher: Cipher) : EncryptedData
     fun decryptSentinelData(ciphertext: ByteArray, cipher: Cipher) : ByteArray
 
-    fun getInitializedCipherForSentinelEncryption(): Cipher
-    fun getInitializedCipherForSentinelDecryption(initializationVector: ByteArray): Cipher
+    fun getInitializedCipherForSentinelEncryption(email: String): Cipher
+    fun getInitializedCipherForSentinelDecryption(email: String, initializationVector: ByteArray): Cipher
 }
 
 class CryptographyManagerImpl : CryptographyManager {
@@ -99,18 +98,19 @@ class CryptographyManagerImpl : CryptographyManager {
         return cipher.doFinal(ciphertext)
     }
 
-    override fun getInitializedCipherForSentinelEncryption(): Cipher {
+    override fun getInitializedCipherForSentinelEncryption(email: String): Cipher {
         val cipher = getAESCipher()
-        val secretKey = getOrCreateSentinelKey()
+        val secretKey = getOrCreateSentinelKey(email)
         cipher.init(Cipher.ENCRYPT_MODE, secretKey)
         return cipher
     }
 
     override fun getInitializedCipherForSentinelDecryption(
+        email: String,
         initializationVector: ByteArray
     ): Cipher {
         val cipher = getAESCipher()
-        val secretKey = getOrCreateSentinelKey()
+        val secretKey = getOrCreateSentinelKey(email)
         cipher.init(Cipher.DECRYPT_MODE, secretKey, GCMParameterSpec(128, initializationVector))
         return cipher
     }
@@ -127,13 +127,13 @@ class CryptographyManagerImpl : CryptographyManager {
         return signature.verify(signatureToCheck)
     }
 
-    override fun getOrCreateSentinelKey(): SecretKey {
+    override fun getOrCreateSentinelKey(email: String): SecretKey {
         val keyStore = KeyStore.getInstance(ANDROID_KEYSTORE)
         keyStore.load(null)
-        val key = keyStore.getKey(SENTINEL_KEY_NAME, null)
+        val key = keyStore.getKey(email.emailToSentinelKeyId(), null)
         if (key != null) return key as SecretKey
 
-        return createAESKey(SENTINEL_KEY_NAME)
+        return createAESKey(email.emailToSentinelKeyId())
     }
 
     override fun getOrCreateKey(keyName: String): PrivateKey {
@@ -153,8 +153,7 @@ class CryptographyManagerImpl : CryptographyManager {
     override fun getCertificateFromKeystore(deviceId: String): Certificate {
         val keyStore = KeyStore.getInstance(ANDROID_KEYSTORE)
         keyStore.load(null) // Keystore must be loaded before it can be accessed
-        val cert = keyStore.getCertificate(deviceId)
-        return cert
+        return keyStore.getCertificate(deviceId)
     }
 
     private fun createECDeviceKey(keyName: String): PrivateKey {
@@ -180,7 +179,6 @@ class CryptographyManagerImpl : CryptographyManager {
             .setDigests(
                 KeyProperties.DIGEST_SHA256
             )
-            .setIsStrongBoxBacked(true)
             .build()
 
         kpg.initialize(parameterSpec)
@@ -200,7 +198,6 @@ class CryptographyManagerImpl : CryptographyManager {
             setUserAuthenticationRequired(true)
             setInvalidatedByBiometricEnrollment(true)
             setRandomizedEncryptionRequired(true)
-            setIsStrongBoxBacked(true)
         }
 
         val keyGenParams = paramsBuilder.build()

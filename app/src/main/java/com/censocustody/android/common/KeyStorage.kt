@@ -55,7 +55,7 @@ class KeyStorageImpl @Inject constructor(
     }
 
     override fun saveSentinelData(email: String, cipher: Cipher) {
-        cryptographyManager.getOrCreateSentinelKey()
+        cryptographyManager.getOrCreateSentinelKey(email)
         val encryptedSentinelData =
             cryptographyManager.encryptSentinelData(cipher)
 
