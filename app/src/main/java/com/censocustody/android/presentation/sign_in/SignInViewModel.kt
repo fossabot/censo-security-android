@@ -87,7 +87,7 @@ class SignInViewModel @Inject constructor(
 
     fun kickOffBiometryLoginOrMoveToPasswordEntry() {
         viewModelScope.launch {
-            if (keyRepository.hasV3RootSeedStored()) {
+            if (keyRepository.hasDeviceIdSaved(state.email)) {
                 state = state.copy(
                     triggerBioPrompt = Resource.Success(null),
                     bioPromptReason = BioPromptReason.RETURN_LOGIN,

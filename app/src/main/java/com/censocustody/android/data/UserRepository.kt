@@ -67,9 +67,9 @@ class UserRepositoryImpl(
         val loginBody = LoginBody(
             deviceId = deviceId,
             credentials = LoginCredentials(
-                type = LoginType.PASSWORD_BASED,
+                type = LoginType.EMAIL_VERIFICATION_BASED,
                 email = email,
-                password = password
+                verificationToken = password
             )
         )
 
