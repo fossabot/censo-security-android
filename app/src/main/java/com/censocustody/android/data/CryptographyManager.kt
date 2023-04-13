@@ -153,8 +153,7 @@ class CryptographyManagerImpl : CryptographyManager {
     override fun getCertificateFromKeystore(deviceId: String): Certificate {
         val keyStore = KeyStore.getInstance(ANDROID_KEYSTORE)
         keyStore.load(null) // Keystore must be loaded before it can be accessed
-        val cert = keyStore.getCertificate(deviceId)
-        return cert
+        return keyStore.getCertificate(deviceId)
     }
 
     private fun createECDeviceKey(keyName: String): PrivateKey {
@@ -180,7 +179,6 @@ class CryptographyManagerImpl : CryptographyManager {
             .setDigests(
                 KeyProperties.DIGEST_SHA256
             )
-            .setIsStrongBoxBacked(true)
             .build()
 
         kpg.initialize(parameterSpec)
@@ -200,7 +198,6 @@ class CryptographyManagerImpl : CryptographyManager {
             setUserAuthenticationRequired(true)
             setInvalidatedByBiometricEnrollment(true)
             setRandomizedEncryptionRequired(true)
-            setIsStrongBoxBacked(true)
         }
 
         val keyGenParams = paramsBuilder.build()
