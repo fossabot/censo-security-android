@@ -1,6 +1,5 @@
 package com.censocustody.android.presentation.components
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
@@ -91,7 +90,7 @@ fun SignInTextField(
                     val image =
                         if (passwordVisibility) Icons.Filled.Visibility else Icons.Filled.VisibilityOff
                     val contentDescription =
-                        if (passwordVisibility) R.string.hide_password_content_description else R.string.show_password_content_description
+                        if (passwordVisibility) R.string.hide_token_content_description else R.string.show_token_content_description
                     IconButton(onClick = onPasswordClick) {
                         Icon(
                             imageVector = image,
@@ -111,7 +110,7 @@ fun SignInTextField(
             if (errorMessage.isEmpty()) {
                 errorMessage =
                     if (isPassword) {
-                        stringResource(R.string.invalid_password_error)
+                        stringResource(R.string.invalid_token_error)
                     } else {
                         stringResource(R.string.invalid_email_error)
                     }

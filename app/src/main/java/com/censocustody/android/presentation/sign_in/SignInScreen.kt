@@ -171,16 +171,16 @@ fun SignInScreen(
                         } else {
                             SignInTextField(
                                 modifier = Modifier.padding(horizontal = boxItemsHorizontalPadding),
-                                valueText = state.password,
-                                placeholder = stringResource(id = R.string.password_hint),
-                                onValueChange = viewModel::updatePassword,
+                                valueText = state.verificationToken,
+                                placeholder = stringResource(id = R.string.token_hint),
+                                onValueChange = viewModel::updateVerificationToken,
                                 keyboardType = KeyboardType.Password,
                                 onPasswordClick = {
                                     passwordVisibility.value = !passwordVisibility.value
                                 },
                                 passwordVisibility = passwordVisibility.value,
                                 onDoneAction = viewModel::attemptLogin,
-                                errorEnabled = state.passwordErrorEnabled,
+                                errorEnabled = state.verificationTokenErrorEnabled,
                                 isPassword = true,
                                 showDoneAction = true
                             )
@@ -213,7 +213,7 @@ fun SignInScreen(
                             }
                             viewModel.signInActionCompleted()
                         }) {
-                        if (state.loginResult is Resource.Loading) {
+                        if (state.loginResult is Resource.Loading || state.sendVerificationEmail is Resource.Loading) {
                             Box(
                                 modifier = Modifier
                                     .height(28.dp)
@@ -237,10 +237,25 @@ fun SignInScreen(
                 }
             }
 
+            if (state.sendVerificationEmail is Resource.Error) {
+                val errorReason = state.loginResult.censoError?.getErrorMessage(context)
+
+                SignInAlertDialog(
+                    title = stringResource(R.string.send_verify_failed_title),
+                    confirmText = stringResource(R.string.ok),
+                    dismissText = stringResource(id = R.string.cancel),
+                    onCancel = viewModel::resetSendVerificationEmail,
+                    onExit = viewModel::resetSendVerificationEmail,
+                    onConfirm = viewModel::resetSendVerificationEmail,
+                    message = errorReason ?: stringResource(R.string.email_not_found_default_error),
+                    showDismissButton = false
+                )
+            }
+
             if (state.loginResult is Resource.Error) {
                 val errorReason = state.loginResult.censoError?.getErrorMessage(context)
 
-                if (state.loginStep == LoginStep.PASSWORD_ENTRY) {
+                if (state.loginStep == LoginStep.TOKEN_ENTRY) {
 
                     if (errorReason == null) {
                         stringResource(R.string.login_failed_message)
@@ -262,10 +277,10 @@ fun SignInScreen(
                     SignInAlertDialog(
                         title = stringResource(R.string.sign_in_error),
                         confirmText = stringResource(R.string.try_again),
-                        dismissText = stringResource(id = R.string.login_with_password),
-                        onCancel = viewModel::skipToPasswordEntry,
+                        dismissText = stringResource(id = R.string.login_with_token),
+                        onCancel = viewModel::skipToTokenEntry,
                         onExit = viewModel::resetLoginCall,
-                        onConfirm = viewModel::kickOffBiometryLoginOrMoveToPasswordEntry,
+                        onConfirm = viewModel::kickOffBiometryLoginOrSendVerificationEmail,
                         message = errorReason
                             ?: stringResource(R.string.error_occurred_signature_login),
                         showDismissButton = true
@@ -326,9 +341,11 @@ fun SignInAlertDialog(
                 Text(
                     modifier = Modifier
                         .padding(horizontal = 32.dp)
+                        .fillMaxWidth()
                         .align(Alignment.Center),
                     text = title,
                     fontWeight = FontWeight.SemiBold,
+                    textAlign = TextAlign.Center,
                     color = TextBlack,
                     fontSize = 24.sp
                 )

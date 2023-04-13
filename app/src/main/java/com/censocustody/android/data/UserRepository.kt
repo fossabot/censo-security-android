@@ -3,14 +3,12 @@ package com.censocustody.android.data
 import android.annotation.SuppressLint
 import android.content.Context
 import android.provider.Settings
-import androidx.biometric.BiometricPrompt.CryptoObject
 import com.censocustody.android.common.*
 import com.censocustody.android.data.models.*
 import okhttp3.ResponseBody
-import java.security.Signature
 
 interface UserRepository {
-    suspend fun loginWithPassword(email: String, password: String): Resource<LoginResponse>
+    suspend fun loginWithVerificationToken(email: String, token: String): Resource<LoginResponse>
     suspend fun loginWithTimestamp(email: String, timestamp: String, signedTimestamp: String): Resource<LoginResponse>
     suspend fun saveToken(token: String)
     suspend fun verifyUser(): Resource<VerifyUser>
@@ -25,6 +23,7 @@ interface UserRepository {
     suspend fun setUserLoggedIn()
     suspend fun logOut(): Boolean
     suspend fun resetPassword(email: String) : ResponseBody
+    suspend fun sendVerificationEmail(email: String) : Resource<ResponseBody>
     suspend fun retrieveUserEmail(): String
     fun retrieveCachedUserEmail(): String
     suspend fun saveUserEmail(email: String)
@@ -55,10 +54,16 @@ class UserRepositoryImpl(
 
     override suspend fun resetPassword(email: String) = anchorApiService.recoverPassword(email)
 
+    override suspend fun sendVerificationEmail(email: String) =
+        retrieveApiResource {
+            //anchorApiService.sendVerificationEmail(URLEncoder.encode(email, "utf-8"))
+            anchorApiService.sendVerificationEmail(email)
+        }
+
     @SuppressLint("HardwareIds")
-    override suspend fun loginWithPassword(
+    override suspend fun loginWithVerificationToken(
         email: String,
-        password: String
+        token: String
     ): Resource<LoginResponse> {
         val deviceId = Settings.Secure.getString(
             applicationContext.contentResolver, Settings.Secure.ANDROID_ID
@@ -69,7 +74,7 @@ class UserRepositoryImpl(
             credentials = LoginCredentials(
                 type = LoginType.EMAIL_VERIFICATION_BASED,
                 email = email,
-                verificationToken = password
+                verificationToken = token
             )
         )
 

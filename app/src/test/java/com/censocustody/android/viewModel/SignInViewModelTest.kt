@@ -16,6 +16,8 @@ import junit.framework.TestCase.assertTrue
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.*
+import okhttp3.ResponseBody
+import okhttp3.ResponseBody.Companion.toResponseBody
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -67,6 +69,7 @@ class SignInViewModelTest : BaseViewModelTest() {
         whenever(userRepository.retrieveCachedUserEmail()).then { "" }
         whenever(userRepository.retrieveUserEmail()).then { validEmail }
         whenever(userRepository.retrieveUserDeviceId(any())).then { deviceId }
+        whenever(userRepository.sendVerificationEmail(validEmail)).then { Resource.Success("".toResponseBody()) }
         whenever(keyRepository.generateTimestamp()).then { timestamp }
         whenever(keyRepository.signTimestamp(any())).then { signedTimestamp }
 
@@ -94,7 +97,7 @@ class SignInViewModelTest : BaseViewModelTest() {
             signInViewModel.updateEmail(validEmail)
             signInViewModel.signInActionCompleted()
 
-            assertTrue(signInViewModel.state.loginStep == LoginStep.PASSWORD_ENTRY)
+            assertTrue(signInViewModel.state.loginStep == LoginStep.TOKEN_ENTRY)
         }
 
     @Test
@@ -108,7 +111,7 @@ class SignInViewModelTest : BaseViewModelTest() {
             signInViewModel.updateEmail("         ${validEmail.uppercase()}        ")
             signInViewModel.signInActionCompleted()
 
-            assertTrue(signInViewModel.state.loginStep == LoginStep.PASSWORD_ENTRY)
+            assertTrue(signInViewModel.state.loginStep == LoginStep.TOKEN_ENTRY)
             assertTrue(signInViewModel.state.email == validEmail)
             verify(userRepository, times(1)).saveUserEmail(validEmail)
         }
@@ -138,13 +141,13 @@ class SignInViewModelTest : BaseViewModelTest() {
 
             signInViewModel.updateEmail(validEmail)
             signInViewModel.signInActionCompleted()
-            signInViewModel.updatePassword(invalidPassword)
+            signInViewModel.updateVerificationToken(invalidPassword)
             signInViewModel.signInActionCompleted()
 
             verify(userRepository, times(0))
-                .loginWithPassword(validEmail, invalidPassword)
+                .loginWithVerificationToken(validEmail, invalidPassword)
             assertTrue(signInViewModel.state.loginResult !is Resource.Loading)
-            assertEquals(true, signInViewModel.state.passwordErrorEnabled)
+            assertEquals(true, signInViewModel.state.verificationTokenErrorEnabled)
         }
 
     @Test
@@ -157,11 +160,11 @@ class SignInViewModelTest : BaseViewModelTest() {
 
             signInViewModel.updateEmail(validEmail)
             signInViewModel.signInActionCompleted()
-            signInViewModel.updatePassword(validPassword)
+            signInViewModel.updateVerificationToken(validPassword)
             signInViewModel.signInActionCompleted()
 
             verify(userRepository, times(1))
-                .loginWithPassword(validEmail, validPassword)
+                .loginWithVerificationToken(validEmail, validPassword)
             assertTrue(signInViewModel.state.loginResult is Resource.Loading)
         }
 
@@ -170,7 +173,7 @@ class SignInViewModelTest : BaseViewModelTest() {
         runTest {
             whenever(keyRepository.hasV3RootSeedStored()).then { false }
             whenever(userRepository.userLoggedIn()).then { false }
-            whenever(userRepository.loginWithPassword(validEmail, validPassword)).then {
+            whenever(userRepository.loginWithVerificationToken(validEmail, validPassword)).then {
                 Resource.Success(LoginResponse(jwt))
             }
             whenever(keyRepository.getInitializedCipherForSentinelEncryption()).then { cipher }
@@ -179,7 +182,7 @@ class SignInViewModelTest : BaseViewModelTest() {
 
             signInViewModel.updateEmail(validEmail)
             signInViewModel.signInActionCompleted()
-            signInViewModel.updatePassword(validPassword)
+            signInViewModel.updateVerificationToken(validPassword)
             signInViewModel.signInActionCompleted()
 
             advanceUntilIdle()
@@ -198,7 +201,7 @@ class SignInViewModelTest : BaseViewModelTest() {
         runTest {
             whenever(keyRepository.hasV3RootSeedStored()).then { false }
             whenever(userRepository.userLoggedIn()).then { false }
-            whenever(userRepository.loginWithPassword(validEmail, validPassword)).then {
+            whenever(userRepository.loginWithVerificationToken(validEmail, validPassword)).then {
                 Resource.Success(LoginResponse(null))
             }
 
@@ -206,7 +209,7 @@ class SignInViewModelTest : BaseViewModelTest() {
 
             signInViewModel.updateEmail(validEmail)
             signInViewModel.signInActionCompleted()
-            signInViewModel.updatePassword(validPassword)
+            signInViewModel.updateVerificationToken(validPassword)
             signInViewModel.signInActionCompleted()
 
             advanceUntilIdle()
@@ -219,7 +222,7 @@ class SignInViewModelTest : BaseViewModelTest() {
         runTest {
             whenever(keyRepository.hasV3RootSeedStored()).then { false }
             whenever(userRepository.userLoggedIn()).then { false }
-            whenever(userRepository.loginWithPassword(validEmail, validPassword)).then {
+            whenever(userRepository.loginWithVerificationToken(validEmail, validPassword)).then {
                 Resource.Error<LoginResponse>()
             }
 
@@ -227,7 +230,7 @@ class SignInViewModelTest : BaseViewModelTest() {
 
             signInViewModel.updateEmail(validEmail)
             signInViewModel.signInActionCompleted()
-            signInViewModel.updatePassword(validPassword)
+            signInViewModel.updateVerificationToken(validPassword)
             signInViewModel.signInActionCompleted()
 
             advanceUntilIdle()
@@ -278,7 +281,7 @@ class SignInViewModelTest : BaseViewModelTest() {
             whenever(keyRepository.hasV3RootSeedStored()).then { false }
             whenever(userRepository.userLoggedIn()).then { false }
             whenever(keyRepository.getInitializedCipherForSentinelEncryption()).then { cipher }
-            whenever(userRepository.loginWithPassword(validEmail, validPassword)).then {
+            whenever(userRepository.loginWithVerificationToken(validEmail, validPassword)).then {
                 Resource.Success(LoginResponse(jwt))
             }
 
@@ -286,7 +289,7 @@ class SignInViewModelTest : BaseViewModelTest() {
 
             signInViewModel.updateEmail(validEmail)
             signInViewModel.signInActionCompleted()
-            signInViewModel.updatePassword(validPassword)
+            signInViewModel.updateVerificationToken(validPassword)
             signInViewModel.signInActionCompleted()
 
             advanceUntilIdle()
