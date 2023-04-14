@@ -86,12 +86,21 @@ class EntranceViewModel @Inject constructor(
         verifyUser: VerifyUser
     ): Boolean {
         if (!userRepository.userHasDeviceIdSaved(userEmail)) return true
+<<<<<<< HEAD
 
         if (userRepository.userHasBootstrapDeviceIdSaved(userEmail)) return false
 
         val devicePublicKey = userRepository.retrieveUserDevicePublicKey(userEmail)
         val backendPublicKey = verifyUser.deviceKeyInfo?.key
 
+=======
+
+        if (userRepository.userHasBootstrapDeviceIdSaved(userEmail)) return false
+
+        val devicePublicKey = userRepository.retrieveUserDevicePublicKey(userEmail)
+        val backendPublicKey = verifyUser.deviceKeyInfo?.key
+
+>>>>>>> 7a4fdb2 (Setup reauthenticate screen. Add logic in entrance VM to navigate user to reauth screen. No longer directly navigate from the device registration to key creation for bootstrap user due to re-auth step)
         return devicePublicKey.lowercase() != backendPublicKey?.lowercase()
     }
 
@@ -172,6 +181,8 @@ class EntranceViewModel @Inject constructor(
 
         val email = userRepository.retrieveUserEmail()
 
+        val email = userRepository.retrieveUserEmail()
+
         //Setup Data
         val userHasUploadedKeysToBackendBefore = !verifyUser.publicKeys.isNullOrEmpty()
         val userHasV3RootSeedSaved = keyRepository.hasV3RootSeedStored()
@@ -185,8 +196,11 @@ class EntranceViewModel @Inject constructor(
         //User's JWT token is email verified, so they need to do biometry login. This needs to happen before we send keys up to
         val doesUserNeedToReAuthenticate = userRepository.isTokenEmailVerified()
 
+<<<<<<< HEAD
         val isBootstrapUser = userRepository.userHasBootstrapDeviceIdSaved(email)
 
+=======
+>>>>>>> 7a4fdb2 (Setup reauthenticate screen. Add logic in entrance VM to navigate user to reauth screen. No longer directly navigate from the device registration to key creation for bootstrap user due to re-auth step)
         //Does this logged in user need to add sentinel data for background biometry
         val needToAddSentinelData = !keyRepository.haveSentinelData()
 
@@ -223,7 +237,11 @@ class EntranceViewModel @Inject constructor(
                     state.copy(
                         userDestinationResult = Resource.Success(UserDestination.PENDING_APPROVAL)
                     )
+<<<<<<< HEAD
                 } else if (doesUserNeedToReAuthenticate && !isBootstrapUser) {
+=======
+                } else if (doesUserNeedToReAuthenticate) {
+>>>>>>> 7a4fdb2 (Setup reauthenticate screen. Add logic in entrance VM to navigate user to reauth screen. No longer directly navigate from the device registration to key creation for bootstrap user due to re-auth step)
                     state =
                         state.copy(userDestinationResult = Resource.Success(UserDestination.RE_AUTHENTICATE))
                     return
