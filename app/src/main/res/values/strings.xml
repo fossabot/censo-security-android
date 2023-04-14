@@ -262,6 +262,7 @@
     <string name="pending_approval">Pending Approval</string>
     <string name="send_verify_failed_title">Failed To Send Verification Email</string>
     <string name="email_not_found_default_error">Email not found. Please try again.</string>
-    <string name="reauth_bioprompt_message">We need to re-authenticate your device.</string>
+    <string name="reauth_bioprompt_message">Censo needs to re-authenticate your device after creating device key.</string>
     <string name="re_authenticate_title">Authenticate</string>
+    <string name="verification_email_sent">Verification email sent!</string>
 </resources>

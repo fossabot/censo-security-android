@@ -1,6 +1,7 @@
 package com.censocustody.android.presentation.sign_in
 
 import android.annotation.SuppressLint
+import android.widget.Toast
 import androidx.biometric.BiometricPrompt
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
@@ -67,6 +68,17 @@ fun SignInScreen(
                     inclusive = true
                 }
             }
+        }
+
+        if (state.sendVerificationEmail is Resource.Success) {
+            viewModel.resetSendVerificationEmail()
+
+            Toast.makeText(
+                context,
+                context.getString(R.string.verification_email_sent),
+                Toast.LENGTH_LONG
+            ).show()
+
         }
 
         if (state.triggerBioPrompt is Resource.Success) {
@@ -186,19 +198,39 @@ fun SignInScreen(
                             )
                         }
                         Spacer(modifier = Modifier.size(12.dp))
-                        Box(modifier = Modifier.fillMaxWidth()) {
-                            Text(
-                                modifier = Modifier
-                                    .align(Alignment.CenterEnd)
-                                    .clickable { navController.navigate(Screen.ResetPasswordRoute.route) }
-                                    .padding(top = 8.dp, end = boxItemsHorizontalPadding),
-                                text = stringResource(R.string.reset_password),
-                                color = TextRed,
-                                textAlign = TextAlign.End,
-                                fontWeight = FontWeight.W400
-                            )
+                        if (state.loginStep == LoginStep.TOKEN_ENTRY) {
+                            CensoButton(
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp).align(Alignment.End),
+                                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 12.dp),
+                                enabled = true,
+                                onClick = {
+                                    viewModel.sendVerificationEmail()
+                                }) {
+                                if (state.sendVerificationEmail is Resource.Loading) {
+                                    Box(
+                                        modifier = Modifier
+                                            .height(28.dp)
+                                            .width(28.dp)
+                                    ) {
+                                        CircularProgressIndicator(
+                                            modifier = Modifier.height(28.dp),
+                                            color = CensoWhite,
+                                            strokeWidth = 2.dp,
+                                        )
+                                    }
+                                } else {
+                                    Text(
+                                        modifier = Modifier.padding(horizontal = 24.dp),
+                                        text = "Send Token",
+                                        fontSize = 18.sp,
+                                        color = if (state.email.isNotEmpty()) CensoWhite else CensoWhite.copy(
+                                            alpha = 0.35f
+                                        )
+                                    )
+                                }
+                            }
+                            Spacer(modifier = Modifier.height(24.dp))
                         }
-                        Spacer(modifier = Modifier.size(24.dp))
                     }
                     Spacer(modifier = Modifier.weight(6f))
                     CensoButton(
@@ -213,7 +245,7 @@ fun SignInScreen(
                             }
                             viewModel.signInActionCompleted()
                         }) {
-                        if (state.loginResult is Resource.Loading || state.sendVerificationEmail is Resource.Loading) {
+                        if (state.loginResult is Resource.Loading) {
                             Box(
                                 modifier = Modifier
                                     .height(28.dp)
