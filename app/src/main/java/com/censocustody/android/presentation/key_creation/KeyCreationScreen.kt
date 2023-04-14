@@ -79,7 +79,7 @@ fun KeyCreationScreen(
 
     LaunchedEffect(key1 = state) {
         if (state.uploadingKeyProcess is Resource.Success) {
-            navController.navigate(Screen.ApprovalListRoute.route) {
+            navController.navigate(Screen.EntranceRoute.route) {
                 launchSingleTop = true
                 popUpToTop()
             }

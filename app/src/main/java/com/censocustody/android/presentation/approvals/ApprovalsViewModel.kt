@@ -5,6 +5,7 @@ import com.censocustody.android.common.Resource
 import com.censocustody.android.common.CensoCountDownTimer
 import com.censocustody.android.data.ApprovalsRepository
 import com.censocustody.android.data.KeyRepository
+import com.censocustody.android.data.UserRepository
 import com.censocustody.android.data.models.approvalV2.ApprovalRequestV2
 import com.censocustody.android.presentation.common_approvals.CommonApprovalsViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -14,6 +15,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ApprovalsViewModel @Inject constructor(
+    private val userRepository: UserRepository,
     private val approvalsRepository: ApprovalsRepository,
     keyRepository: KeyRepository,
     timer: CensoCountDownTimer,
@@ -48,6 +50,38 @@ class ApprovalsViewModel @Inject constructor(
         refreshData()
     }
     //endregion
+
+    fun refreshFromAPush() {
+        viewModelScope.launch {
+            if (!userRepository.isTokenEmailVerified()) {
+
+                val cachedApprovals = state.approvals.toList()
+
+                state = state.copy(approvalsResultRequest = Resource.Loading())
+                delay(250)
+
+                val walletApprovalsResource = approvalsRepository.getApprovalRequests()
+
+                val approvals =
+                    when (walletApprovalsResource) {
+                        is Resource.Success -> {
+                            walletApprovalsResource.data ?: emptyList()
+                        }
+                        is Resource.Error -> {
+                            cachedApprovals
+                        }
+                        else -> {
+                            emptyList()
+                        }
+                    }
+
+                state = state.copy(
+                    approvalsResultRequest = walletApprovalsResource,
+                    approvals = approvals
+                )
+            }
+        }
+    }
 
     fun refreshData() {
         retrieveWalletApprovals()

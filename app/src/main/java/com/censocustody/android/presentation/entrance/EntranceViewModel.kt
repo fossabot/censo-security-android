@@ -170,6 +170,8 @@ class EntranceViewModel @Inject constructor(
         //User's JWT token is email verified, so they need to do biometry login. This needs to happen before we send keys up to
         val doesUserNeedToReAuthenticate = userRepository.isTokenEmailVerified()
 
+        val isBootstrapUser = userRepository.userHasBootstrapDeviceIdSaved(email)
+
         //Does this logged in user need to add sentinel data for background biometry
         val needToAddSentinelData = !keyRepository.haveSentinelData()
 
@@ -206,7 +208,7 @@ class EntranceViewModel @Inject constructor(
                     state.copy(
                         userDestinationResult = Resource.Success(UserDestination.PENDING_APPROVAL)
                     )
-                } else if (doesUserNeedToReAuthenticate) {
+                } else if (doesUserNeedToReAuthenticate && !isBootstrapUser) {
                     state =
                         state.copy(userDestinationResult = Resource.Success(UserDestination.RE_AUTHENTICATE))
                     return
@@ -238,6 +240,12 @@ class EntranceViewModel @Inject constructor(
                             userDestinationResult = Resource.Success(UserDestination.KEY_MANAGEMENT_RECOVERY)
                         )
                     }
+                return
+            }
+
+            isBootstrapUser && doesUserNeedToReAuthenticate -> {
+                state =
+                    state.copy(userDestinationResult = Resource.Success(UserDestination.RE_AUTHENTICATE))
                 return
             }
         }

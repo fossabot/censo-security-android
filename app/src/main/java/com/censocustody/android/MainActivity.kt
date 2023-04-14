@@ -74,7 +74,7 @@ class MainActivity : FragmentActivity() {
                 if (safeIntent.hasExtra(NOTIFICATION_DISPLAYED_KEY)
                     && safeIntent.getBooleanExtra(NOTIFICATION_DISPLAYED_KEY, false)
                 ) {
-                    approvalsViewModel.refreshData()
+                    approvalsViewModel.refreshFromAPush()
                 }
             }
         }
