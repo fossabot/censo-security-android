@@ -26,6 +26,7 @@ import com.censocustody.android.presentation.approvals.NavIconTopBar
 import com.censocustody.android.presentation.key_management.BackgroundUI
 import com.censocustody.android.presentation.key_management.PreBiometryDialog
 import com.censocustody.android.ui.theme.ButtonRed
+import com.censocustody.android.ui.theme.CensoWhite
 import org.intellij.lang.annotations.JdkConstants.HorizontalAlignment
 
 @Composable
@@ -116,7 +117,7 @@ fun ReAuthenticateScreen(
                 Text("Failed to Authenticate User", fontSize = 20.sp)
                 Spacer(modifier = Modifier.height(28.dp))
                 Button(onClick = viewModel::retry) {
-                    Text(stringResource(R.string.try_again), fontSize = 18.sp)
+                    Text(stringResource(R.string.try_again), fontSize = 18.sp, color = CensoWhite)
                 }
             }
         }

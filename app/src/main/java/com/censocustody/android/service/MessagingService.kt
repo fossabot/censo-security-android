@@ -22,11 +22,14 @@ import com.censocustody.android.data.PushRepository
 import com.censocustody.android.data.UserRepository
 import com.censocustody.android.data.models.PushBody
 import com.censocustody.android.presentation.Screen
+import com.censocustody.android.service.MessagingService.Companion.APPROVAL_REQUEST_TYPE
 import com.censocustody.android.service.MessagingService.Companion.BODY_KEY
 import com.censocustody.android.service.MessagingService.Companion.DEFAULT_BODY
 import com.censocustody.android.service.MessagingService.Companion.DEFAULT_TITLE
 import com.censocustody.android.service.MessagingService.Companion.NOTIFICATION_DISPLAYED_KEY
+import com.censocustody.android.service.MessagingService.Companion.PUSH_TYPE_KEY
 import com.censocustody.android.service.MessagingService.Companion.TITLE_KEY
+import com.google.gson.annotations.SerializedName
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.*
 import java.util.*
@@ -108,7 +111,8 @@ class MessagingService : FirebaseMessagingService() {
     private fun parsePushData(data: Map<String, String>): PushData {
         return PushData(
             title = data.getOrDefault(TITLE_KEY, DEFAULT_TITLE),
-            body = data.getOrDefault(BODY_KEY, DEFAULT_BODY)
+            body = data.getOrDefault(BODY_KEY, DEFAULT_BODY),
+            pushType = data.getOrDefault(PUSH_TYPE_KEY, "")
         )
     }
 
@@ -118,9 +122,16 @@ class MessagingService : FirebaseMessagingService() {
      * @param messageBody FCM message body received.
      */
     private fun sendNotification(pushData: PushData) {
+        val deepLink = if (pushData.pushType == APPROVAL_REQUEST_TYPE) {
+            Screen.ApprovalListRoute.buildScreenDeepLinkUri().toUri()
+        } else {
+            Screen.EntranceRoute.buildScreenDeepLinkUri().toUri()
+        }
+
+
         val splashScreenIntent = Intent(
             Intent.ACTION_VIEW,
-            Screen.ApprovalListRoute.buildScreenDeepLinkUri().toUri(),
+            deepLink,
             this,
             MainActivity::class.java
         )
@@ -154,10 +165,12 @@ class MessagingService : FirebaseMessagingService() {
         val notificationId = abs(Date().time.toInt())
         notificationManager.notify(notificationId, notificationBuilder.build())
 
-        //Send a broadcast to the main activity to update the approvals data
-        val notificationDisplayedIntent = Intent(BuildConfig.APPLICATION_ID)
-        notificationDisplayedIntent.putExtra(NOTIFICATION_DISPLAYED_KEY, true)
-        sendBroadcast(notificationDisplayedIntent)
+        if (pushData.pushType == APPROVAL_REQUEST_TYPE) {
+            //Send a broadcast to the main activity to update the approvals data
+            val notificationDisplayedIntent = Intent(BuildConfig.APPLICATION_ID)
+            notificationDisplayedIntent.putExtra(NOTIFICATION_DISPLAYED_KEY, true)
+            sendBroadcast(notificationDisplayedIntent)
+        }
     }
 
     override fun onDestroy() {
@@ -170,11 +183,14 @@ class MessagingService : FirebaseMessagingService() {
 
         const val TITLE_KEY = "title"
         const val BODY_KEY = "body"
-
+        const val PUSH_TYPE_KEY = "pushType"
 
         const val DEFAULT_TITLE = "Censo Custody"
         const val DEFAULT_BODY = "Verification Needed"
+
+        const val APPROVAL_REQUEST_TYPE = "ApprovalRequest"
+        const val DEVICE_APPROVED_TYPE = "DeviceApproved"
     }
 }
 
-data class PushData(val body: String, val title: String)
+data class PushData(val body: String, val title: String, val pushType: String)
