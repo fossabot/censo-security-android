@@ -2,6 +2,10 @@ package com.censocustody.android.data.models
 
 import com.google.gson.annotations.SerializedName
 
+data class TokenBody(
+    val email: String
+)
+
 data class LoginBody(
     val credentials: LoginCredentials,
     val deviceId: String

@@ -3,7 +3,6 @@ package com.censocustody.android.data
 import com.censocustody.android.BuildConfig
 import okhttp3.*
 import okhttp3.logging.HttpLoggingInterceptor
-import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.http.*
 import java.util.concurrent.TimeUnit
@@ -35,9 +34,6 @@ interface AnchorApiService {
                 .create(AnchorApiService::class.java)
         }
     }
-
-    @GET("email/{userEmail}/verification-token")
-    suspend fun sendVerificationEmail(@Path("userEmail") userEmail: String) : Response<ResponseBody>
 
     @POST("email/{userEmail}/password-reset")
     suspend fun recoverPassword(@Path("userEmail") userEmail: String): ResponseBody

@@ -56,8 +56,7 @@ class UserRepositoryImpl(
 
     override suspend fun sendVerificationEmail(email: String) =
         retrieveApiResource {
-            //anchorApiService.sendVerificationEmail(URLEncoder.encode(email, "utf-8"))
-            anchorApiService.sendVerificationEmail(email)
+            api.sendVerificationEmail(TokenBody(email))
         }
 
     @SuppressLint("HardwareIds")
