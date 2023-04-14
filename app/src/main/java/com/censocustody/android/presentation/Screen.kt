@@ -22,6 +22,7 @@ sealed class Screen(val route: String) {
     object DeviceRegistrationRoute : Screen("device_registration_screen") {
         const val DEVICE_REG_ARG = "device_registration_arg"
     }
+    object ReAuthenticateRoute : Screen("re_authenticate_screen")
 
     fun buildScreenDeepLinkUri() = "$CENSO_CUSTODY_URI${this.route}"
 
