@@ -71,7 +71,7 @@ class EntranceViewModel @Inject constructor(
 
         if (userLoggedIn) {
             censoUserData.setEmail(userRepository.retrieveCachedUserEmail())
-            checkIfUserHasDeviceRegistered()
+            retrieveUserVerifyDetails()
         } else {
             //DESTINATION: Send user to login screen.
             state =
@@ -81,33 +81,18 @@ class EntranceViewModel @Inject constructor(
         }
     }
 
-    private suspend fun checkIfUserHasDeviceRegistered() {
-        val userEmail = userRepository.retrieveUserEmail()
-        val verifyUser = retrieveUserVerifyDetails(checkUserDestinationAfterFinish = false)
+    private suspend fun doesDeviceNeedToBeRegistered(
+        userEmail: String,
+        verifyUser: VerifyUser
+    ): Boolean {
+        if (!userRepository.userHasDeviceIdSaved(userEmail)) return true
 
-        if (userRepository.userHasDeviceIdSaved(userEmail)) {
+        if (userRepository.userHasBootstrapDeviceIdSaved(userEmail)) return false
 
-            if (verifyUser != null) {
-                val devicePublicKey = userRepository.retrieveUserDevicePublicKey(userEmail)
-                val backendPublicKey = verifyUser.deviceKeyInfo?.key
+        val devicePublicKey = userRepository.retrieveUserDevicePublicKey(userEmail)
+        val backendPublicKey = verifyUser.deviceKeyInfo?.key
 
-                if (devicePublicKey.lowercase() == backendPublicKey?.lowercase()) {
-                    determineUserDestination(verifyUser)
-                } else {
-                    //DESTINATION: Send user to device registration
-                    state = state.copy(
-                        userDestinationResult = Resource.Success(UserDestination.DEVICE_REGISTRATION)
-                    )
-                }
-
-            }
-        } else {
-            //DESTINATION: Send user to device registration
-            state =
-                state.copy(
-                    userDestinationResult = Resource.Success(UserDestination.DEVICE_REGISTRATION)
-                )
-        }
+        return devicePublicKey.lowercase() != backendPublicKey?.lowercase()
     }
 
     private suspend fun enforceMinimumVersion(minimumSemanticVersion: String) {
@@ -128,30 +113,23 @@ class EntranceViewModel @Inject constructor(
         }
     }
 
-    private suspend fun retrieveUserVerifyDetails(checkUserDestinationAfterFinish: Boolean = true) : VerifyUser?{
+    private suspend fun retrieveUserVerifyDetails() {
         val verifyUserDataResource = userRepository.verifyUser()
 
         if (verifyUserDataResource is Resource.Success) {
             val verifyUser = verifyUserDataResource.data
 
-            return if (verifyUser != null) {
+            if (verifyUser != null) {
                 censoUserData.setCensoUser(verifyUser = verifyUser)
                 state = state.copy(verifyUserResult = verifyUserDataResource)
-                if (checkUserDestinationAfterFinish) {
-                    determineUserDestination(verifyUser)
-                }
-                verifyUser
+                determineUserDestination(verifyUser)
             } else {
                 handleVerifyUserError(verifyUserDataResource)
-                null
             }
 
         } else if (verifyUserDataResource is Resource.Error) {
             handleVerifyUserError(verifyUserDataResource)
-            return null
         }
-
-        return null
     }
 
     fun retryRetrieveVerifyUserDetails() {
@@ -177,20 +155,30 @@ class EntranceViewModel @Inject constructor(
         // 3. User needs to create or recover root seed
         // 4. User has local data save but never uploaded to backend
 
+        val email = userRepository.retrieveUserEmail()
+
         //Setup Data
         val userHasUploadedKeysToBackendBefore = !verifyUser.publicKeys.isNullOrEmpty()
         val userHasV3RootSeedSaved = keyRepository.hasV3RootSeedStored()
         val localPublicKeys = keyRepository.retrieveV3PublicKeys()
 
-        //Check 1 SENTINEL: Does this logged in user need to add sentinel data for background biometry
+        //Device needs to be registered.
+        val deviceNeedsToBeRegistered = doesDeviceNeedToBeRegistered(
+            userEmail = email, verifyUser = verifyUser
+        )
+
+        //User's JWT token is email verified, so they need to do biometry login. This needs to happen before we send keys up to
+        val doesUserNeedToReAuthenticate = userRepository.isTokenEmailVerified()
+
+        //Does this logged in user need to add sentinel data for background biometry
         val needToAddSentinelData = !keyRepository.haveSentinelData()
 
-        //Check 2 UPLOAD_KEYS: because backed missing one or more. This happens when we have added more keys to app since user initially uploaded keys.
+        //Backend missing one or more keys. This happens when we have added more keys to app since user initially uploaded keys.
         val needToUpdateKeysSavedOnBackend = userHasUploadedKeysToBackendBefore
                 && userHasV3RootSeedSaved
                 && verifyUser.userNeedsToUpdateKeyRegistration(localPublicKeys)
 
-        //Check 3 CREATE/RECOVER: This user does not have a local private key and needs to either create a key or recover a key
+        //CREATE/RECOVER: This user does not have a local private key and needs to either create a key or recover a key
         val needToCreateRootSeed = !userHasUploadedKeysToBackendBefore
         val needToRecoverRootSeed = !userHasV3RootSeedSaved && userHasUploadedKeysToBackendBefore
 
@@ -202,6 +190,11 @@ class EntranceViewModel @Inject constructor(
                 )
                 return
             }
+            deviceNeedsToBeRegistered -> {
+                state = state.copy(userDestinationResult = Resource.Success(UserDestination.DEVICE_REGISTRATION))
+                return
+            }
+
             needToUpdateKeysSavedOnBackend -> {
                 state = state.copy(
                     userDestinationResult = Resource.Success(UserDestination.UPLOAD_KEYS)
@@ -209,17 +202,23 @@ class EntranceViewModel @Inject constructor(
                 return
             }
             needToCreateRootSeed -> {
-                state = if (verifyUser.shardingPolicy == null) {
-                    state.copy(
-                        userDestinationResult = Resource.Success(UserDestination.DEVICE_REGISTRATION)
-                    )
-                } else if (!verifyUser.canAddSigners) {
+                state = if (!verifyUser.canAddSigners && verifyUser.shardingPolicy != null) {
                     state.copy(
                         userDestinationResult = Resource.Success(UserDestination.PENDING_APPROVAL)
                     )
+                } else if (doesUserNeedToReAuthenticate) {
+                    state =
+                        state.copy(userDestinationResult = Resource.Success(UserDestination.RE_AUTHENTICATE))
+                    return
                 } else {
+                    val bootstrapImageUrl =
+                        if (verifyUser.shardingPolicy == null) userRepository.retrieveBootstrapImageUrl(
+                            email
+                        ) else ""
+
                     state.copy(
-                        userDestinationResult = Resource.Success(UserDestination.KEY_MANAGEMENT_CREATION)
+                        userDestinationResult = Resource.Success(UserDestination.KEY_MANAGEMENT_CREATION),
+                        bootstrapImageUrl = bootstrapImageUrl
                     )
                 }
                 return
@@ -230,6 +229,10 @@ class EntranceViewModel @Inject constructor(
                         state.copy(
                             userDestinationResult = Resource.Success(UserDestination.PENDING_APPROVAL)
                         )
+                    } else if (doesUserNeedToReAuthenticate) {
+                        state =
+                            state.copy(userDestinationResult = Resource.Success(UserDestination.RE_AUTHENTICATE))
+                        return
                     } else {
                         state.copy(
                             userDestinationResult = Resource.Success(UserDestination.KEY_MANAGEMENT_RECOVERY)

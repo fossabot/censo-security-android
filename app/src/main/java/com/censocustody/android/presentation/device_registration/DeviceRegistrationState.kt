@@ -41,7 +41,6 @@ data class DeviceRegistrationState(
     val userImage: UserImage? = null,
 
     val kickUserToEntrance : Boolean = false,
-    val createdBootstrapDeviceData: Resource<Unit> = Resource.Uninitialized,
 )
 
 

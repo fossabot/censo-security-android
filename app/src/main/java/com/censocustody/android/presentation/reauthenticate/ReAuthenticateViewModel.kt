@@ -4,15 +4,18 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.censocustody.android.common.Resource
 import com.censocustody.android.data.*
 import com.censocustody.android.data.models.LoginResponse
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class ReAuthenticateViewModel @Inject constructor(
     private val userRepository: UserRepository,
+    private val keyRepository: KeyRepository,
     private val censoUserData: CensoUserData
 ) : ViewModel() {
 
@@ -24,10 +27,28 @@ class ReAuthenticateViewModel @Inject constructor(
     }
 
     fun biometryApproved() {
+        viewModelScope.launch {
+            handleBiometryReturnLogin()
+        }
     }
 
     fun biometryFailed() {
         state = state.copy(loginResult = Resource.Error(exception = Exception("Failed Biometry")))
+    }
+
+    private fun handleBiometryReturnLogin() {
+        viewModelScope.launch {
+            try {
+                val timestamp = keyRepository.generateTimestamp()
+                val signedTimestamp = keyRepository.signTimestamp(
+                    timestamp = timestamp
+                )
+
+                loginWithBiometry(timestamp = timestamp, signedTimestamp = signedTimestamp)
+            } catch (e: Exception) {
+                biometryFailed()
+            }
+        }
     }
 
     private suspend fun loginWithBiometry(timestamp: String, signedTimestamp: String) {
@@ -85,6 +106,7 @@ class ReAuthenticateViewModel @Inject constructor(
     }
 
     fun retry() {
+        resetLoginResult()
         triggerBioPrompt()
     }
 

@@ -18,6 +18,7 @@ interface AuthProvider {
     //UserState Notifying Functionality
     fun setUserState(userState: UserState)
     fun addUserStateListener(listener: UserStateListener)
+    fun isEmailVerifiedToken(jwt: String): Boolean
     fun clearAllListeners()
 }
 
@@ -50,8 +51,8 @@ class CensoAuth(
         return try {
             val jwtDecoded = JWT(jwt)
             val jwtEmail =
-                if (jwtDecoded.claims.containsKey("email")) {
-                    jwtDecoded.claims["email"]?.asString()
+                if (jwtDecoded.claims.containsKey(EMAIL_TOKEN_KEY)) {
+                    jwtDecoded.claims[EMAIL_TOKEN_KEY]?.asString()
                 } else {
                     ""
                 }
@@ -60,6 +61,23 @@ class CensoAuth(
         } catch (e: Exception) {
             RaygunClient.send(e, listOf(JWT_TAG, MANUALLY_REPORTED_TAG))
             ""
+        }
+    }
+
+    override fun isEmailVerifiedToken(jwt: String): Boolean {
+        return try {
+            val jwtDecoded = JWT(jwt)
+            val jwtEmail =
+                if (jwtDecoded.claims.containsKey(EMAIL_VERIFIED_KEY)) {
+                    jwtDecoded.claims[EMAIL_VERIFIED_KEY]?.asBoolean()
+                } else {
+                    true
+                }
+
+            jwtEmail ?: true
+        } catch (e: Exception) {
+            RaygunClient.send(e, listOf(JWT_TAG, MANUALLY_REPORTED_TAG))
+            true
         }
     }
 
@@ -116,6 +134,11 @@ class CensoAuth(
                 Thread { listener.onUserStateChanged(userState) }.start()
             }
         }
+    }
+
+    companion object {
+        const val EMAIL_TOKEN_KEY = "email"
+        const val EMAIL_VERIFIED_KEY = "email_verification"
     }
 }
 

@@ -35,10 +35,14 @@ interface UserRepository {
     suspend fun saveBootstrapDeviceId(email: String, deviceId: String)
     suspend fun saveBootstrapDevicePublicKey(email: String, publicKey: String)
     suspend fun userHasDeviceIdSaved(email: String) : Boolean
+    suspend fun userHasBootstrapDeviceIdSaved(email: String) : Boolean
     suspend fun addUserDevice(userDevice: UserDevice) : Resource<Unit>
     suspend fun retrieveUserDevicePublicKey(email: String) : String
     suspend fun retrieveBootstrapDevicePublicKey(email: String) : String
     suspend fun clearPreviousDeviceInfo(email: String)
+    suspend fun isTokenEmailVerified() : Boolean
+    fun saveBootstrapImageUrl(email: String, bootstrapImageUrl: String)
+    fun retrieveBootstrapImageUrl(email: String) : String
 }
 
 class UserRepositoryImpl(
@@ -205,6 +209,16 @@ class UserRepositoryImpl(
 
     override fun retrieveCachedUserEmail() = SharedPrefsHelper.retrieveUserEmail()
 
+    override fun saveBootstrapImageUrl(email: String, bootstrapImageUrl: String) {
+        SharedPrefsHelper.saveBootstrapImageUrl(
+            email = email,
+            imageUrl = bootstrapImageUrl
+        )
+    }
+
+    override fun retrieveBootstrapImageUrl(email: String) =
+        SharedPrefsHelper.retrieveBootstrapImageUrl(email)
+
     override suspend fun saveUserEmail(email: String) {
         SharedPrefsHelper.saveUserEmail(email)
     }
@@ -237,6 +251,9 @@ class UserRepositoryImpl(
     override suspend fun userHasDeviceIdSaved(email: String) =
         SharedPrefsHelper.userHasDeviceIdSaved(email)
 
+    override suspend fun userHasBootstrapDeviceIdSaved(email: String) =
+        SharedPrefsHelper.userHasBootstrapDeviceIdSaved(email)
+
     override suspend fun retrieveUserDevicePublicKey(email: String) =
         SharedPrefsHelper.retrieveDevicePublicKey(email)
 
@@ -261,6 +278,11 @@ class UserRepositoryImpl(
             SharedPrefsHelper.clearBootstrapDeviceId(email)
             SharedPrefsHelper.clearDeviceBootstrapPublicKey(email)
         }
+    }
+
+    override suspend fun isTokenEmailVerified(): Boolean {
+        val token = authProvider.retrieveToken()
+        return authProvider.isEmailVerifiedToken(token)
     }
 
 

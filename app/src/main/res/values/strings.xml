@@ -262,5 +262,6 @@
     <string name="pending_approval">Pending Approval</string>
     <string name="send_verify_failed_title">Failed To Send Verification Email</string>
     <string name="email_not_found_default_error">Email not found. Please try again.</string>
-    <string name="reauth_bioprompt_message">Your device has been approved. We need to authenticate your device before creating or recovering your key.</string>
+    <string name="reauth_bioprompt_message">Your device has been approved.\n\nWe need to authenticate your device before creating or recovering your key.</string>
+    <string name="re_authenticate_title">Authenticate</string>
 </resources>

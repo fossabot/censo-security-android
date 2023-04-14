@@ -43,9 +43,11 @@ fun EntranceScreen(
             val userDestinationRoute = when (state.userDestinationResult.data) {
                 UserDestination.HOME -> Screen.ApprovalListRoute.route
                 UserDestination.UPLOAD_KEYS -> Screen.UploadKeysRoute.route
+                UserDestination.RE_AUTHENTICATE -> Screen.ReAuthenticateRoute.route
                 UserDestination.KEY_MANAGEMENT_CREATION -> {
                     val keyCreationInitialData = KeyCreationInitialData(
                         verifyUserDetails = state.verifyUserResult.data,
+                        bootstrapUserDeviceImageURI = state.bootstrapImageUrl
                     )
 
                     val keyCreationJson =
