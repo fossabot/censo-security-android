@@ -148,12 +148,27 @@ class EntranceViewModel @Inject constructor(
     //Part 1: Do we need to update key/sentinel data?
     //Part 2: Is our local key valid? valid/invalid
     private suspend fun determineUserDestination(verifyUser: VerifyUser) {
-        //region Part 1:
-        // Check 4 scenarios:
-        // 1. User needs to add Sentinel data,
-        // 2. User needs to update backend with a new chain
-        // 3. User needs to create or recover root seed
-        // 4. User has local data save but never uploaded to backend
+        /**
+
+        // User needs to add Sentinel data
+        // User needs to register device
+        // User needs to update backend with a new chain
+        // User needs to create or recover root seed
+            //Create
+                // If cannot add signers and sharding policy: send to pending approval
+                // If standard user and need to re-authenticate user: send to re-authenticate
+                // Else: create key
+            //Recover
+                // If cannot add signers: send to pending approval
+                // If need to re-auth: send to re-authenticate
+                // Else: recover key
+        // Bootstrap user needs to re-authenticate
+
+
+         // None of above scenarios match:
+            // User is good, check they have valid key and let them into app
+
+        **/
 
         val email = userRepository.retrieveUserEmail()
 
@@ -251,7 +266,7 @@ class EntranceViewModel @Inject constructor(
         }
         //endregion
 
-        //region Part 2: Passed all checks, lets check if our our local key valid?
+        //Passed all checks, lets check if our local key is valid.
         val doesUserHaveValidLocalKey =
             keyRepository.doesUserHaveValidLocalKey(verifyUser)
 
