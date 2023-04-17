@@ -1,5 +1,6 @@
 package com.censocustody.android.presentation.reauthenticate
 
+import android.annotation.SuppressLint
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.*
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -29,6 +30,7 @@ import com.censocustody.android.ui.theme.ButtonRed
 import com.censocustody.android.ui.theme.CensoWhite
 import org.intellij.lang.annotations.JdkConstants.HorizontalAlignment
 
+@SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
 fun ReAuthenticateScreen(
     navController: NavController,
