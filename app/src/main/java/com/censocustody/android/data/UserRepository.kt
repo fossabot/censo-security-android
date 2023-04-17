@@ -42,6 +42,7 @@ interface UserRepository {
     suspend fun clearPreviousDeviceInfo(email: String)
     suspend fun isTokenEmailVerified() : Boolean
     fun saveBootstrapImageUrl(email: String, bootstrapImageUrl: String)
+    fun clearBootstrapImageUrl(email: String)
     fun retrieveBootstrapImageUrl(email: String) : String
 }
 
@@ -218,6 +219,10 @@ class UserRepositoryImpl(
 
     override fun retrieveBootstrapImageUrl(email: String) =
         SharedPrefsHelper.retrieveBootstrapImageUrl(email)
+
+    override fun clearBootstrapImageUrl(email: String) {
+        SharedPrefsHelper.clearBootstrapImageUrl(email)
+    }
 
     override suspend fun saveUserEmail(email: String) {
         SharedPrefsHelper.saveUserEmail(email)

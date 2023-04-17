@@ -21,7 +21,6 @@ interface KeyRepository {
     suspend fun saveV3PublicKeys(rootSeed: ByteArray) : List<WalletSigner>
     suspend fun retrieveV3PublicKeys() : List<WalletSigner>
     suspend fun hasV3RootSeedStored() : Boolean
-    suspend fun hasDeviceIdSaved(email: String) : Boolean
     suspend fun haveSentinelData() : Boolean
     suspend fun generateTimestamp() : String
     suspend fun saveSentinelData(cipher: Cipher)
@@ -247,11 +246,6 @@ class KeyRepositoryImpl(
         val userEmail = userRepository.retrieveUserEmail()
         return securePreferences.hasV3RootSeed(userEmail)
     }
-
-    override suspend fun hasDeviceIdSaved(email: String): Boolean {
-        return SharedPrefsHelper.userHasDeviceIdSaved(email)
-    }
-
     override suspend fun haveSentinelData(): Boolean {
         val userEmail = userRepository.retrieveUserEmail()
         return encryptionManager.haveSentinelDataStored(userEmail)

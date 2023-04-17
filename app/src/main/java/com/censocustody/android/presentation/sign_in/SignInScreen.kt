@@ -133,7 +133,6 @@ fun SignInScreen(
                         .fillMaxSize()
                         .verticalScroll(rememberScrollState())
                 ) {
-                    val passwordVisibility = remember { mutableStateOf(false) }
                     Image(
                         modifier = Modifier.width(200.dp),
                         painter = painterResource(R.drawable.logo_red_black),
@@ -178,7 +177,8 @@ fun SignInScreen(
                                 onDoneAction = viewModel::signInActionCompleted,
                                 keyboardType = KeyboardType.Email,
                                 errorEnabled = state.emailErrorEnabled,
-                                showDoneAction = false
+                                showDoneAction = false,
+                                errorText = stringResource(id = R.string.invalid_email_error)
                             )
                         } else {
                             SignInTextField(
@@ -186,21 +186,19 @@ fun SignInScreen(
                                 valueText = state.verificationToken,
                                 placeholder = stringResource(id = R.string.token_hint),
                                 onValueChange = viewModel::updateVerificationToken,
-                                keyboardType = KeyboardType.Password,
-                                onPasswordClick = {
-                                    passwordVisibility.value = !passwordVisibility.value
-                                },
-                                passwordVisibility = passwordVisibility.value,
+                                keyboardType = KeyboardType.Number,
                                 onDoneAction = viewModel::attemptLogin,
                                 errorEnabled = state.verificationTokenErrorEnabled,
-                                isPassword = true,
+                                errorText = stringResource(id = R.string.invalid_token_error),
                                 showDoneAction = true
                             )
                         }
                         Spacer(modifier = Modifier.size(12.dp))
                         if (state.loginStep == LoginStep.TOKEN_ENTRY) {
                             CensoButton(
-                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp).align(Alignment.End),
+                                modifier = Modifier
+                                    .padding(horizontal = 8.dp, vertical = 4.dp)
+                                    .align(Alignment.End),
                                 contentPadding = PaddingValues(horizontal = 12.dp, vertical = 12.dp),
                                 enabled = true,
                                 onClick = {
@@ -245,7 +243,7 @@ fun SignInScreen(
                             }
                             viewModel.signInActionCompleted()
                         }) {
-                        if (state.loginResult is Resource.Loading) {
+                        if (state.loginResult is Resource.Loading || state.sendVerificationEmail is Resource.Loading) {
                             Box(
                                 modifier = Modifier
                                     .height(28.dp)

@@ -9,8 +9,6 @@
     <string name="sign_in_button">Sign In</string>
     <string name="email_hint">Email Address</string>
     <string name="token_hint">Verification Token</string>
-    <string name="hide_token_content_description">hide verification token</string>
-    <string name="show_token_content_description">show verification token</string>
     <string name="invalid_token_error">Please enter a verification token</string>
     <string name="invalid_email_error">Please enter a valid email</string>
     <string name="ok">OK</string>

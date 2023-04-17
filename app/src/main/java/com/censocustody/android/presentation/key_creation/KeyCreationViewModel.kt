@@ -142,6 +142,10 @@ class KeyCreationViewModel @Inject constructor(
             rootSeed = Mnemonics.MnemonicCode(phrase = phrase).toSeed()
         )
 
+        if (bootStrapResource is Resource.Success) {
+            userRepository.clearBootstrapImageUrl(userEmail)
+        }
+
         if (bootStrapResource is Resource.Error) {
             RaygunClient.send(
                 bootStrapResource.exception ?: Exception("Failed to upload bootstrap data"),

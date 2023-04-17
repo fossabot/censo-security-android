@@ -54,37 +54,15 @@ class ApprovalsViewModel @Inject constructor(
     fun refreshFromAPush() {
         viewModelScope.launch {
             if (!userRepository.isTokenEmailVerified()) {
-
-                val cachedApprovals = state.approvals.toList()
-
-                state = state.copy(approvalsResultRequest = Resource.Loading())
-                delay(250)
-
-                val walletApprovalsResource = approvalsRepository.getApprovalRequests()
-
-                val approvals =
-                    when (walletApprovalsResource) {
-                        is Resource.Success -> {
-                            walletApprovalsResource.data ?: emptyList()
-                        }
-                        is Resource.Error -> {
-                            cachedApprovals
-                        }
-                        else -> {
-                            emptyList()
-                        }
-                    }
-
-                state = state.copy(
-                    approvalsResultRequest = walletApprovalsResource,
-                    approvals = approvals
-                )
+                refreshApprovalsData()
             }
         }
     }
 
     fun refreshData() {
-        retrieveWalletApprovals()
+        viewModelScope.launch {
+            refreshApprovalsData()
+        }
     }
 
     fun resetApprovalsData() {
@@ -115,33 +93,31 @@ class ApprovalsViewModel @Inject constructor(
     }
 
     //region API Calls
-    private fun retrieveWalletApprovals() {
-        viewModelScope.launch {
-            val cachedApprovals = state.approvals.toList()
+    private suspend fun refreshApprovalsData() {
+        val cachedApprovals = state.approvals.toList()
 
-            state = state.copy(approvalsResultRequest = Resource.Loading())
-            delay(250)
+        state = state.copy(approvalsResultRequest = Resource.Loading())
+        delay(250)
 
-            val walletApprovalsResource = approvalsRepository.getApprovalRequests()
+        val walletApprovalsResource = approvalsRepository.getApprovalRequests()
 
-            val approvals =
-                when (walletApprovalsResource) {
-                    is Resource.Success -> {
-                        walletApprovalsResource.data ?: emptyList()
-                    }
-                    is Resource.Error -> {
-                        cachedApprovals
-                    }
-                    else -> {
-                        emptyList()
-                    }
+        val approvals =
+            when (walletApprovalsResource) {
+                is Resource.Success -> {
+                    walletApprovalsResource.data ?: emptyList()
                 }
+                is Resource.Error -> {
+                    cachedApprovals
+                }
+                else -> {
+                    emptyList()
+                }
+            }
 
-            state = state.copy(
-                approvalsResultRequest = walletApprovalsResource,
-                approvals = approvals
-            )
-        }
+        state = state.copy(
+            approvalsResultRequest = walletApprovalsResource,
+            approvals = approvals
+        )
     }
     //endregion
 
