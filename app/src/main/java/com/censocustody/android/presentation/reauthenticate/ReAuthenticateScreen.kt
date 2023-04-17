@@ -116,7 +116,7 @@ fun ReAuthenticateScreen(
                     .align(Alignment.Center),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text("Failed to Authenticate User", fontSize = 20.sp)
+                Text(stringResource(R.string.failed_auth_title), fontSize = 20.sp)
                 Spacer(modifier = Modifier.height(28.dp))
                 Button(onClick = viewModel::retry) {
                     Text(stringResource(R.string.try_again), fontSize = 18.sp, color = CensoWhite)

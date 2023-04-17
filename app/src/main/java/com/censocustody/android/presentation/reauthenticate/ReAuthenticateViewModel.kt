@@ -27,9 +27,7 @@ class ReAuthenticateViewModel @Inject constructor(
     }
 
     fun biometryApproved() {
-        viewModelScope.launch {
-            handleBiometryReturnLogin()
-        }
+        handleBiometryReturnLogin()
     }
 
     fun biometryFailed() {
