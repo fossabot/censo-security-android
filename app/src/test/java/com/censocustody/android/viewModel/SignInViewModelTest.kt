@@ -89,7 +89,7 @@ class SignInViewModelTest : BaseViewModelTest() {
     @Test
     fun `valid email with no private key moves us to password entry`() =
         runTest {
-            whenever(keyRepository.hasV3RootSeedStored()).then { false }
+            whenever(keyRepository.hasDeviceIdSaved(any())).then { false }
             whenever(userRepository.userLoggedIn()).then { false }
 
             initVM()
@@ -103,7 +103,7 @@ class SignInViewModelTest : BaseViewModelTest() {
     @Test
     fun `sanitize email when inputted by user`() =
         runTest {
-            whenever(keyRepository.hasV3RootSeedStored()).then { false }
+            whenever(keyRepository.hasDeviceIdSaved(any())).then { false }
             whenever(userRepository.userLoggedIn()).then { false }
 
             initVM()
@@ -119,7 +119,7 @@ class SignInViewModelTest : BaseViewModelTest() {
     @Test
     fun `invalid email with no private key does not move us to password entry`() =
         runTest {
-            whenever(keyRepository.hasV3RootSeedStored()).then { false }
+            whenever(keyRepository.hasDeviceIdSaved(any())).then { false }
             whenever(userRepository.userLoggedIn()).then { false }
 
             initVM()
@@ -134,7 +134,7 @@ class SignInViewModelTest : BaseViewModelTest() {
     @Test
     fun `invalid password does not attempt password based login`() =
         runTest {
-            whenever(keyRepository.hasV3RootSeedStored()).then { false }
+            whenever(keyRepository.hasDeviceIdSaved(any())).then { false }
             whenever(userRepository.userLoggedIn()).then { false }
 
             initVM()
@@ -153,7 +153,7 @@ class SignInViewModelTest : BaseViewModelTest() {
     @Test
     fun `valid password attempts password based login`() =
         runTest {
-            whenever(keyRepository.hasV3RootSeedStored()).then { false }
+            whenever(keyRepository.hasDeviceIdSaved(any())).then { false }
             whenever(userRepository.userLoggedIn()).then { false }
 
             initVM()
@@ -171,7 +171,7 @@ class SignInViewModelTest : BaseViewModelTest() {
     @Test
     fun `valid password login triggers successful login`() =
         runTest {
-            whenever(keyRepository.hasV3RootSeedStored()).then { false }
+            whenever(keyRepository.hasDeviceIdSaved(any())).then { false }
             whenever(userRepository.userLoggedIn()).then { false }
             whenever(userRepository.loginWithVerificationToken(validEmail, validPassword)).then {
                 Resource.Success(LoginResponse(jwt))
@@ -199,7 +199,7 @@ class SignInViewModelTest : BaseViewModelTest() {
     @Test
     fun `no token returned on password login triggers login error`() =
         runTest {
-            whenever(keyRepository.hasV3RootSeedStored()).then { false }
+            whenever(keyRepository.hasDeviceIdSaved(any())).then { false }
             whenever(userRepository.userLoggedIn()).then { false }
             whenever(userRepository.loginWithVerificationToken(validEmail, validPassword)).then {
                 Resource.Success(LoginResponse(null))
@@ -220,7 +220,7 @@ class SignInViewModelTest : BaseViewModelTest() {
     @Test
     fun `invalid password login triggers login error`() =
         runTest {
-            whenever(keyRepository.hasV3RootSeedStored()).then { false }
+            whenever(keyRepository.hasDeviceIdSaved(any())).then { false }
             whenever(userRepository.userLoggedIn()).then { false }
             whenever(userRepository.loginWithVerificationToken(validEmail, validPassword)).then {
                 Resource.Error<LoginResponse>()
@@ -241,7 +241,7 @@ class SignInViewModelTest : BaseViewModelTest() {
     @Test
     fun `valid email with a private key attempts biometric login`() =
         runTest {
-            whenever(keyRepository.hasV3RootSeedStored()).then { true }
+            whenever(keyRepository.hasDeviceIdSaved(any())).then { true }
             whenever(userRepository.userLoggedIn()).then { false }
 
             initVM()
@@ -257,7 +257,7 @@ class SignInViewModelTest : BaseViewModelTest() {
     @Test
     fun `biometry approved during return login attempts signature based login`() =
         runTest {
-            whenever(keyRepository.hasV3RootSeedStored()).then { true }
+            whenever(keyRepository.hasDeviceIdSaved(any())).then { true }
             whenever(userRepository.userLoggedIn()).then { false }
 
             initVM()
@@ -278,7 +278,7 @@ class SignInViewModelTest : BaseViewModelTest() {
     @Test
     fun `biometry approved during initial login attempts saving sentinel data`() =
         runTest {
-            whenever(keyRepository.hasV3RootSeedStored()).then { false }
+            whenever(keyRepository.hasDeviceIdSaved(any())).then { false }
             whenever(userRepository.userLoggedIn()).then { false }
             whenever(keyRepository.getInitializedCipherForSentinelEncryption()).then { cipher }
             whenever(userRepository.loginWithVerificationToken(validEmail, validPassword)).then {
@@ -305,7 +305,7 @@ class SignInViewModelTest : BaseViewModelTest() {
         runTest {
             whenever(keyRepository.haveSentinelData()).then { true }
             whenever(userRepository.userLoggedIn()).then { false }
-            whenever(keyRepository.hasV3RootSeedStored()).then { true }
+            whenever(keyRepository.hasDeviceIdSaved(any())).then { true }
             whenever(userRepository.loginWithTimestamp(any(), any(), any())).then {
                 Resource.Success(LoginResponse(jwt))
             }
@@ -330,7 +330,7 @@ class SignInViewModelTest : BaseViewModelTest() {
         runTest {
             whenever(keyRepository.haveSentinelData()).then { false }
             whenever(userRepository.userLoggedIn()).then { false }
-            whenever(keyRepository.hasV3RootSeedStored()).then { true }
+            whenever(keyRepository.hasDeviceIdSaved(any())).then { true }
             whenever(keyRepository.getInitializedCipherForSentinelEncryption()).then { cipher }
             whenever(userRepository.loginWithTimestamp(any(), any(), any())).then {
                 Resource.Success(LoginResponse(jwt))
@@ -360,7 +360,7 @@ class SignInViewModelTest : BaseViewModelTest() {
     @Test
     fun `no token returned on signature based login triggers login error`() =
         runTest {
-            whenever(keyRepository.hasV3RootSeedStored()).then { true }
+            whenever(keyRepository.hasDeviceIdSaved(any())).then { true }
             whenever(userRepository.userLoggedIn()).then { false }
             whenever(userRepository.loginWithTimestamp(any(), any(), any())).then {
                 Resource.Success(LoginResponse(null))
@@ -383,7 +383,7 @@ class SignInViewModelTest : BaseViewModelTest() {
     @Test
     fun `invalid signature based login triggers login error`() =
         runTest {
-            whenever(keyRepository.hasV3RootSeedStored()).then { true }
+            whenever(keyRepository.hasDeviceIdSaved(any())).then { true }
             whenever(userRepository.userLoggedIn()).then { false }
             whenever(userRepository.loginWithTimestamp(any(), any(), any())).then {
                 Resource.Error<LoginResponse>()
@@ -406,7 +406,7 @@ class SignInViewModelTest : BaseViewModelTest() {
     @Test
     fun `biometry failure does not attempts signature based login`() =
         runTest {
-            whenever(keyRepository.hasV3RootSeedStored()).then { true }
+            whenever(keyRepository.hasDeviceIdSaved(any())).then { true }
             whenever(userRepository.userLoggedIn()).then { false }
 
             initVM()

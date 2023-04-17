@@ -87,14 +87,14 @@ class SignInViewModel @Inject constructor(
 
     fun kickOffBiometryLoginOrSendVerificationEmail() {
         viewModelScope.launch {
-            state = if (keyRepository.hasDeviceIdSaved(state.email)) {
-                state.copy(
+            if (keyRepository.hasDeviceIdSaved(state.email)) {
+                state = state.copy(
                     triggerBioPrompt = Resource.Success(null),
                     bioPromptReason = BioPromptReason.RETURN_LOGIN,
                     loginResult = Resource.Uninitialized
                 )
             } else {
-                state.copy(loginStep = LoginStep.TOKEN_ENTRY)
+                sendVerificationEmail()
             }
         }
     }
@@ -155,7 +155,14 @@ class SignInViewModel @Inject constructor(
         viewModelScope.launch {
             val verificationResource = userRepository.sendVerificationEmail(state.email)
 
-            state = state.copy(sendVerificationEmail = verificationResource)
+            state = if (verificationResource is Resource.Success) {
+                state.copy(
+                    sendVerificationEmail = verificationResource,
+                    loginStep = LoginStep.TOKEN_ENTRY
+                )
+            } else {
+                state.copy(sendVerificationEmail = verificationResource)
+            }
         }
     }
     private fun loginWithToken() {
