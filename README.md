@@ -80,3 +80,8 @@ Pushing to:
 Run the local script `upload_build.sh`
 
 Need to pass one argument: `--token` which is the firebase token needed to upload builds to Firebase App Tester.
+
+
+# Testing Deep Link
+
+adb shell am start -W -a android.intent.action.VIEW -d "censo://login" com.censocustody.android.[VARIANT_SUFFIX]

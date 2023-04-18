@@ -3,6 +3,7 @@ package com.censocustody.android
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.*
+import android.net.Uri
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.compose.setContent
@@ -85,6 +86,11 @@ class MainActivity : FragmentActivity() {
 
         setupRayGunCrashReporting()
         setupPushChannel()
+
+        mainViewModel.parseIntentData(
+            action = intent?.action,
+            data = intent?.data
+        )
 
         setContent {
             val context = LocalContext.current

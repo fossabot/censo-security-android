@@ -1,5 +1,8 @@
 package com.censocustody.android.presentation.semantic_version_check
 
+import android.content.Intent
+import android.net.Uri
+import android.util.Patterns
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -11,6 +14,7 @@ import com.censocustody.android.data.EncryptionManagerImpl.Companion.SENTINEL_ST
 import com.censocustody.android.data.KeyRepository
 import com.censocustody.android.data.UserRepository
 import com.censocustody.android.presentation.Screen
+import com.censocustody.android.presentation.Screen.Companion.DEEP_LINK_LOGIN_HOST
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.crypto.Cipher
@@ -56,6 +60,26 @@ data class MainViewModel @Inject constructor(
             else -> BlockAppUI.NONE
         }
     }
+
+    fun parseIntentData(action: String?, data: Uri?) {
+        if (action != Intent.ACTION_VIEW || data == null) {
+            return
+        }
+
+        if (data.host == DEEP_LINK_LOGIN_HOST) {
+            val userEmail = grabEmailFromLoginIntentData(data) ?: ""
+
+            if (Patterns.EMAIL_ADDRESS.matcher(userEmail).matches()) {
+                viewModelScope.launch {
+                    if (!userRepository.userLoggedIn()) {
+                        userRepository.saveUserEmail(userEmail)
+                    }
+                }
+            }
+        }
+    }
+
+    private fun grabEmailFromLoginIntentData(data: Uri) = data.encodedPath?.replace("/", "")
 
     private suspend fun launchBlockingForegroundBiometryRetrieval() {
         state = state.copy(bioPromptTrigger = Resource.Loading())

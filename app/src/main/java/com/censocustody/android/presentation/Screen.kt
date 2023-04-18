@@ -32,5 +32,7 @@ sealed class Screen(val route: String) {
 
         //Used for setting up deep linking options for composable screens
         const val CENSO_CUSTODY_URI = "data://censocustody/"
+
+        const val DEEP_LINK_LOGIN_HOST = "login"
     }
 }
