@@ -89,11 +89,6 @@ class MainActivity : FragmentActivity() {
         setupRayGunCrashReporting()
         setupPushChannel()
 
-        mainViewModel.parseIntentData(
-            action = intent?.action,
-            data = intent?.data
-        )
-
         setContent {
             val context = LocalContext.current
             val navController = rememberNavController()

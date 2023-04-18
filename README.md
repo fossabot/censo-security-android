@@ -84,4 +84,4 @@ Need to pass one argument: `--token` which is the firebase token needed to uploa
 
 # Testing Deep Link
 
-adb shell am start -W -a android.intent.action.VIEW -d "censo://login" com.censocustody.android.[VARIANT_SUFFIX]
+adb shell am start -W -a android.intent.action.VIEW -d "censo://login/[EMAIL_HERE]/[TOKEN_HERE]" com.censocustody.android.[VARIANT_SUFFIX]
