@@ -22,21 +22,21 @@ fun WithdrawalRequestDetailContent(withdrawalRequestUI: WithdrawalRequestUI) {
     Spacer(modifier = Modifier.height(24.dp))
 
     val facts = listOfNotNull(
-        RowData(
-            title = stringResource(R.string.from_wallet),
+        RowData.KeyValueRow(
+            key = stringResource(R.string.from_wallet),
             value = withdrawalRequestUI.fromAccount,
         ),
-        RowData(
-            title = stringResource(R.string.destination),
+        RowData.KeyValueRow(
+            key = stringResource(R.string.destination),
             value = withdrawalRequestUI.toAccount,
         ),
-        RowData(
-            title = stringResource(R.string.destination_address),
+        RowData.KeyValueRow(
+            key = stringResource(R.string.destination_address),
             value = withdrawalRequestUI.address.maskAddress(),
         ),
         if (withdrawalRequestUI.nftMetadataName != null) {
-            RowData(
-                title = stringResource(R.string.nft_name),
+            RowData.KeyValueRow(
+                key = stringResource(R.string.nft_name),
                 value = withdrawalRequestUI.nftMetadataName,
             )
         } else null,
@@ -44,31 +44,31 @@ fun WithdrawalRequestDetailContent(withdrawalRequestUI: WithdrawalRequestUI) {
 
     val feeFacts = if (withdrawalRequestUI.replacementFee != null) {
         listOf(
-            RowData(
-                title = stringResource(R.string.amount),
+            RowData.KeyValueRow(
+                key = stringResource(R.string.amount),
                 value = withdrawalRequestUI.amount.formattedAmountWithSymbol(withdrawalRequestUI.symbol),
             ),
-            RowData(
-                title = stringResource(R.string.original_fee),
+            RowData.KeyValueRow(
+                key = stringResource(R.string.original_fee),
                 value = withdrawalRequestUI.fee.formattedAmountWithSymbol(withdrawalRequestUI.symbol),
             ),
-            RowData(
-                title = stringResource(R.string.new_fee),
+            RowData.KeyValueRow(
+                key = stringResource(R.string.new_fee),
                 value = withdrawalRequestUI.replacementFee.formattedAmountWithSymbol(withdrawalRequestUI.symbol),
             )
         )
     } else {
         listOf(
             if (withdrawalRequestUI.symbol == "BTC") {
-                RowData(
-                    title = stringResource(R.string.fee),
+                RowData.KeyValueRow(
+                    key = stringResource(R.string.fee),
                     value = withdrawalRequestUI.fee.formattedAmountWithSymbol(
                         withdrawalRequestUI.feeSymbol ?: withdrawalRequestUI.symbol
                     )
                 )
             } else {
-                RowData(
-                    title = stringResource(R.string.fee_estimate),
+                RowData.KeyValueRow(
+                    key = stringResource(R.string.fee_estimate),
                     value = withdrawalRequestUI.fee.formattedUsdEquivalentWithSymbol()
                 )
             }

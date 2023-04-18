@@ -25,16 +25,16 @@ fun CreateOrDeleteAddressBookEntryDetailContent(
     Spacer(modifier = Modifier.height(24.dp))
     val factsData = FactsData(
         facts = listOf(
-            RowData(
-                title = stringResource(R.string.name),
+            RowData.KeyValueRow(
+                key = stringResource(R.string.name),
                 value = entryName,
             ),
-            RowData(
-                title = stringResource(R.string.address),
+            RowData.KeyValueRow(
+                key = stringResource(R.string.address),
                 value = entryAddress.maskAddress(),
             ),
-            RowData(
-                title = stringResource(R.string.chain),
+            RowData.KeyValueRow(
+                key = stringResource(R.string.chain),
                 value = chain.label(),
             ),
         )

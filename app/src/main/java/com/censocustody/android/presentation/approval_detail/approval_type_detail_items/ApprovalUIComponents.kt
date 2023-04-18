@@ -17,6 +17,7 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -87,7 +88,25 @@ fun UserInfoRow(
 }
 
 @Composable
-fun UserImage(image: String?, name: String) {
+fun UserImageRow(
+    backgroundColor: Color,
+    name: String,
+    image: String?
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(backgroundColor)
+            .padding(vertical = 14.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Center
+    ) {
+        UserImage(image, name, size = 224.dp)
+    }
+}
+
+@Composable
+fun UserImage(image: String?, name: String, size: Dp = 56.dp) {
     var bitmap: Bitmap? = null
     var haveValidBitmap = false
     if (!image.isNullOrEmpty()) {
@@ -105,7 +124,7 @@ fun UserImage(image: String?, name: String) {
             contentScale = ContentScale.Crop, // crop the image if it's not a square
             modifier = Modifier
                 .padding(horizontal = 8.dp, vertical = 2.dp)
-                .size(56.dp)
+                .size(size)
                 .clip(CircleShape) // clip to the circle shape
         )
     } else {

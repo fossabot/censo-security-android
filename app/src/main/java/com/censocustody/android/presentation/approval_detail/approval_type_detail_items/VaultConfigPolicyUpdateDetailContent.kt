@@ -63,12 +63,12 @@ fun generatePolicyRows(
     val approvalsRequiredRow = FactsData(
         title = context.getString(R.string.approvals),
         facts = listOf(
-            RowData(
-                title = context.getString(R.string.approvals_required),
+            RowData.KeyValueRow(
+                key = context.getString(R.string.approvals_required),
                 value = approvalsRequired,
             ),
-            RowData(
-                title = context.getString(R.string.approval_expiration),
+            RowData.KeyValueRow(
+                key = context.getString(R.string.approval_expiration),
                 value = convertSecondsIntoReadableText(policy.approvalTimeout.toInt(), context),
             )
         )
@@ -80,8 +80,8 @@ fun generatePolicyRows(
     val approversList = policy.approvers.retrieveRowData()
     if (approversList.isEmpty()) {
         approversList.add(
-            RowData(
-                title = context.getString(R.string.no_approvers_text),
+            RowData.KeyValueRow(
+                key = context.getString(R.string.no_approvers_text),
                 value = ""
             )
         )
@@ -99,8 +99,8 @@ fun generatePolicyRows(
             FactsData(
                 title = context.getString(R.string.fees),
                 facts = chainFees.map {
-                    RowData(
-                        title = "${it.chain.label()} ${context.getString(R.string.fee_estimate)}",
+                    RowData.KeyValueRow(
+                        key = "${it.chain.label()} ${context.getString(R.string.fee_estimate)}",
                         value = it.fee.formattedUsdEquivalentWithSymbol()
                     )
                 }
