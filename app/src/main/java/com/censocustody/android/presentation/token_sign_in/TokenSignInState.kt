@@ -8,8 +8,6 @@ import javax.crypto.Cipher
 data class TokenSignInState(
     val email: String = "",
     val verificationToken: String = "",
-    val emailErrorEnabled: Boolean = false,
-    val verificationTokenErrorEnabled: Boolean = false,
     val loginResult: Resource<LoginResponse> = Resource.Uninitialized,
     val exitLoginFlow : Resource<Unit> = Resource.Uninitialized,
     val triggerBioPrompt: Resource<Cipher> = Resource.Uninitialized,

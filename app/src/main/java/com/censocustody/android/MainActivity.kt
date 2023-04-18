@@ -198,7 +198,6 @@ class MainActivity : FragmentActivity() {
                     uriPattern = "censo://login/{userEmail}/{token}"
                 }),
             ) { backStackEntry ->
-                censoLog(message = "Navigating to token sign in screen...")
                 val userEmail = backStackEntry.arguments?.getString("userEmail")
                 val token = backStackEntry.arguments?.getString("token")
                 TokenSignInScreen(

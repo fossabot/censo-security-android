@@ -52,33 +52,31 @@ class TokenSignInViewModel @Inject constructor(
         }
     }
 
-    private fun loginWithToken() {
+    private suspend fun loginWithToken() {
         state = state.copy(loginResult = Resource.Loading())
-        viewModelScope.launch {
-            try {
-                val loginResource = userRepository.loginWithVerificationToken(
-                    email = state.email, token = state.verificationToken
-                )
-                when (loginResource) {
-                    is Resource.Success -> {
-                        val token = loginResource.data?.token
-                        if (token != null) {
-                            userSuccessfullyLoggedIn(token)
-                            showBiometryForSentinelData()
-                        } else {
-                            userFailedLogin(e = Exception("NO TOKEN"))
-                        }
-                    }
-                    is Resource.Error -> {
-                        userFailedLogin(resource = loginResource)
-                    }
-                    else -> {
-                        state = state.copy(loginResult = Resource.Loading())
+        try {
+            val loginResource = userRepository.loginWithVerificationToken(
+                email = state.email, token = state.verificationToken
+            )
+            when (loginResource) {
+                is Resource.Success -> {
+                    val token = loginResource.data?.token
+                    if (token != null) {
+                        userSuccessfullyLoggedIn(token)
+                        showBiometryForSentinelData()
+                    } else {
+                        userFailedLogin(e = Exception("NO TOKEN"))
                     }
                 }
-            } catch (e: Exception) {
-                userFailedLogin(e = e)
+                is Resource.Error -> {
+                    userFailedLogin(resource = loginResource)
+                }
+                else -> {
+                    state = state.copy(loginResult = Resource.Loading())
+                }
             }
+        } catch (e: Exception) {
+            userFailedLogin(e = e)
         }
     }
 
@@ -89,18 +87,22 @@ class TokenSignInViewModel @Inject constructor(
     }
 
     fun biometryFailed() {
-        state = state.copy(loginResult = Resource.Error())
+        state = state.copy(triggerBioPrompt = Resource.Error())
     }
 
-    private fun showBiometryForSentinelData() {
-        viewModelScope.launch {
-            val cipher = keyRepository.getInitializedCipherForSentinelEncryption()
+    private suspend fun showBiometryForSentinelData() {
+        val cipher = keyRepository.getInitializedCipherForSentinelEncryption()
 
-            if (cipher != null) {
-                state = state.copy(
-                    triggerBioPrompt = Resource.Success(cipher),
-                )
-            }
+        if (cipher != null) {
+            state = state.copy(
+                triggerBioPrompt = Resource.Success(cipher),
+            )
+        }
+    }
+
+    fun retryBiometry() {
+        viewModelScope.launch {
+            showBiometryForSentinelData()
         }
     }
 
@@ -127,9 +129,13 @@ class TokenSignInViewModel @Inject constructor(
 
     private fun userFailedLogin(resource: Resource<LoginResponse>? = null, e: Exception? = null) {
         state = if (resource != null) {
-            state.copy(loginResult = resource)
+            state.copy(
+                loginResult = resource,
+                exitLoginFlow = Resource.Success(Unit)
+            )
         } else {
             state.copy(
+                exitLoginFlow = Resource.Success(Unit),
                 loginResult = Resource.Error(
                     exception = Exception(e?.message ?: NO_INTERNET_ERROR)
                 )

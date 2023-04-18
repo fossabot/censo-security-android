@@ -28,6 +28,7 @@ import com.censocustody.android.presentation.Screen
 import com.censocustody.android.ui.theme.*
 import androidx.compose.runtime.Composable
 import com.censocustody.android.common.BioCryptoUtil
+import com.censocustody.android.presentation.sign_in.SignInAlertDialog
 
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 
@@ -120,4 +121,17 @@ fun TokenSignInScreen(
             }
         }
     )
+
+    if (state.triggerBioPrompt is Resource.Error) {
+        SignInAlertDialog(
+            title = stringResource(R.string.biometry_failed_title),
+            confirmText = stringResource(R.string.ok),
+            dismissText = stringResource(id = R.string.cancel),
+            onCancel = viewModel::retryBiometry,
+            onExit = viewModel::retryBiometry,
+            onConfirm = viewModel::retryBiometry,
+            message = "",
+            showDismissButton = false
+        )
+    }
 }
