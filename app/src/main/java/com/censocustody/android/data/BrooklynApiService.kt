@@ -69,6 +69,9 @@ interface BrooklynApiService {
     @POST("v1/login")
     suspend fun login(@Body loginBody: LoginBody) : RetrofitResponse<LoginResponse>
 
+    @POST("v1/verification-token")
+    suspend fun sendVerificationEmail(@Body verificationTokenBody: TokenBody): RetrofitResponse<ResponseBody>
+
     @GET("v1/users")
     @Headers(AUTH_REQUIRED)
     suspend fun verifyUser(): RetrofitResponse<VerifyUser>

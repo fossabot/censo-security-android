@@ -6,6 +6,7 @@ import com.censocustody.android.data.models.VerifyUser
 data class EntranceState(
     val userDestinationResult: Resource<UserDestination> = Resource.Uninitialized,
     val verifyUserResult: Resource<VerifyUser> = Resource.Uninitialized,
+    val bootstrapImageUrl: String = ""
 )
 
 /**
@@ -18,9 +19,11 @@ data class EntranceState(
  * UPLOAD_KEYS
  * DEVICE_REGISTRATION
  * FORCE_UPDATE
+ * RE_AUTHENTICATE
  *
  */
 enum class UserDestination {
     FORCE_UPDATE, LOGIN, KEY_MANAGEMENT_CREATION, KEY_MANAGEMENT_RECOVERY,
-    UPLOAD_KEYS, HOME, INVALID_KEY, DEVICE_REGISTRATION, PENDING_APPROVAL
+    UPLOAD_KEYS, HOME, INVALID_KEY, DEVICE_REGISTRATION, PENDING_APPROVAL,
+    RE_AUTHENTICATE
 }

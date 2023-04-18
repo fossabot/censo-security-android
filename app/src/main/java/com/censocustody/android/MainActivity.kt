@@ -46,6 +46,7 @@ import com.censocustody.android.presentation.key_recovery.KeyRecoveryInitialData
 import com.censocustody.android.presentation.key_recovery.KeyRecoveryScreen
 import com.censocustody.android.presentation.keys_upload.KeysUploadScreen
 import com.censocustody.android.presentation.pending_approval.PendingApprovalScreen
+import com.censocustody.android.presentation.reauthenticate.ReAuthenticateScreen
 import com.censocustody.android.presentation.reset_password.ResetPasswordScreen
 import com.censocustody.android.presentation.sign_in.SignInScreen
 import com.censocustody.android.service.MessagingService.Companion.NOTIFICATION_DISPLAYED_KEY
@@ -73,7 +74,7 @@ class MainActivity : FragmentActivity() {
                 if (safeIntent.hasExtra(NOTIFICATION_DISPLAYED_KEY)
                     && safeIntent.getBooleanExtra(NOTIFICATION_DISPLAYED_KEY, false)
                 ) {
-                    approvalsViewModel.refreshData()
+                    approvalsViewModel.refreshFromAPush()
                 }
             }
         }
@@ -273,6 +274,11 @@ class MainActivity : FragmentActivity() {
                 route = Screen.PendingApprovalRoute.route
             ) {
                 PendingApprovalScreen(navController = navController)
+            }
+            composable(
+                route = Screen.ReAuthenticateRoute.route
+            ) {
+                ReAuthenticateScreen(navController = navController)
             }
         }
     }

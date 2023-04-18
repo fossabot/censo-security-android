@@ -246,7 +246,6 @@ class KeyRepositoryImpl(
         val userEmail = userRepository.retrieveUserEmail()
         return securePreferences.hasV3RootSeed(userEmail)
     }
-
     override suspend fun haveSentinelData(): Boolean {
         val userEmail = userRepository.retrieveUserEmail()
         return encryptionManager.haveSentinelDataStored(userEmail)

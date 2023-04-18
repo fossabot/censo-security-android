@@ -80,23 +80,6 @@ fun DeviceRegistrationScreen(
             viewModel.resetUserLoggedIn()
         }
 
-        if (state.createdBootstrapDeviceData is Resource.Success) {
-
-            val keyCreationInitialData = KeyCreationInitialData(
-                verifyUserDetails = state.verifyUser,
-                bootstrapUserDeviceImageURI = state.fileUrl
-            )
-
-            val keyCreationJson =
-                KeyCreationInitialData.toJson(
-                    keyCreationInitialData,
-                    AndroidUriWrapper()
-                )
-            val route = "${Screen.KeyCreationRoute.route}/$keyCreationJson"
-
-            navController.navigate(route)
-        }
-
         if (state.triggerBioPrompt is Resource.Success) {
             viewModel.resetPromptTrigger()
 

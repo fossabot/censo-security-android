@@ -1,6 +1,7 @@
 package com.censocustody.android.presentation.sign_in
 
 import android.annotation.SuppressLint
+import android.widget.Toast
 import androidx.biometric.BiometricPrompt
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
@@ -69,6 +70,17 @@ fun SignInScreen(
             }
         }
 
+        if (state.sendVerificationEmail is Resource.Success) {
+            viewModel.resetSendVerificationEmail()
+
+            Toast.makeText(
+                context,
+                context.getString(R.string.verification_email_sent),
+                Toast.LENGTH_LONG
+            ).show()
+
+        }
+
         if (state.triggerBioPrompt is Resource.Success) {
             viewModel.resetPromptTrigger()
 
@@ -121,7 +133,6 @@ fun SignInScreen(
                         .fillMaxSize()
                         .verticalScroll(rememberScrollState())
                 ) {
-                    val passwordVisibility = remember { mutableStateOf(false) }
                     Image(
                         modifier = Modifier.width(200.dp),
                         painter = painterResource(R.drawable.logo_red_black),
@@ -166,39 +177,58 @@ fun SignInScreen(
                                 onDoneAction = viewModel::signInActionCompleted,
                                 keyboardType = KeyboardType.Email,
                                 errorEnabled = state.emailErrorEnabled,
-                                showDoneAction = false
+                                showDoneAction = false,
+                                errorText = stringResource(id = R.string.invalid_email_error)
                             )
                         } else {
                             SignInTextField(
                                 modifier = Modifier.padding(horizontal = boxItemsHorizontalPadding),
-                                valueText = state.password,
-                                placeholder = stringResource(id = R.string.password_hint),
-                                onValueChange = viewModel::updatePassword,
-                                keyboardType = KeyboardType.Password,
-                                onPasswordClick = {
-                                    passwordVisibility.value = !passwordVisibility.value
-                                },
-                                passwordVisibility = passwordVisibility.value,
+                                valueText = state.verificationToken,
+                                placeholder = stringResource(id = R.string.token_hint),
+                                onValueChange = viewModel::updateVerificationToken,
+                                keyboardType = KeyboardType.Number,
                                 onDoneAction = viewModel::attemptLogin,
-                                errorEnabled = state.passwordErrorEnabled,
-                                isPassword = true,
+                                errorEnabled = state.verificationTokenErrorEnabled,
+                                errorText = stringResource(id = R.string.invalid_token_error),
                                 showDoneAction = true
                             )
                         }
                         Spacer(modifier = Modifier.size(12.dp))
-                        Box(modifier = Modifier.fillMaxWidth()) {
-                            Text(
+                        if (state.loginStep == LoginStep.TOKEN_ENTRY) {
+                            CensoButton(
                                 modifier = Modifier
-                                    .align(Alignment.CenterEnd)
-                                    .clickable { navController.navigate(Screen.ResetPasswordRoute.route) }
-                                    .padding(top = 8.dp, end = boxItemsHorizontalPadding),
-                                text = stringResource(R.string.reset_password),
-                                color = TextRed,
-                                textAlign = TextAlign.End,
-                                fontWeight = FontWeight.W400
-                            )
+                                    .padding(horizontal = 8.dp, vertical = 4.dp)
+                                    .align(Alignment.End),
+                                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 12.dp),
+                                enabled = true,
+                                onClick = {
+                                    viewModel.sendVerificationEmail()
+                                }) {
+                                if (state.sendVerificationEmail is Resource.Loading) {
+                                    Box(
+                                        modifier = Modifier
+                                            .height(28.dp)
+                                            .width(28.dp)
+                                    ) {
+                                        CircularProgressIndicator(
+                                            modifier = Modifier.height(28.dp),
+                                            color = CensoWhite,
+                                            strokeWidth = 2.dp,
+                                        )
+                                    }
+                                } else {
+                                    Text(
+                                        modifier = Modifier.padding(horizontal = 24.dp),
+                                        text = "Send Token",
+                                        fontSize = 18.sp,
+                                        color = if (state.email.isNotEmpty()) CensoWhite else CensoWhite.copy(
+                                            alpha = 0.35f
+                                        )
+                                    )
+                                }
+                            }
+                            Spacer(modifier = Modifier.height(24.dp))
                         }
-                        Spacer(modifier = Modifier.size(24.dp))
                     }
                     Spacer(modifier = Modifier.weight(6f))
                     CensoButton(
@@ -213,7 +243,7 @@ fun SignInScreen(
                             }
                             viewModel.signInActionCompleted()
                         }) {
-                        if (state.loginResult is Resource.Loading) {
+                        if (state.loginResult is Resource.Loading || state.sendVerificationEmail is Resource.Loading) {
                             Box(
                                 modifier = Modifier
                                     .height(28.dp)
@@ -237,10 +267,25 @@ fun SignInScreen(
                 }
             }
 
+            if (state.sendVerificationEmail is Resource.Error) {
+                val errorReason = state.loginResult.censoError?.getErrorMessage(context)
+
+                SignInAlertDialog(
+                    title = stringResource(R.string.send_verify_failed_title),
+                    confirmText = stringResource(R.string.ok),
+                    dismissText = stringResource(id = R.string.cancel),
+                    onCancel = viewModel::resetSendVerificationEmail,
+                    onExit = viewModel::resetSendVerificationEmail,
+                    onConfirm = viewModel::resetSendVerificationEmail,
+                    message = errorReason ?: stringResource(R.string.email_not_found_default_error),
+                    showDismissButton = false
+                )
+            }
+
             if (state.loginResult is Resource.Error) {
                 val errorReason = state.loginResult.censoError?.getErrorMessage(context)
 
-                if (state.loginStep == LoginStep.PASSWORD_ENTRY) {
+                if (state.loginStep == LoginStep.TOKEN_ENTRY) {
 
                     if (errorReason == null) {
                         stringResource(R.string.login_failed_message)
@@ -262,10 +307,10 @@ fun SignInScreen(
                     SignInAlertDialog(
                         title = stringResource(R.string.sign_in_error),
                         confirmText = stringResource(R.string.try_again),
-                        dismissText = stringResource(id = R.string.login_with_password),
-                        onCancel = viewModel::skipToPasswordEntry,
+                        dismissText = stringResource(id = R.string.login_with_token),
+                        onCancel = viewModel::skipToTokenEntry,
                         onExit = viewModel::resetLoginCall,
-                        onConfirm = viewModel::kickOffBiometryLoginOrMoveToPasswordEntry,
+                        onConfirm = viewModel::kickOffBiometryLoginOrSendVerificationEmail,
                         message = errorReason
                             ?: stringResource(R.string.error_occurred_signature_login),
                         showDismissButton = true
@@ -326,9 +371,11 @@ fun SignInAlertDialog(
                 Text(
                     modifier = Modifier
                         .padding(horizontal = 32.dp)
+                        .fillMaxWidth()
                         .align(Alignment.Center),
                     text = title,
                     fontWeight = FontWeight.SemiBold,
+                    textAlign = TextAlign.Center,
                     color = TextBlack,
                     fontSize = 24.sp
                 )
