@@ -158,7 +158,8 @@ sealed class ApprovalRequestDetailsV2 {
         val deviceKey: String,
         val deviceType: DeviceType,
         val currentShardingPolicyRevisionGuid: String?,
-        val targetShardingPolicy: ShardingPolicy?
+        val targetShardingPolicy: ShardingPolicy?,
+        val replacingDeviceGuid: String?
     ) : ApprovalRequestDetailsV2()
 
     data class RemoveDevice(

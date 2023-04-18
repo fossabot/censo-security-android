@@ -28,7 +28,11 @@ fun ApprovalRequestDetailsV2.getHeader(context: Context) =
     when (this) {
         //AddDevice
         is ApprovalRequestDetailsV2.AddDevice -> {
-            context.getString(R.string.add_new_device_approval_header)
+            if (this.replacingDeviceGuid == null) {
+                context.getString(R.string.add_new_device_approval_header)
+            } else {
+                context.getString(R.string.add_replacement_device_approval_header)
+            }
         }
         //RemoveDevice
         is ApprovalRequestDetailsV2.RemoveDevice -> {
