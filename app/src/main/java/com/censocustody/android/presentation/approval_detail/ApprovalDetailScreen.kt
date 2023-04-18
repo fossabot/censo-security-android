@@ -314,29 +314,35 @@ fun ApprovalStatus(
     isInitiationRequest: Boolean
 ) {
     val facts = mutableListOf<RowData>()
-    vaultName?.let { facts.add(RowData(title = stringResource(R.string.vault_name), value = vaultName)) }
-    val sectionTitle = stringResource(R.string.status)
-    facts.add(
-        RowData(
-            title = if (isInitiationRequest) {
-                stringResource(R.string.initiated_by)
-            } else {
-                stringResource(R.string.requested_by)
-            },
-            value = requestedBy
-        )
-    )
-    facts.add(
-        RowData(
-            title = stringResource(R.string.approvals_received),
-            value = "$approvalsReceived ${stringResource(id = R.string.of)} $totalApprovals",
+    vaultName?.let {
+        facts.add(RowData.KeyValueRow(
+            key = stringResource(R.string.vault_name),
+            value = vaultName
         ))
-    facts.add(RowData(
-        title = stringResource(R.string.denials_received),
+    }
+    val sectionTitle = stringResource(R.string.status)
+    facts.add(RowData.KeyValueRow(
+        key = if (isInitiationRequest) {
+            stringResource(R.string.initiated_by)
+        } else {
+            stringResource(R.string.requested_by)
+        },
+        value = requestedBy
+    ))
+    facts.add(RowData.KeyValueRow(
+        key = stringResource(R.string.approvals_received),
+        value = "$approvalsReceived ${stringResource(id = R.string.of)} $totalApprovals",
+    ))
+    facts.add(RowData.KeyValueRow(
+        key = stringResource(R.string.denials_received),
         value = "$denialsReceived ${stringResource(id = R.string.of)} $totalApprovals",
     ))
-    expiresIn?.let { facts.add(
-        RowData(title = stringResource(R.string.expires_in), value = expiresIn))  }
+    expiresIn?.let {
+        facts.add(RowData.KeyValueRow(
+            key = stringResource(R.string.expires_in),
+            value = expiresIn
+        ))
+    }
 
     val factsData = FactsData(title = sectionTitle, facts = facts.toList())
 

@@ -28,11 +28,11 @@ fun VaultUserRolesUpdateDetailContent(
         factsData = FactsData(
             title = LocalContext.current.getString(R.string.vault_user_roles),
             facts = update.userRoles.map { userRole ->
-                RowData(
-                    title = userRole.name,
-                    value = userRole.email,
-                    userImage = userRole.jpegThumbnail,
-                    userRole = LocalContext.current.getString(when (userRole.role) {
+                RowData.UserRole(
+                    name = userRole.name,
+                    email = userRole.email,
+                    image = userRole.jpegThumbnail,
+                    role = LocalContext.current.getString(when (userRole.role) {
                         ApprovalRequestDetailsV2.VaultUserRoleEnum.Viewer -> R.string.vault_user_role_viewer
                         ApprovalRequestDetailsV2.VaultUserRoleEnum.TransactionSubmitter -> R.string.vault_user_role_transaction_submitter
                     })

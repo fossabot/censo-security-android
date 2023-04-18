@@ -55,8 +55,8 @@ fun generateWalletAddressWhitelistUpdateDetailRows(
 
     if (destinationsList.isEmpty()) {
         destinationsList.add(
-            RowData(
-                title = context.getString(R.string.no_whitelisted_addresses),
+            RowData.KeyValueRow(
+                key = context.getString(R.string.no_whitelisted_addresses),
                 value = ""
             )
         )
@@ -76,8 +76,8 @@ fun getFeeEstimate(context: Context, fee: ApprovalRequestDetailsV2.Amount): Fact
         FactsData(
             title = context.getString(R.string.fees),
             listOf(
-                RowData(
-                    title = context.getString(R.string.fee_estimate),
+                RowData.KeyValueRow(
+                    key = context.getString(R.string.fee_estimate),
                     value = fee.formattedUsdEquivalentWithSymbol()
                 )
             )

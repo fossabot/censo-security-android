@@ -27,7 +27,7 @@ fun WalletDetailContent(walletCreationUIData: WalletCreationUIData) {
     Spacer(modifier = Modifier.height(24.dp))
     val factsData = FactsData(
         facts = listOf(
-            RowData(title = stringResource(R.string.wallet_name_title), value = walletCreationUIData.name),
+            RowData.KeyValueRow(key = stringResource(R.string.wallet_name_title), value = walletCreationUIData.name),
         )
     )
     FactRow(factsData = factsData)
@@ -63,12 +63,12 @@ fun generateWalletDetailRows(
     val approvalsRequiredRow = FactsData(
         title = context.getString(R.string.approvals),
         facts = listOf(
-            RowData(
-                title = context.getString(R.string.approvals_required_title),
+            RowData.KeyValueRow(
+                key = context.getString(R.string.approvals_required_title),
                 value = "${walletCreationUIData.approvalsReceived} ${context.getString(R.string.of)} ${walletCreationUIData.walletApprovalPolicy.approvalsRequired}",
             ),
-            RowData(
-                title = context.getString(R.string.approval_expiration),
+            RowData.KeyValueRow(
+                key = context.getString(R.string.approval_expiration),
                 value = convertSecondsIntoReadableText(
                     walletCreationUIData.walletApprovalPolicy.approvalTimeout.toInt(),
                     context
@@ -84,7 +84,7 @@ fun generateWalletDetailRows(
     val approversList = walletCreationUIData.walletApprovalPolicy.approvers.retrieveSignerRowData()
     if (approversList.isEmpty()) {
         approversList.add(
-            RowData(title = context.getString(R.string.no_approvers_text), value = ""))
+            RowData.KeyValueRow(key = context.getString(R.string.no_approvers_text), value = ""))
     }
 
     val approverRow = FactsData(

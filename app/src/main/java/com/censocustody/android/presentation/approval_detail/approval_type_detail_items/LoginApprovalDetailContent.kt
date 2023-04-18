@@ -30,15 +30,13 @@ fun LoginApprovalDetailContent(header: String, name: String, email: String) {
     //todo: Get UI for this where we have multiple rows for same user.
     val factsData = FactsData(
         facts = listOf(
-            RowData(
-                title = stringResource(R.string.login_name),
+            RowData.KeyValueRow(
+                key = stringResource(R.string.login_name),
                 value = name,
-                userRow = false
             ),
-            RowData(
-                title = stringResource(R.string.login_email),
+            RowData.KeyValueRow(
+                key = stringResource(R.string.login_email),
                 value = email,
-                userRow = false
             )
         )
     )
