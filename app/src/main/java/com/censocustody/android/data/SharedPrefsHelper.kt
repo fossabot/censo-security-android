@@ -15,6 +15,7 @@ object SharedPrefsHelper {
     private const val USER_TOKEN = "user_token"
     private const val DEVICE_ID = "_device_id"
     private const val DEVICE_PUBLIC_KEY = "_device_public_key"
+    private const val BOOTSTRAP_IMAGE_LOCATION = "_bootstrap_image_location"
 
     //Sentinel Data Storage
     private const val BGRD_INIT_VECTOR = "_bgrd_init_vector"
@@ -300,6 +301,31 @@ object SharedPrefsHelper {
         email: String
     ): String {
         return sharedPrefs.getString("${email.lowercase().trim()}$BOOTSTRAP_DEVICE_PUBLIC_KEY", "") ?: ""
+    }
+    //endregion
+
+    //region bootstrap user image URL
+    fun clearBootstrapImageUrl(email: String) {
+        val editor = sharedPrefs.edit()
+        editor.putString("${email.lowercase().trim()}$BOOTSTRAP_IMAGE_LOCATION", "")
+        editor.apply()
+    }
+
+    fun saveBootstrapImageUrl(
+        email: String,
+        imageUrl: String
+    ) {
+        val editor = sharedPrefs.edit()
+        editor.putString("${email.lowercase().trim()}$BOOTSTRAP_IMAGE_LOCATION", imageUrl)
+        editor.apply()
+    }
+
+    fun userHasBootstrapImageUrl(email: String) = retrieveBootstrapImageUrl(email).isNotEmpty()
+
+    fun retrieveBootstrapImageUrl(
+        email: String
+    ): String {
+        return sharedPrefs.getString("${email.lowercase().trim()}$BOOTSTRAP_IMAGE_LOCATION", "") ?: ""
     }
     //endregion
 }

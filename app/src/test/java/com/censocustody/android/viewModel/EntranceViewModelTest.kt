@@ -16,6 +16,7 @@ import com.censocustody.android.data.models.WalletSigner
 import com.censocustody.android.data.models.*
 import com.censocustody.android.presentation.entrance.EntranceViewModel
 import com.censocustody.android.presentation.entrance.UserDestination
+import com.nhaarman.mockitokotlin2.any
 import junit.framework.TestCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -254,7 +255,7 @@ class EntranceViewModelTest : BaseViewModelTest() {
                 Resource.Success(verifyUserWithNoShardingPolicy)
             }
 
-            whenever(keyRepository.hasV3RootSeedStored()).then { false }
+            whenever(userRepository.userHasDeviceIdSaved(any())).then { false }
 
             entranceViewModel.onStart()
             advanceUntilIdle()
@@ -638,12 +639,14 @@ class EntranceViewModelTest : BaseViewModelTest() {
 
     private suspend fun setupLoggedInUserWithValidEmail() {
         whenever(userRepository.retrieveCachedUserEmail()).then { email }
+        whenever(userRepository.isTokenEmailVerified()).then { false }
         whenever(userRepository.userLoggedIn()).then { true }
     }
 
-    private suspend fun setupUserWithDeviceIdAndPublicKey() {
+    private suspend fun setupUserWithDeviceIdAndPublicKey(bootstrapUser: Boolean = false) {
         whenever(userRepository.retrieveUserEmail()).then { email }
         whenever(userRepository.userHasDeviceIdSaved(email)).then { true }
+        whenever(userRepository.userHasBootstrapDeviceIdSaved(email)).then { bootstrapUser }
         whenever(userRepository.retrieveUserDevicePublicKey(email)).then { devicePublicKey }
     }
 

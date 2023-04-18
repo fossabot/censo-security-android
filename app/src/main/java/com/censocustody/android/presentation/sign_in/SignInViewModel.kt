@@ -45,8 +45,8 @@ class SignInViewModel @Inject constructor(
         viewModelScope.launch { userRepository.saveUserEmail(sanitizedEmail) }
     }
 
-    fun updatePassword(updatedPassword: String) {
-        state = state.copy(password = updatedPassword, passwordErrorEnabled = false)
+    fun updateVerificationToken(updatedToken: String) {
+        state = state.copy(verificationToken = updatedToken, verificationTokenErrorEnabled = false)
     }
 
     fun moveBackToEmailScreen() {
@@ -65,7 +65,7 @@ class SignInViewModel @Inject constructor(
             if (state.loginStep == LoginStep.EMAIL_ENTRY) {
                 checkEmail()
             } else {
-                checkPassword()
+                checkToken()
             }
         }
     }
@@ -74,27 +74,27 @@ class SignInViewModel @Inject constructor(
         if (state.email.isEmpty()) {
             state = state.copy(emailErrorEnabled = true)
         } else {
-            kickOffBiometryLoginOrMoveToPasswordEntry()
+            kickOffBiometryLoginOrSendVerificationEmail()
         }
     }
 
-    fun skipToPasswordEntry() {
+    fun skipToTokenEntry() {
         state = state.copy(
-            loginStep = LoginStep.PASSWORD_ENTRY,
+            loginStep = LoginStep.TOKEN_ENTRY,
             loginResult = Resource.Uninitialized
         )
     }
 
-    fun kickOffBiometryLoginOrMoveToPasswordEntry() {
+    fun kickOffBiometryLoginOrSendVerificationEmail() {
         viewModelScope.launch {
-            if (keyRepository.hasV3RootSeedStored()) {
+            if (userRepository.userHasDeviceIdSaved(state.email)) {
                 state = state.copy(
                     triggerBioPrompt = Resource.Success(null),
                     bioPromptReason = BioPromptReason.RETURN_LOGIN,
                     loginResult = Resource.Uninitialized
                 )
             } else {
-                state = state.copy(loginStep = LoginStep.PASSWORD_ENTRY)
+                sendVerificationEmail()
             }
         }
     }
@@ -140,9 +140,9 @@ class SignInViewModel @Inject constructor(
         }
     }
 
-    private fun checkPassword() {
-        if (state.password.isEmpty()) {
-            state = state.copy(passwordErrorEnabled = true)
+    private fun checkToken() {
+        if (state.verificationToken.isEmpty()) {
+            state = state.copy(verificationTokenErrorEnabled = true)
         } else {
             attemptLogin()
         }
@@ -150,12 +150,27 @@ class SignInViewModel @Inject constructor(
     //endregion
 
     //region Login + API Calls
-    private fun loginWithPassword() {
+
+    fun sendVerificationEmail() {
+        viewModelScope.launch {
+            val verificationResource = userRepository.sendVerificationEmail(state.email)
+
+            state = if (verificationResource is Resource.Success) {
+                state.copy(
+                    sendVerificationEmail = verificationResource,
+                    loginStep = LoginStep.TOKEN_ENTRY
+                )
+            } else {
+                state.copy(sendVerificationEmail = verificationResource)
+            }
+        }
+    }
+    private fun loginWithToken() {
         state = state.copy(loginResult = Resource.Loading())
         viewModelScope.launch {
             try {
-                val loginResource = userRepository.loginWithPassword(
-                    email = state.email, password = state.password
+                val loginResource = userRepository.loginWithVerificationToken(
+                    email = state.email, token = state.verificationToken
                 )
                 when (loginResource) {
                     is Resource.Success -> {
@@ -211,11 +226,11 @@ class SignInViewModel @Inject constructor(
 
     fun attemptLogin() {
         if (state.signInButtonEnabled) {
-            loginWithPassword()
+            loginWithToken()
         } else {
             state = state.copy(
                 emailErrorEnabled = !state.emailValid(),
-                passwordErrorEnabled = !state.passwordValid()
+                verificationTokenErrorEnabled = !state.verificationTokenValid()
             )
         }
     }
@@ -299,6 +314,10 @@ class SignInViewModel @Inject constructor(
 
     fun resetLoginCall() {
         state = state.copy(loginResult = Resource.Uninitialized)
+    }
+
+    fun resetSendVerificationEmail() {
+        state = state.copy(sendVerificationEmail = Resource.Uninitialized)
     }
 
     fun resetExitLoginFlow() {

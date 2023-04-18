@@ -197,10 +197,14 @@ class DeviceRegistrationViewModel @Inject constructor(
                         email = email,
                         publicKey = state.bootstrapPublicKey
                     )
+                    userRepository.saveBootstrapImageUrl(
+                        email = email,
+                        bootstrapImageUrl = state.fileUrl
+                    )
 
                     //Send user to the key creation with the image data passed along...
                     state = state.copy(
-                        createdBootstrapDeviceData = Resource.Success(Unit),
+                        addUserDevice = Resource.Success(Unit),
                     )
                 } else {
                     RaygunClient.send(
