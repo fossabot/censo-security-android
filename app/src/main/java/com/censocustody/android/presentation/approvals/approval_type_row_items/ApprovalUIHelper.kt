@@ -287,8 +287,8 @@ fun List<ApprovalRequestDetailsV2.DestinationAddress>.retrieveDestinationsRowDat
     if (isNotEmpty()) {
         for (destination in this.sortedBy { it.name }) {
             destinationsList.add(
-                RowData(
-                    title = destination.name,
+                RowData.KeyValueRow(
+                    key = destination.name,
                     value = destination.address.maskAddress(),
                 )
             )
@@ -302,11 +302,10 @@ fun List<ApprovalRequestDetailsV2.VaultSigner>.retrieveRowData(): MutableList<Ro
     if (isNotEmpty()) {
         for (approver in this.sortedBy { it.name }) {
             approversList.add(
-                RowData(
-                    title = approver.name,
-                    value = approver.email,
-                    userImage = approver.jpegThumbnail,
-                    userRow = true
+                RowData.UserInfo(
+                    name = approver.name,
+                    email = approver.email,
+                    image = approver.jpegThumbnail,
                 ))
         }
     }
@@ -318,11 +317,10 @@ fun List<ApprovalRequestDetailsV2.Signer>.retrieveSignerRowData(): MutableList<R
     if (isNotEmpty()) {
         for (approver in this.sortedBy { it.name }) {
             approversList.add(
-                RowData(
-                    title = approver.name,
-                    value = approver.email,
-                    userImage = approver.jpegThumbnail,
-                    userRow = true
+                RowData.UserInfo(
+                    name = approver.name,
+                    email = approver.email,
+                    image = approver.jpegThumbnail,
                 ))
         }
     }

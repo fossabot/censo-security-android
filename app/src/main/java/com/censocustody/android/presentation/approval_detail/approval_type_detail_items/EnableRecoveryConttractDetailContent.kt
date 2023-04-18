@@ -26,13 +26,13 @@ fun EnableRecoveryContractDetailContent(
     Spacer(modifier = Modifier.height(24.dp))
     val factsData = FactsData(
         facts = listOf(
-            RowData(
-                title = LocalContext.current.getString(R.string.recovery_threshold),
+            RowData.KeyValueRow(
+                key = LocalContext.current.getString(R.string.recovery_threshold),
                 value = details.recoveryThreshold.toString(),
             )
         ) + details.recoveryAddresses.mapIndexed { index, address ->
-            RowData(
-                title = "${LocalContext.current.getString(R.string.recovery_address)} #${index + 1}",
+            RowData.KeyValueRow(
+                key = "${LocalContext.current.getString(R.string.recovery_address)} #${index + 1}",
                 value = address
             )
         }

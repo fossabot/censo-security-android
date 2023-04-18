@@ -8,6 +8,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.censocustody.android.presentation.approval_detail.approval_type_detail_items.ApprovalInfoRow
+import com.censocustody.android.presentation.approval_detail.approval_type_detail_items.UserImageRow
 import com.censocustody.android.presentation.approval_detail.approval_type_detail_items.UserInfoRow
 import com.censocustody.android.presentation.approval_detail.approval_type_detail_items.UserRoleRow
 import com.censocustody.android.ui.theme.*
@@ -30,27 +31,34 @@ fun FactRow(factsData: FactsData, modifier: Modifier = Modifier, hideFinalDivide
             Divider(modifier = Modifier.height(1.0.dp), color = BorderGrey)
 
             val rowBackgroundColor = if (index % 2 == 0) BackgroundDark else BackgroundLight
-            if (fact.userRow) {
-                UserInfoRow(
-                    backgroundColor = rowBackgroundColor,
-                    name = fact.title,
-                    email = fact.value,
-                    image = fact.userImage
-                )
-            } else if (fact.userRole != null) {
-                UserRoleRow(
-                    backgroundColor = rowBackgroundColor,
-                    name = fact.title,
-                    email = fact.value,
-                    role = fact.userRole,
-                    image = fact.userImage
-                )
-            } else {
-                ApprovalInfoRow(
-                    backgroundColor = rowBackgroundColor,
-                    title = fact.title,
-                    value = fact.value
-                )
+            when (fact) {
+                is RowData.KeyValueRow ->
+                    ApprovalInfoRow(
+                        backgroundColor = rowBackgroundColor,
+                        title = fact.key,
+                        value = fact.value
+                    )
+                is RowData.UserInfo ->
+                    UserInfoRow(
+                        backgroundColor = rowBackgroundColor,
+                        name = fact.name,
+                        email = fact.email,
+                        image = fact.image
+                    )
+                is RowData.UserImage ->
+                    UserImageRow(
+                        backgroundColor = rowBackgroundColor,
+                        name = fact.name,
+                        image = fact.image
+                    )
+                is RowData.UserRole ->
+                    UserRoleRow(
+                        backgroundColor = rowBackgroundColor,
+                        name = fact.name,
+                        email = fact.email,
+                        role = fact.role,
+                        image = fact.image
+                    )
             }
             if (!hideFinalDivider) {
                 Divider(modifier = Modifier.height(1.0.dp), color = BorderGrey)
@@ -64,10 +72,9 @@ data class FactsData(
     val facts: List<RowData>,
 )
 
-data class RowData(
-    val title: String,
-    val value: String,
-    val userImage: String? = null,
-    val userRow: Boolean = false,
-    val userRole: String? = null
-)
+sealed class RowData {
+    data class KeyValueRow(val key: String, val value: String): RowData()
+    data class UserInfo(val name: String, val email: String, val image: String? = null): RowData()
+    data class UserImage(val name: String, val image: String?): RowData()
+    data class UserRole(val name: String, val email: String, val role: String, val image: String? = null): RowData()
+}

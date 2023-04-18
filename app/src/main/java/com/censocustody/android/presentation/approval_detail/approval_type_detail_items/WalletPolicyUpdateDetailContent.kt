@@ -59,11 +59,11 @@ fun generateAccountPolicyUpdateRows(
     val approvalsInfoRow = FactsData(
         title = context.getString(R.string.approvals).uppercase(),
         facts = listOf(
-            RowData(
-                title = context.getString(R.string.approvals_required),
+            RowData.KeyValueRow(
+                key = context.getString(R.string.approvals_required),
                 value = "$approvalsRequired"),
-            RowData(
-                title = context. getString(R.string.approval_expiration),
+            RowData.KeyValueRow(
+                key = context. getString(R.string.approval_expiration),
                 value = convertSecondsIntoReadableText(approvalTimeout.toInt(), context))
         )
     )
@@ -74,8 +74,8 @@ fun generateAccountPolicyUpdateRows(
     val approversList = approvers.retrieveSignerRowData()
     if (approversList.isEmpty()) {
         approversList.add(
-            RowData(
-                title = context.getString(R.string.no_wallet_approvers_text),
+            RowData.KeyValueRow(
+                key = context.getString(R.string.no_wallet_approvers_text),
                 value = ""
             )
         )
