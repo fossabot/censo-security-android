@@ -42,10 +42,7 @@ interface UserRepository {
     suspend fun clearPreviousDeviceInfo(email: String)
     suspend fun isTokenEmailVerified() : Boolean
     fun saveBootstrapImageUrl(email: String, bootstrapImageUrl: String)
-<<<<<<< HEAD
     fun clearBootstrapImageUrl(email: String)
-=======
->>>>>>> 7a4fdb2 (Setup reauthenticate screen. Add logic in entrance VM to navigate user to reauth screen. No longer directly navigate from the device registration to key creation for bootstrap user due to re-auth step)
     fun retrieveBootstrapImageUrl(email: String) : String
 }
 
@@ -223,13 +220,10 @@ class UserRepositoryImpl(
     override fun retrieveBootstrapImageUrl(email: String) =
         SharedPrefsHelper.retrieveBootstrapImageUrl(email)
 
-<<<<<<< HEAD
     override fun clearBootstrapImageUrl(email: String) {
         SharedPrefsHelper.clearBootstrapImageUrl(email)
     }
 
-=======
->>>>>>> 7a4fdb2 (Setup reauthenticate screen. Add logic in entrance VM to navigate user to reauth screen. No longer directly navigate from the device registration to key creation for bootstrap user due to re-auth step)
     override suspend fun saveUserEmail(email: String) {
         SharedPrefsHelper.saveUserEmail(email)
     }

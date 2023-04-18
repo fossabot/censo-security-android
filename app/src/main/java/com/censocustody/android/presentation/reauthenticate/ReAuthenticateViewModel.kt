@@ -27,13 +27,7 @@ class ReAuthenticateViewModel @Inject constructor(
     }
 
     fun biometryApproved() {
-<<<<<<< HEAD
         handleBiometryReturnLogin()
-=======
-        viewModelScope.launch {
-            handleBiometryReturnLogin()
-        }
->>>>>>> 7a4fdb2 (Setup reauthenticate screen. Add logic in entrance VM to navigate user to reauth screen. No longer directly navigate from the device registration to key creation for bootstrap user due to re-auth step)
     }
 
     fun biometryFailed() {

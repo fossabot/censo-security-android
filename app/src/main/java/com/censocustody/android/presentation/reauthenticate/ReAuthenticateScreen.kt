@@ -27,11 +27,7 @@ import com.censocustody.android.presentation.approvals.NavIconTopBar
 import com.censocustody.android.presentation.key_management.BackgroundUI
 import com.censocustody.android.presentation.key_management.PreBiometryDialog
 import com.censocustody.android.ui.theme.ButtonRed
-<<<<<<< HEAD
 import com.censocustody.android.ui.theme.CensoWhite
-=======
->>>>>>> 7a4fdb2 (Setup reauthenticate screen. Add logic in entrance VM to navigate user to reauth screen. No longer directly navigate from the device registration to key creation for bootstrap user due to re-auth step)
-import org.intellij.lang.annotations.JdkConstants.HorizontalAlignment
 
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
@@ -119,17 +115,10 @@ fun ReAuthenticateScreen(
                     .align(Alignment.Center),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-<<<<<<< HEAD
                 Text(stringResource(R.string.failed_auth_title), fontSize = 20.sp)
                 Spacer(modifier = Modifier.height(28.dp))
                 Button(onClick = viewModel::retry) {
                     Text(stringResource(R.string.try_again), fontSize = 18.sp, color = CensoWhite)
-=======
-                Text("Failed to Authenticate User", fontSize = 20.sp)
-                Spacer(modifier = Modifier.height(28.dp))
-                Button(onClick = viewModel::retry) {
-                    Text(stringResource(R.string.try_again), fontSize = 18.sp)
->>>>>>> 7a4fdb2 (Setup reauthenticate screen. Add logic in entrance VM to navigate user to reauth screen. No longer directly navigate from the device registration to key creation for bootstrap user due to re-auth step)
                 }
             }
         }
