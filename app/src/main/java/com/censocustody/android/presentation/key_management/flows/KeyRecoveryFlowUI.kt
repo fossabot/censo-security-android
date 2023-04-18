@@ -10,7 +10,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import com.censocustody.android.R
 import com.censocustody.android.common.Resource
-import com.censocustody.android.data.models.Signers
 import com.censocustody.android.presentation.components.AuthTopAppBar
 import com.censocustody.android.presentation.key_management.*
 
@@ -106,7 +105,7 @@ fun KeyRecoveryFlowUI(
                         allSetState = keyRecoveryState
                     )
                     else -> EntryScreenPhraseUI(
-                        title = stringResource(R.string.time_to_restore_key),
+                        title = stringResource(R.string.time_to_recover_key),
                         subtitle = stringResource(R.string.how_did_you_back_it_up),
                         buttonOneText = stringResource(R.string.paste_phrase),
                         buttonTwoText = stringResource(R.string.by_keyboard),
