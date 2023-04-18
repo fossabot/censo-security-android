@@ -10,6 +10,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.biometric.BiometricPrompt
 import androidx.compose.material.Surface
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.platform.LocalContext
@@ -54,6 +55,7 @@ import com.censocustody.android.service.MessagingService.Companion.NOTIFICATION_
 import com.censocustody.android.ui.theme.BackgroundWhite
 import com.censocustody.android.ui.theme.CensoMobileTheme
 import com.censocustody.android.presentation.semantic_version_check.BlockingUI
+import com.censocustody.android.presentation.token_sign_in.TokenSignInScreen
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -195,6 +197,21 @@ class MainActivity : FragmentActivity() {
             navController = navController,
             startDestination = Screen.EntranceRoute.route,
         ) {
+            composable(
+                "tokenLogin?userEmail={userEmail}?token={token}",
+                deepLinks = listOf(navDeepLink {
+                    uriPattern = "censo://login/{userEmail}/{token}"
+                }),
+            ) { backStackEntry ->
+                censoLog(message = "Navigating to token sign in screen...")
+                val userEmail = backStackEntry.arguments?.getString("userEmail")
+                val token = backStackEntry.arguments?.getString("token")
+                TokenSignInScreen(
+                    navController = navController,
+                    email = userEmail,
+                    token = token,
+                )
+            }
             composable(
                 route = Screen.EntranceRoute.route
             ) {
