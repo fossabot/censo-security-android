@@ -86,7 +86,7 @@
     <string name="vault_policy_creation_approval_header">Create Vault</string>
     <string name="vault_policy_update_approval_header">Update Vault Policy</string>
     <string name="add_new_device_approval_header">Add New Device</string>
-    <string name="add_replacement_device_approval_header">Add Replacement Device</string>
+    <string name="add_replacement_device_approval_header">Replace Device</string>
     <string name="remove_device_approval_header">Remove Device</string>
     <string name="suspend_user">Suspend User</string>
     <string name="restore_user">Restore User</string>
