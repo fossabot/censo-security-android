@@ -9,26 +9,28 @@ import com.google.mlkit.vision.barcode.common.Barcode
 import com.google.mlkit.vision.common.InputImage
 
 @ExperimentalGetImage
-class BarcodeAnalyzer(
-    val callback: () -> Unit
+class WalletConnectBarcodeAnalyzer(
+    val callback: (uri: String?) -> Unit
 ) : ImageAnalysis.Analyzer {
     override fun analyze(imageProxy: ImageProxy) {
-        val options = BarcodeScannerOptions.Builder()
-            .setBarcodeFormats(Barcode.FORMAT_QR_CODE)
-            .build()
+        val options = BarcodeScannerOptions.Builder().enableAllPotentialBarcodes().build()
 
         val scanner = BarcodeScanning.getClient(options)
         val mediaImage = imageProxy.image
         mediaImage?.let {
             val image = InputImage.fromMediaImage(mediaImage, imageProxy.imageInfo.rotationDegrees)
 
-            scanner.process(image)
-                .addOnSuccessListener { barcodes ->
+            scanner.process(image).addOnSuccessListener { barcodes ->
                     if (barcodes.size > 0) {
-                        callback()
+                        for (barcode in barcodes) {
+                            when (barcode.valueType) {
+                                Barcode.TYPE_TEXT -> {
+                                    callback(barcode.rawValue)
+                                }
+                            }
+                        }
                     }
-                }
-                .addOnFailureListener {
+                }.addOnFailureListener {
                     // Task failed with an exception
                     // ...
                 }
