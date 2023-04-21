@@ -266,4 +266,6 @@
     <string name="verification_email_sent">Verification email sent!</string>
     <string name="failed_auth_title">Failed to Authenticate User</string>
     <string name="biometry_failed_title">Biometry Failed, Please Try Again.</string>
+    <string name="scan_qr_code_title">Scan QR Code</string>
+    <string name="exit_scan_qr_screen">Exit Scan QR Screen</string>
 </resources>

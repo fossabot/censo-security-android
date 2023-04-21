@@ -17,6 +17,7 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.AccountCircle
 import androidx.compose.material.icons.rounded.ArrowDownward
+import androidx.compose.material.icons.rounded.QrCode
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -178,11 +179,12 @@ fun ApprovalsListScreen(
         scaffoldState = scaffoldState,
         snackbarHost = { scaffoldState.snackbarHostState },
         topBar = {
-            NavIconTopBar(
+            ApprovalsTopBar(
                 title = stringResource(id = R.string.approvals),
                 onAppBarIconClick = { navController.navigate(Screen.AccountRoute.route) },
                 navigationIcon = Icons.Rounded.AccountCircle,
-                navigationIconContentDes = stringResource(id = R.string.content_des_account_icon)
+                navigationIconContentDes = stringResource(id = R.string.content_des_account_icon),
+                onQrScanClick = { navController.navigate(Screen.ScanQRRoute.route) },
             )
         },
         content = { innerPadding ->
@@ -304,6 +306,39 @@ fun NavIconTopBar(
         onAppBarIconClick = { onAppBarIconClick() },
         navigationIcon = navigationIcon,
         navigationIconContentDes = navigationIconContentDes,
+    )
+}
+
+//region Screen Composables
+@Composable
+fun ApprovalsTopBar(
+    title: String,
+    onAppBarIconClick: () -> Unit,
+    navigationIcon: ImageVector,
+    navigationIconContentDes: String,
+    onQrScanClick: () -> Unit
+) {
+    CenteredTopAppBar(
+        title = title,
+        backgroundColor = BackgroundGrey,
+        onAppBarIconClick = { onAppBarIconClick() },
+        navigationIcon = navigationIcon,
+        navigationIconContentDes = navigationIconContentDes,
+        actions = {
+            Box(modifier = Modifier
+                .fillMaxHeight()
+                .clickable { onQrScanClick() }
+                .padding(horizontal = 12.dp)
+                .align(alignment = Alignment.CenterVertically)
+            ) {
+                Icon(
+                    modifier = Modifier.size(24.dp).align(Alignment.Center),
+                    imageVector = Icons.Rounded.QrCode,
+                    tint = TextBlack,
+                    contentDescription = "scan DApp QR code"
+                )
+            }
+        }
     )
 }
 

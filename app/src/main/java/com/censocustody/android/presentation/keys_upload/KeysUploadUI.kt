@@ -67,7 +67,6 @@ fun KeysUploadUI(
                         .padding(horizontal = 16.dp)
                         .border(width = 1.5.dp, color = UnfocusedGrey.copy(alpha = 0.50f))
                         .background(color = BackgroundGrey)
-                        .shadow(elevation = 2.5.dp)
                         .shadow(elevation = 2.5.dp),
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.CenterHorizontally

@@ -159,9 +159,9 @@ class MainActivity : FragmentActivity() {
                         when (event) {
                             Lifecycle.Event.ON_START
                             -> {
-                                mainViewModel.onForeground(
-                                    BiometricUtil.checkForBiometricFeaturesOnDevice(context),
-                                )
+//                                mainViewModel.onForeground(
+//                                    BiometricUtil.checkForBiometricFeaturesOnDevice(context),
+//                                )
                             }
                             else -> Unit
                         }
@@ -176,15 +176,15 @@ class MainActivity : FragmentActivity() {
                         mainViewModel.resetSendUserToEntrance()
                     }
 
-                    val blockAppUI = mainViewModel.blockUIStatus()
-
-                    BlockingUI(
-                        blockAppUI = blockAppUI,
-                        bioPromptTrigger = mainState.bioPromptTrigger,
-                        biometryUnavailable = mainState.biometryTooManyAttempts,
-                        biometryStatus = mainState.biometryStatus,
-                        retry = mainViewModel::retryBiometricGate
-                    )
+//                    val blockAppUI = mainViewModel.blockUIStatus()
+//
+//                    BlockingUI(
+//                        blockAppUI = blockAppUI,
+//                        bioPromptTrigger = mainState.bioPromptTrigger,
+//                        biometryUnavailable = mainState.biometryTooManyAttempts,
+//                        biometryStatus = mainState.biometryStatus,
+//                        retry = mainViewModel::retryBiometricGate
+//                    )
                 }
             }
         }
@@ -195,7 +195,7 @@ class MainActivity : FragmentActivity() {
 
         NavHost(
             navController = navController,
-            startDestination = Screen.ScanQRRoute.route,
+            startDestination = Screen.EntranceRoute.route,
         ) {
             composable(
                 "$TOKEN_DEEPLINK_LOGIN?$DL_EMAIL_KEY={$DL_EMAIL_KEY}?$DL_TOKEN_KEY={$DL_TOKEN_KEY}",

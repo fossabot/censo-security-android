@@ -128,6 +128,10 @@ interface BrooklynApiService {
     @GET("v1/recovery-shards")
     @Headers(AUTH_REQUIRED)
     suspend fun getRecoveryShards(): RetrofitResponse<GetRecoveryShardsResponse>
+
+    @POST("v1/wallet-connect")
+    @Headers(AUTH_REQUIRED)
+    suspend fun walletConnectPairing(@Body walletConnectPairingRequest: WalletConnectPairingRequest) : RetrofitResponse<ResponseBody>
 }
 
 class AnalyticsInterceptor : Interceptor {
