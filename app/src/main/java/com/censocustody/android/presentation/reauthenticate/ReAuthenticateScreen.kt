@@ -28,7 +28,6 @@ import com.censocustody.android.presentation.key_management.BackgroundUI
 import com.censocustody.android.presentation.key_management.PreBiometryDialog
 import com.censocustody.android.ui.theme.ButtonRed
 import com.censocustody.android.ui.theme.CensoWhite
-import org.intellij.lang.annotations.JdkConstants.HorizontalAlignment
 
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable

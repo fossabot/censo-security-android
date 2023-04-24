@@ -162,4 +162,10 @@ object AppModule {
         return AnchorApiService.create()
     }
 
+    @Provides
+    @Singleton
+    fun provideEmailValidator() : EmailValidator {
+        return AndroidEmailValidator()
+    }
+
 }

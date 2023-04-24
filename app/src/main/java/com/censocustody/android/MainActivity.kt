@@ -3,12 +3,14 @@ package com.censocustody.android
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.*
+import android.net.Uri
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.biometric.BiometricPrompt
 import androidx.compose.material.Surface
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.platform.LocalContext
@@ -27,6 +29,9 @@ import com.censocustody.android.common.BioCryptoUtil.NO_CIPHER_CODE
 import com.censocustody.android.data.*
 import com.censocustody.android.data.models.approvalV2.ApprovalRequestV2
 import com.censocustody.android.presentation.Screen
+import com.censocustody.android.presentation.Screen.Companion.DL_EMAIL_KEY
+import com.censocustody.android.presentation.Screen.Companion.DL_TOKEN_KEY
+import com.censocustody.android.presentation.Screen.Companion.TOKEN_DEEPLINK_LOGIN
 import com.censocustody.android.presentation.account.AccountScreen
 import com.censocustody.android.presentation.semantic_version_check.EnforceUpdateScreen
 import com.censocustody.android.presentation.semantic_version_check.MainViewModel
@@ -53,6 +58,7 @@ import com.censocustody.android.service.MessagingService.Companion.NOTIFICATION_
 import com.censocustody.android.ui.theme.BackgroundWhite
 import com.censocustody.android.ui.theme.CensoMobileTheme
 import com.censocustody.android.presentation.semantic_version_check.BlockingUI
+import com.censocustody.android.presentation.token_sign_in.TokenSignInScreen
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -189,6 +195,20 @@ class MainActivity : FragmentActivity() {
             navController = navController,
             startDestination = Screen.EntranceRoute.route,
         ) {
+            composable(
+                "$TOKEN_DEEPLINK_LOGIN?$DL_EMAIL_KEY={$DL_EMAIL_KEY}?$DL_TOKEN_KEY={$DL_TOKEN_KEY}",
+                deepLinks = listOf(navDeepLink {
+                    uriPattern = "censo://login/{$DL_EMAIL_KEY}/{$DL_TOKEN_KEY}"
+                }),
+            ) { backStackEntry ->
+                val userEmail = backStackEntry.arguments?.getString(DL_EMAIL_KEY)
+                val token = backStackEntry.arguments?.getString(DL_TOKEN_KEY)
+                TokenSignInScreen(
+                    navController = navController,
+                    email = userEmail,
+                    token = token,
+                )
+            }
             composable(
                 route = Screen.EntranceRoute.route
             ) {
