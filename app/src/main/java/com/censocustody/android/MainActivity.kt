@@ -29,6 +29,9 @@ import com.censocustody.android.common.BioCryptoUtil.NO_CIPHER_CODE
 import com.censocustody.android.data.*
 import com.censocustody.android.data.models.approvalV2.ApprovalRequestV2
 import com.censocustody.android.presentation.Screen
+import com.censocustody.android.presentation.Screen.Companion.DL_EMAIL_KEY
+import com.censocustody.android.presentation.Screen.Companion.DL_TOKEN_KEY
+import com.censocustody.android.presentation.Screen.Companion.TOKEN_DEEPLINK_LOGIN
 import com.censocustody.android.presentation.account.AccountScreen
 import com.censocustody.android.presentation.semantic_version_check.EnforceUpdateScreen
 import com.censocustody.android.presentation.semantic_version_check.MainViewModel
@@ -193,13 +196,13 @@ class MainActivity : FragmentActivity() {
             startDestination = Screen.EntranceRoute.route,
         ) {
             composable(
-                "tokenLogin?userEmail={userEmail}?token={token}",
+                "$TOKEN_DEEPLINK_LOGIN?$DL_EMAIL_KEY={$DL_EMAIL_KEY}?$DL_TOKEN_KEY={$DL_TOKEN_KEY}",
                 deepLinks = listOf(navDeepLink {
-                    uriPattern = "censo://login/{userEmail}/{token}"
+                    uriPattern = "censo://login/{$DL_EMAIL_KEY}/{$DL_TOKEN_KEY}"
                 }),
             ) { backStackEntry ->
-                val userEmail = backStackEntry.arguments?.getString("userEmail")
-                val token = backStackEntry.arguments?.getString("token")
+                val userEmail = backStackEntry.arguments?.getString(DL_EMAIL_KEY)
+                val token = backStackEntry.arguments?.getString(DL_TOKEN_KEY)
                 TokenSignInScreen(
                     navController = navController,
                     email = userEmail,
