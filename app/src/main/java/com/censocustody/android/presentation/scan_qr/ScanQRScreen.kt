@@ -76,7 +76,7 @@ fun ScanQRScreen(
 
             Permission(
                 permission = Manifest.permission.CAMERA,
-                rationale = stringResource(R.string.explain_photo_permission),
+                rationale = stringResource(R.string.explain_photo_permission_scan_qr),
                 permissionNotAvailableContent = {
                     Column(
                         Modifier

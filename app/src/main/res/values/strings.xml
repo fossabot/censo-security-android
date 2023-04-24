@@ -248,6 +248,7 @@
     <string name="open_settings">Open Settings</string>
     <string name="missing_camera_permission">Missing Camera permission. Please give access in settings.</string>
     <string name="explain_photo_permission">Taking a photo is required to use the Censo Security app.</string>
+    <string name="explain_photo_permission_scan_qr">Camera access is required to scan QR code.</string>
     <string name="camera_permission_request">Camera Permission Request</string>
     <string name="unable_process_image">Unable to process image, please retake image.</string>
     <string name="wallet">Wallet</string>
