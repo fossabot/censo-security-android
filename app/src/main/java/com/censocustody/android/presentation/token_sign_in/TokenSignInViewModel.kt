@@ -62,7 +62,7 @@ class TokenSignInViewModel @Inject constructor(
             when (loginResource) {
                 is Resource.Success -> {
                     val token = loginResource.data?.token
-                    if (token != null) {
+                    if (token != null && token.isNotEmpty()) {
                         userSuccessfullyLoggedIn(token)
                         showBiometryForSentinelData()
                     } else {
