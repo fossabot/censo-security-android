@@ -335,7 +335,7 @@ fun ApprovalsTopBar(
                     modifier = Modifier.size(24.dp).align(Alignment.Center),
                     imageVector = Icons.Rounded.QrCode,
                     tint = TextBlack,
-                    contentDescription = "scan DApp QR code"
+                    contentDescription = stringResource(R.string.scan_qr_code_cont_desc)
                 )
             }
         }

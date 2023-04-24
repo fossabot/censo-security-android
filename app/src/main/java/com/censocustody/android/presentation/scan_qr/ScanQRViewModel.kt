@@ -6,7 +6,6 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.censocustody.android.common.Resource
-import com.censocustody.android.common.censoLog
 import com.censocustody.android.data.ApprovalsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
@@ -27,10 +26,9 @@ class ScanQRViewModel @Inject constructor(
         )
     }
 
-    fun receivedWalletConnectUri(uri: String) {
-        if (state.scanQRCodeResult is Resource.Loading) {
+    fun receivedWalletConnectUri(uri: String?) {
+        if (state.scanQRCodeResult is Resource.Loading && uri != null) {
             state = state.copy(scanQRCodeResult = Resource.Success(uri))
-            censoLog(message = "The URI from Wallet Connect: $uri")
             sendUriToBackend(uri = uri)
         }
     }
@@ -44,6 +42,10 @@ class ScanQRViewModel @Inject constructor(
                 uploadWcUri = walletPairingResource
             )
         }
+    }
+
+    fun failedToScan(exception: Exception) {
+        state = state.copy(scanQRCodeResult = Resource.Error(exception = exception))
     }
 
     fun retryScan() {

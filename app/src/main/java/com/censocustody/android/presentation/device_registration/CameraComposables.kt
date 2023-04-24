@@ -178,13 +178,7 @@ fun CameraCapture(
                 )
                 Spacer(modifier = Modifier.height(32.dp))
                 CensoButton(
-                    onClick = {
-                        context.startActivity(
-                            Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
-                                data = Uri.fromParts("package", context.packageName, null)
-                            }
-                        )
-                    },
+                    onClick = { context.sendUserToPermissions() },
                     contentPadding = PaddingValues(horizontal = 28.dp, vertical = 12.dp)
                 ) {
                     Text(

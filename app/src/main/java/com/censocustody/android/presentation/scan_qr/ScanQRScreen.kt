@@ -2,9 +2,6 @@ package com.censocustody.android.presentation.scan_qr
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.content.Intent
-import android.net.Uri
-import android.provider.Settings
 import androidx.activity.ComponentActivity
 import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
@@ -34,9 +31,9 @@ import androidx.navigation.NavController
 import com.censocustody.android.R
 import com.censocustody.android.common.CensoButton
 import com.censocustody.android.common.Resource
-import com.censocustody.android.common.censoLog
 import com.censocustody.android.presentation.approvals.NavIconTopBar
 import com.censocustody.android.presentation.device_registration.Permission
+import com.censocustody.android.presentation.device_registration.sendUserToPermissions
 import com.censocustody.android.ui.theme.*
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import java.util.concurrent.Executors
@@ -96,13 +93,7 @@ fun ScanQRScreen(
                         )
                         Spacer(modifier = Modifier.height(32.dp))
                         CensoButton(
-                            onClick = {
-                                context.startActivity(
-                                    Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
-                                        data = Uri.fromParts("package", context.packageName, null)
-                                    }
-                                )
-                            },
+                            onClick = { context.sendUserToPermissions() },
                             contentPadding = PaddingValues(horizontal = 28.dp, vertical = 12.dp)
                         ) {
                             Text(
@@ -125,7 +116,7 @@ fun ScanQRScreen(
                             Spacer(modifier = Modifier.height(36.dp))
                             Text(
                                 modifier = Modifier.padding(horizontal = 8.dp),
-                                text = "DApp Connected Successfully!",
+                                text = stringResource(R.string.upload_wc_uri_success),
                                 textAlign = TextAlign.Center,
                                 color = TextBlack,
                                 fontSize = 22.sp
@@ -134,7 +125,7 @@ fun ScanQRScreen(
                             CensoButton(onClick = viewModel::userFinished) {
                                 Text(
                                     modifier = Modifier.padding(8.dp),
-                                    text = "Done",
+                                    text = stringResource(id = R.string.done),
                                     fontSize = 20.sp,
                                     color = CensoWhite
                                 )
@@ -146,7 +137,9 @@ fun ScanQRScreen(
                             Spacer(modifier = Modifier.height(36.dp))
                             Text(
                                 modifier = Modifier.padding(horizontal = 8.dp),
-                                text = if (scanQRResult is Resource.Error) "Failed to scan QR Code" else "Failed to upload code to backend",
+                                text =
+                                    if (scanQRResult is Resource.Error) stringResource(R.string.failed_scan_qr_code)
+                                    else stringResource(R.string.failed_upload_wc_uri),
                                 textAlign = TextAlign.Center,
                                 color = TextBlack,
                                 fontSize = 22.sp
@@ -155,7 +148,7 @@ fun ScanQRScreen(
                             CensoButton(onClick = viewModel::retryScan) {
                                 Text(
                                     modifier = Modifier.padding(8.dp),
-                                    text = "Try Again",
+                                    text = stringResource(id = R.string.try_again),
                                     fontSize = 20.sp,
                                     color = CensoWhite
                                 )
@@ -167,7 +160,7 @@ fun ScanQRScreen(
                             Spacer(modifier = Modifier.height(36.dp))
                             Text(
                                 modifier = Modifier.padding(horizontal = 8.dp),
-                                text = "Start Scanning...",
+                                text = stringResource(R.string.start_scanning),
                                 textAlign = TextAlign.Center,
                                 color = TextBlack,
                                 fontSize = 22.sp
@@ -176,7 +169,7 @@ fun ScanQRScreen(
                             CensoButton(onClick = viewModel::startScanning) {
                                 Text(
                                     modifier = Modifier.padding(8.dp),
-                                    text = "Scan QR Code",
+                                    text = stringResource(R.string.scan_qr_code),
                                     fontSize = 20.sp,
                                     color = CensoWhite
                                 )
@@ -188,7 +181,7 @@ fun ScanQRScreen(
                             Spacer(modifier = Modifier.height(36.dp))
                             Text(
                                 modifier = Modifier.padding(horizontal = 8.dp),
-                                text = "Found wallet, uploading data...",
+                                text = stringResource(R.string.scan_qr_code_success),
                                 textAlign = TextAlign.Center,
                                 color = TextBlack,
                                 fontSize = 22.sp
@@ -204,59 +197,9 @@ fun ScanQRScreen(
                     }
 
                     if (state.scanQRCodeResult is Resource.Loading) {
-                        AndroidView(
-                            { context ->
-                                val cameraExecutor = Executors.newSingleThreadExecutor()
-                                val previewView = PreviewView(context).also {
-                                    it.scaleType = PreviewView.ScaleType.FILL_CENTER
-                                }
-                                val cameraProviderFuture =
-                                    ProcessCameraProvider.getInstance(context)
-                                cameraProviderFuture.addListener({
-                                    val cameraProvider: ProcessCameraProvider =
-                                        cameraProviderFuture.get()
-
-                                    val preview = Preview.Builder()
-                                        .build()
-                                        .also {
-                                            it.setSurfaceProvider(previewView.surfaceProvider)
-                                        }
-
-                                    val imageCapture = ImageCapture.Builder().build()
-
-                                    val imageAnalyzer = ImageAnalysis.Builder()
-                                        .build()
-                                        .also {
-                                            it.setAnalyzer(
-                                                cameraExecutor,
-                                                WalletConnectBarcodeAnalyzer { uri ->
-                                                    viewModel.receivedWalletConnectUri(uri ?: "")
-                                                })
-                                        }
-
-                                    val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
-
-                                    try {
-                                        // Unbind use cases before rebinding
-                                        cameraProvider.unbindAll()
-
-                                        // Bind use cases to camera
-                                        cameraProvider.bindToLifecycle(
-                                            context as ComponentActivity,
-                                            cameraSelector,
-                                            preview,
-                                            imageCapture,
-                                            imageAnalyzer
-                                        )
-
-                                    } catch (exc: Exception) {
-                                        exc.printStackTrace()
-                                        censoLog(message = "Use case binding failed: $exc")
-                                    }
-                                }, ContextCompat.getMainExecutor(context))
-                                previewView
-                            },
-                            modifier = Modifier.fillMaxSize()
+                        ScanQRCodeComposable(
+                            receivedUri = viewModel::receivedWalletConnectUri,
+                            scanFailure = viewModel::failedToScan
                         )
                     }
                 }
@@ -264,6 +207,69 @@ fun ScanQRScreen(
         }
     )
     //endregion
+}
+
+@androidx.annotation.OptIn(androidx.camera.core.ExperimentalGetImage::class)
+@Composable
+fun ScanQRCodeComposable(
+    receivedUri: (String?) -> Unit,
+    scanFailure: (Exception) -> Unit
+) {
+    AndroidView(
+        { context ->
+            val cameraExecutor = Executors.newSingleThreadExecutor()
+            val previewView = PreviewView(context).also {
+                it.scaleType = PreviewView.ScaleType.FILL_CENTER
+            }
+            val cameraProviderFuture =
+                ProcessCameraProvider.getInstance(context)
+            cameraProviderFuture.addListener({
+                val cameraProvider: ProcessCameraProvider =
+                    cameraProviderFuture.get()
+
+                val preview = Preview.Builder()
+                    .build()
+                    .also {
+                        it.setSurfaceProvider(previewView.surfaceProvider)
+                    }
+
+                val imageCapture = ImageCapture.Builder().build()
+
+                val imageAnalyzer = ImageAnalysis.Builder()
+                    .build()
+                    .also {
+                        it.setAnalyzer(
+                            cameraExecutor,
+                            WalletConnectBarcodeAnalyzer(
+                                foundQrCallback = receivedUri,
+                                failedToScanCallback = scanFailure
+                            )
+                        )
+                    }
+
+                val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
+
+                try {
+                    // Unbind use cases before rebinding
+                    cameraProvider.unbindAll()
+
+                    // Bind use cases to camera
+                    cameraProvider.bindToLifecycle(
+                        context as ComponentActivity,
+                        cameraSelector,
+                        preview,
+                        imageCapture,
+                        imageAnalyzer
+                    )
+
+                } catch (exc: Exception) {
+                    scanFailure(exc)
+                }
+            }, ContextCompat.getMainExecutor(context))
+            previewView
+        },
+        modifier = Modifier.fillMaxSize()
+    )
 }
 
 @Composable
