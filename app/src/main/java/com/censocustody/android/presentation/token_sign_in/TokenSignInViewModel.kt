@@ -21,7 +21,8 @@ class TokenSignInViewModel @Inject constructor(
     private val userRepository: UserRepository,
     private val pushRepository: PushRepository,
     private val keyRepository: KeyRepository,
-    private val censoUserData: CensoUserData
+    private val censoUserData: CensoUserData,
+    private val emailValidator: EmailValidator
 ) : ViewModel() {
 
     var state by mutableStateOf(TokenSignInState())
@@ -43,7 +44,7 @@ class TokenSignInViewModel @Inject constructor(
                 return@launch
             }
 
-            if (!state.emailValid() || !state.verificationTokenValid()) {
+            if (!emailValidator.validEmail(state.email) || !state.verificationTokenValid()) {
                 state = state.copy(exitLoginFlow = Resource.Success(Unit))
                 return@launch
             }
