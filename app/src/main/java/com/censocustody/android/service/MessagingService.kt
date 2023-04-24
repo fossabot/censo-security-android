@@ -18,8 +18,8 @@ import com.censocustody.android.BuildConfig
 import com.censocustody.android.MainActivity
 import com.censocustody.android.R
 import com.censocustody.android.common.Resource
-import com.censocustody.android.data.PushRepository
-import com.censocustody.android.data.UserRepository
+import com.censocustody.android.data.repository.PushRepository
+import com.censocustody.android.data.repository.UserRepository
 import com.censocustody.android.data.models.PushBody
 import com.censocustody.android.presentation.Screen
 import com.censocustody.android.service.MessagingService.Companion.APPROVAL_REQUEST_TYPE
@@ -29,7 +29,6 @@ import com.censocustody.android.service.MessagingService.Companion.DEFAULT_TITLE
 import com.censocustody.android.service.MessagingService.Companion.NOTIFICATION_DISPLAYED_KEY
 import com.censocustody.android.service.MessagingService.Companion.PUSH_TYPE_KEY
 import com.censocustody.android.service.MessagingService.Companion.TITLE_KEY
-import com.google.gson.annotations.SerializedName
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.*
 import java.util.*

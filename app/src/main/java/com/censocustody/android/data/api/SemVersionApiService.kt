@@ -1,4 +1,4 @@
-package com.censocustody.android.data
+package com.censocustody.android.data.api
 
 import com.google.gson.GsonBuilder
 import com.censocustody.android.BuildConfig

@@ -1,11 +1,10 @@
-package com.censocustody.android.data
+package com.censocustody.android.data.repository
 
 import com.censocustody.android.common.Resource
 import com.censocustody.android.common.CensoError
-import com.censocustody.android.data.models.GetShardsResponse
-import com.censocustody.android.data.models.RegisterApprovalDisposition
-import com.censocustody.android.data.models.Shard
-import com.censocustody.android.data.models.WalletConnectPairingRequest
+import com.censocustody.android.data.api.BrooklynApiService
+import com.censocustody.android.data.cryptography.EncryptionManager
+import com.censocustody.android.data.models.*
 import com.censocustody.android.data.models.approvalV2.ApprovalDispositionRequestV2
 import com.censocustody.android.data.models.approvalV2.ApprovalRequestV2
 import okhttp3.ResponseBody
@@ -92,5 +91,3 @@ class ApprovalsRepositoryImpl @Inject constructor(
         }
     }
 }
-
-data class Shards(val shards: List<Shard>?)

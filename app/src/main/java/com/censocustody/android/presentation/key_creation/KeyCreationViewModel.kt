@@ -1,7 +1,6 @@
 package com.censocustody.android.presentation.key_creation
 
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -11,8 +10,11 @@ import cash.z.ecc.android.bip39.Mnemonics
 import cash.z.ecc.android.bip39.toSeed
 import com.censocustody.android.common.*
 import com.censocustody.android.data.*
-import com.censocustody.android.data.models.UserImage
+import com.censocustody.android.data.cryptography.CryptographyManager
 import com.censocustody.android.data.models.VerifyUser
+import com.censocustody.android.data.repository.KeyRepository
+import com.censocustody.android.data.repository.UserRepository
+import com.censocustody.android.data.storage.SharedPrefsHelper
 import com.raygun.raygun4android.RaygunClient
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch

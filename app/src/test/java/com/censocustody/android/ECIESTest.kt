@@ -1,6 +1,6 @@
 package com.censocustody.android
 
-import com.censocustody.android.data.ECIESManager
+import com.censocustody.android.data.cryptography.ECIESManager
 import org.bouncycastle.jce.ECNamedCurveTable
 import org.bouncycastle.jce.provider.BouncyCastleProvider
 import org.junit.Test

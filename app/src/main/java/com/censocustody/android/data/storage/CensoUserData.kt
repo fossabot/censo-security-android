@@ -1,6 +1,7 @@
-package com.censocustody.android.data
+package com.censocustody.android.data.storage
 
 import com.censocustody.android.data.models.VerifyUser
+import com.censocustody.android.data.repository.UserRepository
 
 interface CensoUserData {
     fun getCensoUser(): VerifyUser?

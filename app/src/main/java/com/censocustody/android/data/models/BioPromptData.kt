@@ -1,4 +1,4 @@
-package com.censocustody.android.data
+package com.censocustody.android.data.models
 
 import com.censocustody.android.common.BioPromptReason
 

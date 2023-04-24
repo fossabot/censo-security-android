@@ -2,8 +2,8 @@ package com.censocustody.android.common
 
 import cash.z.ecc.android.bip39.Mnemonics
 import cash.z.ecc.android.bip39.toSeed
-import com.censocustody.android.data.EncryptionManagerImpl.Companion.DATA_CHECK
-import com.censocustody.android.data.CensoPrivateKey
+import com.censocustody.android.data.cryptography.EncryptionManagerImpl.Companion.DATA_CHECK
+import com.censocustody.android.data.cryptography.CensoPrivateKey
 import org.bitcoinj.core.Base58
 import org.bitcoinj.core.ECKey
 import org.bouncycastle.asn1.ASN1InputStream

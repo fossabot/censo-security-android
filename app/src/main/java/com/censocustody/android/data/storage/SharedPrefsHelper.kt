@@ -1,8 +1,9 @@
-package com.censocustody.android.data
+package com.censocustody.android.data.storage
 
 import android.content.Context
 import android.content.SharedPreferences
 import com.censocustody.android.common.BaseWrapper
+import com.censocustody.android.data.cryptography.EncryptedData
 
 object SharedPrefsHelper {
 

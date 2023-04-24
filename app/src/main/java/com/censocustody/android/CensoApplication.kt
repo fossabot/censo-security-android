@@ -4,7 +4,7 @@ import android.app.Application
 import com.google.firebase.FirebaseApp
 import com.raygun.raygun4android.RaygunClient
 import com.censocustody.android.common.CrashReportingUtil
-import com.censocustody.android.data.SharedPrefsHelper
+import com.censocustody.android.data.storage.SharedPrefsHelper
 import dagger.hilt.android.HiltAndroidApp
 
 @HiltAndroidApp

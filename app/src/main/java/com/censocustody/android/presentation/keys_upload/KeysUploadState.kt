@@ -2,7 +2,7 @@ package com.censocustody.android.presentation.keys_upload
 
 import com.censocustody.android.common.BioPromptReason
 import com.censocustody.android.common.Resource
-import com.censocustody.android.data.BioPromptData
+import com.censocustody.android.data.models.BioPromptData
 import com.censocustody.android.data.models.WalletSigner
 
 data class KeysUploadState(

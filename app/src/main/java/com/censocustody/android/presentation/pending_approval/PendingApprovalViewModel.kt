@@ -10,12 +10,11 @@ import com.censocustody.android.common.CensoCountDownTimerImpl
 import com.censocustody.android.common.CensoError
 import com.censocustody.android.common.Resource
 import com.censocustody.android.data.*
-import com.censocustody.android.data.BaseRepository.Companion.CONFLICT_CODE
+import com.censocustody.android.data.repository.BaseRepository.Companion.CONFLICT_CODE
+import com.censocustody.android.data.repository.UserRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import kotlin.random.Random
 
 @HiltViewModel
 class PendingApprovalViewModel @Inject constructor(

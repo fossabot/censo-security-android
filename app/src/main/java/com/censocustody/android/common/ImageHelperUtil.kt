@@ -13,7 +13,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.core.content.ContextCompat
 import androidx.exifinterface.media.ExifInterface
-import com.censocustody.android.data.CryptographyManager
+import com.censocustody.android.data.cryptography.CryptographyManager
 import com.censocustody.android.data.models.LogoType
 import com.censocustody.android.data.models.UserImage
 import com.raygun.raygun4android.RaygunClient

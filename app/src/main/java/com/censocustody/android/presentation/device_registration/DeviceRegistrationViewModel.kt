@@ -7,9 +7,9 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.censocustody.android.common.*
-import com.censocustody.android.data.CryptographyManager
-import com.censocustody.android.data.ECIESManager
-import com.censocustody.android.data.UserRepository
+import com.censocustody.android.data.cryptography.CryptographyManager
+import com.censocustody.android.data.cryptography.ECIESManager
+import com.censocustody.android.data.repository.UserRepository
 import com.censocustody.android.data.models.DeviceType
 import com.censocustody.android.data.models.UserDevice
 import com.raygun.raygun4android.RaygunClient
