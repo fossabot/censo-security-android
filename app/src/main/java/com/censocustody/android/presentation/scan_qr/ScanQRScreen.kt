@@ -166,7 +166,7 @@ fun ScanQRScreen(
                                 fontSize = 22.sp
                             )
                             Spacer(modifier = Modifier.height(36.dp))
-                            CensoButton(onClick = viewModel::startScanning) {
+                            CensoButton(onClick = viewModel::retryScan) {
                                 Text(
                                     modifier = Modifier.padding(8.dp),
                                     text = stringResource(R.string.scan_qr_code),

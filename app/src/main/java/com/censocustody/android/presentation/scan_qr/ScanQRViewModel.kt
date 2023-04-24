@@ -20,14 +20,8 @@ class ScanQRViewModel @Inject constructor(
     var state by mutableStateOf(ScanQRState())
         private set
 
-    fun startScanning() {
-        state = state.copy(
-            scanQRCodeResult = Resource.Loading()
-        )
-    }
-
     fun receivedWalletConnectUri(uri: String?) {
-        if (state.scanQRCodeResult is Resource.Loading && uri != null) {
+        if (state.scanQRCodeResult is Resource.Loading && !uri.isNullOrEmpty()) {
             state = state.copy(scanQRCodeResult = Resource.Success(uri))
             sendUriToBackend(uri = uri)
         }
@@ -35,7 +29,6 @@ class ScanQRViewModel @Inject constructor(
 
     private fun sendUriToBackend(uri: String) {
         viewModelScope.launch {
-            delay(500)
             val walletPairingResource = approvalsRepository.sendWcUri(uri = uri)
 
             state = state.copy(
