@@ -1,6 +1,6 @@
 package com.censocustody.android.data.models.approvalV2
 
-import com.censocustody.android.data.SignedPayload
+import com.censocustody.android.data.cryptography.SignedPayload
 import com.google.gson.typeadapters.RuntimeTypeAdapterFactory
 
 sealed class ApprovalSignature {

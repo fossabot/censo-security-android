@@ -1,11 +1,12 @@
-package com.censocustody.android.data
+package com.censocustody.android.data.storage
 
 import android.content.Context
 import android.content.SharedPreferences
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
-import com.censocustody.android.data.SecurePreferencesImpl.Companion.SHARED_PREF_NAME
+import com.censocustody.android.data.cryptography.EncryptedData
 import com.censocustody.android.data.models.StoredKeyData
+import com.censocustody.android.data.storage.SecurePreferencesImpl.Companion.SHARED_PREF_NAME
 import javax.inject.Inject
 
 interface SecurePreferences {

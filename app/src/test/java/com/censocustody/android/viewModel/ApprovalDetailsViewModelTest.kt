@@ -5,11 +5,10 @@ import com.nhaarman.mockitokotlin2.whenever
 import com.censocustody.android.*
 import com.censocustody.android.common.Resource
 import com.censocustody.android.common.CensoCountDownTimer
-import com.censocustody.android.data.ApprovalsRepository
-import com.censocustody.android.data.KeyRepository
-import com.censocustody.android.data.UserRepository
 import com.censocustody.android.data.models.ApprovalDisposition
 import com.censocustody.android.data.models.approvalV2.ApprovalRequestV2
+import com.censocustody.android.data.repository.ApprovalsRepository
+import com.censocustody.android.data.repository.KeyRepository
 import com.censocustody.android.presentation.approval_detail.ApprovalDetailsViewModel
 import com.censocustody.android.presentation.approval_disposition.ApprovalDispositionState
 import junit.framework.TestCase.*

@@ -1,14 +1,11 @@
 package com.censocustody.android.presentation.key_management
 
-import androidx.biometric.BiometricPrompt.CryptoObject
 import com.censocustody.android.common.BioPromptReason
 import com.censocustody.android.common.Resource
-import com.censocustody.android.data.BioPromptData
-import com.censocustody.android.data.models.Signers
+import com.censocustody.android.data.models.BioPromptData
 import com.censocustody.android.data.models.WalletSigner
 import com.censocustody.android.presentation.key_management.flows.KeyCreationFlowStep
 import com.censocustody.android.presentation.key_management.flows.KeyManagementFlowStep
-import javax.crypto.Cipher
 
 data class KeyManagementState(
     //initial data + key management flow data

@@ -1,10 +1,20 @@
-package com.censocustody.android.data
+package com.censocustody.android.data.repository
 
 import android.annotation.SuppressLint
 import android.content.Context
 import android.provider.Settings
 import com.censocustody.android.common.*
+import com.censocustody.android.data.api.AnchorApiService
+import com.censocustody.android.data.api.BrooklynApiService
+import com.censocustody.android.data.api.SemVersionApiService
+import com.censocustody.android.data.cryptography.CryptographyManager
+import com.censocustody.android.data.cryptography.EncryptionManager
 import com.censocustody.android.data.models.*
+import com.censocustody.android.data.repository.BaseRepository
+import com.censocustody.android.data.storage.AuthProvider
+import com.censocustody.android.data.storage.SecurePreferences
+import com.censocustody.android.data.storage.SharedPrefsHelper
+import com.censocustody.android.data.storage.UserState
 import okhttp3.ResponseBody
 
 interface UserRepository {

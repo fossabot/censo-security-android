@@ -1,4 +1,4 @@
-package com.censocustody.android.data
+package com.censocustody.android.data.repository
 
 import com.censocustody.android.common.Resource
 import com.censocustody.android.common.CensoError

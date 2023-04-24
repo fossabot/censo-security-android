@@ -5,13 +5,11 @@ import com.nhaarman.mockitokotlin2.whenever
 import com.censocustody.android.*
 import com.censocustody.android.common.BioPromptReason
 import com.censocustody.android.common.PhraseEntryUtil
+import com.censocustody.android.common.PhraseException
 import com.censocustody.android.common.Resource
-import com.censocustody.android.data.EncryptionManagerImpl.Companion.ROOT_SEED_KEY_NAME
-import com.censocustody.android.data.KeyRepository
-import com.censocustody.android.data.PhraseException
-import com.censocustody.android.data.PhraseValidator
-import com.censocustody.android.data.UserRepository
 import com.censocustody.android.data.models.*
+import com.censocustody.android.data.repository.KeyRepository
+import com.censocustody.android.data.validator.PhraseValidator
 import com.censocustody.android.presentation.key_management.*
 import com.censocustody.android.presentation.key_management.KeyManagementState.Companion.CHANGE_AMOUNT
 import com.censocustody.android.presentation.key_management.KeyManagementState.Companion.FIRST_WORD_INDEX
@@ -27,15 +25,11 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mock
-import javax.crypto.Cipher
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class KeyManagementViewModelTest : BaseViewModelTest() {
 
     //region Mocks and testing objects
-    @Mock
-    lateinit var userRepository: UserRepository
-
     @Mock
     lateinit var keyRepository: KeyRepository
 
@@ -81,7 +75,6 @@ class KeyManagementViewModelTest : BaseViewModelTest() {
 
         keyMgmtViewModel =
             KeyManagementViewModel(
-                userRepository = userRepository,
                 keyRepository = keyRepository,
                 phraseValidator = phraseValidator,
             )

@@ -9,9 +9,11 @@ import com.raygun.raygun4android.RaygunClient
 import com.censocustody.android.BuildConfig
 import com.censocustody.android.common.CrashReportingUtil
 import com.censocustody.android.common.Resource
-import com.censocustody.android.data.*
 import com.censocustody.android.data.models.SemanticVersion
 import com.censocustody.android.data.models.VerifyUser
+import com.censocustody.android.data.repository.KeyRepository
+import com.censocustody.android.data.repository.UserRepository
+import com.censocustody.android.data.storage.CensoUserData
 import com.censocustody.android.presentation.semantic_version_check.MainViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch

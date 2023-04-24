@@ -10,9 +10,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.censocustody.android.common.*
 import com.censocustody.android.common.Resource
-import com.censocustody.android.data.EncryptionManagerImpl.Companion.SENTINEL_STATIC_DATA
-import com.censocustody.android.data.KeyRepository
-import com.censocustody.android.data.UserRepository
+import com.censocustody.android.data.cryptography.EncryptionManagerImpl.Companion.SENTINEL_STATIC_DATA
+import com.censocustody.android.data.repository.KeyRepository
+import com.censocustody.android.data.repository.UserRepository
 import com.censocustody.android.presentation.Screen
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch

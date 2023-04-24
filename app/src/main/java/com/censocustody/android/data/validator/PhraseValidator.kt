@@ -1,9 +1,9 @@
-package com.censocustody.android.data
+package com.censocustody.android.data.validator
 
 import cash.z.ecc.android.bip39.Mnemonics
-import com.censocustody.android.data.PhraseValidator.Companion.EXPECTED_LENGTH
-import com.censocustody.android.data.PhraseValidator.Companion.NOT_ENOUGH_WORDS
-import com.censocustody.android.data.PhraseValidator.Companion.TOO_MANY_WORDS
+import com.censocustody.android.data.validator.PhraseValidator.Companion.EXPECTED_LENGTH
+import com.censocustody.android.data.validator.PhraseValidator.Companion.NOT_ENOUGH_WORDS
+import com.censocustody.android.data.validator.PhraseValidator.Companion.TOO_MANY_WORDS
 import java.util.*
 
 interface PhraseValidator {

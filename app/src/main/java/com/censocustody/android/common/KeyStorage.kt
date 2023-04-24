@@ -1,7 +1,9 @@
 package com.censocustody.android.common
 
 import com.censocustody.android.data.*
-import com.censocustody.android.data.EncryptionManagerImpl.Companion.ROOT_SEED_KEY_NAME
+import com.censocustody.android.data.cryptography.CryptographyManager
+import com.censocustody.android.data.cryptography.EncryptionManagerImpl.Companion.ROOT_SEED_KEY_NAME
+import com.censocustody.android.data.storage.SecurePreferences
 import javax.crypto.Cipher
 import javax.inject.Inject
 

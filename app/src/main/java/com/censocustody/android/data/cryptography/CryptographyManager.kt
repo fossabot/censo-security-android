@@ -1,9 +1,9 @@
-package com.censocustody.android.data
+package com.censocustody.android.data.cryptography
 
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
 import com.censocustody.android.common.emailToSentinelKeyId
-import com.censocustody.android.data.EncryptionManagerImpl.Companion.SENTINEL_STATIC_DATA
+import com.censocustody.android.data.cryptography.EncryptionManagerImpl.Companion.SENTINEL_STATIC_DATA
 import java.security.KeyStore
 import java.security.*
 import java.security.cert.Certificate

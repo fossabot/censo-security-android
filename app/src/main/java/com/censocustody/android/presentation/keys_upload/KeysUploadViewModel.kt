@@ -10,6 +10,9 @@ import com.censocustody.android.common.BioPromptReason
 import com.censocustody.android.common.Resource
 import com.censocustody.android.data.*
 import com.censocustody.android.data.models.mapToPublicKeysList
+import com.censocustody.android.data.repository.KeyRepository
+import com.censocustody.android.data.repository.UserRepository
+import com.censocustody.android.data.storage.SecurePreferences
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject

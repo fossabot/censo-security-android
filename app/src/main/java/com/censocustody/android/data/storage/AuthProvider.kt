@@ -1,10 +1,12 @@
-package com.censocustody.android.data
+package com.censocustody.android.data.storage
 
 import androidx.annotation.AnyThread
 import com.auth0.android.jwt.JWT
 import com.raygun.raygun4android.RaygunClient
 import com.censocustody.android.common.CrashReportingUtil.JWT_TAG
 import com.censocustody.android.common.CrashReportingUtil.MANUALLY_REPORTED_TAG
+import com.censocustody.android.data.cryptography.EncryptionManager
+import com.censocustody.android.data.storage.SharedPrefsHelper
 import java.util.*
 import kotlin.collections.HashMap
 

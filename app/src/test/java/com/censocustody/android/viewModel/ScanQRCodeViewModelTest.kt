@@ -1,7 +1,7 @@
 package com.censocustody.android.viewModel
 
 import com.censocustody.android.common.Resource
-import com.censocustody.android.data.ApprovalsRepository
+import com.censocustody.android.data.repository.ApprovalsRepository
 import com.censocustody.android.presentation.scan_qr.ScanQRViewModel
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.times

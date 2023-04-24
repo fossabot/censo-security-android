@@ -6,9 +6,9 @@ import com.nhaarman.mockitokotlin2.whenever
 import com.censocustody.android.common.BioPromptReason
 import com.censocustody.android.common.BiometricUtil
 import com.censocustody.android.common.Resource
-import com.censocustody.android.data.EncryptionManagerImpl.Companion.SENTINEL_STATIC_DATA
-import com.censocustody.android.data.KeyRepository
-import com.censocustody.android.data.UserRepository
+import com.censocustody.android.data.cryptography.EncryptionManagerImpl.Companion.SENTINEL_STATIC_DATA
+import com.censocustody.android.data.repository.KeyRepository
+import com.censocustody.android.data.repository.UserRepository
 import com.censocustody.android.presentation.semantic_version_check.MainViewModel
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertTrue

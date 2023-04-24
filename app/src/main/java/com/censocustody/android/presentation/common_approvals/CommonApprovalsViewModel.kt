@@ -6,13 +6,12 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.censocustody.android.common.*
-import com.censocustody.android.data.ApprovalsRepository
-import com.censocustody.android.data.KeyRepository
-import com.censocustody.android.data.Shards
-import com.censocustody.android.data.SharedPrefsHelper
+import com.censocustody.android.data.repository.ApprovalsRepository
+import com.censocustody.android.data.repository.KeyRepository
 import com.censocustody.android.data.models.ApprovalDisposition
 import com.censocustody.android.data.models.RegisterApprovalDisposition
 import com.censocustody.android.data.models.Shard
+import com.censocustody.android.data.models.Shards
 import com.censocustody.android.data.models.approvalV2.ApprovalDispositionRequestV2
 import com.censocustody.android.data.models.approvalV2.ApprovalRequestDetailsV2
 import com.censocustody.android.data.models.approvalV2.ApprovalRequestV2

@@ -10,9 +10,11 @@ import androidx.lifecycle.viewModelScope
 import cash.z.ecc.android.bip39.Mnemonics
 import cash.z.ecc.android.bip39.toSeed
 import com.censocustody.android.common.*
-import com.censocustody.android.data.*
+import com.censocustody.android.data.models.BioPromptData
 import com.censocustody.android.data.models.IndexedPhraseWord
 import com.censocustody.android.data.models.WalletSigner
+import com.censocustody.android.data.repository.KeyRepository
+import com.censocustody.android.data.validator.PhraseValidator
 import com.censocustody.android.presentation.key_management.KeyManagementState.Companion.NO_PHRASE_ERROR
 import com.censocustody.android.presentation.key_management.KeyManagementState.Companion.FIRST_WORD_INDEX
 import com.censocustody.android.presentation.key_management.flows.*
@@ -20,7 +22,6 @@ import kotlinx.coroutines.*
 
 @HiltViewModel
 class KeyManagementViewModel @Inject constructor(
-    private val userRepository: UserRepository,
     private val keyRepository: KeyRepository,
     private val phraseValidator: PhraseValidator
 ) : ViewModel() {

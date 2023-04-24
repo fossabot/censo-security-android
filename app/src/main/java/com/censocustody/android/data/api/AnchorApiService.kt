@@ -1,4 +1,4 @@
-package com.censocustody.android.data
+package com.censocustody.android.data.api
 
 import com.censocustody.android.BuildConfig
 import okhttp3.*

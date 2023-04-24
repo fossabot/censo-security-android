@@ -1,4 +1,4 @@
-package com.censocustody.android.data
+package com.censocustody.android.common
 
 class PhraseException : Exception(NULL_PHRASE_IN_STATE) {
     companion object {
