@@ -3,7 +3,6 @@ package com.censocustody.android
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.*
-import android.net.Uri
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.compose.setContent
@@ -11,7 +10,6 @@ import androidx.activity.viewModels
 import androidx.biometric.BiometricPrompt
 import androidx.camera.core.ExperimentalGetImage
 import androidx.compose.material.Surface
-import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.platform.LocalContext
@@ -27,8 +25,10 @@ import com.censocustody.android.common.CrashReportingUtil
 import com.censocustody.android.common.Resource
 import com.censocustody.android.common.*
 import com.censocustody.android.common.BioCryptoUtil.NO_CIPHER_CODE
-import com.censocustody.android.data.*
 import com.censocustody.android.data.models.approvalV2.ApprovalRequestV2
+import com.censocustody.android.data.storage.AuthProvider
+import com.censocustody.android.data.storage.UserState
+import com.censocustody.android.data.storage.UserStateListener
 import com.censocustody.android.presentation.Screen
 import com.censocustody.android.presentation.Screen.Companion.DL_EMAIL_KEY
 import com.censocustody.android.presentation.Screen.Companion.DL_TOKEN_KEY
@@ -46,8 +46,6 @@ import com.censocustody.android.presentation.device_registration.DeviceRegistrat
 import com.censocustody.android.presentation.entrance.EntranceScreen
 import com.censocustody.android.presentation.key_creation.KeyCreationInitialData
 import com.censocustody.android.presentation.key_creation.KeyCreationScreen
-import com.censocustody.android.presentation.key_management.KeyManagementInitialData
-import com.censocustody.android.presentation.key_management.KeyManagementScreen
 import com.censocustody.android.presentation.key_recovery.KeyRecoveryInitialData
 import com.censocustody.android.presentation.key_recovery.KeyRecoveryScreen
 import com.censocustody.android.presentation.keys_upload.KeysUploadScreen

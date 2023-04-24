@@ -1,8 +1,8 @@
 package com.censocustody.android.common
 
-import com.censocustody.android.data.EncryptionManagerImpl
-import com.censocustody.android.data.EncryptionManagerImpl.Companion.DATA_CHECK
-import com.censocustody.android.data.CensoPrivateKey
+import com.censocustody.android.data.cryptography.CensoPrivateKey
+import com.censocustody.android.data.cryptography.EncryptionManagerImpl
+import com.censocustody.android.data.cryptography.EncryptionManagerImpl.Companion.DATA_CHECK
 import org.bouncycastle.crypto.digests.SHA512Digest
 import org.bouncycastle.crypto.macs.HMac
 import org.bouncycastle.crypto.params.Ed25519PrivateKeyParameters

@@ -1,4 +1,4 @@
-package com.censocustody.android.data
+package com.censocustody.android.data.cryptography
 
 import org.bouncycastle.asn1.ASN1Sequence
 import org.bouncycastle.asn1.DERBitString

@@ -2,7 +2,7 @@ package com.censocustody.android.common
 
 import android.content.Context
 import com.censocustody.android.R
-import com.censocustody.android.data.EncryptionManagerImpl.Companion.SENTINEL_KEY_NAME
+import com.censocustody.android.data.cryptography.EncryptionManagerImpl.Companion.SENTINEL_KEY_NAME
 
 
 const val HELP_URL = "https://help.censo.co"

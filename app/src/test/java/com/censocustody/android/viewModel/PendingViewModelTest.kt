@@ -5,10 +5,10 @@ import com.censocustody.android.presentation.pending_approval.PendingApprovalVie
 import com.nhaarman.mockitokotlin2.whenever
 import com.censocustody.android.common.CensoCountDownTimer
 import com.censocustody.android.common.Resource
-import com.censocustody.android.data.UserRepository
 import com.censocustody.android.data.models.DeviceKeyInfo
 import com.censocustody.android.data.models.Organization
 import com.censocustody.android.data.models.VerifyUser
+import com.censocustody.android.data.repository.UserRepository
 import junit.framework.TestCase.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi

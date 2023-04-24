@@ -1,4 +1,4 @@
-package com.censocustody.android.data
+package com.censocustody.android.data.repository
 
 import android.content.Context
 import android.provider.Settings
@@ -6,7 +6,9 @@ import com.google.firebase.messaging.FirebaseMessaging
 import com.raygun.raygun4android.RaygunClient
 import com.censocustody.android.common.CrashReportingUtil
 import com.censocustody.android.common.Resource
+import com.censocustody.android.data.api.BrooklynApiService
 import com.censocustody.android.data.models.PushBody
+import com.censocustody.android.data.repository.BaseRepository
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 

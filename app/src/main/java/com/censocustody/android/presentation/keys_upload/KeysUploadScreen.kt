@@ -9,13 +9,11 @@ import androidx.fragment.app.FragmentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.censocustody.android.common.BioCryptoUtil
-import com.censocustody.android.common.BioCryptoUtil.NO_CIPHER_CODE
 import com.censocustody.android.common.Resource
 import com.censocustody.android.common.popUpToTop
 import com.censocustody.android.presentation.Screen
 import com.censocustody.android.R
 import com.censocustody.android.common.BioPromptReason
-import com.censocustody.android.data.BioPromptData
 
 @OptIn(
     androidx.compose.foundation.ExperimentalFoundationApi::class

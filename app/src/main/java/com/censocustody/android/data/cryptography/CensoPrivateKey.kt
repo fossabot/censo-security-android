@@ -1,4 +1,4 @@
-package com.censocustody.android.data
+package com.censocustody.android.data.cryptography
 
 interface CensoPrivateKey {
     fun getPublicKeyBytes(): ByteArray
