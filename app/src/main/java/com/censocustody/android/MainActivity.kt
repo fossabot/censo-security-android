@@ -9,6 +9,7 @@ import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.biometric.BiometricPrompt
+import androidx.camera.core.ExperimentalGetImage
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -53,6 +54,7 @@ import com.censocustody.android.presentation.keys_upload.KeysUploadScreen
 import com.censocustody.android.presentation.pending_approval.PendingApprovalScreen
 import com.censocustody.android.presentation.reauthenticate.ReAuthenticateScreen
 import com.censocustody.android.presentation.reset_password.ResetPasswordScreen
+import com.censocustody.android.presentation.scan_qr.ScanQRScreen
 import com.censocustody.android.presentation.sign_in.SignInScreen
 import com.censocustody.android.service.MessagingService.Companion.NOTIFICATION_DISPLAYED_KEY
 import com.censocustody.android.ui.theme.BackgroundWhite
@@ -62,7 +64,7 @@ import com.censocustody.android.presentation.token_sign_in.TokenSignInScreen
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
-@AndroidEntryPoint
+@ExperimentalGetImage @AndroidEntryPoint
 class MainActivity : FragmentActivity() {
 
     @Inject
@@ -299,6 +301,11 @@ class MainActivity : FragmentActivity() {
                 route = Screen.ReAuthenticateRoute.route
             ) {
                 ReAuthenticateScreen(navController = navController)
+            }
+            composable(
+                route = Screen.ScanQRRoute.route
+            ) {
+                ScanQRScreen(navController = navController)
             }
         }
     }

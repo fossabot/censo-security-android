@@ -5,8 +5,10 @@ import com.censocustody.android.common.CensoError
 import com.censocustody.android.data.models.GetShardsResponse
 import com.censocustody.android.data.models.RegisterApprovalDisposition
 import com.censocustody.android.data.models.Shard
+import com.censocustody.android.data.models.WalletConnectPairingRequest
 import com.censocustody.android.data.models.approvalV2.ApprovalDispositionRequestV2
 import com.censocustody.android.data.models.approvalV2.ApprovalRequestV2
+import okhttp3.ResponseBody
 import javax.inject.Inject
 
 interface ApprovalsRepository {
@@ -19,6 +21,8 @@ interface ApprovalsRepository {
     ): Resource<ApprovalDispositionRequestV2.RegisterApprovalDispositionV2Body>
 
     suspend fun retrieveShards(policyRevisionId: String, userId: String? = null) : Resource<GetShardsResponse>
+
+    suspend fun sendWcUri(uri: String): Resource<ResponseBody>
 }
 
 class ApprovalsRepositoryImpl @Inject constructor(
@@ -35,6 +39,11 @@ class ApprovalsRepositoryImpl @Inject constructor(
         userId: String?
     ): Resource<GetShardsResponse> =
         retrieveApiResource { api.getShards(policyRevisionId = policyRevisionId, userId = userId) }
+
+    override suspend fun sendWcUri(uri: String) =
+        retrieveApiResource {
+            api.walletConnectPairing(WalletConnectPairingRequest(uri = uri))
+        }
 
     override suspend fun approveOrDenyDisposition(
         requestId: String,

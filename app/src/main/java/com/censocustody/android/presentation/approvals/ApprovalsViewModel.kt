@@ -97,7 +97,7 @@ class ApprovalsViewModel @Inject constructor(
         val cachedApprovals = state.approvals.toList()
 
         state = state.copy(approvalsResultRequest = Resource.Loading())
-        delay(250)
+        delay(500)
 
         val walletApprovalsResource = approvalsRepository.getApprovalRequests()
 
