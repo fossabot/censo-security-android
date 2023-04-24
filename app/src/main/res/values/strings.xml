@@ -248,6 +248,7 @@
     <string name="open_settings">Open Settings</string>
     <string name="missing_camera_permission">Missing Camera permission. Please give access in settings.</string>
     <string name="explain_photo_permission">Taking a photo is required to use the Censo Security app.</string>
+    <string name="explain_photo_permission_scan_qr">Camera access is required to scan QR code.</string>
     <string name="camera_permission_request">Camera Permission Request</string>
     <string name="unable_process_image">Unable to process image, please retake image.</string>
     <string name="wallet">Wallet</string>
@@ -266,4 +267,13 @@
     <string name="verification_email_sent">Verification email sent!</string>
     <string name="failed_auth_title">Failed to Authenticate User</string>
     <string name="biometry_failed_title">Biometry Failed, Please Try Again.</string>
+    <string name="scan_qr_code_title">Scan QR Code</string>
+    <string name="exit_scan_qr_screen">Exit Scan QR Screen</string>
+    <string name="scan_qr_code_cont_desc">Scan QR code</string>
+    <string name="upload_wc_uri_success">Connected to DApp.</string>
+    <string name="failed_scan_qr_code">Failed to scan QR Code</string>
+    <string name="failed_upload_wc_uri">Failed to upload code to backend. QR Code may have already been added.</string>
+    <string name="start_scanning">Start Scanning…</string>
+    <string name="scan_qr_code">Scan QR Code</string>
+    <string name="scan_qr_code_success">Connecting to DApp…</string>
 </resources>

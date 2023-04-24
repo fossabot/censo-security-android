@@ -24,6 +24,8 @@ sealed class Screen(val route: String) {
     }
     object ReAuthenticateRoute : Screen("re_authenticate_screen")
 
+    object ScanQRRoute : Screen("scan_qr_screen")
+
     fun buildScreenDeepLinkUri() = "$CENSO_CUSTODY_URI${this.route}"
 
     companion object {

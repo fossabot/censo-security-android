@@ -36,6 +36,7 @@ import java.util.*
 import javax.inject.Inject
 import kotlin.math.abs
 
+@androidx.camera.core.ExperimentalGetImage
 @AndroidEntryPoint
 class MessagingService : FirebaseMessagingService() {
 
@@ -153,7 +154,7 @@ class MessagingService : FirebaseMessagingService() {
             .setContentIntent(pendingIntent)
 
         val notificationManager =
-            getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            getSystemService(NOTIFICATION_SERVICE) as NotificationManager
 
         val channel = NotificationChannel(
             channelId,
