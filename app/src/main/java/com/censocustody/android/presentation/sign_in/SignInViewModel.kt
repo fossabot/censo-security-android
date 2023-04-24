@@ -87,17 +87,15 @@ class SignInViewModel @Inject constructor(
 
     fun kickOffBiometryLoginOrSendVerificationEmail() {
         viewModelScope.launch {
-//            if (userRepository.userHasDeviceIdSaved(state.email)) {
-//                state = state.copy(
-//                    triggerBioPrompt = Resource.Success(null),
-//                    bioPromptReason = BioPromptReason.RETURN_LOGIN,
-//                    loginResult = Resource.Uninitialized
-//                )
-//            } else {
-//                sendVerificationEmail()
-//            }
-
-            sendVerificationEmail()
+            if (userRepository.userHasDeviceIdSaved(state.email)) {
+                state = state.copy(
+                    triggerBioPrompt = Resource.Success(null),
+                    bioPromptReason = BioPromptReason.RETURN_LOGIN,
+                    loginResult = Resource.Uninitialized
+                )
+            } else {
+                sendVerificationEmail()
+            }
         }
     }
 

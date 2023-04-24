@@ -128,20 +128,15 @@ class TokenSignInViewModel @Inject constructor(
     }
 
     private fun userFailedLogin(resource: Resource<LoginResponse>? = null, e: Exception? = null) {
-        state = if (resource != null) {
-            state.copy(
-                loginResult = resource,
-                exitLoginFlow = Resource.Success(Unit)
-            )
-        } else {
+        state =
             state.copy(
                 exitLoginFlow = Resource.Success(Unit),
-                loginResult = Resource.Error(
+                loginResult = resource ?: Resource.Error(
                     exception = Exception(e?.message ?: NO_INTERNET_ERROR)
                 )
             )
-        }
     }
+
 
     private suspend fun submitNotificationTokenForRegistration() {
         try {
