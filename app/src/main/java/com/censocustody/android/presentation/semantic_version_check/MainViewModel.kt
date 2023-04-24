@@ -1,5 +1,8 @@
 package com.censocustody.android.presentation.semantic_version_check
 
+import android.content.Intent
+import android.net.Uri
+import android.util.Patterns
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
