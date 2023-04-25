@@ -151,12 +151,6 @@ object AppModule {
     }
 
     @Provides
-    @Singleton
-    fun provideUserData(userRepository: UserRepository): CensoUserData {
-        return CensoUserDataImpl(userRepository)
-    }
-
-    @Provides
     fun provideCountDownTimer(): CensoCountDownTimer {
         return CensoCountDownTimerImpl()
     }

@@ -13,7 +13,6 @@ import com.censocustody.android.data.models.SemanticVersion
 import com.censocustody.android.data.models.VerifyUser
 import com.censocustody.android.data.repository.KeyRepository
 import com.censocustody.android.data.repository.UserRepository
-import com.censocustody.android.data.storage.CensoUserData
 import com.censocustody.android.presentation.semantic_version_check.MainViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
@@ -23,7 +22,6 @@ import javax.inject.Inject
 class EntranceViewModel @Inject constructor(
     private val userRepository: UserRepository,
     private val keyRepository: KeyRepository,
-    private val censoUserData: CensoUserData
 ) : ViewModel() {
 
     var state by mutableStateOf(EntranceState())
@@ -72,7 +70,6 @@ class EntranceViewModel @Inject constructor(
         }
 
         if (userLoggedIn) {
-            censoUserData.setEmail(userRepository.retrieveCachedUserEmail())
             retrieveUserVerifyDetails()
         } else {
             //DESTINATION: Send user to login screen.
@@ -122,7 +119,6 @@ class EntranceViewModel @Inject constructor(
             val verifyUser = verifyUserDataResource.data
 
             if (verifyUser != null) {
-                censoUserData.setCensoUser(verifyUser = verifyUser)
                 state = state.copy(verifyUserResult = verifyUserDataResource)
                 determineUserDestination(verifyUser)
             } else {
@@ -142,7 +138,6 @@ class EntranceViewModel @Inject constructor(
     }
 
     private fun handleVerifyUserError(verifyUserDataResource: Resource<VerifyUser>) {
-        censoUserData.setCensoUser(null)
         state = state.copy(verifyUserResult = verifyUserDataResource)
     }
 

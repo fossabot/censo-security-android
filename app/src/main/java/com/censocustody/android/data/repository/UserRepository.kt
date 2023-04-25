@@ -36,7 +36,6 @@ interface UserRepository {
     suspend fun resetPassword(email: String) : ResponseBody
     suspend fun sendVerificationEmail(email: String) : Resource<ResponseBody>
     suspend fun retrieveUserEmail(): String
-    fun retrieveCachedUserEmail(): String
     suspend fun saveUserEmail(email: String)
     suspend fun checkMinimumVersion(): Resource<SemanticVersionResponse>
     suspend fun setKeyInvalidated()
@@ -56,6 +55,8 @@ interface UserRepository {
     fun clearBootstrapImageUrl(email: String)
     fun retrieveBootstrapImageUrl(email: String) : String
     fun createUserImage(userPhoto: Bitmap, keyName: String) : UserImage
+    fun getCachedUser() : VerifyUser?
+    fun setCachedUser(verifyUser: VerifyUser?)
 }
 
 class UserRepositoryImpl(
@@ -68,6 +69,14 @@ class UserRepositoryImpl(
     private val cryptographyManager: CryptographyManager,
     private val applicationContext: Context
 ) : UserRepository, BaseRepository() {
+
+    private var censoUser: VerifyUser? = null
+
+    override fun getCachedUser() = censoUser
+
+    override fun setCachedUser(verifyUser: VerifyUser?) {
+        censoUser = verifyUser
+    }
 
     override suspend fun resetPassword(email: String) = anchorApiService.recoverPassword(email)
 
@@ -219,8 +228,6 @@ class UserRepositoryImpl(
             ""
         }
     }
-
-    override fun retrieveCachedUserEmail() = SharedPrefsHelper.retrieveUserEmail()
 
     override fun saveBootstrapImageUrl(email: String, bootstrapImageUrl: String) {
         SharedPrefsHelper.saveBootstrapImageUrl(

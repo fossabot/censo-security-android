@@ -7,7 +7,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.censocustody.android.common.Resource
 import com.censocustody.android.data.repository.PushRepository
-import com.censocustody.android.data.storage.CensoUserData
 import com.censocustody.android.data.repository.UserRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
@@ -17,20 +16,21 @@ import javax.inject.Inject
 class AccountViewModel @Inject constructor(
     private val userRepository: UserRepository,
     private val pushRepository: PushRepository,
-    private val censoUserData: CensoUserData
 ) : ViewModel() {
 
     var state by mutableStateOf(AccountState())
         private set
 
     fun onStart() {
-        setUserInfo()
+        viewModelScope.launch {
+            setUserInfo()
+        }
     }
 
-    private fun setUserInfo() {
+    private suspend fun setUserInfo() {
         state = state.copy(
-            email = censoUserData.getEmail(),
-            name = censoUserData.getCensoUser()?.fullName ?: ""
+            email = userRepository.retrieveUserEmail(),
+            name = userRepository.getCachedUser()?.fullName ?: ""
         )
     }
 
