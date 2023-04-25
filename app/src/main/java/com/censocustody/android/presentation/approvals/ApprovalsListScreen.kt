@@ -42,11 +42,11 @@ import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import com.raygun.raygun4android.RaygunClient
 import com.censocustody.android.R
 import com.censocustody.android.common.*
-import com.censocustody.android.data.storage.SharedPrefsHelper
 import com.censocustody.android.data.models.ApprovalDisposition
 import com.censocustody.android.data.models.approvalV2.ApprovalDispositionRequestV2
 import com.censocustody.android.data.models.approvalV2.ApprovalRequestDetailsV2
 import com.censocustody.android.data.models.approvalV2.ApprovalRequestV2
+import com.censocustody.android.data.repository.PushRepository
 import com.censocustody.android.presentation.Screen
 import com.censocustody.android.presentation.approvals.approval_type_row_items.*
 import com.censocustody.android.presentation.components.*
@@ -55,7 +55,7 @@ import com.censocustody.android.ui.theme.*
 @Composable
 fun ApprovalsListScreen(
     navController: NavController,
-    approvalsViewModel: ApprovalsViewModel,
+    approvalsViewModel: ApprovalsViewModel
 ) {
     val approvalsState = approvalsViewModel.state
 
@@ -88,12 +88,12 @@ fun ApprovalsListScreen(
                     Manifest.permission.POST_NOTIFICATIONS
                 )
 
-                val seenDialogBefore = SharedPrefsHelper.userHasSeenPermissionDialog()
+                val seenDialogBefore = approvalsViewModel.userHasSeenPushDialog()
 
                 if (notificationGranted != PackageManager.PERMISSION_GRANTED) {
                     if (shownPermissionJustOnceBefore && !seenDialogBefore) {
                         //show dialog to user because they have rejected permissions once before
-                        SharedPrefsHelper.setUserSeenPermissionDialog(true)
+                        approvalsViewModel.setUserSeenPushDialog(true)
                         approvalsViewModel.triggerPushNotificationDialog()
                     } else if (!seenDialogBefore) {
                         //show permission to user for first time with no dialog
@@ -259,7 +259,7 @@ fun ApprovalsListScreen(
                         }
                     },
                     onDismiss = {
-                        SharedPrefsHelper.setUserSeenPermissionDialog(false)
+                        approvalsViewModel.setUserSeenPushDialog(false)
                         approvalsViewModel.resetPushNotificationDialog()
                     }
                 )

@@ -9,12 +9,9 @@ import androidx.lifecycle.viewModelScope
 import cash.z.ecc.android.bip39.Mnemonics
 import cash.z.ecc.android.bip39.toSeed
 import com.censocustody.android.common.*
-import com.censocustody.android.data.*
-import com.censocustody.android.data.cryptography.CryptographyManager
 import com.censocustody.android.data.models.VerifyUser
 import com.censocustody.android.data.repository.KeyRepository
 import com.censocustody.android.data.repository.UserRepository
-import com.censocustody.android.data.storage.SharedPrefsHelper
 import com.raygun.raygun4android.RaygunClient
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
@@ -24,7 +21,6 @@ import javax.inject.Inject
 class KeyCreationViewModel @Inject constructor(
     private val userRepository: UserRepository,
     private val keyRepository: KeyRepository,
-    private val cryptographyManager: CryptographyManager
 ) : ViewModel() {
 
     var state by mutableStateOf(KeyCreationState())
@@ -109,13 +105,12 @@ class KeyCreationViewModel @Inject constructor(
 
     private suspend fun uploadBootStrapData(bitmap: Bitmap) {
         val userEmail = userRepository.retrieveUserEmail()
-        val deviceId = SharedPrefsHelper.retrieveDeviceId(email = userEmail)
+        val deviceId = userRepository.retrieveUserDeviceId(email = userEmail)
 
         //Get user image all ready
-        val userImage = generateUserImageObject(
+        val userImage = userRepository.createUserImage(
             userPhoto = bitmap,
             keyName = deviceId,
-            cryptographyManager = cryptographyManager
         )
 
         val imageByteArray = BaseWrapper.decodeFromBase64(userImage.image)
@@ -123,10 +118,10 @@ class KeyCreationViewModel @Inject constructor(
 
         val signatureToCheck = BaseWrapper.decodeFromBase64(userImage.signature)
 
-        val verified = cryptographyManager.verifySignature(
+        val verified = keyRepository.verifySignature(
             keyName = deviceId,
-            dataSigned = hashOfImage,
-            signatureToCheck = signatureToCheck
+            signedData = hashOfImage,
+            signature = signatureToCheck
         )
 
         if (!verified) {

@@ -12,8 +12,11 @@ import com.censocustody.android.data.models.*
 import com.censocustody.android.data.storage.SecurePreferences
 import com.censocustody.android.data.storage.SharedPrefsHelper
 import com.raygun.raygun4android.RaygunClient
+import org.web3j.abi.datatypes.Bool
 import java.security.InvalidAlgorithmParameterException
 import java.security.KeyStoreException
+import java.security.PrivateKey
+import java.security.PublicKey
 import javax.crypto.Cipher
 
 interface KeyRepository {
@@ -52,6 +55,16 @@ interface KeyRepository {
     ): List<WalletSigner>
 
     suspend fun removeBootstrapDeviceData()
+
+    suspend fun verifySignature(
+        keyName: String,
+        signedData: ByteArray,
+        signature: ByteArray
+    ): Boolean
+
+    suspend fun createDeviceKeyId() : String
+    suspend fun getOrCreateKey(keyName: String) : PrivateKey
+    suspend fun getPublicKeyFromDeviceKey(keyName: String) : PublicKey
 }
 
 class KeyRepositoryImpl(
@@ -224,6 +237,25 @@ class KeyRepositoryImpl(
             SharedPrefsHelper.clearDeviceBootstrapPublicKey(email)
         }
     }
+
+    override suspend fun verifySignature(
+        keyName: String,
+        signedData: ByteArray,
+        signature: ByteArray
+    ) = cryptographyManager.verifySignature(
+            keyName = keyName,
+            dataSigned = signedData,
+            signatureToCheck = signature
+        )
+
+    override suspend fun createDeviceKeyId() = cryptographyManager.createDeviceKeyId()
+
+    override suspend fun getOrCreateKey(keyName: String) =
+        cryptographyManager.getOrCreateKey(keyName)
+
+    override suspend fun getPublicKeyFromDeviceKey(keyName: String) =
+        cryptographyManager.getPublicKeyFromDeviceKey(keyName)
+
 
     override suspend fun retrieveV3RootSeed(): ByteArray? {
         return try {

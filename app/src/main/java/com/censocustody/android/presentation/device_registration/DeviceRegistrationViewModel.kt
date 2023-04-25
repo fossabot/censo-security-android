@@ -7,11 +7,11 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.censocustody.android.common.*
-import com.censocustody.android.data.cryptography.CryptographyManager
 import com.censocustody.android.data.cryptography.ECIESManager
 import com.censocustody.android.data.repository.UserRepository
 import com.censocustody.android.data.models.DeviceType
 import com.censocustody.android.data.models.UserDevice
+import com.censocustody.android.data.repository.KeyRepository
 import com.raygun.raygun4android.RaygunClient
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
@@ -21,7 +21,7 @@ import javax.inject.Inject
 @HiltViewModel
 class DeviceRegistrationViewModel @Inject constructor(
     private val userRepository: UserRepository,
-    private val cryptographyManager: CryptographyManager
+    private val keyRepository: KeyRepository
 ) : ViewModel() {
 
     var state by mutableStateOf(DeviceRegistrationState())
@@ -83,10 +83,9 @@ class DeviceRegistrationViewModel @Inject constructor(
                 val keyName = state.standardKeyName
 
                 if (capturedUserPhoto != null && keyName.isNotEmpty()) {
-                    val userImage = generateUserImageObject(
+                    val userImage = userRepository.createUserImage(
                         userPhoto = capturedUserPhoto,
                         keyName = keyName,
-                        cryptographyManager = cryptographyManager
                     )
 
                     val imageByteArray = BaseWrapper.decodeFromBase64(userImage.image)
@@ -94,10 +93,10 @@ class DeviceRegistrationViewModel @Inject constructor(
 
                     val signatureToCheck = BaseWrapper.decodeFromBase64(userImage.signature)
 
-                    val verified = cryptographyManager.verifySignature(
+                    val verified = keyRepository.verifySignature(
                         keyName = keyName,
-                        dataSigned = hashOfImage,
-                        signatureToCheck = signatureToCheck
+                        signedData = hashOfImage,
+                        signature = signatureToCheck
                     )
 
                     if (!verified) {
@@ -262,8 +261,8 @@ class DeviceRegistrationViewModel @Inject constructor(
 
     private fun createBootstrapKeysForDevice() {
         viewModelScope.launch {
-            val standardKeyId = cryptographyManager.createDeviceKeyId()
-            val bootstrapKeyId = cryptographyManager.createDeviceKeyId()
+            val standardKeyId = keyRepository.createDeviceKeyId()
+            val bootstrapKeyId = keyRepository.createDeviceKeyId()
 
             state = state.copy(
                 standardKeyName = standardKeyId,
@@ -271,13 +270,13 @@ class DeviceRegistrationViewModel @Inject constructor(
             )
 
             try {
-                cryptographyManager.getOrCreateKey(keyName = standardKeyId)
-                cryptographyManager.getOrCreateKey(keyName = bootstrapKeyId)
+                keyRepository.getOrCreateKey(keyName = standardKeyId)
+                keyRepository.getOrCreateKey(keyName = bootstrapKeyId)
 
                 val standardPublicKey =
-                    cryptographyManager.getPublicKeyFromDeviceKey(keyName = standardKeyId)
+                    keyRepository.getPublicKeyFromDeviceKey(keyName = standardKeyId)
                 val bootstrapPublicKey =
-                    cryptographyManager.getPublicKeyFromDeviceKey(keyName = bootstrapKeyId)
+                    keyRepository.getPublicKeyFromDeviceKey(keyName = bootstrapKeyId)
 
                 val compressedStandardPublicKey =
                     ECIESManager.extractUncompressedPublicKey(standardPublicKey.encoded)
@@ -310,13 +309,13 @@ class DeviceRegistrationViewModel @Inject constructor(
 
     private fun createStandardKeyForDevice() {
         viewModelScope.launch {
-            val keyId = cryptographyManager.createDeviceKeyId()
+            val keyId = keyRepository.createDeviceKeyId()
             state = state.copy(standardKeyName = keyId)
             try {
 
-                cryptographyManager.getOrCreateKey(keyName = keyId)
+                keyRepository.getOrCreateKey(keyName = keyId)
 
-                val publicKey = cryptographyManager.getPublicKeyFromDeviceKey(keyName = keyId)
+                val publicKey = keyRepository.getPublicKeyFromDeviceKey(keyName = keyId)
                 val compressedPublicKey =
                     ECIESManager.extractUncompressedPublicKey(publicKey.encoded)
 

@@ -9,6 +9,7 @@ import com.censocustody.android.common.Resource
 import com.censocustody.android.data.api.BrooklynApiService
 import com.censocustody.android.data.models.PushBody
 import com.censocustody.android.data.repository.BaseRepository
+import com.censocustody.android.data.storage.SharedPrefsHelper
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
@@ -17,6 +18,8 @@ interface PushRepository {
     suspend fun removePushNotification()
     suspend fun getDeviceId(): String
     suspend fun retrievePushToken(): String
+    fun userHasSeenPushDialog() : Boolean
+    fun setUserSeenPushDialog(seenDialog: Boolean)
 }
 
 class PushRepositoryImpl @Inject constructor(
@@ -30,6 +33,13 @@ class PushRepositoryImpl @Inject constructor(
 
     override suspend fun retrievePushToken(): String =
         FirebaseMessaging.getInstance().token.await()
+
+    override fun userHasSeenPushDialog(): Boolean =
+        SharedPrefsHelper.userHasSeenPermissionDialog()
+
+    override fun setUserSeenPushDialog(seenDialog: Boolean) {
+        SharedPrefsHelper.setUserSeenPermissionDialog(seenDialog)
+    }
 
     override suspend fun addPushNotification(pushBody: PushBody): Resource<PushBody?> =
         retrieveApiResource { api.addPushNotificationToken(pushBody) }

@@ -2,6 +2,7 @@ package com.censocustody.android.data.repository
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.graphics.Bitmap
 import android.provider.Settings
 import com.censocustody.android.common.*
 import com.censocustody.android.data.api.AnchorApiService
@@ -54,6 +55,7 @@ interface UserRepository {
     fun saveBootstrapImageUrl(email: String, bootstrapImageUrl: String)
     fun clearBootstrapImageUrl(email: String)
     fun retrieveBootstrapImageUrl(email: String) : String
+    fun createUserImage(userPhoto: Bitmap, keyName: String) : UserImage
 }
 
 class UserRepositoryImpl(
@@ -229,6 +231,13 @@ class UserRepositoryImpl(
 
     override fun retrieveBootstrapImageUrl(email: String) =
         SharedPrefsHelper.retrieveBootstrapImageUrl(email)
+
+    override fun createUserImage(userPhoto: Bitmap, keyName: String) =
+        generateUserImageObject(
+            userPhoto = userPhoto,
+            keyName = keyName,
+            cryptographyManager = cryptographyManager
+        )
 
     override fun clearBootstrapImageUrl(email: String) {
         SharedPrefsHelper.clearBootstrapImageUrl(email)
