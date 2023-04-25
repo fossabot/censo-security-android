@@ -6,13 +6,9 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.censocustody.android.common.BioCryptoUtil.FAIL_ERROR
-import com.censocustody.android.common.BioPromptReason
 import com.censocustody.android.common.Resource
-import com.censocustody.android.data.*
-import com.censocustody.android.data.models.mapToPublicKeysList
 import com.censocustody.android.data.repository.KeyRepository
 import com.censocustody.android.data.repository.UserRepository
-import com.censocustody.android.data.storage.SecurePreferences
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -33,7 +29,6 @@ import javax.inject.Inject
 class KeysUploadViewModel @Inject constructor(
     private val keyRepository: KeyRepository,
     private val userRepository: UserRepository,
-    private val securePreferences: SecurePreferences
 ) : ViewModel() {
 
     var state by mutableStateOf(KeysUploadState())
@@ -82,12 +77,11 @@ class KeysUploadViewModel @Inject constructor(
 
     //region Step 3: Save all data
     private suspend fun retrieveWalletSignersAndTriggerDeviceSignatureRetrieval(rootSeed: ByteArray) {
-        val userEmail = userRepository.retrieveUserEmail()
-        val publicKeysMap = securePreferences.retrieveV3PublicKeys(userEmail)
+        val publicKeys = keyRepository.retrieveV3PublicKeys()
 
         val walletSignersToAdd = keyRepository.signPublicKeys(
             rootSeed = rootSeed,
-            publicKeys = publicKeysMap.mapToPublicKeysList()
+            publicKeys = publicKeys
         )
 
         state = state.copy(walletSigners = walletSignersToAdd)
