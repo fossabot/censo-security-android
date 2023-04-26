@@ -2,7 +2,7 @@ package com.censocustody.android
 
 import cash.z.ecc.android.bip39.Mnemonics
 import cash.z.ecc.android.bip39.toSeed
-import com.censocustody.android.common.Ed25519HierarchicalPrivateKey
+import com.censocustody.android.data.cryptography.Ed25519HierarchicalPrivateKey
 
 fun createSolanaKeyPairFromMnemonic(mnenomic: Mnemonics.MnemonicCode): TestKeyPair {
     val rootSeed = mnenomic.toSeed()

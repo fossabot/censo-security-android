@@ -7,6 +7,9 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.censocustody.android.common.*
+import com.censocustody.android.common.ui.hashOfUserImage
+import com.censocustody.android.common.util.CrashReportingUtil
+import com.censocustody.android.common.wrapper.BaseWrapper
 import com.censocustody.android.data.cryptography.ECIESManager
 import com.censocustody.android.data.repository.UserRepository
 import com.censocustody.android.data.models.DeviceType

@@ -42,11 +42,11 @@ import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import com.raygun.raygun4android.RaygunClient
 import com.censocustody.android.R
 import com.censocustody.android.common.*
+import com.censocustody.android.common.util.CrashReportingUtil
 import com.censocustody.android.data.models.ApprovalDisposition
 import com.censocustody.android.data.models.approvalV2.ApprovalDispositionRequestV2
 import com.censocustody.android.data.models.approvalV2.ApprovalRequestDetailsV2
 import com.censocustody.android.data.models.approvalV2.ApprovalRequestV2
-import com.censocustody.android.data.repository.PushRepository
 import com.censocustody.android.presentation.Screen
 import com.censocustody.android.presentation.approvals.approval_type_row_items.*
 import com.censocustody.android.presentation.components.*

@@ -19,7 +19,7 @@ import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat.startActivity
 import com.censocustody.android.common.CensoButton
 import com.censocustody.android.common.Resource
-import com.censocustody.android.common.CensoError
+import com.censocustody.android.common.exception.CensoError
 import com.censocustody.android.R
 import com.censocustody.android.common.HELP_URL
 import com.censocustody.android.ui.theme.*

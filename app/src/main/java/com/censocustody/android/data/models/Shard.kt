@@ -1,6 +1,6 @@
 package com.censocustody.android.data.models
 
-import com.censocustody.android.common.toHexString
+import com.censocustody.android.common.wrapper.toHexString
 import java.math.BigInteger
 
 data class ShardCopy(

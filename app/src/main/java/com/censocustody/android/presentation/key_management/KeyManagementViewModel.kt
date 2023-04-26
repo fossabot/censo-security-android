@@ -10,6 +10,7 @@ import androidx.lifecycle.viewModelScope
 import cash.z.ecc.android.bip39.Mnemonics
 import cash.z.ecc.android.bip39.toSeed
 import com.censocustody.android.common.*
+import com.censocustody.android.common.util.PhraseEntryUtil
 import com.censocustody.android.data.models.BioPromptData
 import com.censocustody.android.data.models.IndexedPhraseWord
 import com.censocustody.android.data.models.WalletSigner

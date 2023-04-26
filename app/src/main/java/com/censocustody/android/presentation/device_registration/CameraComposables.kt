@@ -3,11 +3,8 @@
 package com.censocustody.android.presentation.device_registration
 
 import android.Manifest
-import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.net.Uri
-import android.provider.Settings
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.camera.core.CameraSelector
@@ -43,6 +40,8 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.foundation.Canvas
 import com.censocustody.android.R
 import com.censocustody.android.common.*
+import com.censocustody.android.common.ui.*
+import com.censocustody.android.common.util.CrashReportingUtil
 import com.censocustody.android.ui.theme.BackgroundWhite
 import com.censocustody.android.ui.theme.ButtonRed
 import com.censocustody.android.ui.theme.CensoWhite

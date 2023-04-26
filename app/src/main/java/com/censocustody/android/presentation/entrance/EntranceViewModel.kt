@@ -7,7 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.raygun.raygun4android.RaygunClient
 import com.censocustody.android.BuildConfig
-import com.censocustody.android.common.CrashReportingUtil
+import com.censocustody.android.common.util.CrashReportingUtil
 import com.censocustody.android.common.Resource
 import com.censocustody.android.data.models.SemanticVersion
 import com.censocustody.android.data.models.VerifyUser

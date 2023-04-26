@@ -1,7 +1,7 @@
 package com.censocustody.android.data.repository
 
 import com.censocustody.android.common.Resource
-import com.censocustody.android.common.CensoError
+import com.censocustody.android.common.exception.CensoError
 import com.censocustody.android.data.api.BrooklynApiService
 import com.censocustody.android.data.cryptography.EncryptionManager
 import com.censocustody.android.data.models.*

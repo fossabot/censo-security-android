@@ -5,6 +5,8 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.provider.Settings
 import com.censocustody.android.common.*
+import com.censocustody.android.common.ui.generateUserImageObject
+import com.censocustody.android.common.wrapper.BaseWrapper
 import com.censocustody.android.data.api.AnchorApiService
 import com.censocustody.android.data.api.BrooklynApiService
 import com.censocustody.android.data.api.SemVersionApiService

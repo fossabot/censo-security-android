@@ -1,11 +1,9 @@
 package com.censocustody.android.data.models.evm
 
 import com.censocustody.android.common.evm.*
-import com.censocustody.android.common.pad
-import com.censocustody.android.data.models.Chain
+import com.censocustody.android.common.wrapper.pad
 import com.censocustody.android.data.models.approvalV2.ApprovalRequestDetailsV2
 import org.bouncycastle.util.encoders.Hex
-import org.web3j.abi.datatypes.generated.Bytes32
 import org.web3j.crypto.Hash
 import java.math.BigInteger
 import java.nio.ByteBuffer

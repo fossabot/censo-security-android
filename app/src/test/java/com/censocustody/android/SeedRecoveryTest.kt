@@ -1,7 +1,7 @@
 package com.censocustody.android
 
-import com.censocustody.android.common.*
-import com.censocustody.android.common.SecretSharerUtils.randomFieldElement
+import com.censocustody.android.data.cryptography.*
+import com.censocustody.android.data.cryptography.SecretSharerUtils.randomFieldElement
 import org.junit.Assert.*
 import java.math.BigInteger
 import java.util.UUID

@@ -1,5 +1,6 @@
-package com.censocustody.android.common
+package com.censocustody.android.common.util
 
+import com.censocustody.android.common.wrapper.toHexString
 import org.bitcoinj.core.Base58
 import org.bouncycastle.jce.ECNamedCurveTable
 import org.bouncycastle.jce.interfaces.ECPublicKey

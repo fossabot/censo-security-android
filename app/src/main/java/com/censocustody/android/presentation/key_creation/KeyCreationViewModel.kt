@@ -9,6 +9,9 @@ import androidx.lifecycle.viewModelScope
 import cash.z.ecc.android.bip39.Mnemonics
 import cash.z.ecc.android.bip39.toSeed
 import com.censocustody.android.common.*
+import com.censocustody.android.common.ui.hashOfUserImage
+import com.censocustody.android.common.util.CrashReportingUtil
+import com.censocustody.android.common.wrapper.BaseWrapper
 import com.censocustody.android.data.models.VerifyUser
 import com.censocustody.android.data.repository.KeyRepository
 import com.censocustody.android.data.repository.UserRepository

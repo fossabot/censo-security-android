@@ -1,8 +1,5 @@
 package com.censocustody.android.presentation.semantic_version_check
 
-import android.content.Intent
-import android.net.Uri
-import android.util.Patterns
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -10,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.censocustody.android.common.*
 import com.censocustody.android.common.Resource
+import com.censocustody.android.common.util.BiometricUtil
 import com.censocustody.android.data.cryptography.EncryptionManagerImpl.Companion.SENTINEL_STATIC_DATA
 import com.censocustody.android.data.repository.KeyRepository
 import com.censocustody.android.data.repository.UserRepository

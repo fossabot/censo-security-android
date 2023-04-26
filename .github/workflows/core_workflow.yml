@@ -17,6 +17,8 @@ on:
         required: true
       keyPassword:
         required: true
+      createFirebaseBuild:
+        required: true
       alias:
         required: true
 
@@ -63,7 +65,8 @@ jobs:
       - name: Stop previous gradle
         run: ./gradlew --stop
 
-      - name: Upload build to firebase
+      - if: createFirebaseBuild
+        name: Upload build to firebase
         env:
           FIREBASE_TOKEN: ${{ secrets.firebaseToken }}
         run: "./gradlew assemble${{ inputs.variant }} appDistributionUpload${{ inputs.variant }}"

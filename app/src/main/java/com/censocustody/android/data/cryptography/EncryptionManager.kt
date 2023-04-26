@@ -2,13 +2,18 @@ package com.censocustody.android.data.cryptography
 
 import cash.z.ecc.android.bip39.Mnemonics
 import com.censocustody.android.common.*
-import com.censocustody.android.common.BaseWrapper
+import com.censocustody.android.common.util.EcdsaUtils
+import com.censocustody.android.common.wrapper.BaseWrapper
+import com.censocustody.android.common.wrapper.toByteArrayNoSign
+import com.censocustody.android.common.wrapper.toHexString
+import com.censocustody.android.common.wrapper.toParticipantIdAsHexString
 import com.censocustody.android.data.cryptography.EncryptionManagerImpl.Companion.DATA_CHECK
 import com.censocustody.android.data.models.*
 import com.censocustody.android.data.models.StoredKeyData.Companion.BITCOIN_KEY
 import com.censocustody.android.data.models.StoredKeyData.Companion.OFFCHAIN_KEY
 import com.censocustody.android.data.models.StoredKeyData.Companion.ETHEREUM_KEY
 import com.censocustody.android.data.models.approvalV2.ApprovalSignature
+import com.censocustody.android.data.storage.KeyStorage
 import com.censocustody.android.data.storage.SharedPrefsHelper
 import com.google.android.gms.common.util.VisibleForTesting
 import org.bouncycastle.util.encoders.Hex
