@@ -4,7 +4,7 @@ import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.whenever
 import com.censocustody.android.*
 import com.censocustody.android.common.BioPromptReason
-import com.censocustody.android.common.PhraseEntryUtil
+import com.censocustody.android.common.util.PhraseEntryUtil
 import com.censocustody.android.common.PhraseException
 import com.censocustody.android.common.Resource
 import com.censocustody.android.data.models.*

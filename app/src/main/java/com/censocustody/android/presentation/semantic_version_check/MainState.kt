@@ -1,7 +1,7 @@
 package com.censocustody.android.presentation.semantic_version_check
 
 import com.censocustody.android.common.BioPromptReason
-import com.censocustody.android.common.BiometricUtil
+import com.censocustody.android.common.util.BiometricUtil
 import com.censocustody.android.common.Resource
 import javax.crypto.Cipher
 

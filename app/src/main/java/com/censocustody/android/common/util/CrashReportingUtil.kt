@@ -1,4 +1,4 @@
-package com.censocustody.android.common
+package com.censocustody.android.common.util
 
 object CrashReportingUtil {
     const val BROADCAST_RECEIVER_TAG = "BroadcastReceiver"

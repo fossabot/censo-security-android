@@ -5,9 +5,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.censocustody.android.common.CrashReportingUtil
+import com.censocustody.android.common.util.CrashReportingUtil
 import com.censocustody.android.common.Resource
-import com.censocustody.android.data.*
 import com.censocustody.android.data.models.GetRecoveryShardsResponse
 import com.censocustody.android.data.repository.KeyRepository
 import com.raygun.raygun4android.RaygunClient

@@ -6,6 +6,9 @@ on:
       variant:
         required: true
         type: string
+      createFirebaseBuild:
+        required: true
+        type: boolean
     secrets:
       googleServices:
         required: true
@@ -63,7 +66,8 @@ jobs:
       - name: Stop previous gradle
         run: ./gradlew --stop
 
-      - name: Upload build to firebase
+      - if: ${{ inputs.createFirebaseBuild }}
+        name: Upload build to firebase
         env:
           FIREBASE_TOKEN: ${{ secrets.firebaseToken }}
         run: "./gradlew assemble${{ inputs.variant }} appDistributionUpload${{ inputs.variant }}"

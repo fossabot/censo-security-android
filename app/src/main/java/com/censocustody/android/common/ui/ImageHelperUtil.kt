@@ -1,4 +1,4 @@
-package com.censocustody.android.common
+package com.censocustody.android.common.ui
 
 import android.content.Context
 import android.graphics.Bitmap
@@ -13,6 +13,8 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.core.content.ContextCompat
 import androidx.exifinterface.media.ExifInterface
+import com.censocustody.android.common.util.CrashReportingUtil
+import com.censocustody.android.common.wrapper.BaseWrapper
 import com.censocustody.android.data.cryptography.CryptographyManager
 import com.censocustody.android.data.models.LogoType
 import com.censocustody.android.data.models.UserImage

@@ -20,8 +20,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.raygun.raygun4android.RaygunClient
-import com.censocustody.android.common.BiometricUtil
-import com.censocustody.android.common.CrashReportingUtil
+import com.censocustody.android.common.util.BiometricUtil
+import com.censocustody.android.common.util.CrashReportingUtil
 import com.censocustody.android.common.Resource
 import com.censocustody.android.common.*
 import com.censocustody.android.common.BioCryptoUtil.NO_CIPHER_CODE

@@ -11,6 +11,7 @@ import com.censocustody.android.data.models.RecoveryShard
 import com.censocustody.android.data.models.approvalV2.ApprovalRequestV2
 import com.censocustody.android.data.repository.ApprovalsRepository
 import com.censocustody.android.data.repository.KeyRepository
+import com.censocustody.android.data.repository.PushRepository
 import com.censocustody.android.data.repository.UserRepository
 import com.censocustody.android.presentation.approval_disposition.ApprovalDispositionState
 import com.censocustody.android.presentation.approvals.ApprovalsViewModel
@@ -44,6 +45,9 @@ class ApprovalsViewModelTest : BaseViewModelTest() {
 
     @Mock
     lateinit var countdownTimer: CensoCountDownTimer
+
+    @Mock
+    lateinit var pushRepository: PushRepository
 
     private lateinit var approvalsViewModel: ApprovalsViewModel
 
@@ -85,7 +89,8 @@ class ApprovalsViewModelTest : BaseViewModelTest() {
                 approvalsRepository = approvalsRepository,
                 keyRepository = keyRepository,
                 userRepository = userRepository,
-                timer = countdownTimer
+                timer = countdownTimer,
+                pushRepository = pushRepository
             )
     }
 

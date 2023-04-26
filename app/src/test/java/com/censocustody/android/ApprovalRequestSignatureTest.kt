@@ -2,19 +2,14 @@ package com.censocustody.android
 
 import cash.z.ecc.android.bip39.Mnemonics
 import cash.z.ecc.android.bip39.toSeed
-import com.censocustody.android.common.BaseWrapper
-import com.censocustody.android.common.ChildPathNumber
-import com.censocustody.android.common.KeyStorage
-import com.censocustody.android.data.*
-import com.censocustody.android.data.cryptography.AllKeys
-import com.censocustody.android.data.cryptography.CryptographyManagerImpl
-import com.censocustody.android.data.cryptography.EncryptionManagerImpl
-import com.censocustody.android.data.cryptography.SignableDataResult
+import com.censocustody.android.common.wrapper.BaseWrapper
+import com.censocustody.android.data.cryptography.*
 import com.censocustody.android.data.models.ApprovalDisposition
 import com.censocustody.android.data.models.approvalV2.ApprovalDispositionRequestV2
 import com.censocustody.android.data.models.approvalV2.ApprovalRequestV2
 import com.censocustody.android.data.models.approvalV2.ApprovalRequestV2Deserializer
 import com.censocustody.android.data.models.approvalV2.ApprovalSignature
+import com.censocustody.android.data.storage.KeyStorage
 import com.google.gson.Gson
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.whenever
@@ -23,7 +18,6 @@ import org.junit.Test
 import org.mockito.Mock
 import org.mockito.MockitoAnnotations
 import java.util.*
-import javax.crypto.Cipher
 
 class ApprovalRequestSignatureTest {
 
@@ -31,9 +25,6 @@ class ApprovalRequestSignatureTest {
 
     @Mock
     lateinit var keyStorage: KeyStorage
-
-    @Mock
-    lateinit var cipher: Cipher
 
     lateinit var encryptionManager: EncryptionManagerImpl
 

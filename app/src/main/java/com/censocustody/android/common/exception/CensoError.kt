@@ -1,4 +1,4 @@
-package com.censocustody.android.common
+package com.censocustody.android.common.exception
 
 import android.content.Context
 import com.censocustody.android.R

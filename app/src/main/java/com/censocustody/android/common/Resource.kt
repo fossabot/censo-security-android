@@ -1,5 +1,7 @@
 package com.censocustody.android.common
 
+import com.censocustody.android.common.exception.CensoError
+
 sealed class Resource<out T>(
     val data: T? = null,
     val exception: Exception? = null,

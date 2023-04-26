@@ -9,14 +9,13 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.viewModelScope
 import com.raygun.raygun4android.RaygunClient
 import com.censocustody.android.common.*
-import com.censocustody.android.data.*
-import com.censocustody.android.common.NoInternetException.Companion.NO_INTERNET_ERROR
+import com.censocustody.android.common.exception.NoInternetException.Companion.NO_INTERNET_ERROR
+import com.censocustody.android.common.util.CrashReportingUtil
 import com.censocustody.android.data.models.LoginResponse
 import com.censocustody.android.data.models.PushBody
 import com.censocustody.android.data.repository.KeyRepository
 import com.censocustody.android.data.repository.PushRepository
 import com.censocustody.android.data.repository.UserRepository
-import com.censocustody.android.data.storage.CensoUserData
 import com.censocustody.android.data.validator.EmailValidator
 import kotlinx.coroutines.*
 import javax.crypto.Cipher
@@ -26,7 +25,6 @@ class TokenSignInViewModel @Inject constructor(
     private val userRepository: UserRepository,
     private val pushRepository: PushRepository,
     private val keyRepository: KeyRepository,
-    private val censoUserData: CensoUserData,
     private val emailValidator: EmailValidator
 ) : ViewModel() {
 
@@ -126,7 +124,6 @@ class TokenSignInViewModel @Inject constructor(
 
     private suspend fun userSuccessfullyLoggedIn(token: String) {
         userRepository.saveUserEmail(state.email)
-        censoUserData.setEmail(state.email)
         userRepository.setUserLoggedIn()
         userRepository.saveToken(token)
         submitNotificationTokenForRegistration()

@@ -13,7 +13,6 @@ import com.censocustody.android.data.models.WalletSigner
 import com.censocustody.android.data.models.*
 import com.censocustody.android.data.repository.KeyRepository
 import com.censocustody.android.data.repository.UserRepository
-import com.censocustody.android.data.storage.CensoUserData
 import com.censocustody.android.presentation.entrance.EntranceViewModel
 import com.censocustody.android.presentation.entrance.UserDestination
 import com.nhaarman.mockitokotlin2.any
@@ -42,9 +41,6 @@ class EntranceViewModelTest : BaseViewModelTest() {
 
     @Mock
     lateinit var keyRepository: KeyRepository
-
-    @Mock
-    lateinit var censoUserData: CensoUserData
 
     private lateinit var currentVersionName: String
 
@@ -150,7 +146,6 @@ class EntranceViewModelTest : BaseViewModelTest() {
         entranceViewModel = EntranceViewModel(
             userRepository = userRepository,
             keyRepository = keyRepository,
-            censoUserData = censoUserData
         )
     }
 
@@ -167,16 +162,6 @@ class EntranceViewModelTest : BaseViewModelTest() {
     }
 
     @Test
-    fun `if user is logged in then we set email value on the censo user data`() = runTest {
-        setupLoggedInUserWithValidEmail()
-        setupUserWithDeviceIdAndPublicKey()
-
-        entranceViewModel.onStart()
-
-        verify(censoUserData, times(1)).setEmail(email)
-    }
-
-    @Test
     fun `if user does not have sentinel data send them to sign in`() = runTest {
         setupLoggedInUserWithValidEmail()
         setupUserWithDeviceIdAndPublicKey()
@@ -190,9 +175,6 @@ class EntranceViewModelTest : BaseViewModelTest() {
 
         entranceViewModel.onStart()
         advanceUntilIdle()
-
-        verify(censoUserData, times(1))
-            .setCensoUser(basicVerifyUserWithValidPublicKey)
 
         assertTrue(entranceViewModel.state.userDestinationResult is Resource.Success)
         assertTrue(entranceViewModel.state.userDestinationResult.data == UserDestination.LOGIN)
@@ -213,9 +195,6 @@ class EntranceViewModelTest : BaseViewModelTest() {
             entranceViewModel.onStart()
             advanceUntilIdle()
 
-            verify(censoUserData, times(1))
-                .setCensoUser(basicVerifyUserWithNoPublicKeys)
-
             assertTrue(entranceViewModel.state.userDestinationResult is Resource.Success)
             assertTrue(entranceViewModel.state.userDestinationResult.data == UserDestination.KEY_MANAGEMENT_CREATION)
         }
@@ -234,9 +213,6 @@ class EntranceViewModelTest : BaseViewModelTest() {
 
             entranceViewModel.onStart()
             advanceUntilIdle()
-
-            verify(censoUserData, times(1))
-                .setCensoUser(basicVerifyUserWithNoPublicKeysNotReadyToBeAdded)
 
             assertTrue(entranceViewModel.state.userDestinationResult is Resource.Success)
             assertTrue(entranceViewModel.state.userDestinationResult.data == UserDestination.PENDING_APPROVAL)
@@ -260,9 +236,6 @@ class EntranceViewModelTest : BaseViewModelTest() {
             entranceViewModel.onStart()
             advanceUntilIdle()
 
-            verify(censoUserData, times(1))
-                .setCensoUser(verifyUserWithNoShardingPolicy)
-
             assertTrue(entranceViewModel.state.userDestinationResult is Resource.Success)
             assertTrue(entranceViewModel.state.userDestinationResult.data == UserDestination.DEVICE_REGISTRATION)
         }
@@ -281,9 +254,6 @@ class EntranceViewModelTest : BaseViewModelTest() {
 
             entranceViewModel.onStart()
             advanceUntilIdle()
-
-            verify(censoUserData, times(1))
-                .setCensoUser(basicVerifyUserWithNoPublicKeys)
 
             assertTrue(entranceViewModel.state.userDestinationResult is Resource.Success)
             assertTrue(entranceViewModel.state.userDestinationResult.data == UserDestination.KEY_MANAGEMENT_CREATION)
@@ -304,9 +274,6 @@ class EntranceViewModelTest : BaseViewModelTest() {
             entranceViewModel.onStart()
             advanceUntilIdle()
 
-            verify(censoUserData, times(1))
-                .setCensoUser(basicVerifyUserWithValidPublicKey)
-
             assertTrue(entranceViewModel.state.userDestinationResult is Resource.Success)
             assertTrue(entranceViewModel.state.userDestinationResult.data == UserDestination.KEY_MANAGEMENT_RECOVERY)
         }
@@ -325,9 +292,6 @@ class EntranceViewModelTest : BaseViewModelTest() {
 
             entranceViewModel.onStart()
             advanceUntilIdle()
-
-            verify(censoUserData, times(1))
-                .setCensoUser(basicVerifyUserWithValidPublicKeysNotReadyToBeAdded)
 
             assertTrue(entranceViewModel.state.userDestinationResult is Resource.Success)
             assertTrue(entranceViewModel.state.userDestinationResult.data == UserDestination.PENDING_APPROVAL)
@@ -351,9 +315,6 @@ class EntranceViewModelTest : BaseViewModelTest() {
             entranceViewModel.onStart()
             advanceUntilIdle()
 
-            verify(censoUserData, times(1))
-                .setCensoUser(basicVerifyUserWithValidPublicKey)
-
             assertTrue(entranceViewModel.state.userDestinationResult is Resource.Success)
             assertTrue(entranceViewModel.state.userDestinationResult.data == UserDestination.HOME)
         }
@@ -376,9 +337,6 @@ class EntranceViewModelTest : BaseViewModelTest() {
             entranceViewModel.onStart()
             advanceUntilIdle()
 
-            verify(censoUserData, times(1))
-                .setCensoUser(basicVerifyUserWithValidPublicKey)
-
             assertTrue(entranceViewModel.state.userDestinationResult is Resource.Success)
             assertTrue(entranceViewModel.state.userDestinationResult.data == UserDestination.INVALID_KEY)
         }
@@ -395,9 +353,6 @@ class EntranceViewModelTest : BaseViewModelTest() {
 
             entranceViewModel.onStart()
             advanceUntilIdle()
-
-            verify(censoUserData, times(1))
-                .setCensoUser(null)
 
             assertTrue(entranceViewModel.state.userDestinationResult is Resource.Uninitialized)
         }
@@ -417,9 +372,6 @@ class EntranceViewModelTest : BaseViewModelTest() {
 
             entranceViewModel.onStart()
 
-            verify(censoUserData, times(1))
-                .setCensoUser(null)
-
             assertTrue(entranceViewModel.state.userDestinationResult is Resource.Uninitialized)
 
             whenever(userRepository.verifyUser()).then {
@@ -427,9 +379,6 @@ class EntranceViewModelTest : BaseViewModelTest() {
             }
 
             entranceViewModel.retryRetrieveVerifyUserDetails()
-
-            verify(censoUserData, times(1))
-                .setCensoUser(basicVerifyUserWithValidPublicKey)
 
             assertTrue(entranceViewModel.state.userDestinationResult is Resource.Success)
             assertTrue(entranceViewModel.state.userDestinationResult.data == UserDestination.HOME)
@@ -638,7 +587,7 @@ class EntranceViewModelTest : BaseViewModelTest() {
     }
 
     private suspend fun setupLoggedInUserWithValidEmail() {
-        whenever(userRepository.retrieveCachedUserEmail()).then { email }
+        whenever(userRepository.retrieveUserEmail()).then { email }
         whenever(userRepository.isTokenEmailVerified()).then { false }
         whenever(userRepository.userLoggedIn()).then { true }
     }

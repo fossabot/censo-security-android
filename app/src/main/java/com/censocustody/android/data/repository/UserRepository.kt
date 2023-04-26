@@ -2,8 +2,11 @@ package com.censocustody.android.data.repository
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.graphics.Bitmap
 import android.provider.Settings
 import com.censocustody.android.common.*
+import com.censocustody.android.common.ui.generateUserImageObject
+import com.censocustody.android.common.wrapper.BaseWrapper
 import com.censocustody.android.data.api.AnchorApiService
 import com.censocustody.android.data.api.BrooklynApiService
 import com.censocustody.android.data.api.SemVersionApiService
@@ -35,7 +38,6 @@ interface UserRepository {
     suspend fun resetPassword(email: String) : ResponseBody
     suspend fun sendVerificationEmail(email: String) : Resource<ResponseBody>
     suspend fun retrieveUserEmail(): String
-    fun retrieveCachedUserEmail(): String
     suspend fun saveUserEmail(email: String)
     suspend fun checkMinimumVersion(): Resource<SemanticVersionResponse>
     suspend fun setKeyInvalidated()
@@ -54,6 +56,9 @@ interface UserRepository {
     fun saveBootstrapImageUrl(email: String, bootstrapImageUrl: String)
     fun clearBootstrapImageUrl(email: String)
     fun retrieveBootstrapImageUrl(email: String) : String
+    fun createUserImage(userPhoto: Bitmap, keyName: String) : UserImage
+    fun getCachedUser() : VerifyUser?
+    fun setCachedUser(verifyUser: VerifyUser?)
 }
 
 class UserRepositoryImpl(
@@ -66,6 +71,14 @@ class UserRepositoryImpl(
     private val cryptographyManager: CryptographyManager,
     private val applicationContext: Context
 ) : UserRepository, BaseRepository() {
+
+    private var censoUser: VerifyUser? = null
+
+    override fun getCachedUser() = censoUser
+
+    override fun setCachedUser(verifyUser: VerifyUser?) {
+        censoUser = verifyUser
+    }
 
     override suspend fun resetPassword(email: String) = anchorApiService.recoverPassword(email)
 
@@ -218,8 +231,6 @@ class UserRepositoryImpl(
         }
     }
 
-    override fun retrieveCachedUserEmail() = SharedPrefsHelper.retrieveUserEmail()
-
     override fun saveBootstrapImageUrl(email: String, bootstrapImageUrl: String) {
         SharedPrefsHelper.saveBootstrapImageUrl(
             email = email,
@@ -229,6 +240,13 @@ class UserRepositoryImpl(
 
     override fun retrieveBootstrapImageUrl(email: String) =
         SharedPrefsHelper.retrieveBootstrapImageUrl(email)
+
+    override fun createUserImage(userPhoto: Bitmap, keyName: String) =
+        generateUserImageObject(
+            userPhoto = userPhoto,
+            keyName = keyName,
+            cryptographyManager = cryptographyManager
+        )
 
     override fun clearBootstrapImageUrl(email: String) {
         SharedPrefsHelper.clearBootstrapImageUrl(email)

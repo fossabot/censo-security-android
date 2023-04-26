@@ -9,13 +9,13 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.viewModelScope
 import com.raygun.raygun4android.RaygunClient
 import com.censocustody.android.common.*
-import com.censocustody.android.common.NoInternetException.Companion.NO_INTERNET_ERROR
+import com.censocustody.android.common.exception.NoInternetException.Companion.NO_INTERNET_ERROR
+import com.censocustody.android.common.util.CrashReportingUtil
 import com.censocustody.android.data.models.LoginResponse
 import com.censocustody.android.data.models.PushBody
 import com.censocustody.android.data.repository.KeyRepository
 import com.censocustody.android.data.repository.PushRepository
 import com.censocustody.android.data.repository.UserRepository
-import com.censocustody.android.data.storage.CensoUserData
 import kotlinx.coroutines.*
 import javax.crypto.Cipher
 
@@ -23,20 +23,19 @@ import javax.crypto.Cipher
 class SignInViewModel @Inject constructor(
     private val userRepository: UserRepository,
     private val pushRepository: PushRepository,
-    private val keyRepository: KeyRepository,
-    private val censoUserData: CensoUserData
+    private val keyRepository: KeyRepository
 ) : ViewModel() {
 
     var state by mutableStateOf(SignInState())
         private set
 
     init {
-        getCachedEmail()
+        getEmailIfSaved()
     }
 
-    private fun getCachedEmail() {
+    private fun getEmailIfSaved() {
         viewModelScope.launch {
-            val email = userRepository.retrieveCachedUserEmail()
+            val email = userRepository.retrieveUserEmail()
             state = state.copy(email = email)
         }
     }
@@ -240,7 +239,6 @@ class SignInViewModel @Inject constructor(
 
     private suspend fun userSuccessfullyLoggedIn(token: String) {
         userRepository.saveUserEmail(state.email)
-        censoUserData.setEmail(state.email)
         userRepository.setUserLoggedIn()
         userRepository.saveToken(token)
         submitNotificationTokenForRegistration()

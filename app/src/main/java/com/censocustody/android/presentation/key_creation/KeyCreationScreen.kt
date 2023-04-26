@@ -26,6 +26,9 @@ import com.censocustody.android.presentation.key_management.BackgroundUI
 import com.censocustody.android.presentation.key_management.SmallAuthFlowButton
 import com.censocustody.android.R
 import com.censocustody.android.common.*
+import com.censocustody.android.common.ui.rotateImageIfRequired
+import com.censocustody.android.common.ui.squareCropImage
+import com.censocustody.android.common.util.CrashReportingUtil
 import com.censocustody.android.presentation.key_management.PreBiometryDialog
 import com.censocustody.android.ui.theme.*
 import com.raygun.raygun4android.RaygunClient

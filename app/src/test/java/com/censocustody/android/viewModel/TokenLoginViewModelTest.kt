@@ -7,7 +7,6 @@ import com.censocustody.android.data.models.PushBody
 import com.censocustody.android.data.repository.KeyRepository
 import com.censocustody.android.data.repository.PushRepository
 import com.censocustody.android.data.repository.UserRepository
-import com.censocustody.android.data.storage.CensoUserData
 import com.censocustody.android.data.validator.EmailValidator
 import com.censocustody.android.presentation.token_sign_in.TokenSignInViewModel
 import com.nhaarman.mockitokotlin2.any
@@ -39,9 +38,6 @@ class TokenLoginViewModelTest : BaseViewModelTest() {
     lateinit var keyRepository: KeyRepository
 
     @Mock
-    lateinit var censoUserData: CensoUserData
-
-    @Mock
     lateinit var emailValidator: EmailValidator
 
     @Mock
@@ -71,7 +67,6 @@ class TokenLoginViewModelTest : BaseViewModelTest() {
                 userRepository = userRepository,
                 pushRepository = pushRepository,
                 keyRepository = keyRepository,
-                censoUserData = censoUserData,
                 emailValidator = emailValidator
             )
 
@@ -271,7 +266,7 @@ class TokenLoginViewModelTest : BaseViewModelTest() {
         }
 
     private suspend fun assertSavedDataAfterSuccessfulApiLogin() {
-        verify(censoUserData, times(1)).setEmail(validEmail)
+        verify(userRepository, times(1)).saveUserEmail(validEmail)
         verify(userRepository, times(1)).setUserLoggedIn()
         verify(userRepository, times(1)).saveToken(exampleLoginResponse.token!!)
         assertPushNotificationRegistrationAttempted()

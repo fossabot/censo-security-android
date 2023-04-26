@@ -4,6 +4,10 @@ import cash.z.ecc.android.bip39.Mnemonics
 import cash.z.ecc.android.bip39.toSeed
 import com.google.gson.Gson
 import com.censocustody.android.common.*
+import com.censocustody.android.common.wrapper.toHexString
+import com.censocustody.android.data.cryptography.ChildPathNumber
+import com.censocustody.android.data.cryptography.Ed25519HierarchicalPrivateKey
+import com.censocustody.android.data.cryptography.Secp256k1HierarchicalKey
 import org.bitcoinj.core.Base58
 import org.junit.Assert.*
 import org.junit.Test
