@@ -6,6 +6,8 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.censocustody.android.common.*
+import com.censocustody.android.common.util.CrashReportingUtil
+import com.censocustody.android.common.wrapper.toShareUserId
 import com.censocustody.android.data.repository.ApprovalsRepository
 import com.censocustody.android.data.repository.KeyRepository
 import com.censocustody.android.data.models.ApprovalDisposition

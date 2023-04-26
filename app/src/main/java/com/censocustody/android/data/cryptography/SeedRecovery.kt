@@ -1,18 +1,6 @@
-package com.censocustody.android.common
+package com.censocustody.android.data.cryptography
 
-import com.censocustody.android.common.SecretSharerUtils.dotProduct
-import org.bitcoinj.core.Base58
-import org.bouncycastle.jce.ECNamedCurveTable
 import java.math.BigInteger
-import org.bouncycastle.jce.interfaces.ECPublicKey
-import org.bouncycastle.jce.provider.BouncyCastleProvider
-import org.bouncycastle.util.encoders.Hex
-import java.security.AlgorithmParameters
-import java.security.KeyFactory
-import java.security.spec.ECGenParameterSpec
-import java.security.spec.ECParameterSpec
-import java.security.spec.ECPoint
-import java.security.spec.ECPublicKeySpec
 
 data class Point(val x: BigInteger, val y: BigInteger) {
     constructor(x: String, y: String) : this(BigInteger(x), BigInteger(y))
@@ -179,7 +167,7 @@ class SecretSharer(val secret: BigInteger, val threshold: Int, val participants:
     val shards = getShares(participants, threshold, secret)
 
     fun vandermonde(participants: List<BigInteger>, threshold: Int) = SecretSharerUtils.vandermonde(participants, threshold, order)
-    fun dotProduct(matrix: Matrix, vector: Vector) = dotProduct(matrix, vector, order)
+    fun dotProduct(matrix: Matrix, vector: Vector) = SecretSharerUtils.dotProduct(matrix, vector, order)
     fun invertLUP(lu: Matrix, p: Vector) = SecretSharerUtils.invertLUP(lu, p, order)
     fun decomposeLUP(matrix: Matrix) = SecretSharerUtils.decomposeLUP(matrix, order)
     fun addShards(shares: List<BigInteger>, weights: List<BigInteger>) = SecretSharerUtils.addShares(shares, weights, order)

@@ -1,6 +1,7 @@
-package com.censocustody.android.common
+package com.censocustody.android.common.wrapper
 
 import org.bitcoinj.core.Base58
+import org.bouncycastle.util.encoders.Hex
 import java.math.BigInteger
 import java.security.MessageDigest
 import java.util.*
@@ -19,6 +20,17 @@ fun BigInteger.toHexString(): String {
 }
 fun ByteArray.toHexString(): String =
     joinToString(separator = "") { eachByte -> "%02x".format(eachByte) }
+
+fun ByteArray.toPaddedHexString(length: Int) = joinToString("") { "%02X".format(it) }.padStart(length, '0')
+fun ByteArray.pad(length: Int): ByteArray = Hex.decode(this.toPaddedHexString(length * 2))
+fun BigInteger.toByteArrayNoSign(len: Int): ByteArray {
+    val byteArray = this.toByteArray()
+    return when {
+        byteArray.size == len + 1 && byteArray[0].compareTo(0) == 0 -> byteArray.slice(IntRange(1, byteArray.size - 1)).toByteArray()
+        byteArray.size < len -> byteArray.pad(len)
+        else -> byteArray
+    }
+}
 
 fun BigInteger.toByteArrayNoSign(): ByteArray {
     val byteArray = this.toByteArray()

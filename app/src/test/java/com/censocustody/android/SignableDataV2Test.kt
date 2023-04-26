@@ -1,6 +1,6 @@
 package com.censocustody.android
 
-import com.censocustody.android.common.toHexString
+import com.censocustody.android.common.wrapper.toHexString
 import com.censocustody.android.data.cryptography.SignableDataResult
 import com.censocustody.android.data.models.ApprovalDisposition
 import com.censocustody.android.data.models.approvalV2.ApprovalDispositionRequestV2

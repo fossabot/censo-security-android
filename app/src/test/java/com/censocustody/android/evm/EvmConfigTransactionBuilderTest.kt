@@ -1,7 +1,7 @@
 package com.censocustody.android.evm
 
 import com.censocustody.android.common.evm.*
-import com.censocustody.android.common.toHexString
+import com.censocustody.android.common.wrapper.toHexString
 import com.censocustody.android.data.models.approvalV2.ApprovalRequestDetailsV2
 import com.censocustody.android.data.models.evm.EvmConfigTransactionBuilder
 import org.bouncycastle.util.encoders.Hex

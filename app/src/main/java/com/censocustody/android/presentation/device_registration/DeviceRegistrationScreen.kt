@@ -20,8 +20,9 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.censocustody.android.R
 import com.censocustody.android.common.*
+import com.censocustody.android.common.ui.ImageCaptureError
+import com.censocustody.android.common.ui.getCameraProvider
 import com.censocustody.android.presentation.Screen
-import com.censocustody.android.presentation.key_creation.KeyCreationInitialData
 import com.censocustody.android.presentation.key_management.BackgroundUI
 import com.censocustody.android.presentation.key_management.SmallAuthFlowButton
 import com.censocustody.android.ui.theme.*

@@ -1,7 +1,7 @@
 package com.censocustody.android.data.repository
 
 import com.censocustody.android.common.Resource
-import com.censocustody.android.common.CensoError
+import com.censocustody.android.common.exception.CensoError
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import retrofit2.Response

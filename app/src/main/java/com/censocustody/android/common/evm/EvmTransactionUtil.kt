@@ -1,7 +1,7 @@
 package com.censocustody.android.common.evm
 
-import com.censocustody.android.common.pad
-import com.censocustody.android.common.toHexString
+import com.censocustody.android.common.wrapper.pad
+import com.censocustody.android.common.wrapper.toHexString
 import org.bitcoinj.core.Base58
 import org.bouncycastle.util.encoders.Hex
 import org.web3j.crypto.Keys

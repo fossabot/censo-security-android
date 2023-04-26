@@ -12,7 +12,6 @@ import com.censocustody.android.data.models.PushBody
 import com.censocustody.android.data.repository.KeyRepository
 import com.censocustody.android.data.repository.PushRepository
 import com.censocustody.android.data.repository.UserRepository
-import com.censocustody.android.data.storage.CensoUserData
 import com.censocustody.android.presentation.sign_in.LoginStep
 import com.censocustody.android.presentation.sign_in.SignInViewModel
 import junit.framework.TestCase.assertEquals
@@ -20,7 +19,6 @@ import junit.framework.TestCase.assertTrue
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.*
-import okhttp3.ResponseBody
 import okhttp3.ResponseBody.Companion.toResponseBody
 import org.junit.After
 import org.junit.Before
@@ -47,9 +45,6 @@ class SignInViewModelTest : BaseViewModelTest() {
     lateinit var pushRepository: PushRepository
 
     @Mock
-    lateinit var censoUserData: CensoUserData
-
-    @Mock
     lateinit var cipher: Cipher
 
     private val validEmail = "sam@ok.com"
@@ -70,7 +65,7 @@ class SignInViewModelTest : BaseViewModelTest() {
         Dispatchers.setMain(dispatcher)
         MockitoAnnotations.openMocks(this)
 
-        whenever(userRepository.retrieveCachedUserEmail()).then { "" }
+        whenever(userRepository.retrieveUserEmail()).then { "" }
         whenever(userRepository.retrieveUserEmail()).then { validEmail }
         whenever(userRepository.retrieveUserDeviceId(any())).then { deviceId }
         whenever(userRepository.sendVerificationEmail(validEmail)).then { Resource.Success("".toResponseBody()) }
@@ -82,13 +77,14 @@ class SignInViewModelTest : BaseViewModelTest() {
     }
 
     @Test
-    fun `retrieve cached email on initialization`() {
-        whenever(userRepository.retrieveCachedUserEmail()).then { validEmail }
+    fun `retrieve cached email on initialization`() =
+        runTest {
+            whenever(userRepository.retrieveUserEmail()).then { validEmail }
 
-        initVM()
+            initVM()
 
-        assertTrue(signInViewModel.state.email == validEmail)
-    }
+            assertTrue(signInViewModel.state.email == validEmail)
+        }
 
     @Test
     fun `valid email with no private key moves us to password entry`() =
@@ -432,13 +428,14 @@ class SignInViewModelTest : BaseViewModelTest() {
         signInViewModel = SignInViewModel(
             keyRepository = keyRepository,
             userRepository = userRepository,
-            censoUserData = censoUserData,
             pushRepository = pushRepository,
         )
     }
 
     private suspend fun assertSavedDataAfterSuccessfulApiLogin() {
-        verify(censoUserData, times(1)).setEmail(validEmail)
+        //we save everytime user updates email (entering via keyboard), and after success.
+        verify(userRepository, times(2)).saveUserEmail(validEmail)
+
         verify(userRepository, times(1)).setUserLoggedIn()
         verify(userRepository, times(1)).saveToken(jwt)
         assertPushNotificationRegistrationAttempted()

@@ -7,6 +7,7 @@ import com.censocustody.android.data.repository.ApprovalsRepository
 import com.censocustody.android.data.repository.KeyRepository
 import com.censocustody.android.data.repository.UserRepository
 import com.censocustody.android.data.models.approvalV2.ApprovalRequestV2
+import com.censocustody.android.data.repository.PushRepository
 import com.censocustody.android.presentation.common_approvals.CommonApprovalsViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
@@ -17,6 +18,7 @@ import javax.inject.Inject
 class ApprovalsViewModel @Inject constructor(
     private val userRepository: UserRepository,
     private val approvalsRepository: ApprovalsRepository,
+    private val pushRepository: PushRepository,
     keyRepository: KeyRepository,
     timer: CensoCountDownTimer,
 ) : CommonApprovalsViewModel(
@@ -64,6 +66,11 @@ class ApprovalsViewModel @Inject constructor(
             refreshApprovalsData()
         }
     }
+
+    fun userHasSeenPushDialog() = pushRepository.userHasSeenPushDialog()
+
+    fun setUserSeenPushDialog(seenDialog: Boolean) =
+        pushRepository.setUserSeenPushDialog(seenDialog)
 
     fun resetApprovalsData() {
         state = state.copy(

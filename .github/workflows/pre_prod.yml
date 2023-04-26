@@ -16,6 +16,7 @@ jobs:
     uses: ./.github/workflows/core_workflow.yml
     with:
       variant: PreProd
+      createFirebaseBuild: false
     secrets:
       googleServices: ${{ secrets.GOOGLE_SERVICES }}
       firebaseToken: ${{ secrets.FIREBASE_TOKEN }}

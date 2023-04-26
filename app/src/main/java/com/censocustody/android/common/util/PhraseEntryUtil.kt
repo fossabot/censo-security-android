@@ -1,5 +1,6 @@
-package com.censocustody.android.common
+package com.censocustody.android.common.util
 
+import com.censocustody.android.common.PhraseException
 import com.censocustody.android.data.models.IndexedPhraseWord
 import com.censocustody.android.presentation.key_management.ConfirmPhraseWordsState
 import com.censocustody.android.presentation.key_management.KeyManagementFlow

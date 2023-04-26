@@ -5,13 +5,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.censocustody.android.common.NoInternetException
+import com.censocustody.android.common.exception.NoInternetException
 import com.censocustody.android.common.Resource
-import com.censocustody.android.data.*
 import com.censocustody.android.data.models.LoginResponse
 import com.censocustody.android.data.repository.KeyRepository
 import com.censocustody.android.data.repository.UserRepository
-import com.censocustody.android.data.storage.CensoUserData
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -19,8 +17,7 @@ import javax.inject.Inject
 @HiltViewModel
 class ReAuthenticateViewModel @Inject constructor(
     private val userRepository: UserRepository,
-    private val keyRepository: KeyRepository,
-    private val censoUserData: CensoUserData
+    private val keyRepository: KeyRepository
 ) : ViewModel() {
 
     var state by mutableStateOf(ReAuthenticateState())
@@ -90,7 +87,6 @@ class ReAuthenticateViewModel @Inject constructor(
 
     private suspend fun userSuccessfullyLoggedIn(email: String, token: String) {
         userRepository.saveUserEmail(email)
-        censoUserData.setEmail(email)
         userRepository.setUserLoggedIn()
         userRepository.saveToken(token)
     }
