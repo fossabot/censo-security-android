@@ -6,6 +6,9 @@ on:
       variant:
         required: true
         type: string
+      createFirebaseBuild:
+        required: true
+        type: boolean
     secrets:
       googleServices:
         required: true
@@ -16,8 +19,6 @@ on:
       passphrase:
         required: true
       keyPassword:
-        required: true
-      createFirebaseBuild:
         required: true
       alias:
         required: true
