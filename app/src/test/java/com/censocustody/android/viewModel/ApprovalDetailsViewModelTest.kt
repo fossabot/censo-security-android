@@ -4,7 +4,7 @@ import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.whenever
 import com.censocustody.android.*
 import com.censocustody.android.common.Resource
-import com.censocustody.android.common.CensoCountDownTimer
+import com.censocustody.android.common.wrapper.CensoCountDownTimer
 import com.censocustody.android.data.models.ApprovalDisposition
 import com.censocustody.android.data.models.approvalV2.ApprovalRequestV2
 import com.censocustody.android.data.repository.ApprovalsRepository

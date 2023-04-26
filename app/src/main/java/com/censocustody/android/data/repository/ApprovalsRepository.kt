@@ -22,6 +22,7 @@ interface ApprovalsRepository {
     suspend fun retrieveShards(policyRevisionId: String, userId: String? = null) : Resource<GetShardsResponse>
 
     suspend fun sendWcUri(uri: String): Resource<ResponseBody>
+    suspend fun checkIfConnectionHasSessions() : Resource<ResponseBody>
 }
 
 class ApprovalsRepositoryImpl @Inject constructor(
@@ -42,6 +43,11 @@ class ApprovalsRepositoryImpl @Inject constructor(
     override suspend fun sendWcUri(uri: String) =
         retrieveApiResource {
             api.walletConnectPairing(WalletConnectPairingRequest(uri = uri))
+        }
+
+    override suspend fun checkIfConnectionHasSessions() =
+        retrieveApiResource {
+            api.checkSessionsOnConnectedDApp()
         }
 
     override suspend fun approveOrDenyDisposition(

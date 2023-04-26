@@ -3,8 +3,8 @@ package com.censocustody.android.viewModel
 import com.censocustody.android.*
 import com.censocustody.android.ResourceState.ERROR
 import com.censocustody.android.ResourceState.SUCCESS
-import com.censocustody.android.common.CensoCountDownTimer
 import com.censocustody.android.common.Resource
+import com.censocustody.android.common.wrapper.CensoCountDownTimer
 import com.censocustody.android.data.*
 import com.censocustody.android.data.models.ApprovalDisposition
 import com.censocustody.android.data.models.RecoveryShard
@@ -25,7 +25,6 @@ import kotlinx.coroutines.test.*
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
-import org.mockito.ArgumentMatchers
 import org.mockito.Mock
 import java.util.*
 

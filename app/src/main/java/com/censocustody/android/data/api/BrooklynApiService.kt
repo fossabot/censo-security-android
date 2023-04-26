@@ -150,6 +150,9 @@ interface BrooklynApiService {
     @Headers(AUTH_REQUIRED)
     suspend fun registerOrgAdminRecoverySignatures(@Body orgAdminRecoverySignaturesRequest: OrgAdminRecoverySignaturesRequest): RetrofitResponse<Unit>
 
+    @GET("v1/wallet-connect-session")
+    @Headers(AUTH_REQUIRED)
+    suspend fun checkSessionsOnConnectedDApp() : RetrofitResponse<ResponseBody>
 }
 
 class AnalyticsInterceptor : Interceptor {

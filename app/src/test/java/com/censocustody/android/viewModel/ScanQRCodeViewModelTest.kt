@@ -1,6 +1,7 @@
 package com.censocustody.android.viewModel
 
 import com.censocustody.android.common.Resource
+import com.censocustody.android.common.wrapper.CensoCountDownTimer
 import com.censocustody.android.data.repository.ApprovalsRepository
 import com.censocustody.android.presentation.scan_qr.ScanQRViewModel
 import com.nhaarman.mockitokotlin2.any
@@ -29,6 +30,9 @@ class ScanQRCodeViewModelTest : BaseViewModelTest() {
     @Mock
     lateinit var approvalsRepository: ApprovalsRepository
 
+    @Mock
+    lateinit var countdownTimer: CensoCountDownTimer
+
     private val dispatcher = TestCoroutineDispatcher()
 
     private val validURI = "wc:8eeb2d71daf1a3a57933a64d8f3ed3412dfdde6fcc5ff56a6372ece5b82f6b97@2?relay-protocol=irn&symKey=90d8cb943c73bb86771784cf4950d9c9c50645013806b1972e9d6fc40aa19a47"
@@ -42,7 +46,8 @@ class ScanQRCodeViewModelTest : BaseViewModelTest() {
 
         scanQRViewModel =
             ScanQRViewModel(
-                approvalsRepository = approvalsRepository
+                approvalsRepository = approvalsRepository,
+                timer = countdownTimer
             )
     }
 

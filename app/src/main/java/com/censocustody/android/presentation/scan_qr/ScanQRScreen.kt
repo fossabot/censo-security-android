@@ -48,7 +48,11 @@ fun ScanQRScreen(
 ) {
     val state = viewModel.state
 
-    //region LaunchedEffect
+    //region Side Effects
+    DisposableEffect(key1 = viewModel) {
+        onDispose { viewModel.onStop() }
+    }
+
     LaunchedEffect(key1 = state) {
         if (state.exitScreen) {
             viewModel.exitScreen()
@@ -110,13 +114,14 @@ fun ScanQRScreen(
 
                     val scanQRResult = state.scanQRCodeResult
                     val uploadWcUriResult = state.uploadWcUri
+                    val checkingConnections = state.checkSessionsOnConnection
 
-                    if (uploadWcUriResult is Resource.Success) {
+                    if (checkingConnections is Resource.Success) {
                         ScanQRBoxUI {
                             Spacer(modifier = Modifier.height(36.dp))
                             Text(
                                 modifier = Modifier.padding(horizontal = 8.dp),
-                                text = stringResource(R.string.upload_wc_uri_success),
+                                text = stringResource(R.string.checked_connections_success),
                                 textAlign = TextAlign.Center,
                                 color = TextBlack,
                                 fontSize = 22.sp
@@ -176,12 +181,13 @@ fun ScanQRScreen(
                             }
                             Spacer(modifier = Modifier.height(36.dp))
                         }
-                    } else if (scanQRResult is Resource.Success) {
+                    } else if (scanQRResult is Resource.Success || checkingConnections is Resource.Loading) {
                         ScanQRBoxUI {
                             Spacer(modifier = Modifier.height(36.dp))
                             Text(
                                 modifier = Modifier.padding(horizontal = 8.dp),
-                                text = stringResource(R.string.scan_qr_code_success),
+                                text = if (checkingConnections is Resource.Loading) stringResource(R.string.checking_sessions_loading)
+                                else stringResource(R.string.scan_qr_code_success),
                                 textAlign = TextAlign.Center,
                                 color = TextBlack,
                                 fontSize = 22.sp

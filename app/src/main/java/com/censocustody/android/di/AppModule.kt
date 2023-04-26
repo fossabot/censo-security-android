@@ -1,8 +1,8 @@
 package com.censocustody.android.di
 
 import android.content.Context
-import com.censocustody.android.common.CensoCountDownTimer
-import com.censocustody.android.common.CensoCountDownTimerImpl
+import com.censocustody.android.common.wrapper.CensoCountDownTimer
+import com.censocustody.android.common.wrapper.CensoCountDownTimerImpl
 import com.censocustody.android.data.*
 import com.censocustody.android.data.api.AnchorApiService
 import com.censocustody.android.data.api.BrooklynApiService
