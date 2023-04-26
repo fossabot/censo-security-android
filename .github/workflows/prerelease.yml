@@ -16,6 +16,7 @@ jobs:
     uses: ./.github/workflows/core_workflow.yml
     with:
       variant: PreRelease
+      createFirebaseBuild: false
     secrets:
       googleServices: ${{ secrets.GOOGLE_SERVICES }}
       firebaseToken: ${{ secrets.FIREBASE_TOKEN }}
@@ -23,4 +24,3 @@ jobs:
       passphrase: ${{ secrets.PASSPHRASE }}
       keyPassword: ${{ secrets.RELEASE_STORE_PASSWORD }}
       alias: ${{ secrets.RELEASE_KEY_ALIAS }}
-      createFirebaseBuild: false
