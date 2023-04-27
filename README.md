@@ -91,7 +91,7 @@ adb shell am start -W -a android.intent.action.VIEW -d "censo://login/[EMAIL_HER
 
 # Architecture
 
-INSERT IMAGE FOR ARCHITECTURE HERE
+![img.png](img.png)
 
 We use a MVVM (Model - View - ViewModel) Architecture
 
