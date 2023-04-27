@@ -89,14 +89,14 @@ Need to pass one argument: `--token` which is the firebase token needed to uploa
 adb shell am start -W -a android.intent.action.VIEW -d "censo://login/[EMAIL_HERE]/[TOKEN_HERE]" com.censocustody.android.[VARIANT_SUFFIX]
 
 
-#Architecture
+# Architecture
 
 INSERT IMAGE FOR ARCHITECTURE HERE
 
 We use a MVVM (Model - View - ViewModel) Architecture
 
 
-###View Layer
+### View Layer
 
 The view layer is implemented using `Jetpack Compose`
 
@@ -117,7 +117,7 @@ Each screen handles certain `Side Effects`
 - `Disposable Effect` : lifecycle events that the screen wants to respond to. Inform the ViewModel that the screen has started or is being disposed.
 
 
-###View Model Layer
+### View Model Layer
 
 The `ViewModel` handles all the logic associated with `State` changes and persists user state beyond configuration changes.
 
@@ -131,7 +131,7 @@ This is the most tested layer in our codebase. We write unit tests that mock the
 `ViewModels` should not contain any code from the Android SDK. This way they can be heavily unit tested and those tests will not need an Android device to run.
 
 
-####State
+#### State
 `State` objects are simple Kotlin data classes. Every value must have a default value. The `ViewModel`makes copies of the existing state whenever it needs to emit a new state value.
 
 `State` is not exposed to the view layer and can only be set inside the `ViewModel`.
@@ -143,7 +143,7 @@ This is the most tested layer in our codebase. We write unit tests that mock the
 - Uninitialized
 
 
-###Repository/Data Layer
+### Repository/Data Layer
 
 The `Repository` layer handles all work involved with data sources.
 
@@ -168,7 +168,7 @@ The current data sources in the app are:
 - `Android Keystore`
 
 
-##Networking
+## Networking
 
 We use the Retrofit Library to handle all of our networking.
 
@@ -198,27 +198,27 @@ We have one deeplink route: `TokenLoginScreen`: censo://login/\{userEmail\}/\{to
   - We only match a route that has both the email and token arguments.
 - We send the user to the `TokenSignInScreen`with the email and token arguments.
 
-##Storage
+## Storage
 
-##Cryptography
+## Cryptography
 
-###`Encryption Manager`
+### `Encryption Manager`
 
-###`Cryptography Manager`
+### `Cryptography Manager`
 
-##Unit Test
+## Unit Test
 
-##Push Notifications
+## Push Notifications
 
-##3rd Party Libraries
+## 3rd Party Libraries
 
-##Main Flows
+## Main Flows
 
-###Auth/Sign In
+### Auth/Sign In
 
-###Entrance Flow
+### Entrance Flow
 
-###Approval Signing Flow
+### Approval Signing Flow
 
 1. Create the `ApprovalDispositionRequest`
 2. Call `convertToApiBody`on the `ApprovalDispositionRequest`
