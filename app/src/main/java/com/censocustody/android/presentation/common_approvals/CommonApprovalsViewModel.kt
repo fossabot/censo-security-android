@@ -211,7 +211,7 @@ abstract class  CommonApprovalsViewModel(
         requestDetails: ApprovalRequestDetailsV2?
     ): List<Shard>? {
         when (requestDetails) {
-            is ApprovalRequestDetailsV2.AddDevice -> {
+            is ApprovalRequestDetailsV2.EnableDevice -> {
 
                 if (requestDetails.currentShardingPolicyRevisionGuid == null) return null
 
@@ -236,7 +236,7 @@ abstract class  CommonApprovalsViewModel(
         requestDetails: ApprovalRequestDetailsV2?
     ): List<Shard>? {
         val policyId = when (requestDetails) {
-            is ApprovalRequestDetailsV2.AddDevice ->
+            is ApprovalRequestDetailsV2.EnableDevice ->
                 requestDetails.targetShardingPolicy?.let {
                     requestDetails.currentShardingPolicyRevisionGuid
                 }

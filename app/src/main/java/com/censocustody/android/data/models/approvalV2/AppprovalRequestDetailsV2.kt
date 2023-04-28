@@ -73,9 +73,9 @@ sealed class ApprovalRequestDetailsV2 {
         val approvalRequestDetailsV2AdapterFactory: RuntimeTypeAdapterFactory<ApprovalRequestDetailsV2> = RuntimeTypeAdapterFactory.of(
             ApprovalRequestDetailsV2::class.java, "type"
         ).registerSubtype(
-            AddDevice::class.java, "AddDevice"
+            EnableDevice::class.java, "EnableDevice"
         ).registerSubtype(
-            RemoveDevice::class.java, "RemoveDevice"
+            DisableDevice::class.java, "DisableDevice"
         ).registerSubtype(
             OrgAdminPolicyUpdate::class.java, "OrgAdminPolicyUpdate"
         ).registerSubtype(
@@ -150,19 +150,20 @@ sealed class ApprovalRequestDetailsV2 {
         val feeSymbolInfo: EvmSymbolInfo
     )
 
-    data class AddDevice(
+    data class EnableDevice(
         val name: String,
         val email: String,
         val jpegThumbnail: String,
         val deviceGuid: String,
         val deviceKey: String,
         val deviceType: DeviceType,
+        val firstTime: Boolean,
         val currentShardingPolicyRevisionGuid: String?,
         val targetShardingPolicy: ShardingPolicy?,
         val replacingDeviceGuid: String?
     ) : ApprovalRequestDetailsV2()
 
-    data class RemoveDevice(
+    data class DisableDevice(
         val name: String,
         val email: String,
         val jpegThumbnail: String,
