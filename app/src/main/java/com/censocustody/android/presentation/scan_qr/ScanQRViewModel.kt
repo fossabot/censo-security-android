@@ -6,6 +6,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.censocustody.android.common.Resource
+import com.censocustody.android.common.censoLog
 import com.censocustody.android.common.wrapper.CensoCountDownTimer
 import com.censocustody.android.common.wrapper.CensoCountDownTimerImpl
 import com.censocustody.android.data.repository.ApprovalsRepository
@@ -28,7 +29,11 @@ class ScanQRViewModel @Inject constructor(
 
     fun receivedWalletConnectUri(uri: String?) {
         if (state.scanQRCodeResult is Resource.Loading && !uri.isNullOrEmpty()) {
-            state = state.copy(scanQRCodeResult = Resource.Success(uri))
+            val topic = uri.substringAfter(":").substringBefore("@")
+            state = state.copy(
+                scanQRCodeResult = Resource.Success(uri),
+                topic = topic
+            )
             sendUriToBackend(uri = uri)
         }
     }
@@ -56,7 +61,12 @@ class ScanQRViewModel @Inject constructor(
 
     private fun checkSessions() {
         viewModelScope.launch {
-            val checkSessionsResource = approvalsRepository.checkIfConnectionHasSessions()
+            if (state.topic.isEmpty()) {
+                state = state.copy(scanQRCodeResult = Resource.Error())
+                return@launch
+            }
+
+            val checkSessionsResource = approvalsRepository.checkIfConnectionHasSessions(state.topic)
 
             if (checkSessionsResource is Resource.Success) {
                 timer.stopCountDownTimer()

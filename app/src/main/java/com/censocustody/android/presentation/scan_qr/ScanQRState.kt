@@ -7,5 +7,6 @@ data class ScanQRState(
     val scanQRCodeResult: Resource<String> = Resource.Loading(),
     val uploadWcUri: Resource<ResponseBody> = Resource.Uninitialized,
     val checkSessionsOnConnection: Resource<ResponseBody> = Resource.Uninitialized,
-    val exitScreen: Boolean = false
+    val exitScreen: Boolean = false,
+    val topic: String = ""
 )
