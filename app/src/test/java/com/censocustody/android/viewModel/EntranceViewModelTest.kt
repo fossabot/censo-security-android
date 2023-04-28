@@ -85,7 +85,8 @@ class EntranceViewModelTest : BaseViewModelTest() {
             devicePublicKey, true, null
         ),
         shardingPolicy = exampleShardingPolicy,
-        canAddSigners = true
+        canAddSigners = true,
+        orgAdminInfo = null
     )
 
     private val validSolanaPublicKey = WalletPublicKey(

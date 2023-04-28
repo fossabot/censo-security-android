@@ -29,7 +29,8 @@ fun getVerifyUser() = VerifyUser(
         "", false, null
     ),
     shardingPolicy = null,
-    canAddSigners = true
+    canAddSigners = true,
+    orgAdminInfo = null
 )
 
 class ExampleMnemonicAndKeys {

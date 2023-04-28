@@ -45,7 +45,8 @@ class PendingApprovalViewModelTest : BaseViewModelTest() {
             "", true, null
         ),
         shardingPolicy = null,
-        canAddSigners = true
+        canAddSigners = true,
+        orgAdminInfo = null
     )
 
     private val basicVerifyUserCannotAddSigners = basicVerifyUserCanAddSigners.copy(

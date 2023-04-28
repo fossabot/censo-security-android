@@ -17,6 +17,13 @@ data class DeviceKeyInfo(
     val bootstrapKey: String?,
 )
 
+data class OrgAdminInfo(
+    val hasRecoveryContract: Boolean,
+    val participantId: String,
+    val hasPendingOrgRecovery: Boolean,
+    val canInitiateOrgRecovery: Boolean
+)
+
 data class VerifyUser(
     val fullName: String?,
     val hasApprovalPermission: Boolean?,
@@ -27,7 +34,8 @@ data class VerifyUser(
     val deviceKeyInfo: DeviceKeyInfo?,
     // if this come back as null, then this is the bootstrap user for the org they belong to.
     val shardingPolicy: ShardingPolicy?,
-    val canAddSigners: Boolean
+    val canAddSigners: Boolean,
+    val orgAdminInfo: OrgAdminInfo?
 ) {
     fun compareAgainstLocalKeys(hashMap: HashMap<String, String>): Boolean {
         if (publicKeys.isNullOrEmpty()) {

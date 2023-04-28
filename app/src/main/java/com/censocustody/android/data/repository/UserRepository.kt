@@ -13,7 +13,6 @@ import com.censocustody.android.data.api.SemVersionApiService
 import com.censocustody.android.data.cryptography.CryptographyManager
 import com.censocustody.android.data.cryptography.EncryptionManager
 import com.censocustody.android.data.models.*
-import com.censocustody.android.data.repository.BaseRepository
 import com.censocustody.android.data.storage.AuthProvider
 import com.censocustody.android.data.storage.SecurePreferences
 import com.censocustody.android.data.storage.SharedPrefsHelper
@@ -32,6 +31,13 @@ interface UserRepository {
         rootSeed: ByteArray?,
     ): Resource<Unit>
     suspend fun addBootstrapUser(userImage: UserImage, walletSigners: List<WalletSigner>, rootSeed: ByteArray): Resource<Unit>
+    suspend fun addOrgAdminRecoveredDevice(
+        userImage: UserImage,
+        walletSigners: List<WalletSigner>,
+        rootSeed: ByteArray,
+        policy: ShardingPolicy,
+        shardingParticipantId: String
+    ): Resource<Unit>
     suspend fun userLoggedIn(): Boolean
     suspend fun setUserLoggedIn()
     suspend fun logOut(): Boolean
@@ -217,6 +223,58 @@ class UserRepositoryImpl(
                 userDeviceAndSigners = BootstrapUserDeviceAndSigners(
                     userDevice = userDevice,
                     bootstrapDevice = bootstrapDevice,
+                    signersInfo = signers
+                )
+            )
+        }
+    }
+
+    override suspend fun addOrgAdminRecoveredDevice(
+        userImage: UserImage,
+        walletSigners: List<WalletSigner>,
+        rootSeed: ByteArray,
+        policy: ShardingPolicy,
+        shardingParticipantId: String
+    ): Resource<Unit> {
+        val email = retrieveUserEmail()
+
+        val signedDeviceData = encryptionManager.signKeysForUpload(
+            email = email,
+            walletSigners = walletSigners,
+            bootstrapSign = false
+        )
+
+        val devicePublicKey = retrieveUserDevicePublicKey(email)
+
+        val userDevice = UserDevice(
+            userImage = userImage,
+            deviceType = DeviceType.ANDROID,
+            publicKey = devicePublicKey
+        )
+
+        val share = encryptionManager.createShare(
+            shardingPolicy = ShardingPolicy(
+                policy.policyRevisionGuid,
+                policy.threshold,
+                policy.participants.map { participant ->
+                    if (participant.participantId == shardingParticipantId) {
+                        ShardingParticipant(participant.participantId, listOf(devicePublicKey))
+                    } else participant
+                }
+            ),
+            rootSeed = rootSeed
+        )
+
+        val signers = Signers(
+            signers = walletSigners,
+            signature = BaseWrapper.encodeToBase64(signedDeviceData),
+            share = share
+        )
+
+        return retrieveApiResource {
+            api.addOrgAdminRecoveredDeviceAndSigners(
+                orgAdminRecoveredDeviceAndSigners = OrgAdminRecoveredDeviceAndSigners(
+                    userDevice = userDevice,
                     signersInfo = signers
                 )
             )
