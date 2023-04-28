@@ -168,12 +168,12 @@ fun ApprovalRowContent(
 ) {
 
     when (type) {
-        //AddDevice
-        is ApprovalRequestDetailsV2.AddDevice -> {
-            AddOrRemoveDeviceRowContent(header = type.getHeader(LocalContext.current), type.email)
+        //EnableDevice
+        is ApprovalRequestDetailsV2.EnableDevice -> {
+            EnableOrDisableDeviceRowContent(header = type.getHeader(LocalContext.current), type.email)
         }
-        is ApprovalRequestDetailsV2.RemoveDevice -> {
-            AddOrRemoveDeviceRowContent(header = type.getHeader(LocalContext.current), type.email)
+        is ApprovalRequestDetailsV2.DisableDevice -> {
+            EnableOrDisableDeviceRowContent(header = type.getHeader(LocalContext.current), type.email)
         }
         //OrgAdminPolicyUpdate
         is ApprovalRequestDetailsV2.OrgAdminPolicyUpdate -> {
@@ -323,12 +323,12 @@ fun ApprovalRowContent(
 fun ApprovalDetailContent(approval: ApprovalRequestV2, type: ApprovalRequestDetailsV2) {
 
     when (type) {
-        //AddDevice
-        is ApprovalRequestDetailsV2.AddDevice -> {
-            AddOrRemoveDeviceDetailContent(type.getHeader(LocalContext.current), userDevice = type.toUserDeviceUI())
+        //EnableDevice
+        is ApprovalRequestDetailsV2.EnableDevice -> {
+            EnableOrDisableDeviceDetailContent(type.getHeader(LocalContext.current), userDevice = type.toUserDeviceUI())
         }
-        is ApprovalRequestDetailsV2.RemoveDevice -> {
-            AddOrRemoveDeviceDetailContent(type.getHeader(LocalContext.current), userDevice = type.toUserDeviceUI())
+        is ApprovalRequestDetailsV2.DisableDevice -> {
+            EnableOrDisableDeviceDetailContent(type.getHeader(LocalContext.current), userDevice = type.toUserDeviceUI())
         }
         //OrgAdminPolicyUpdate
         is ApprovalRequestDetailsV2.OrgAdminPolicyUpdate -> {

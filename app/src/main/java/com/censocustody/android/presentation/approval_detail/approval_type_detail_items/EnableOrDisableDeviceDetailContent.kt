@@ -15,7 +15,7 @@ import com.censocustody.android.presentation.components.FactsData
 import com.censocustody.android.presentation.components.RowData
 
 @Composable
-fun AddOrRemoveDeviceDetailContent(
+fun EnableOrDisableDeviceDetailContent(
     header: String,
     userDevice: UserDeviceUI
 ) {
@@ -62,18 +62,18 @@ data class UserDeviceUI(
     val deviceType: DeviceType,
 )
 
-fun ApprovalRequestDetailsV2.AddDevice.toUserDeviceUI(): UserDeviceUI {
+fun ApprovalRequestDetailsV2.EnableDevice.toUserDeviceUI(): UserDeviceUI {
     return(UserDeviceUI(this.name, this.email, this.jpegThumbnail, this.deviceGuid, this.deviceKey, this.deviceType))
 }
 
-fun ApprovalRequestDetailsV2.RemoveDevice.toUserDeviceUI(): UserDeviceUI {
+fun ApprovalRequestDetailsV2.DisableDevice.toUserDeviceUI(): UserDeviceUI {
     return(UserDeviceUI(this.name, this.email, this.jpegThumbnail, this.deviceGuid, this.deviceKey, this.deviceType))
 }
 
 @Composable
 @Preview
-fun AddDeviceDetailsContentPreview() {
-    AddOrRemoveDeviceDetailContent(
+fun EnableDeviceDetailsContentPreview() {
+    EnableOrDisableDeviceDetailContent(
         "Add New Device",
         UserDeviceUI(
             "User 1",
