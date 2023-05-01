@@ -46,6 +46,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTag
+import com.censocustody.android.common.tag.Tag
 
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @OptIn(ExperimentalComposeUiApi::class)
@@ -118,6 +121,9 @@ fun SignInScreen(
         if (state.loginStep == LoginStep.EMAIL_ENTRY) { { } } else viewModel::moveBackToEmailScreen
 
     Scaffold(
+        modifier = Modifier.semantics {
+            testTag = Tag.sign_in_screen_container
+        },
         topBar = {
             SignInTopAppBar(
                 title = screenTitle,
@@ -132,6 +138,7 @@ fun SignInScreen(
                     modifier = Modifier
                         .fillMaxSize()
                         .verticalScroll(rememberScrollState())
+                        .semantics { testTag = Tag.sign_in_screen_content_column }
                 ) {
                     Image(
                         modifier = Modifier.width(200.dp),
@@ -234,7 +241,8 @@ fun SignInScreen(
                     CensoButton(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 24.dp),
+                            .padding(horizontal = 24.dp)
+                            .semantics { testTag = Tag.sign_in_screen_sign_in_button },
                         contentPadding = PaddingValues(vertical = 16.dp),
                         enabled = state.email.isNotEmpty(),
                         onClick = {
