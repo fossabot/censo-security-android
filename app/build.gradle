@@ -246,4 +246,13 @@ dependencies {
     androidTestImplementation 'androidx.test.ext:junit:1.1.3'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
     androidTestImplementation "androidx.compose.ui:ui-test-junit4:1.3.1"
+
+    //Integration testing
+    def kaspressoVersion = '1.5.2'
+    testImplementation "com.kaspersky.android-components:kaspresso:$kaspressoVersion"
+    testImplementation "com.kaspersky.android-components:kaspresso-compose-support:$kaspressoVersion"
+    androidTestImplementation "com.kaspersky.android-components:kaspresso:$kaspressoVersion"
+    androidTestImplementation "com.kaspersky.android-components:kaspresso-compose-support:$kaspressoVersion"
+    androidTestUtil 'androidx.test:orchestrator:1.4.2'
+
 }
