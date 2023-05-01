@@ -22,7 +22,7 @@ interface ApprovalsRepository {
     suspend fun retrieveShards(policyRevisionId: String, userId: String? = null) : Resource<GetShardsResponse>
 
     suspend fun sendWcUri(uri: String): Resource<ResponseBody>
-    suspend fun checkIfConnectionHasSessions(topic: String) : Resource<ResponseBody>
+    suspend fun checkIfConnectionHasSessions(topic: String) : Resource<List<WalletConnectTopic>>
 }
 
 class ApprovalsRepositoryImpl @Inject constructor(

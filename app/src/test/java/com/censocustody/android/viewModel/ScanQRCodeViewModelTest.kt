@@ -36,6 +36,7 @@ class ScanQRCodeViewModelTest : BaseViewModelTest() {
     private val dispatcher = TestCoroutineDispatcher()
 
     private val validURI = "wc:8eeb2d71daf1a3a57933a64d8f3ed3412dfdde6fcc5ff56a6372ece5b82f6b97@2?relay-protocol=irn&symKey=90d8cb943c73bb86771784cf4950d9c9c50645013806b1972e9d6fc40aa19a47"
+    private val topic = "8eeb2d71daf1a3a57933a64d8f3ed3412dfdde6fcc5ff56a6372ece5b82f6b97"
     private val nullURI = null
     private val emptyURI = ""
 
@@ -115,6 +116,24 @@ class ScanQRCodeViewModelTest : BaseViewModelTest() {
 
             assert(scanQRViewModel.state.scanQRCodeResult is Resource.Success)
             assert(scanQRViewModel.state.uploadWcUri is Resource.Success)
+            assert(scanQRViewModel.state.topic == topic)
+        }
+
+    @Test
+    fun `Save topic from URI on Send URI Success to backend`() =
+        runTest {
+
+            whenever(approvalsRepository.sendWcUri(any())).then {
+                Resource.Success("".toResponseBody())
+            }
+
+            scanQRViewModel.receivedWalletConnectUri(validURI)
+
+            verify(approvalsRepository, times(1)).sendWcUri(validURI)
+
+            assert(scanQRViewModel.state.scanQRCodeResult is Resource.Success)
+            assert(scanQRViewModel.state.uploadWcUri is Resource.Success)
+            assert(scanQRViewModel.state.topic == topic)
         }
 
     @Test
@@ -170,6 +189,25 @@ class ScanQRCodeViewModelTest : BaseViewModelTest() {
             val exception = Exception("Failed to scan.")
 
             whenever(approvalsRepository.sendWcUri(any())).then {
+                Resource.Success("".toResponseBody())
+            }
+
+            scanQRViewModel.failedToScan(exception)
+
+            verify(approvalsRepository, times(0)).sendWcUri(any())
+
+            assert(scanQRViewModel.state.scanQRCodeResult is Resource.Error)
+            assert(scanQRViewModel.state.scanQRCodeResult.exception == exception)
+            assert(scanQRViewModel.state.uploadWcUri is Resource.Uninitialized)
+        }
+
+    @Test
+    fun `User failing to get session does not show anything to user`() =
+        runTest {
+
+            val exception = Exception("Failed to scan.")
+
+            whenever(approvalsRepository.checkIfConnectionHasSessions(any())).then {
                 Resource.Success("".toResponseBody())
             }
 

@@ -152,7 +152,7 @@ interface BrooklynApiService {
 
     @GET("v1/wallet-connect/{topic}")
     @Headers(AUTH_REQUIRED)
-    suspend fun checkSessionsOnConnectedDApp(@Path("topic") topic: String) : RetrofitResponse<ResponseBody>
+    suspend fun checkSessionsOnConnectedDApp(@Path("topic") topic: String) : RetrofitResponse<List<WalletConnectTopic>>
 }
 
 class AnalyticsInterceptor : Interceptor {

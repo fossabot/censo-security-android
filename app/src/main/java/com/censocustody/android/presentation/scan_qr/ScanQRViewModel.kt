@@ -9,6 +9,7 @@ import com.censocustody.android.common.Resource
 import com.censocustody.android.common.censoLog
 import com.censocustody.android.common.wrapper.CensoCountDownTimer
 import com.censocustody.android.common.wrapper.CensoCountDownTimerImpl
+import com.censocustody.android.data.models.WalletConnectTopic
 import com.censocustody.android.data.repository.ApprovalsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
@@ -66,17 +67,26 @@ class ScanQRViewModel @Inject constructor(
                 return@launch
             }
 
-            val checkSessionsResource = approvalsRepository.checkIfConnectionHasSessions(state.topic)
+            val checkSessionsResource =
+                approvalsRepository.checkIfConnectionHasSessions(state.topic)
 
             if (checkSessionsResource is Resource.Success) {
-                timer.stopCountDownTimer()
 
-                state = state.copy(
-                    checkSessionsOnConnection = checkSessionsResource
-                )
+                if (dAppHasValidSession(checkSessionsResource.data)) {
+                    timer.stopCountDownTimer()
+
+                    state = state.copy(
+                        checkSessionsOnConnection = checkSessionsResource
+                    )
+                }
             }
         }
     }
+
+    private fun dAppHasValidSession(sessions: List<WalletConnectTopic>?) =
+        sessions?.firstOrNull {
+            it.status == WalletConnectTopic.ACCEPTED
+        } != null
 
     fun failedToScan(exception: Exception) {
         exception.printStackTrace()
