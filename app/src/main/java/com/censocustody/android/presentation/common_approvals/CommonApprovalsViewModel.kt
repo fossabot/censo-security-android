@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.censocustody.android.common.*
 import com.censocustody.android.common.util.CrashReportingUtil
+import com.censocustody.android.common.util.sendError
 import com.censocustody.android.common.wrapper.toShareUserId
 import com.censocustody.android.data.repository.ApprovalsRepository
 import com.censocustody.android.data.repository.KeyRepository
@@ -136,14 +137,7 @@ abstract class  CommonApprovalsViewModel(
                 requestDetails = approvalRequestDetails
             )
         } catch (e: Exception) {
-            RaygunClient.send(
-                e,
-                listOf(
-                    CrashReportingUtil.APPROVAL_DISPOSITION,
-                    CrashReportingUtil.MANUALLY_REPORTED_TAG,
-                    CrashReportingUtil.RETRIEVE_SHARDS
-                )
-            )
+            e.sendError(CrashReportingUtil.RETRIEVE_SHARDS)
             return approvalDispositionState.copy(
                 registerApprovalDispositionResult = Resource.Error(exception = e)
             )
@@ -154,14 +148,7 @@ abstract class  CommonApprovalsViewModel(
                 requestDetails = approvalRequestDetails
             )
         } catch (e: Exception) {
-            RaygunClient.send(
-                e,
-                listOf(
-                    CrashReportingUtil.APPROVAL_DISPOSITION,
-                    CrashReportingUtil.MANUALLY_REPORTED_TAG,
-                    CrashReportingUtil.RETRIEVE_SHARDS
-                )
-            )
+            e.sendError(CrashReportingUtil.RETRIEVE_SHARDS)
             return approvalDispositionState.copy(
                 registerApprovalDispositionResult = Resource.Error(exception = e)
             )
@@ -176,14 +163,9 @@ abstract class  CommonApprovalsViewModel(
             )
 
         if (approvalDispositionResponseResource is Resource.Error) {
-            RaygunClient.send(
-                approvalDispositionResponseResource.exception
-                    ?: Exception("Approval Disposition Failed"),
-                listOf(
-                    CrashReportingUtil.APPROVAL_DISPOSITION,
-                    CrashReportingUtil.MANUALLY_REPORTED_TAG,
-                )
-            )
+            (approvalDispositionResponseResource.exception
+                ?: Exception("Approval Disposition Failed"))
+                .sendError(CrashReportingUtil.APPROVAL_DISPOSITION)
         }
 
         removeBootstrapDeviceIfNeeded(

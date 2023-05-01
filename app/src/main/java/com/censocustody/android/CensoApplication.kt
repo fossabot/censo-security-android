@@ -4,6 +4,7 @@ import android.app.Application
 import com.google.firebase.FirebaseApp
 import com.raygun.raygun4android.RaygunClient
 import com.censocustody.android.common.util.CrashReportingUtil
+import com.censocustody.android.common.util.sendError
 import com.censocustody.android.data.storage.SharedPrefsHelper
 import dagger.hilt.android.HiltAndroidApp
 
@@ -20,13 +21,7 @@ class CensoApplication : Application() {
         try {
             FirebaseApp.initializeApp(this)
         } catch (e: Exception) {
-            RaygunClient.send(
-                e,
-                listOf(
-                    CrashReportingUtil.MANUALLY_REPORTED_TAG,
-                    CrashReportingUtil.PUSH_NOTIFICATION_TAG
-                )
-            )
+            e.sendError(CrashReportingUtil.PUSH_NOTIFICATION_TAG)
         }
     }
 }
