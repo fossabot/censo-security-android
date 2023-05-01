@@ -84,6 +84,7 @@ class EntranceViewModelTest : BaseViewModelTest() {
         deviceKeyInfo = DeviceKeyInfo(
             devicePublicKey, true, null
         ),
+        userShardedToPolicyGuid = null,
         shardingPolicy = exampleShardingPolicy,
         canAddSigners = true,
         orgAdminInfo = null

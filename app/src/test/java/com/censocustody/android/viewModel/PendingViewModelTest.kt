@@ -44,6 +44,7 @@ class PendingApprovalViewModelTest : BaseViewModelTest() {
         deviceKeyInfo = DeviceKeyInfo(
             "", true, null
         ),
+        userShardedToPolicyGuid = null,
         shardingPolicy = null,
         canAddSigners = true,
         orgAdminInfo = null

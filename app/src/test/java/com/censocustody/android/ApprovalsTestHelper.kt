@@ -28,6 +28,7 @@ fun getVerifyUser() = VerifyUser(
     deviceKeyInfo = DeviceKeyInfo(
         "", false, null
     ),
+    userShardedToPolicyGuid = null,
     shardingPolicy = null,
     canAddSigners = true,
     orgAdminInfo = null

@@ -32,6 +32,7 @@ data class VerifyUser(
     val organization: Organization?,
     val publicKeys: List<WalletPublicKey?>?,
     val deviceKeyInfo: DeviceKeyInfo?,
+    val userShardedToPolicyGuid: String?,
     // if this come back as null, then this is the bootstrap user for the org they belong to.
     val shardingPolicy: ShardingPolicy?,
     val canAddSigners: Boolean,

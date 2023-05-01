@@ -1,8 +1,14 @@
 package com.censocustody.android
 
+import com.censocustody.android.common.wrapper.BaseWrapper
 import com.censocustody.android.common.wrapper.toHexString
+import com.censocustody.android.data.cryptography.Secp256k1HierarchicalKey
+import com.censocustody.android.data.cryptography.Secp256k1HierarchicalKey.Companion.ethereumDerivationPath
+import com.censocustody.android.data.models.Chain
 import com.censocustody.android.data.models.OrgAdminRecoveryRequest
-import com.censocustody.android.data.models.recovery.SignableRecoveryData
+import com.censocustody.android.data.models.OrgAdminRecoverySignaturesRequest
+import com.censocustody.android.data.models.recovery.RecoveryAppSigningResponse
+import com.censocustody.android.data.models.recovery.RecoverySignatureItem
 import org.junit.Assert.*
 import org.junit.Test
 import org.web3j.crypto.Hash
@@ -21,37 +27,100 @@ class OrgRecoveryTest {
     @Test
     fun testSingleChangeRecoveryTx() {
         val orgRecoveryRequest = OrgAdminRecoveryRequest.fromString(orgRecoveryRequestSingleChange)
-        val signableData = orgRecoveryRequest.retrieveSignableData()
+        val recoveryAppSigningRequest = orgRecoveryRequest.getRecoveryAppSigningRequest()
         assertEquals(
             "cb8a7e65872c8594abfdbe1ca5e0ab5df5f98258b6b9f35a44e535426f33a0bb",
-            signableData.filterIsInstance<SignableRecoveryData.Ethereum>().first().dataToSign.toHexString()
+            BaseWrapper.decodeFromBase64(recoveryAppSigningRequest.items.first { it.chain == Chain.ethereum }.dataToSign).toHexString()
         )
         assertEquals(
             "cb8a7e65872c8594abfdbe1ca5e0ab5df5f98258b6b9f35a44e535426f33a0bb",
-            signableData.filterIsInstance<SignableRecoveryData.Polygon>().first().dataToSign.toHexString()
+            BaseWrapper.decodeFromBase64(recoveryAppSigningRequest.items.first { it.chain == Chain.polygon }.dataToSign).toHexString()
         )
         assertEquals(
             Hash.sha256(orgRecoveryRequest.toJson().toByteArray()).toHexString(),
-            signableData.filterIsInstance<SignableRecoveryData.Offchain>().first().dataToSign.toHexString()
+            BaseWrapper.decodeFromBase64(recoveryAppSigningRequest.items.first { it.chain == Chain.offchain }.dataToSign).toHexString()
         )
     }
 
     @Test
     fun testMultipleChangesRecoveryTx() {
         val orgRecoveryRequest = OrgAdminRecoveryRequest.fromString(orgRecoveryRequestMultipleChanges)
-        val signableData = orgRecoveryRequest.retrieveSignableData()
+        val recoveryAppSigningRequest = orgRecoveryRequest.getRecoveryAppSigningRequest()
         assertEquals(
             "334ca7d1168e12b626a827def790a75b79fb08bfa311ab571f955db6c8a1fc72",
-            signableData.filterIsInstance<SignableRecoveryData.Ethereum>().first().dataToSign.toHexString()
+            BaseWrapper.decodeFromBase64(recoveryAppSigningRequest.items.first { it.chain == Chain.ethereum }.dataToSign).toHexString()
         )
         assertEquals(
             "40fae325732650391653f60720ad2a11363ca9e6a95d72878c503784e0ace340",
-            signableData.filterIsInstance<SignableRecoveryData.Polygon>().first().dataToSign.toHexString()
+            BaseWrapper.decodeFromBase64(recoveryAppSigningRequest.items.first { it.chain == Chain.polygon }.dataToSign).toHexString()
         )
         assertEquals(
             Hash.sha256(orgRecoveryRequest.toJson().toByteArray()).toHexString(),
-            signableData.filterIsInstance<SignableRecoveryData.Offchain>().first().dataToSign.toHexString()
+            BaseWrapper.decodeFromBase64(recoveryAppSigningRequest.items.first { it.chain == Chain.offchain }.dataToSign).toHexString()
         )
     }
+
+    @Test
+    fun testRecoveryAppFlow() {
+        val seedPhrase = "whip spatial call cream base decorate tobacco life below lobster arena movie cat fix buffalo vibrant victory jungle category picnic way raise hazard exact"
+        val recoveryAppKey = Secp256k1HierarchicalKey.fromSeedPhrase(seedPhrase, ethereumDerivationPath)
+
+        val myOrgRecoveryRequest = OrgAdminRecoveryRequest.fromString(orgRecoveryRequestMultipleChanges)
+
+        // get JSON request that will be string-ified in QR code for recovery app to read
+        val recoveryAppSigningRequest = myOrgRecoveryRequest.getRecoveryAppSigningRequest()
+
+        // perform the steps recovery app does so sign with the key and send back json response via QR code
+        val recoveryAppSigningResponse = RecoveryAppSigningResponse(
+            recoveryAppKey.getEthereumAddress(),
+            recoveryAppSigningRequest.items.map {
+                RecoverySignatureItem(
+                    it.chain,
+                    BaseWrapper.encodeToBase64(recoveryAppKey.signData(BaseWrapper.decodeFromBase64(it.dataToSign)))
+                )
+            }
+        )
+
+        // map to the signature request to send to brooklyn
+        val orgAdminRecoverySignaturesRequest = OrgAdminRecoverySignaturesRequest.fromRecoveryAppSigningResponse(
+            myOrgRecoveryRequest,
+            recoveryAppSigningResponse
+        )
+
+        // verify signatures in request to brooklyn appear to be valid.
+        assertTrue(
+            recoveryAppKey.verifySignature(
+                BaseWrapper.decodeFromBase64(recoveryAppSigningRequest.items.first { it.chain == Chain.ethereum }.dataToSign),
+                BaseWrapper.decodeFromBase64(orgAdminRecoverySignaturesRequest.signatures.filterIsInstance<OrgAdminRecoverySignaturesRequest.Signature.Ethereum>().first().signature)
+            )
+        )
+
+        assertTrue(
+            recoveryAppKey.verifySignature(
+                BaseWrapper.decodeFromBase64(recoveryAppSigningRequest.items.first { it.chain == Chain.polygon }.dataToSign),
+                BaseWrapper.decodeFromBase64(orgAdminRecoverySignaturesRequest.signatures.filterIsInstance<OrgAdminRecoverySignaturesRequest.Signature.Polygon>().first().signature)
+            )
+        )
+
+        assertTrue(
+            recoveryAppKey.verifySignature(
+                BaseWrapper.decodeFromBase64(recoveryAppSigningRequest.items.first { it.chain == Chain.offchain }.dataToSign),
+                BaseWrapper.decodeFromBase64(orgAdminRecoverySignaturesRequest.signatures.filterIsInstance<OrgAdminRecoverySignaturesRequest.Signature.OffChain>().first().signature)
+            )
+        )
+
+        assertEquals(
+            recoveryAppSigningRequest.items.first { it.chain == Chain.offchain }.dataToSign,
+            BaseWrapper.encodeToBase64(
+                Hash.sha256(
+                    BaseWrapper.decodeFromBase64(
+                        orgAdminRecoverySignaturesRequest.signatures.filterIsInstance<OrgAdminRecoverySignaturesRequest.Signature.OffChain>().first().signedData
+                    )
+                )
+            )
+        )
+    }
+
+
 
 }

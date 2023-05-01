@@ -1,9 +1,11 @@
 package com.censocustody.android.data.models
 
+import com.censocustody.android.common.wrapper.BaseWrapper
 import com.censocustody.android.data.models.OrgAdminRecoveryRequest.RecoverySafeTx.Companion.recoverySafeTxAdapterFactory
 import com.censocustody.android.data.models.approvalV2.ApprovalRequestDetailsV2
 import com.censocustody.android.data.models.evm.EvmRecoveryTransactionBuilder
-import com.censocustody.android.data.models.recovery.SignableRecoveryData
+import com.censocustody.android.data.models.recovery.RecoveryAppSigningRequest
+import com.censocustody.android.data.models.recovery.SignableRecoveryItem
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.typeadapters.RuntimeTypeAdapterFactory
@@ -81,29 +83,37 @@ data class OrgAdminRecoveryRequest(
         val txs: List<RecoverySafeTx>,
     )
 
-    fun retrieveSignableData(): List<SignableRecoveryData> {
-        val offchainData = this.toJson().toByteArray()
-        return this.recoveryTxs.mapNotNull { recoveryTxs ->
+    fun getOffchainData() = this.toJson().toByteArray()
+
+    fun getRecoveryAppSigningRequest(): RecoveryAppSigningRequest {
+        val offchainData = getOffchainData()
+        val items = this.recoveryTxs.mapNotNull { recoveryTxs ->
             when (recoveryTxs.chain) {
-                Chain.ethereum -> SignableRecoveryData.Ethereum(
-                    EvmRecoveryTransactionBuilder.getRecoveryDataSafeHash(
+                Chain.ethereum -> SignableRecoveryItem(
+                    Chain.ethereum,
+                    BaseWrapper.encodeToBase64(EvmRecoveryTransactionBuilder.getRecoveryDataSafeHash(
                         recoveryTxs,
                         signingData.filterIsInstance<ApprovalRequestDetailsV2.SigningData.EthereumSigningData>()
                             .first().transaction
-                    )
+                    ))
                 )
-                Chain.polygon -> SignableRecoveryData.Polygon(
-                    EvmRecoveryTransactionBuilder.getRecoveryDataSafeHash(
+                Chain.polygon -> SignableRecoveryItem(
+                    Chain.polygon,
+                    BaseWrapper.encodeToBase64(EvmRecoveryTransactionBuilder.getRecoveryDataSafeHash(
                         recoveryTxs,
                         signingData.filterIsInstance<ApprovalRequestDetailsV2.SigningData.PolygonSigningData>()
                             .first().transaction
-                    )
+                    ))
                 )
                 else -> null
             }
         } + listOf(
-            SignableRecoveryData.Offchain(offchainData, Hash.sha256(offchainData))
+            SignableRecoveryItem(
+                Chain.offchain,
+                BaseWrapper.encodeToBase64(Hash.sha256(offchainData))
+            )
         )
+        return RecoveryAppSigningRequest(items)
     }
 }
 

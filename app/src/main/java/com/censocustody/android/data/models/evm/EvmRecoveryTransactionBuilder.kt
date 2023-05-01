@@ -60,6 +60,7 @@ object EvmRecoveryTransactionBuilder {
                     is OrgAdminRecoveryRequest.RecoverySafeTx.OrgVaultSwapOwner -> orgVaultAddress
                     is OrgAdminRecoveryRequest.RecoverySafeTx.VaultSwapOwner -> change.vaultSafeAddress
                     is OrgAdminRecoveryRequest.RecoverySafeTx.WalletSwapOwner -> change.vaultSafeAddress
+                    else -> ""
                 },
                 when (change) {
                     is OrgAdminRecoveryRequest.RecoverySafeTx.OrgVaultSwapOwner ->
@@ -77,6 +78,7 @@ object EvmRecoveryTransactionBuilder {
                             EvmConfigTransactionBuilder.getPolicyUpdateExecutionFromModuleData(change.walletSafeAddress, EvmConfigTransactionBuilder.swapOwnerTx(change.prev, old, new))
                         )
                     }
+                    else -> ByteArray(0)
                 }
             )
         }

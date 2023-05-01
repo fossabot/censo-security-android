@@ -27,6 +27,7 @@ import org.bouncycastle.jce.interfaces.ECPublicKey
 import org.bouncycastle.jce.provider.BouncyCastleProvider
 import org.bouncycastle.jce.spec.ECPrivateKeySpec
 import org.bouncycastle.util.Properties
+import org.web3j.crypto.Keys
 import java.io.ByteArrayOutputStream
 import java.io.IOException
 import java.math.BigInteger
@@ -225,6 +226,12 @@ class Secp256k1HierarchicalKey(
     private fun getPublicKeyFromPrivate(privateKey: ECPrivateKey): ByteArray {
         return getECPublicKeyFromPrivate(privateKey).q.getEncoded(true)
     }
+
+    fun getEthereumAddress(): String =
+        Keys.toChecksumAddress(
+            "0x" + Keys.getAddress(getECPublicKeyFromPrivate(privateKey!!).q.getEncoded(false).toHexString().slice(2 until 130))
+        )
+
 
     override fun getPublicKeyBytes(): ByteArray {
         return publicKey ?: getPublicKeyFromPrivate() ?: throw Exception("Cannot calculate public key")
