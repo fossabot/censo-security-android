@@ -5,6 +5,7 @@ import cash.z.ecc.android.bip39.Mnemonics
 import cash.z.ecc.android.bip39.toSeed
 import com.censocustody.android.common.*
 import com.censocustody.android.common.util.CrashReportingUtil
+import com.censocustody.android.common.util.sendError
 import com.censocustody.android.common.wrapper.BaseWrapper
 import com.censocustody.android.data.api.BrooklynApiService
 import com.censocustody.android.data.cryptography.CryptographyManager
@@ -153,12 +154,7 @@ class KeyRepositoryImpl(
 
             return verifyUser?.compareAgainstLocalKeys(publicKeys) == true
         } catch (e: Exception) {
-            RaygunClient.send(
-                e, listOf(
-                    CrashReportingUtil.RECOVER_KEY,
-                    CrashReportingUtil.MANUALLY_REPORTED_TAG
-                )
-            )
+            e.sendError(CrashReportingUtil.RECOVER_KEY)
             return false
         }
     }
@@ -307,10 +303,7 @@ class KeyRepositoryImpl(
     }
 
     override suspend fun handleKeyInvalidatedException(exception: Exception) {
-        RaygunClient.send(
-            exception,
-            listOf(CrashReportingUtil.MANUALLY_REPORTED_TAG, CrashReportingUtil.KEY_INVALIDATED)
-        )
+        exception.sendError(CrashReportingUtil.KEY_INVALIDATED)
 
         if (exception.cause is KeyStoreException) {
             wipeAllDataAfterKeyInvalidatedException()

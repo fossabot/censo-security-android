@@ -43,6 +43,7 @@ import com.raygun.raygun4android.RaygunClient
 import com.censocustody.android.R
 import com.censocustody.android.common.*
 import com.censocustody.android.common.util.CrashReportingUtil
+import com.censocustody.android.common.util.sendError
 import com.censocustody.android.data.models.ApprovalDisposition
 import com.censocustody.android.data.models.approvalV2.ApprovalDispositionRequestV2
 import com.censocustody.android.data.models.approvalV2.ApprovalRequestDetailsV2
@@ -102,13 +103,7 @@ fun ApprovalsListScreen(
                 }
             }
         } catch (e: Exception) {
-            RaygunClient.send(
-                e,
-                listOf(
-                    CrashReportingUtil.MANUALLY_REPORTED_TAG,
-                    CrashReportingUtil.PUSH_NOTIFICATION_PERMISSION_TAG
-                )
-            )
+            e.sendError(CrashReportingUtil.PUSH_NOTIFICATION_PERMISSION_TAG)
         }
     }
 

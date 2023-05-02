@@ -5,6 +5,7 @@ import com.auth0.android.jwt.JWT
 import com.raygun.raygun4android.RaygunClient
 import com.censocustody.android.common.util.CrashReportingUtil.JWT_TAG
 import com.censocustody.android.common.util.CrashReportingUtil.MANUALLY_REPORTED_TAG
+import com.censocustody.android.common.util.sendError
 import com.censocustody.android.data.cryptography.EncryptionManager
 import java.util.*
 import kotlin.collections.HashMap
@@ -60,7 +61,7 @@ class CensoAuth(
 
             jwtEmail ?: ""
         } catch (e: Exception) {
-            RaygunClient.send(e, listOf(JWT_TAG, MANUALLY_REPORTED_TAG))
+            e.sendError(JWT_TAG)
             ""
         }
     }
@@ -77,7 +78,7 @@ class CensoAuth(
 
             jwtEmail ?: true
         } catch (e: Exception) {
-            RaygunClient.send(e, listOf(JWT_TAG, MANUALLY_REPORTED_TAG))
+            e.sendError(JWT_TAG)
             true
         }
     }
@@ -99,7 +100,7 @@ class CensoAuth(
                 throw TokenExpiredException()
             }
         } catch (e: Exception) {
-            RaygunClient.send(e, listOf(JWT_TAG, MANUALLY_REPORTED_TAG))
+            e.sendError(JWT_TAG)
         }
 
         return token

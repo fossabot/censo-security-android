@@ -9,6 +9,7 @@ import com.raygun.raygun4android.RaygunClient
 import com.censocustody.android.BuildConfig
 import com.censocustody.android.common.util.CrashReportingUtil
 import com.censocustody.android.common.Resource
+import com.censocustody.android.common.util.sendError
 import com.censocustody.android.data.models.SemanticVersion
 import com.censocustody.android.data.models.VerifyUser
 import com.censocustody.android.data.repository.KeyRepository
@@ -44,21 +45,12 @@ class EntranceViewModel @Inject constructor(
                 )
             } else if (semanticVersion is Resource.Error) {
                 checkLoggedIn()
-                RaygunClient.send(
-                    semanticVersion.exception ?: Exception("Error retrieving min version"), listOf(
-                        CrashReportingUtil.FORCE_UPGRADE_TAG,
-                        CrashReportingUtil.MANUALLY_REPORTED_TAG
-                    )
-                )
+                (semanticVersion.exception ?: Exception("Error retrieving min version"))
+                    .sendError(CrashReportingUtil.FORCE_UPGRADE_TAG)
             }
         } catch (e: Exception) {
             checkLoggedIn()
-            RaygunClient.send(
-                e, listOf(
-                    CrashReportingUtil.FORCE_UPGRADE_TAG,
-                    CrashReportingUtil.MANUALLY_REPORTED_TAG
-                )
-            )
+            e.sendError(CrashReportingUtil.FORCE_UPGRADE_TAG)
         }
     }
 

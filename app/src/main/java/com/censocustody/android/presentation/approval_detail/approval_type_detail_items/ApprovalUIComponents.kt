@@ -22,6 +22,7 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.censocustody.android.common.util.CrashReportingUtil
+import com.censocustody.android.common.util.sendError
 import com.censocustody.android.presentation.approvals.approval_type_row_items.nameToInitials
 import com.censocustody.android.ui.theme.*
 import com.raygun.raygun4android.RaygunClient
@@ -241,12 +242,7 @@ fun String.toBitMap(): Bitmap? {
         val encodeByte: ByteArray = Base64.decode(this, Base64.DEFAULT)
         BitmapFactory.decodeByteArray(encodeByte, 0, encodeByte.size)
     } catch (e: Exception) {
-        RaygunClient.send(
-            e, listOf(
-                CrashReportingUtil.IMAGE,
-                CrashReportingUtil.MANUALLY_REPORTED_TAG
-            )
-        )
+        e.sendError(CrashReportingUtil.IMAGE)
         null
     }
 }

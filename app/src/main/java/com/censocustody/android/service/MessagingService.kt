@@ -18,6 +18,8 @@ import com.censocustody.android.BuildConfig
 import com.censocustody.android.MainActivity
 import com.censocustody.android.R
 import com.censocustody.android.common.Resource
+import com.censocustody.android.common.util.CrashReportingUtil
+import com.censocustody.android.common.util.sendError
 import com.censocustody.android.data.repository.PushRepository
 import com.censocustody.android.data.repository.UserRepository
 import com.censocustody.android.data.models.PushBody
@@ -102,7 +104,8 @@ class MessagingService : FirebaseMessagingService() {
                 val pushResponse = pushRepository.addPushNotification(pushBody)
 
                 if (pushResponse is Resource.Error) {
-                    RaygunClient.send(Exception("Failed to register token from automatic registration: ${pushResponse.censoError}"))
+                    Exception("Failed to register token from automatic registration: ${pushResponse.censoError}")
+                        .sendError(CrashReportingUtil.PUSH_NOTIFICATION_TAG)
                 }
             }
         }

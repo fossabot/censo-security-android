@@ -2,9 +2,11 @@ package com.censocustody.android.common.ui
 
 import android.content.Context
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
+import android.graphics.Color
 import android.graphics.Matrix
 import android.net.Uri
+import androidmads.library.qrgenearator.QRGContents
+import androidmads.library.qrgenearator.QRGEncoder
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
 import androidx.camera.lifecycle.ProcessCameraProvider
@@ -14,6 +16,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.core.content.ContextCompat
 import androidx.exifinterface.media.ExifInterface
 import com.censocustody.android.common.util.CrashReportingUtil
+import com.censocustody.android.common.util.sendError
 import com.censocustody.android.common.wrapper.BaseWrapper
 import com.censocustody.android.data.cryptography.CryptographyManager
 import com.censocustody.android.data.models.LogoType
@@ -35,6 +38,20 @@ const val MAX_IMAGE_SIZE_BYTES = 8_388_608 //8MB
 @Composable
 fun Dp.dpToPx() = with(LocalDensity.current) { this@dpToPx.toPx() }
 
+fun String.generateQRCode(size: Int = 500): Bitmap? {
+    return try {
+        QRGEncoder(this, null, QRGContents.Type.TEXT, size)
+            .apply {
+                colorBlack = Color.WHITE
+                colorWhite = Color.BLACK
+            }
+            .bitmap
+    } catch (e: Exception) {
+        e.sendError(CrashReportingUtil.QR_CODE)
+        null
+    }
+}
+
 suspend fun Context.getCameraProvider(): ProcessCameraProvider = suspendCoroutine { continuation ->
     try {
         ProcessCameraProvider.getInstance(this).also { future ->
@@ -44,12 +61,7 @@ suspend fun Context.getCameraProvider(): ProcessCameraProvider = suspendCoroutin
             )
         }
     } catch (e: Exception) {
-        RaygunClient.send(
-            e, listOf(
-                CrashReportingUtil.IMAGE,
-                CrashReportingUtil.MANUALLY_REPORTED_TAG
-            )
-        )
+        e.sendError(CrashReportingUtil.IMAGE)
         continuation.resumeWithException(e)
     }
 }
@@ -71,23 +83,13 @@ suspend fun ImageCapture.takePhoto(executor: Executor): File {
                     }
 
                     override fun onError(ex: ImageCaptureException) {
-                        RaygunClient.send(
-                            ex, listOf(
-                                CrashReportingUtil.IMAGE,
-                                CrashReportingUtil.MANUALLY_REPORTED_TAG
-                            )
-                        )
+                        ex.sendError(CrashReportingUtil.IMAGE)
                         continuation.resumeWithException(ex)
                     }
                 }
             )
         } catch (e: Exception) {
-            RaygunClient.send(
-                e, listOf(
-                    CrashReportingUtil.IMAGE,
-                    CrashReportingUtil.MANUALLY_REPORTED_TAG
-                )
-            )
+            e.sendError(CrashReportingUtil.IMAGE)
             continuation.resumeWithException(e)
         }
     }

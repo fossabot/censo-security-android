@@ -11,6 +11,7 @@ import cash.z.ecc.android.bip39.toSeed
 import com.censocustody.android.common.*
 import com.censocustody.android.common.ui.hashOfUserImage
 import com.censocustody.android.common.util.CrashReportingUtil
+import com.censocustody.android.common.util.sendError
 import com.censocustody.android.common.wrapper.BaseWrapper
 import com.censocustody.android.data.models.VerifyUser
 import com.censocustody.android.data.repository.KeyRepository
@@ -92,13 +93,7 @@ class KeyCreationViewModel @Inject constructor(
                     uploadKeys()
                 }
             } catch (e: Exception) {
-                RaygunClient.send(
-                    e,
-                    listOf(
-                        CrashReportingUtil.MANUALLY_REPORTED_TAG,
-                        CrashReportingUtil.KEY_CREATION
-                    )
-                )
+                e.sendError(CrashReportingUtil.KEY_CREATION)
                 state = state.copy(
                     uploadingKeyProcess = Resource.Error(exception = e)
                 )
@@ -147,13 +142,8 @@ class KeyCreationViewModel @Inject constructor(
         }
 
         if (bootStrapResource is Resource.Error) {
-            RaygunClient.send(
-                bootStrapResource.exception ?: Exception("Failed to upload bootstrap data"),
-                listOf(
-                    CrashReportingUtil.MANUALLY_REPORTED_TAG,
-                    CrashReportingUtil.KEY_CREATION
-                )
-            )
+            (bootStrapResource.exception ?: Exception("Failed to upload bootstrap data"))
+                .sendError(CrashReportingUtil.KEY_CREATION)
         }
 
         state = state.copy(uploadingKeyProcess = bootStrapResource)
@@ -171,13 +161,8 @@ class KeyCreationViewModel @Inject constructor(
         )
 
         if (walletSignerResource is Resource.Error) {
-            RaygunClient.send(
-                walletSignerResource.exception ?: Exception("Failed to upload device data"),
-                listOf(
-                    CrashReportingUtil.MANUALLY_REPORTED_TAG,
-                    CrashReportingUtil.KEY_CREATION
-                )
-            )
+            (walletSignerResource.exception ?: Exception("Failed to upload device data"))
+                .sendError(CrashReportingUtil.KEY_CREATION)
         }
 
         state = state.copy(uploadingKeyProcess = walletSignerResource)

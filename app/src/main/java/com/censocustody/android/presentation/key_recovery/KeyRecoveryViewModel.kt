@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.censocustody.android.common.util.CrashReportingUtil
 import com.censocustody.android.common.Resource
+import com.censocustody.android.common.util.sendError
 import com.censocustody.android.data.models.GetRecoveryShardsResponse
 import com.censocustody.android.data.repository.KeyRepository
 import com.raygun.raygun4android.RaygunClient
@@ -87,12 +88,7 @@ class KeyRecoveryViewModel @Inject constructor(
                 ancestors = recoveryData.ancestors
             )
         } catch (e: Exception) {
-            RaygunClient.send(
-                e, listOf(
-                    CrashReportingUtil.RECOVER_KEY,
-                    CrashReportingUtil.MANUALLY_REPORTED_TAG
-                )
-            )
+            e.sendError(CrashReportingUtil.RECOVER_KEY)
             state =
                 state.copy(
                     recoverKeyProcess = Resource.Error(
@@ -116,12 +112,7 @@ class KeyRecoveryViewModel @Inject constructor(
             )
             true
         } catch (e: Exception) {
-            RaygunClient.send(
-                e, listOf(
-                    CrashReportingUtil.RECOVER_KEY,
-                    CrashReportingUtil.MANUALLY_REPORTED_TAG
-                )
-            )
+            e.sendError(CrashReportingUtil.RECOVER_KEY)
             state = state.copy(
                 recoverKeyProcess = Resource.Error(
                     data = RecoveryError.SAVE_FAILED,
@@ -151,13 +142,9 @@ class KeyRecoveryViewModel @Inject constructor(
             )
             triggerBioPrompt()
         } else if (recoveryShardsResource is Resource.Error) {
-            RaygunClient.send(
-                recoveryShardsResource.exception
-                    ?: Exception("Failed retrieving recovery shards from API"), listOf(
-                    CrashReportingUtil.RECOVER_KEY,
-                    CrashReportingUtil.MANUALLY_REPORTED_TAG
-                )
-            )
+            (recoveryShardsResource.exception
+                ?: Exception("Failed retrieving recovery shards from API"))
+                .sendError(CrashReportingUtil.RECOVER_KEY)
             state =
                 state.copy(
                     recoverKeyProcess = Resource.Error(

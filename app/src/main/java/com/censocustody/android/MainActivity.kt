@@ -25,6 +25,7 @@ import com.censocustody.android.common.util.CrashReportingUtil
 import com.censocustody.android.common.Resource
 import com.censocustody.android.common.*
 import com.censocustody.android.common.BioCryptoUtil.NO_CIPHER_CODE
+import com.censocustody.android.common.util.sendError
 import com.censocustody.android.data.models.approvalV2.ApprovalRequestV2
 import com.censocustody.android.data.storage.AuthProvider
 import com.censocustody.android.data.storage.UserState
@@ -341,12 +342,7 @@ class MainActivity : FragmentActivity() {
             intentFilter.addAction(BuildConfig.APPLICATION_ID)
             registerReceiver(notificationDisplayedBroadcastReceiver, intentFilter)
         } catch (e: Exception) {
-            RaygunClient.send(
-                e, listOf(
-                    CrashReportingUtil.BROADCAST_RECEIVER_TAG,
-                    CrashReportingUtil.MANUALLY_REPORTED_TAG,
-                )
-            )
+            e.sendError(CrashReportingUtil.BROADCAST_RECEIVER_TAG)
         }
     }
 
@@ -355,12 +351,7 @@ class MainActivity : FragmentActivity() {
         try {
             unregisterReceiver(notificationDisplayedBroadcastReceiver)
         } catch (e: Exception) {
-            RaygunClient.send(
-                e, listOf(
-                    CrashReportingUtil.BROADCAST_RECEIVER_TAG,
-                    CrashReportingUtil.MANUALLY_REPORTED_TAG,
-                )
-            )
+            e.sendError(CrashReportingUtil.BROADCAST_RECEIVER_TAG)
         }
     }
 
