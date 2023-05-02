@@ -6,6 +6,7 @@ import org.bouncycastle.jce.ECNamedCurveTable
 import org.bouncycastle.jce.interfaces.ECPublicKey
 import org.bouncycastle.jce.provider.BouncyCastleProvider
 import org.bouncycastle.util.encoders.Hex
+import org.web3j.crypto.Keys
 import java.math.BigInteger
 import java.security.AlgorithmParameters
 import java.security.KeyFactory

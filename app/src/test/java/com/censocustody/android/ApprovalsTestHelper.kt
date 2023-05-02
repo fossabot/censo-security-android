@@ -28,8 +28,10 @@ fun getVerifyUser() = VerifyUser(
     deviceKeyInfo = DeviceKeyInfo(
         "", false, null
     ),
+    userShardedToPolicyGuid = null,
     shardingPolicy = null,
-    canAddSigners = true
+    canAddSigners = true,
+    orgAdminInfo = null
 )
 
 class ExampleMnemonicAndKeys {
