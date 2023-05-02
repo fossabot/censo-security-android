@@ -11,6 +11,7 @@ import com.censocustody.android.common.wrapper.CensoCountDownTimer
 import com.censocustody.android.common.wrapper.CensoCountDownTimerImpl
 import com.censocustody.android.data.models.WalletConnectTopic
 import com.censocustody.android.data.repository.ApprovalsRepository
+import com.censocustody.android.presentation.scan_qr.ScanQRState.Companion.MAX_POLL
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -62,6 +63,12 @@ class ScanQRViewModel @Inject constructor(
 
     private fun checkSessions() {
         viewModelScope.launch {
+            if (state.timesPolled <= MAX_POLL) {
+                state = state.copy(checkSessionsOnConnection = Resource.Error())
+                timer.stopCountDownTimer()
+                return@launch
+            }
+
             if (state.topic.isEmpty()) {
                 state = state.copy(scanQRCodeResult = Resource.Error())
                 return@launch
@@ -85,7 +92,7 @@ class ScanQRViewModel @Inject constructor(
 
     private fun dAppHasValidSession(sessions: List<WalletConnectTopic>?) =
         sessions?.firstOrNull {
-            it.status == WalletConnectTopic.ACCEPTED
+            it.status == WalletConnectTopic.ACTIVE
         } != null
 
     fun failedToScan(exception: Exception) {

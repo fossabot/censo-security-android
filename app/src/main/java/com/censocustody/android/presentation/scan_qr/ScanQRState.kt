@@ -9,5 +9,10 @@ data class ScanQRState(
     val uploadWcUri: Resource<ResponseBody> = Resource.Uninitialized,
     val checkSessionsOnConnection: Resource<List<WalletConnectTopic>> = Resource.Uninitialized,
     val exitScreen: Boolean = false,
-    val topic: String = ""
-)
+    val topic: String = "",
+    val timesPolled: Int = 0
+) {
+    companion object {
+        const val MAX_POLL = 5
+    }
+}

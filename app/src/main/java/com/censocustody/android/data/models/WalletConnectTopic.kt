@@ -10,7 +10,7 @@ data class WalletConnectTopic(
 ) {
     companion object {
         const val REJECTED = "Rejected"
-        const val ACCEPTED = "Accepted"
+        const val ACTIVE = "Active"
     }
 }
 
