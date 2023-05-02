@@ -27,7 +27,7 @@ class OrgRecoveryTest {
     @Test
     fun testSingleChangeRecoveryTx() {
         val orgRecoveryRequest = OrgAdminRecoveryRequest.fromString(orgRecoveryRequestSingleChange)
-        val recoveryAppSigningRequest = orgRecoveryRequest.getRecoveryAppSigningRequest()
+        val recoveryAppSigningRequest = orgRecoveryRequest.toRecoveryAppSigningRequest()
         assertEquals(
             "cb8a7e65872c8594abfdbe1ca5e0ab5df5f98258b6b9f35a44e535426f33a0bb",
             BaseWrapper.decodeFromBase64(recoveryAppSigningRequest.items.first { it.chain == Chain.ethereum }.dataToSign).toHexString()
@@ -45,7 +45,7 @@ class OrgRecoveryTest {
     @Test
     fun testMultipleChangesRecoveryTx() {
         val orgRecoveryRequest = OrgAdminRecoveryRequest.fromString(orgRecoveryRequestMultipleChanges)
-        val recoveryAppSigningRequest = orgRecoveryRequest.getRecoveryAppSigningRequest()
+        val recoveryAppSigningRequest = orgRecoveryRequest.toRecoveryAppSigningRequest()
         assertEquals(
             "334ca7d1168e12b626a827def790a75b79fb08bfa311ab571f955db6c8a1fc72",
             BaseWrapper.decodeFromBase64(recoveryAppSigningRequest.items.first { it.chain == Chain.ethereum }.dataToSign).toHexString()
@@ -64,11 +64,12 @@ class OrgRecoveryTest {
     fun testRecoveryAppFlow() {
         val seedPhrase = "whip spatial call cream base decorate tobacco life below lobster arena movie cat fix buffalo vibrant victory jungle category picnic way raise hazard exact"
         val recoveryAppKey = Secp256k1HierarchicalKey.fromSeedPhrase(seedPhrase, ethereumDerivationPath)
+        println(recoveryAppKey.getBase58UncompressedPublicKey())
 
         val myOrgRecoveryRequest = OrgAdminRecoveryRequest.fromString(orgRecoveryRequestMultipleChanges)
 
         // get JSON request that will be string-ified in QR code for recovery app to read
-        val recoveryAppSigningRequest = myOrgRecoveryRequest.getRecoveryAppSigningRequest()
+        val recoveryAppSigningRequest = myOrgRecoveryRequest.toRecoveryAppSigningRequest()
 
         // perform the steps recovery app does so sign with the key and send back json response via QR code
         val recoveryAppSigningResponse = RecoveryAppSigningResponse(
@@ -119,6 +120,8 @@ class OrgRecoveryTest {
                 )
             )
         )
+
+        assertEquals(orgAdminRecoverySignaturesRequest.recoveryAddress, "0xD96fA11F6f86b648011dcD8cf047458932b043Df")
     }
 
 

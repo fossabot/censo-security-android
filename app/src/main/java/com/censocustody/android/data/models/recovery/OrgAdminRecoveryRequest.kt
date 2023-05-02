@@ -85,7 +85,7 @@ data class OrgAdminRecoveryRequest(
 
     fun getOffchainData() = this.toJson().toByteArray()
 
-    fun getRecoveryAppSigningRequest(): RecoveryAppSigningRequest {
+    fun toRecoveryAppSigningRequest(): RecoveryAppSigningRequest {
         val offchainData = getOffchainData()
         val items = this.recoveryTxs.mapNotNull { recoveryTxs ->
             when (recoveryTxs.chain) {
