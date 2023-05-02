@@ -45,7 +45,7 @@ class EntranceViewModel @Inject constructor(
                 )
             } else if (semanticVersion is Resource.Error) {
                 checkLoggedIn()
-                semanticVersion.exception ?: Exception("Error retrieving min version")
+                (semanticVersion.exception ?: Exception("Error retrieving min version"))
                     .sendError(CrashReportingUtil.FORCE_UPGRADE_TAG)
             }
         } catch (e: Exception) {
