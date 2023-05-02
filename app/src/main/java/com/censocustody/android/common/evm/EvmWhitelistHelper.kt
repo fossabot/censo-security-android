@@ -36,7 +36,7 @@ class EvmWhitelistHelper(val addresses: List<EvmAddress>, val targetDestinations
                 guardAddresses.find { it.address.lowercase() == currentGuardAddress.lowercase() }?.name ?: GnosisSafeConstants.censoGuard
             )
             val targetSettings = WhitelistSettings(whitelistEnabled ?: currentSetting.whitelistEnabled, dappsEnabled ?: currentSetting.dappsEnabled)
-            return guardAddresses.find { it.name == getGuardNameForTargetSettings(targetSettings) }?.address ?: currentGuardAddress
+            return guardAddresses.find { it.name == getGuardNameForTargetSettings(targetSettings) && !it.deprecated }?.address ?: currentGuardAddress
 
         }
         fun getCurrentSettingsForGuardName(guardName: String): WhitelistSettings {

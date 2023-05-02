@@ -539,7 +539,8 @@ sealed class ApprovalRequestDetailsV2 {
 
         data class ContractNameAndAddress(
             val name: String,
-            val address: String
+            val address: String,
+            val deprecated: Boolean,
         )
         data class EthereumTransaction(
             val chainId: Long,
