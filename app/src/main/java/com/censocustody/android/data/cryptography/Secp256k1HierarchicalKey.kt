@@ -27,6 +27,7 @@ import org.bouncycastle.jce.interfaces.ECPublicKey
 import org.bouncycastle.jce.provider.BouncyCastleProvider
 import org.bouncycastle.jce.spec.ECPrivateKeySpec
 import org.bouncycastle.util.Properties
+import org.web3j.crypto.Keys
 import java.io.ByteArrayOutputStream
 import java.io.IOException
 import java.math.BigInteger
@@ -129,7 +130,8 @@ class Secp256k1HierarchicalKey(
             if (!priv && !pub) {
                 throw Exception("not a known key type")
             }
-            val depth = buffer.get().toInt() and 0xFF // convert signed byte to positive int since depth cannot be negative
+            val depth = buffer.get()
+                .toInt() and 0xFF // convert signed byte to positive int since depth cannot be negative
             val parentFingerprint = buffer.int
             val i = buffer.int
             val childPathNumber = if (i != 0) ChildPathNumber.fromValue(i) else null
@@ -139,9 +141,22 @@ class Secp256k1HierarchicalKey(
             val data = ByteArray(33)
             buffer.get(data)
             return if (pub) {
-                Secp256k1HierarchicalKey(null, KeyParameter(chainCode), depth, childPathNumber, parentFingerprint, data)
+                Secp256k1HierarchicalKey(
+                    null,
+                    KeyParameter(chainCode),
+                    depth,
+                    childPathNumber,
+                    parentFingerprint,
+                    data
+                )
             } else {
-                Secp256k1HierarchicalKey(getECPrivateKey(data.slice(1..32).toByteArray()), KeyParameter(chainCode), depth, childPathNumber, parentFingerprint)
+                Secp256k1HierarchicalKey(
+                    getECPrivateKey(data.slice(1..32).toByteArray()),
+                    KeyParameter(chainCode),
+                    depth,
+                    childPathNumber,
+                    parentFingerprint
+                )
             }
         }
 
@@ -219,12 +234,24 @@ class Secp256k1HierarchicalKey(
 
     private fun getECPublicKeyFromPrivate(privateKey: ECPrivateKey): ECPublicKey {
         val q = privateKey.parameters.g.multiply(privateKey.d)
-        return factory.generatePublic(org.bouncycastle.jce.spec.ECPublicKeySpec(q, privateKey.parameters)) as ECPublicKey
+        return factory.generatePublic(
+            org.bouncycastle.jce.spec.ECPublicKeySpec(
+                q,
+                privateKey.parameters
+            )
+        ) as ECPublicKey
     }
 
     private fun getPublicKeyFromPrivate(privateKey: ECPrivateKey): ByteArray {
         return getECPublicKeyFromPrivate(privateKey).q.getEncoded(true)
     }
+
+    fun getEthereumAddress(): String {
+        return Keys.toChecksumAddress(
+        "0x" + Keys.getAddress(getECPublicKeyFromPrivate(privateKey!!).q.getEncoded(false).toHexString().slice(2 until 130))
+        )
+    }
+
 
     override fun getPublicKeyBytes(): ByteArray {
         return publicKey ?: getPublicKeyFromPrivate() ?: throw Exception("Cannot calculate public key")

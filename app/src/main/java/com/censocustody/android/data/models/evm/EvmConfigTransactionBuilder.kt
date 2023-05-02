@@ -109,6 +109,18 @@ object EvmConfigTransactionBuilder {
         )
     }
 
+    fun getPolicyUpdateExecutionFromModuleData(
+        safeAddress: String,
+        data: ByteArray
+    ): ByteArray {
+        return execTransactionFromModuleTx(
+            safeAddress,
+            BigInteger.ZERO,
+            data,
+            Operation.CALL
+        )
+    }
+
     fun getPolicyUpdateExecutionFromModuleDataSafeHash(
         verifyingAddress: String,
         safeAddress: String,
@@ -255,7 +267,7 @@ object EvmConfigTransactionBuilder {
         return dataBuf.array()
     }
 
-    private fun execTransactionFromModuleTx(to: EvmAddress, value: BigInteger, data: ByteArray, operation: Operation): ByteArray {
+    fun execTransactionFromModuleTx(to: EvmAddress, value: BigInteger, data: ByteArray, operation: Operation): ByteArray {
         // execTransactionFromModule(address,uint256,bytes,unit256)
         val mod = data.size.mod(32)
         val padding = if (mod > 0) 32 - mod else 0
@@ -292,7 +304,7 @@ object EvmConfigTransactionBuilder {
         return dataBuf.array()
     }
 
-    private fun swapOwnerTx(prev: EvmAddress, old: EvmAddress, new: EvmAddress): ByteArray {
+    fun swapOwnerTx(prev: EvmAddress, old: EvmAddress, new: EvmAddress): ByteArray {
         // swapOwner(address,address,address)
         val dataBuf = ByteBuffer.allocate(4 + 32 * 3)
         dataBuf.put(Hex.decode("e318b52b"))
@@ -310,7 +322,7 @@ object EvmConfigTransactionBuilder {
         return dataBuf.array()
     }
 
-    private fun multiSendTx(data:  ByteArray): ByteArray {
+    fun multiSendTx(data:  ByteArray): ByteArray {
         // multiSend(bytes)
         val mod = data.size.mod(32)
         val padding = if (mod > 0) 32 - mod else 0
@@ -325,7 +337,7 @@ object EvmConfigTransactionBuilder {
         return dataBuf.array()
     }
 
-    private fun encodeTransaction(address: ByteArray, data: ByteArray): ByteArray {
+    fun encodeTransaction(address: ByteArray, data: ByteArray): ByteArray {
         val buffer = ByteBuffer.allocate(1 + 20 + 32 + 32 + data.size)
         buffer.put(0)
         buffer.put(address)

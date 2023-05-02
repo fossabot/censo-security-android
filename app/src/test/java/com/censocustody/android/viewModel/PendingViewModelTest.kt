@@ -44,8 +44,10 @@ class PendingApprovalViewModelTest : BaseViewModelTest() {
         deviceKeyInfo = DeviceKeyInfo(
             "", true, null
         ),
+        userShardedToPolicyGuid = null,
         shardingPolicy = null,
-        canAddSigners = true
+        canAddSigners = true,
+        orgAdminInfo = null
     )
 
     private val basicVerifyUserCannotAddSigners = basicVerifyUserCanAddSigners.copy(

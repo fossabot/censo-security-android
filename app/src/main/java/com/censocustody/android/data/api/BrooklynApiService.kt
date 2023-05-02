@@ -10,6 +10,7 @@ import com.censocustody.android.data.api.BrooklynApiService.Companion.DEVICE_TYP
 import com.censocustody.android.data.api.BrooklynApiService.Companion.OS_VERSION_HEADER
 import com.censocustody.android.data.api.BrooklynApiService.Companion.X_CENSO_ID
 import com.censocustody.android.data.models.*
+import com.censocustody.android.data.models.OrgAdminRecoveryRequest.RecoverySafeTx.Companion.recoverySafeTxAdapterFactory
 import com.censocustody.android.data.models.approvalV2.ApprovalDispositionRequestV2
 import com.censocustody.android.data.models.approvalV2.ApprovalRequestV2
 import com.censocustody.android.data.models.approvalV2.ApprovalRequestV2Deserializer
@@ -58,6 +59,7 @@ interface BrooklynApiService {
             val customGson = GsonBuilder()
                 .registerTypeAdapter(ApprovalRequestV2::class.java, ApprovalRequestV2Deserializer())
                 .registerTypeAdapterFactory(approvalSignatureAdapterFactory)
+                .registerTypeAdapterFactory(recoverySafeTxAdapterFactory)
                 .create()
 
             return Retrofit.Builder()
@@ -135,6 +137,19 @@ interface BrooklynApiService {
     @POST("v1/wallet-connect")
     @Headers(AUTH_REQUIRED)
     suspend fun walletConnectPairing(@Body walletConnectPairingRequest: WalletConnectPairingRequest) : RetrofitResponse<ResponseBody>
+
+    @POST("v1/org-admin-recovered-devices")
+    @Headers(AUTH_REQUIRED)
+    suspend fun addOrgAdminRecoveredDeviceAndSigners(@Body orgAdminRecoveredDeviceAndSigners: OrgAdminRecoveredDeviceAndSigners): RetrofitResponse<Unit>
+
+    @GET("v1/my-org-admin-recovery-request")
+    @Headers(AUTH_REQUIRED)
+    suspend fun getMyOrgAdminRecoveryRequest(): RetrofitResponse<OrgAdminRecoveryRequest>
+
+    @POST("v1/org-admin-recovery-signatures")
+    @Headers(AUTH_REQUIRED)
+    suspend fun registerOrgAdminRecoverySignatures(@Body orgAdminRecoverySignaturesRequest: OrgAdminRecoverySignaturesRequest): RetrofitResponse<Unit>
+
 }
 
 class AnalyticsInterceptor : Interceptor {
