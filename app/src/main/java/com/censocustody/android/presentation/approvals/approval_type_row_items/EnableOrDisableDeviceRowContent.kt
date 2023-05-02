@@ -10,7 +10,7 @@ import com.censocustody.android.presentation.approval_detail.approval_type_detai
 import com.censocustody.android.presentation.approvals.ApprovalContentHeader
 
 @Composable
-fun AddOrRemoveDeviceRowContent(
+fun EnableOrDisableDeviceRowContent(
     header: String, email: String
 ) {
     ApprovalContentHeader(header = header, topSpacing = 16, bottomSpacing = 8)

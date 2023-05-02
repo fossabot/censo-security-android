@@ -26,17 +26,21 @@ import java.util.*
 fun ApprovalRequestDetailsV2.getHeader(context: Context) =
 
     when (this) {
-        //AddDevice
-        is ApprovalRequestDetailsV2.AddDevice -> {
+        //EnableDevice
+        is ApprovalRequestDetailsV2.EnableDevice -> {
             if (this.replacingDeviceGuid == null) {
-                context.getString(R.string.add_new_device_approval_header)
+                if (this.firstTime) {
+                    context.getString(R.string.enable_new_device_approval_header)
+                } else {
+                    context.getString(R.string.enable_existing_device_approval_header)
+                }
             } else {
-                context.getString(R.string.add_replacement_device_approval_header)
+                context.getString(R.string.enable_replacement_device_approval_header)
             }
         }
-        //RemoveDevice
-        is ApprovalRequestDetailsV2.RemoveDevice -> {
-            context.getString(R.string.remove_device_approval_header)
+        //DisableDevice
+        is ApprovalRequestDetailsV2.DisableDevice -> {
+            context.getString(R.string.disable_device_approval_header)
         }
         //OrgAdminPolicyUpdate
         is ApprovalRequestDetailsV2.OrgAdminPolicyUpdate -> {

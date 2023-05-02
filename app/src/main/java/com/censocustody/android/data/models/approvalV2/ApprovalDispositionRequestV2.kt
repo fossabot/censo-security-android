@@ -42,8 +42,8 @@ data class ApprovalDispositionRequestV2(
                     is ApprovalRequestDetailsV2.VaultCreation,
                     is ApprovalRequestDetailsV2.CreateAddressBookEntry,
                     is ApprovalRequestDetailsV2.DeleteAddressBookEntry,
-                    is ApprovalRequestDetailsV2.AddDevice,
-                    is ApprovalRequestDetailsV2.RemoveDevice,
+                    is ApprovalRequestDetailsV2.EnableDevice,
+                    is ApprovalRequestDetailsV2.DisableDevice,
                     is ApprovalRequestDetailsV2.OrgNameUpdate,
                     is ApprovalRequestDetailsV2.VaultUserRolesUpdate,
                     is ApprovalRequestDetailsV2.SuspendUser,
@@ -409,7 +409,7 @@ data class ApprovalDispositionRequestV2(
         if (recoveryShards == null || recoveryShards.isEmpty()) return null
 
         return when (requestType) {
-            is ApprovalRequestDetailsV2.AddDevice ->
+            is ApprovalRequestDetailsV2.EnableDevice ->
                 encryptionManager.reEncryptShards(
                     email = email,
                     shards = recoveryShards,
@@ -429,7 +429,7 @@ data class ApprovalDispositionRequestV2(
                     shards = reShareShards,
                     requestType.shardingPolicyChangeInfo.targetPolicy
                 )
-            is ApprovalRequestDetailsV2.AddDevice -> {
+            is ApprovalRequestDetailsV2.EnableDevice -> {
                 requestType.targetShardingPolicy?.let {
                     encryptionManager.handleReshare(
                         email = email,
