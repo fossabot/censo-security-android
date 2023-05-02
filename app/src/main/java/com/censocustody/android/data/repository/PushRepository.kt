@@ -6,6 +6,7 @@ import com.google.firebase.messaging.FirebaseMessaging
 import com.raygun.raygun4android.RaygunClient
 import com.censocustody.android.common.util.CrashReportingUtil
 import com.censocustody.android.common.Resource
+import com.censocustody.android.common.util.sendError
 import com.censocustody.android.data.api.BrooklynApiService
 import com.censocustody.android.data.models.PushBody
 import com.censocustody.android.data.storage.SharedPrefsHelper
@@ -49,12 +50,7 @@ class PushRepositoryImpl @Inject constructor(
             try {
                 api.removePushNotificationToken(deviceId, DEVICE_TYPE)
             } catch (e: Exception) {
-                RaygunClient.send(e,
-                    listOf(
-                        CrashReportingUtil.MANUALLY_REPORTED_TAG,
-                        CrashReportingUtil.PUSH_NOTIFICATION_TAG
-                    )
-                )
+                e.sendError(CrashReportingUtil.PUSH_NOTIFICATION_TAG)
             }
         }
     }

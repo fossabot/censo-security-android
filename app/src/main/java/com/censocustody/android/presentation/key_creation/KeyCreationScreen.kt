@@ -29,6 +29,7 @@ import com.censocustody.android.common.*
 import com.censocustody.android.common.ui.rotateImageIfRequired
 import com.censocustody.android.common.ui.squareCropImage
 import com.censocustody.android.common.util.CrashReportingUtil
+import com.censocustody.android.common.util.sendError
 import com.censocustody.android.presentation.key_management.PreBiometryDialog
 import com.censocustody.android.ui.theme.*
 import com.raygun.raygun4android.RaygunClient
@@ -55,13 +56,7 @@ fun KeyCreationScreen(
                 null
             }
         } catch (e: Exception) {
-            RaygunClient.send(
-                e,
-                listOf(
-                    CrashReportingUtil.MANUALLY_REPORTED_TAG,
-                    CrashReportingUtil.IMAGE
-                )
-            )
+            e.sendError(CrashReportingUtil.IMAGE)
             null
         }
     }

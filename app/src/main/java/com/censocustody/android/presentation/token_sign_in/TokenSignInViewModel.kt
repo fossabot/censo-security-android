@@ -11,6 +11,7 @@ import com.raygun.raygun4android.RaygunClient
 import com.censocustody.android.common.*
 import com.censocustody.android.common.exception.NoInternetException.Companion.NO_INTERNET_ERROR
 import com.censocustody.android.common.util.CrashReportingUtil
+import com.censocustody.android.common.util.sendError
 import com.censocustody.android.data.models.LoginResponse
 import com.censocustody.android.data.models.PushBody
 import com.censocustody.android.data.repository.KeyRepository
@@ -167,12 +168,7 @@ class TokenSignInViewModel @Inject constructor(
                 }
             }
         } catch (e: Exception) {
-            RaygunClient.send(
-                e, listOf(
-                    CrashReportingUtil.PUSH_NOTIFICATION_TAG,
-                    CrashReportingUtil.MANUALLY_REPORTED_TAG,
-                )
-            )
+            e.sendError(CrashReportingUtil.PUSH_NOTIFICATION_TAG)
         }
     }
 

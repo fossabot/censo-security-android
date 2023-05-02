@@ -9,6 +9,7 @@ import androidx.lifecycle.viewModelScope
 import com.censocustody.android.common.*
 import com.censocustody.android.common.ui.hashOfUserImage
 import com.censocustody.android.common.util.CrashReportingUtil
+import com.censocustody.android.common.util.sendError
 import com.censocustody.android.common.wrapper.BaseWrapper
 import com.censocustody.android.data.cryptography.ECIESManager
 import com.censocustody.android.data.repository.UserRepository
@@ -35,13 +36,8 @@ class DeviceRegistrationViewModel @Inject constructor(
             state = state.copy(
                 kickUserToEntrance = true
             )
-            RaygunClient.send(
-                Exception("Missing verify user data when entering device registration flow"),
-                listOf(
-                    CrashReportingUtil.MANUALLY_REPORTED_TAG,
-                    CrashReportingUtil.DEVICE_REGISTRATION
-                )
-            )
+            Exception("Missing verify user data when entering device registration flow")
+                .sendError(CrashReportingUtil.DEVICE_REGISTRATION)
             return
         }
 
@@ -127,13 +123,8 @@ class DeviceRegistrationViewModel @Inject constructor(
                         state = state.copy(addUserDevice = userDeviceAdded)
 
                     } else if (userDeviceAdded is Resource.Error) {
-                        RaygunClient.send(
-                            userDeviceAdded.exception ?: Exception("Failed to add user device"),
-                            listOf(
-                                CrashReportingUtil.MANUALLY_REPORTED_TAG,
-                                CrashReportingUtil.DEVICE_REGISTRATION
-                            )
-                        )
+                        (userDeviceAdded.exception ?: Exception("Failed to add user device"))
+                            .sendError(CrashReportingUtil.DEVICE_REGISTRATION)
                         state = state.copy(
                             addUserDevice = userDeviceAdded,
                             deviceRegistrationError = DeviceRegistrationError.API,
@@ -143,13 +134,8 @@ class DeviceRegistrationViewModel @Inject constructor(
 
 
                 } else {
-                    RaygunClient.send(
-                        Exception("Missing essential data for device registration"),
-                        listOf(
-                            CrashReportingUtil.MANUALLY_REPORTED_TAG,
-                            CrashReportingUtil.DEVICE_REGISTRATION
-                        )
-                    )
+                    Exception("Missing essential data for device registration")
+                        .sendError(CrashReportingUtil.DEVICE_REGISTRATION)
                     state = state.copy(
                         addUserDevice = Resource.Error(exception = Exception("Missing essential data for device registration")),
                         deviceRegistrationError = DeviceRegistrationError.API,
@@ -157,13 +143,7 @@ class DeviceRegistrationViewModel @Inject constructor(
                     )
                 }
             } catch (e: Exception) {
-                RaygunClient.send(
-                    e,
-                    listOf(
-                        CrashReportingUtil.MANUALLY_REPORTED_TAG,
-                        CrashReportingUtil.DEVICE_REGISTRATION
-                    )
-                )
+                e.sendError(CrashReportingUtil.DEVICE_REGISTRATION)
                 state = state.copy(
                     addUserDevice = Resource.Error(exception = e),
                     deviceRegistrationError = DeviceRegistrationError.SIGNING_IMAGE,
@@ -209,13 +189,8 @@ class DeviceRegistrationViewModel @Inject constructor(
                         addUserDevice = Resource.Success(Unit),
                     )
                 } else {
-                    RaygunClient.send(
-                        Exception("Missing essential data for bootstrap device registration"),
-                        listOf(
-                            CrashReportingUtil.MANUALLY_REPORTED_TAG,
-                            CrashReportingUtil.DEVICE_REGISTRATION
-                        )
-                    )
+                    Exception("Missing essential data for bootstrap device registration")
+                        .sendError(CrashReportingUtil.DEVICE_REGISTRATION)
                     state = state.copy(
                         addUserDevice = Resource.Error(exception = Exception("Missing essential data for bootstrap device registration")),
                         deviceRegistrationError = DeviceRegistrationError.API,
@@ -223,13 +198,7 @@ class DeviceRegistrationViewModel @Inject constructor(
                     )
                 }
             } catch (e: Exception) {
-                RaygunClient.send(
-                    e,
-                    listOf(
-                        CrashReportingUtil.MANUALLY_REPORTED_TAG,
-                        CrashReportingUtil.DEVICE_REGISTRATION
-                    )
-                )
+                e.sendError(CrashReportingUtil.DEVICE_REGISTRATION)
                 state = state.copy(
                     addUserDevice = Resource.Error(exception = e),
                     deviceRegistrationError = DeviceRegistrationError.BOOTSTRAP,
@@ -295,13 +264,7 @@ class DeviceRegistrationViewModel @Inject constructor(
                 triggerBioPrompt()
 
             } catch (e: Exception) {
-                RaygunClient.send(
-                    e,
-                    listOf(
-                        CrashReportingUtil.MANUALLY_REPORTED_TAG,
-                        CrashReportingUtil.DEVICE_REGISTRATION
-                    )
-                )
+                e.sendError(CrashReportingUtil.DEVICE_REGISTRATION)
                 state = state.copy(
                     deviceRegistrationError = DeviceRegistrationError.SIGNING_IMAGE,
                     capturingDeviceKey = Resource.Uninitialized
@@ -327,13 +290,7 @@ class DeviceRegistrationViewModel @Inject constructor(
                 triggerBioPrompt()
 
             } catch (e: Exception) {
-                RaygunClient.send(
-                    e,
-                    listOf(
-                        CrashReportingUtil.MANUALLY_REPORTED_TAG,
-                        CrashReportingUtil.DEVICE_REGISTRATION
-                    )
-                )
+                e.sendError(CrashReportingUtil.DEVICE_REGISTRATION)
                 state = state.copy(
                     deviceRegistrationError = DeviceRegistrationError.SIGNING_IMAGE,
                     capturingDeviceKey = Resource.Uninitialized
@@ -351,12 +308,7 @@ class DeviceRegistrationViewModel @Inject constructor(
     }
 
     fun capturedUserPhotoError(exception: Exception) {
-        RaygunClient.send(
-            exception, listOf(
-                CrashReportingUtil.IMAGE,
-                CrashReportingUtil.MANUALLY_REPORTED_TAG
-            )
-        )
+        exception.sendError(CrashReportingUtil.IMAGE)
         state = state.copy(
             deviceRegistrationError = DeviceRegistrationError.IMAGE_CAPTURE,
             triggerImageCapture = Resource.Uninitialized,

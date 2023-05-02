@@ -42,6 +42,7 @@ import com.censocustody.android.R
 import com.censocustody.android.common.*
 import com.censocustody.android.common.ui.*
 import com.censocustody.android.common.util.CrashReportingUtil
+import com.censocustody.android.common.util.sendError
 import com.censocustody.android.ui.theme.BackgroundWhite
 import com.censocustody.android.ui.theme.ButtonRed
 import com.censocustody.android.ui.theme.CensoWhite
@@ -74,12 +75,7 @@ fun CaptureUserImageContent(
                 userImageBitmap = squareCropImage(userImageBitmap)
             }
         } catch (e: Exception) {
-            RaygunClient.send(e,
-                listOf(
-                    CrashReportingUtil.MANUALLY_REPORTED_TAG,
-                    CrashReportingUtil.IMAGE
-                )
-            )
+            e.sendError(CrashReportingUtil.IMAGE)
             userImageBitmap = null
         }
 
