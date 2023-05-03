@@ -109,10 +109,13 @@ android {
             debuggable true
         }
         recovery {
-            initWith preRelease
             resValue "string", "app_name", "Censo Recovery App"
-            applicationIdSuffix ".debug"
+            applicationIdSuffix ".recovery"
             minifyEnabled false
+            buildConfigField "String", "BASE_URL", "\"https://brooklyn-prerelease.censocustody.com/\""
+            buildConfigField "String", "MIN_VERSION_ENDPOINT", "\"censo-security-app-version-dev.json\""
+            buildConfigField "String", "ANCHOR_URL", "\"https://prerelease.censocustody.com/\""
+            resValue "string", "RAYGUN_APP_ID", "\"\""
             debuggable true
         }
     }
