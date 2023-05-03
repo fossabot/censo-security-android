@@ -259,7 +259,7 @@ class UserRepositoryImpl(
                 policy.policyRevisionGuid,
                 if (bootstrapShardingParticipantId != null) 1 else policy.threshold,
                 policy.participants.filterNot {
-                        participant -> participant.participantId != bootstrapShardingParticipantId
+                        participant -> participant.participantId == bootstrapShardingParticipantId
                 }.map { participant ->
                     if (participant.participantId == shardingParticipantId) {
                         ShardingParticipant(participant.participantId, listOf(devicePublicKey))
