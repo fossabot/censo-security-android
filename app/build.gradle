@@ -108,6 +108,19 @@ android {
             minifyEnabled false
             debuggable true
         }
+        recovery {
+            initWith preRelease
+            resValue "string", "app_name", "Censo Recovery App"
+            applicationIdSuffix ".debug"
+            minifyEnabled false
+            debuggable true
+        }
+    }
+    sourceSets {
+        release.java.srcDir 'src/common/java'
+        preProd.java.srcDir 'src/common/java'
+        preRelease.java.srcDir 'src/common/java'
+        debug.java.srcDir 'src/common/java'
     }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
