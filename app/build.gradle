@@ -108,6 +108,22 @@ android {
             minifyEnabled false
             debuggable true
         }
+        recovery {
+            resValue "string", "app_name", "Censo Recovery App"
+            applicationIdSuffix ".recovery"
+            minifyEnabled false
+            buildConfigField "String", "BASE_URL", "\"https://brooklyn-prerelease.censocustody.com/\""
+            buildConfigField "String", "MIN_VERSION_ENDPOINT", "\"censo-security-app-version-dev.json\""
+            buildConfigField "String", "ANCHOR_URL", "\"https://prerelease.censocustody.com/\""
+            resValue "string", "RAYGUN_APP_ID", "\"\""
+            debuggable true
+        }
+    }
+    sourceSets {
+        release.java.srcDir 'src/common/java'
+        preProd.java.srcDir 'src/common/java'
+        preRelease.java.srcDir 'src/common/java'
+        debug.java.srcDir 'src/common/java'
     }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
