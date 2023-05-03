@@ -10,6 +10,7 @@ import com.censocustody.android.data.cryptography.SignableDataResult
 import com.censocustody.android.data.cryptography.SignableV2
 import com.censocustody.android.data.models.*
 import com.censocustody.android.data.models.evm.EvmConfigTransactionBuilder
+import com.censocustody.android.data.models.evm.EvmDAppTransactionBuilder
 import org.web3j.crypto.Hash
 import kotlin.Exception
 import com.censocustody.android.data.models.evm.EvmTransferTransactionBuilder
@@ -88,6 +89,42 @@ data class ApprovalDispositionRequestV2(
                                     requestType.destination.address,
                                     requestType.signingData.transaction
                                 ),
+                                getApprovalRequestDetailsSignature()
+                            )
+                        )
+                    }
+
+                    is ApprovalRequestDetailsV2.EthereumDAppRequest -> {
+                        listOf(
+                            SignableDataResult.Ethereum(
+                                when (requestType.dappParams) {
+                                    is ApprovalRequestDetailsV2.DAppParams.EthSendTransaction -> {
+                                        EvmDAppTransactionBuilder.sendTransactionSafeHash(
+                                            requestType.wallet.address,
+                                            requestType.dappParams.transaction,
+                                            requestType.signingData.transaction,
+                                        )
+                                    }
+                                    else -> throw RuntimeException("not implemented")
+                                },
+                                getApprovalRequestDetailsSignature()
+                            )
+                        )
+                    }
+
+                    is ApprovalRequestDetailsV2.PolygonDAppRequest -> {
+                        listOf(
+                            SignableDataResult.Polygon(
+                                when (requestType.dappParams) {
+                                    is ApprovalRequestDetailsV2.DAppParams.EthSendTransaction -> {
+                                        EvmDAppTransactionBuilder.sendTransactionSafeHash(
+                                            requestType.wallet.address,
+                                            requestType.dappParams.transaction,
+                                            requestType.signingData.transaction,
+                                        )
+                                    }
+                                    else -> throw RuntimeException("not implemented")
+                                },
                                 getApprovalRequestDetailsSignature()
                             )
                         )

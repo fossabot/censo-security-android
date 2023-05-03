@@ -8,6 +8,7 @@ import com.censocustody.android.data.models.Chain
 import com.censocustody.android.data.models.DeviceType
 import com.censocustody.android.data.models.ShardingPolicy
 import com.censocustody.android.data.models.approval.*
+import com.censocustody.android.data.models.approvalV2.ApprovalRequestDetailsV2.DAppParams.Companion.dAppParamsAdapterFactory
 import com.censocustody.android.data.models.approvalV2.ApprovalSignature.Companion.approvalSignatureAdapterFactory
 import com.censocustody.android.data.models.approvalV2.ApprovalRequestDetailsV2.EvmTokenInfo.Companion.evmTokenInfoAdapterFactory
 import com.censocustody.android.data.models.approvalV2.ApprovalRequestDetailsV2.OnChainPolicy.Companion.onChainPolicyAdapterFactory
@@ -43,6 +44,7 @@ data class ApprovalRequestV2(
                 .registerTypeAdapterFactory(evmTokenInfoAdapterFactory)
                 .registerTypeAdapterFactory(signingDataAdapterFactory)
                 .registerTypeAdapterFactory(approvalSignatureAdapterFactory)
+                .registerTypeAdapterFactory(dAppParamsAdapterFactory)
                 .create()
                 .toJson(approval)
             return uriWrapper.encode(jsonString)
@@ -130,6 +132,10 @@ sealed class ApprovalRequestDetailsV2 {
             RestoreUser::class.java, "RestoreUser"
         ).registerSubtype(
             EnableRecoveryContract::class.java, "EnableRecoveryContract"
+        ).registerSubtype(
+            EthereumDAppRequest::class.java, "EthereumDAppRequest"
+        ).registerSubtype(
+            PolygonDAppRequest::class.java, "PolygonDAppRequest"
         )
 
         val gsonBuilder: Gson = GsonBuilder()
@@ -139,6 +145,7 @@ sealed class ApprovalRequestDetailsV2 {
             .registerTypeAdapterFactory(evmTokenInfoAdapterFactory)
             .registerTypeAdapterFactory(signingDataAdapterFactory)
             .registerTypeAdapterFactory(approvalSignatureAdapterFactory)
+            .registerTypeAdapterFactory(dAppParamsAdapterFactory)
             .create()
     }
 
@@ -412,6 +419,24 @@ sealed class ApprovalRequestDetailsV2 {
         val chainFees: List<ChainFee>,
     ) : ApprovalRequestDetailsV2()
 
+    data class EthereumDAppRequest(
+        val wallet: WalletInfo,
+        val fee: Amount,
+        val feeSymbolInfo: EvmSymbolInfo,
+        val dappInfo: DAppInfo,
+        val dappParams: DAppParams,
+        val signingData: SigningData.EthereumSigningData,
+    ) : ApprovalRequestDetailsV2()
+
+    data class PolygonDAppRequest(
+        val wallet: WalletInfo,
+        val fee: Amount,
+        val feeSymbolInfo: EvmSymbolInfo,
+        val dappInfo: DAppInfo,
+        val dappParams: DAppParams,
+        val signingData: SigningData.PolygonSigningData,
+    ) : ApprovalRequestDetailsV2()
+
     data class Signer(
         val name: String,
         val email: String,
@@ -611,4 +636,53 @@ sealed class ApprovalRequestDetailsV2 {
         val address: String,
         val isChange: Boolean
     )
+
+    data class EvmSimulatedChange(
+        val amount: Amount,
+        val symbolInfo: EvmSymbolInfo
+    )
+
+    data class DAppInfo(
+        val name: String,
+        val url: String,
+        val description: String,
+        val icons: List<String>,
+    )
+
+    data class EvmTransaction(
+        val from: String,
+        val to: String,
+        val value: String,
+        val data: String,
+    )
+
+    sealed class DAppParams {
+        companion object {
+            val dAppParamsAdapterFactory: RuntimeTypeAdapterFactory<DAppParams> =
+                RuntimeTypeAdapterFactory.of(
+                    DAppParams::class.java, "type"
+                ).registerSubtype(
+                    DAppParams.EthSendTransaction::class.java, "EthSendTransaction"
+                ).registerSubtype(
+                    DAppParams.EthSign::class.java, "EthSign"
+                ).registerSubtype(
+                    DAppParams.EthSignTypedData::class.java, "EthSignTypedData"
+                )
+        }
+        data class EthSendTransaction(
+            val simulatedChanges: List<EvmSimulatedChange>,
+            val transaction: EvmTransaction,
+        ) : DAppParams()
+
+        data class EthSign(
+            val message: String,
+            val messageHash: String,
+        ) : DAppParams()
+
+        data class EthSignTypedData(
+            val eip721Data: String,
+            val messageHash: String,
+        ) : DAppParams()
+    }
+
 }

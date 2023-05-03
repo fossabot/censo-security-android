@@ -179,7 +179,17 @@ fun ApprovalRequestDetailsV2.getHeader(context: Context) =
             "Enable Recovery Policy"
         }
 
-        ApprovalRequestDetailsV2.UnknownApprovalType -> {
+        is ApprovalRequestDetailsV2.EthereumDAppRequest,
+        is ApprovalRequestDetailsV2.PolygonDAppRequest -> {
+            when (this.dAppParams()) {
+                is ApprovalRequestDetailsV2.DAppParams.EthSendTransaction -> "dApp Transaction"
+                is ApprovalRequestDetailsV2.DAppParams.EthSign -> "dApp Sign Message"
+                is ApprovalRequestDetailsV2.DAppParams.EthSignTypedData -> "dApp Sign Data"
+                else -> "Unknown"
+            }
+        }
+
+        is ApprovalRequestDetailsV2.UnknownApprovalType -> {
             context.getString(R.string.unknown_approval_header)
         }
     }
@@ -441,6 +451,33 @@ fun ApprovalRequestDetailsV2.transferPolicyUpdateName() =
     when (this) {
         is ApprovalRequestDetailsV2.EthereumTransferPolicyUpdate -> wallet.name
         is ApprovalRequestDetailsV2.PolygonTransferPolicyUpdate -> wallet.name
+        else -> ""
+    }
+
+fun ApprovalRequestDetailsV2.dAppParams() =
+    when (this) {
+        is ApprovalRequestDetailsV2.EthereumDAppRequest -> dappParams
+        is ApprovalRequestDetailsV2.PolygonDAppRequest -> dappParams
+        else -> null
+    }
+
+fun ApprovalRequestDetailsV2.dAppInfo() =
+    when (this) {
+        is ApprovalRequestDetailsV2.EthereumDAppRequest -> dappInfo
+        is ApprovalRequestDetailsV2.PolygonDAppRequest -> dappInfo
+        else -> null
+    }
+
+fun ApprovalRequestDetailsV2.dAppSimulationResults() =
+    when (val params = this.dAppParams()) {
+        is ApprovalRequestDetailsV2.DAppParams.EthSendTransaction -> params.simulatedChanges
+        else -> emptyList()
+    }
+
+fun ApprovalRequestDetailsV2.dAppFromAccount() =
+    when (this) {
+        is ApprovalRequestDetailsV2.EthereumDAppRequest -> wallet.name
+        is ApprovalRequestDetailsV2.PolygonDAppRequest -> wallet.name
         else -> ""
     }
 

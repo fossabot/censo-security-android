@@ -312,8 +312,19 @@ fun ApprovalRowContent(
             EnableRecoveryContractRowContent(header = type.getHeader(LocalContext.current))
         }
 
+        is ApprovalRequestDetailsV2.EthereumDAppRequest,
+        is ApprovalRequestDetailsV2.PolygonDAppRequest -> {
+            when (type.dAppParams()) {
+                is ApprovalRequestDetailsV2.DAppParams.EthSendTransaction -> DAppEthSendTransactionContent(
+                    header = type.getHeader(LocalContext.current),
+                    subtitle = type.dAppInfo()!!.name,
+                )
+                else -> throw RuntimeException("not implemented")
+            }
+        }
+
         //Unknown
-        ApprovalRequestDetailsV2.UnknownApprovalType -> {
+        is ApprovalRequestDetailsV2.UnknownApprovalType -> {
             Text(text = type.getHeader(LocalContext.current), color = TextBlack)
         }
     }
@@ -491,8 +502,22 @@ fun ApprovalDetailContent(approval: ApprovalRequestV2, type: ApprovalRequestDeta
             EnableRecoveryContractDetailContent(details = type)
         }
 
+        is ApprovalRequestDetailsV2.EthereumDAppRequest,
+        is ApprovalRequestDetailsV2.PolygonDAppRequest -> {
+            when (type.dAppParams()) {
+                is ApprovalRequestDetailsV2.DAppParams.EthSendTransaction -> DAppEthSendTransactionDetailContent(
+                    header = type.getHeader(LocalContext.current),
+                    fromAccount = type.dAppFromAccount(),
+                    fee = type.fee()!!,
+                    dAppInfo = type.dAppInfo()!!,
+                    simulationResults = type.dAppSimulationResults()
+                )
+                else -> throw RuntimeException("not implemented")
+            }
+        }
+
         //Unknown
-        ApprovalRequestDetailsV2.UnknownApprovalType -> {
+        is ApprovalRequestDetailsV2.UnknownApprovalType -> {
             val header = type.getHeader(LocalContext.current)
             Text(text = header, color = TextBlack)
         }
