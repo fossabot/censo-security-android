@@ -12,7 +12,10 @@ import androidx.camera.core.ExperimentalGetImage
 import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTag
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.Lifecycle
 import androidx.navigation.*
@@ -25,6 +28,7 @@ import com.censocustody.android.common.CrashReportingUtil
 import com.censocustody.android.common.Resource
 import com.censocustody.android.common.*
 import com.censocustody.android.common.BioCryptoUtil.NO_CIPHER_CODE
+import com.censocustody.android.common.tag.TestTag
 import com.censocustody.android.data.models.approvalV2.ApprovalRequestV2
 import com.censocustody.android.data.storage.AuthProvider
 import com.censocustody.android.data.storage.UserState
@@ -143,7 +147,10 @@ class MainActivity : FragmentActivity() {
             }
 
             CensoMobileTheme {
-                Surface(color = BackgroundWhite) {
+                Surface(
+                    modifier = Modifier.semantics { testTag = TestTag.main_activity_surface_container },
+                    color = BackgroundWhite
+                ) {
                     //NavHost
                     CensoNavHost(navController = navController)
 

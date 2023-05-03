@@ -9,8 +9,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -21,6 +22,7 @@ import com.censocustody.android.ui.theme.CensoWhite
 import javax.crypto.Cipher
 import com.censocustody.android.common.CensoButton
 import com.censocustody.android.R
+import com.censocustody.android.common.tag.TestTag
 import com.censocustody.android.ui.theme.BackgroundGrey
 import com.censocustody.android.ui.theme.TextBlack
 
@@ -67,16 +69,18 @@ fun ForegroundBlockingUI(
             .clickable(
                 indication = null,
                 interactionSource = interactionSource
-            ) { },
+            ) { }
+            .semantics { testTag = TestTag.biometry_blocking_ui_container},
     ) {
         Column(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth().semantics { testTag = TestTag.biometry_blocking_ui_column },
             verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
                 modifier = Modifier
-                    .padding(top = 124.dp, start = 48.dp, end = 48.dp),
+                    .padding(top = 124.dp, start = 48.dp, end = 48.dp)
+                    .semantics { testTag = TestTag.biometry_blocking_ui_text },
                 text = if (biometryUnavailable)
                     stringResource(R.string.biometry_unavailable)
                 else stringResource(R.string.foreground_access_app),

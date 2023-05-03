@@ -12,11 +12,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.censocustody.android.R
+import com.censocustody.android.common.tag.TestTag
 import com.censocustody.android.ui.theme.BackgroundWhite
 import com.censocustody.android.ui.theme.TextBlack
 import com.censocustody.android.ui.theme.TopAppBarText
@@ -116,7 +119,9 @@ fun CenteredTopAppBar(
         .width(72.dp - appBarHorizontalPadding)
 
     TopAppBar(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .semantics { testTag = TestTag.centered_top_app_bar },
         backgroundColor = backgroundColor,
         contentColor = TextBlack,
         elevation = 0.dp,
@@ -154,7 +159,9 @@ fun CenteredTopAppBar(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .semantics { testTag = TestTag.centered_top_app_bar_title },
                     textAlign = TextAlign.Center,
                     maxLines = 1,
                     text = title,
