@@ -3,6 +3,8 @@ package com.censocustody.android.presentation.scan_qr
 import androidx.camera.core.ExperimentalGetImage
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.ImageProxy
+import com.censocustody.android.common.censoLog
+import com.google.android.gms.tasks.OnCompleteListener
 import com.google.mlkit.vision.barcode.BarcodeScannerOptions
 import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.barcode.common.Barcode
@@ -32,7 +34,10 @@ class WalletConnectBarcodeAnalyzer(
                     }
                 }
             }.addOnFailureListener(failedToScanCallback)
+                .addOnCompleteListener {
+                    mediaImage.close()
+                    imageProxy.close()
+                }
         }
-        imageProxy.close()
     }
 }

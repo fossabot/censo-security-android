@@ -159,7 +159,7 @@
     <string name="continue_to_censo">Continue to Censo</string>
     <string name="paste_phrase">Paste Phrase</string>
     <string name="how_did_you_back_it_up">How did you back it up?</string>
-    <string name="time_to_recover_key">It\'s time to recover your private key using your secret recovery phrase</string>
+    <string name="time_to_recover_key">It\'s time to recover the private key using the secret recovery phrase</string>
     <string name="by_keyboard">Enter With Keyboard</string>
 
     <string name="write_each_word_down">Write each word down\nin order</string>
@@ -277,4 +277,16 @@
     <string name="start_scanning">Start Scanning…</string>
     <string name="scan_qr_code">Scan QR Code</string>
     <string name="scan_qr_code_success">Connecting to DApp…</string>
+
+    <!--  Recovery App Strings  -->
+    <string name="welcome_to_censo_recovery">Welcome to Censo Recovery.\n\nTo get started choose one of the recovery options below</string>
+    <string name="scan_qr_code_via_main_app">Scan the QR code via the Censo Custody Application to continue the recovery process</string>
+    <string name="once_the_qr_code_has_been_scanned">Once the QR code has been scanned\nfollow the steps in the Censo Custody Application to proceed with recovery</string>
+    <string name="recover_more_keys">Need to recover more keys?\nPress the button below to restart the recovery process</string>
+    <string name="phrase_entry">Phrase Entry</string>
+    <string name="scan_qr_code_for_recovery">Scan QR Code</string>
+    <string name="something_went_wrong_please_restart_recovery">Something went wrong, please start the recovery process over</string>
+    <string name="restart_recovery">Restart Recovery</string>
+    <string name="phrase_entry_error">Something went wrong during phrase entry, please start again</string>
+
 </resources>

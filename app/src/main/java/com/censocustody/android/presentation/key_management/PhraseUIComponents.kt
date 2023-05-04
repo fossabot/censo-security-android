@@ -17,6 +17,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.NavigateBefore
 import androidx.compose.material.icons.filled.NavigateNext
 import androidx.compose.material.icons.outlined.AccountCircle
+import androidx.compose.material.icons.outlined.ChevronLeft
 import androidx.compose.material.icons.outlined.ContentCopy
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -103,8 +104,8 @@ fun EntryScreenPhraseUI(
             IconButton(modifier = Modifier.align(Alignment.CenterStart), onClick = onExit) {
                 Icon(
                     modifier = Modifier.size(32.dp),
-                    imageVector = Icons.Outlined.AccountCircle,
-                    contentDescription = stringResource(id = R.string.content_des_account_icon),
+                    imageVector = Icons.Outlined.ChevronLeft,
+                    contentDescription = stringResource(id = R.string.back),
                     tint = TextBlack
                 )
             }
@@ -113,7 +114,7 @@ fun EntryScreenPhraseUI(
         Image(
             painter = painterResource(R.drawable.ic_key_auth),
             contentDescription = stringResource(R.string.key_icon_content_desc),
-            colorFilter = ColorFilter.colorMatrix(matrix)
+            colorFilter = ColorFilter.tint(TextBlack)
         )
         Spacer(modifier = Modifier.weight(1.0f))
         Text(
