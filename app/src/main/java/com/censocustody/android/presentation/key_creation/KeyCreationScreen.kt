@@ -32,7 +32,6 @@ import com.censocustody.android.common.util.CrashReportingUtil
 import com.censocustody.android.common.util.sendError
 import com.censocustody.android.presentation.key_management.PreBiometryDialog
 import com.censocustody.android.ui.theme.*
-import com.raygun.raygun4android.RaygunClient
 import java.io.File
 
 @Composable
@@ -63,13 +62,17 @@ fun KeyCreationScreen(
 
     DisposableEffect(key1 = viewModel) {
 
-        val bitmap = if (initialData.bootstrapUserDeviceImageURI.isNotEmpty()) {
-            cropAndRotateImage(initialData.bootstrapUserDeviceImageURI)
+        val bitmap = if (initialData.userDeviceImageURI.isNotEmpty()) {
+            cropAndRotateImage(initialData.userDeviceImageURI)
         } else {
             null
         }
 
-        viewModel.onStart(initialData.verifyUserDetails, bootstrapUserDeviceImage = bitmap)
+        viewModel.onStart(
+            verifyUser = initialData.verifyUserDetails,
+            bootstrapUserDeviceImage = bitmap,
+            recoveryType = initialData.recoveryType,
+        )
         onDispose {
             viewModel.cleanUp()
         }

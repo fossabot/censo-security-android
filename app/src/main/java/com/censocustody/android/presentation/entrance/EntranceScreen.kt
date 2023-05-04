@@ -21,6 +21,7 @@ import com.censocustody.android.presentation.Screen
 import com.censocustody.android.presentation.components.CensoErrorScreen
 import com.censocustody.android.ui.theme.BackgroundWhite
 import com.censocustody.android.R
+import com.censocustody.android.data.models.RecoveryType
 import com.censocustody.android.presentation.device_registration.DeviceRegistrationInitialData
 import com.censocustody.android.presentation.key_creation.KeyCreationInitialData
 import com.censocustody.android.presentation.key_recovery.KeyRecoveryInitialData
@@ -47,7 +48,8 @@ fun EntranceScreen(
                 UserDestination.KEY_MANAGEMENT_CREATION -> {
                     val keyCreationInitialData = KeyCreationInitialData(
                         verifyUserDetails = state.verifyUserResult.data,
-                        bootstrapUserDeviceImageURI = state.bootstrapImageUrl
+                        userDeviceImageURI = state.bootstrapImageUrl,
+                        recoveryType = if (state.bootstrapImageUrl.isEmpty()) RecoveryType.Standard else RecoveryType.Bootstrap
                     )
 
                     val keyCreationJson =
@@ -74,8 +76,16 @@ fun EntranceScreen(
                     "${Screen.KeyRecoveryRoute.route}/$keyRecoveryJson"
                 }
                 UserDestination.DEVICE_REGISTRATION -> {
+
+                    val recoveryType =
+                        if (state.verifyUserResult.data != null && state.verifyUserResult.data.shardingPolicy == null) {
+                            RecoveryType.Bootstrap
+                        } else {
+                            RecoveryType.Standard
+                        }
+
                     val deviceRegistrationInitialData = DeviceRegistrationInitialData(
-                        bootstrapUser = state.verifyUserResult.data != null && state.verifyUserResult.data.shardingPolicy == null,
+                        recoveryType = recoveryType,
                         verifyUser = state.verifyUserResult.data
                     )
 

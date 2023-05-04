@@ -3,6 +3,7 @@ package com.censocustody.android.presentation.key_creation
 import android.graphics.Bitmap
 import com.censocustody.android.common.Resource
 import com.censocustody.android.common.UriWrapper
+import com.censocustody.android.data.models.RecoveryType
 import com.censocustody.android.data.models.VerifyUser
 import com.censocustody.android.data.models.WalletSigner
 import com.google.gson.GsonBuilder
@@ -19,13 +20,16 @@ data class KeyCreationState(
     val uploadingKeyProcess: Resource<Unit> = Resource.Uninitialized,
 
     val verifyUserDetails: VerifyUser? = null,
-    val bootstrapUserDeviceImage: Bitmap? = null,
+
+    val recoveryType: RecoveryType = RecoveryType.Standard,
+    val deviceImage: Bitmap? = null,
 )
 
 //If user image is filled in, then we are setting up bootstrap user
 data class KeyCreationInitialData(
     val verifyUserDetails: VerifyUser?,
-    val bootstrapUserDeviceImageURI : String = ""
+    val recoveryType: RecoveryType,
+    val userDeviceImageURI : String = ""
 ) {
     companion object {
         fun toJson(

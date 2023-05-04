@@ -13,10 +13,10 @@ import com.censocustody.android.common.ui.hashOfUserImage
 import com.censocustody.android.common.util.CrashReportingUtil
 import com.censocustody.android.common.util.sendError
 import com.censocustody.android.common.wrapper.BaseWrapper
+import com.censocustody.android.data.models.RecoveryType
 import com.censocustody.android.data.models.VerifyUser
 import com.censocustody.android.data.repository.KeyRepository
 import com.censocustody.android.data.repository.UserRepository
-import com.raygun.raygun4android.RaygunClient
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -31,16 +31,20 @@ class KeyCreationViewModel @Inject constructor(
         private set
 
     //region VM SETUP
-    fun onStart(verifyUser: VerifyUser?, bootstrapUserDeviceImage: Bitmap?) {
-        if (verifyUser != null && bootstrapUserDeviceImage != null) {
-            state = state.copy(
+    fun onStart(verifyUser: VerifyUser?, recoveryType: RecoveryType, bootstrapUserDeviceImage: Bitmap?) {
+        state = if (verifyUser != null && bootstrapUserDeviceImage != null) {
+            state.copy(
                 verifyUserDetails = verifyUser,
-                bootstrapUserDeviceImage = bootstrapUserDeviceImage,
+                recoveryType = recoveryType,
+                deviceImage = bootstrapUserDeviceImage,
             )
         } else if (verifyUser != null) {
-            state = state.copy(
+            state.copy(
+                recoveryType = recoveryType,
                 verifyUserDetails = verifyUser
             )
+        } else {
+            state.copy(recoveryType = recoveryType)
         }
 
         viewModelScope.launch {
@@ -87,8 +91,8 @@ class KeyCreationViewModel @Inject constructor(
 
                 state = state.copy(walletSigners = walletSigners)
 
-                if (state.verifyUserDetails != null && state.verifyUserDetails?.shardingPolicy == null && state.bootstrapUserDeviceImage != null) {
-                    uploadBootStrapData(state.bootstrapUserDeviceImage!!)
+                if (state.verifyUserDetails != null && state.verifyUserDetails?.shardingPolicy == null && state.deviceImage != null) {
+                    uploadBootStrapData(state.deviceImage!!)
                 } else {
                     uploadKeys()
                 }

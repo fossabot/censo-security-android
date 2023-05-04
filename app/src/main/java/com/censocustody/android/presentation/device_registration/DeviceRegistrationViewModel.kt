@@ -14,6 +14,7 @@ import com.censocustody.android.common.wrapper.BaseWrapper
 import com.censocustody.android.data.cryptography.ECIESManager
 import com.censocustody.android.data.repository.UserRepository
 import com.censocustody.android.data.models.DeviceType
+import com.censocustody.android.data.models.RecoveryType
 import com.censocustody.android.data.models.UserDevice
 import com.censocustody.android.data.repository.KeyRepository
 import com.raygun.raygun4android.RaygunClient
@@ -42,7 +43,7 @@ class DeviceRegistrationViewModel @Inject constructor(
         }
 
         state = state.copy(
-            isBootstrapUser = initialData.bootstrapUser,
+            recoveryType = initialData.recoveryType,
             verifyUser = initialData.verifyUser
         )
 
@@ -61,9 +62,7 @@ class DeviceRegistrationViewModel @Inject constructor(
     }
 
     fun biometryApproved() {
-        if (state.isBootstrapUser) {
-            sendBootstrapUserToKeyCreation()
-        } else {
+        if (state.recoveryType == RecoveryType.Standard) {
             sendUserDeviceAndImageToBackend()
         }
     }
@@ -153,7 +152,7 @@ class DeviceRegistrationViewModel @Inject constructor(
         }
     }
 
-    private fun sendBootstrapUserToKeyCreation() {
+    private fun sendUserToKeyCreation(bootStrapUser: Boolean) {
         viewModelScope.launch {
             try {
                 val capturedUserPhoto = state.capturedUserPhoto
@@ -171,20 +170,22 @@ class DeviceRegistrationViewModel @Inject constructor(
                         email = email,
                         publicKey = state.standardPublicKey
                     )
-                    userRepository.saveBootstrapDeviceId(
-                        email = email,
-                        deviceId = state.bootstrapKeyName
-                    )
-                    userRepository.saveBootstrapDevicePublicKey(
-                        email = email,
-                        publicKey = state.bootstrapPublicKey
-                    )
+
+                    if (bootStrapUser) {
+                        userRepository.saveBootstrapDeviceId(
+                            email = email,
+                            deviceId = state.bootstrapKeyName
+                        )
+                        userRepository.saveBootstrapDevicePublicKey(
+                            email = email,
+                            publicKey = state.bootstrapPublicKey
+                        )
+                    }
                     userRepository.saveBootstrapImageUrl(
                         email = email,
                         bootstrapImageUrl = state.fileUrl
                     )
 
-                    //Send user to the key creation with the image data passed along...
                     state = state.copy(
                         addUserDevice = Resource.Success(Unit),
                     )
@@ -222,12 +223,10 @@ class DeviceRegistrationViewModel @Inject constructor(
     }
 
     fun imageCaptured() {
-        if (state.isBootstrapUser) {
-            //Standard Device Registration
-            createBootstrapKeysForDevice()
-        } else {
-            //Standard Device Registration
-            createStandardKeyForDevice()
+        when (state.recoveryType) {
+            RecoveryType.Bootstrap -> createBootstrapKeysForDevice()
+            RecoveryType.Standard -> createStandardKeyForDevice()
+            RecoveryType.Organization -> createOrgRecoveryKeyForDevice()
         }
     }
 
@@ -261,8 +260,7 @@ class DeviceRegistrationViewModel @Inject constructor(
                     bootstrapPublicKey = BaseWrapper.encode(compressedBootstrapPublicKey)
                 )
 
-                triggerBioPrompt()
-
+                sendUserToKeyCreation(bootStrapUser = true)
             } catch (e: Exception) {
                 e.sendError(CrashReportingUtil.DEVICE_REGISTRATION)
                 state = state.copy(
@@ -297,6 +295,40 @@ class DeviceRegistrationViewModel @Inject constructor(
                 )
             }
         }
+    }
+
+    private fun createOrgRecoveryKeyForDevice() {
+        viewModelScope.launch {
+            val standardKeyId = keyRepository.createDeviceKeyId()
+
+            state = state.copy(
+                standardKeyName = standardKeyId,
+            )
+
+            try {
+                keyRepository.getOrCreateKey(keyName = standardKeyId)
+
+                val standardPublicKey =
+                    keyRepository.getPublicKeyFromDeviceKey(keyName = standardKeyId)
+
+                val compressedStandardPublicKey =
+                    ECIESManager.extractUncompressedPublicKey(standardPublicKey.encoded)
+
+                state = state.copy(
+                    standardPublicKey = BaseWrapper.encode(compressedStandardPublicKey),
+                )
+
+                sendUserToKeyCreation(bootStrapUser = false)
+
+            } catch (e: Exception) {
+                e.sendError(CrashReportingUtil.DEVICE_REGISTRATION)
+                state = state.copy(
+                    deviceRegistrationError = DeviceRegistrationError.SIGNING_IMAGE,
+                    capturingDeviceKey = Resource.Uninitialized
+                )
+            }
+        }
+
     }
 
     fun capturedUserPhotoSuccess(userPhoto: Bitmap, fileUrl: String) {

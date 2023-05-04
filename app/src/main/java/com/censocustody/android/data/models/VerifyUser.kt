@@ -77,6 +77,10 @@ data class VerifyUser(
     }
 }
 
+enum class RecoveryType {
+    Standard, Bootstrap, Organization
+}
+
 data class Organization(
     val id: String?,
     val name: String?
