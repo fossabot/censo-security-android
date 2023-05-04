@@ -10,6 +10,7 @@ import com.censocustody.android.presentation.key_management.KeyManagementState.C
 import com.censocustody.android.presentation.key_management.KeyManagementState.Companion.LAST_SET_START_INDEX
 import com.censocustody.android.presentation.key_management.KeyManagementState.Companion.LAST_WORD_INDEX
 import com.censocustody.android.presentation.key_management.KeyManagementState.Companion.PHRASE_WORD_COUNT
+import com.censocustody.android.presentation.org_key_recovery.OrgKeyRecoveryState
 
 object PhraseEntryUtil {
 
@@ -181,6 +182,40 @@ object PhraseEntryUtil {
         submittedWords: List<String>,
         state: KeyManagementState
     ): KeyManagementState? {
+        val previousSubmittedWord = submittedWords.getOrNull(word.wordIndex)
+        if (previousSubmittedWord != null) {
+            if (previousSubmittedWord == word.wordValue) {
+                //Word has not been changed, get the next word to display
+                return state.copy(
+                    confirmPhraseWordsState = getNextWordToDisplay(
+                        index = word.wordIndex,
+                        state = state.confirmPhraseWordsState
+                    )
+                )
+            } else {
+                //Word has been edited, replace the previously submitted word
+                val updatedConfirmPhraseWordsState = replacePreviouslySubmittedWordWithEditedInput(
+                    editedWordInput = word.wordValue,
+                    index = word.wordIndex,
+                    state = state.confirmPhraseWordsState
+                )
+                //Return null or the updated state
+                return updatedConfirmPhraseWordsState?.let { safeState ->
+                    state.copy(
+                        confirmPhraseWordsState = safeState
+                    )
+                }
+            }
+        } else {
+            return null
+        }
+    }
+
+    fun handlePreviouslySubmittedWordDuringOrgRecovery(
+        word: IndexedPhraseWord,
+        submittedWords: List<String>,
+        state: OrgKeyRecoveryState
+    ) : OrgKeyRecoveryState? {
         val previousSubmittedWord = submittedWords.getOrNull(word.wordIndex)
         if (previousSubmittedWord != null) {
             if (previousSubmittedWord == word.wordValue) {
