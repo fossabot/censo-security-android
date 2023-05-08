@@ -5,10 +5,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.censocustody.android.common.CensoCountDownTimer
-import com.censocustody.android.common.CensoCountDownTimerImpl
 import com.censocustody.android.common.exception.CensoError
 import com.censocustody.android.common.Resource
+import com.censocustody.android.common.wrapper.CensoCountDownTimer
+import com.censocustody.android.common.wrapper.CensoCountDownTimerImpl
 import com.censocustody.android.data.repository.BaseRepository.Companion.CONFLICT_CODE
 import com.censocustody.android.data.repository.UserRepository
 import dagger.hilt.android.lifecycle.HiltViewModel

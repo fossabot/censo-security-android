@@ -1,4 +1,4 @@
-package com.censocustody.android.common
+package com.censocustody.android.common.wrapper
 
 import android.os.CountDownTimer
 

@@ -3,8 +3,8 @@ package com.censocustody.android.viewModel
 import com.censocustody.android.presentation.pending_approval.PendingApprovalViewModel
 
 import com.nhaarman.mockitokotlin2.whenever
-import com.censocustody.android.common.CensoCountDownTimer
 import com.censocustody.android.common.Resource
+import com.censocustody.android.common.wrapper.CensoCountDownTimer
 import com.censocustody.android.data.models.DeviceKeyInfo
 import com.censocustody.android.data.models.Organization
 import com.censocustody.android.data.models.VerifyUser
