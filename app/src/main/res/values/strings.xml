@@ -277,4 +277,13 @@
     <string name="start_scanning">Start Scanning…</string>
     <string name="scan_qr_code">Scan QR Code</string>
     <string name="scan_qr_code_success">Connecting to DApp…</string>
+    <string name="dapp_name">dApp Name</string>
+    <string name="dapp_url">dApp URL</string>
+    <string name="dapp_description">dApp Description</string>
+    <string name="no_simulation_results">No simulation results available</string>
+    <string name="simulation_results">Expected transfers</string>
+    <string name="eth_send_transaction_header">dApp Transaction</string>
+    <string name="eth_sign_header">dApp Sign Message</string>
+    <string name="eth_sign_typed_data_header">dApp Sign Data</string>
+    <string name="enable_recovery_contract_header">Enable Recovery Policy</string>
 </resources>

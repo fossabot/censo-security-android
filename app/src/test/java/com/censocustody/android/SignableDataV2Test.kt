@@ -40,6 +40,7 @@ class SignableDataV2Test {
 
     private inline fun <reified T: SignableDataResult.Evm> testEvmOps(testCases: List<TestCase>) {
         testCases.forEach {
+            println(it)
             println(it.request)
             val details = deserializer.toObjectWithParsedDetails(it.request).details
             val approval = ApprovalDispositionRequestV2(
