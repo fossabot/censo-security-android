@@ -105,7 +105,20 @@ data class ApprovalDispositionRequestV2(
                                             requestType.signingData.transaction,
                                         )
                                     }
-                                    else -> throw RuntimeException("not implemented")
+                                    is ApprovalRequestDetailsV2.DAppParams.EthSign -> {
+                                        EvmDAppTransactionBuilder.signSafeHash(
+                                            requestType.wallet.address,
+                                            requestType.dappParams,
+                                            requestType.signingData.transaction
+                                        )
+                                    }
+                                    is ApprovalRequestDetailsV2.DAppParams.EthSignTypedData -> {
+                                        EvmDAppTransactionBuilder.signSafeTypedDataHash(
+                                            requestType.wallet.address,
+                                            requestType.dappParams,
+                                            requestType.signingData.transaction
+                                        )
+                                    }
                                 },
                                 getApprovalRequestDetailsSignature()
                             )
@@ -123,7 +136,20 @@ data class ApprovalDispositionRequestV2(
                                             requestType.signingData.transaction,
                                         )
                                     }
-                                    else -> throw RuntimeException("not implemented")
+                                    is ApprovalRequestDetailsV2.DAppParams.EthSign -> {
+                                        EvmDAppTransactionBuilder.signSafeHash(
+                                            requestType.wallet.address,
+                                            requestType.dappParams,
+                                            requestType.signingData.transaction
+                                        )
+                                    }
+                                    is ApprovalRequestDetailsV2.DAppParams.EthSignTypedData -> {
+                                        EvmDAppTransactionBuilder.signSafeTypedDataHash(
+                                            requestType.wallet.address,
+                                            requestType.dappParams,
+                                            requestType.signingData.transaction
+                                        )
+                                    }
                                 },
                                 getApprovalRequestDetailsSignature()
                             )
