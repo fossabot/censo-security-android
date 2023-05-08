@@ -176,10 +176,20 @@ fun ApprovalRequestDetailsV2.getHeader(context: Context) =
         }
 
         is ApprovalRequestDetailsV2.EnableRecoveryContract -> {
-            "Enable Recovery Policy"
+            context.getString(R.string.enable_recovery_contract_header)
         }
 
-        ApprovalRequestDetailsV2.UnknownApprovalType -> {
+        is ApprovalRequestDetailsV2.EthereumDAppRequest,
+        is ApprovalRequestDetailsV2.PolygonDAppRequest -> {
+            when (this.dAppParams()) {
+                is ApprovalRequestDetailsV2.DAppParams.EthSendTransaction -> context.getString(R.string.eth_send_transaction_header)
+                is ApprovalRequestDetailsV2.DAppParams.EthSign -> context.getString(R.string.eth_sign_header)
+                is ApprovalRequestDetailsV2.DAppParams.EthSignTypedData -> context.getString(R.string.eth_sign_typed_data_header)
+                else -> context.getString(R.string.unknown_approval_header)
+            }
+        }
+
+        is ApprovalRequestDetailsV2.UnknownApprovalType -> {
             context.getString(R.string.unknown_approval_header)
         }
     }
@@ -441,6 +451,33 @@ fun ApprovalRequestDetailsV2.transferPolicyUpdateName() =
     when (this) {
         is ApprovalRequestDetailsV2.EthereumTransferPolicyUpdate -> wallet.name
         is ApprovalRequestDetailsV2.PolygonTransferPolicyUpdate -> wallet.name
+        else -> ""
+    }
+
+fun ApprovalRequestDetailsV2.dAppParams() =
+    when (this) {
+        is ApprovalRequestDetailsV2.EthereumDAppRequest -> dappParams
+        is ApprovalRequestDetailsV2.PolygonDAppRequest -> dappParams
+        else -> null
+    }
+
+fun ApprovalRequestDetailsV2.dAppInfo() =
+    when (this) {
+        is ApprovalRequestDetailsV2.EthereumDAppRequest -> dappInfo
+        is ApprovalRequestDetailsV2.PolygonDAppRequest -> dappInfo
+        else -> null
+    }
+
+fun ApprovalRequestDetailsV2.dAppSimulationResults() =
+    when (val params = this.dAppParams()) {
+        is ApprovalRequestDetailsV2.DAppParams.EthSendTransaction -> params.simulatedChanges
+        else -> emptyList()
+    }
+
+fun ApprovalRequestDetailsV2.dAppFromAccount() =
+    when (this) {
+        is ApprovalRequestDetailsV2.EthereumDAppRequest -> wallet.name
+        is ApprovalRequestDetailsV2.PolygonDAppRequest -> wallet.name
         else -> ""
     }
 

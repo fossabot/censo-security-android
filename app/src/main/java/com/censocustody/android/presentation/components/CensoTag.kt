@@ -19,11 +19,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
-import com.censocustody.android.ui.theme.CensoWhite
 import com.censocustody.android.R
-import com.censocustody.android.ui.theme.BackgroundDark
-import com.censocustody.android.ui.theme.BackgroundGrey
-import com.censocustody.android.ui.theme.TextBlack
+import com.censocustody.android.ui.theme.*
 
 @Composable
 fun CensoTag(
@@ -98,7 +95,7 @@ fun CensoTagRow(
                     centerVerticallyTo(parent)
                 },
             imageVector = iconArrow,
-            tint = CensoWhite,
+            tint = DarkGreyText,
             contentDescription = iconContentDescription
         )
 
