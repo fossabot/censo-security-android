@@ -137,14 +137,19 @@ fun ScanQRScreen(
                             }
                             Spacer(modifier = Modifier.height(36.dp))
                         }
-                    } else if (scanQRResult is Resource.Error || uploadWcUriResult is Resource.Error) {
+                    } else if (scanQRResult is Resource.Error || uploadWcUriResult is Resource.Error || checkingConnections is Resource.Error) {
                         ScanQRBoxUI {
                             Spacer(modifier = Modifier.height(36.dp))
                             Text(
                                 modifier = Modifier.padding(horizontal = 8.dp),
                                 text =
-                                    if (scanQRResult is Resource.Error) stringResource(R.string.failed_scan_qr_code)
-                                    else stringResource(R.string.failed_upload_wc_uri),
+                                if (scanQRResult is Resource.Error) {
+                                    stringResource(R.string.failed_scan_qr_code)
+                                } else if (checkingConnections is Resource.Error) {
+                                    stringResource(R.string.no_active_sessions_found)
+                                } else {
+                                    stringResource(R.string.failed_upload_wc_uri)
+                                },
                                 textAlign = TextAlign.Center,
                                 color = TextBlack,
                                 fontSize = 22.sp

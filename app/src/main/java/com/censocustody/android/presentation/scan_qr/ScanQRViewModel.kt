@@ -63,7 +63,7 @@ class ScanQRViewModel @Inject constructor(
 
     private fun checkSessions() {
         viewModelScope.launch {
-            if (state.timesPolled <= MAX_POLL) {
+            if (state.timesPolled >= MAX_POLL) {
                 state = state.copy(checkSessionsOnConnection = Resource.Error())
                 timer.stopCountDownTimer()
                 return@launch
@@ -85,6 +85,8 @@ class ScanQRViewModel @Inject constructor(
                     state = state.copy(
                         checkSessionsOnConnection = checkSessionsResource
                     )
+                } else {
+                    state = state.copy(timesPolled = state.timesPolled + 1)
                 }
             }
         }
