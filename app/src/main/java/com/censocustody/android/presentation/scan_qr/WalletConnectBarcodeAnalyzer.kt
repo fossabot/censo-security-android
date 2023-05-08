@@ -21,18 +21,23 @@ class WalletConnectBarcodeAnalyzer(
         mediaImage?.let {
             val image = InputImage.fromMediaImage(mediaImage, imageProxy.imageInfo.rotationDegrees)
 
-            scanner.process(image).addOnSuccessListener { barcodes ->
-                if (barcodes.size > 0) {
-                    for (barcode in barcodes) {
-                        when (barcode.valueType) {
-                            Barcode.TYPE_TEXT -> {
-                                foundQrCallback(barcode.rawValue)
+            scanner.process(image)
+                .addOnSuccessListener { barcodes ->
+                    if (barcodes.size > 0) {
+                        for (barcode in barcodes) {
+                            when (barcode.valueType) {
+                                Barcode.TYPE_TEXT -> {
+                                    foundQrCallback(barcode.rawValue)
+                                }
                             }
                         }
                     }
+                }.addOnFailureListener {
+                    failedToScanCallback(it)
+                }.addOnCompleteListener {
+                    imageProxy.image?.close()
+                    imageProxy.close()
                 }
-            }.addOnFailureListener(failedToScanCallback)
         }
-        imageProxy.close()
     }
 }

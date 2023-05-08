@@ -1,7 +1,7 @@
 package com.censocustody.android.presentation.approval_detail
 
 import com.censocustody.android.common.Resource
-import com.censocustody.android.common.CensoCountDownTimer
+import com.censocustody.android.common.wrapper.CensoCountDownTimer
 import com.censocustody.android.data.repository.ApprovalsRepository
 import com.censocustody.android.data.repository.KeyRepository
 import com.censocustody.android.data.models.approvalV2.ApprovalRequestV2
