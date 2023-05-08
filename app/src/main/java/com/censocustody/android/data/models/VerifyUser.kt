@@ -20,6 +20,7 @@ data class DeviceKeyInfo(
 data class OrgAdminInfo(
     val hasRecoveryContract: Boolean,
     val participantId: String,
+    val bootstrapParticipantId: String?,
     val hasPendingOrgRecovery: Boolean,
     val canInitiateOrgRecovery: Boolean
 )

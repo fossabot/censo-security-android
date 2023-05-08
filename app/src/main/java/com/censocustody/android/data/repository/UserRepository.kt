@@ -36,7 +36,8 @@ interface UserRepository {
         walletSigners: List<WalletSigner>,
         rootSeed: ByteArray,
         policy: ShardingPolicy,
-        shardingParticipantId: String
+        shardingParticipantId: String,
+        bootstrapShardingParticipantId: String?
     ): Resource<Unit>
     suspend fun userLoggedIn(): Boolean
     suspend fun setUserLoggedIn()
@@ -234,7 +235,8 @@ class UserRepositoryImpl(
         walletSigners: List<WalletSigner>,
         rootSeed: ByteArray,
         policy: ShardingPolicy,
-        shardingParticipantId: String
+        shardingParticipantId: String,
+        bootstrapShardingParticipantId: String?
     ): Resource<Unit> {
         val email = retrieveUserEmail()
 
@@ -255,8 +257,10 @@ class UserRepositoryImpl(
         val share = encryptionManager.createShare(
             shardingPolicy = ShardingPolicy(
                 policy.policyRevisionGuid,
-                policy.threshold,
-                policy.participants.map { participant ->
+                if (bootstrapShardingParticipantId != null) 1 else policy.threshold,
+                policy.participants.filterNot {
+                        participant -> participant.participantId == bootstrapShardingParticipantId
+                }.map { participant ->
                     if (participant.participantId == shardingParticipantId) {
                         ShardingParticipant(participant.participantId, listOf(devicePublicKey))
                     } else participant
