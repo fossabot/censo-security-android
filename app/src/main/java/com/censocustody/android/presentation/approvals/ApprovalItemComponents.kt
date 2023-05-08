@@ -319,7 +319,15 @@ fun ApprovalRowContent(
                     header = type.getHeader(LocalContext.current),
                     subtitle = type.dAppInfo()!!.name,
                 )
-                else -> throw RuntimeException("not implemented")
+                is ApprovalRequestDetailsV2.DAppParams.EthSign -> DAppEthSignContent(
+                    header = type.getHeader(LocalContext.current),
+                    subtitle = type.dAppInfo()!!.name
+                )
+                is ApprovalRequestDetailsV2.DAppParams.EthSignTypedData -> DAppEthSignTypedDataContent(
+                    header = type.getHeader(LocalContext.current),
+                    subtitle = type.dAppInfo()!!.name
+                )
+                null -> Text(text = type.getHeader(LocalContext.current), color = TextBlack)
             }
         }
 
@@ -504,7 +512,7 @@ fun ApprovalDetailContent(approval: ApprovalRequestV2, type: ApprovalRequestDeta
 
         is ApprovalRequestDetailsV2.EthereumDAppRequest,
         is ApprovalRequestDetailsV2.PolygonDAppRequest -> {
-            when (type.dAppParams()) {
+            when (val params = type.dAppParams()) {
                 is ApprovalRequestDetailsV2.DAppParams.EthSendTransaction -> DAppEthSendTransactionDetailContent(
                     header = type.getHeader(LocalContext.current),
                     fromAccount = type.dAppFromAccount(),
@@ -512,6 +520,24 @@ fun ApprovalDetailContent(approval: ApprovalRequestV2, type: ApprovalRequestDeta
                     dAppInfo = type.dAppInfo()!!,
                     simulationResults = type.dAppSimulationResults()
                 )
+                is ApprovalRequestDetailsV2.DAppParams.EthSign -> {
+                    DAppEthSignDetailContent(
+                        header = type.getHeader(LocalContext.current),
+                        fromAccount = type.dAppFromAccount(),
+                        fee = type.fee()!!,
+                        dAppInfo = type.dAppInfo()!!,
+                        message = params.displayMessage
+                    )
+                }
+                is ApprovalRequestDetailsV2.DAppParams.EthSignTypedData -> {
+                    DAppEthSignTypedDataDetailContent(
+                        header = type.getHeader(LocalContext.current),
+                        fromAccount = type.dAppFromAccount(),
+                        fee = type.fee()!!,
+                        dAppInfo = type.dAppInfo()!!,
+                        data = params.eip712Data(),
+                    )
+                }
                 else -> throw RuntimeException("not implemented")
             }
         }

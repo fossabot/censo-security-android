@@ -13,10 +13,14 @@ import com.censocustody.android.data.models.approvalV2.ApprovalSignature.Compani
 import com.censocustody.android.data.models.approvalV2.ApprovalRequestDetailsV2.EvmTokenInfo.Companion.evmTokenInfoAdapterFactory
 import com.censocustody.android.data.models.approvalV2.ApprovalRequestDetailsV2.OnChainPolicy.Companion.onChainPolicyAdapterFactory
 import com.censocustody.android.data.models.approvalV2.ApprovalRequestDetailsV2.SigningData.Companion.signingDataAdapterFactory
+import com.censocustody.android.data.models.evm.EIP712Data
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.annotations.SerializedName
 import com.google.gson.typeadapters.RuntimeTypeAdapterFactory
+import org.bouncycastle.util.encoders.Hex
+import org.web3j.crypto.StructuredData
+import org.web3j.crypto.StructuredDataEncoder
 import java.lang.reflect.Modifier
 import java.math.BigInteger
 
@@ -677,12 +681,25 @@ sealed class ApprovalRequestDetailsV2 {
         data class EthSign(
             val message: String,
             val messageHash: String,
-        ) : DAppParams()
+        ) : DAppParams() {
+            val displayMessage = run {
+                val decoded = Hex.decode(message.removePrefix("0x")).decodeToString()
+                val letterOrDigitCount = decoded.count { it.isLetterOrDigit() || it.isWhitespace() }
+                if (letterOrDigitCount.toDouble() / decoded.count().toDouble() > 0.66) {
+                    decoded
+                } else {
+                    message
+                }
+            }
+        }
 
         data class EthSignTypedData(
-            val eip721Data: String,
+            val eip712Data: String,
             val messageHash: String,
-        ) : DAppParams()
+        ) : DAppParams() {
+            fun structuredData() = StructuredDataEncoder(eip712Data)
+            fun eip712Data() = EIP712Data(eip712Data)
+        }
     }
 
 }
