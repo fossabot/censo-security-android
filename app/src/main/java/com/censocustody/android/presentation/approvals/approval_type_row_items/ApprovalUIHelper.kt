@@ -176,16 +176,16 @@ fun ApprovalRequestDetailsV2.getHeader(context: Context) =
         }
 
         is ApprovalRequestDetailsV2.EnableRecoveryContract -> {
-            "Enable Recovery Policy"
+            context.getString(R.string.enable_recovery_contract_header)
         }
 
         is ApprovalRequestDetailsV2.EthereumDAppRequest,
         is ApprovalRequestDetailsV2.PolygonDAppRequest -> {
             when (this.dAppParams()) {
-                is ApprovalRequestDetailsV2.DAppParams.EthSendTransaction -> "dApp Transaction"
-                is ApprovalRequestDetailsV2.DAppParams.EthSign -> "dApp Sign Message"
-                is ApprovalRequestDetailsV2.DAppParams.EthSignTypedData -> "dApp Sign Data"
-                else -> "Unknown"
+                is ApprovalRequestDetailsV2.DAppParams.EthSendTransaction -> context.getString(R.string.eth_send_transaction_header)
+                is ApprovalRequestDetailsV2.DAppParams.EthSign -> context.getString(R.string.eth_sign_header)
+                is ApprovalRequestDetailsV2.DAppParams.EthSignTypedData -> context.getString(R.string.eth_sign_typed_data_header)
+                else -> context.getString(R.string.unknown_approval_header)
             }
         }
 
