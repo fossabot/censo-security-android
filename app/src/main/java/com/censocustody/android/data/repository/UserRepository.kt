@@ -13,10 +13,13 @@ import com.censocustody.android.data.api.SemVersionApiService
 import com.censocustody.android.data.cryptography.CryptographyManager
 import com.censocustody.android.data.cryptography.EncryptionManager
 import com.censocustody.android.data.models.*
+import com.censocustody.android.data.models.recovery.OrgAdminRecoveredDeviceAndSigners
 import com.censocustody.android.data.storage.AuthProvider
 import com.censocustody.android.data.storage.SecurePreferences
 import com.censocustody.android.data.storage.SharedPrefsHelper
 import com.censocustody.android.data.storage.UserState
+import com.censocustody.android.data.validator.AndroidNameAndModelProvider
+import com.censocustody.android.data.validator.NameAndModelProvider
 import okhttp3.ResponseBody
 
 interface UserRepository {
@@ -55,7 +58,7 @@ interface UserRepository {
     suspend fun saveBootstrapDevicePublicKey(email: String, publicKey: String)
     suspend fun userHasDeviceIdSaved(email: String) : Boolean
     suspend fun userHasBootstrapDeviceIdSaved(email: String) : Boolean
-    suspend fun addUserDevice(userDevice: UserDevice) : Resource<Unit>
+    suspend fun addUserDevice(publicKey: String, userImage: UserImage) : Resource<Unit>
     suspend fun retrieveUserDevicePublicKey(email: String) : String
     suspend fun retrieveBootstrapDevicePublicKey(email: String) : String
     suspend fun clearPreviousDeviceInfo(email: String)
@@ -76,6 +79,7 @@ class UserRepositoryImpl(
     private val versionApiService: SemVersionApiService,
     private val encryptionManager: EncryptionManager,
     private val cryptographyManager: CryptographyManager,
+    private val nameAndModelProvider: NameAndModelProvider,
     private val applicationContext: Context
 ) : UserRepository, BaseRepository() {
 
@@ -197,10 +201,14 @@ class UserRepositoryImpl(
         val bootstrapPublicKey = retrieveBootstrapDevicePublicKey(email)
         val devicePublicKey = retrieveUserDevicePublicKey(email)
 
+        val nameAndModel = nameAndModelProvider.retrieveNameAndModel()
+
         val userDevice = UserDevice(
             userImage = userImage,
             deviceType = DeviceType.ANDROID,
-            publicKey = devicePublicKey
+            publicKey = devicePublicKey,
+            name = nameAndModel.name,
+            model = nameAndModel.model
         )
 
         val bootstrapDevice = BootstrapDevice(
@@ -248,10 +256,14 @@ class UserRepositoryImpl(
 
         val devicePublicKey = retrieveUserDevicePublicKey(email)
 
+        val nameAndModel = nameAndModelProvider.retrieveNameAndModel()
+
         val userDevice = UserDevice(
             userImage = userImage,
             deviceType = DeviceType.ANDROID,
-            publicKey = devicePublicKey
+            publicKey = devicePublicKey,
+            name = nameAndModel.name,
+            model = nameAndModel.model
         )
 
         val share = encryptionManager.createShare(
@@ -390,8 +402,18 @@ class UserRepositoryImpl(
     }
 
 
-    override suspend fun addUserDevice(userDevice: UserDevice): Resource<Unit> {
+    override suspend fun addUserDevice(publicKey: String, userImage: UserImage): Resource<Unit> {
         return retrieveApiResource {
+            val nameAndModel = nameAndModelProvider.retrieveNameAndModel()
+
+            val userDevice = UserDevice(
+                publicKey = publicKey,
+                userImage = userImage,
+                deviceType = DeviceType.ANDROID,
+                name = nameAndModel.name,
+                model = nameAndModel.model
+            )
+
             api.addUserDevice(userDevice)
         }
     }

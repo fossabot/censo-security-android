@@ -1,6 +1,8 @@
-package com.censocustody.android.data.models
+package com.censocustody.android.data.models.recovery
 
 import com.censocustody.android.common.wrapper.BaseWrapper
+import com.censocustody.android.data.models.Chain
+import com.censocustody.android.data.models.recovery.OrgAdminRecoveryRequest
 import com.censocustody.android.data.models.recovery.RecoveryAppSigningResponse
 
 data class OrgAdminRecoverySignaturesRequest(

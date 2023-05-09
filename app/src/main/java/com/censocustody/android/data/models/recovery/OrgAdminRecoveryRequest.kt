@@ -1,11 +1,12 @@
-package com.censocustody.android.data.models
+package com.censocustody.android.data.models.recovery
 
 import com.censocustody.android.common.wrapper.BaseWrapper
-import com.censocustody.android.data.models.OrgAdminRecoveryRequest.RecoverySafeTx.Companion.recoverySafeTxAdapterFactory
+import com.censocustody.android.data.models.Chain
+import com.censocustody.android.data.models.Signers
+import com.censocustody.android.data.models.UserDevice
 import com.censocustody.android.data.models.approvalV2.ApprovalRequestDetailsV2
 import com.censocustody.android.data.models.evm.EvmRecoveryTransactionBuilder
-import com.censocustody.android.data.models.recovery.RecoveryAppSigningRequest
-import com.censocustody.android.data.models.recovery.SignableRecoveryItem
+import com.censocustody.android.data.models.recovery.OrgAdminRecoveryRequest.RecoverySafeTx.Companion.recoverySafeTxAdapterFactory
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.typeadapters.RuntimeTypeAdapterFactory

@@ -7,6 +7,8 @@ data class UserDevice(
     val deviceType: DeviceType,
     val userImage: UserImage,
     val replacingDeviceIdentifier: String? = null,
+    val name: String,
+    val model: String
 )
 
 enum class DeviceType(val value: String) {
@@ -20,3 +22,5 @@ enum class DeviceType(val value: String) {
         }
     }
 }
+
+data class NameAndModel(val name: String, val model: String)

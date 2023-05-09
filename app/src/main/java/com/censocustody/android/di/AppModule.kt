@@ -13,10 +13,7 @@ import com.censocustody.android.data.cryptography.EncryptionManager
 import com.censocustody.android.data.cryptography.EncryptionManagerImpl
 import com.censocustody.android.data.repository.*
 import com.censocustody.android.data.storage.*
-import com.censocustody.android.data.validator.AndroidEmailValidator
-import com.censocustody.android.data.validator.EmailValidator
-import com.censocustody.android.data.validator.PhraseValidator
-import com.censocustody.android.data.validator.PhraseValidatorImpl
+import com.censocustody.android.data.validator.*
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -59,6 +56,7 @@ object AppModule {
         semVersionApiService: SemVersionApiService,
         encryptionManager: EncryptionManager,
         cryptographyManager: CryptographyManager,
+        nameAndModelProvider: NameAndModelProvider,
         @ApplicationContext applicationContext: Context
     ): UserRepository {
         return UserRepositoryImpl(
@@ -69,7 +67,8 @@ object AppModule {
             versionApiService = semVersionApiService,
             applicationContext = applicationContext,
             cryptographyManager = cryptographyManager,
-            encryptionManager = encryptionManager
+            encryptionManager = encryptionManager,
+            nameAndModelProvider = nameAndModelProvider
         )
     }
 
@@ -169,6 +168,12 @@ object AppModule {
     @Singleton
     fun provideEmailValidator() : EmailValidator {
         return AndroidEmailValidator()
+    }
+
+    @Provides
+    @Singleton
+    fun provideNameAndModelProvider(@ApplicationContext applicationContext: Context) : NameAndModelProvider {
+        return AndroidNameAndModelProvider(applicationContext)
     }
 
 }

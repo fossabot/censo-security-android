@@ -5,8 +5,8 @@ import com.censocustody.android.common.wrapper.toHexString
 import com.censocustody.android.data.cryptography.Secp256k1HierarchicalKey
 import com.censocustody.android.data.cryptography.Secp256k1HierarchicalKey.Companion.ethereumDerivationPath
 import com.censocustody.android.data.models.Chain
-import com.censocustody.android.data.models.OrgAdminRecoveryRequest
-import com.censocustody.android.data.models.OrgAdminRecoverySignaturesRequest
+import com.censocustody.android.data.models.recovery.OrgAdminRecoveryRequest
+import com.censocustody.android.data.models.recovery.OrgAdminRecoverySignaturesRequest
 import com.censocustody.android.data.models.recovery.RecoveryAppSigningResponse
 import com.censocustody.android.data.models.recovery.RecoverySignatureItem
 import org.junit.Assert.*
