@@ -289,4 +289,6 @@
     <string name="checked_connections_success">Connected to DApp and DApp has active sessions.</string>
     <string name="no_active_sessions_found">No Active Sessions Found For dApp</string>
     <string name="message_to_sign">Message</string>
+    <string name="maintenance">Maintenance Mode</string>
+    <string name="checking_maintenance_mode">We are currently in maintenance mode. We will return you to the app when maintenance is complete.</string>
 </resources>
