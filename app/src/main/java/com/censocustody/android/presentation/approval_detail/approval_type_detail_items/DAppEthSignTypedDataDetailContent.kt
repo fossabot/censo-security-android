@@ -115,41 +115,47 @@ fun EIP712Entry(eip712Data: EIP712Data, entry: EIP712Data.Entry) {
 
 @Composable
 fun EIP712View(eip712Data: EIP712Data) {
-    Column(modifier = Modifier.padding(16.dp)) {
-        eip712Data.getDomainName()?.let {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    text = "Domain:",
-                    fontWeight = FontWeight.Bold,
-                    textAlign = TextAlign.End
-                )
-                Text(
-                    text = it,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(8.dp),
-                    textAlign = TextAlign.Start
-                )
+    if (eip712Data.isValidEIP712) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            eip712Data.getDomainName()?.let {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = "Domain:",
+                        fontWeight = FontWeight.Bold,
+                        textAlign = TextAlign.End
+                    )
+                    Text(
+                        text = it,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(8.dp),
+                        textAlign = TextAlign.Start
+                    )
+                }
+            }
+            eip712Data.getDomainVerifyingContract()?.let {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = "Contract:",
+                        fontWeight = FontWeight.Bold,
+                        textAlign = TextAlign.End
+                    )
+                    Text(
+                        text = it,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(8.dp),
+                        textAlign = TextAlign.Start
+                    )
+                }
+            }
+            for (entry in eip712Data.getMessageEntries()) {
+                EIP712Entry(eip712Data = eip712Data, entry = entry)
             }
         }
-        eip712Data.getDomainVerifyingContract()?.let {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    text = "Contract:",
-                    fontWeight = FontWeight.Bold,
-                    textAlign = TextAlign.End
-                )
-                Text(
-                    text = it,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(8.dp),
-                    textAlign = TextAlign.Start
-                )
-            }
-        }
-        for (entry in eip712Data.getMessageEntries()) {
-            EIP712Entry(eip712Data = eip712Data, entry = entry)
+    } else {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(eip712Data.json)
         }
     }
 }
