@@ -106,11 +106,8 @@ class DeviceRegistrationViewModel @Inject constructor(
                     userRepository.saveDeviceId(email = email, deviceId = keyName)
 
                     val userDeviceAdded = userRepository.addUserDevice(
-                        UserDevice(
-                            publicKey = state.standardPublicKey,
-                            deviceType = DeviceType.ANDROID,
-                            userImage = userImage
-                        )
+                        publicKey = state.standardPublicKey,
+                        userImage = userImage
                     )
 
                     if (userDeviceAdded is Resource.Success) {

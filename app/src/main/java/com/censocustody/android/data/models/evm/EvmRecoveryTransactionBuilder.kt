@@ -1,8 +1,8 @@
 package com.censocustody.android.data.models.evm
 
 import com.censocustody.android.common.evm.*
-import com.censocustody.android.data.models.OrgAdminRecoveryRequest
 import com.censocustody.android.data.models.approvalV2.ApprovalRequestDetailsV2
+import com.censocustody.android.data.models.recovery.OrgAdminRecoveryRequest
 import java.math.BigInteger
 
 

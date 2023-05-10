@@ -10,11 +10,14 @@ import com.censocustody.android.data.api.BrooklynApiService.Companion.DEVICE_TYP
 import com.censocustody.android.data.api.BrooklynApiService.Companion.OS_VERSION_HEADER
 import com.censocustody.android.data.api.BrooklynApiService.Companion.X_CENSO_ID
 import com.censocustody.android.data.models.*
-import com.censocustody.android.data.models.OrgAdminRecoveryRequest.RecoverySafeTx.Companion.recoverySafeTxAdapterFactory
 import com.censocustody.android.data.models.approvalV2.ApprovalDispositionRequestV2
 import com.censocustody.android.data.models.approvalV2.ApprovalRequestV2
 import com.censocustody.android.data.models.approvalV2.ApprovalRequestV2Deserializer
 import com.censocustody.android.data.models.approvalV2.ApprovalSignature.Companion.approvalSignatureAdapterFactory
+import com.censocustody.android.data.models.recovery.OrgAdminRecoveredDeviceAndSigners
+import com.censocustody.android.data.models.recovery.OrgAdminRecoveryRequest
+import com.censocustody.android.data.models.recovery.OrgAdminRecoveryRequest.RecoverySafeTx.Companion.recoverySafeTxAdapterFactory
+import com.censocustody.android.data.models.recovery.OrgAdminRecoverySignaturesRequest
 import com.censocustody.android.data.storage.AuthProvider
 import com.censocustody.android.data.storage.TokenExpiredException
 import com.censocustody.android.data.storage.UserState
