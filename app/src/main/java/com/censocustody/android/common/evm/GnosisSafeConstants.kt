@@ -10,6 +10,7 @@ object GnosisSafeConstants {
     val multiSendCallOnlyAddress = "0x40A2aCCbd92BCA938b02010E17A5b8929b49130D"
     val gnosisSafeAddress = "0xd9Db270c1B5E3Bd161E8c8503c55cEABeE709552"
     val gnosisSafeProxyFactoryAddress = "0xa6B71E26C5e0845f74c812102Ca7114b6a896AB2"
+    val signMessageLibAddress = "0xA65387F16B013cf2Af4605Ad8aA5ec25a2cbA3a2"
     val addressZero = "0x000000000000000000000000000000000000000000"
 
     val sentinelAddress = "0x0000000000000000000000000000000000000001"
