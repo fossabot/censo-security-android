@@ -2,6 +2,7 @@ package com.censocustody.android.viewModel
 
 import com.censocustody.android.common.Resource
 import com.censocustody.android.common.wrapper.CensoCountDownTimer
+import com.censocustody.android.data.models.WalletConnectPairingResponse
 import com.censocustody.android.data.repository.ApprovalsRepository
 import com.censocustody.android.presentation.scan_qr.ScanQRViewModel
 import com.nhaarman.mockitokotlin2.any
@@ -11,10 +12,7 @@ import com.nhaarman.mockitokotlin2.whenever
 import junit.framework.TestCase.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.TestCoroutineDispatcher
-import kotlinx.coroutines.test.resetMain
-import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.test.setMain
+import kotlinx.coroutines.test.*
 import okhttp3.ResponseBody
 import okhttp3.ResponseBody.Companion.toResponseBody
 import org.junit.After
@@ -57,13 +55,17 @@ class ScanQRCodeViewModelTest : BaseViewModelTest() {
         Dispatchers.resetMain()
     }
 
+    private suspend fun mockSuccessfulResponse() {
+        whenever(approvalsRepository.sendWcUri(any())).then {
+            Resource.Success(WalletConnectPairingResponse(topic))
+        }
+    }
+
     @Test
     fun `after retrieving valid value from scanning QR, should make call to upload uri`() =
         runTest {
 
-            whenever(approvalsRepository.sendWcUri(any())).then {
-                Resource.Success("".toResponseBody())
-            }
+            mockSuccessfulResponse()
 
             scanQRViewModel.receivedWalletConnectUri(validURI)
 
@@ -76,9 +78,7 @@ class ScanQRCodeViewModelTest : BaseViewModelTest() {
     fun `after retrieving null value from scanning QR, should not make call to upload uri`() =
         runTest {
 
-            whenever(approvalsRepository.sendWcUri(any())).then {
-                Resource.Success("".toResponseBody())
-            }
+            mockSuccessfulResponse()
 
             scanQRViewModel.receivedWalletConnectUri(nullURI)
 
@@ -91,9 +91,7 @@ class ScanQRCodeViewModelTest : BaseViewModelTest() {
     fun `after retrieving empty value from scanning QR, should not make call to upload uri`() =
         runTest {
 
-            whenever(approvalsRepository.sendWcUri(any())).then {
-                Resource.Success("".toResponseBody())
-            }
+            mockSuccessfulResponse()
 
             scanQRViewModel.receivedWalletConnectUri(emptyURI)
 
@@ -106,9 +104,7 @@ class ScanQRCodeViewModelTest : BaseViewModelTest() {
     fun `Sending URI to backend shows user success state`() =
         runTest {
 
-            whenever(approvalsRepository.sendWcUri(any())).then {
-                Resource.Success("".toResponseBody())
-            }
+            mockSuccessfulResponse()
 
             scanQRViewModel.receivedWalletConnectUri(validURI)
 
@@ -123,9 +119,7 @@ class ScanQRCodeViewModelTest : BaseViewModelTest() {
     fun `Save topic from URI on Send URI Success to backend`() =
         runTest {
 
-            whenever(approvalsRepository.sendWcUri(any())).then {
-                Resource.Success("".toResponseBody())
-            }
+            mockSuccessfulResponse()
 
             scanQRViewModel.receivedWalletConnectUri(validURI)
 
@@ -168,9 +162,7 @@ class ScanQRCodeViewModelTest : BaseViewModelTest() {
             assert(scanQRViewModel.state.scanQRCodeResult is Resource.Success)
             assert(scanQRViewModel.state.uploadWcUri is Resource.Error)
 
-            whenever(approvalsRepository.sendWcUri(any())).then {
-                Resource.Success("".toResponseBody())
-            }
+            mockSuccessfulResponse()
 
             scanQRViewModel.retryScan()
 
@@ -188,9 +180,7 @@ class ScanQRCodeViewModelTest : BaseViewModelTest() {
 
             val exception = Exception("Failed to scan.")
 
-            whenever(approvalsRepository.sendWcUri(any())).then {
-                Resource.Success("".toResponseBody())
-            }
+            mockSuccessfulResponse()
 
             scanQRViewModel.failedToScan(exception)
 
@@ -207,9 +197,7 @@ class ScanQRCodeViewModelTest : BaseViewModelTest() {
 
             val exception = Exception("Failed to scan.")
 
-            whenever(approvalsRepository.checkIfConnectionHasSessions(any())).then {
-                Resource.Success("".toResponseBody())
-            }
+            mockSuccessfulResponse()
 
             scanQRViewModel.failedToScan(exception)
 
@@ -227,9 +215,7 @@ class ScanQRCodeViewModelTest : BaseViewModelTest() {
 
             val exception = Exception("Failed to scan.")
 
-            whenever(approvalsRepository.sendWcUri(any())).then {
-                Resource.Success("".toResponseBody())
-            }
+            mockSuccessfulResponse()
 
             scanQRViewModel.failedToScan(exception)
 
@@ -238,11 +224,6 @@ class ScanQRCodeViewModelTest : BaseViewModelTest() {
             assert(scanQRViewModel.state.scanQRCodeResult is Resource.Error)
             assert(scanQRViewModel.state.scanQRCodeResult.exception == exception)
             assert(scanQRViewModel.state.uploadWcUri is Resource.Uninitialized)
-
-
-            whenever(approvalsRepository.sendWcUri(any())).then {
-                Resource.Success("".toResponseBody())
-            }
 
             scanQRViewModel.retryScan()
 
@@ -257,9 +238,7 @@ class ScanQRCodeViewModelTest : BaseViewModelTest() {
     fun `After successfully completing flow, user can leave screen`() =
         runTest {
 
-            whenever(approvalsRepository.sendWcUri(any())).then {
-                Resource.Success("".toResponseBody())
-            }
+            mockSuccessfulResponse()
 
             scanQRViewModel.receivedWalletConnectUri(validURI)
 

@@ -21,7 +21,7 @@ interface ApprovalsRepository {
 
     suspend fun retrieveShards(policyRevisionId: String, userId: String? = null) : Resource<GetShardsResponse>
 
-    suspend fun sendWcUri(uri: String): Resource<ResponseBody>
+    suspend fun sendWcUri(uri: String): Resource<WalletConnectPairingResponse>
     suspend fun checkIfConnectionHasSessions(topic: String) : Resource<List<WalletConnectTopic>>
 }
 

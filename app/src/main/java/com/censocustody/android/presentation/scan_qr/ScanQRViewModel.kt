@@ -31,10 +31,8 @@ class ScanQRViewModel @Inject constructor(
 
     fun receivedWalletConnectUri(uri: String?) {
         if (state.scanQRCodeResult is Resource.Loading && !uri.isNullOrEmpty()) {
-            val topic = uri.substringAfter(":").substringBefore("@")
             state = state.copy(
                 scanQRCodeResult = Resource.Success(uri),
-                topic = topic
             )
             sendUriToBackend(uri = uri)
         }
@@ -45,6 +43,9 @@ class ScanQRViewModel @Inject constructor(
             val walletPairingResource = approvalsRepository.sendWcUri(uri = uri)
 
             if (walletPairingResource is Resource.Success) {
+                state = state.copy(
+                    topic = walletPairingResource.data!!.topic
+                )
                 startPolling()
             }
 
