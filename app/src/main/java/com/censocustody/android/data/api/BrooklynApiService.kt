@@ -15,8 +15,8 @@ import com.censocustody.android.data.models.approvalV2.ApprovalRequestV2
 import com.censocustody.android.data.models.approvalV2.ApprovalRequestV2Deserializer
 import com.censocustody.android.data.models.approvalV2.ApprovalSignature.Companion.approvalSignatureAdapterFactory
 import com.censocustody.android.data.models.recovery.OrgAdminRecoveredDeviceAndSigners
-import com.censocustody.android.data.models.recovery.OrgAdminRecoveryRequest
 import com.censocustody.android.data.models.recovery.OrgAdminRecoveryRequest.RecoverySafeTx.Companion.recoverySafeTxAdapterFactory
+import com.censocustody.android.data.models.recovery.OrgAdminRecoveryRequestEnvelope
 import com.censocustody.android.data.models.recovery.OrgAdminRecoverySignaturesRequest
 import com.censocustody.android.data.storage.AuthProvider
 import com.censocustody.android.data.storage.TokenExpiredException
@@ -147,7 +147,7 @@ interface BrooklynApiService {
 
     @GET("v1/my-org-admin-recovery-request")
     @Headers(AUTH_REQUIRED)
-    suspend fun getMyOrgAdminRecoveryRequest(): RetrofitResponse<OrgAdminRecoveryRequest>
+    suspend fun getMyOrgAdminRecoveryRequest(): RetrofitResponse<OrgAdminRecoveryRequestEnvelope>
 
     @POST("v1/org-admin-recovery-signatures")
     @Headers(AUTH_REQUIRED)

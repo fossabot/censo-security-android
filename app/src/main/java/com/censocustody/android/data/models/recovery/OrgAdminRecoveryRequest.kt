@@ -23,6 +23,31 @@ data class PublicKeyInfo(
     var chain: Chain,
 )
 
+data class RecoveryPolicy(
+    val threshold: Int,
+    val addresses: List<String>
+)
+
+data class OrgAdminRecoveryRequestEnvelope(
+    val request: OrgAdminRecoveryRequest,
+    val recoveryPolicy: RecoveryPolicy,
+    val signaturesReceivedFrom: List<String>,
+) {
+
+    companion object {
+        val gsonBuilder: Gson = GsonBuilder()
+            .excludeFieldsWithModifiers(Modifier.STATIC)
+            .registerTypeAdapterFactory(recoverySafeTxAdapterFactory)
+            .registerTypeAdapterFactory(ApprovalRequestDetailsV2.SigningData.signingDataAdapterFactory)
+            .create()
+
+        fun fromString(json: String): OrgAdminRecoveryRequestEnvelope {
+            return gsonBuilder.fromJson(json, OrgAdminRecoveryRequestEnvelope::class.java)
+        }
+    }
+}
+
+
 data class OrgAdminRecoveryRequest(
     val deviceKey: String,
     val chainKeys: List<PublicKeyInfo>,
