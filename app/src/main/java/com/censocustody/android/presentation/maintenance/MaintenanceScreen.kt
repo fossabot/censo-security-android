@@ -65,7 +65,8 @@ fun MaintenanceScreen(
                 title = stringResource(R.string.maintenance),
                 onAppBarIconClick = { navController.navigate(Screen.AccountRoute.route) },
                 navigationIcon = Icons.Rounded.AccountCircle,
-                navigationIconContentDes = stringResource(id = R.string.content_des_account_icon)
+                navigationIconContentDes = stringResource(id = R.string.content_des_account_icon),
+                showNavIcon = state.userLoggedIn
             )
         },
         content = { _ ->

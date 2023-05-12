@@ -293,13 +293,15 @@ fun NavIconTopBar(
     title: String,
     onAppBarIconClick: () -> Unit,
     navigationIcon: ImageVector,
-    navigationIconContentDes: String
+    navigationIconContentDes: String,
+    showNavIcon: Boolean = true
 ) {
     CenteredTopAppBar(
         title = title,
         backgroundColor = BackgroundGrey,
         onAppBarIconClick = { onAppBarIconClick() },
         navigationIcon = navigationIcon,
+        showNavIcon = showNavIcon,
         navigationIconContentDes = navigationIconContentDes,
     )
 }
