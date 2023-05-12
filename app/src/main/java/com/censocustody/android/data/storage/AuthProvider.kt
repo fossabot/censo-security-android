@@ -2,9 +2,7 @@ package com.censocustody.android.data.storage
 
 import androidx.annotation.AnyThread
 import com.auth0.android.jwt.JWT
-import com.raygun.raygun4android.RaygunClient
 import com.censocustody.android.common.util.CrashReportingUtil.JWT_TAG
-import com.censocustody.android.common.util.CrashReportingUtil.MANUALLY_REPORTED_TAG
 import com.censocustody.android.common.util.sendError
 import com.censocustody.android.data.cryptography.EncryptionManager
 import java.util.*
@@ -18,7 +16,6 @@ interface AuthProvider {
     suspend fun retrieveDeviceId(): String
 
     //UserState Notifying Functionality
-    fun retrieveUserState(): UserState
     fun setUserState(userState: UserState)
     fun addUserStateListener(listener: UserStateListener)
     fun isEmailVerifiedToken(jwt: String): Boolean
@@ -29,8 +26,6 @@ class CensoAuth(
     val encryptionManager: EncryptionManager,
     val securePreferences: SecurePreferences
 ) : AuthProvider {
-
-    var currentUserState = UserState.STANDARD
 
     private val listeners: HashMap<String, UserStateListener> = hashMapOf()
 
@@ -114,8 +109,6 @@ class CensoAuth(
         return SharedPrefsHelper.retrieveDeviceId(email)
     }
 
-    override fun retrieveUserState() = currentUserState
-
     override suspend fun signOut() {
         SharedPrefsHelper.setUserLoggedIn(false)
         SharedPrefsHelper.clearEmail()
@@ -136,7 +129,6 @@ class CensoAuth(
 
     @AnyThread
     override fun setUserState(userState: UserState) {
-        this.currentUserState = userState
         synchronized(listeners) {
             for (listener in listeners.values) {
                 Thread { listener.onUserStateChanged(userState) }.start()

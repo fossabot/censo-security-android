@@ -231,9 +231,7 @@ class AuthInterceptor(private val authProvider: AuthProvider) : Interceptor {
         }
 
         if (response.code == MAINTENANCE_CODE) {
-            if (authProvider.retrieveUserState() != UserState.MAINTENANCE_MODE) {
-                authProvider.setUserState(userState = UserState.MAINTENANCE_MODE)
-            }
+            authProvider.setUserState(userState = UserState.MAINTENANCE_MODE)
         }
 
         return response
