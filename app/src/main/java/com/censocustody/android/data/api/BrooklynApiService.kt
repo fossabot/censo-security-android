@@ -139,7 +139,7 @@ interface BrooklynApiService {
 
     @POST("v1/wallet-connect")
     @Headers(AUTH_REQUIRED)
-    suspend fun walletConnectPairing(@Body walletConnectPairingRequest: WalletConnectPairingRequest) : RetrofitResponse<ResponseBody>
+    suspend fun walletConnectPairing(@Body walletConnectPairingRequest: WalletConnectPairingRequest) : RetrofitResponse<WalletConnectPairingResponse>
 
     @POST("v1/org-admin-recovered-devices")
     @Headers(AUTH_REQUIRED)
