@@ -18,6 +18,7 @@ import com.censocustody.android.data.models.recovery.OrgAdminRecoveredDeviceAndS
 import com.censocustody.android.data.models.recovery.OrgAdminRecoveryRequest
 import com.censocustody.android.data.models.recovery.OrgAdminRecoveryRequest.RecoverySafeTx.Companion.recoverySafeTxAdapterFactory
 import com.censocustody.android.data.models.recovery.OrgAdminRecoverySignaturesRequest
+import com.censocustody.android.data.repository.BaseRepository.Companion.MAINTENANCE_CODE
 import com.censocustody.android.data.storage.AuthProvider
 import com.censocustody.android.data.storage.TokenExpiredException
 import com.censocustody.android.data.storage.UserState
@@ -227,6 +228,10 @@ class AuthInterceptor(private val authProvider: AuthProvider) : Interceptor {
         if (authRequired && response.code == UNAUTHORIZED) {
             runBlocking { authProvider.signOut() }
             authProvider.setUserState(userState = UserState.REFRESH_TOKEN_EXPIRED)
+        }
+
+        if (response.code == MAINTENANCE_CODE) {
+            authProvider.setUserState(userState = UserState.MAINTENANCE_MODE)
         }
 
         return response

@@ -50,6 +50,7 @@ import com.censocustody.android.presentation.key_creation.KeyCreationScreen
 import com.censocustody.android.presentation.key_recovery.KeyRecoveryInitialData
 import com.censocustody.android.presentation.key_recovery.KeyRecoveryScreen
 import com.censocustody.android.presentation.keys_upload.KeysUploadScreen
+import com.censocustody.android.presentation.maintenance.MaintenanceScreen
 import com.censocustody.android.presentation.pending_approval.PendingApprovalScreen
 import com.censocustody.android.presentation.reauthenticate.ReAuthenticateScreen
 import com.censocustody.android.presentation.reset_password.ResetPasswordScreen
@@ -306,6 +307,11 @@ class MainActivity : FragmentActivity() {
             ) {
                 ScanQRScreen(navController = navController)
             }
+            composable(
+                route = Screen.MaintenanceRoute.route
+            ) {
+                MaintenanceScreen(navController = navController)
+            }
         }
     }
 
@@ -328,6 +334,15 @@ class MainActivity : FragmentActivity() {
                         navController.navigate(Screen.EntranceRoute.route) {
                             launchSingleTop = true
                             popUpToTop()
+                        }
+                    }
+
+                    if (userState == UserState.MAINTENANCE_MODE) {
+                        if (navController.currentDestination?.route != Screen.MaintenanceRoute.route) {
+                            navController.navigate(Screen.MaintenanceRoute.route) {
+                                launchSingleTop = true
+                                popUpToTop()
+                            }
                         }
                     }
                 }

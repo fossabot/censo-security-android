@@ -1,9 +1,10 @@
-package com.censocustody.android.presentation.pending_approval
+package com.censocustody.android.presentation.maintenance
 
 import com.censocustody.android.common.Resource
 import com.censocustody.android.data.models.VerifyUser
 
-data class PendingApprovalState(
+data class MaintenanceState(
     val verifyUserResult: Resource<VerifyUser> = Resource.Uninitialized,
     val sendUserToEntrance: Resource<Boolean> = Resource.Uninitialized,
+    val userLoggedIn: Boolean = false
 )
