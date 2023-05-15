@@ -9,6 +9,7 @@ import com.censocustody.android.data.models.DeviceType
 import com.censocustody.android.data.models.ShardingPolicy
 import com.censocustody.android.data.models.approval.*
 import com.censocustody.android.data.models.approvalV2.ApprovalRequestDetailsV2.DAppParams.Companion.dAppParamsAdapterFactory
+import com.censocustody.android.data.models.approvalV2.ApprovalRequestDetailsV2.EvmSimulationResult.Companion.evmSimulationResultAdapterFactory
 import com.censocustody.android.data.models.approvalV2.ApprovalSignature.Companion.approvalSignatureAdapterFactory
 import com.censocustody.android.data.models.approvalV2.ApprovalRequestDetailsV2.EvmTokenInfo.Companion.evmTokenInfoAdapterFactory
 import com.censocustody.android.data.models.approvalV2.ApprovalRequestDetailsV2.OnChainPolicy.Companion.onChainPolicyAdapterFactory
@@ -19,7 +20,6 @@ import com.google.gson.GsonBuilder
 import com.google.gson.annotations.SerializedName
 import com.google.gson.typeadapters.RuntimeTypeAdapterFactory
 import org.bouncycastle.util.encoders.Hex
-import org.web3j.crypto.StructuredData
 import org.web3j.crypto.StructuredDataEncoder
 import java.lang.reflect.Modifier
 import java.math.BigInteger
@@ -49,6 +49,7 @@ data class ApprovalRequestV2(
                 .registerTypeAdapterFactory(signingDataAdapterFactory)
                 .registerTypeAdapterFactory(approvalSignatureAdapterFactory)
                 .registerTypeAdapterFactory(dAppParamsAdapterFactory)
+                .registerTypeAdapterFactory(evmSimulationResultAdapterFactory)
                 .create()
                 .toJson(approval)
             return uriWrapper.encode(jsonString)
@@ -150,6 +151,7 @@ sealed class ApprovalRequestDetailsV2 {
             .registerTypeAdapterFactory(signingDataAdapterFactory)
             .registerTypeAdapterFactory(approvalSignatureAdapterFactory)
             .registerTypeAdapterFactory(dAppParamsAdapterFactory)
+            .registerTypeAdapterFactory(evmSimulationResultAdapterFactory)
             .create()
     }
 
@@ -641,10 +643,26 @@ sealed class ApprovalRequestDetailsV2 {
         val isChange: Boolean
     )
 
-    data class EvmSimulatedChange(
-        val amount: Amount,
-        val symbolInfo: EvmSymbolInfo
-    )
+    sealed class EvmSimulationResult {
+        data class Success(val balanceChanges: List<BalanceChange>) : EvmSimulationResult()
+        data class Failure(val reason: String) : EvmSimulationResult()
+
+        data class BalanceChange(
+            val amount: Amount,
+            val symbolInfo: EvmSymbolInfo
+        )
+
+        companion object {
+            val evmSimulationResultAdapterFactory: RuntimeTypeAdapterFactory<EvmSimulationResult> =
+                RuntimeTypeAdapterFactory.of(
+                    EvmSimulationResult::class.java, "type"
+                ).registerSubtype(
+                    EvmSimulationResult.Success::class.java, "Success"
+                ).registerSubtype(
+                    EvmSimulationResult.Failure::class.java, "Failure"
+                )
+        }
+    }
 
     data class DAppInfo(
         val name: String,
@@ -674,7 +692,7 @@ sealed class ApprovalRequestDetailsV2 {
                 )
         }
         data class EthSendTransaction(
-            val simulatedChanges: List<EvmSimulatedChange>,
+            val simulationResult: EvmSimulationResult?,
             val transaction: EvmTransaction,
         ) : DAppParams()
 
