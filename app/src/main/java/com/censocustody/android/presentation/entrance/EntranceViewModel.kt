@@ -112,6 +112,7 @@ class EntranceViewModel @Inject constructor(
 
             if (verifyUser != null) {
                 state = state.copy(verifyUserResult = verifyUserDataResource)
+                userRepository.setCachedUser(verifyUser)
                 determineUserDestination(verifyUser)
             } else {
                 handleVerifyUserError(verifyUserDataResource)
