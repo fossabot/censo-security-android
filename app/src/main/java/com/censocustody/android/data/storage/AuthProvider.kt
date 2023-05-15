@@ -2,9 +2,7 @@ package com.censocustody.android.data.storage
 
 import androidx.annotation.AnyThread
 import com.auth0.android.jwt.JWT
-import com.raygun.raygun4android.RaygunClient
 import com.censocustody.android.common.util.CrashReportingUtil.JWT_TAG
-import com.censocustody.android.common.util.CrashReportingUtil.MANUALLY_REPORTED_TAG
 import com.censocustody.android.common.util.sendError
 import com.censocustody.android.data.cryptography.EncryptionManager
 import java.util.*
@@ -152,5 +150,5 @@ interface UserStateListener {
 }
 
 enum class UserState {
-    REFRESH_TOKEN_EXPIRED, INVALIDATED_KEY
+    REFRESH_TOKEN_EXPIRED, INVALIDATED_KEY, MAINTENANCE_MODE
 }
