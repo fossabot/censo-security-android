@@ -470,8 +470,8 @@ fun ApprovalRequestDetailsV2.dAppInfo() =
 
 fun ApprovalRequestDetailsV2.dAppSimulationResults() =
     when (val params = this.dAppParams()) {
-        is ApprovalRequestDetailsV2.DAppParams.EthSendTransaction -> params.simulatedChanges
-        else -> emptyList()
+        is ApprovalRequestDetailsV2.DAppParams.EthSendTransaction -> params.simulationResult
+        else -> null
     }
 
 fun ApprovalRequestDetailsV2.dAppFromAccount() =

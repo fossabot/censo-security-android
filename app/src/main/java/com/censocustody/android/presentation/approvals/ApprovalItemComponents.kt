@@ -518,7 +518,7 @@ fun ApprovalDetailContent(approval: ApprovalRequestV2, type: ApprovalRequestDeta
                     fromAccount = type.dAppFromAccount(),
                     fee = type.fee()!!,
                     dAppInfo = type.dAppInfo()!!,
-                    simulationResults = type.dAppSimulationResults()
+                    simulationResult = type.dAppSimulationResults()
                 )
                 is ApprovalRequestDetailsV2.DAppParams.EthSign -> {
                     DAppEthSignDetailContent(
