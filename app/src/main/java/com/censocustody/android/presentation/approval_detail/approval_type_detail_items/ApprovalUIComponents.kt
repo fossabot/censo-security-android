@@ -41,6 +41,7 @@ fun ApprovalRowTitleText(title: String) {
 @Composable
 fun ApprovalSubtitle(text: String, fontSize: TextUnit = 16.sp) {
     Text(
+        modifier = Modifier.padding(horizontal = 8.dp),
         text = text,
         color = DarkGreyText,
         textAlign = TextAlign.Center,

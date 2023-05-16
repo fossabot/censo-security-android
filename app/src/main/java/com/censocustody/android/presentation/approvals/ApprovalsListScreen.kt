@@ -453,6 +453,7 @@ fun ListDataEmptyState() {
         Spacer(modifier = Modifier.height(48.dp))
         Text(
             text = stringResource(R.string.nothing_to_approve),
+            textAlign = TextAlign.Center,
             color = DarkGreyText,
             fontSize = 32.sp
         )
