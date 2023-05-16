@@ -115,16 +115,35 @@ class CryptographyManagerImpl : CryptographyManager {
         return cipher
     }
 
+    //todo: start here tomorrow and see if I can do something different with the setup
     override fun verifySignature(
         keyName: String,
         dataSigned: ByteArray,
         signatureToCheck: ByteArray
     ): Boolean {
-        val signature = Signature.getInstance(SHA_256_ECDSA)
-        val certificate = getCertificateFromKeystore(keyName)
-        signature.initVerify(certificate)
-        signature.update(dataSigned)
-        return signature.verify(signatureToCheck)
+        val ks = KeyStore.getInstance("AndroidKeyStore").apply {
+            load(null)
+        }
+        val entry = ks.getEntry(keyName, null) as? KeyStore.PrivateKeyEntry
+        if (entry == null) {
+            return false
+        }
+
+        val valid: Boolean = Signature.getInstance("SHA256withECDSA").run {
+            initVerify(entry.certificate)
+            update(dataSigned)
+            verify(signatureToCheck)
+        }
+
+        return valid
+
+
+
+//        val signature = Signature.getInstance(SHA_256_ECDSA)
+//        val certificate = getCertificateFromKeystore(keyName)
+//        signature.initVerify(certificate)
+//        signature.update(dataSigned)
+//        return signature.verify(signatureToCheck)
     }
 
     override fun getOrCreateSentinelKey(email: String): SecretKey {
@@ -164,17 +183,18 @@ class CryptographyManagerImpl : CryptographyManager {
 
         val paramBuilder = KeyGenParameterSpec.Builder(
             keyName,
-            KeyProperties.PURPOSE_SIGN or KeyProperties.PURPOSE_VERIFY or KeyProperties.PURPOSE_AGREE_KEY
+            KeyProperties.PURPOSE_VERIFY or KeyProperties.PURPOSE_SIGN or KeyProperties.PURPOSE_AGREE_KEY
         )
 
         val parameterSpec = paramBuilder
             .setAlgorithmParameterSpec(ECGenParameterSpec(SECP_256_R1))
             .setKeySize(KEY_SIZE)
+            //.setIsStrongBoxBacked(true)
             .setRandomizedEncryptionRequired(true)
-            .setUserAuthenticationRequired(true)
-            .setUserAuthenticationParameters(
-                BIOMETRY_TIMEOUT, KeyProperties.AUTH_BIOMETRIC_STRONG
-            )
+//            .setUserAuthenticationRequired(true)
+//            .setUserAuthenticationParameters(
+//                BIOMETRY_TIMEOUT, KeyProperties.AUTH_BIOMETRIC_STRONG
+//            )
             .setInvalidatedByBiometricEnrollment(true)
             .setDigests(
                 KeyProperties.DIGEST_SHA256
@@ -195,6 +215,7 @@ class CryptographyManagerImpl : CryptographyManager {
             setBlockModes(ENCRYPTION_BLOCK_MODE)
             setEncryptionPaddings(ENCRYPTION_PADDING)
             setKeySize(KEY_SIZE)
+            setIsStrongBoxBacked(true)
             setUserAuthenticationRequired(true)
             setInvalidatedByBiometricEnrollment(true)
             setRandomizedEncryptionRequired(true)

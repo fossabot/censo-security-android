@@ -61,6 +61,7 @@ import com.censocustody.android.ui.theme.BackgroundWhite
 import com.censocustody.android.ui.theme.CensoMobileTheme
 import com.censocustody.android.presentation.semantic_version_check.BlockingUI
 import com.censocustody.android.presentation.token_sign_in.TokenSignInScreen
+import com.censocustody.android.presentation.verify.VerifyScreen
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -159,9 +160,9 @@ class MainActivity : FragmentActivity() {
                         when (event) {
                             Lifecycle.Event.ON_START
                             -> {
-                                mainViewModel.onForeground(
-                                    BiometricUtil.checkForBiometricFeaturesOnDevice(context),
-                                )
+//                                mainViewModel.onForeground(
+//                                    BiometricUtil.checkForBiometricFeaturesOnDevice(context),
+//                                )
                             }
                             else -> Unit
                         }
@@ -176,15 +177,15 @@ class MainActivity : FragmentActivity() {
                         mainViewModel.resetSendUserToEntrance()
                     }
 
-                    val blockAppUI = mainViewModel.blockUIStatus()
-
-                    BlockingUI(
-                        blockAppUI = blockAppUI,
-                        bioPromptTrigger = mainState.bioPromptTrigger,
-                        biometryUnavailable = mainState.biometryTooManyAttempts,
-                        biometryStatus = mainState.biometryStatus,
-                        retry = mainViewModel::retryBiometricGate
-                    )
+//                    val blockAppUI = mainViewModel.blockUIStatus()
+//
+//                    BlockingUI(
+//                        blockAppUI = blockAppUI,
+//                        bioPromptTrigger = mainState.bioPromptTrigger,
+//                        biometryUnavailable = mainState.biometryTooManyAttempts,
+//                        biometryStatus = mainState.biometryStatus,
+//                        retry = mainViewModel::retryBiometricGate
+//                    )
                 }
             }
         }
@@ -195,8 +196,11 @@ class MainActivity : FragmentActivity() {
 
         NavHost(
             navController = navController,
-            startDestination = Screen.EntranceRoute.route,
+            startDestination = "main",
         ) {
+            composable(route = "main") {
+                VerifyScreen()
+            }
             composable(
                 "$TOKEN_DEEPLINK_LOGIN?$DL_EMAIL_KEY={$DL_EMAIL_KEY}?$DL_TOKEN_KEY={$DL_TOKEN_KEY}",
                 deepLinks = listOf(navDeepLink {

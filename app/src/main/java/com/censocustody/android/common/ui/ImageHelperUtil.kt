@@ -199,6 +199,17 @@ fun generateUserImageObject(
             keyName = keyName,
         )
 
+
+    val verified = cryptographyManager.verifySignature(
+        keyName = keyName,
+        dataSigned = hash,
+        signatureToCheck = signedImageData
+    )
+
+    if (!verified) {
+        throw Exception("Device image signature not valid.")
+    }
+
     return UserImage(
         image = encodedImageData,
         type = LogoType.JPEG,

@@ -18,6 +18,7 @@ import com.censocustody.android.data.models.UserDevice
 import com.censocustody.android.data.repository.KeyRepository
 import com.raygun.raygun4android.RaygunClient
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -86,21 +87,6 @@ class DeviceRegistrationViewModel @Inject constructor(
                         userPhoto = capturedUserPhoto,
                         keyName = keyName,
                     )
-
-                    val imageByteArray = BaseWrapper.decodeFromBase64(userImage.image)
-                    val hashOfImage = hashOfUserImage(imageByteArray)
-
-                    val signatureToCheck = BaseWrapper.decodeFromBase64(userImage.signature)
-
-                    val verified = keyRepository.verifySignature(
-                        keyName = keyName,
-                        signedData = hashOfImage,
-                        signature = signatureToCheck
-                    )
-
-                    if (!verified) {
-                        throw Exception("Device image signature not valid.")
-                    }
 
                     val email = userRepository.retrieveUserEmail()
                     userRepository.saveDeviceId(email = email, deviceId = keyName)
