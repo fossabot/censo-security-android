@@ -16,8 +16,8 @@ fun VaultCreationRowContent(
     header: String,
     vaultName: String
 ) {
-    ApprovalRowContentHeader(header = header, topSpacing = 16)
+    ApprovalRowContentHeader(header = header, topSpacing = 16, bottomSpacing = 16)
     ApprovalSubtitle(text = vaultName.toVaultName(LocalContext.current), fontSize = 20.sp)
-    Spacer(modifier = Modifier.height(20.dp))
+    Spacer(modifier = Modifier.height(24.dp))
 }
 
