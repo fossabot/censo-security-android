@@ -280,6 +280,7 @@
     <string name="dapp_url">dApp URL</string>
     <string name="dapp_description">dApp Description</string>
     <string name="no_simulation_results">No simulation results available</string>
+    <string name="simulation_failure">Simulation failed</string>
     <string name="simulation_results">Expected transfers</string>
     <string name="eth_send_transaction_header">dApp Transaction</string>
     <string name="eth_sign_header">dApp Sign Message</string>
