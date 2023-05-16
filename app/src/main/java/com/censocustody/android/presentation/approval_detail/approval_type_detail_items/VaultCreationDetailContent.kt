@@ -18,8 +18,9 @@ fun VaultCreationDetailContent(
     vaultCreation: ApprovalRequestDetailsV2.VaultCreation,
 ) {
     val header = vaultCreation.getHeader(LocalContext.current)
-    ApprovalContentHeader(header = header, topSpacing = 24, bottomSpacing = 36)
+    ApprovalContentHeader(header = header, topSpacing = 24, bottomSpacing = 16)
     ApprovalSubtitle(text = vaultCreation.name.toVaultName(LocalContext.current), fontSize = 20.sp)
+    Spacer(modifier = Modifier.height(16.dp))
 
     val approverRowInfoData = generatePolicyRows(
         policy = vaultCreation.approvalPolicy,
