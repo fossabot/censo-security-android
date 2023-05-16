@@ -121,8 +121,8 @@ class CryptographyManagerImpl : CryptographyManager {
         signatureToCheck: ByteArray
     ): Boolean {
         val signature = Signature.getInstance(SHA_256_ECDSA)
-        val certificate = getCertificateFromKeystore(keyName)
-        signature.initVerify(certificate)
+        val publicKey = getPublicKeyFromDeviceKey(keyName)
+        signature.initVerify(publicKey)
         signature.update(dataSigned)
         return signature.verify(signatureToCheck)
     }
