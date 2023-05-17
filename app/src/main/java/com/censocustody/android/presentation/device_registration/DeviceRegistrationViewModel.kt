@@ -85,6 +85,7 @@ class DeviceRegistrationViewModel @Inject constructor(
                     )
 
                     val email = userRepository.retrieveUserEmail()
+                    userRepository.clearLeftoverDeviceInfoIfPresent(email = email)
                     userRepository.saveDeviceId(email = email, deviceId = keyName)
 
                     val userDeviceAdded = userRepository.addUserDevice(
@@ -93,7 +94,6 @@ class DeviceRegistrationViewModel @Inject constructor(
                     )
 
                     if (userDeviceAdded is Resource.Success) {
-                        userRepository.clearLeftoverDeviceInfoIfPresent(email = email)
                         userRepository.clearPreviousDeviceId(email = email)
                         userRepository.saveDeviceId(email = email, deviceId = keyName)
                         userRepository.saveDevicePublicKey(
