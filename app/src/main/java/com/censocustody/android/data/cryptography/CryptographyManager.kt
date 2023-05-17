@@ -2,6 +2,7 @@ package com.censocustody.android.data.cryptography
 
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
+import com.censocustody.android.BuildConfig
 import com.censocustody.android.common.emailToSentinelKeyId
 import com.censocustody.android.data.cryptography.EncryptionManagerImpl.Companion.SENTINEL_STATIC_DATA
 import java.security.KeyStore
@@ -170,7 +171,7 @@ class CryptographyManagerImpl : CryptographyManager {
         val parameterSpec = paramBuilder
             .setAlgorithmParameterSpec(ECGenParameterSpec(SECP_256_R1))
             .setKeySize(KEY_SIZE)
-            .setIsStrongBoxBacked(true)
+            .setIsStrongBoxBacked(!BuildConfig.DEBUG)
             .setRandomizedEncryptionRequired(true)
             .setUserAuthenticationRequired(true)
             .setUserAuthenticationParameters(
@@ -196,7 +197,7 @@ class CryptographyManagerImpl : CryptographyManager {
             setBlockModes(ENCRYPTION_BLOCK_MODE)
             setEncryptionPaddings(ENCRYPTION_PADDING)
             setKeySize(KEY_SIZE)
-            setIsStrongBoxBacked(true)
+            setIsStrongBoxBacked(!BuildConfig.DEBUG)
             setUserAuthenticationRequired(true)
             setInvalidatedByBiometricEnrollment(true)
             setRandomizedEncryptionRequired(true)
