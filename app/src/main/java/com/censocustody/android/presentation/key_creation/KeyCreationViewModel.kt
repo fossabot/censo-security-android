@@ -111,22 +111,6 @@ class KeyCreationViewModel @Inject constructor(
             keyName = deviceId,
         )
 
-        val imageByteArray = BaseWrapper.decodeFromBase64(userImage.image)
-        val hashOfImage = hashOfUserImage(imageByteArray)
-
-        val signatureToCheck = BaseWrapper.decodeFromBase64(userImage.signature)
-
-        val verified = keyRepository.verifySignature(
-            keyName = deviceId,
-            signedData = hashOfImage,
-            signature = signatureToCheck
-        )
-
-        if (!verified) {
-            throw Exception("Device image signature not valid.")
-        }
-
-
         val phrase = state.keyGeneratedPhrase ?: throw Exception("Missing phrase when trying to create bootstrap")
 
         val walletSigners = state.walletSigners

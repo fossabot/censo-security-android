@@ -59,12 +59,6 @@ interface KeyRepository {
 
     suspend fun removeBootstrapDeviceData()
 
-    suspend fun verifySignature(
-        keyName: String,
-        signedData: ByteArray,
-        signature: ByteArray
-    ): Boolean
-
     suspend fun createDeviceKeyId() : String
     suspend fun getOrCreateKey(keyName: String) : PrivateKey
     suspend fun getPublicKeyFromDeviceKey(keyName: String) : PublicKey
@@ -235,16 +229,6 @@ class KeyRepositoryImpl(
             SharedPrefsHelper.clearDeviceBootstrapPublicKey(email)
         }
     }
-
-    override suspend fun verifySignature(
-        keyName: String,
-        signedData: ByteArray,
-        signature: ByteArray
-    ) = cryptographyManager.verifySignature(
-            keyName = keyName,
-            dataSigned = signedData,
-            signatureToCheck = signature
-        )
 
     override suspend fun createDeviceKeyId() = cryptographyManager.createDeviceKeyId()
 
