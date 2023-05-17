@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.pm.PackageManager
 import androidx.biometric.BiometricManager
 import androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_STRONG
+import com.censocustody.android.BuildConfig
 
 object BiometricUtil {
 
@@ -19,7 +20,7 @@ object BiometricUtil {
             PackageManager.FEATURE_STRONGBOX_KEYSTORE
         )
 
-        if (!hasStrongBox) {
+        if (!hasStrongBox && !BuildConfig.DEBUG) {
             return Companion.BiometricsStatus.BIOMETRICS_NOT_AVAILABLE
         }
 

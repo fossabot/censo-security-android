@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
-import android.content.Context
 import android.content.Intent
 import android.media.RingtoneManager
 import android.provider.Settings
@@ -13,7 +12,6 @@ import androidx.core.app.TaskStackBuilder
 import androidx.core.net.toUri
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
-import com.raygun.raygun4android.RaygunClient
 import com.censocustody.android.BuildConfig
 import com.censocustody.android.MainActivity
 import com.censocustody.android.R
@@ -180,7 +178,7 @@ class MessagingService : FirebaseMessagingService() {
         }
     }
 
-    fun sendBroadcastToRefreshApprovals() {
+    private fun sendBroadcastToRefreshApprovals() {
         val notificationDisplayedIntent = Intent(BuildConfig.APPLICATION_ID)
         notificationDisplayedIntent.putExtra(NOTIFICATION_DISPLAYED_KEY, true)
         sendBroadcast(notificationDisplayedIntent)
