@@ -13,10 +13,7 @@ import com.censocustody.android.common.util.sendError
 import com.censocustody.android.common.wrapper.BaseWrapper
 import com.censocustody.android.data.cryptography.ECIESManager
 import com.censocustody.android.data.repository.UserRepository
-import com.censocustody.android.data.models.DeviceType
-import com.censocustody.android.data.models.UserDevice
 import com.censocustody.android.data.repository.KeyRepository
-import com.raygun.raygun4android.RaygunClient
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -111,6 +108,8 @@ class DeviceRegistrationViewModel @Inject constructor(
                     )
 
                     if (userDeviceAdded is Resource.Success) {
+                        userRepository.clearLeftoverDeviceInfoIfPresent(email = email)
+                        userRepository.clearPreviousDeviceId(email = email)
                         userRepository.saveDeviceId(email = email, deviceId = keyName)
                         userRepository.saveDevicePublicKey(
                             email = email,
@@ -161,7 +160,7 @@ class DeviceRegistrationViewModel @Inject constructor(
                     val email = userRepository.retrieveUserEmail()
 
                     //in case user was unable to upload previous keys, they will need to redo device image work
-                    userRepository.clearPreviousDeviceInfo(email)
+                    userRepository.clearLeftoverDeviceInfoIfPresent(email)
 
                     userRepository.saveDeviceId(email = email, deviceId = keyName)
                     userRepository.saveDevicePublicKey(

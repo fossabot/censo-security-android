@@ -31,6 +31,8 @@ object SharedPrefsHelper {
     private const val V3_ROOT_SEED_INIT_VECTOR = "_v3_root_seed_init_vector"
     private const val V3_PUBLIC_KEYS = "_v3_public_keys_list"
 
+    private const val PREVIOUS_DEVICE_ID = "_previous_device_id"
+
     private lateinit var appContext: Context
     private lateinit var sharedPrefs: SharedPreferences
 
@@ -327,6 +329,32 @@ object SharedPrefsHelper {
         email: String
     ): String {
         return sharedPrefs.getString("${email.lowercase().trim()}$BOOTSTRAP_IMAGE_LOCATION", "") ?: ""
+    }
+    //endregion
+
+
+    //region bootstrap device id
+    fun clearPreviousDeviceId(email: String) {
+        val editor = sharedPrefs.edit()
+        editor.putString("${email.lowercase().trim()}$PREVIOUS_DEVICE_ID", "")
+        editor.apply()
+    }
+
+    fun savePreviousDeviceId(
+        email: String,
+        deviceId: String
+    ) {
+        val editor = sharedPrefs.edit()
+        editor.putString("${email.lowercase().trim()}$PREVIOUS_DEVICE_ID", deviceId)
+        editor.apply()
+    }
+
+    fun userHasPreviousDeviceIdSaved(email: String) = retrievePreviousDeviceId(email).isNotEmpty()
+
+    fun retrievePreviousDeviceId(
+        email: String
+    ): String {
+        return sharedPrefs.getString("${email.lowercase().trim()}$PREVIOUS_DEVICE_ID", "") ?: ""
     }
     //endregion
 }

@@ -32,6 +32,7 @@ interface SecurePreferences {
 
     //device key data
     fun clearDeviceKeyData(email: String)
+    fun clearBootstrapKeyData(email: String)
 }
 
 class SecurePreferencesImpl @Inject constructor(applicationContext: Context) :
@@ -153,6 +154,11 @@ class SecurePreferencesImpl @Inject constructor(applicationContext: Context) :
     override fun clearDeviceKeyData(email: String) {
         SharedPrefsHelper.clearDeviceId(email)
         SharedPrefsHelper.clearDevicePublicKey(email)
+    }
+
+    override fun clearBootstrapKeyData(email: String) {
+        SharedPrefsHelper.clearBootstrapDeviceId(email)
+        SharedPrefsHelper.clearDeviceBootstrapPublicKey(email)
     }
     //endregion
 

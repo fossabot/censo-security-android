@@ -18,7 +18,6 @@ import com.censocustody.android.data.storage.AuthProvider
 import com.censocustody.android.data.storage.SecurePreferences
 import com.censocustody.android.data.storage.SharedPrefsHelper
 import com.censocustody.android.data.storage.UserState
-import com.censocustody.android.data.validator.AndroidNameAndModelProvider
 import com.censocustody.android.data.validator.NameAndModelProvider
 import okhttp3.ResponseBody
 
@@ -61,7 +60,7 @@ interface UserRepository {
     suspend fun addUserDevice(publicKey: String, userImage: UserImage) : Resource<Unit>
     suspend fun retrieveUserDevicePublicKey(email: String) : String
     suspend fun retrieveBootstrapDevicePublicKey(email: String) : String
-    suspend fun clearPreviousDeviceInfo(email: String)
+    suspend fun clearLeftoverDeviceInfoIfPresent(email: String)
     suspend fun isTokenEmailVerified() : Boolean
     fun saveBootstrapImageUrl(email: String, bootstrapImageUrl: String)
     fun clearBootstrapImageUrl(email: String)
@@ -69,6 +68,7 @@ interface UserRepository {
     fun createUserImage(userPhoto: Bitmap, keyName: String) : UserImage
     fun getCachedUser() : VerifyUser?
     fun setCachedUser(verifyUser: VerifyUser?)
+    fun clearPreviousDeviceId(email: String)
 }
 
 class UserRepositoryImpl(
@@ -89,6 +89,10 @@ class UserRepositoryImpl(
 
     override fun setCachedUser(verifyUser: VerifyUser?) {
         censoUser = verifyUser
+    }
+
+    override fun clearPreviousDeviceId(email: String) {
+        SharedPrefsHelper.clearPreviousDeviceId(email)
     }
 
     override suspend fun resetPassword(email: String) = anchorApiService.recoverPassword(email)
@@ -367,7 +371,7 @@ class UserRepositoryImpl(
     override suspend fun retrieveBootstrapDevicePublicKey(email: String) =
         SharedPrefsHelper.retrieveBootstrapDevicePublicKey(email)
 
-    override suspend fun clearPreviousDeviceInfo(email: String) {
+    override suspend fun clearLeftoverDeviceInfoIfPresent(email: String) {
         if (SharedPrefsHelper.userHasDeviceIdSaved(email)) {
             val oldDeviceId = SharedPrefsHelper.retrieveDeviceId(email)
 
@@ -404,6 +408,9 @@ class UserRepositoryImpl(
 
     override suspend fun addUserDevice(publicKey: String, userImage: UserImage): Resource<Unit> {
         return retrieveApiResource {
+            val email = retrieveUserEmail()
+            val previousDeviceId = SharedPrefsHelper.retrievePreviousDeviceId(email)
+
             val nameAndModel = nameAndModelProvider.retrieveNameAndModel()
 
             val userDevice = UserDevice(
@@ -411,7 +418,8 @@ class UserRepositoryImpl(
                 userImage = userImage,
                 deviceType = DeviceType.ANDROID,
                 name = nameAndModel.name,
-                model = nameAndModel.model
+                model = nameAndModel.model,
+                replacingDeviceIdentifier = previousDeviceId.ifEmpty { null }
             )
 
             api.addUserDevice(userDevice)

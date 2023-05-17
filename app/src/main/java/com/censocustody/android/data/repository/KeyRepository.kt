@@ -328,17 +328,28 @@ class KeyRepositoryImpl(
         cryptographyManager.deleteKeyIfPresent(EncryptionManagerImpl.Companion.ROOT_SEED_KEY_NAME)
         securePreferences.clearAllV3KeyData(email)
         securePreferences.clearSentinelData(email)
-        deleteDeviceKeyInfoWhenBiometryInvalidated(email)
+        deleteDeviceKeyInfo(email)
+        deleteBootstrapDeviceKeyInfo(email)
         userRepository.logOut()
         userRepository.setKeyInvalidated()
     }
 
-    private fun deleteDeviceKeyInfoWhenBiometryInvalidated(email: String) {
+    private fun deleteDeviceKeyInfo(email: String) {
         val deviceId = SharedPrefsHelper.retrieveDeviceId(email)
+        SharedPrefsHelper.savePreviousDeviceId(email = email, deviceId = deviceId)
 
         if (deviceId.isNotEmpty()) {
             cryptographyManager.deleteKeyIfPresent(deviceId)
         }
         securePreferences.clearDeviceKeyData(email)
+    }
+
+    private fun deleteBootstrapDeviceKeyInfo(email: String) {
+        val deviceId = SharedPrefsHelper.retrieveBootstrapDeviceId(email)
+
+        if (deviceId.isNotEmpty()) {
+            cryptographyManager.deleteKeyIfPresent(deviceId)
+        }
+        securePreferences.clearBootstrapKeyData(email)
     }
 }
