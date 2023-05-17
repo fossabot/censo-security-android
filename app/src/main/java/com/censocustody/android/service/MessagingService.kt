@@ -30,6 +30,7 @@ import com.censocustody.android.service.MessagingService.Companion.DEFAULT_BODY
 import com.censocustody.android.service.MessagingService.Companion.DEFAULT_TITLE
 import com.censocustody.android.service.MessagingService.Companion.NOTIFICATION_DISPLAYED_KEY
 import com.censocustody.android.service.MessagingService.Companion.PUSH_TYPE_KEY
+import com.censocustody.android.service.MessagingService.Companion.SILENT_CLEAR_TYPE
 import com.censocustody.android.service.MessagingService.Companion.TITLE_KEY
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.*
@@ -125,6 +126,12 @@ class MessagingService : FirebaseMessagingService() {
      * @param messageBody FCM message body received.
      */
     private fun sendNotification(pushData: PushData) {
+        if (pushData.pushType == SILENT_CLEAR_TYPE) {
+            sendBroadcastToRefreshApprovals()
+            return
+        }
+
+
         val deepLink = if (pushData.pushType == APPROVAL_REQUEST_TYPE) {
             Screen.ApprovalListRoute.buildScreenDeepLinkUri().toUri()
         } else {
@@ -169,11 +176,14 @@ class MessagingService : FirebaseMessagingService() {
         notificationManager.notify(notificationId, notificationBuilder.build())
 
         if (pushData.pushType == APPROVAL_REQUEST_TYPE) {
-            //Send a broadcast to the main activity to update the approvals data
-            val notificationDisplayedIntent = Intent(BuildConfig.APPLICATION_ID)
-            notificationDisplayedIntent.putExtra(NOTIFICATION_DISPLAYED_KEY, true)
-            sendBroadcast(notificationDisplayedIntent)
+            sendBroadcastToRefreshApprovals()
         }
+    }
+
+    fun sendBroadcastToRefreshApprovals() {
+        val notificationDisplayedIntent = Intent(BuildConfig.APPLICATION_ID)
+        notificationDisplayedIntent.putExtra(NOTIFICATION_DISPLAYED_KEY, true)
+        sendBroadcast(notificationDisplayedIntent)
     }
 
     override fun onDestroy() {
@@ -193,6 +203,7 @@ class MessagingService : FirebaseMessagingService() {
 
         const val APPROVAL_REQUEST_TYPE = "ApprovalRequest"
         const val DEVICE_APPROVED_TYPE = "DeviceApproved"
+        const val SILENT_CLEAR_TYPE = "SilentClear"
     }
 }
 
