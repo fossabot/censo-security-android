@@ -133,24 +133,26 @@ fun SignInScreen(
                         .fillMaxSize()
                         .verticalScroll(rememberScrollState())
                 ) {
+                    Spacer(modifier = Modifier.weight(0.50f))
                     Image(
-                        modifier = Modifier.width(200.dp),
+                        modifier = Modifier.width(260.dp),
                         painter = painterResource(R.drawable.logo_red_black),
                         contentDescription = "",
                         contentScale = ContentScale.FillWidth,
                     )
-                    Spacer(modifier = Modifier.weight(1.75f))
+                    Spacer(modifier = Modifier.weight(0.50f))
                     val headerText =
                         buildAnnotatedString {
                             if (state.loginStep == LoginStep.EMAIL_ENTRY) {
                                 append(stringResource(R.string.sign_in_subtitle))
                             } else {
-                                append("${stringResource(R.string.signing_in_as)}\n")
+                                append("${stringResource(R.string.verification_code_sent_to)} ")
                                 withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
                                     append(state.email)
                                 }
                             }
                         }
+                    Spacer(modifier = Modifier.weight(0.50f))
                     Text(
                         text = headerText,
                         color = TextBlack,
@@ -159,16 +161,28 @@ fun SignInScreen(
                         lineHeight = 28.sp,
                         letterSpacing = 0.25.sp
                     )
+                    if (state.loginStep == LoginStep.TOKEN_ENTRY) {
+                        Text(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 24.dp, vertical = 16.dp)
+                                .clickable { viewModel.sendVerificationEmail() },
+                            text = stringResource(R.string.send_token),
+                            textAlign = TextAlign.Center,
+                            fontSize = 18.sp,
+                            color = TextRed
+                        )
+                    }
                     val boxItemsHorizontalPadding = 8.dp
+
+                    Spacer(modifier = Modifier.weight(0.5f))
 
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(horizontal = 16.dp)
                     ) {
-                        Spacer(modifier = Modifier.size(20.dp))
                         if (state.loginStep == LoginStep.EMAIL_ENTRY) {
-                            Spacer(modifier = Modifier.size(16.dp))
                             SignInTextField(
                                 modifier = Modifier.padding(horizontal = boxItemsHorizontalPadding),
                                 valueText = state.email,
@@ -194,41 +208,6 @@ fun SignInScreen(
                             )
                         }
                         Spacer(modifier = Modifier.size(12.dp))
-                        if (state.loginStep == LoginStep.TOKEN_ENTRY) {
-                            CensoButton(
-                                modifier = Modifier
-                                    .padding(horizontal = 8.dp, vertical = 4.dp)
-                                    .align(Alignment.End),
-                                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 12.dp),
-                                enabled = true,
-                                onClick = {
-                                    viewModel.sendVerificationEmail()
-                                }) {
-                                if (state.sendVerificationEmail is Resource.Loading) {
-                                    Box(
-                                        modifier = Modifier
-                                            .height(28.dp)
-                                            .width(28.dp)
-                                    ) {
-                                        CircularProgressIndicator(
-                                            modifier = Modifier.height(28.dp),
-                                            color = CensoWhite,
-                                            strokeWidth = 2.dp,
-                                        )
-                                    }
-                                } else {
-                                    Text(
-                                        modifier = Modifier.padding(horizontal = 24.dp),
-                                        text = "Send Token",
-                                        fontSize = 18.sp,
-                                        color = if (state.email.isNotEmpty()) CensoWhite else CensoWhite.copy(
-                                            alpha = 0.35f
-                                        )
-                                    )
-                                }
-                            }
-                            Spacer(modifier = Modifier.height(24.dp))
-                        }
                     }
                     Spacer(modifier = Modifier.weight(6f))
                     CensoButton(
