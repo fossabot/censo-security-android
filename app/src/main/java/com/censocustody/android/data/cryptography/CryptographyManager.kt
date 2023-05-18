@@ -19,12 +19,6 @@ interface CryptographyManager {
     fun createDeviceKeyId(): String
     fun deleteKeyIfPresent(keyName: String)
     fun getCertificateFromKeystore(deviceId: String): Certificate
-    fun verifySignature(
-        keyName: String,
-        dataSigned: ByteArray,
-        signatureToCheck: ByteArray
-    ): Boolean
-
     fun getOrCreateKey(keyName: String): PrivateKey
     fun getOrCreateSentinelKey(email: String): SecretKey
     fun getPublicKeyFromDeviceKey(keyName: String): PublicKey
@@ -62,7 +56,19 @@ class CryptographyManagerImpl : CryptographyManager {
         val signature = Signature.getInstance(SHA_256_ECDSA)
         signature.initSign(key)
         signature.update(dataToSign)
-        return signature.sign()
+        val signedData = signature.sign()
+
+        val verified = verifySignature(
+            keyName = keyName,
+            dataSigned = dataToSign,
+            signatureToCheck = signedData
+        )
+
+        if (!verified) {
+            throw Exception("Device key signature invalid.")
+        }
+
+        return signedData
     }
 
     override fun decryptData(keyName: String, ciphertext: ByteArray): ByteArray {
@@ -115,7 +121,7 @@ class CryptographyManagerImpl : CryptographyManager {
         return cipher
     }
 
-    override fun verifySignature(
+    private fun verifySignature(
         keyName: String,
         dataSigned: ByteArray,
         signatureToCheck: ByteArray

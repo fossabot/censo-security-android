@@ -87,21 +87,6 @@ class DeviceRegistrationViewModel @Inject constructor(
                         keyName = keyName,
                     )
 
-                    val imageByteArray = BaseWrapper.decodeFromBase64(userImage.image)
-                    val hashOfImage = hashOfUserImage(imageByteArray)
-
-                    val signatureToCheck = BaseWrapper.decodeFromBase64(userImage.signature)
-
-                    val verified = keyRepository.verifySignature(
-                        keyName = keyName,
-                        signedData = hashOfImage,
-                        signature = signatureToCheck
-                    )
-
-                    if (!verified) {
-                        throw Exception("Device image signature not valid.")
-                    }
-
                     val email = userRepository.retrieveUserEmail()
                     userRepository.saveDeviceId(email = email, deviceId = keyName)
 
