@@ -8,12 +8,12 @@
 
     <string name="sign_in_button">Sign In</string>
     <string name="email_hint">Email Address</string>
-    <string name="token_hint">Verification Token</string>
-    <string name="invalid_token_error">Please enter a verification token</string>
+    <string name="token_hint">Verification Code</string>
+    <string name="invalid_token_error">Please enter a verification code</string>
     <string name="invalid_email_error">Please enter a valid email</string>
     <string name="ok">OK</string>
     <string name="login_failed_title">Login Failed</string>
-    <string name="login_failed_message">User with email and verification token not found.\n\nPlease try again.</string>
+    <string name="login_failed_message">User with email and verification code not found.\n\nPlease try again.</string>
 
     <string name="cancel">Cancel</string>
     <string name="contact_censo">We are unable to verify your key. Please contact Censo directly to resolve this issue.</string>
@@ -203,6 +203,7 @@
 
     <string name="no_phrase_found" type="id">Unable to use current phrase. Please start over.</string>
     <string name="signing_in_as">Signing in as</string>
+    <string name="verification_code_sent_to">A verification code has been sent to</string>
     <string name="too_many_failed_attempts">Too many failed attempts, please try again later.</string>
     <string name="key_management_bio_canceled">Biometry approval failed. Please try again.</string>
 
@@ -253,7 +254,7 @@
     <string name="camera_permission_request">Camera Permission Request</string>
     <string name="unable_process_image">Unable to process image, please retake image.</string>
     <string name="wallet">Wallet</string>
-    <string name="login_with_token">Use Verification Token</string>
+    <string name="login_with_token">Use Verification Code</string>
     <string name="bootstrap_failure">Failed to create initial user information. Please try again.</string>
     <string name="error_retrieving_user">Error retrieving user details.</string>
     <string name="waiting_for_device_approval">Waiting for your organization administrators to authorize this device.\n\nPlease check back later.</string>
@@ -292,4 +293,5 @@
     <string name="message_to_sign">Message</string>
     <string name="maintenance">Maintenance Mode</string>
     <string name="checking_maintenance_mode">We are currently in maintenance mode.\n\nWe will return you to the app when maintenance is complete.</string>
+    <string name="send_token">Resend Verification Code</string>
 </resources>
