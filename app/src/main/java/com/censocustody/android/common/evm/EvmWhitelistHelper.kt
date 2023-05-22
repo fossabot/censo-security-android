@@ -86,6 +86,13 @@ class EvmWhitelistHelper(val addresses: List<EvmAddress>, val targetDestinations
         return removedAddresses() + addedAddresses()
     }
 
+    fun changesForRenameEntry(evmAddress: EvmAddress, newName: String): List<EvmWhitelistInstruction> {
+        return listOfNotNull(
+            intTo12ByteHex(1) + prevAddress(evmAddress.lowercase()).clean(),
+            EvmDestination(newName, evmAddress).nameHashAndAddress()
+        )
+    }
+
     private fun prevAddress(address: String): String {
         var prev: String? = null
         currentAddresses.forEach { addr ->

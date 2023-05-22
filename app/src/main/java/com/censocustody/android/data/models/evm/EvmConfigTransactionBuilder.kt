@@ -9,12 +9,47 @@ import java.math.BigInteger
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
-data class PolicyUpdateData(
+data class ContractUpdateData(
     val data: ByteArray,
     val multiSend: Boolean
 )
 
 object EvmConfigTransactionBuilder {
+
+    fun getWalletNameUpdateExecutionFromModuleDataSafeHash(walletAddress: String, newName: String, whitelistUpdates: Map<String, List<ByteArray>>, signingData: ApprovalRequestDetailsV2.SigningData.EthereumTransaction): ByteArray {
+        val contractUpdateData = getWalletNameUpdateExecutionFromModuleData(walletAddress, newName, whitelistUpdates)
+        return EvmTransactionUtil.computeSafeTransactionHash(
+            chainId = signingData.chainId,
+            safeAddress = signingData.vaultAddress!!,
+            to = if (contractUpdateData.multiSend) GnosisSafeConstants.multiSendCallOnlyAddress else walletAddress,
+            value = BigInteger.ZERO,
+            data = contractUpdateData.data,
+            nonce = signingData.safeNonce.toBigInteger(),
+            operation = if (contractUpdateData.multiSend) Operation.DELEGATECALL else Operation.CALL,
+        )
+    }
+
+    private fun getWalletNameUpdateExecutionFromModuleData(walletAddress: String, newName: String, whitelistUpdates: Map<String, List<ByteArray>>): ContractUpdateData {
+        val updateNameData = getNameUpdateExecutionFromModuleData(walletAddress, newName)
+        return if (whitelistUpdates.isEmpty()) {
+            ContractUpdateData(updateNameData, false)
+        } else {
+            ContractUpdateData(
+                multiSendTx(
+                    encodeTransaction(
+                        EvmTransactionUtil.normalizeAddress(walletAddress),
+                        updateNameData
+                    ) + whitelistUpdates.map { (targetWalletAddress, renameInstructions) ->
+                        encodeTransaction(
+                            EvmTransactionUtil.normalizeAddress(targetWalletAddress),
+                            getUpdateWhitelistExecutionFromModuleData(targetWalletAddress, renameInstructions)
+                        )
+                    }.reduce { array, next -> array + next }
+                ),
+                true
+            )
+        }
+    }
 
     fun getSetGuardExecutionFromModuleDataSafeHash(walletAddress: EvmAddress, guardAddress: EvmAddress, signingData: ApprovalRequestDetailsV2.SigningData.EthereumTransaction): ByteArray {
         return EvmTransactionUtil.computeSafeTransactionHash(
@@ -77,14 +112,14 @@ object EvmConfigTransactionBuilder {
         )
     }
 
-    fun getPolicyUpdateData(safeAddress: EvmAddress, txs: List<SafeTx>): PolicyUpdateData {
+    fun getPolicyUpdateData(safeAddress: EvmAddress, txs: List<SafeTx>): ContractUpdateData {
         val encodedTxs = getPolicyChangeDataList(txs)
         return when {
-            encodedTxs.isEmpty() -> PolicyUpdateData(ByteArray(0), false)
-            encodedTxs.size == 1 -> PolicyUpdateData(encodedTxs[0], false)
+            encodedTxs.isEmpty() -> ContractUpdateData(ByteArray(0), false)
+            encodedTxs.size == 1 -> ContractUpdateData(encodedTxs[0], false)
             else -> {
                 val normalizedAddress = EvmTransactionUtil.normalizeAddress(safeAddress)
-                PolicyUpdateData(
+                ContractUpdateData(
                     multiSendTx(
                         encodedTxs.map {
                             encodeTransaction(normalizedAddress, it)

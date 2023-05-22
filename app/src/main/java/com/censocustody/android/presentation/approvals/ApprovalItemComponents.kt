@@ -196,9 +196,10 @@ fun ApprovalRowContent(
                 accountName = type.walletCreationAccountName()
             )
         }
-        //BalanceAccountNameUpdate
+        //WalletNameUpdate
         is ApprovalRequestDetailsV2.EthereumWalletNameUpdate,
-        is ApprovalRequestDetailsV2.PolygonWalletNameUpdate -> {
+        is ApprovalRequestDetailsV2.PolygonWalletNameUpdate,
+        is ApprovalRequestDetailsV2.BitcoinWalletNameUpdate -> {
             NameUpdateRowContent(
                 header = type.getHeader(LocalContext.current),
                 oldName = type.walletNameOldAccountName(),
@@ -382,14 +383,16 @@ fun ApprovalDetailContent(approval: ApprovalRequestV2, type: ApprovalRequestDeta
                 Text(text = header, color = TextBlack)
             }
         }
-        //BalanceAccountNameUpdate
+        //WalletNameUpdate
         is ApprovalRequestDetailsV2.EthereumWalletNameUpdate,
-        is ApprovalRequestDetailsV2.PolygonWalletNameUpdate -> {
+        is ApprovalRequestDetailsV2.PolygonWalletNameUpdate,
+        is ApprovalRequestDetailsV2.BitcoinWalletNameUpdate -> {
             NameUpdateDetailContent(
                 header = type.getHeader(LocalContext.current),
                 oldName = type.walletNameOldAccountName(),
                 newName = type.walletNameNewAccountName(),
-                renameType = RenameType.Wallet
+                renameType = RenameType.Wallet,
+                chainFees = type.chainFeesForRename()
             )
         }
 
@@ -481,7 +484,8 @@ fun ApprovalDetailContent(approval: ApprovalRequestV2, type: ApprovalRequestDeta
                 header = type.getHeader(LocalContext.current),
                 oldName = type.oldName,
                 newName = type.newName,
-                renameType = RenameType.Vault
+                renameType = RenameType.Vault,
+                chainFees = type.chainFees
             )
         }
 
@@ -490,7 +494,7 @@ fun ApprovalDetailContent(approval: ApprovalRequestV2, type: ApprovalRequestDeta
                 header = type.getHeader(LocalContext.current),
                 oldName = type.oldName,
                 newName = type.newName,
-                renameType = RenameType.Org
+                renameType = RenameType.Org,
             )
         }
 
