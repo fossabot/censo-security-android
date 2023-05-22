@@ -48,7 +48,8 @@ data class ApprovalDispositionRequestV2(
                     is ApprovalRequestDetailsV2.OrgNameUpdate,
                     is ApprovalRequestDetailsV2.VaultUserRolesUpdate,
                     is ApprovalRequestDetailsV2.SuspendUser,
-                    is ApprovalRequestDetailsV2.RestoreUser -> {
+                    is ApprovalRequestDetailsV2.RestoreUser,
+                    is ApprovalRequestDetailsV2.BitcoinWalletNameUpdate -> {
                         listOf(getApprovalRequestDetailsSignature())
                     }
 
@@ -250,6 +251,50 @@ data class ApprovalDispositionRequestV2(
                                 ),
                                 offchain = getApprovalRequestDetailsSignature()
                             ),
+                        )
+                    }
+                    is ApprovalRequestDetailsV2.EthereumWalletNameUpdate -> {
+                        listOf(
+                            SignableDataResult.Ethereum(
+                                EvmConfigTransactionBuilder.getWalletNameUpdateExecutionFromModuleDataSafeHash(
+                                    requestType.wallet.address,
+                                    requestType.newName,
+                                    requestType.whitelistUpdates.associate { update ->
+                                        update.walletAddress to
+                                                EvmWhitelistHelper(
+                                                    update.currentOnChainWhitelist,
+                                                    listOf()
+                                                ).changesForRenameEntry(
+                                                    requestType.wallet.address,
+                                                    requestType.newName
+                                                ).map { Hex.decode(it) }
+                                    },
+                                    requestType.signingData.transaction
+                                ),
+                                getApprovalRequestDetailsSignature()
+                            )
+                        )
+                    }
+                    is ApprovalRequestDetailsV2.PolygonWalletNameUpdate -> {
+                        listOf(
+                            SignableDataResult.Polygon(
+                                EvmConfigTransactionBuilder.getWalletNameUpdateExecutionFromModuleDataSafeHash(
+                                    requestType.wallet.address,
+                                    requestType.newName,
+                                    requestType.whitelistUpdates.associate { update ->
+                                        update.walletAddress to
+                                                EvmWhitelistHelper(
+                                                    update.currentOnChainWhitelist,
+                                                    listOf()
+                                                ).changesForRenameEntry(
+                                                    requestType.wallet.address,
+                                                    requestType.newName
+                                                ).map { Hex.decode(it) }
+                                    },
+                                    requestType.signingData.transaction
+                                ),
+                                getApprovalRequestDetailsSignature()
+                            )
                         )
                     }
 

@@ -34,13 +34,13 @@ object EvmRecoveryTransactionBuilder {
         )
     }
 
-    private fun getRecoveryUpdateData(orgVaultAddress: String, old: String, new: String, changes: List<OrgAdminRecoveryRequest.RecoverySafeTx>): PolicyUpdateData {
+    private fun getRecoveryUpdateData(orgVaultAddress: String, old: String, new: String, changes: List<OrgAdminRecoveryRequest.RecoverySafeTx>): ContractUpdateData {
         val encodedFunctionCalls = getRecoveryFunctionCalls(orgVaultAddress, old, new, changes)
         return when {
-            encodedFunctionCalls.isEmpty() -> PolicyUpdateData(ByteArray(0), false)
-            encodedFunctionCalls.size == 1 -> PolicyUpdateData(encodedFunctionCalls[0].second, false)
+            encodedFunctionCalls.isEmpty() -> ContractUpdateData(ByteArray(0), false)
+            encodedFunctionCalls.size == 1 -> ContractUpdateData(encodedFunctionCalls[0].second, false)
             else -> {
-                PolicyUpdateData(
+                ContractUpdateData(
                     EvmConfigTransactionBuilder.multiSendTx(
                         encodedFunctionCalls.map {
                             val normalizedAddress = EvmTransactionUtil.normalizeAddress(it.first)

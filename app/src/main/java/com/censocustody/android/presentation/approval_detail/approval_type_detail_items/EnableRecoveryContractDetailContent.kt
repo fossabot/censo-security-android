@@ -5,11 +5,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.censocustody.android.R
-import com.censocustody.android.common.maskAddress
-import com.censocustody.android.data.models.Chain
 import com.censocustody.android.data.models.approvalV2.ApprovalRequestDetailsV2
 import com.censocustody.android.presentation.approvals.ApprovalContentHeader
 import com.censocustody.android.presentation.approvals.approval_type_row_items.getHeader

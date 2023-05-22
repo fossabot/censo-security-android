@@ -71,6 +71,7 @@
     <string name="balance_account_creation_approval_header">Add Wallet</string>
     <string name="ethereum_wallet_name_update_approval_header">Rename Ethereum Wallet</string>
     <string name="polygon_wallet_name_update_approval_header">Rename Polygon Wallet</string>
+    <string name="bitcoin_wallet_name_update_approval_header">Rename Bitcoin Wallet</string>
     <string name="vault_name_update_approval_header">Rename Vault</string>
     <string name="vault_user_roles_update_approval_header">Update User Roles in Vault</string>
     <string name="org_name_update_approval_header">Rename Organization</string>

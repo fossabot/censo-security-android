@@ -32,7 +32,7 @@ class SignableDataV2Test {
     }
 
     @Test
-    fun testPolgygonOps() {
+    fun testPolygonOps() {
         testEvmOps<SignableDataResult.Polygon>(
             Gson().fromJson(ClassLoader.getSystemResource("polygon-test-cases.json").readText().trimEnd('\n'), TestCases::class.java).testCases
         )
