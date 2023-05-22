@@ -12,6 +12,7 @@ import com.censocustody.android.common.maskAddress
 import com.censocustody.android.common.toVaultName
 import com.censocustody.android.common.toWalletName
 import com.censocustody.android.data.models.ApprovalDisposition
+import com.censocustody.android.data.models.Chain
 import com.censocustody.android.ui.theme.GreyText
 import com.censocustody.android.data.models.approvalV2.ApprovalRequestDetailsV2
 import com.censocustody.android.presentation.approval_detail.approval_type_detail_items.PolicyUpdateUIData
@@ -60,12 +61,15 @@ fun ApprovalRequestDetailsV2.getHeader(context: Context) =
         is ApprovalRequestDetailsV2.PolygonWalletCreation -> {
             context.getString(R.string.balance_account_creation_approval_header)
         }
-        //BalanceAccountNameUpdate
+        //WalletNameUpdate
         is ApprovalRequestDetailsV2.EthereumWalletNameUpdate -> {
             context.getString(R.string.ethereum_wallet_name_update_approval_header)
         }
         is ApprovalRequestDetailsV2.PolygonWalletNameUpdate -> {
             context.getString(R.string.polygon_wallet_name_update_approval_header)
+        }
+        is ApprovalRequestDetailsV2.BitcoinWalletNameUpdate -> {
+            context.getString(R.string.bitcoin_wallet_name_update_approval_header)
         }
 
         //CreateAddressBookEntry
@@ -367,7 +371,21 @@ fun ApprovalRequestDetailsV2.walletNameOldAccountName() =
         is ApprovalRequestDetailsV2.PolygonWalletNameUpdate -> {
             this.wallet.name
         }
+        is ApprovalRequestDetailsV2.BitcoinWalletNameUpdate -> {
+            this.wallet.name
+        }
         else -> ""
+    }
+
+fun ApprovalRequestDetailsV2.chainFeesForRename() =
+    when (this) {
+        is ApprovalRequestDetailsV2.EthereumWalletNameUpdate -> {
+            listOf(ApprovalRequestDetailsV2.ChainFee(Chain.ethereum, this.fee, this.feeSymbolInfo))
+        }
+        is ApprovalRequestDetailsV2.PolygonWalletNameUpdate -> {
+            listOf(ApprovalRequestDetailsV2.ChainFee(Chain.polygon, this.fee, this.feeSymbolInfo))
+        }
+        else -> null
     }
 
 fun ApprovalRequestDetailsV2.walletNameNewAccountName() =
@@ -376,6 +394,9 @@ fun ApprovalRequestDetailsV2.walletNameNewAccountName() =
             this.newName
         }
         is ApprovalRequestDetailsV2.PolygonWalletNameUpdate -> {
+            this.newName
+        }
+        is ApprovalRequestDetailsV2.BitcoinWalletNameUpdate -> {
             this.newName
         }
         else -> ""

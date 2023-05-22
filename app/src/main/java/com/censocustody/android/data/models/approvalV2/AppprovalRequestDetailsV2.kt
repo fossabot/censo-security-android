@@ -110,6 +110,8 @@ sealed class ApprovalRequestDetailsV2 {
         ).registerSubtype(
             PolygonWalletNameUpdate::class.java, "PolygonWalletNameUpdate"
         ).registerSubtype(
+            BitcoinWalletNameUpdate::class.java, "BitcoinWalletNameUpdate"
+        ).registerSubtype(
             EthereumWalletSettingsUpdate::class.java, "EthereumWalletSettingsUpdate"
         ).registerSubtype(
             PolygonWalletSettingsUpdate::class.java, "PolygonWalletSettingsUpdate"
@@ -267,14 +269,32 @@ sealed class ApprovalRequestDetailsV2 {
         val feeSymbolInfo: EvmSymbolInfo
     ) : ApprovalRequestDetailsV2()
 
+    data class WalletNameWhitelistUpdate(
+        val walletAddress: EvmAddress,
+        val currentOnChainWhitelist: List<EvmAddress>,
+    )
+
     data class EthereumWalletNameUpdate(
         val wallet: WalletInfo,
-        val newName: String
+        val newName: String,
+        val whitelistUpdates: List<WalletNameWhitelistUpdate>,
+        val fee: Amount,
+        val feeSymbolInfo: EvmSymbolInfo,
+        val signingData: SigningData.EthereumSigningData
     ) : ApprovalRequestDetailsV2()
 
     data class PolygonWalletNameUpdate(
         val wallet: WalletInfo,
-        val newName: String
+        val newName: String,
+        val whitelistUpdates: List<WalletNameWhitelistUpdate>,
+        val fee: Amount,
+        val feeSymbolInfo: EvmSymbolInfo,
+        val signingData: SigningData.PolygonSigningData
+    ) : ApprovalRequestDetailsV2()
+
+    data class BitcoinWalletNameUpdate(
+        val wallet: WalletInfo,
+        val newName: String,
     ) : ApprovalRequestDetailsV2()
 
     data class EthereumWalletWhitelistUpdate(
