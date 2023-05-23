@@ -524,6 +524,8 @@ fun ApprovalRequestDetailsV2.fee(): ApprovalRequestDetailsV2.Amount? =
         is ApprovalRequestDetailsV2.PolygonWalletWhitelistUpdate -> fee
         is ApprovalRequestDetailsV2.EthereumTransferPolicyUpdate -> fee
         is ApprovalRequestDetailsV2.PolygonTransferPolicyUpdate -> fee
+        is ApprovalRequestDetailsV2.EthereumDAppRequest -> fee
+        is ApprovalRequestDetailsV2.PolygonDAppRequest -> fee
         else -> null
     }
 
