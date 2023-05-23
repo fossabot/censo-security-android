@@ -14,9 +14,14 @@ data class ContractUpdateData(
     val multiSend: Boolean
 )
 
+data class RenameWhitelistUpdate(
+    val targetWalletAddress: String,
+    val renameInstructions: List<ByteArray>
+)
+
 object EvmConfigTransactionBuilder {
 
-    fun getWalletNameUpdateExecutionFromModuleDataSafeHash(walletAddress: String, newName: String, whitelistUpdates: Map<String, List<ByteArray>>, signingData: ApprovalRequestDetailsV2.SigningData.EthereumTransaction): ByteArray {
+    fun getWalletNameUpdateExecutionFromModuleDataSafeHash(walletAddress: String, newName: String, whitelistUpdates: List<RenameWhitelistUpdate>, signingData: ApprovalRequestDetailsV2.SigningData.EthereumTransaction): ByteArray {
         val contractUpdateData = getWalletNameUpdateExecutionFromModuleData(walletAddress, newName, whitelistUpdates)
         return EvmTransactionUtil.computeSafeTransactionHash(
             chainId = signingData.chainId,
@@ -29,7 +34,7 @@ object EvmConfigTransactionBuilder {
         )
     }
 
-    private fun getWalletNameUpdateExecutionFromModuleData(walletAddress: String, newName: String, whitelistUpdates: Map<String, List<ByteArray>>): ContractUpdateData {
+    private fun getWalletNameUpdateExecutionFromModuleData(walletAddress: String, newName: String, whitelistUpdates: List<RenameWhitelistUpdate>): ContractUpdateData {
         val updateNameData = getNameUpdateExecutionFromModuleData(walletAddress, newName)
         return if (whitelistUpdates.isEmpty()) {
             ContractUpdateData(updateNameData, false)
@@ -39,10 +44,10 @@ object EvmConfigTransactionBuilder {
                     encodeTransaction(
                         EvmTransactionUtil.normalizeAddress(walletAddress),
                         updateNameData
-                    ) + whitelistUpdates.map { (targetWalletAddress, renameInstructions) ->
+                    ) + whitelistUpdates.map { renameWhitelistUpdate ->
                         encodeTransaction(
-                            EvmTransactionUtil.normalizeAddress(targetWalletAddress),
-                            getUpdateWhitelistExecutionFromModuleData(targetWalletAddress, renameInstructions)
+                            EvmTransactionUtil.normalizeAddress(renameWhitelistUpdate.targetWalletAddress),
+                            getUpdateWhitelistExecutionFromModuleData(renameWhitelistUpdate.targetWalletAddress, renameWhitelistUpdate.renameInstructions)
                         )
                     }.reduce { array, next -> array + next }
                 ),

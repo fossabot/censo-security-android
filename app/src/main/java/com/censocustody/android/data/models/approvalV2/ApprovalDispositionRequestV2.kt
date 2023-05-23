@@ -14,6 +14,7 @@ import com.censocustody.android.data.models.evm.EvmDAppTransactionBuilder
 import org.web3j.crypto.Hash
 import kotlin.Exception
 import com.censocustody.android.data.models.evm.EvmTransferTransactionBuilder
+import com.censocustody.android.data.models.evm.RenameWhitelistUpdate
 import org.bouncycastle.util.encoders.Hex
 
 data class ApprovalDispositionRequestV2(
@@ -259,15 +260,14 @@ data class ApprovalDispositionRequestV2(
                                 EvmConfigTransactionBuilder.getWalletNameUpdateExecutionFromModuleDataSafeHash(
                                     requestType.wallet.address,
                                     requestType.newName,
-                                    requestType.whitelistUpdates.associate { update ->
-                                        update.walletAddress to
-                                                EvmWhitelistHelper(
-                                                    update.currentOnChainWhitelist,
-                                                    listOf()
-                                                ).changesForRenameEntry(
-                                                    requestType.wallet.address,
-                                                    requestType.newName
-                                                ).map { Hex.decode(it) }
+                                    requestType.whitelistUpdates.map { update ->
+                                        RenameWhitelistUpdate(
+                                            update.walletAddress,
+                                            EvmWhitelistHelper(update.currentOnChainWhitelist, listOf()).changesForRenameEntry(
+                                                requestType.wallet.address,
+                                                requestType.newName
+                                            ).map { Hex.decode(it) }
+                                        )
                                     },
                                     requestType.signingData.transaction
                                 ),
@@ -281,15 +281,14 @@ data class ApprovalDispositionRequestV2(
                                 EvmConfigTransactionBuilder.getWalletNameUpdateExecutionFromModuleDataSafeHash(
                                     requestType.wallet.address,
                                     requestType.newName,
-                                    requestType.whitelistUpdates.associate { update ->
-                                        update.walletAddress to
-                                                EvmWhitelistHelper(
-                                                    update.currentOnChainWhitelist,
-                                                    listOf()
-                                                ).changesForRenameEntry(
-                                                    requestType.wallet.address,
-                                                    requestType.newName
-                                                ).map { Hex.decode(it) }
+                                    requestType.whitelistUpdates.map { update ->
+                                        RenameWhitelistUpdate(
+                                            update.walletAddress,
+                                            EvmWhitelistHelper(update.currentOnChainWhitelist, listOf()).changesForRenameEntry(
+                                                requestType.wallet.address,
+                                                requestType.newName
+                                            ).map { Hex.decode(it) }
+                                        )
                                     },
                                     requestType.signingData.transaction
                                 ),
