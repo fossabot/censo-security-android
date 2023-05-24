@@ -664,8 +664,11 @@ sealed class ApprovalRequestDetailsV2 {
     )
 
     enum class TokenAllowanceType {
+        @SerializedName("LIMITED")
         LIMITED,
+        @SerializedName("UNLIMITED")
         UNLIMITED,
+        @SerializedName("REVOKE")
         REVOKE,
     }
 
