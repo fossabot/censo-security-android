@@ -87,7 +87,7 @@ fun DAppEthSendTransactionDetailContent(header: String, fromAccount: String, fee
                                     key = allowance.symbolInfo.symbol,
                                     value = when (allowance.allowanceType) {
                                         ApprovalRequestDetailsV2.TokenAllowanceType.LIMITED -> formattedAmount(
-                                            allowance.allowedAmount?.value ?: "0"
+                                            allowance.allowedAmount.value
                                         )
                                         ApprovalRequestDetailsV2.TokenAllowanceType.UNLIMITED -> "UNLIMITED"
                                         ApprovalRequestDetailsV2.TokenAllowanceType.REVOKE -> "ALLOWANCE REVOKED"
