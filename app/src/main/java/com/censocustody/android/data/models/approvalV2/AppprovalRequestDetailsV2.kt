@@ -684,7 +684,7 @@ sealed class ApprovalRequestDetailsV2 {
         data class TokenAllowance(
             val symbolInfo: EvmSymbolInfo,
             val allowedAddress: String,
-            val allowedAmount: Amount?,
+            val allowedAmount: Amount,
             val allowanceType: TokenAllowanceType,
         )
 
