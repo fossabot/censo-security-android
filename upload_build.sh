@@ -16,35 +16,12 @@ if [[ -z $token ]]; then
   exit 1
 fi
 
-environment="Debug"
+if [[ -z variant ]]; then
+  printf "Missing variant. Make sure to pass variant as: --variant argument.\n"
+  exit 1
+fi
 
-prerelease="PreRelease"
-release="Release"
-preprod="PreProd"
-
-PS3='Please choose environment: '
-options=("$prerelease" "$preprod" "$release")
-select opt in "${options[@]}"
-do
-    case $opt in
-        "$prerelease")
-            environment=$prerelease
-            echo "Creating PreRelease build..."
-            break
-            ;;
-        "$preprod")
-            echo "Creating PreProd build..."
-            environment=$preprod
-            break
-            ;;
-        "$release")
-            echo "Creating Release build..."
-            environment=$release
-            break
-            ;;
-        *) echo "invalid option $REPLY";;
-    esac
-done
+environment=$variant
 
 ./gradlew --stop
 echo Running lint"${environment}"
