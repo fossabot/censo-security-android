@@ -19,6 +19,7 @@ import com.censocustody.android.presentation.approval_detail.approval_type_detai
 import com.censocustody.android.presentation.approval_detail.approval_type_detail_items.WhitelistUpdateUI
 import com.censocustody.android.presentation.approval_detail.approval_type_detail_items.WithdrawalRequestUI
 import com.censocustody.android.presentation.components.RowData
+import java.math.BigInteger
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
 import java.text.NumberFormat
@@ -634,7 +635,7 @@ fun ApprovalRequestDetailsV2.Amount.formattedUsdEquivalentWithSymbol(): String =
     "${formattedUSDEquivalentV2(usdEquivalent)} USD"
 
 fun formattedAmount(amount: String): String {
-    fun formatSeparator(number: Int): String {
+    fun formatSeparator(number: BigInteger): String {
         return String.format("%,d", number)
     }
 
@@ -647,7 +648,7 @@ fun formattedAmount(amount: String): String {
             amount
         }
 
-    val wholePartString = formatSeparator(wholePart.toInt())
+    val wholePartString = formatSeparator(wholePart.toBigInteger())
     split.add(0, wholePartString)
     return split.joinToString(separator = ".")
 }
