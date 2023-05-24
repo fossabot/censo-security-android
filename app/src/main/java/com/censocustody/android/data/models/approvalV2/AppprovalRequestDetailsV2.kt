@@ -663,13 +663,26 @@ sealed class ApprovalRequestDetailsV2 {
         val isChange: Boolean
     )
 
+    enum class TokenAllowanceType {
+        LIMITED,
+        UNLIMITED,
+        REVOKE,
+    }
+
     sealed class EvmSimulationResult {
-        data class Success(val balanceChanges: List<BalanceChange>) : EvmSimulationResult()
+        data class Success(val balanceChanges: List<BalanceChange>, val tokenAllowances: List<TokenAllowance>) : EvmSimulationResult()
         data class Failure(val reason: String) : EvmSimulationResult()
 
         data class BalanceChange(
             val amount: Amount,
             val symbolInfo: EvmSymbolInfo
+        )
+
+        data class TokenAllowance(
+            val symbolInfo: EvmSymbolInfo,
+            val allowedAddress: String,
+            val allowedAmount: Amount?,
+            val allowanceType: TokenAllowanceType,
         )
 
         companion object {

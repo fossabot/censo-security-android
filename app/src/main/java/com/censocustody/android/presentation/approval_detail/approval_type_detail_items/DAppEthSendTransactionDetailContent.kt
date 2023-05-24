@@ -65,17 +65,38 @@ fun DAppEthSendTransactionDetailContent(header: String, fromAccount: String, fee
                 )
             }
             is ApprovalRequestDetailsV2.EvmSimulationResult.Success -> {
-                FactRow(
-                    factsData = FactsData(
-                        title = stringResource(R.string.simulation_results),
-                        facts = simulationResult.balanceChanges.map { change ->
-                            RowData.KeyValueRow(
-                                key = change.symbolInfo.symbol,
-                                value = formattedAmount(change.amount.value)
-                            )
-                        }
+                if (simulationResult.balanceChanges.isNotEmpty()) {
+                    FactRow(
+                        factsData = FactsData(
+                            title = stringResource(R.string.simulation_results),
+                            facts = simulationResult.balanceChanges.map { change ->
+                                RowData.KeyValueRow(
+                                    key = change.symbolInfo.symbol,
+                                    value = formattedAmount(change.amount.value)
+                                )
+                            }
+                        )
                     )
-                )
+                }
+                if (simulationResult.tokenAllowances.isNotEmpty()) {
+                    FactRow(
+                        factsData = FactsData(
+                            title = stringResource(R.string.simulation_allowance_results),
+                            facts = simulationResult.tokenAllowances.map { allowance ->
+                                RowData.KeyValueRow(
+                                    key = allowance.symbolInfo.symbol,
+                                    value = when (allowance.allowanceType) {
+                                        ApprovalRequestDetailsV2.TokenAllowanceType.LIMITED -> formattedAmount(
+                                            allowance.allowedAmount?.value ?: "0"
+                                        )
+                                        ApprovalRequestDetailsV2.TokenAllowanceType.UNLIMITED -> "UNLIMITED"
+                                        ApprovalRequestDetailsV2.TokenAllowanceType.REVOKE -> "ALLOWANCE REVOKED"
+                                    }
+                                )
+                            }
+                        )
+                    )
+                }
             }
             null -> {
                 Text(
@@ -109,6 +130,14 @@ fun DAppEthSendTransactionDetailContentPreview() {
                     ApprovalRequestDetailsV2.Amount("-9.87", "-9.87", "-9.86"),
                     ApprovalRequestDetailsV2.EvmSymbolInfo("USDC", "USDC")
                 ),
+            ),
+            listOf(
+                ApprovalRequestDetailsV2.EvmSimulationResult.TokenAllowance(
+                    ApprovalRequestDetailsV2.EvmSymbolInfo("USDC", "USDC"),
+                    "allowed-address",
+                    ApprovalRequestDetailsV2.Amount("123456789121314151617181920.00", "1234567891011121314151617181920.00", "1234567891011121314151617181920.00"),
+                    ApprovalRequestDetailsV2.TokenAllowanceType.LIMITED
+                )
             )
         )
     )

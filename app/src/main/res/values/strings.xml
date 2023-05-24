@@ -284,6 +284,7 @@
     <string name="no_simulation_results">No simulation results available</string>
     <string name="simulation_failure">Simulation failed</string>
     <string name="simulation_results">Expected transfers</string>
+    <string name="simulation_allowance_results">Token allowances</string>
     <string name="eth_send_transaction_header">dApp Transaction</string>
     <string name="eth_sign_header">dApp Sign Message</string>
     <string name="eth_sign_typed_data_header">dApp Sign Data</string>
