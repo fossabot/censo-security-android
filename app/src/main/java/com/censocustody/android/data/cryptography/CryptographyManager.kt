@@ -171,7 +171,7 @@ class CryptographyManagerImpl : CryptographyManager {
         val parameterSpec = paramBuilder
             .setAlgorithmParameterSpec(ECGenParameterSpec(SECP_256_R1))
             .setKeySize(KEY_SIZE)
-            .setIsStrongBoxBacked(!BuildConfig.DEBUG)
+            .setIsStrongBoxBacked(true)
             .setRandomizedEncryptionRequired(true)
             .setUserAuthenticationRequired(true)
             .setUserAuthenticationParameters(
@@ -197,7 +197,7 @@ class CryptographyManagerImpl : CryptographyManager {
             setBlockModes(ENCRYPTION_BLOCK_MODE)
             setEncryptionPaddings(ENCRYPTION_PADDING)
             setKeySize(KEY_SIZE)
-            setIsStrongBoxBacked(!BuildConfig.DEBUG)
+            setIsStrongBoxBacked(true)
             setUserAuthenticationRequired(true)
             setInvalidatedByBiometricEnrollment(true)
             setRandomizedEncryptionRequired(true)
