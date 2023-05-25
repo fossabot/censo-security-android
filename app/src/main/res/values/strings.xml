@@ -300,4 +300,6 @@
     <string name="no_dapp_enabled_wallets">You do not have any dapp-enabled wallets</string>
     <string name="connect">Connect</string>
     <string name="failed_retrieve_wallets">Failed to get wallets before connecting to DApp</string>
+    <string name="unlimited">UNLIMITED</string>
+    <string name="allowance_revoked">ALLOWANCE REVOKED</string>
 </resources>
