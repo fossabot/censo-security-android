@@ -5,7 +5,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.raygun.raygun4android.RaygunClient
 import com.censocustody.android.BuildConfig
 import com.censocustody.android.common.util.CrashReportingUtil
 import com.censocustody.android.common.Resource
@@ -134,6 +133,17 @@ class EntranceViewModel @Inject constructor(
         state = state.copy(verifyUserResult = verifyUserDataResource)
     }
 
+    fun userDismissedRecoveryTypeDialog() {
+        viewModelScope.launch { checkMinimumVersion() }
+    }
+
+    fun userSelectedOrgRecoveryType(recoveryType: RecoveryType) {
+        state = state.copy(
+            recoveryType = Resource.Success(recoveryType),
+            userDestinationResult = Resource.Success(UserDestination.DEVICE_REGISTRATION)
+        )
+    }
+
     //2 part method.
     //Part 1: Do we need to update key/sentinel data?
     //Part 2: Is our local key valid? valid/invalid
@@ -198,7 +208,14 @@ class EntranceViewModel @Inject constructor(
                 return
             }
             deviceNeedsToBeRegistered -> {
-                state = state.copy(userDestinationResult = Resource.Success(UserDestination.DEVICE_REGISTRATION))
+                val isOrgAdmin = verifyUser.orgAdminInfo != null
+                val hasRecoveryContract = verifyUser.orgAdminInfo?.hasRecoveryContract == true
+
+                state = if (isOrgAdmin && hasRecoveryContract) {
+                    state.copy(displayOrgRecoveryDialog = Resource.Success(true))
+                } else {
+                    state.copy(userDestinationResult = Resource.Success(UserDestination.DEVICE_REGISTRATION))
+                }
                 return
             }
 

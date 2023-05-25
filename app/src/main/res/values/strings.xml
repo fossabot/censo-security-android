@@ -294,4 +294,8 @@
     <string name="maintenance">Maintenance Mode</string>
     <string name="checking_maintenance_mode">We are currently in maintenance mode.\n\nWe will return you to the app when maintenance is complete.</string>
     <string name="send_token">Resend Verification Code</string>
+    <string name="this_device">This Device</string>
+    <string name="organization">Organization</string>
+    <string name="org_recovery_dialog_message">Do you need to recover a single device or the entire organization?</string>
+    <string name="org_recovery_dialog_title">Select Recovery Type</string>
 </resources>

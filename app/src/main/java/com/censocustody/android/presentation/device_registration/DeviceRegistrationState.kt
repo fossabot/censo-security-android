@@ -7,6 +7,7 @@ import com.censocustody.android.data.models.BootstrapDevice
 import com.censocustody.android.data.models.UserDevice
 import com.censocustody.android.data.models.UserImage
 import com.censocustody.android.data.models.VerifyUser
+import com.censocustody.android.presentation.entrance.RecoveryType
 import com.google.gson.GsonBuilder
 import java.lang.reflect.Modifier
 
@@ -50,7 +51,8 @@ enum class DeviceRegistrationError {
 
 data class DeviceRegistrationInitialData(
     val verifyUser: VerifyUser?,
-    val bootstrapUser: Boolean
+    val bootstrapUser: Boolean,
+    val recoveryType: RecoveryType
 ) {
     companion object {
         fun toJson(
