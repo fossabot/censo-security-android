@@ -89,8 +89,8 @@ fun DAppEthSendTransactionDetailContent(header: String, fromAccount: String, fee
                                         ApprovalRequestDetailsV2.TokenAllowanceType.LIMITED -> formattedAmount(
                                             allowance.allowedAmount.value
                                         )
-                                        ApprovalRequestDetailsV2.TokenAllowanceType.UNLIMITED -> "UNLIMITED"
-                                        ApprovalRequestDetailsV2.TokenAllowanceType.REVOKE -> "ALLOWANCE REVOKED"
+                                        ApprovalRequestDetailsV2.TokenAllowanceType.UNLIMITED -> stringResource(R.string.unlimited)
+                                        ApprovalRequestDetailsV2.TokenAllowanceType.REVOKE -> stringResource(R.string.allowance_revoked)
                                     }
                                 )
                             }
