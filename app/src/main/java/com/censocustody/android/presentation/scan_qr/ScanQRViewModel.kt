@@ -34,6 +34,7 @@ class ScanQRViewModel @Inject constructor(
         if (state.scanQRCodeResult is Resource.Loading && !uri.isNullOrEmpty()) {
             state = state.copy(
                 scanQRCodeResult = Resource.Success(uri),
+                uri = uri
             )
             retrieveAvailableDAppVaults()
         }
@@ -42,30 +43,43 @@ class ScanQRViewModel @Inject constructor(
     private fun retrieveAvailableDAppVaults() {
         viewModelScope.launch {
             val availableDAppVaults = approvalsRepository.availableDAppVaults()
+            val haveSingleWallet =
+                availableDAppVaults.data?.vaults?.flatMap { it.wallets }?.size == 1
 
-            state = state.copy(
-                availableDAppVaultsResult = availableDAppVaults
-            )
+            if (haveSingleWallet) {
+                val singleWallet = availableDAppVaults.data?.vaults?.flatMap { it.wallets }?.first()
+                sendUriToBackend(
+                    uri = state.uri,
+                    walletAddress = singleWallet!!.walletAddress
+                )
+            } else {
+                state = state.copy(
+                    availableDAppVaultsResult = availableDAppVaults
+                )
+            }
         }
     }
 
     fun userSelectedWallet(wallet: AvailableDAppWallet) {
         censoLog(message = "Wallet selected: $wallet")
         state = state.copy(availableDAppVaultsResult = Resource.Uninitialized)
-//        viewModelScope.launch {
-//            state.scanQRCodeResult.data?.let {
-//                sendUriToBackend(it)
-//            } ?: missingURIData()
-//        }
+        viewModelScope.launch {
+            state.scanQRCodeResult.data?.let {
+                sendUriToBackend(
+                    uri = it,
+                    walletAddress = wallet.walletAddress
+                )
+            } ?: missingURIData()
+        }
     }
 
     private fun missingURIData() {
         state = state.copy(scanQRCodeResult = Resource.Error())
     }
 
-    private fun sendUriToBackend(uri: String) {
+    private fun sendUriToBackend(uri: String, walletAddress: String) {
         viewModelScope.launch {
-            val walletPairingResource = approvalsRepository.sendWcUri(uri = uri)
+            val walletPairingResource = approvalsRepository.sendWcUri(uri = uri, walletAddress)
 
             if (walletPairingResource is Resource.Success) {
                 state = state.copy(
@@ -132,6 +146,8 @@ class ScanQRViewModel @Inject constructor(
         state = state.copy(
             scanQRCodeResult = Resource.Loading(),
             uploadWcUri = Resource.Uninitialized,
+            availableDAppVaultsResult = Resource.Uninitialized,
+            checkSessionsOnConnection = Resource.Uninitialized
         )
     }
 
