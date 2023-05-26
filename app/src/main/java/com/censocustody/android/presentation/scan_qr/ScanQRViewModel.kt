@@ -6,7 +6,6 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.censocustody.android.common.Resource
-import com.censocustody.android.common.censoLog
 import com.censocustody.android.common.wrapper.CensoCountDownTimer
 import com.censocustody.android.common.wrapper.CensoCountDownTimerImpl
 import com.censocustody.android.data.models.AvailableDAppWallet
@@ -61,15 +60,18 @@ class ScanQRViewModel @Inject constructor(
     }
 
     fun userSelectedWallet(wallet: AvailableDAppWallet) {
-        censoLog(message = "Wallet selected: $wallet")
         state = state.copy(availableDAppVaultsResult = Resource.Uninitialized)
+
+        if (state.uri.isEmpty()) {
+            missingURIData()
+            return
+        }
+
         viewModelScope.launch {
-            state.scanQRCodeResult.data?.let {
-                sendUriToBackend(
-                    uri = it,
-                    walletAddress = wallet.walletAddress
-                )
-            } ?: missingURIData()
+            sendUriToBackend(
+                uri = state.uri,
+                walletAddress = wallet.walletAddress
+            )
         }
     }
 
@@ -147,7 +149,8 @@ class ScanQRViewModel @Inject constructor(
             scanQRCodeResult = Resource.Loading(),
             uploadWcUri = Resource.Uninitialized,
             availableDAppVaultsResult = Resource.Uninitialized,
-            checkSessionsOnConnection = Resource.Uninitialized
+            checkSessionsOnConnection = Resource.Uninitialized,
+            timesPolled = 0
         )
     }
 
