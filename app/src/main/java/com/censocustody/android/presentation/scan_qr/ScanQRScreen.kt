@@ -135,7 +135,7 @@ fun ScanQRScreen(
                                 Spacer(modifier = Modifier.height(44.dp))
                                 Text(
                                     text = stringResource(R.string.no_dapp_enabled_wallets),
-                                    fontSize = 28.sp,
+                                    fontSize = 24.sp,
                                     color = TextBlack,
                                     textAlign = TextAlign.Center
                                 )
