@@ -11,6 +11,9 @@ data class AvailableDAppWallet(
     val chains: List<Chain>
 )
 
+fun List<Chain>.toSingleText() =
+    this.joinToString(separator = ", ") { it.label() }
+
 data class AvailableDAppVaults(
     val vaults: List<AvailableDAppVault>
 )
