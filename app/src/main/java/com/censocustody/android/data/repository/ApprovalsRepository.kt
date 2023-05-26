@@ -58,50 +58,50 @@ class ApprovalsRepositoryImpl @Inject constructor(
             api.checkSessionsOnConnectedDApp(topic)
         }
 
-    override suspend fun availableDAppVaults(): Resource<AvailableDAppVaults> {
+    override suspend fun availableDAppVaults(): Resource<AvailableDAppVaults> =
+        retrieveApiResource { api.availableDAppVaults() }
         //return Resource.Success(AvailableDAppVaults(emptyList()))
-        return Resource.Success(
-            AvailableDAppVaults(
-                listOf(
-                    AvailableDAppVault(
-                        vaultName = "Vault One",
-                        wallets = listOf(
-                            AvailableDAppWallet(
-                                walletName = "Wallet One",
-                                walletAddress = "0978654321567890cgfhvjbj",
-                                chains = listOf(Chain.bitcoin)
-                            ),
-                            AvailableDAppWallet(
-                                walletName = "Wallet Two",
-                                walletAddress = "09786gxdfchvbn89765",
-                                chains = listOf(Chain.offchain, Chain.bitcoin)
-                            )
-                        )
-                    ),
-                    AvailableDAppVault(
-                        vaultName = "This Other Vault",
-                        wallets = listOf(
-                            AvailableDAppWallet(
-                                walletName = "Wallet Whatever",
-                                walletAddress = "089765dfsghjvbknlm",
-                                chains = listOf(Chain.polygon, Chain.ethereum)
-                            )
-                        )
-                    ),
-                    AvailableDAppVault(
-                        vaultName = "Tertiary Vault",
-                        wallets = listOf(
-                            AvailableDAppWallet(
-                                walletName = "Yes I am a wallet",
-                                walletAddress = "809766e54wxgfhcvjb",
-                                chains = listOf(Chain.ethereum, Chain.bitcoin)
-                            )
-                        )
-                    ),
-                )
-            )
-        )
-    }
+//        return Resource.Success(
+//            AvailableDAppVaults(
+//                listOf(
+//                    AvailableDAppVault(
+//                        vaultName = "Vault One",
+//                        wallets = listOf(
+//                            AvailableDAppWallet(
+//                                walletName = "Wallet One",
+//                                walletAddress = "0978654321567890cgfhvjbj",
+//                                chains = listOf(Chain.bitcoin)
+//                            ),
+//                            AvailableDAppWallet(
+//                                walletName = "Wallet Two",
+//                                walletAddress = "09786gxdfchvbn89765",
+//                                chains = listOf(Chain.offchain, Chain.bitcoin)
+//                            )
+//                        )
+//                    ),
+//                    AvailableDAppVault(
+//                        vaultName = "This Other Vault",
+//                        wallets = listOf(
+//                            AvailableDAppWallet(
+//                                walletName = "Wallet Whatever",
+//                                walletAddress = "089765dfsghjvbknlm",
+//                                chains = listOf(Chain.polygon, Chain.ethereum)
+//                            )
+//                        )
+//                    ),
+//                    AvailableDAppVault(
+//                        vaultName = "Tertiary Vault",
+//                        wallets = listOf(
+//                            AvailableDAppWallet(
+//                                walletName = "Yes I am a wallet",
+//                                walletAddress = "809766e54wxgfhcvjb",
+//                                chains = listOf(Chain.ethereum, Chain.bitcoin)
+//                            )
+//                        )
+//                    ),
+//                )
+//            )
+//        )
 
     override suspend fun approveOrDenyDisposition(
         requestId: String,
