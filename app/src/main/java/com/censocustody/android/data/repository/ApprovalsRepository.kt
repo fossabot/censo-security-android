@@ -7,6 +7,7 @@ import com.censocustody.android.data.cryptography.EncryptionManager
 import com.censocustody.android.data.models.*
 import com.censocustody.android.data.models.approvalV2.ApprovalDispositionRequestV2
 import com.censocustody.android.data.models.approvalV2.ApprovalRequestV2
+import kotlinx.coroutines.delay
 import okhttp3.ResponseBody
 import javax.inject.Inject
 
@@ -23,6 +24,8 @@ interface ApprovalsRepository {
 
     suspend fun sendWcUri(uri: String): Resource<WalletConnectPairingResponse>
     suspend fun checkIfConnectionHasSessions(topic: String) : Resource<List<WalletConnectTopic>>
+
+    suspend fun availableDAppVaults() : Resource<AvailableDAppVaults>
 }
 
 class ApprovalsRepositoryImpl @Inject constructor(
@@ -49,6 +52,51 @@ class ApprovalsRepositoryImpl @Inject constructor(
         retrieveApiResource {
             api.checkSessionsOnConnectedDApp(topic)
         }
+
+    override suspend fun availableDAppVaults(): Resource<AvailableDAppVaults> {
+        //return Resource.Success(AvailableDAppVaults(emptyList()))
+        return Resource.Success(
+            AvailableDAppVaults(
+                listOf(
+                    AvailableDAppVault(
+                        vaultName = "Vault One",
+                        wallets = listOf(
+                            AvailableDAppWallet(
+                                walletName = "Wallet One",
+                                walletAddress = "0978654321567890cgfhvjbj",
+                                chains = listOf(Chain.bitcoin)
+                            ),
+                            AvailableDAppWallet(
+                                walletName = "Wallet Two",
+                                walletAddress = "09786gxdfchvbn89765",
+                                chains = listOf(Chain.bitcoin)
+                            )
+                        )
+                    ),
+                    AvailableDAppVault(
+                        vaultName = "This Other Vault",
+                        wallets = listOf(
+                            AvailableDAppWallet(
+                                walletName = "Wallet Whatever",
+                                walletAddress = "089765dfsghjvbknlm",
+                                chains = listOf(Chain.polygon)
+                            )
+                        )
+                    ),
+                    AvailableDAppVault(
+                        vaultName = "Tertiary Vault",
+                        wallets = listOf(
+                            AvailableDAppWallet(
+                                walletName = "Yes I am a wallet",
+                                walletAddress = "809766e54wxgfhcvjb",
+                                chains = listOf(Chain.ethereum)
+                            )
+                        )
+                    ),
+                )
+            )
+        )
+    }
 
     override suspend fun approveOrDenyDisposition(
         requestId: String,
