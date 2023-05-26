@@ -14,6 +14,7 @@ import com.censocustody.android.common.wrapper.BaseWrapper
 import com.censocustody.android.data.cryptography.ECIESManager
 import com.censocustody.android.data.repository.UserRepository
 import com.censocustody.android.data.repository.KeyRepository
+import com.censocustody.android.presentation.entrance.UserType
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -39,7 +40,7 @@ class DeviceRegistrationViewModel @Inject constructor(
         }
 
         state = state.copy(
-            isBootstrapUser = initialData.bootstrapUser,
+            userType = initialData.userType,
             verifyUser = initialData.verifyUser
         )
 
@@ -58,7 +59,7 @@ class DeviceRegistrationViewModel @Inject constructor(
     }
 
     fun biometryApproved() {
-        if (state.isBootstrapUser) {
+        if (state.userType == UserType.BOOTSTRAP) {
             sendBootstrapUserToKeyCreation()
         } else {
             sendUserDeviceAndImageToBackend()
@@ -203,7 +204,7 @@ class DeviceRegistrationViewModel @Inject constructor(
     }
 
     fun imageCaptured() {
-        if (state.isBootstrapUser) {
+        if (state.userType == UserType.BOOTSTRAP) {
             //Standard Device Registration
             createBootstrapKeysForDevice()
         } else {

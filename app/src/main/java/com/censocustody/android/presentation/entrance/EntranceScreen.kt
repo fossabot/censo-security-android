@@ -37,7 +37,6 @@ import com.censocustody.android.R
 import com.censocustody.android.presentation.device_registration.DeviceRegistrationInitialData
 import com.censocustody.android.presentation.key_creation.KeyCreationInitialData
 import com.censocustody.android.presentation.key_recovery.KeyRecoveryInitialData
-import com.censocustody.android.presentation.sign_in.SignInAlertDialog
 import com.censocustody.android.ui.theme.*
 
 @Composable
@@ -88,10 +87,19 @@ fun EntranceScreen(
                     "${Screen.KeyRecoveryRoute.route}/$keyRecoveryJson"
                 }
                 UserDestination.DEVICE_REGISTRATION -> {
+                    val userType =
+                        if (state.userType is Resource.Success && state.userType.data != null) {
+                            state.userType.data
+                        } else if (state.verifyUserResult.data != null && state.verifyUserResult.data.shardingPolicy == null) {
+                            UserType.BOOTSTRAP
+                        } else {
+                            UserType.STANDARD
+                        }
+
+
                     val deviceRegistrationInitialData = DeviceRegistrationInitialData(
-                        bootstrapUser = state.verifyUserResult.data != null && state.verifyUserResult.data.shardingPolicy == null,
                         verifyUser = state.verifyUserResult.data,
-                        recoveryType = state.recoveryType.data ?: RecoveryType.DEVICE
+                        userType = userType
                     )
 
                     val deviceRegistrationJson =
@@ -138,8 +146,8 @@ fun EntranceScreen(
 
     if (state.displayOrgRecoveryDialog is Resource.Success) {
         OrgRecoveryDialog(
-            organizationSelected = { viewModel.userSelectedOrgRecoveryType(RecoveryType.ORGANIZATION) },
-            thisDeviceSelected = { viewModel.userSelectedOrgRecoveryType(RecoveryType.DEVICE) },
+            organizationSelected = { viewModel.userSelectedOrgRecoveryType(UserType.ORGANIZATION) },
+            thisDeviceSelected = { viewModel.userSelectedOrgRecoveryType(UserType.STANDARD) },
             onDismiss = viewModel::userDismissedRecoveryTypeDialog
         )
     }

@@ -8,7 +8,7 @@ data class EntranceState(
     val verifyUserResult: Resource<VerifyUser> = Resource.Uninitialized,
     val bootstrapImageUrl: String = "",
     val displayOrgRecoveryDialog: Resource<Boolean> = Resource.Uninitialized,
-    val recoveryType: Resource<RecoveryType> = Resource.Uninitialized
+    val userType: Resource<UserType> = Resource.Uninitialized
 )
 
 /**
@@ -30,6 +30,6 @@ enum class UserDestination {
     RE_AUTHENTICATE
 }
 
-enum class RecoveryType {
-    DEVICE, ORGANIZATION
+enum class UserType {
+    STANDARD, ORGANIZATION, BOOTSTRAP
 }

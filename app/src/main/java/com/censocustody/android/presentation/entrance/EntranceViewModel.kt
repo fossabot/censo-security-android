@@ -137,9 +137,9 @@ class EntranceViewModel @Inject constructor(
         viewModelScope.launch { checkMinimumVersion() }
     }
 
-    fun userSelectedOrgRecoveryType(recoveryType: RecoveryType) {
+    fun userSelectedOrgRecoveryType(userType: UserType) {
         state = state.copy(
-            recoveryType = Resource.Success(recoveryType),
+            userType = Resource.Success(userType),
             userDestinationResult = Resource.Success(UserDestination.DEVICE_REGISTRATION)
         )
     }
