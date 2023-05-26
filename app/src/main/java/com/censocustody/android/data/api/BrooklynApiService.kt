@@ -142,6 +142,10 @@ interface BrooklynApiService {
     @Headers(AUTH_REQUIRED)
     suspend fun walletConnectPairing(@Body walletConnectPairingRequest: WalletConnectPairingRequest) : RetrofitResponse<WalletConnectPairingResponse>
 
+    @POST("v1/available-dapp-wallets")
+    @Headers(AUTH_REQUIRED)
+    suspend fun availableDAppVaults() : RetrofitResponse<AvailableDAppVaults>
+
     @POST("v1/org-admin-recovered-devices")
     @Headers(AUTH_REQUIRED)
     suspend fun addOrgAdminRecoveredDeviceAndSigners(@Body orgAdminRecoveredDeviceAndSigners: OrgAdminRecoveredDeviceAndSigners): RetrofitResponse<Unit>

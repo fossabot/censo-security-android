@@ -7,9 +7,11 @@ import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.Divider
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
@@ -31,6 +33,9 @@ import androidx.navigation.NavController
 import com.censocustody.android.R
 import com.censocustody.android.common.CensoButton
 import com.censocustody.android.common.Resource
+import com.censocustody.android.common.maskAddress
+import com.censocustody.android.data.models.AvailableDAppVault
+import com.censocustody.android.data.models.AvailableDAppWallet
 import com.censocustody.android.presentation.approvals.NavIconTopBar
 import com.censocustody.android.presentation.device_registration.Permission
 import com.censocustody.android.presentation.device_registration.sendUserToPermissions
@@ -116,7 +121,37 @@ fun ScanQRScreen(
                     val uploadWcUriResult = state.uploadWcUri
                     val checkingConnections = state.checkSessionsOnConnection
 
-                    if (checkingConnections is Resource.Success) {
+                    if (state.availableDAppVaultsResult is Resource.Success) {
+                        if (state.availableDAppVaultsResult.data?.vaults?.flatMap { it.wallets }.isNullOrEmpty()) {
+                            Column(modifier = Modifier.align(Alignment.TopCenter)) {
+                                Spacer(modifier = Modifier.height(44.dp))
+                                Text(
+                                    text = stringResource(R.string.no_dapp_enabled_wallets),
+                                    fontSize = 28.sp,
+                                    color = TextBlack,
+                                    textAlign = TextAlign.Center
+                                )
+                            }
+                        } else {
+                            Column(
+                                modifier = Modifier.fillMaxSize(),
+                                verticalArrangement = Arrangement.Top,
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                Spacer(modifier = Modifier.height(44.dp))
+                                Text(
+                                    text = stringResource(R.string.select_wallet_title),
+                                    fontSize = 24.sp,
+                                    color = TextBlack
+                                )
+                                Spacer(modifier = Modifier.height(44.dp))
+                                state.availableDAppVaultsResult.data?.vaults?.forEach {
+                                    WalletsInVault(vault = it, viewModel::userSelectedWallet)
+                                    Spacer(modifier = Modifier.height(32.dp))
+                                }
+                            }
+                        }
+                    } else if (checkingConnections is Resource.Success) {
                         ScanQRBoxUI {
                             Spacer(modifier = Modifier.height(36.dp))
                             Text(
@@ -281,6 +316,44 @@ fun ScanQRCodeComposable(
         },
         modifier = Modifier.fillMaxSize()
     )
+}
+
+@Composable
+fun WalletsInVault(vault: AvailableDAppVault, onSelected: (AvailableDAppWallet) -> Unit) {
+    VaultHeader(vault.vaultName)
+    Divider(modifier = Modifier.height(1.0.dp), color = BorderGrey)
+
+    Column() {
+        vault.wallets.forEach {
+            WalletInVault(it, onSelected)
+            Divider(modifier = Modifier.height(1.0.dp), color = BorderGrey)
+        }
+    }
+}
+
+@Composable
+fun VaultHeader(vaultName: String) {
+    Text(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 4.dp),
+        textAlign = TextAlign.Start,
+        text = vaultName,
+        fontSize = 20.sp
+    )
+}
+
+@Composable
+fun WalletInVault(wallet: AvailableDAppWallet, onSelected: (AvailableDAppWallet) -> Unit) {
+    Column(
+        modifier = Modifier
+            .clickable { onSelected(wallet) }
+            .padding(horizontal = 16.dp, vertical = 12.dp)
+    ) {
+        Text(
+            text = "${wallet.walletName} (${wallet.chains.first()}) - ${wallet.walletAddress.maskAddress()}"
+        )
+    }
 }
 
 @Composable

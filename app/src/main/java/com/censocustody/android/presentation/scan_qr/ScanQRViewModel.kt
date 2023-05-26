@@ -6,8 +6,10 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.censocustody.android.common.Resource
+import com.censocustody.android.common.censoLog
 import com.censocustody.android.common.wrapper.CensoCountDownTimer
 import com.censocustody.android.common.wrapper.CensoCountDownTimerImpl
+import com.censocustody.android.data.models.AvailableDAppWallet
 import com.censocustody.android.data.models.WalletConnectTopic
 import com.censocustody.android.data.repository.ApprovalsRepository
 import com.censocustody.android.presentation.scan_qr.ScanQRState.Companion.MAX_POLL
@@ -33,8 +35,32 @@ class ScanQRViewModel @Inject constructor(
             state = state.copy(
                 scanQRCodeResult = Resource.Success(uri),
             )
-            sendUriToBackend(uri = uri)
+            retrieveAvailableDAppVaults()
         }
+    }
+
+    private fun retrieveAvailableDAppVaults() {
+        viewModelScope.launch {
+            val availableDAppVaults = approvalsRepository.availableDAppVaults()
+
+            state = state.copy(
+                availableDAppVaultsResult = availableDAppVaults
+            )
+        }
+    }
+
+    fun userSelectedWallet(wallet: AvailableDAppWallet) {
+        censoLog(message = "Wallet selected: $wallet")
+        state = state.copy(availableDAppVaultsResult = Resource.Uninitialized)
+//        viewModelScope.launch {
+//            state.scanQRCodeResult.data?.let {
+//                sendUriToBackend(it)
+//            } ?: missingURIData()
+//        }
+    }
+
+    private fun missingURIData() {
+        state = state.copy(scanQRCodeResult = Resource.Error())
     }
 
     private fun sendUriToBackend(uri: String) {
