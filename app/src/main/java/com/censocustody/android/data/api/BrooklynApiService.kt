@@ -142,7 +142,7 @@ interface BrooklynApiService {
     @Headers(AUTH_REQUIRED)
     suspend fun walletConnectPairing(@Body walletConnectPairingRequest: WalletConnectPairingRequest) : RetrofitResponse<WalletConnectPairingResponse>
 
-    @POST("v1/available-dapp-wallets")
+    @GET("v1/available-dapp-wallets")
     @Headers(AUTH_REQUIRED)
     suspend fun availableDAppVaults() : RetrofitResponse<AvailableDAppVaults>
 
