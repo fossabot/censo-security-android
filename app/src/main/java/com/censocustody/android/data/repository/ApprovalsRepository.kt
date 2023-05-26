@@ -22,7 +22,7 @@ interface ApprovalsRepository {
 
     suspend fun retrieveShards(policyRevisionId: String, userId: String? = null) : Resource<GetShardsResponse>
 
-    suspend fun sendWcUri(uri: String): Resource<WalletConnectPairingResponse>
+    suspend fun sendWcUri(uri: String, walletAddress: String): Resource<WalletConnectPairingResponse>
     suspend fun checkIfConnectionHasSessions(topic: String) : Resource<List<WalletConnectTopic>>
 
     suspend fun availableDAppVaults() : Resource<AvailableDAppVaults>
@@ -43,9 +43,14 @@ class ApprovalsRepositoryImpl @Inject constructor(
     ): Resource<GetShardsResponse> =
         retrieveApiResource { api.getShards(policyRevisionId = policyRevisionId, userId = userId) }
 
-    override suspend fun sendWcUri(uri: String) =
+    override suspend fun sendWcUri(uri: String, walletAddress: String) =
         retrieveApiResource {
-            api.walletConnectPairing(WalletConnectPairingRequest(uri = uri))
+            api.walletConnectPairing(
+                WalletConnectPairingRequest(
+                    uri = uri,
+                    walletAddresses = listOf(walletAddress)
+                )
+            )
         }
 
     override suspend fun checkIfConnectionHasSessions(topic: String) =
@@ -69,7 +74,7 @@ class ApprovalsRepositoryImpl @Inject constructor(
                             AvailableDAppWallet(
                                 walletName = "Wallet Two",
                                 walletAddress = "09786gxdfchvbn89765",
-                                chains = listOf(Chain.bitcoin)
+                                chains = listOf(Chain.offchain, Chain.bitcoin)
                             )
                         )
                     ),
@@ -79,7 +84,7 @@ class ApprovalsRepositoryImpl @Inject constructor(
                             AvailableDAppWallet(
                                 walletName = "Wallet Whatever",
                                 walletAddress = "089765dfsghjvbknlm",
-                                chains = listOf(Chain.polygon)
+                                chains = listOf(Chain.polygon, Chain.ethereum)
                             )
                         )
                     ),
@@ -89,7 +94,7 @@ class ApprovalsRepositoryImpl @Inject constructor(
                             AvailableDAppWallet(
                                 walletName = "Yes I am a wallet",
                                 walletAddress = "809766e54wxgfhcvjb",
-                                chains = listOf(Chain.ethereum)
+                                chains = listOf(Chain.ethereum, Chain.bitcoin)
                             )
                         )
                     ),
