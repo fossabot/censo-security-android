@@ -233,7 +233,7 @@ dependencies {
     implementation 'com.github.androidmads:QRGenerator:1.0.1'
 
     // Crypto utils
-    implementation("org.web3j:core:5.0.0")  {
+    implementation("org.web3j:core:4.9.7")  {
         exclude group: "org.bouncycastle"
     }
 
