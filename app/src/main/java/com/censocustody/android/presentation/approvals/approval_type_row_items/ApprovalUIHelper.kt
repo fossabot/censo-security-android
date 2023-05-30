@@ -632,7 +632,11 @@ fun ApprovalRequestDetailsV2.Amount.formattedAmountWithSymbol(symbol: String): S
     "${formattedAmount(value)} $symbol"
 
 fun ApprovalRequestDetailsV2.Amount.formattedUsdEquivalentWithSymbol(): String =
-    "${formattedUSDEquivalentV2(usdEquivalent)} USD"
+    "${formattedUSDEquivalentV2(usdEquivalent?.absoluteValue())} USD"
+
+fun String.isNegative() = startsWith("-")
+
+fun String.absoluteValue() = if (isNegative()) substring(1) else this
 
 fun formattedAmount(amount: String): String {
     fun formatSeparator(number: BigInteger): String {
@@ -652,7 +656,6 @@ fun formattedAmount(amount: String): String {
     split.add(0, wholePartString)
     return split.joinToString(separator = ".")
 }
-
 
 
 fun formattedUSDEquivalentV2(usdEquivalent: String?, hideSymbol: Boolean = true): String {
@@ -676,3 +679,10 @@ private fun usdFormatterV2(hideSymbol: Boolean = true): DecimalFormat {
     }
     return formatter
 }
+
+fun ApprovalRequestDetailsV2.EvmSimulationResult.TokenAllowance.displayAmount() =
+    when(allowanceType) {
+        ApprovalRequestDetailsV2.TokenAllowanceType.LIMITED -> allowedAmount.value
+        ApprovalRequestDetailsV2.TokenAllowanceType.UNLIMITED -> "Unlimited"
+        ApprovalRequestDetailsV2.TokenAllowanceType.REVOKE -> null
+    }

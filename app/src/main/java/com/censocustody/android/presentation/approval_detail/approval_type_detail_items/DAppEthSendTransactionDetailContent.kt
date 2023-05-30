@@ -19,16 +19,18 @@ import com.censocustody.android.presentation.components.RowData
 import com.censocustody.android.ui.theme.DarkGreyText
 
 @Composable
-fun DAppEthSendTransactionDetailContent(header: String, fromAccount: String, fee: ApprovalRequestDetailsV2.Amount, dAppInfo: ApprovalRequestDetailsV2.DAppInfo, simulationResult: ApprovalRequestDetailsV2.EvmSimulationResult?) {
-    ApprovalContentHeader(header = header, topSpacing = 24, bottomSpacing = 8)
-    ApprovalSubtitle(text = dAppInfo.name)
-    Spacer(modifier = Modifier.height(24.dp))
+fun DAppEthSendTransactionDetailContent(
+    header: String,
+    fromAccount: String,
+    fee: ApprovalRequestDetailsV2.Amount,
+    dAppInfo: ApprovalRequestDetailsV2.DAppInfo,
+    simulationResult: ApprovalRequestDetailsV2.EvmSimulationResult?
+) {
+//    ApprovalContentHeader(header = header, topSpacing = 24, bottomSpacing = 8)
+//    ApprovalSubtitle(text = dAppInfo.name)
+//    Spacer(modifier = Modifier.height(24.dp))
 
     val facts = listOf(
-        RowData.KeyValueRow(
-            key = stringResource(R.string.from_wallet),
-            value = fromAccount,
-        ),
         RowData.KeyValueRow(
             key = stringResource(R.string.dapp_name),
             value = dAppInfo.name,
@@ -36,10 +38,6 @@ fun DAppEthSendTransactionDetailContent(header: String, fromAccount: String, fee
         RowData.KeyValueRow(
             key = stringResource(R.string.dapp_url),
             value = dAppInfo.url,
-        ),
-        RowData.KeyValueRow(
-            key = stringResource(R.string.dapp_description),
-            value = dAppInfo.description,
         ),
     )
 
@@ -49,12 +47,12 @@ fun DAppEthSendTransactionDetailContent(header: String, fromAccount: String, fee
             value = fee.formattedUsdEquivalentWithSymbol()
         )
     )
+
     Column(
+        modifier = Modifier.padding(horizontal = 8.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        FactRow(factsData = FactsData(facts = facts + feeFacts))
-
         when (simulationResult) {
             is ApprovalRequestDetailsV2.EvmSimulationResult.Failure -> {
                 Text(
@@ -66,36 +64,30 @@ fun DAppEthSendTransactionDetailContent(header: String, fromAccount: String, fee
             }
             is ApprovalRequestDetailsV2.EvmSimulationResult.Success -> {
                 if (simulationResult.balanceChanges.isNotEmpty()) {
-                    FactRow(
-                        factsData = FactsData(
-                            title = stringResource(R.string.simulation_results),
-                            facts = simulationResult.balanceChanges.map { change ->
-                                RowData.KeyValueRow(
-                                    key = change.symbolInfo.symbol,
-                                    value = formattedAmount(change.amount.value)
-                                )
-                            }
+                    simulationResult.balanceChanges.forEach {
+                        DAppTransferInfo(
+                            header = if (it.amount.isNegative()) "Send ${it.symbolInfo.symbol}" else "Receive ${it.symbolInfo.symbol}",
+                            subtitle = it.amount.absoluteValue(),
+                            usdEquivalent = it.amount.formattedUsdEquivalentWithSymbol(),
+                            fromText = fromAccount,
+                            toText = dAppInfo.name,
+                            directionIsForward = !it.amount.isNegative()
                         )
-                    )
+                        Spacer(modifier = Modifier.height(8.dp))
+                    }
                 }
                 if (simulationResult.tokenAllowances.isNotEmpty()) {
-                    FactRow(
-                        factsData = FactsData(
-                            title = stringResource(R.string.simulation_allowance_results),
-                            facts = simulationResult.tokenAllowances.map { allowance ->
-                                RowData.KeyValueRow(
-                                    key = allowance.symbolInfo.symbol,
-                                    value = when (allowance.allowanceType) {
-                                        ApprovalRequestDetailsV2.TokenAllowanceType.LIMITED -> formattedAmount(
-                                            allowance.allowedAmount.value
-                                        )
-                                        ApprovalRequestDetailsV2.TokenAllowanceType.UNLIMITED -> stringResource(R.string.unlimited)
-                                        ApprovalRequestDetailsV2.TokenAllowanceType.REVOKE -> stringResource(R.string.allowance_revoked)
-                                    }
-                                )
-                            }
+                    simulationResult.tokenAllowances.forEach {
+                        DAppTransferInfo(
+                            header = if (it.allowanceType == ApprovalRequestDetailsV2.TokenAllowanceType.REVOKE) "Revoke use of ${it.symbolInfo.symbol}" else "Allow use of ${it.symbolInfo.symbol}",
+                            subtitle = it.displayAmount(),
+                            usdEquivalent = if (it.allowanceType == ApprovalRequestDetailsV2.TokenAllowanceType.LIMITED) it.allowedAmount.formattedUsdEquivalentWithSymbol() else null,
+                            fromText = fromAccount,
+                            toText = dAppInfo.name,
+                            directionIsForward = true
                         )
-                    )
+                        Spacer(modifier = Modifier.height(8.dp))
+                    }
                 }
             }
             null -> {
@@ -107,19 +99,42 @@ fun DAppEthSendTransactionDetailContent(header: String, fromAccount: String, fee
                 )
             }
         }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        FactRow(
+            factsData = FactsData(
+                title = "DAPP INFO",
+                facts = facts,
+            )
+        )
+
+        Spacer(modifier = Modifier.height(4.dp))
+
+        FactRow(
+            factsData = FactsData(
+                title = "FEES",
+                facts = feeFacts,
+            )
+        )
     }
 
     Spacer(modifier = Modifier.height(28.dp))
 }
 
 @Composable
-@Preview
+@Preview(showBackground = true, backgroundColor = 0xFFFFFF)
 fun DAppEthSendTransactionDetailContentPreview() {
     DAppEthSendTransactionDetailContent(
         header = "DApp Transaction",
         fromAccount = "from wallet",
         fee = ApprovalRequestDetailsV2.Amount("0.00123", "0.0012300", "0.24"),
-        dAppInfo = ApprovalRequestDetailsV2.DAppInfo("dApp Name", "dApp.url", "dApp Description", emptyList()),
+        dAppInfo = ApprovalRequestDetailsV2.DAppInfo(
+            "dApp Name",
+            "dApp.url",
+            "dApp Description",
+            emptyList()
+        ),
         simulationResult = ApprovalRequestDetailsV2.EvmSimulationResult.Success(
             listOf(
                 ApprovalRequestDetailsV2.EvmSimulationResult.BalanceChange(
@@ -135,7 +150,11 @@ fun DAppEthSendTransactionDetailContentPreview() {
                 ApprovalRequestDetailsV2.EvmSimulationResult.TokenAllowance(
                     ApprovalRequestDetailsV2.EvmSymbolInfo("USDC", "USDC"),
                     "allowed-address",
-                    ApprovalRequestDetailsV2.Amount("123456789121314151617181920.00", "1234567891011121314151617181920.00", "1234567891011121314151617181920.00"),
+                    ApprovalRequestDetailsV2.Amount(
+                        "123456789121314151617181920.00",
+                        "1234567891011121314151617181920.00",
+                        "1234567891011121314151617181920.00"
+                    ),
                     ApprovalRequestDetailsV2.TokenAllowanceType.LIMITED
                 )
             )
@@ -143,16 +162,16 @@ fun DAppEthSendTransactionDetailContentPreview() {
     )
 }
 
-@Composable
-@Preview
-fun DAppEthSendTransactionDetailContentPreview_SimFailure() {
-    DAppEthSendTransactionDetailContent(
-        header = "DApp Transaction",
-        fromAccount = "from wallet",
-        fee = ApprovalRequestDetailsV2.Amount("0.00123", "0.0012300", "0.24"),
-        dAppInfo = ApprovalRequestDetailsV2.DAppInfo("dApp Name", "dApp.url", "dApp Description", emptyList()),
-        simulationResult = ApprovalRequestDetailsV2.EvmSimulationResult.Failure(
-            reason = "execution reverted"
-        )
-    )
-}
+//@Composable
+//@Preview(showBackground = true, backgroundColor = 0xFFFFFF)
+//fun DAppEthSendTransactionDetailContentPreview_SimFailure() {
+//    DAppEthSendTransactionDetailContent(
+//        header = "DApp Transaction",
+//        fromAccount = "from wallet",
+//        fee = ApprovalRequestDetailsV2.Amount("0.00123", "0.0012300", "0.24"),
+//        dAppInfo = ApprovalRequestDetailsV2.DAppInfo("dApp Name", "dApp.url", "dApp Description", emptyList()),
+//        simulationResult = ApprovalRequestDetailsV2.EvmSimulationResult.Failure(
+//            reason = "execution reverted"
+//        )
+//    )
+//}

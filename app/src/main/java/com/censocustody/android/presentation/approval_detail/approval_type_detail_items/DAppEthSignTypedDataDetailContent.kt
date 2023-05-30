@@ -42,10 +42,10 @@ fun DAppEthSignTypedDataDetailContent(header: String, fromAccount: String, fee: 
             key = stringResource(R.string.dapp_url),
             value = dAppInfo.url,
         ),
-        RowData.KeyValueRow(
-            key = stringResource(R.string.dapp_description),
-            value = dAppInfo.description,
-        ),
+//        RowData.KeyValueRow(
+//            key = stringResource(R.string.dapp_description),
+//            value = dAppInfo.description,
+//        ),
     )
 
     val feeFacts = listOf(

@@ -542,6 +542,10 @@ sealed class ApprovalRequestDetailsV2 {
         fun fundamentalAmountAsBigInteger(): BigInteger {
             return BigInteger(nativeValue.replace(".", ""), 10)
         }
+
+        fun isNegative() = value.startsWith("-")
+
+        fun absoluteValue() = if (isNegative()) value.substring(1) else value
     }
 
     data class BitcoinSymbolInfo(
