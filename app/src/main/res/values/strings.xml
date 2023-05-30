@@ -302,4 +302,6 @@
     <string name="failed_retrieve_wallets">Failed to get wallets before connecting to DApp</string>
     <string name="unlimited">UNLIMITED</string>
     <string name="allowance_revoked">ALLOWANCE REVOKED</string>
+    <string name="successfully_connected">Successfully connected</string>
+    <string name="dapp">DApp</string>
 </resources>

@@ -7,13 +7,10 @@ import androidx.activity.ComponentActivity
 import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.*
 import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Divider
 import androidx.compose.material.Scaffold
@@ -25,7 +22,9 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -163,20 +162,52 @@ fun ScanQRScreen(
                             }
                         }
                     } else if (checkingConnections is Resource.Success) {
-                        ScanQRBoxUI {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(32.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center
+                        ) {
+
+                            val topicData = checkingConnections.data
+
+                            val noTopicDataPresent = checkingConnections.data.isNullOrEmpty()
+
+                            var walletName = stringResource(id = R.string.wallet).lowercase()
+                            var dapp = stringResource(R.string.dapp)
+                            var dappIconUrl = ""
+
+                            if (state.selectedWallet != null) {
+                                walletName = state.selectedWallet.walletName
+                            }
+
+                            if (!noTopicDataPresent) {
+                                val topic = topicData?.get(0)!!
+                                dapp = topic.name
+                                dappIconUrl = topic.url
+                            }
+
+                            if (dappIconUrl.isNotEmpty()) {
+                                Image(
+                                    modifier = Modifier.width(260.dp),
+                                    painter = painterResource(R.drawable.logo_red_black),
+                                    contentDescription = "",
+                                    contentScale = ContentScale.FillWidth,
+                                )
+                            }
                             Spacer(modifier = Modifier.height(36.dp))
                             Text(
-                                modifier = Modifier.padding(horizontal = 8.dp),
-                                text = stringResource(R.string.checked_connections_success),
+                                text = "${stringResource(R.string.successfully_connected)} $walletName ${stringResource(id = R.string.to).lowercase()} $dapp",
                                 textAlign = TextAlign.Center,
                                 color = TextBlack,
-                                fontSize = 22.sp
+                                fontSize = 28.sp
                             )
                             Spacer(modifier = Modifier.height(36.dp))
                             CensoButton(onClick = viewModel::userFinished) {
                                 Text(
                                     modifier = Modifier.padding(8.dp),
-                                    text = stringResource(id = R.string.done),
+                                    text = stringResource(id = R.string.ok),
                                     fontSize = 20.sp,
                                     color = CensoWhite
                                 )
