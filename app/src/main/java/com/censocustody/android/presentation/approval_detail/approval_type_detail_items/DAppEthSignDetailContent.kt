@@ -37,11 +37,7 @@ fun DAppEthSignDetailContent(header: String, fromAccount: String, fee: ApprovalR
         RowData.KeyValueRow(
             key = stringResource(R.string.dapp_url),
             value = dAppInfo.url,
-        ),
-//        RowData.KeyValueRow(
-//            key = stringResource(R.string.dapp_description),
-//            value = dAppInfo.description,
-//        ),
+        )
     )
 
     val feeFacts = listOf(

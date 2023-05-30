@@ -26,9 +26,9 @@ fun DAppEthSendTransactionDetailContent(
     dAppInfo: ApprovalRequestDetailsV2.DAppInfo,
     simulationResult: ApprovalRequestDetailsV2.EvmSimulationResult?
 ) {
-//    ApprovalContentHeader(header = header, topSpacing = 24, bottomSpacing = 8)
-//    ApprovalSubtitle(text = dAppInfo.name)
-//    Spacer(modifier = Modifier.height(24.dp))
+    ApprovalContentHeader(header = header, topSpacing = 24, bottomSpacing = 8)
+    ApprovalSubtitle(text = dAppInfo.name)
+    Spacer(modifier = Modifier.height(24.dp))
 
     val facts = listOf(
         RowData.KeyValueRow(
@@ -54,14 +54,6 @@ fun DAppEthSendTransactionDetailContent(
         verticalArrangement = Arrangement.Center
     ) {
         when (simulationResult) {
-            is ApprovalRequestDetailsV2.EvmSimulationResult.Failure -> {
-                Text(
-                    "${stringResource(R.string.simulation_failure)}: ${simulationResult.reason}",
-                    color = DarkGreyText,
-                    modifier = Modifier.padding(start = 16.dp, top = 6.dp, bottom = 6.dp),
-                    letterSpacing = 0.25.sp
-                )
-            }
             is ApprovalRequestDetailsV2.EvmSimulationResult.Success -> {
                 if (simulationResult.balanceChanges.isNotEmpty()) {
                     simulationResult.balanceChanges.forEach {
@@ -90,9 +82,17 @@ fun DAppEthSendTransactionDetailContent(
                     }
                 }
             }
-            null -> {
+            is ApprovalRequestDetailsV2.EvmSimulationResult.Failure -> {
                 Text(
-                    stringResource(R.string.no_simulation_results),
+                    "${stringResource(R.string.simulation_failure)}: ${simulationResult.reason}",
+                    color = DarkGreyText,
+                    modifier = Modifier.padding(start = 16.dp, top = 6.dp, bottom = 6.dp),
+                    letterSpacing = 0.25.sp
+                )
+            }
+            else -> {
+                Text(
+                    stringResource(R.string.simulation_failure),
                     color = DarkGreyText,
                     modifier = Modifier.padding(start = 16.dp, top = 6.dp, bottom = 6.dp),
                     letterSpacing = 0.25.sp
