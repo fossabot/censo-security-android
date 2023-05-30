@@ -395,6 +395,8 @@ fun ApprovalsList(
                         val timeRemainingInSeconds =
                             if (shouldRefreshTimers) calculatedTimerSecondsLeft else calculatedTimerSecondsLeft
 
+                        val showApprovalFromList = safeApproval.details.isDAppRequest()
+
                         if (type.isUnknownTypeOrUIUnimplemented()) {
                             UnknownApprovalItem(
                                 timeRemainingInSeconds = timeRemainingInSeconds,
@@ -421,7 +423,8 @@ fun ApprovalsList(
                                 onApproveClicked = { onApproveClicked(approvalRequests[index]) },
                                 onMoreInfoClicked = { onMoreInfoClicked(approvalRequests[index]) },
                                 rowMetaData = rowMetaData,
-                                positiveButtonText = safeApproval.approveButtonCaption(context)
+                                positiveButtonText = safeApproval.approveButtonCaption(context),
+                                showApprovalButton = showApprovalFromList
                             ) {
                                 ApprovalRowContent(
                                     type = type,

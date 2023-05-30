@@ -76,6 +76,9 @@ sealed class ApprovalRequestDetailsV2 {
     fun isDeviceKeyApprovalType() =
         this is Login || this is PasswordReset
 
+    fun isDAppRequest() =
+        this is EthereumDAppRequest || this is PolygonDAppRequest
+
     companion object {
         val approvalRequestDetailsV2AdapterFactory: RuntimeTypeAdapterFactory<ApprovalRequestDetailsV2> = RuntimeTypeAdapterFactory.of(
             ApprovalRequestDetailsV2::class.java, "type"
