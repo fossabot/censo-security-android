@@ -279,11 +279,7 @@
     <string name="scan_qr_code_success">Connecting to DApp…</string>
     <string name="dapp_name">dApp Name</string>
     <string name="dapp_url">dApp URL</string>
-    <string name="dapp_description">dApp Description</string>
-    <string name="no_simulation_results">No simulation results available</string>
     <string name="simulation_failure">Simulation failed</string>
-    <string name="simulation_results">Expected transfers</string>
-    <string name="simulation_allowance_results">Token allowances</string>
     <string name="eth_send_transaction_header">dApp Transaction</string>
     <string name="eth_sign_header">dApp Sign Message</string>
     <string name="eth_sign_typed_data_header">dApp Sign Data</string>
@@ -298,8 +294,6 @@
     <string name="no_dapp_enabled_wallets">You do not have any dapp-enabled wallets</string>
     <string name="connect">Connect</string>
     <string name="failed_retrieve_wallets">Failed to get wallets before connecting to DApp</string>
-    <string name="unlimited">UNLIMITED</string>
-    <string name="allowance_revoked">ALLOWANCE REVOKED</string>
     <string name="dapp">DApp</string>
     <string name="successfully_connected_dapp_message">Successfully connected %1$s to %2$s</string>
     <string name="dapp_info">DAPP INFO</string>
