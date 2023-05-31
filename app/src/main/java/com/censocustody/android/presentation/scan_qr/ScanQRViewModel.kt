@@ -47,6 +47,7 @@ class ScanQRViewModel @Inject constructor(
 
             if (haveSingleWallet) {
                 val singleWallet = availableDAppVaults.data?.vaults?.flatMap { it.wallets }?.first()
+                state = state.copy(selectedWallet = singleWallet)
                 sendUriToBackend(
                     uri = state.uri,
                     walletAddress = singleWallet!!.walletAddress
@@ -60,7 +61,10 @@ class ScanQRViewModel @Inject constructor(
     }
 
     fun userSelectedWallet(wallet: AvailableDAppWallet) {
-        state = state.copy(availableDAppVaultsResult = Resource.Uninitialized)
+        state = state.copy(
+            availableDAppVaultsResult = Resource.Uninitialized,
+            selectedWallet = wallet
+        )
 
         if (state.uri.isEmpty()) {
             missingURIData()

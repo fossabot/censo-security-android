@@ -2,6 +2,7 @@ package com.censocustody.android.presentation.scan_qr
 
 import com.censocustody.android.common.Resource
 import com.censocustody.android.data.models.AvailableDAppVaults
+import com.censocustody.android.data.models.AvailableDAppWallet
 import com.censocustody.android.data.models.WalletConnectPairingResponse
 import com.censocustody.android.data.models.WalletConnectTopic
 import okhttp3.ResponseBody
@@ -14,7 +15,8 @@ data class ScanQRState(
     val exitScreen: Boolean = false,
     val topic: String = "",
     val timesPolled: Int = 0,
-    val availableDAppVaultsResult: Resource<AvailableDAppVaults> = Resource.Uninitialized
+    val availableDAppVaultsResult: Resource<AvailableDAppVaults> = Resource.Uninitialized,
+    val selectedWallet: AvailableDAppWallet? = null
 ) {
     companion object {
         const val MAX_POLL = 5
