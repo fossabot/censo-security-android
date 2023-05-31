@@ -57,8 +57,10 @@ fun DAppEthSendTransactionDetailContent(
             is ApprovalRequestDetailsV2.EvmSimulationResult.Success -> {
                 if (simulationResult.balanceChanges.isNotEmpty()) {
                     simulationResult.balanceChanges.forEach {
+                        val symbolName = it.symbolInfo.symbol.displaySymbol()
+
                         DAppTransferInfo(
-                            header = if (it.amount.isNegative()) "Send ${it.symbolInfo.symbol}" else "Receive ${it.symbolInfo.symbol}",
+                            header = if (it.amount.isNegative()) "${stringResource(R.string.send)} $symbolName" else "${stringResource(R.string.receive)} $symbolName}",
                             subtitle = it.amount.absoluteValue(),
                             usdEquivalent = it.amount.formattedUsdEquivalentWithSymbol(),
                             fromText = fromAccount,
@@ -70,8 +72,10 @@ fun DAppEthSendTransactionDetailContent(
                 }
                 if (simulationResult.tokenAllowances.isNotEmpty()) {
                     simulationResult.tokenAllowances.forEach {
+                        val symbolName = it.symbolInfo.symbol.displaySymbol()
+
                         DAppTransferInfo(
-                            header = if (it.allowanceType == ApprovalRequestDetailsV2.TokenAllowanceType.REVOKE) "Revoke use of ${it.symbolInfo.symbol}" else "Allow use of ${it.symbolInfo.symbol}",
+                            header = if (it.allowanceType == ApprovalRequestDetailsV2.TokenAllowanceType.REVOKE) "${stringResource(R.string.revoke_use_of)} $symbolName" else "${stringResource(R.string.allow_use_of)} $symbolName}",
                             subtitle = it.displayAmount(),
                             usdEquivalent = if (it.allowanceType == ApprovalRequestDetailsV2.TokenAllowanceType.LIMITED) it.allowedAmount.formattedUsdEquivalentWithSymbol() else null,
                             fromText = fromAccount,
@@ -104,7 +108,7 @@ fun DAppEthSendTransactionDetailContent(
 
         FactRow(
             factsData = FactsData(
-                title = "DAPP INFO",
+                title = stringResource(R.string.dapp_info),
                 facts = facts,
             )
         )
@@ -113,7 +117,7 @@ fun DAppEthSendTransactionDetailContent(
 
         FactRow(
             factsData = FactsData(
-                title = "FEES",
+                title = stringResource(id = R.string.fees).uppercase(),
                 facts = feeFacts,
             )
         )

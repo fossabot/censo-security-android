@@ -105,7 +105,6 @@
 
     <string name="name">Name</string>
     <string name="wallet_name_title">Wallet Name</string>
-<!--    <string name="wallet_title">Wallet</string>-->
     <string name="approvers">Transfer Approvers</string>
     <string name="details_title">Details</string>
     <string name="status">status</string>
@@ -303,4 +302,9 @@
     <string name="allowance_revoked">ALLOWANCE REVOKED</string>
     <string name="dapp">DApp</string>
     <string name="successfully_connected_dapp_message">Successfully connected %1$s to %2$s</string>
+    <string name="dapp_info">DAPP INFO</string>
+    <string name="send">Send</string>
+    <string name="receive">Receive</string>
+    <string name="revoke_use_of">Revoke use of</string>
+    <string name="allow_use_of">Allow use of</string>
 </resources>

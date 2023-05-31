@@ -18,7 +18,8 @@ object CrashReportingUtil {
     const val KEY_CREATION = "KeyCreation"
     const val DEVICE_REGISTRATION = "DeviceRegistration"
     const val QR_CODE = "QR Code"
-    const val RETRIEVE_NAME_MODEL = "Retrieve Name Model"
+    const val RETRIEVE_NAME_MODEL = "RetrieveNameModel"
+    const val DISPLAY_SYMBOL = "DisplaySymbol"
 }
 
 fun Exception.sendError(reason: String) {

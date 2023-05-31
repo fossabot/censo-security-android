@@ -11,6 +11,8 @@ import com.censocustody.android.common.convertSecondsIntoCountdownText
 import com.censocustody.android.common.maskAddress
 import com.censocustody.android.common.toVaultName
 import com.censocustody.android.common.toWalletName
+import com.censocustody.android.common.util.CrashReportingUtil.DISPLAY_SYMBOL
+import com.censocustody.android.common.util.sendError
 import com.censocustody.android.data.models.ApprovalDisposition
 import com.censocustody.android.data.models.Chain
 import com.censocustody.android.ui.theme.GreyText
@@ -637,6 +639,21 @@ fun ApprovalRequestDetailsV2.Amount.formattedUsdEquivalentWithSymbol(): String =
 fun String.isNegative() = startsWith("-")
 
 fun String.absoluteValue() = if (isNegative()) substring(1) else this
+
+fun String.displaySymbol(): String =
+    try {
+        if (startsWith(':')) {
+            // all we have is a token mint address, just use the first and last 4 characters
+            substring(1, 5) + "..." + substring(length - 4)
+        } else if (contains(':')) {
+            split(":")[0]
+        } else {
+            this
+        }
+    } catch (e: Exception) {
+        e.sendError(DISPLAY_SYMBOL)
+        this
+    }
 
 fun formattedAmount(amount: String): String {
     fun formatSeparator(number: BigInteger): String {
