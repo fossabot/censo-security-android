@@ -11,6 +11,8 @@ import com.censocustody.android.common.convertSecondsIntoCountdownText
 import com.censocustody.android.common.maskAddress
 import com.censocustody.android.common.toVaultName
 import com.censocustody.android.common.toWalletName
+import com.censocustody.android.common.util.CrashReportingUtil.DISPLAY_SYMBOL
+import com.censocustody.android.common.util.sendError
 import com.censocustody.android.data.models.ApprovalDisposition
 import com.censocustody.android.data.models.Chain
 import com.censocustody.android.ui.theme.GreyText
@@ -632,7 +634,26 @@ fun ApprovalRequestDetailsV2.Amount.formattedAmountWithSymbol(symbol: String): S
     "${formattedAmount(value)} $symbol"
 
 fun ApprovalRequestDetailsV2.Amount.formattedUsdEquivalentWithSymbol(): String =
-    "${formattedUSDEquivalentV2(usdEquivalent)} USD"
+    "${formattedUSDEquivalentV2(usdEquivalent?.absoluteValue())} USD"
+
+fun String.isNegative() = startsWith("-")
+
+fun String.absoluteValue() = if (isNegative()) substring(1) else this
+
+fun String.displaySymbol(): String =
+    try {
+        if (startsWith(':')) {
+            // all we have is a token mint address, just use the first and last 4 characters
+            substring(1, 5) + "..." + substring(length - 4)
+        } else if (contains(':')) {
+            split(":")[0]
+        } else {
+            this
+        }
+    } catch (e: Exception) {
+        e.sendError(DISPLAY_SYMBOL)
+        this
+    }
 
 fun formattedAmount(amount: String): String {
     fun formatSeparator(number: BigInteger): String {
@@ -652,7 +673,6 @@ fun formattedAmount(amount: String): String {
     split.add(0, wholePartString)
     return split.joinToString(separator = ".")
 }
-
 
 
 fun formattedUSDEquivalentV2(usdEquivalent: String?, hideSymbol: Boolean = true): String {
@@ -676,3 +696,10 @@ private fun usdFormatterV2(hideSymbol: Boolean = true): DecimalFormat {
     }
     return formatter
 }
+
+fun ApprovalRequestDetailsV2.EvmSimulationResult.TokenAllowance.displayAmount(context: Context) =
+    when(allowanceType) {
+        ApprovalRequestDetailsV2.TokenAllowanceType.LIMITED -> allowedAmount.value
+        ApprovalRequestDetailsV2.TokenAllowanceType.UNLIMITED -> context.getString(R.string.unlimited)
+        ApprovalRequestDetailsV2.TokenAllowanceType.REVOKE -> null
+    }
