@@ -2,20 +2,14 @@ package com.censocustody.android.presentation.scan_qr
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.widget.Space
 import androidx.activity.ComponentActivity
 import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.scrollable
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.Divider
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
@@ -26,6 +20,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -34,6 +29,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import coil.compose.AsyncImage
 import com.censocustody.android.R
 import com.censocustody.android.common.CensoButton
 import com.censocustody.android.common.Resource
@@ -46,7 +42,6 @@ import com.censocustody.android.presentation.device_registration.Permission
 import com.censocustody.android.presentation.device_registration.sendUserToPermissions
 import com.censocustody.android.ui.theme.*
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import org.bouncycastle.math.raw.Mod
 import java.util.concurrent.Executors
 
 @OptIn(ExperimentalPermissionsApi::class)
@@ -163,20 +158,52 @@ fun ScanQRScreen(
                             }
                         }
                     } else if (checkingConnections is Resource.Success) {
-                        ScanQRBoxUI {
-                            Spacer(modifier = Modifier.height(36.dp))
+                        Column(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(32.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center
+                        ) {
+
+                            val topicData = checkingConnections.data
+
+                            val noTopicDataPresent = checkingConnections.data.isNullOrEmpty()
+
+                            var walletName = stringResource(id = R.string.wallet).lowercase()
+                            var dapp = stringResource(R.string.dapp)
+                            var dappIconUrl : String? = ""
+
+                            if (state.selectedWallet != null) {
+                                walletName = state.selectedWallet.walletName
+                            }
+
+                            if (!noTopicDataPresent) {
+                                val topic = topicData?.get(0)!!
+                                dapp = topic.name
+                                dappIconUrl = topic.icons.firstOrNull()
+                            }
+
+                            if (!dappIconUrl.isNullOrEmpty()) {
+                                AsyncImage(
+                                    modifier = Modifier.width(100.dp),
+                                    model = dappIconUrl,
+                                    contentDescription = "",
+                                    error = painterResource(R.drawable.censo_icon_color)
+                                )
+                            }
+                            Spacer(modifier = Modifier.height(44.dp))
                             Text(
-                                modifier = Modifier.padding(horizontal = 8.dp),
-                                text = stringResource(R.string.checked_connections_success),
+                                text = stringResource(R.string.successfully_connected_dapp_message, walletName, dapp),
                                 textAlign = TextAlign.Center,
                                 color = TextBlack,
-                                fontSize = 22.sp
+                                fontSize = 28.sp
                             )
-                            Spacer(modifier = Modifier.height(36.dp))
+                            Spacer(modifier = Modifier.height(44.dp))
                             CensoButton(onClick = viewModel::userFinished) {
                                 Text(
                                     modifier = Modifier.padding(8.dp),
-                                    text = stringResource(id = R.string.done),
+                                    text = stringResource(id = R.string.ok),
                                     fontSize = 20.sp,
                                     color = CensoWhite
                                 )
