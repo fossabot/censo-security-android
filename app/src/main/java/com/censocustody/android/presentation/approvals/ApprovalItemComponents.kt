@@ -85,7 +85,8 @@ fun ApprovalRowContentHeader(
 fun ApprovalButtonRow(
     onApproveClicked: () -> Unit,
     onMoreInfoClicked: () -> Unit,
-    positiveButtonText: String
+    positiveButtonText: String,
+    displayApproveButton: Boolean
 ) {
     Column(modifier = Modifier.background(Color.White)) {
         Divider(color = BorderGrey, modifier = Modifier.height(1.0.dp))
@@ -93,28 +94,30 @@ fun ApprovalButtonRow(
             modifier = Modifier.height(IntrinsicSize.Min),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            CompositionLocalProvider(LocalRippleTheme provides CustomRippleTheme) {
-                TextButton(
-                    modifier = Modifier
-                        .weight(1f)
-                        .padding(top = 4.dp, bottom = 4.dp),
-                    onClick = onApproveClicked
-                ) {
-                    Text(
-                        positiveButtonText,
-                        color = ApprovalGreen,
-                        fontSize = 17.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        modifier = Modifier.padding(top = 4.dp, bottom = 4.dp),
-                    )
+            if (displayApproveButton) {
+                CompositionLocalProvider(LocalRippleTheme provides CustomRippleTheme) {
+                    TextButton(
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(top = 4.dp, bottom = 4.dp),
+                        onClick = onApproveClicked
+                    ) {
+                        Text(
+                            positiveButtonText,
+                            color = ApprovalGreen,
+                            fontSize = 17.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            modifier = Modifier.padding(top = 4.dp, bottom = 4.dp),
+                        )
+                    }
                 }
+                Divider(
+                    color = BorderGrey,
+                    modifier = Modifier
+                        .fillMaxHeight()
+                        .width(1.0.dp)
+                )
             }
-            Divider(
-                color = BorderGrey,
-                modifier = Modifier
-                    .fillMaxHeight()
-                    .width(1.0.dp)
-            )
             CompositionLocalProvider(LocalRippleTheme provides CustomRippleTheme) {
                 TextButton(
                     modifier = Modifier

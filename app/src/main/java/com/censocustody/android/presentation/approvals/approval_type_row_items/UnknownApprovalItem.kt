@@ -10,6 +10,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -26,9 +28,10 @@ fun UnknownApprovalItem(
 ) {
     Column(
         modifier = Modifier
-            .clip(RoundedCornerShape(8.dp))
+            .shadow(elevation = 5.dp)
+            .clip(RoundedCornerShape(4.dp))
             .fillMaxWidth()
-            .background(color = BackgroundGrey),
+            .background(color = Color.White),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         ApprovalItemHeader(
