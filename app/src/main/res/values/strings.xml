@@ -290,7 +290,6 @@
     <string name="eth_sign_typed_data_header">dApp Sign Data</string>
     <string name="enable_recovery_contract_header">Enable Recovery Policy</string>
     <string name="checking_sessions_loading">Connected to DApp.\n\nChecking sessions…</string>
-    <string name="checked_connections_success">Connected to DApp and DApp has active sessions.</string>
     <string name="no_active_sessions_found">No Active Sessions Found For dApp</string>
     <string name="message_to_sign">Message</string>
     <string name="maintenance">Maintenance Mode</string>
@@ -302,4 +301,6 @@
     <string name="failed_retrieve_wallets">Failed to get wallets before connecting to DApp</string>
     <string name="unlimited">UNLIMITED</string>
     <string name="allowance_revoked">ALLOWANCE REVOKED</string>
+    <string name="dapp">DApp</string>
+    <string name="successfully_connected_dapp_message">Successfully connected %1$s to %2$s</string>
 </resources>
