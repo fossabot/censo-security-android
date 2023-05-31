@@ -2,17 +2,14 @@ package com.censocustody.android.presentation.scan_qr
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.widget.Space
 import androidx.activity.ComponentActivity
 import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
 import androidx.compose.foundation.*
-import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.Divider
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
@@ -22,7 +19,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -46,7 +42,6 @@ import com.censocustody.android.presentation.device_registration.Permission
 import com.censocustody.android.presentation.device_registration.sendUserToPermissions
 import com.censocustody.android.ui.theme.*
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import org.bouncycastle.math.raw.Mod
 import java.util.concurrent.Executors
 
 @OptIn(ExperimentalPermissionsApi::class)
@@ -191,18 +186,20 @@ fun ScanQRScreen(
 
                             if (!dappIconUrl.isNullOrEmpty()) {
                                 AsyncImage(
+                                    modifier = Modifier.width(100.dp),
                                     model = dappIconUrl,
                                     contentDescription = "",
+                                    error = painterResource(R.drawable.censo_icon_color)
                                 )
                             }
-                            Spacer(modifier = Modifier.height(36.dp))
+                            Spacer(modifier = Modifier.height(44.dp))
                             Text(
                                 text = "${stringResource(R.string.successfully_connected)} $walletName ${stringResource(id = R.string.to).lowercase()} $dapp",
                                 textAlign = TextAlign.Center,
                                 color = TextBlack,
                                 fontSize = 28.sp
                             )
-                            Spacer(modifier = Modifier.height(36.dp))
+                            Spacer(modifier = Modifier.height(44.dp))
                             CensoButton(onClick = viewModel::userFinished) {
                                 Text(
                                     modifier = Modifier.padding(8.dp),
