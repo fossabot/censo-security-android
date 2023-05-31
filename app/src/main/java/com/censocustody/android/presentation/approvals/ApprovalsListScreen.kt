@@ -395,7 +395,7 @@ fun ApprovalsList(
                         val timeRemainingInSeconds =
                             if (shouldRefreshTimers) calculatedTimerSecondsLeft else calculatedTimerSecondsLeft
 
-                        val showApprovalFromList = safeApproval.details.isDAppRequest()
+                        val showApprovalFromList = !safeApproval.details.isDAppRequest()
 
                         if (type.isUnknownTypeOrUIUnimplemented()) {
                             UnknownApprovalItem(

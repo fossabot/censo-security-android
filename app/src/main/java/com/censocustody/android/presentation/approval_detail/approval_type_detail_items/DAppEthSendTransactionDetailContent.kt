@@ -1,6 +1,7 @@
 package com.censocustody.android.presentation.approval_detail.approval_type_detail_items
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.Divider
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -11,11 +12,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.censocustody.android.R
 import com.censocustody.android.data.models.approvalV2.ApprovalRequestDetailsV2
+import com.censocustody.android.data.models.approvalV2.ApprovalRequestV2
+import com.censocustody.android.data.models.approvalV2.ApprovalRequestV2Deserializer
 import com.censocustody.android.presentation.approvals.ApprovalContentHeader
 import com.censocustody.android.presentation.approvals.approval_type_row_items.*
 import com.censocustody.android.presentation.components.FactRow
 import com.censocustody.android.presentation.components.FactsData
 import com.censocustody.android.presentation.components.RowData
+import com.censocustody.android.ui.theme.BorderGrey
 import com.censocustody.android.ui.theme.DarkGreyText
 
 @Composable
@@ -26,9 +30,7 @@ fun DAppEthSendTransactionDetailContent(
     dAppInfo: ApprovalRequestDetailsV2.DAppInfo,
     simulationResult: ApprovalRequestDetailsV2.EvmSimulationResult?
 ) {
-    ApprovalContentHeader(header = header, topSpacing = 24, bottomSpacing = 8)
-    ApprovalSubtitle(text = dAppInfo.name)
-    Spacer(modifier = Modifier.height(24.dp))
+    ApprovalContentHeader(header = header, topSpacing = 8, bottomSpacing = 32)
 
     val facts = listOf(
         RowData.KeyValueRow(
@@ -49,7 +51,6 @@ fun DAppEthSendTransactionDetailContent(
     )
 
     Column(
-        modifier = Modifier.padding(horizontal = 8.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
@@ -59,21 +60,30 @@ fun DAppEthSendTransactionDetailContent(
                     simulationResult.balanceChanges.forEach {
                         val symbolName = it.symbolInfo.symbol.displaySymbol()
 
+                        Divider(modifier = Modifier
+                            .height(1.0.dp)
+                            .padding(horizontal = 16.dp), color = BorderGrey)
                         DAppTransferInfo(
-                            header = if (it.amount.isNegative()) "${stringResource(R.string.send)} $symbolName" else "${stringResource(R.string.receive)} $symbolName}",
+                            header = if (it.amount.isNegative()) "${stringResource(R.string.send)} $symbolName" else "${stringResource(R.string.receive)} $symbolName",
                             subtitle = it.amount.absoluteValue(),
                             usdEquivalent = it.amount.formattedUsdEquivalentWithSymbol(),
                             fromText = fromAccount,
                             toText = dAppInfo.name,
                             directionIsForward = !it.amount.isNegative()
                         )
-                        Spacer(modifier = Modifier.height(8.dp))
+                        Spacer(modifier = Modifier.height(16.dp))
                     }
                 }
+                Divider(modifier = Modifier
+                    .height(1.0.dp)
+                    .padding(horizontal = 16.dp), color = BorderGrey)
                 if (simulationResult.tokenAllowances.isNotEmpty()) {
                     simulationResult.tokenAllowances.forEach {
                         val symbolName = it.symbolInfo.symbol.displaySymbol()
 
+                        Divider(modifier = Modifier
+                            .height(1.0.dp)
+                            .padding(horizontal = 16.dp), color = BorderGrey)
                         DAppTransferInfo(
                             header = if (it.allowanceType == ApprovalRequestDetailsV2.TokenAllowanceType.REVOKE) "${stringResource(R.string.revoke_use_of)} $symbolName" else "${stringResource(R.string.allow_use_of)} $symbolName}",
                             subtitle = it.displayAmount(),
@@ -82,7 +92,7 @@ fun DAppEthSendTransactionDetailContent(
                             toText = dAppInfo.name,
                             directionIsForward = true
                         )
-                        Spacer(modifier = Modifier.height(8.dp))
+                        Spacer(modifier = Modifier.height(16.dp))
                     }
                 }
             }
@@ -166,16 +176,16 @@ fun DAppEthSendTransactionDetailContentPreview() {
     )
 }
 
-//@Composable
-//@Preview(showBackground = true, backgroundColor = 0xFFFFFF)
-//fun DAppEthSendTransactionDetailContentPreview_SimFailure() {
-//    DAppEthSendTransactionDetailContent(
-//        header = "DApp Transaction",
-//        fromAccount = "from wallet",
-//        fee = ApprovalRequestDetailsV2.Amount("0.00123", "0.0012300", "0.24"),
-//        dAppInfo = ApprovalRequestDetailsV2.DAppInfo("dApp Name", "dApp.url", "dApp Description", emptyList()),
-//        simulationResult = ApprovalRequestDetailsV2.EvmSimulationResult.Failure(
-//            reason = "execution reverted"
-//        )
-//    )
-//}
+@Composable
+@Preview(showBackground = true, backgroundColor = 0xFFFFFF)
+fun DAppEthSendTransactionDetailContentPreview_SimFailure() {
+    DAppEthSendTransactionDetailContent(
+        header = "DApp Transaction",
+        fromAccount = "from wallet",
+        fee = ApprovalRequestDetailsV2.Amount("0.00123", "0.0012300", "0.24"),
+        dAppInfo = ApprovalRequestDetailsV2.DAppInfo("dApp Name", "dApp.url", "dApp Description", emptyList()),
+        simulationResult = ApprovalRequestDetailsV2.EvmSimulationResult.Failure(
+            reason = "execution reverted"
+        )
+    )
+}
