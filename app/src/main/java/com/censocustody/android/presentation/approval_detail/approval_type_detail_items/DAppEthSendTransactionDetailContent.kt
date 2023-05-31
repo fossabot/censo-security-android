@@ -6,6 +6,7 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -86,7 +87,7 @@ fun DAppEthSendTransactionDetailContent(
                             .padding(horizontal = 16.dp), color = BorderGrey)
                         DAppTransferInfo(
                             header = if (it.allowanceType == ApprovalRequestDetailsV2.TokenAllowanceType.REVOKE) "${stringResource(R.string.revoke_use_of)} $symbolName" else "${stringResource(R.string.allow_use_of)} $symbolName}",
-                            subtitle = it.displayAmount(),
+                            subtitle = it.displayAmount(LocalContext.current),
                             usdEquivalent = if (it.allowanceType == ApprovalRequestDetailsV2.TokenAllowanceType.LIMITED) it.allowedAmount.formattedUsdEquivalentWithSymbol() else null,
                             fromText = fromAccount,
                             toText = dAppInfo.name,

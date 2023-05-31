@@ -697,9 +697,9 @@ private fun usdFormatterV2(hideSymbol: Boolean = true): DecimalFormat {
     return formatter
 }
 
-fun ApprovalRequestDetailsV2.EvmSimulationResult.TokenAllowance.displayAmount() =
+fun ApprovalRequestDetailsV2.EvmSimulationResult.TokenAllowance.displayAmount(context: Context) =
     when(allowanceType) {
         ApprovalRequestDetailsV2.TokenAllowanceType.LIMITED -> allowedAmount.value
-        ApprovalRequestDetailsV2.TokenAllowanceType.UNLIMITED -> "Unlimited"
+        ApprovalRequestDetailsV2.TokenAllowanceType.UNLIMITED -> context.getString(R.string.unlimited)
         ApprovalRequestDetailsV2.TokenAllowanceType.REVOKE -> null
     }
