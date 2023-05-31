@@ -33,6 +33,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import coil.compose.AsyncImage
 import com.censocustody.android.R
 import com.censocustody.android.common.CensoButton
 import com.censocustody.android.common.Resource
@@ -176,7 +177,7 @@ fun ScanQRScreen(
 
                             var walletName = stringResource(id = R.string.wallet).lowercase()
                             var dapp = stringResource(R.string.dapp)
-                            var dappIconUrl = ""
+                            var dappIconUrl : String? = ""
 
                             if (state.selectedWallet != null) {
                                 walletName = state.selectedWallet.walletName
@@ -185,15 +186,13 @@ fun ScanQRScreen(
                             if (!noTopicDataPresent) {
                                 val topic = topicData?.get(0)!!
                                 dapp = topic.name
-                                dappIconUrl = topic.url
+                                dappIconUrl = topic.icons.firstOrNull()
                             }
 
-                            if (dappIconUrl.isNotEmpty()) {
-                                Image(
-                                    modifier = Modifier.width(260.dp),
-                                    painter = painterResource(R.drawable.logo_red_black),
+                            if (!dappIconUrl.isNullOrEmpty()) {
+                                AsyncImage(
+                                    model = dappIconUrl,
                                     contentDescription = "",
-                                    contentScale = ContentScale.FillWidth,
                                 )
                             }
                             Spacer(modifier = Modifier.height(36.dp))
