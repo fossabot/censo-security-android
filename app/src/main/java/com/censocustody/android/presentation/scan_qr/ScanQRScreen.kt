@@ -194,7 +194,7 @@ fun ScanQRScreen(
                             }
                             Spacer(modifier = Modifier.height(44.dp))
                             Text(
-                                text = "${stringResource(R.string.successfully_connected)} $walletName ${stringResource(id = R.string.to).lowercase()} $dapp",
+                                text = stringResource(R.string.successfully_connected_dapp_message, walletName, dapp),
                                 textAlign = TextAlign.Center,
                                 color = TextBlack,
                                 fontSize = 28.sp
