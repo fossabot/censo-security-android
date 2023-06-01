@@ -295,7 +295,7 @@
     <string name="connect">Connect</string>
     <string name="failed_retrieve_wallets">Failed to get wallets before connecting to DApp</string>
     <string name="dapp">DApp</string>
-    <string name="successfully_connected_dapp_message">Successfully connected %1$s to %2$s</string>
+    <string name="successfully_connected_dapp_message">%1$s successfully connected to %2$s</string>
     <string name="dapp_info">DAPP INFO</string>
     <string name="send">Send</string>
     <string name="receive">Receive</string>
