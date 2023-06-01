@@ -42,10 +42,6 @@ fun DAppEthSignTypedDataDetailContent(header: String, fromAccount: String, fee: 
             key = stringResource(R.string.dapp_url),
             value = dAppInfo.url,
         ),
-        RowData.KeyValueRow(
-            key = stringResource(R.string.dapp_description),
-            value = dAppInfo.description,
-        ),
     )
 
     val feeFacts = listOf(
@@ -58,8 +54,6 @@ fun DAppEthSignTypedDataDetailContent(header: String, fromAccount: String, fee: 
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        FactRow(factsData = FactsData(facts = facts + feeFacts))
-
         Row {
             Text(
                 text = stringResource(R.string.message_to_sign),
@@ -67,6 +61,8 @@ fun DAppEthSignTypedDataDetailContent(header: String, fromAccount: String, fee: 
                 modifier = Modifier.padding(start = 16.dp, top = 6.dp, bottom = 6.dp),
             )
         }
+
+        FactRow(factsData = FactsData(facts = facts + feeFacts))
 
         Row(modifier = Modifier
             .fillMaxWidth()

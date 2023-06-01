@@ -7,6 +7,7 @@ import com.censocustody.android.data.cryptography.EncryptionManager
 import com.censocustody.android.data.models.*
 import com.censocustody.android.data.models.approvalV2.ApprovalDispositionRequestV2
 import com.censocustody.android.data.models.approvalV2.ApprovalRequestV2
+import kotlinx.coroutines.delay
 import okhttp3.ResponseBody
 import javax.inject.Inject
 
@@ -21,8 +22,10 @@ interface ApprovalsRepository {
 
     suspend fun retrieveShards(policyRevisionId: String, userId: String? = null) : Resource<GetShardsResponse>
 
-    suspend fun sendWcUri(uri: String): Resource<WalletConnectPairingResponse>
+    suspend fun sendWcUri(uri: String, walletAddress: String): Resource<WalletConnectPairingResponse>
     suspend fun checkIfConnectionHasSessions(topic: String) : Resource<List<WalletConnectTopic>>
+
+    suspend fun availableDAppVaults() : Resource<AvailableDAppVaults>
 }
 
 class ApprovalsRepositoryImpl @Inject constructor(
@@ -40,15 +43,23 @@ class ApprovalsRepositoryImpl @Inject constructor(
     ): Resource<GetShardsResponse> =
         retrieveApiResource { api.getShards(policyRevisionId = policyRevisionId, userId = userId) }
 
-    override suspend fun sendWcUri(uri: String) =
+    override suspend fun sendWcUri(uri: String, walletAddress: String) =
         retrieveApiResource {
-            api.walletConnectPairing(WalletConnectPairingRequest(uri = uri))
+            api.walletConnectPairing(
+                WalletConnectPairingRequest(
+                    uri = uri,
+                    walletAddresses = listOf(walletAddress)
+                )
+            )
         }
 
     override suspend fun checkIfConnectionHasSessions(topic: String) =
         retrieveApiResource {
             api.checkSessionsOnConnectedDApp(topic)
         }
+
+    override suspend fun availableDAppVaults(): Resource<AvailableDAppVaults> =
+        retrieveApiResource { api.availableDAppVaults() }
 
     override suspend fun approveOrDenyDisposition(
         requestId: String,

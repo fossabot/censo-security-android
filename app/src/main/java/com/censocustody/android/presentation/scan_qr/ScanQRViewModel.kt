@@ -8,6 +8,7 @@ import androidx.lifecycle.viewModelScope
 import com.censocustody.android.common.Resource
 import com.censocustody.android.common.wrapper.CensoCountDownTimer
 import com.censocustody.android.common.wrapper.CensoCountDownTimerImpl
+import com.censocustody.android.data.models.AvailableDAppWallet
 import com.censocustody.android.data.models.WalletConnectTopic
 import com.censocustody.android.data.repository.ApprovalsRepository
 import com.censocustody.android.presentation.scan_qr.ScanQRState.Companion.MAX_POLL
@@ -32,14 +33,59 @@ class ScanQRViewModel @Inject constructor(
         if (state.scanQRCodeResult is Resource.Loading && !uri.isNullOrEmpty()) {
             state = state.copy(
                 scanQRCodeResult = Resource.Success(uri),
+                uri = uri
             )
-            sendUriToBackend(uri = uri)
+            retrieveAvailableDAppVaults()
         }
     }
 
-    private fun sendUriToBackend(uri: String) {
+    private fun retrieveAvailableDAppVaults() {
         viewModelScope.launch {
-            val walletPairingResource = approvalsRepository.sendWcUri(uri = uri)
+            val availableDAppVaults = approvalsRepository.availableDAppVaults()
+            val haveSingleWallet =
+                availableDAppVaults.data?.vaults?.flatMap { it.wallets }?.size == 1
+
+            if (haveSingleWallet) {
+                val singleWallet = availableDAppVaults.data?.vaults?.flatMap { it.wallets }?.first()
+                state = state.copy(selectedWallet = singleWallet)
+                sendUriToBackend(
+                    uri = state.uri,
+                    walletAddress = singleWallet!!.walletAddress
+                )
+            } else {
+                state = state.copy(
+                    availableDAppVaultsResult = availableDAppVaults
+                )
+            }
+        }
+    }
+
+    fun userSelectedWallet(wallet: AvailableDAppWallet) {
+        state = state.copy(
+            availableDAppVaultsResult = Resource.Uninitialized,
+            selectedWallet = wallet
+        )
+
+        if (state.uri.isEmpty()) {
+            missingURIData()
+            return
+        }
+
+        viewModelScope.launch {
+            sendUriToBackend(
+                uri = state.uri,
+                walletAddress = wallet.walletAddress
+            )
+        }
+    }
+
+    private fun missingURIData() {
+        state = state.copy(scanQRCodeResult = Resource.Error())
+    }
+
+    private fun sendUriToBackend(uri: String, walletAddress: String) {
+        viewModelScope.launch {
+            val walletPairingResource = approvalsRepository.sendWcUri(uri = uri, walletAddress)
 
             if (walletPairingResource is Resource.Success) {
                 state = state.copy(
@@ -106,6 +152,9 @@ class ScanQRViewModel @Inject constructor(
         state = state.copy(
             scanQRCodeResult = Resource.Loading(),
             uploadWcUri = Resource.Uninitialized,
+            availableDAppVaultsResult = Resource.Uninitialized,
+            checkSessionsOnConnection = Resource.Uninitialized,
+            timesPolled = 0
         )
     }
 

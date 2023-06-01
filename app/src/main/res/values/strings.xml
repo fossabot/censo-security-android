@@ -105,7 +105,6 @@
 
     <string name="name">Name</string>
     <string name="wallet_name_title">Wallet Name</string>
-<!--    <string name="wallet_title">Wallet</string>-->
     <string name="approvers">Transfer Approvers</string>
     <string name="details_title">Details</string>
     <string name="status">status</string>
@@ -280,19 +279,27 @@
     <string name="scan_qr_code_success">Connecting to DApp…</string>
     <string name="dapp_name">dApp Name</string>
     <string name="dapp_url">dApp URL</string>
-    <string name="dapp_description">dApp Description</string>
-    <string name="no_simulation_results">No simulation results available</string>
     <string name="simulation_failure">Simulation failed</string>
-    <string name="simulation_results">Expected transfers</string>
     <string name="eth_send_transaction_header">dApp Transaction</string>
     <string name="eth_sign_header">dApp Sign Message</string>
     <string name="eth_sign_typed_data_header">dApp Sign Data</string>
     <string name="enable_recovery_contract_header">Enable Recovery Policy</string>
     <string name="checking_sessions_loading">Connected to DApp.\n\nChecking sessions…</string>
-    <string name="checked_connections_success">Connected to DApp and DApp has active sessions.</string>
     <string name="no_active_sessions_found">No Active Sessions Found For dApp</string>
     <string name="message_to_sign">Message</string>
     <string name="maintenance">Maintenance Mode</string>
     <string name="checking_maintenance_mode">We are currently in maintenance mode.\n\nWe will return you to the app when maintenance is complete.</string>
     <string name="send_token">Resend Verification Code</string>
+    <string name="select_wallet_title">Select a wallet:</string>
+    <string name="no_dapp_enabled_wallets">You do not have any dapp-enabled wallets</string>
+    <string name="connect">Connect</string>
+    <string name="failed_retrieve_wallets">Failed to get wallets before connecting to DApp</string>
+    <string name="dapp">DApp</string>
+    <string name="successfully_connected_dapp_message">%1$s successfully connected to %2$s</string>
+    <string name="dapp_info">DAPP INFO</string>
+    <string name="send">Send</string>
+    <string name="receive">Receive</string>
+    <string name="revoke_use_of">Revoke use of</string>
+    <string name="allow_use_of">Allow use of</string>
+    <string name="unlimited">Unlimited</string>
 </resources>

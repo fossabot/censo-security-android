@@ -16,5 +16,5 @@ fun DAppEthSendTransactionContent(
 ) {
     ApprovalContentHeader(header = header, topSpacing = 16, bottomSpacing = 8)
     ApprovalSubtitle(text = subtitle)
-    Spacer(modifier = Modifier.height(32.dp))
+    Spacer(modifier = Modifier.height(24.dp))
 }

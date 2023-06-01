@@ -6,7 +6,7 @@ import androidx.activity.ComponentActivity
 import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
-import androidx.compose.foundation.background
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.CircularProgressIndicator
@@ -20,6 +20,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -28,9 +29,14 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import coil.compose.AsyncImage
 import com.censocustody.android.R
 import com.censocustody.android.common.CensoButton
 import com.censocustody.android.common.Resource
+import com.censocustody.android.common.maskAddress
+import com.censocustody.android.data.models.AvailableDAppVault
+import com.censocustody.android.data.models.AvailableDAppWallet
+import com.censocustody.android.data.models.toSingleText
 import com.censocustody.android.presentation.approvals.NavIconTopBar
 import com.censocustody.android.presentation.device_registration.Permission
 import com.censocustody.android.presentation.device_registration.sendUserToPermissions
@@ -115,29 +121,96 @@ fun ScanQRScreen(
                     val scanQRResult = state.scanQRCodeResult
                     val uploadWcUriResult = state.uploadWcUri
                     val checkingConnections = state.checkSessionsOnConnection
+                    val retrievingAvailableWallets = state.availableDAppVaultsResult
 
-                    if (checkingConnections is Resource.Success) {
-                        ScanQRBoxUI {
-                            Spacer(modifier = Modifier.height(36.dp))
+                    if (retrievingAvailableWallets is Resource.Success) {
+                        if (state.availableDAppVaultsResult.data?.vaults?.flatMap { it.wallets }
+                                .isNullOrEmpty()) {
+                            Column(modifier = Modifier.align(Alignment.TopCenter)) {
+                                Spacer(modifier = Modifier.height(44.dp))
+                                Text(
+                                    text = stringResource(R.string.no_dapp_enabled_wallets),
+                                    fontSize = 24.sp,
+                                    color = TextBlack,
+                                    textAlign = TextAlign.Center
+                                )
+                            }
+                        } else {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .verticalScroll(rememberScrollState())
+                                    .background(color = BackgroundGrey),
+                                verticalArrangement = Arrangement.Top,
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                Spacer(modifier = Modifier.height(12.dp))
+                                Text(
+                                    text = stringResource(R.string.select_wallet_title),
+                                    fontSize = 24.sp,
+                                    color = TextBlack
+                                )
+                                Spacer(modifier = Modifier.height(24.dp))
+                                state.availableDAppVaultsResult.data?.vaults?.forEach {
+                                    WalletsInVault(vault = it, viewModel::userSelectedWallet)
+                                    Spacer(modifier = Modifier.height(32.dp))
+                                }
+                            }
+                        }
+                    } else if (checkingConnections is Resource.Success) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(32.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center
+                        ) {
+
+                            val topicData = checkingConnections.data
+
+                            val noTopicDataPresent = checkingConnections.data.isNullOrEmpty()
+
+                            var walletName = stringResource(id = R.string.wallet).lowercase()
+                            var dapp = stringResource(R.string.dapp)
+                            var dappIconUrl : String? = ""
+
+                            if (state.selectedWallet != null) {
+                                walletName = state.selectedWallet.walletName
+                            }
+
+                            if (!noTopicDataPresent) {
+                                val topic = topicData?.get(0)!!
+                                dapp = topic.name
+                                dappIconUrl = topic.icons.firstOrNull()
+                            }
+
+                            if (!dappIconUrl.isNullOrEmpty()) {
+                                AsyncImage(
+                                    modifier = Modifier.width(100.dp),
+                                    model = dappIconUrl,
+                                    contentDescription = "",
+                                    error = painterResource(R.drawable.censo_icon_color)
+                                )
+                            }
+                            Spacer(modifier = Modifier.height(44.dp))
                             Text(
-                                modifier = Modifier.padding(horizontal = 8.dp),
-                                text = stringResource(R.string.checked_connections_success),
+                                text = stringResource(R.string.successfully_connected_dapp_message, walletName, dapp),
                                 textAlign = TextAlign.Center,
                                 color = TextBlack,
-                                fontSize = 22.sp
+                                fontSize = 28.sp
                             )
-                            Spacer(modifier = Modifier.height(36.dp))
+                            Spacer(modifier = Modifier.height(44.dp))
                             CensoButton(onClick = viewModel::userFinished) {
                                 Text(
                                     modifier = Modifier.padding(8.dp),
-                                    text = stringResource(id = R.string.done),
+                                    text = stringResource(id = R.string.ok),
                                     fontSize = 20.sp,
                                     color = CensoWhite
                                 )
                             }
                             Spacer(modifier = Modifier.height(36.dp))
                         }
-                    } else if (scanQRResult is Resource.Error || uploadWcUriResult is Resource.Error || checkingConnections is Resource.Error) {
+                    } else if (scanQRResult is Resource.Error || uploadWcUriResult is Resource.Error || checkingConnections is Resource.Error || retrievingAvailableWallets is Resource.Error) {
                         ScanQRBoxUI {
                             Spacer(modifier = Modifier.height(36.dp))
                             Text(
@@ -147,7 +220,9 @@ fun ScanQRScreen(
                                     stringResource(R.string.failed_scan_qr_code)
                                 } else if (checkingConnections is Resource.Error) {
                                     stringResource(R.string.no_active_sessions_found)
-                                } else {
+                                } else if (retrievingAvailableWallets is Resource.Error) {
+                                    stringResource(R.string.failed_retrieve_wallets)
+                                }else {
                                     stringResource(R.string.failed_upload_wc_uri)
                                 },
                                 textAlign = TextAlign.Center,
@@ -281,6 +356,68 @@ fun ScanQRCodeComposable(
         },
         modifier = Modifier.fillMaxSize()
     )
+}
+
+@Composable
+fun WalletsInVault(vault: AvailableDAppVault, onSelected: (AvailableDAppWallet) -> Unit) {
+    VaultHeader(vault.vaultName)
+    Spacer(modifier = Modifier.height(8.dp))
+    Column() {
+        vault.wallets.forEach {
+            WalletInVault(it, onSelected)
+        }
+    }
+}
+
+@Composable
+fun VaultHeader(vaultName: String) {
+    Text(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp),
+        textAlign = TextAlign.Start,
+        text = vaultName,
+        fontSize = 16.sp,
+        color = GreyText
+    )
+}
+
+@Composable
+fun WalletInVault(wallet: AvailableDAppWallet, onSelected: (AvailableDAppWallet) -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onSelected(wallet) }
+            .padding(horizontal = 16.dp, vertical = 4.dp)
+            .background(shape = RoundedCornerShape(4.dp, 4.dp, 0.dp, 0.dp), color = CensoWhite),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Column(
+            modifier = Modifier
+                .weight(2.5f)
+                .padding(horizontal = 16.dp, vertical = 12.dp),
+        ) {
+            Text(
+                text = "${wallet.walletName} (${wallet.walletAddress.maskAddress()})",
+                color = TextBlack,
+                fontSize = 18.sp
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(text = wallet.chains.toSingleText(), color = GreyText)
+        }
+        CensoButton(
+            modifier = Modifier
+                .weight(1.5f)
+                .padding(horizontal = 16.dp, vertical = 12.dp),
+            contentPadding = PaddingValues(horizontal = 4.dp, vertical = 2.dp),
+            onClick = { onSelected(wallet) }) {
+            Text(
+                text = stringResource(R.string.connect),
+                color = CensoWhite,
+                fontSize = 16.sp
+            )
+        }
+    }
 }
 
 @Composable

@@ -2,7 +2,7 @@ package com.censocustody.android.viewModel
 
 import com.censocustody.android.common.Resource
 import com.censocustody.android.common.wrapper.CensoCountDownTimer
-import com.censocustody.android.data.models.WalletConnectPairingResponse
+import com.censocustody.android.data.models.*
 import com.censocustody.android.data.repository.ApprovalsRepository
 import com.censocustody.android.presentation.scan_qr.ScanQRViewModel
 import com.nhaarman.mockitokotlin2.any
@@ -14,9 +14,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.*
 import okhttp3.ResponseBody
-import okhttp3.ResponseBody.Companion.toResponseBody
 import org.junit.After
 import org.junit.Before
+import org.junit.Ignore
 import org.junit.Test
 import org.mockito.Mock
 
@@ -32,6 +32,61 @@ class ScanQRCodeViewModelTest : BaseViewModelTest() {
     lateinit var countdownTimer: CensoCountDownTimer
 
     private val dispatcher = TestCoroutineDispatcher()
+
+    private val singleAvailableDappWallet = AvailableDAppVaults(
+        listOf(
+            AvailableDAppVault(
+                vaultName = "Single Vault",
+                wallets = listOf(
+                    AvailableDAppWallet(
+                        walletName = "Single Wallet",
+                        walletAddress = "97865645fardsghjk",
+                        chains = listOf(Chain.ethereum)
+                    )
+                )
+            )
+        )
+    )
+
+    private val multipleAvailableDAppWallets = AvailableDAppVaults(
+        listOf(
+            AvailableDAppVault(
+                vaultName = "Vaulter",
+                wallets = listOf(
+                    AvailableDAppWallet(
+                        walletName = "ETH Wallet",
+                        walletAddress = "97865645fardsghjk",
+                        chains = listOf(Chain.ethereum)
+                    )
+                )
+            ),
+            AvailableDAppVault(
+                vaultName = "Other Vault",
+                wallets = listOf(
+                    AvailableDAppWallet(
+                        walletName = "Who Is Wallet",
+                        walletAddress = "0978655sfdghj",
+                        chains = listOf(Chain.ethereum)
+                    ),
+                    AvailableDAppWallet(
+                        walletName = "Yes I Am Wallet",
+                        walletAddress = "0987654dfsghj",
+                        chains = listOf(Chain.polygon)
+                    )
+                )
+            ),
+            AvailableDAppVault(
+                vaultName = "Backup Vault",
+                wallets = listOf(
+                    AvailableDAppWallet(
+                        walletName = "BTC Wallet",
+                        walletAddress = "lkhjghf4523678",
+                        chains = listOf(Chain.bitcoin)
+                    )
+                )
+            )
+        )
+    )
 
     private val validURI = "wc:8eeb2d71daf1a3a57933a64d8f3ed3412dfdde6fcc5ff56a6372ece5b82f6b97@2?relay-protocol=irn&symKey=90d8cb943c73bb86771784cf4950d9c9c50645013806b1972e9d6fc40aa19a47"
     private val topic = "8eeb2d71daf1a3a57933a64d8f3ed3412dfdde6fcc5ff56a6372ece5b82f6b97"
@@ -55,34 +110,35 @@ class ScanQRCodeViewModelTest : BaseViewModelTest() {
         Dispatchers.resetMain()
     }
 
-    private suspend fun mockSuccessfulResponse() {
-        whenever(approvalsRepository.sendWcUri(any())).then {
+    private suspend fun mockSuccessfulSendWCURIResponse() {
+        whenever(approvalsRepository.sendWcUri(any(), any())).then {
             Resource.Success(WalletConnectPairingResponse(topic))
         }
     }
 
     @Test
-    fun `after retrieving valid value from scanning QR, should make call to upload uri`() =
+    fun `after retrieving valid value from scanning QR, should make call to get available wallets`() =
         runTest {
-
-            mockSuccessfulResponse()
+            whenever(approvalsRepository.availableDAppVaults()).then {
+                Resource.Success(multipleAvailableDAppWallets)
+            }
 
             scanQRViewModel.receivedWalletConnectUri(validURI)
 
-            verify(approvalsRepository, times(1)).sendWcUri(validURI)
+            verify(approvalsRepository, times(1)).availableDAppVaults()
 
             assert(scanQRViewModel.state.scanQRCodeResult is Resource.Success)
         }
 
     @Test
-    fun `after retrieving null value from scanning QR, should not make call to upload uri`() =
+    fun `after retrieving null value from scanning QR, should not make call to get available wallets`() =
         runTest {
 
-            mockSuccessfulResponse()
+            mockSuccessfulSendWCURIResponse()
 
             scanQRViewModel.receivedWalletConnectUri(nullURI)
 
-            verify(approvalsRepository, times(0)).sendWcUri(any())
+            verify(approvalsRepository, times(0)).availableDAppVaults()
 
             assert(scanQRViewModel.state.scanQRCodeResult is Resource.Loading)
         }
@@ -91,24 +147,51 @@ class ScanQRCodeViewModelTest : BaseViewModelTest() {
     fun `after retrieving empty value from scanning QR, should not make call to upload uri`() =
         runTest {
 
-            mockSuccessfulResponse()
+            mockSuccessfulSendWCURIResponse()
 
             scanQRViewModel.receivedWalletConnectUri(emptyURI)
 
-            verify(approvalsRepository, times(0)).sendWcUri(any())
+            verify(approvalsRepository, times(0)).sendWcUri(any(), any())
 
             assert(scanQRViewModel.state.scanQRCodeResult is Resource.Loading)
         }
 
     @Test
-    fun `Sending URI to backend shows user success state`() =
+    fun `After receiving wallet connect URI, we retrieve available dapps`() =
         runTest {
 
-            mockSuccessfulResponse()
+            mockSuccessfulSendWCURIResponse()
+
+            whenever(approvalsRepository.availableDAppVaults()).then {
+                Resource.Success(multipleAvailableDAppWallets)
+            }
 
             scanQRViewModel.receivedWalletConnectUri(validURI)
 
-            verify(approvalsRepository, times(1)).sendWcUri(validURI)
+            verify(approvalsRepository, times(1)).availableDAppVaults()
+
+            assert(scanQRViewModel.state.availableDAppVaultsResult is Resource.Success)
+            assert(scanQRViewModel.state.availableDAppVaultsResult.data == multipleAvailableDAppWallets)
+        }
+
+    @Test
+    fun `If we receive a single wallet then we will automatically send URI to backend with that wallet`() =
+        runTest {
+
+            mockSuccessfulSendWCURIResponse()
+
+            whenever(approvalsRepository.availableDAppVaults()).then {
+                Resource.Success(singleAvailableDappWallet)
+            }
+
+            scanQRViewModel.receivedWalletConnectUri(validURI)
+
+            verify(approvalsRepository, times(1)).availableDAppVaults()
+
+            verify(approvalsRepository, times(1)).sendWcUri(
+                validURI,
+                singleAvailableDappWallet.vaults[0].wallets[0].walletAddress
+            )
 
             assert(scanQRViewModel.state.scanQRCodeResult is Resource.Success)
             assert(scanQRViewModel.state.uploadWcUri is Resource.Success)
@@ -116,14 +199,23 @@ class ScanQRCodeViewModelTest : BaseViewModelTest() {
         }
 
     @Test
-    fun `Save topic from URI on Send URI Success to backend`() =
+    fun `Sending URI to backend shows user success state`() =
         runTest {
 
-            mockSuccessfulResponse()
+            mockSuccessfulSendWCURIResponse()
+
+            whenever(approvalsRepository.availableDAppVaults()).then { Resource.Success(multipleAvailableDAppWallets) }
 
             scanQRViewModel.receivedWalletConnectUri(validURI)
 
-            verify(approvalsRepository, times(1)).sendWcUri(validURI)
+            verify(approvalsRepository, times(1)).availableDAppVaults()
+
+            scanQRViewModel.userSelectedWallet(multipleAvailableDAppWallets.vaults[0].wallets[0])
+
+            verify(approvalsRepository, times(1)).sendWcUri(
+                uri = validURI,
+                walletAddress = multipleAvailableDAppWallets.vaults[0].wallets[0].walletAddress
+            )
 
             assert(scanQRViewModel.state.scanQRCodeResult is Resource.Success)
             assert(scanQRViewModel.state.uploadWcUri is Resource.Success)
@@ -134,13 +226,22 @@ class ScanQRCodeViewModelTest : BaseViewModelTest() {
     fun `Failing to send URI to backend shows user failure state`() =
         runTest {
 
-            whenever(approvalsRepository.sendWcUri(any())).then {
+            whenever(approvalsRepository.sendWcUri(any(), any())).then {
                 Resource.Error<ResponseBody>()
             }
 
+            whenever(approvalsRepository.availableDAppVaults()).then { Resource.Success(multipleAvailableDAppWallets) }
+
             scanQRViewModel.receivedWalletConnectUri(validURI)
 
-            verify(approvalsRepository, times(1)).sendWcUri(validURI)
+            verify(approvalsRepository, times(1)).availableDAppVaults()
+
+            scanQRViewModel.userSelectedWallet(multipleAvailableDAppWallets.vaults[0].wallets[0])
+
+            verify(approvalsRepository, times(1)).sendWcUri(
+                uri = validURI,
+                walletAddress = multipleAvailableDAppWallets.vaults[0].wallets[0].walletAddress
+            )
 
             assert(scanQRViewModel.state.scanQRCodeResult is Resource.Success)
             assert(scanQRViewModel.state.uploadWcUri is Resource.Error)
@@ -151,24 +252,44 @@ class ScanQRCodeViewModelTest : BaseViewModelTest() {
     fun `User can retry scanning after failing to send URI to backend`() =
         runTest {
 
-            whenever(approvalsRepository.sendWcUri(any())).then {
+            whenever(approvalsRepository.sendWcUri(any(), any())).then {
                 Resource.Error<ResponseBody>()
+            }
+
+            whenever(approvalsRepository.availableDAppVaults()).then {
+                Resource.Success(
+                    multipleAvailableDAppWallets
+                )
             }
 
             scanQRViewModel.receivedWalletConnectUri(validURI)
 
-            verify(approvalsRepository, times(1)).sendWcUri(validURI)
+            verify(approvalsRepository, times(1)).availableDAppVaults()
+
+            scanQRViewModel.userSelectedWallet(multipleAvailableDAppWallets.vaults[0].wallets[0])
+
+            verify(approvalsRepository, times(1)).sendWcUri(
+                uri = validURI,
+                walletAddress = multipleAvailableDAppWallets.vaults[0].wallets[0].walletAddress
+            )
 
             assert(scanQRViewModel.state.scanQRCodeResult is Resource.Success)
             assert(scanQRViewModel.state.uploadWcUri is Resource.Error)
 
-            mockSuccessfulResponse()
+            mockSuccessfulSendWCURIResponse()
 
             scanQRViewModel.retryScan()
 
             scanQRViewModel.receivedWalletConnectUri(validURI)
 
-            verify(approvalsRepository, times(2)).sendWcUri(validURI)
+            verify(approvalsRepository, times(2)).availableDAppVaults()
+
+            scanQRViewModel.userSelectedWallet(multipleAvailableDAppWallets.vaults[0].wallets[0])
+
+            verify(approvalsRepository, times(2)).sendWcUri(
+                uri = validURI,
+                walletAddress = multipleAvailableDAppWallets.vaults[0].wallets[0].walletAddress
+            )
 
             assert(scanQRViewModel.state.scanQRCodeResult is Resource.Success)
             assert(scanQRViewModel.state.uploadWcUri is Resource.Success)
@@ -180,11 +301,12 @@ class ScanQRCodeViewModelTest : BaseViewModelTest() {
 
             val exception = Exception("Failed to scan.")
 
-            mockSuccessfulResponse()
+            mockSuccessfulSendWCURIResponse()
 
             scanQRViewModel.failedToScan(exception)
 
-            verify(approvalsRepository, times(0)).sendWcUri(any())
+            verify(approvalsRepository, times(0)).availableDAppVaults()
+            verify(approvalsRepository, times(0)).sendWcUri(any(), any())
 
             assert(scanQRViewModel.state.scanQRCodeResult is Resource.Error)
             assert(scanQRViewModel.state.scanQRCodeResult.exception == exception)
@@ -197,11 +319,17 @@ class ScanQRCodeViewModelTest : BaseViewModelTest() {
 
             val exception = Exception("Failed to scan.")
 
-            mockSuccessfulResponse()
+            mockSuccessfulSendWCURIResponse()
+            whenever(approvalsRepository.availableDAppVaults()).then {
+                Resource.Success(
+                    multipleAvailableDAppWallets
+                )
+            }
 
             scanQRViewModel.failedToScan(exception)
 
-            verify(approvalsRepository, times(0)).sendWcUri(any())
+            verify(approvalsRepository, times(0)).availableDAppVaults()
+            verify(approvalsRepository, times(0)).sendWcUri(any(), any())
 
             assert(scanQRViewModel.state.scanQRCodeResult is Resource.Error)
             assert(scanQRViewModel.state.scanQRCodeResult.exception == exception)
@@ -215,11 +343,16 @@ class ScanQRCodeViewModelTest : BaseViewModelTest() {
 
             val exception = Exception("Failed to scan.")
 
-            mockSuccessfulResponse()
+            mockSuccessfulSendWCURIResponse()
+            whenever(approvalsRepository.availableDAppVaults()).then {
+                Resource.Success(
+                    multipleAvailableDAppWallets
+                )
+            }
 
             scanQRViewModel.failedToScan(exception)
 
-            verify(approvalsRepository, times(0)).sendWcUri(any())
+            verify(approvalsRepository, times(0)).availableDAppVaults()
 
             assert(scanQRViewModel.state.scanQRCodeResult is Resource.Error)
             assert(scanQRViewModel.state.scanQRCodeResult.exception == exception)
@@ -229,7 +362,7 @@ class ScanQRCodeViewModelTest : BaseViewModelTest() {
 
             scanQRViewModel.receivedWalletConnectUri(validURI)
 
-            verify(approvalsRepository, times(1)).sendWcUri(validURI)
+            verify(approvalsRepository, times(1)).availableDAppVaults()
 
             assert(scanQRViewModel.state.scanQRCodeResult is Resource.Success)
         }
@@ -238,11 +371,20 @@ class ScanQRCodeViewModelTest : BaseViewModelTest() {
     fun `After successfully completing flow, user can leave screen`() =
         runTest {
 
-            mockSuccessfulResponse()
+            mockSuccessfulSendWCURIResponse()
+
+            whenever(approvalsRepository.availableDAppVaults()).then { Resource.Success(multipleAvailableDAppWallets) }
 
             scanQRViewModel.receivedWalletConnectUri(validURI)
 
-            verify(approvalsRepository, times(1)).sendWcUri(validURI)
+            verify(approvalsRepository, times(1)).availableDAppVaults()
+
+            scanQRViewModel.userSelectedWallet(multipleAvailableDAppWallets.vaults[0].wallets[0])
+
+            verify(approvalsRepository, times(1)).sendWcUri(
+                uri = validURI,
+                walletAddress = multipleAvailableDAppWallets.vaults[0].wallets[0].walletAddress
+            )
 
             assert(scanQRViewModel.state.scanQRCodeResult is Resource.Success)
             assert(scanQRViewModel.state.uploadWcUri is Resource.Success)
