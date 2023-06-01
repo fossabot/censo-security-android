@@ -204,7 +204,7 @@ class ScanQRCodeViewModelTest : BaseViewModelTest() {
 
             mockSuccessfulSendWCURIResponse()
 
-            whenever(approvalsRepository.availableDAppVaults()).then { multipleAvailableDAppWallets }
+            whenever(approvalsRepository.availableDAppVaults()).then { Resource.Success(multipleAvailableDAppWallets) }
 
             scanQRViewModel.receivedWalletConnectUri(validURI)
 
@@ -230,9 +230,7 @@ class ScanQRCodeViewModelTest : BaseViewModelTest() {
                 Resource.Error<ResponseBody>()
             }
 
-            scanQRViewModel.receivedWalletConnectUri(validURI)
-
-            whenever(approvalsRepository.availableDAppVaults()).then { multipleAvailableDAppWallets }
+            whenever(approvalsRepository.availableDAppVaults()).then { Resource.Success(multipleAvailableDAppWallets) }
 
             scanQRViewModel.receivedWalletConnectUri(validURI)
 
@@ -258,9 +256,11 @@ class ScanQRCodeViewModelTest : BaseViewModelTest() {
                 Resource.Error<ResponseBody>()
             }
 
-            scanQRViewModel.receivedWalletConnectUri(validURI)
-
-            whenever(approvalsRepository.availableDAppVaults()).then { multipleAvailableDAppWallets }
+            whenever(approvalsRepository.availableDAppVaults()).then {
+                Resource.Success(
+                    multipleAvailableDAppWallets
+                )
+            }
 
             scanQRViewModel.receivedWalletConnectUri(validURI)
 
@@ -320,6 +320,11 @@ class ScanQRCodeViewModelTest : BaseViewModelTest() {
             val exception = Exception("Failed to scan.")
 
             mockSuccessfulSendWCURIResponse()
+            whenever(approvalsRepository.availableDAppVaults()).then {
+                Resource.Success(
+                    multipleAvailableDAppWallets
+                )
+            }
 
             scanQRViewModel.failedToScan(exception)
 
@@ -339,6 +344,11 @@ class ScanQRCodeViewModelTest : BaseViewModelTest() {
             val exception = Exception("Failed to scan.")
 
             mockSuccessfulSendWCURIResponse()
+            whenever(approvalsRepository.availableDAppVaults()).then {
+                Resource.Success(
+                    multipleAvailableDAppWallets
+                )
+            }
 
             scanQRViewModel.failedToScan(exception)
 
@@ -363,7 +373,7 @@ class ScanQRCodeViewModelTest : BaseViewModelTest() {
 
             mockSuccessfulSendWCURIResponse()
 
-            whenever(approvalsRepository.availableDAppVaults()).then { multipleAvailableDAppWallets }
+            whenever(approvalsRepository.availableDAppVaults()).then { Resource.Success(multipleAvailableDAppWallets) }
 
             scanQRViewModel.receivedWalletConnectUri(validURI)
 
