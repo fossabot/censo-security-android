@@ -38,6 +38,7 @@ import com.censocustody.android.presentation.account.AccountScreen
 import com.censocustody.android.presentation.semantic_version_check.EnforceUpdateScreen
 import com.censocustody.android.presentation.semantic_version_check.MainViewModel
 import com.censocustody.android.presentation.approval_detail.ApprovalDetailsScreen
+import com.censocustody.android.presentation.approval_detail.ApprovalDetailsViewModel
 import com.censocustody.android.presentation.approvals.ApprovalsListScreen
 import com.censocustody.android.presentation.approvals.ApprovalsViewModel
 import com.censocustody.android.presentation.components.OnLifecycleEvent
@@ -61,6 +62,7 @@ import com.censocustody.android.ui.theme.BackgroundWhite
 import com.censocustody.android.ui.theme.CensoMobileTheme
 import com.censocustody.android.presentation.semantic_version_check.BlockingUI
 import com.censocustody.android.presentation.token_sign_in.TokenSignInScreen
+import com.censocustody.android.service.MessagingService.Companion.REQUEST_ID_KEY
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -71,6 +73,7 @@ class MainActivity : FragmentActivity() {
     lateinit var authProvider: AuthProvider
 
     val approvalsViewModel: ApprovalsViewModel by viewModels()
+    val approvalDetailsViewModel: ApprovalDetailsViewModel by viewModels()
 
     internal val mainViewModel: MainViewModel by viewModels()
 
@@ -79,10 +82,15 @@ class MainActivity : FragmentActivity() {
     private val notificationDisplayedBroadcastReceiver: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(p0: Context?, intent: Intent?) {
             intent?.let { safeIntent ->
-                if (safeIntent.hasExtra(NOTIFICATION_DISPLAYED_KEY)
-                    && safeIntent.getBooleanExtra(NOTIFICATION_DISPLAYED_KEY, false)
-                ) {
-                    approvalsViewModel.refreshFromAPush()
+                if (safeIntent.hasExtra(NOTIFICATION_DISPLAYED_KEY)) {
+                    val notificationShown = safeIntent.getBooleanExtra(NOTIFICATION_DISPLAYED_KEY, false)
+
+                    if(notificationShown) {
+                        approvalsViewModel.refreshFromAPush()
+                    } else {
+                        val requestId = safeIntent.getStringExtra(REQUEST_ID_KEY) ?: ""
+                        approvalDetailsViewModel.checkIfApprovalHasBeenCleared(requestId)
+                    }
                 }
             }
         }
@@ -232,7 +240,7 @@ class MainActivity : FragmentActivity() {
                 arguments = listOf(navArgument(Screen.ApprovalDetailRoute.APPROVAL_ARG) { type = NavType.StringType })
             ) { backStackEntry ->
                 val approvalArg = backStackEntry.arguments?.getString(Screen.ApprovalDetailRoute.APPROVAL_ARG) as String
-                ApprovalDetailsScreen(navController = navController, approval = ApprovalRequestV2.fromJson(approvalArg))
+                ApprovalDetailsScreen(navController = navController, approvalDetailsViewModel = approvalDetailsViewModel, approval = ApprovalRequestV2.fromJson(approvalArg))
             }
             composable(
                 route = Screen.ContactCensoRoute.route

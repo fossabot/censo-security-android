@@ -44,7 +44,7 @@ import com.censocustody.android.presentation.components.*
 @Composable
 fun ApprovalDetailsScreen(
     navController: NavController,
-    approvalDetailsViewModel: ApprovalDetailsViewModel = hiltViewModel(),
+    approvalDetailsViewModel: ApprovalDetailsViewModel,
     approval: ApprovalRequestV2?
 ) {
     val approvalDetailsState = approvalDetailsViewModel.state

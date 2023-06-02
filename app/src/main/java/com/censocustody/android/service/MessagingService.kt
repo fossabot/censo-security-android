@@ -28,6 +28,7 @@ import com.censocustody.android.service.MessagingService.Companion.DEFAULT_BODY
 import com.censocustody.android.service.MessagingService.Companion.DEFAULT_TITLE
 import com.censocustody.android.service.MessagingService.Companion.NOTIFICATION_DISPLAYED_KEY
 import com.censocustody.android.service.MessagingService.Companion.PUSH_TYPE_KEY
+import com.censocustody.android.service.MessagingService.Companion.REQUEST_ID_KEY
 import com.censocustody.android.service.MessagingService.Companion.SILENT_CLEAR_TYPE
 import com.censocustody.android.service.MessagingService.Companion.TITLE_KEY
 import dagger.hilt.android.AndroidEntryPoint
@@ -114,7 +115,8 @@ class MessagingService : FirebaseMessagingService() {
         return PushData(
             title = data.getOrDefault(TITLE_KEY, DEFAULT_TITLE),
             body = data.getOrDefault(BODY_KEY, DEFAULT_BODY),
-            pushType = data.getOrDefault(PUSH_TYPE_KEY, "")
+            pushType = data.getOrDefault(PUSH_TYPE_KEY, ""),
+            requestId = data.getOrDefault(REQUEST_ID_KEY, "")
         )
     }
 
@@ -125,7 +127,7 @@ class MessagingService : FirebaseMessagingService() {
      */
     private fun sendNotification(pushData: PushData) {
         if (pushData.pushType == SILENT_CLEAR_TYPE) {
-            sendBroadcastToRefreshApprovals()
+            sendBroadcastToRefreshApprovals(pushData.requestId, false)
             return
         }
 
@@ -174,13 +176,14 @@ class MessagingService : FirebaseMessagingService() {
         notificationManager.notify(notificationId, notificationBuilder.build())
 
         if (pushData.pushType == APPROVAL_REQUEST_TYPE) {
-            sendBroadcastToRefreshApprovals()
+            sendBroadcastToRefreshApprovals(pushData.requestId, true)
         }
     }
 
-    private fun sendBroadcastToRefreshApprovals() {
+    private fun sendBroadcastToRefreshApprovals(requestId: String, notificationShown: Boolean) {
         val notificationDisplayedIntent = Intent(BuildConfig.APPLICATION_ID)
-        notificationDisplayedIntent.putExtra(NOTIFICATION_DISPLAYED_KEY, true)
+        notificationDisplayedIntent.putExtra(NOTIFICATION_DISPLAYED_KEY, notificationShown)
+        notificationDisplayedIntent.putExtra(REQUEST_ID_KEY, requestId)
         sendBroadcast(notificationDisplayedIntent)
     }
 
@@ -195,6 +198,7 @@ class MessagingService : FirebaseMessagingService() {
         const val TITLE_KEY = "title"
         const val BODY_KEY = "body"
         const val PUSH_TYPE_KEY = "pushType"
+        const val REQUEST_ID_KEY = "requestId"
 
         const val DEFAULT_TITLE = "Censo Custody"
         const val DEFAULT_BODY = "Verification Needed"
@@ -205,4 +209,9 @@ class MessagingService : FirebaseMessagingService() {
     }
 }
 
-data class PushData(val body: String, val title: String, val pushType: String)
+data class PushData(
+    val body: String,
+    val title: String,
+    val pushType: String,
+    val requestId: String
+)

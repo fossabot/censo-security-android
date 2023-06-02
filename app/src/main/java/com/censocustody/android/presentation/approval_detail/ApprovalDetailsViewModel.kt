@@ -62,6 +62,12 @@ class ApprovalDetailsViewModel @Inject constructor(
     }
     //endregion
 
+    fun checkIfApprovalHasBeenCleared(requestId: String) {
+        if (requestId.isNotEmpty() && requestId == state.selectedApproval?.id) {
+            setShouldKickOutUser()
+        }
+    }
+
     fun setShouldKickOutUser() {
         state = state.copy(
             shouldKickOutUserToApprovalsScreen = true
