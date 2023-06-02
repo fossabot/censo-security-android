@@ -3,6 +3,7 @@ package com.censocustody.android.data.models.approvalV2
 import android.content.Context
 import com.censocustody.android.R
 import com.censocustody.android.common.UriWrapper
+import com.censocustody.android.common.censoLog
 import com.censocustody.android.common.evm.EvmAddress
 import com.censocustody.android.data.models.Chain
 import com.censocustody.android.data.models.DeviceType
@@ -743,16 +744,21 @@ sealed class ApprovalRequestDetailsV2 {
             val message: String,
             val messageHash: String,
         ) : DAppParams() {
-            val displayMessage = run {
-                val decoded = Hex.decode(message.removePrefix("0x")).decodeToString()
-                val letterOrDigitCount = decoded.count { it.isLetterOrDigit() || it.isWhitespace() }
-                if (letterOrDigitCount.toDouble() / decoded.count().toDouble() > 0.66) {
-                    decoded
-                } else {
+            fun displayMessage(): String =
+                try {
+                    val decoded = Hex.decode(message.removePrefix("0x")).decodeToString()
+                    val letterOrDigitCount =
+                        decoded.count { it.isLetterOrDigit() || it.isWhitespace() }
+                    if (letterOrDigitCount.toDouble() / decoded.count().toDouble() > 0.66) {
+                        decoded
+                    } else {
+                        message
+                    }
+                } catch (e: Exception) {
                     message
                 }
-            }
         }
+
 
         data class EthSignTypedData(
             val eip712Data: String,
