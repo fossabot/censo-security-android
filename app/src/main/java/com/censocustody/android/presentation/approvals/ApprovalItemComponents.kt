@@ -533,7 +533,7 @@ fun ApprovalDetailContent(approval: ApprovalRequestV2, type: ApprovalRequestDeta
                         fromAccount = type.dAppFromAccount(),
                         fee = type.fee()!!,
                         dAppInfo = type.dAppInfo()!!,
-                        message = params.displayMessage
+                        message = params.displayMessage()
                     )
                 }
                 is ApprovalRequestDetailsV2.DAppParams.EthSignTypedData -> {
