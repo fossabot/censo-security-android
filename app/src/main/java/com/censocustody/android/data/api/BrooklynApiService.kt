@@ -7,6 +7,7 @@ import com.censocustody.android.data.repository.BaseRepository.Companion.UNAUTHO
 import com.censocustody.android.data.api.BrooklynApiService.Companion.APP_VERSION_HEADER
 import com.censocustody.android.data.api.BrooklynApiService.Companion.AUTH
 import com.censocustody.android.data.api.BrooklynApiService.Companion.DEVICE_TYPE_HEADER
+import com.censocustody.android.data.api.BrooklynApiService.Companion.IS_API
 import com.censocustody.android.data.api.BrooklynApiService.Companion.OS_VERSION_HEADER
 import com.censocustody.android.data.api.BrooklynApiService.Companion.X_CENSO_ID
 import com.censocustody.android.data.models.*
@@ -40,6 +41,7 @@ interface BrooklynApiService {
         const val AUTH_REQUIRED = "$AUTH: "
         const val X_CENSO_ID = "X-Censo-Device-Identifier"
 
+        const val IS_API = "X-IsApi"
         const val DEVICE_TYPE_HEADER = "X-Censo-Device-Type"
         const val APP_VERSION_HEADER = "X-Censo-App-Version"
         const val OS_VERSION_HEADER = "X-Censo-OS-Version"
@@ -168,6 +170,10 @@ class AnalyticsInterceptor : Interceptor {
         chain.proceed(
             chain.request().newBuilder()
                 .apply {
+                    addHeader(
+                        IS_API,
+                        "true"
+                    )
                     addHeader(
                         DEVICE_TYPE_HEADER,
                         "Android ${Build.MANUFACTURER} - ${Build.DEVICE} (${Build.MODEL})"
