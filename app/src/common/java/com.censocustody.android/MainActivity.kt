@@ -79,21 +79,23 @@ class MainActivity : FragmentActivity() {
 
     private var userStateListener: UserStateListener? = null
 
-    private val notificationDisplayedBroadcastReceiver: BroadcastReceiver = object : BroadcastReceiver() {
-        override fun onReceive(p0: Context?, intent: Intent?) {
-            intent?.let { safeIntent ->
-                if (safeIntent.hasExtra(NOTIFICATION_DISPLAYED_KEY)) {
-                    val notificationShown = safeIntent.getBooleanExtra(NOTIFICATION_DISPLAYED_KEY, false)
+    private val notificationDisplayedBroadcastReceiver: BroadcastReceiver =
+        object : BroadcastReceiver() {
+            override fun onReceive(p0: Context?, intent: Intent?) {
+                intent?.let { safeIntent ->
+                    if (safeIntent.hasExtra(NOTIFICATION_DISPLAYED_KEY)) {
+                        val notificationShown =
+                            safeIntent.getBooleanExtra(NOTIFICATION_DISPLAYED_KEY, false)
 
-                    if(notificationShown) {
                         approvalsViewModel.refreshFromAPush()
-                    } else {
-                        val requestId = safeIntent.getStringExtra(REQUEST_ID_KEY) ?: ""
-                        approvalDetailsViewModel.checkIfApprovalHasBeenCleared(requestId)
+
+                        if (!notificationShown) {
+                            val requestId = safeIntent.getStringExtra(REQUEST_ID_KEY) ?: ""
+                            approvalDetailsViewModel.checkIfApprovalHasBeenCleared(requestId)
+                        }
                     }
                 }
             }
-        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
