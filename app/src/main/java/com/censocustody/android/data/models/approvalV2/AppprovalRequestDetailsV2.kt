@@ -3,7 +3,6 @@ package com.censocustody.android.data.models.approvalV2
 import android.content.Context
 import com.censocustody.android.R
 import com.censocustody.android.common.UriWrapper
-import com.censocustody.android.common.censoLog
 import com.censocustody.android.common.evm.EvmAddress
 import com.censocustody.android.data.models.Chain
 import com.censocustody.android.data.models.DeviceType
@@ -671,17 +670,11 @@ sealed class ApprovalRequestDetailsV2 {
         val isChange: Boolean
     )
 
-    enum class TokenAllowanceType {
-        @SerializedName("LIMITED")
-        LIMITED,
-        @SerializedName("UNLIMITED")
-        UNLIMITED,
-        @SerializedName("REVOKE")
-        REVOKE,
-    }
-
     sealed class EvmSimulationResult {
-        data class Success(val balanceChanges: List<BalanceChange>, val tokenAllowances: List<TokenAllowance>) : EvmSimulationResult()
+        data class Success(
+            val balanceChanges: List<BalanceChange>,
+            val tokenAllowancesV2: List<TokenAllowance>,
+        ) : EvmSimulationResult()
         data class Failure(val reason: String) : EvmSimulationResult()
 
         data class BalanceChange(
@@ -689,12 +682,37 @@ sealed class ApprovalRequestDetailsV2 {
             val symbolInfo: EvmSymbolInfo
         )
 
-        data class TokenAllowance(
-            val symbolInfo: EvmSymbolInfo,
-            val allowedAddress: String,
-            val allowedAmount: Amount,
-            val allowanceType: TokenAllowanceType,
-        )
+        sealed class TokenAllowance {
+            data class SingleTokenApproved(
+                val symbolInfo: EvmSymbolInfo,
+                val spender: String,
+                val amount: Amount,
+                val unlimited: Boolean
+            ) : TokenAllowance()
+
+            data class SingleTokenRevoked(
+                val symbolInfo: EvmSymbolInfo,
+                val spender: String
+            ) : TokenAllowance()
+
+            data class AllTokens(
+                val operator: String,
+                val approved: Boolean
+            ) : TokenAllowance()
+
+            companion object {
+                val tokenAllowanceAdapterFactory: RuntimeTypeAdapterFactory<TokenAllowance> =
+                    RuntimeTypeAdapterFactory.of(
+                        TokenAllowance::class.java, "type"
+                    ).registerSubtype(
+                        SingleTokenApproved::class.java, "SingleTokenApproved"
+                    ).registerSubtype(
+                        SingleTokenRevoked::class.java, "SingleTokenRevoked"
+                    ).registerSubtype(
+                        AllTokens::class.java, "AllTokens"
+                    )
+            }
+        }
 
         companion object {
             val evmSimulationResultAdapterFactory: RuntimeTypeAdapterFactory<EvmSimulationResult> =

@@ -12,6 +12,7 @@ class ApprovalRequestV2Deserializer : JsonDeserializer<ApprovalRequestV2> {
         .registerTypeAdapterFactory(ApprovalSignature.approvalSignatureAdapterFactory)
         .registerTypeAdapterFactory(ApprovalRequestDetailsV2.DAppParams.dAppParamsAdapterFactory)
         .registerTypeAdapterFactory(ApprovalRequestDetailsV2.EvmSimulationResult.evmSimulationResultAdapterFactory)
+        .registerTypeAdapterFactory(ApprovalRequestDetailsV2.EvmSimulationResult.TokenAllowance.tokenAllowanceAdapterFactory)
         .create()
 
     override fun deserialize(
