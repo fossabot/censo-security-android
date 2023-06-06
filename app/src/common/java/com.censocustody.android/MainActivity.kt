@@ -8,7 +8,6 @@ import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.biometric.BiometricPrompt
-import androidx.camera.core.ExperimentalGetImage
 import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -24,6 +23,7 @@ import com.censocustody.android.common.util.CrashReportingUtil
 import com.censocustody.android.common.Resource
 import com.censocustody.android.common.*
 import com.censocustody.android.common.BioCryptoUtil.NO_CIPHER_CODE
+import com.censocustody.android.common.util.BiometricUtil
 import com.censocustody.android.common.util.sendError
 import com.censocustody.android.data.models.approvalV2.ApprovalRequestV2
 import com.censocustody.android.data.storage.AuthProvider
@@ -54,6 +54,7 @@ import com.censocustody.android.presentation.pending_approval.PendingApprovalScr
 import com.censocustody.android.presentation.reauthenticate.ReAuthenticateScreen
 import com.censocustody.android.presentation.reset_password.ResetPasswordScreen
 import com.censocustody.android.presentation.scan_qr.ScanQRScreen
+import com.censocustody.android.presentation.semantic_version_check.BlockingUI
 import com.censocustody.android.presentation.sign_in.SignInScreen
 import com.censocustody.android.ui.theme.BackgroundWhite
 import com.censocustody.android.ui.theme.CensoMobileTheme
@@ -154,9 +155,9 @@ class MainActivity : FragmentActivity() {
                         when (event) {
                             Lifecycle.Event.ON_START
                             -> {
-//                                mainViewModel.onForeground(
-//                                    BiometricUtil.checkForBiometricFeaturesOnDevice(context),
-//                                )
+                                mainViewModel.onForeground(
+                                    BiometricUtil.checkForBiometricFeaturesOnDevice(context),
+                                )
                             }
                             else -> Unit
                         }
@@ -171,15 +172,15 @@ class MainActivity : FragmentActivity() {
                         mainViewModel.resetSendUserToEntrance()
                     }
 
-//                    val blockAppUI = mainViewModel.blockUIStatus()
-//
-//                    BlockingUI(
-//                        blockAppUI = blockAppUI,
-//                        bioPromptTrigger = mainState.bioPromptTrigger,
-//                        biometryUnavailable = mainState.biometryTooManyAttempts,
-//                        biometryStatus = mainState.biometryStatus,
-//                        retry = mainViewModel::retryBiometricGate
-//                    )
+                    val blockAppUI = mainViewModel.blockUIStatus()
+
+                    BlockingUI(
+                        blockAppUI = blockAppUI,
+                        bioPromptTrigger = mainState.bioPromptTrigger,
+                        biometryUnavailable = mainState.biometryTooManyAttempts,
+                        biometryStatus = mainState.biometryStatus,
+                        retry = mainViewModel::retryBiometricGate
+                    )
                 }
             }
         }
