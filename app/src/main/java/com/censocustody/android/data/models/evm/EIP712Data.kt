@@ -8,7 +8,10 @@ class EIP712Data(val json: String) {
     private val jsonObject = try { gson.fromJson(json, JsonObject::class.java) } catch (e: JsonSyntaxException) { null }
     val isValidEIP712 = jsonObject != null
 
-    data class Entry(val name: String, val type: String, val value: Any?)
+    data class Entry(val name: String, val type: String, val value: Any?) {
+        val isArray = type.endsWith("[]")
+        val baseType = type.removeSuffix("[]")
+    }
 
     fun getDomainName(): String? {
         return getDomainEntries().firstOrNull {
