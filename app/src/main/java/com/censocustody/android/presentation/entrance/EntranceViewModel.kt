@@ -134,6 +134,17 @@ class EntranceViewModel @Inject constructor(
         state = state.copy(verifyUserResult = verifyUserDataResource)
     }
 
+    fun userDismissedRecoveryTypeDialog() {
+        viewModelScope.launch { checkMinimumVersion() }
+    }
+
+    fun userSelectedOrgRecoveryType(userType: UserType) {
+        state = state.copy(
+            userType = Resource.Success(userType),
+            userDestinationResult = Resource.Success(UserDestination.DEVICE_REGISTRATION)
+        )
+    }
+
     //2 part method.
     //Part 1: Do we need to update key/sentinel data?
     //Part 2: Is our local key valid? valid/invalid
@@ -198,7 +209,14 @@ class EntranceViewModel @Inject constructor(
                 return
             }
             deviceNeedsToBeRegistered -> {
-                state = state.copy(userDestinationResult = Resource.Success(UserDestination.DEVICE_REGISTRATION))
+                val isOrgAdmin = verifyUser.orgAdminInfo != null
+                val hasRecoveryContract = verifyUser.orgAdminInfo?.hasRecoveryContract == true
+
+                state = if (isOrgAdmin && hasRecoveryContract) {
+                    state.copy(displayOrgRecoveryDialog = Resource.Success(true))
+                } else {
+                    state.copy(userDestinationResult = Resource.Success(UserDestination.DEVICE_REGISTRATION))
+                }
                 return
             }
 

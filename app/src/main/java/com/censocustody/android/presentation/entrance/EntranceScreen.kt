@@ -25,6 +25,22 @@ import com.censocustody.android.presentation.device_registration.DeviceRegistrat
 import com.censocustody.android.presentation.key_creation.KeyCreationInitialData
 import com.censocustody.android.presentation.key_recovery.KeyRecoveryInitialData
 import com.censocustody.android.ui.theme.ButtonRed
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.runtime.remember
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.sp
+import com.censocustody.android.ui.theme.*
 
 @Composable
 fun EntranceScreen(
@@ -74,9 +90,18 @@ fun EntranceScreen(
                     "${Screen.KeyRecoveryRoute.route}/$keyRecoveryJson"
                 }
                 UserDestination.DEVICE_REGISTRATION -> {
+                    val userType =
+                        if (state.userType is Resource.Success && state.userType.data != null) {
+                            state.userType.data
+                        } else if (state.verifyUserResult.data != null && state.verifyUserResult.data.shardingPolicy == null) {
+                            UserType.BOOTSTRAP
+                        } else {
+                            UserType.STANDARD
+                        }
+
                     val deviceRegistrationInitialData = DeviceRegistrationInitialData(
-                        bootstrapUser = state.verifyUserResult.data != null && state.verifyUserResult.data.shardingPolicy == null,
-                        verifyUser = state.verifyUserResult.data
+                        verifyUser = state.verifyUserResult.data,
+                        userType = userType
                     )
 
                     val deviceRegistrationJson =
@@ -121,6 +146,14 @@ fun EntranceScreen(
         )
     }
 
+    if (state.displayOrgRecoveryDialog is Resource.Success) {
+        OrgRecoveryDialog(
+            organizationSelected = { viewModel.userSelectedOrgRecoveryType(UserType.ORGANIZATION) },
+            thisDeviceSelected = { viewModel.userSelectedOrgRecoveryType(UserType.STANDARD) },
+            onDismiss = viewModel::userDismissedRecoveryTypeDialog
+        )
+    }
+
     if (state.verifyUserResult is Resource.Error) {
         CensoErrorScreen(
             errorResource = state.verifyUserResult,
@@ -132,5 +165,131 @@ fun EntranceScreen(
                 viewModel.retryRetrieveVerifyUserDetails()
             }
         )
+    }
+}
+
+@Composable
+fun OrgRecoveryDialog(
+    organizationSelected: () -> Unit,
+    thisDeviceSelected: () -> Unit,
+    onDismiss: () -> Unit,
+) {
+    val upperInteractionSource = remember { MutableInteractionSource() }
+    Column(
+        Modifier
+            .fillMaxSize()
+            .background(color = Color.Transparent)
+            .padding(4.dp)
+            .clickable(indication = null, interactionSource = upperInteractionSource) { },
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        val innerInteractionSource = remember { MutableInteractionSource() }
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 4.dp)
+                .background(color = Color.Transparent)
+                .border(
+                    width = 1.0.dp,
+                    shape = RoundedCornerShape(4.dp),
+                    color = BorderGrey,
+                )
+                .shadow(elevation = 2.5.dp)
+                .clickable(indication = null, interactionSource = innerInteractionSource) { },
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(
+                        color = DialogMainBackground,
+                        shape = RoundedCornerShape(4.dp, 4.dp, 0.dp, 0.dp),
+                    )
+                    .padding(vertical = 16.dp),
+            ) {
+                Text(
+                    modifier = Modifier
+                        .padding(horizontal = 32.dp)
+                        .fillMaxWidth()
+                        .align(Alignment.Center),
+                    text = stringResource(R.string.org_recovery_dialog_title),
+                    fontWeight = FontWeight.SemiBold,
+                    textAlign = TextAlign.Center,
+                    color = TextBlack,
+                    fontSize = 24.sp
+                )
+                IconButton(
+                    modifier = Modifier
+                        .align(Alignment.CenterEnd)
+                        .padding(end = 4.dp),
+                    onClick = onDismiss
+                ) {
+                    Icon(
+                        Icons.Filled.Close,
+                        contentDescription = stringResource(R.string.close_dialog),
+                        tint = TextBlack
+                    )
+                }
+            }
+            Divider(thickness = 2.dp, color = BorderGrey)
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.background(
+                    color = DialogMainBackground,
+                    shape = RoundedCornerShape(0.dp, 0.dp, 4.dp, 4.dp),
+                )
+            ) {
+                Spacer(modifier = Modifier.height(24.dp))
+                Text(
+                    modifier = Modifier.padding(horizontal = 48.dp),
+                    text = stringResource(R.string.org_recovery_dialog_message),
+                    textAlign = TextAlign.Center,
+                    color = TextBlack,
+                    fontSize = 20.sp
+                )
+                Spacer(modifier = Modifier.height(40.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceEvenly,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    val modifier: Modifier = Modifier
+                        .clip(RoundedCornerShape(12.dp))
+                        .weight(1.35f)
+                        .fillMaxWidth()
+                    val textAlign = TextAlign.Center
+                    Spacer(modifier = Modifier.weight(0.20f))
+                    Button(
+                        modifier = modifier,
+                        onClick = thisDeviceSelected
+                    ) {
+                        Text(
+                            modifier = Modifier.padding(vertical = 2.dp),
+                            fontSize = 18.sp,
+                            text = stringResource(R.string.this_device),
+                            color = CensoWhite,
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                    Spacer(modifier = Modifier.weight(0.20f))
+                    Button(
+                        modifier = modifier,
+                        onClick = organizationSelected,
+                    ) {
+                        Text(
+                            modifier = Modifier.padding(vertical = 2.dp),
+                            text = stringResource(R.string.organization),
+                            fontSize = 18.sp,
+                            color = CensoWhite,
+                            textAlign = textAlign
+                        )
+                    }
+                    Spacer(modifier = Modifier.weight(0.20f))
+                }
+                Spacer(modifier = Modifier.height(32.dp))
+            }
+        }
     }
 }

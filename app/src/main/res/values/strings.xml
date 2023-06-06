@@ -304,4 +304,8 @@
     <string name="revoke_use_of_all">Revoke use of all tokens</string>
     <string name="allow_use_of_all">Allow use of all tokens</string>
     <string name="unlimited">Unlimited</string>
+    <string name="this_device">This Device</string>
+    <string name="organization">Organization</string>
+    <string name="org_recovery_dialog_message">Do you need to recover a single device or the entire organization?</string>
+    <string name="org_recovery_dialog_title">Select Recovery Type</string>
 </resources>
