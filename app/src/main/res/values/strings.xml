@@ -301,5 +301,7 @@
     <string name="receive">Receive</string>
     <string name="revoke_use_of">Revoke use of</string>
     <string name="allow_use_of">Allow use of</string>
+    <string name="revoke_use_of_all">Revoke use of all tokens</string>
+    <string name="allow_use_of_all">Allow use of all tokens</string>
     <string name="unlimited">Unlimited</string>
 </resources>

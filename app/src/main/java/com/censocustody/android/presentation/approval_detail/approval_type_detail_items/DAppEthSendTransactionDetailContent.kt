@@ -6,15 +6,12 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.censocustody.android.R
 import com.censocustody.android.data.models.approvalV2.ApprovalRequestDetailsV2
-import com.censocustody.android.data.models.approvalV2.ApprovalRequestV2
-import com.censocustody.android.data.models.approvalV2.ApprovalRequestV2Deserializer
 import com.censocustody.android.presentation.approvals.ApprovalContentHeader
 import com.censocustody.android.presentation.approvals.approval_type_row_items.*
 import com.censocustody.android.presentation.components.FactRow
@@ -78,21 +75,46 @@ fun DAppEthSendTransactionDetailContent(
                 Divider(modifier = Modifier
                     .height(1.0.dp)
                     .padding(horizontal = 16.dp), color = BorderGrey)
-                if (simulationResult.tokenAllowances.isNotEmpty()) {
-                    simulationResult.tokenAllowances.forEach {
-                        val symbolName = it.symbolInfo.symbol.displaySymbol()
-
+                if (simulationResult.tokenAllowancesV2.isNotEmpty()) {
+                    simulationResult.tokenAllowancesV2.forEach {
                         Divider(modifier = Modifier
                             .height(1.0.dp)
                             .padding(horizontal = 16.dp), color = BorderGrey)
-                        DAppTransferInfo(
-                            header = if (it.allowanceType == ApprovalRequestDetailsV2.TokenAllowanceType.REVOKE) "${stringResource(R.string.revoke_use_of)} $symbolName" else "${stringResource(R.string.allow_use_of)} $symbolName}",
-                            subtitle = it.displayAmount(LocalContext.current),
-                            usdEquivalent = if (it.allowanceType == ApprovalRequestDetailsV2.TokenAllowanceType.LIMITED) it.allowedAmount.formattedUsdEquivalentWithSymbol() else null,
-                            fromText = fromAccount,
-                            toText = dAppInfo.name,
-                            directionIsForward = true
-                        )
+
+                        when (it) {
+                            is ApprovalRequestDetailsV2.EvmSimulationResult.TokenAllowance.SingleTokenApproved -> {
+                                val symbolName = it.symbolInfo.symbol.displaySymbol()
+                                DAppTransferInfo(
+                                    header = "${stringResource(R.string.allow_use_of)} $symbolName",
+                                    subtitle = if (it.unlimited) stringResource(R.string.unlimited) else it.amount.value,
+                                    usdEquivalent = if (it.unlimited) null else it.amount.formattedUsdEquivalentWithSymbol(),
+                                    fromText = fromAccount,
+                                    toText = dAppInfo.name,
+                                    directionIsForward = true
+                                )
+                            }
+                            is ApprovalRequestDetailsV2.EvmSimulationResult.TokenAllowance.SingleTokenRevoked -> {
+                                val symbolName = it.symbolInfo.symbol.displaySymbol()
+                                DAppTransferInfo(
+                                    header = "${stringResource(R.string.revoke_use_of)} $symbolName",
+                                    subtitle = null,
+                                    usdEquivalent = null,
+                                    fromText = fromAccount,
+                                    toText = dAppInfo.name,
+                                    directionIsForward = true
+                                )
+                            }
+                            is ApprovalRequestDetailsV2.EvmSimulationResult.TokenAllowance.AllTokens -> {
+                                DAppTransferInfo(
+                                    header = stringResource(if (it.approved) R.string.allow_use_of_all else R.string.revoke_use_of_all),
+                                    subtitle = null,
+                                    usdEquivalent = null,
+                                    fromText = fromAccount,
+                                    toText = dAppInfo.name,
+                                    directionIsForward = true
+                                )
+                            }
+                        }
                         Spacer(modifier = Modifier.height(16.dp))
                     }
                 }
@@ -162,7 +184,7 @@ fun DAppEthSendTransactionDetailContentPreview() {
                 ),
             ),
             listOf(
-                ApprovalRequestDetailsV2.EvmSimulationResult.TokenAllowance(
+                ApprovalRequestDetailsV2.EvmSimulationResult.TokenAllowance.SingleTokenApproved(
                     ApprovalRequestDetailsV2.EvmSymbolInfo("USDC", "USDC"),
                     "allowed-address",
                     ApprovalRequestDetailsV2.Amount(
@@ -170,7 +192,29 @@ fun DAppEthSendTransactionDetailContentPreview() {
                         "1234567891011121314151617181920.00",
                         "1234567891011121314151617181920.00"
                     ),
-                    ApprovalRequestDetailsV2.TokenAllowanceType.LIMITED
+                    unlimited = false
+                ),
+                ApprovalRequestDetailsV2.EvmSimulationResult.TokenAllowance.SingleTokenApproved(
+                    ApprovalRequestDetailsV2.EvmSymbolInfo("USDC", "USDC"),
+                    "allowed-address",
+                    ApprovalRequestDetailsV2.Amount(
+                        "123456789121314151617181920.00",
+                        "1234567891011121314151617181920.00",
+                        "1234567891011121314151617181920.00"
+                    ),
+                    unlimited = true
+                ),
+                ApprovalRequestDetailsV2.EvmSimulationResult.TokenAllowance.SingleTokenRevoked(
+                    ApprovalRequestDetailsV2.EvmSymbolInfo("USDC", "USDC"),
+                    "allowed-address",
+                ),
+                ApprovalRequestDetailsV2.EvmSimulationResult.TokenAllowance.AllTokens(
+                    "allowed-address",
+                    true
+                ),
+                ApprovalRequestDetailsV2.EvmSimulationResult.TokenAllowance.AllTokens(
+                    "allowed-address",
+                    false
                 )
             )
         )
