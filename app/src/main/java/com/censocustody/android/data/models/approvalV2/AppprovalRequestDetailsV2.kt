@@ -446,6 +446,7 @@ sealed class ApprovalRequestDetailsV2 {
         val orgName: String,
         val signingData: List<SigningData>,
         val chainFees: List<ChainFee>,
+        val recoveryContractAddresses: Map<Chain, String>,
     ) : ApprovalRequestDetailsV2()
 
     data class EthereumDAppRequest(
