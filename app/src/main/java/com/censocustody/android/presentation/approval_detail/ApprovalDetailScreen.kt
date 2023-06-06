@@ -87,12 +87,13 @@ fun ApprovalDetailsScreen(
             override fun onReceive(context: Context, intent: Intent) {
                 val requestId = intent.getStringExtra(REQUEST_ID_KEY) ?: ""
                 approvalDetailsViewModel.checkIfApprovalHasBeenCleared(requestId)
-                approvalDetailsViewModel.checkIfApprovalHasBeenCleared(requestId)
             }
         }
+
         val intentFilter = IntentFilter()
         intentFilter.addAction(BuildConfig.APPLICATION_ID)
         context.registerReceiver(broadcastReceiver, intentFilter)
+
         onDispose {
             approvalDetailsViewModel.onStop()
             context.unregisterReceiver(broadcastReceiver)
