@@ -1,6 +1,10 @@
 package com.censocustody.android.presentation.approval_detail
 
 import android.annotation.SuppressLint
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -26,7 +30,9 @@ import androidx.compose.ui.zIndex
 import androidx.fragment.app.FragmentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.navigation.NavController
+import com.censocustody.android.BuildConfig
 import com.censocustody.android.R
 import com.censocustody.android.common.*
 import com.censocustody.android.data.models.ApprovalDisposition
@@ -39,12 +45,14 @@ import com.censocustody.android.presentation.approvals.ApprovalDetailContent
 import com.censocustody.android.presentation.approvals.approval_type_row_items.getApprovalTimerText
 import com.censocustody.android.presentation.approvals.approval_type_row_items.getDialogMessages
 import com.censocustody.android.presentation.components.*
+import com.censocustody.android.service.MessagingService
+import com.censocustody.android.service.MessagingService.Companion.REQUEST_ID_KEY
 
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
 fun ApprovalDetailsScreen(
     navController: NavController,
-    approvalDetailsViewModel: ApprovalDetailsViewModel,
+    approvalDetailsViewModel: ApprovalDetailsViewModel = hiltViewModel(),
     approval: ApprovalRequestV2?
 ) {
     val approvalDetailsState = approvalDetailsViewModel.state
@@ -74,7 +82,21 @@ fun ApprovalDetailsScreen(
 
     DisposableEffect(key1 = approvalDetailsViewModel) {
         approvalDetailsViewModel.onStart(approval)
-        onDispose { approvalDetailsViewModel.onStop() }
+
+        val broadcastReceiver = object : BroadcastReceiver() {
+            override fun onReceive(context: Context, intent: Intent) {
+                val requestId = intent.getStringExtra("requestId") ?: ""
+                approvalDetailsViewModel.checkIfApprovalHasBeenCleared(requestId)
+                approvalDetailsViewModel.checkIfApprovalHasBeenCleared(requestId)
+            }
+        }
+        val intentFilter = IntentFilter()
+        intentFilter.addAction(BuildConfig.APPLICATION_ID)
+        context.registerReceiver(broadcastReceiver, intentFilter)
+        onDispose {
+            approvalDetailsViewModel.onStop()
+            context.unregisterReceiver(broadcastReceiver)
+        }
     }
 
     LaunchedEffect(key1 = approvalDetailsState) {

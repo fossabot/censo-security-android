@@ -15,6 +15,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.platform.LocalContext
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.Lifecycle
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.navigation.*
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -73,7 +74,6 @@ class MainActivity : FragmentActivity() {
     lateinit var authProvider: AuthProvider
 
     val approvalsViewModel: ApprovalsViewModel by viewModels()
-    val approvalDetailsViewModel: ApprovalDetailsViewModel by viewModels()
 
     internal val mainViewModel: MainViewModel by viewModels()
 
@@ -88,15 +88,11 @@ class MainActivity : FragmentActivity() {
                             safeIntent.getBooleanExtra(NOTIFICATION_DISPLAYED_KEY, false)
 
                         approvalsViewModel.refreshFromAPush()
-
-                        if (!notificationShown) {
-                            val requestId = safeIntent.getStringExtra(REQUEST_ID_KEY) ?: ""
-                            approvalDetailsViewModel.checkIfApprovalHasBeenCleared(requestId)
-                        }
                     }
                 }
             }
-    }
+        }
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -169,9 +165,9 @@ class MainActivity : FragmentActivity() {
                         when (event) {
                             Lifecycle.Event.ON_START
                             -> {
-                                mainViewModel.onForeground(
-                                    BiometricUtil.checkForBiometricFeaturesOnDevice(context),
-                                )
+//                                mainViewModel.onForeground(
+//                                    BiometricUtil.checkForBiometricFeaturesOnDevice(context),
+//                                )
                             }
                             else -> Unit
                         }
@@ -186,15 +182,15 @@ class MainActivity : FragmentActivity() {
                         mainViewModel.resetSendUserToEntrance()
                     }
 
-                    val blockAppUI = mainViewModel.blockUIStatus()
-
-                    BlockingUI(
-                        blockAppUI = blockAppUI,
-                        bioPromptTrigger = mainState.bioPromptTrigger,
-                        biometryUnavailable = mainState.biometryTooManyAttempts,
-                        biometryStatus = mainState.biometryStatus,
-                        retry = mainViewModel::retryBiometricGate
-                    )
+//                    val blockAppUI = mainViewModel.blockUIStatus()
+//
+//                    BlockingUI(
+//                        blockAppUI = blockAppUI,
+//                        bioPromptTrigger = mainState.bioPromptTrigger,
+//                        biometryUnavailable = mainState.biometryTooManyAttempts,
+//                        biometryStatus = mainState.biometryStatus,
+//                        retry = mainViewModel::retryBiometricGate
+//                    )
                 }
             }
         }
@@ -242,7 +238,7 @@ class MainActivity : FragmentActivity() {
                 arguments = listOf(navArgument(Screen.ApprovalDetailRoute.APPROVAL_ARG) { type = NavType.StringType })
             ) { backStackEntry ->
                 val approvalArg = backStackEntry.arguments?.getString(Screen.ApprovalDetailRoute.APPROVAL_ARG) as String
-                ApprovalDetailsScreen(navController = navController, approvalDetailsViewModel = approvalDetailsViewModel, approval = ApprovalRequestV2.fromJson(approvalArg))
+                ApprovalDetailsScreen(navController = navController, approval = ApprovalRequestV2.fromJson(approvalArg))
             }
             composable(
                 route = Screen.ContactCensoRoute.route
