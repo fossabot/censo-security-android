@@ -26,7 +26,6 @@ import com.censocustody.android.service.MessagingService.Companion.APPROVAL_REQU
 import com.censocustody.android.service.MessagingService.Companion.BODY_KEY
 import com.censocustody.android.service.MessagingService.Companion.DEFAULT_BODY
 import com.censocustody.android.service.MessagingService.Companion.DEFAULT_TITLE
-import com.censocustody.android.service.MessagingService.Companion.NOTIFICATION_DISPLAYED_KEY
 import com.censocustody.android.service.MessagingService.Companion.PUSH_TYPE_KEY
 import com.censocustody.android.service.MessagingService.Companion.REQUEST_ID_KEY
 import com.censocustody.android.service.MessagingService.Companion.SILENT_CLEAR_TYPE
@@ -37,7 +36,6 @@ import java.util.*
 import javax.inject.Inject
 import kotlin.math.abs
 
-@androidx.camera.core.ExperimentalGetImage
 @AndroidEntryPoint
 class MessagingService : FirebaseMessagingService() {
 
@@ -127,7 +125,7 @@ class MessagingService : FirebaseMessagingService() {
      */
     private fun sendNotification(pushData: PushData) {
         if (pushData.pushType == SILENT_CLEAR_TYPE) {
-            sendBroadcastToRefreshApprovals(pushData.requestId, false)
+            sendBroadcastToRefreshApprovals(pushData.requestId)
             return
         }
 
@@ -176,13 +174,12 @@ class MessagingService : FirebaseMessagingService() {
         notificationManager.notify(notificationId, notificationBuilder.build())
 
         if (pushData.pushType == APPROVAL_REQUEST_TYPE) {
-            sendBroadcastToRefreshApprovals(pushData.requestId, true)
+            sendBroadcastToRefreshApprovals(pushData.requestId)
         }
     }
 
-    private fun sendBroadcastToRefreshApprovals(requestId: String, notificationShown: Boolean) {
+    private fun sendBroadcastToRefreshApprovals(requestId: String) {
         val notificationDisplayedIntent = Intent(BuildConfig.APPLICATION_ID)
-        notificationDisplayedIntent.putExtra(NOTIFICATION_DISPLAYED_KEY, notificationShown)
         notificationDisplayedIntent.putExtra(REQUEST_ID_KEY, requestId)
         sendBroadcast(notificationDisplayedIntent)
     }
@@ -193,8 +190,6 @@ class MessagingService : FirebaseMessagingService() {
     }
 
     object Companion {
-        const val NOTIFICATION_DISPLAYED_KEY = "Notification Displayed Key"
-
         const val TITLE_KEY = "title"
         const val BODY_KEY = "body"
         const val PUSH_TYPE_KEY = "pushType"

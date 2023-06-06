@@ -15,13 +15,11 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.platform.LocalContext
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.Lifecycle
-import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.navigation.*
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.raygun.raygun4android.RaygunClient
-import com.censocustody.android.common.util.BiometricUtil
 import com.censocustody.android.common.util.CrashReportingUtil
 import com.censocustody.android.common.Resource
 import com.censocustody.android.common.*
@@ -39,7 +37,6 @@ import com.censocustody.android.presentation.account.AccountScreen
 import com.censocustody.android.presentation.semantic_version_check.EnforceUpdateScreen
 import com.censocustody.android.presentation.semantic_version_check.MainViewModel
 import com.censocustody.android.presentation.approval_detail.ApprovalDetailsScreen
-import com.censocustody.android.presentation.approval_detail.ApprovalDetailsViewModel
 import com.censocustody.android.presentation.approvals.ApprovalsListScreen
 import com.censocustody.android.presentation.approvals.ApprovalsViewModel
 import com.censocustody.android.presentation.components.OnLifecycleEvent
@@ -58,16 +55,13 @@ import com.censocustody.android.presentation.reauthenticate.ReAuthenticateScreen
 import com.censocustody.android.presentation.reset_password.ResetPasswordScreen
 import com.censocustody.android.presentation.scan_qr.ScanQRScreen
 import com.censocustody.android.presentation.sign_in.SignInScreen
-import com.censocustody.android.service.MessagingService.Companion.NOTIFICATION_DISPLAYED_KEY
 import com.censocustody.android.ui.theme.BackgroundWhite
 import com.censocustody.android.ui.theme.CensoMobileTheme
-import com.censocustody.android.presentation.semantic_version_check.BlockingUI
 import com.censocustody.android.presentation.token_sign_in.TokenSignInScreen
-import com.censocustody.android.service.MessagingService.Companion.REQUEST_ID_KEY
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
-@ExperimentalGetImage @AndroidEntryPoint
+@AndroidEntryPoint
 class MainActivity : FragmentActivity() {
 
     @Inject
@@ -82,13 +76,8 @@ class MainActivity : FragmentActivity() {
     private val notificationDisplayedBroadcastReceiver: BroadcastReceiver =
         object : BroadcastReceiver() {
             override fun onReceive(p0: Context?, intent: Intent?) {
-                intent?.let { safeIntent ->
-                    if (safeIntent.hasExtra(NOTIFICATION_DISPLAYED_KEY)) {
-                        val notificationShown =
-                            safeIntent.getBooleanExtra(NOTIFICATION_DISPLAYED_KEY, false)
-
-                        approvalsViewModel.refreshFromAPush()
-                    }
+                intent?.let { _ ->
+                    approvalsViewModel.refreshFromAPush()
                 }
             }
         }

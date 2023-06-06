@@ -85,7 +85,7 @@ fun ApprovalDetailsScreen(
 
         val broadcastReceiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context, intent: Intent) {
-                val requestId = intent.getStringExtra("requestId") ?: ""
+                val requestId = intent.getStringExtra(REQUEST_ID_KEY) ?: ""
                 approvalDetailsViewModel.checkIfApprovalHasBeenCleared(requestId)
                 approvalDetailsViewModel.checkIfApprovalHasBeenCleared(requestId)
             }
