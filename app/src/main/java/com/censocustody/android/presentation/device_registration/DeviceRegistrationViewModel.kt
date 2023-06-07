@@ -59,10 +59,10 @@ class DeviceRegistrationViewModel @Inject constructor(
     }
 
     fun biometryApproved() {
-        if (state.userType == UserType.BOOTSTRAP) {
-            sendBootstrapUserToKeyCreation()
-        } else {
-            sendUserDeviceAndImageToBackend()
+        when (state.userType) {
+            UserType.STANDARD -> sendUserDeviceAndImageToBackend()
+            UserType.ORGANIZATION -> sendOrganizationUserToKeyCreation()
+            UserType.BOOTSTRAP -> sendBootstrapUserToKeyCreation()
         }
     }
 
@@ -190,6 +190,53 @@ class DeviceRegistrationViewModel @Inject constructor(
         }
     }
 
+    private fun sendOrganizationUserToKeyCreation() {
+        viewModelScope.launch {
+            try {
+                val capturedUserPhoto = state.capturedUserPhoto
+                val keyName = state.standardKeyName
+
+                if (capturedUserPhoto != null && state.fileUrl.isNotEmpty() && keyName.isNotEmpty()) {
+                    //Save device id and device key
+                    val email = userRepository.retrieveUserEmail()
+
+                    //in case user was unable to upload previous keys, they will need to redo device image work
+                    userRepository.clearLeftoverDeviceInfoIfPresent(email)
+
+                    userRepository.saveDeviceId(email = email, deviceId = keyName)
+                    userRepository.saveDevicePublicKey(
+                        email = email,
+                        publicKey = state.standardPublicKey
+                    )
+                    userRepository.saveBootstrapImageUrl(
+                        email = email,
+                        bootstrapImageUrl = state.fileUrl
+                    )
+
+                    //Send user to the key creation with the image data passed along...
+                    state = state.copy(
+                        addUserDevice = Resource.Success(Unit),
+                    )
+                } else {
+                    Exception("Missing essential data for bootstrap device registration")
+                        .sendError(CrashReportingUtil.DEVICE_REGISTRATION)
+                    state = state.copy(
+                        addUserDevice = Resource.Error(exception = Exception("Missing essential data for bootstrap device registration")),
+                        deviceRegistrationError = DeviceRegistrationError.API,
+                        capturingDeviceKey = Resource.Uninitialized
+                    )
+                }
+            } catch (e: Exception) {
+                e.sendError(CrashReportingUtil.DEVICE_REGISTRATION)
+                state = state.copy(
+                    addUserDevice = Resource.Error(exception = e),
+                    deviceRegistrationError = DeviceRegistrationError.BOOTSTRAP,
+                    capturingDeviceKey = Resource.Uninitialized
+                )
+            }
+        }
+    }
+
     private fun triggerBioPrompt() {
         state =
             state.copy(triggerBioPrompt = Resource.Success(Unit))
@@ -204,12 +251,10 @@ class DeviceRegistrationViewModel @Inject constructor(
     }
 
     fun imageCaptured() {
-        if (state.userType == UserType.BOOTSTRAP) {
-            //Standard Device Registration
-            createBootstrapKeysForDevice()
-        } else {
-            //Standard Device Registration
-            createStandardKeyForDevice()
+        when (state.userType) {
+            UserType.STANDARD -> createStandardKeyForDevice()
+            UserType.ORGANIZATION -> createOrganizationKeyForDevice()
+            UserType.BOOTSTRAP -> createBootstrapKeysForDevice()
         }
     }
 
@@ -256,6 +301,32 @@ class DeviceRegistrationViewModel @Inject constructor(
     }
 
     private fun createStandardKeyForDevice() {
+        viewModelScope.launch {
+            val keyId = keyRepository.createDeviceKeyId()
+            state = state.copy(standardKeyName = keyId)
+            try {
+
+                keyRepository.getOrCreateKey(keyName = keyId)
+
+                val publicKey = keyRepository.getPublicKeyFromDeviceKey(keyName = keyId)
+                val compressedPublicKey =
+                    ECIESManager.extractUncompressedPublicKey(publicKey.encoded)
+
+                state = state.copy(standardPublicKey = BaseWrapper.encode(compressedPublicKey))
+
+                triggerBioPrompt()
+
+            } catch (e: Exception) {
+                e.sendError(CrashReportingUtil.DEVICE_REGISTRATION)
+                state = state.copy(
+                    deviceRegistrationError = DeviceRegistrationError.SIGNING_IMAGE,
+                    capturingDeviceKey = Resource.Uninitialized
+                )
+            }
+        }
+    }
+
+    private fun createOrganizationKeyForDevice() {
         viewModelScope.launch {
             val keyId = keyRepository.createDeviceKeyId()
             state = state.copy(standardKeyName = keyId)

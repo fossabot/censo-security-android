@@ -25,6 +25,7 @@ import com.censocustody.android.common.*
 import com.censocustody.android.common.ui.ImageCaptureError
 import com.censocustody.android.common.ui.getCameraProvider
 import com.censocustody.android.presentation.Screen
+import com.censocustody.android.presentation.entrance.UserType
 import com.censocustody.android.presentation.key_management.BackgroundUI
 import com.censocustody.android.presentation.key_management.SmallAuthFlowButton
 import com.censocustody.android.ui.theme.*
@@ -174,7 +175,11 @@ fun DeviceRegistrationScreen(
                     Spacer(modifier = Modifier.height(36.dp))
                     Text(
                         modifier = Modifier.padding(horizontal = 16.dp),
-                        text = stringResource(R.string.take_photo_description),
+                        text = when(state.userType) {
+                            UserType.STANDARD -> "STANDARD"
+                            UserType.ORGANIZATION -> "ORGANIZATION RECOVERY"
+                            UserType.BOOTSTRAP -> "BOOTSTRAP"
+                        },
                         textAlign = TextAlign.Center,
                         color = TextBlack,
                         fontSize = 18.sp
