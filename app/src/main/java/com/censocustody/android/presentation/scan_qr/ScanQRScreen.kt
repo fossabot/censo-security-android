@@ -46,7 +46,6 @@ import java.util.concurrent.Executors
 
 @OptIn(ExperimentalPermissionsApi::class)
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
-@ExperimentalGetImage
 @Composable
 fun ScanQRScreen(
     navController: NavController,

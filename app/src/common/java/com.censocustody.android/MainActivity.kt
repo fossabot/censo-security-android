@@ -8,7 +8,6 @@ import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.biometric.BiometricPrompt
-import androidx.camera.core.ExperimentalGetImage
 import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -20,11 +19,11 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.raygun.raygun4android.RaygunClient
-import com.censocustody.android.common.util.BiometricUtil
 import com.censocustody.android.common.util.CrashReportingUtil
 import com.censocustody.android.common.Resource
 import com.censocustody.android.common.*
 import com.censocustody.android.common.BioCryptoUtil.NO_CIPHER_CODE
+import com.censocustody.android.common.util.BiometricUtil
 import com.censocustody.android.common.util.sendError
 import com.censocustody.android.data.models.approvalV2.ApprovalRequestV2
 import com.censocustody.android.data.storage.AuthProvider
@@ -55,16 +54,15 @@ import com.censocustody.android.presentation.pending_approval.PendingApprovalScr
 import com.censocustody.android.presentation.reauthenticate.ReAuthenticateScreen
 import com.censocustody.android.presentation.reset_password.ResetPasswordScreen
 import com.censocustody.android.presentation.scan_qr.ScanQRScreen
+import com.censocustody.android.presentation.semantic_version_check.BlockingUI
 import com.censocustody.android.presentation.sign_in.SignInScreen
-import com.censocustody.android.service.MessagingService.Companion.NOTIFICATION_DISPLAYED_KEY
 import com.censocustody.android.ui.theme.BackgroundWhite
 import com.censocustody.android.ui.theme.CensoMobileTheme
-import com.censocustody.android.presentation.semantic_version_check.BlockingUI
 import com.censocustody.android.presentation.token_sign_in.TokenSignInScreen
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
-@ExperimentalGetImage @AndroidEntryPoint
+@AndroidEntryPoint
 class MainActivity : FragmentActivity() {
 
     @Inject
@@ -76,17 +74,15 @@ class MainActivity : FragmentActivity() {
 
     private var userStateListener: UserStateListener? = null
 
-    private val notificationDisplayedBroadcastReceiver: BroadcastReceiver = object : BroadcastReceiver() {
-        override fun onReceive(p0: Context?, intent: Intent?) {
-            intent?.let { safeIntent ->
-                if (safeIntent.hasExtra(NOTIFICATION_DISPLAYED_KEY)
-                    && safeIntent.getBooleanExtra(NOTIFICATION_DISPLAYED_KEY, false)
-                ) {
+    private val notificationDisplayedBroadcastReceiver: BroadcastReceiver =
+        object : BroadcastReceiver() {
+            override fun onReceive(p0: Context?, intent: Intent?) {
+                intent?.let { _ ->
                     approvalsViewModel.refreshFromAPush()
                 }
             }
         }
-    }
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
