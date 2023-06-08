@@ -16,6 +16,7 @@ import com.censocustody.android.common.wrapper.BaseWrapper
 import com.censocustody.android.data.models.VerifyUser
 import com.censocustody.android.data.repository.KeyRepository
 import com.censocustody.android.data.repository.UserRepository
+import com.censocustody.android.presentation.entrance.UserType
 import com.raygun.raygun4android.RaygunClient
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
@@ -31,15 +32,21 @@ class KeyCreationViewModel @Inject constructor(
         private set
 
     //region VM SETUP
-    fun onStart(verifyUser: VerifyUser?, bootstrapUserDeviceImage: Bitmap?) {
+    fun onStart(verifyUser: VerifyUser?, bootstrapUserDeviceImage: Bitmap?, userType: UserType) {
         if (verifyUser != null && bootstrapUserDeviceImage != null) {
             state = state.copy(
                 verifyUserDetails = verifyUser,
                 bootstrapUserDeviceImage = bootstrapUserDeviceImage,
+                userType = userType
             )
         } else if (verifyUser != null) {
             state = state.copy(
-                verifyUserDetails = verifyUser
+                verifyUserDetails = verifyUser,
+                userType = userType
+            )
+        } else {
+            state = state.copy(
+                userType = userType
             )
         }
 
@@ -87,10 +94,10 @@ class KeyCreationViewModel @Inject constructor(
 
                 state = state.copy(walletSigners = walletSigners)
 
-                if (state.verifyUserDetails != null && state.verifyUserDetails?.shardingPolicy == null && state.bootstrapUserDeviceImage != null) {
-                    uploadBootStrapData(state.bootstrapUserDeviceImage!!)
-                } else {
-                    uploadKeys()
+                when (state.userType) {
+                    UserType.STANDARD -> uploadKeys()
+                    UserType.ORGANIZATION -> uploadOrgKeys(state.bootstrapUserDeviceImage)
+                    UserType.BOOTSTRAP -> uploadBootStrapData(state.bootstrapUserDeviceImage)
                 }
             } catch (e: Exception) {
                 e.sendError(CrashReportingUtil.KEY_CREATION)
@@ -101,7 +108,11 @@ class KeyCreationViewModel @Inject constructor(
         }
     }
 
-    private suspend fun uploadBootStrapData(bitmap: Bitmap) {
+    private suspend fun uploadBootStrapData(bitmap: Bitmap?) {
+        if (bitmap == null) {
+            throw Exception("Missing user image to sign for bootstrap user")
+        }
+
         val userEmail = userRepository.retrieveUserEmail()
         val deviceId = userRepository.retrieveUserDeviceId(email = userEmail)
 
@@ -150,6 +161,59 @@ class KeyCreationViewModel @Inject constructor(
         }
 
         state = state.copy(uploadingKeyProcess = walletSignerResource)
+    }
+
+    private suspend fun uploadOrgKeys(bitmap: Bitmap?) {
+        val verifyUser = state.verifyUserDetails
+
+        if (bitmap == null) {
+            throw Exception("Missing user image or user details when creating org user keys")
+        }
+
+        if (verifyUser?.shardingPolicy == null
+            || verifyUser.orgAdminInfo?.participantId == null
+            || verifyUser.orgAdminInfo.bootstrapParticipantId == null) {
+            throw Exception("Missing user user details when creating org user keys")
+        }
+
+        val userEmail = userRepository.retrieveUserEmail()
+
+        val orgDeviceId = userRepository.retrieveOrgDeviceId(email = userEmail)
+        val orgPublicKey = userRepository.retrieveOrgDevicePublicKey(email = userEmail)
+
+        userRepository.saveDeviceId(email = userEmail, deviceId = orgDeviceId)
+        userRepository.saveDevicePublicKey(email = userEmail, publicKey = orgPublicKey)
+
+        //Get user image all ready
+        val userImage = userRepository.createUserImage(
+            userPhoto = bitmap,
+            keyName = orgDeviceId,
+        )
+
+        val phrase = state.keyGeneratedPhrase ?: throw Exception("Missing phrase when trying to create org device")
+
+        val walletSigners = state.walletSigners
+
+        val orgAdminRecoveredResource = userRepository.addOrgAdminRecoveredDevice(
+            userImage = userImage,
+            walletSigners = walletSigners,
+            rootSeed = Mnemonics.MnemonicCode(phrase = phrase).toSeed(),
+            policy = verifyUser.shardingPolicy,
+            shardingParticipantId = verifyUser.orgAdminInfo.participantId,
+            bootstrapShardingParticipantId = verifyUser.orgAdminInfo.bootstrapParticipantId
+        )
+
+        if (orgAdminRecoveredResource is Resource.Success) {
+            userRepository.clearOrgDeviceId(userEmail)
+            userRepository.clearBootstrapImageUrl(userEmail)
+        }
+
+        if (orgAdminRecoveredResource is Resource.Error) {
+            (orgAdminRecoveredResource.exception ?: Exception("Failed to upload org device data"))
+                .sendError(CrashReportingUtil.KEY_CREATION)
+        }
+
+        state = state.copy(uploadingKeyProcess = orgAdminRecoveredResource)
     }
 
     fun retryKeyCreation() {

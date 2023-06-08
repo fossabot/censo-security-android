@@ -5,6 +5,7 @@ import com.censocustody.android.common.Resource
 import com.censocustody.android.common.UriWrapper
 import com.censocustody.android.data.models.VerifyUser
 import com.censocustody.android.data.models.WalletSigner
+import com.censocustody.android.presentation.entrance.UserType
 import com.google.gson.GsonBuilder
 import java.lang.reflect.Modifier
 
@@ -20,11 +21,14 @@ data class KeyCreationState(
 
     val verifyUserDetails: VerifyUser? = null,
     val bootstrapUserDeviceImage: Bitmap? = null,
+
+    val userType: UserType = UserType.STANDARD
 )
 
 //If user image is filled in, then we are setting up bootstrap user
 data class KeyCreationInitialData(
     val verifyUserDetails: VerifyUser?,
+    val userType: UserType,
     val bootstrapUserDeviceImageURI : String = ""
 ) {
     companion object {

@@ -64,11 +64,17 @@ interface UserRepository {
     suspend fun isTokenEmailVerified() : Boolean
     fun saveBootstrapImageUrl(email: String, bootstrapImageUrl: String)
     fun clearBootstrapImageUrl(email: String)
+    fun clearOrgDeviceId(email: String)
     fun retrieveBootstrapImageUrl(email: String) : String
     fun createUserImage(userPhoto: Bitmap, keyName: String) : UserImage
     fun getCachedUser() : VerifyUser?
     fun setCachedUser(verifyUser: VerifyUser?)
     fun clearPreviousDeviceId(email: String)
+    suspend fun retrieveOrgDeviceId(email: String) : String
+    suspend fun saveOrgDeviceId(email: String, deviceId: String)
+    suspend fun saveOrgDevicePublicKey(email: String, publicKey: String)
+    suspend fun userHasOrgDeviceIdSaved(email: String) : Boolean
+    suspend fun retrieveOrgDevicePublicKey(email: String) : String
 }
 
 class UserRepositoryImpl(
@@ -330,6 +336,10 @@ class UserRepositoryImpl(
         SharedPrefsHelper.clearBootstrapImageUrl(email)
     }
 
+    override fun clearOrgDeviceId(email: String) {
+        SharedPrefsHelper.clearOrgDeviceId(email)
+    }
+
     override suspend fun saveUserEmail(email: String) {
         SharedPrefsHelper.saveUserEmail(email)
     }
@@ -371,6 +381,23 @@ class UserRepositoryImpl(
     override suspend fun retrieveBootstrapDevicePublicKey(email: String) =
         SharedPrefsHelper.retrieveBootstrapDevicePublicKey(email)
 
+    override suspend fun retrieveOrgDeviceId(email: String) =
+        SharedPrefsHelper.retrieveOrgDeviceId(email)
+
+    override suspend fun saveOrgDeviceId(email: String, deviceId: String) {
+        SharedPrefsHelper.saveOrgDeviceId(email = email, deviceId = deviceId)
+    }
+
+    override suspend fun saveOrgDevicePublicKey(email: String, publicKey: String) {
+        SharedPrefsHelper.saveOrgDevicePublicKey(email = email, publicKey = publicKey)
+    }
+
+    override suspend fun userHasOrgDeviceIdSaved(email: String) =
+        SharedPrefsHelper.userHasOrgDeviceIdSaved(email)
+
+    override suspend fun retrieveOrgDevicePublicKey(email: String) =
+        SharedPrefsHelper.retrieveOrgDevicePublicKey(email)
+
     override suspend fun clearLeftoverDeviceInfoIfPresent(email: String) {
         if (SharedPrefsHelper.userHasDeviceIdSaved(email)) {
             val oldDeviceId = SharedPrefsHelper.retrieveDeviceId(email)
@@ -388,6 +415,15 @@ class UserRepositoryImpl(
 
             SharedPrefsHelper.clearBootstrapDeviceId(email)
             SharedPrefsHelper.clearDeviceBootstrapPublicKey(email)
+        }
+
+        if (SharedPrefsHelper.userHasOrgDeviceIdSaved(email)) {
+            val oldOrgDeviceId = SharedPrefsHelper.retrieveOrgDevicePublicKey(email)
+
+            cryptographyManager.deleteKeyIfPresent(oldOrgDeviceId)
+
+            SharedPrefsHelper.clearOrgDeviceId(email)
+            SharedPrefsHelper.clearDeviceOrgPublicKey(email)
         }
     }
 

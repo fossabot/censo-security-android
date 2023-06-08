@@ -76,6 +76,8 @@ class EntranceViewModel @Inject constructor(
         userEmail: String,
         verifyUser: VerifyUser
     ): Boolean {
+        if (userRepository.userHasOrgDeviceIdSaved(userEmail)) return false
+
         if (!userRepository.userHasDeviceIdSaved(userEmail)) return true
 
         if (userRepository.userHasBootstrapDeviceIdSaved(userEmail)) return false
@@ -200,6 +202,8 @@ class EntranceViewModel @Inject constructor(
         val needToCreateRootSeed = !userHasUploadedKeysToBackendBefore
         val needToRecoverRootSeed = !userHasV3RootSeedSaved && userHasUploadedKeysToBackendBefore
 
+        val userSavedOrgRecoveryKey = userRepository.userHasOrgDeviceIdSaved(email)
+
         //DESTINATION: Any when clause will trigger a user navigating to destination
         when {
             needToAddSentinelData -> {
@@ -226,8 +230,16 @@ class EntranceViewModel @Inject constructor(
                 )
                 return
             }
-            needToCreateRootSeed -> {
-                state = if (!verifyUser.canAddSigners && verifyUser.shardingPolicy != null) {
+            needToCreateRootSeed || userSavedOrgRecoveryKey -> {
+                state = if (userSavedOrgRecoveryKey) {
+                    val bootstrapImageUrl = userRepository.retrieveBootstrapImageUrl(email)
+
+                    state.copy(
+                        userDestinationResult = Resource.Success(UserDestination.KEY_MANAGEMENT_CREATION),
+                        userType = Resource.Success(UserType.ORGANIZATION),
+                        bootstrapImageUrl = bootstrapImageUrl
+                    )
+                } else if (!verifyUser.canAddSigners && verifyUser.shardingPolicy != null) {
                     state.copy(
                         userDestinationResult = Resource.Success(UserDestination.PENDING_APPROVAL)
                     )
@@ -243,6 +255,9 @@ class EntranceViewModel @Inject constructor(
 
                     state.copy(
                         userDestinationResult = Resource.Success(UserDestination.KEY_MANAGEMENT_CREATION),
+                        userType = if (bootstrapImageUrl.isEmpty())
+                            Resource.Success(UserType.STANDARD)
+                        else Resource.Success(UserType.BOOTSTRAP),
                         bootstrapImageUrl = bootstrapImageUrl
                     )
                 }

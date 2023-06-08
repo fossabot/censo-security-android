@@ -69,7 +69,11 @@ fun KeyCreationScreen(
             null
         }
 
-        viewModel.onStart(initialData.verifyUserDetails, bootstrapUserDeviceImage = bitmap)
+        viewModel.onStart(
+            initialData.verifyUserDetails,
+            bootstrapUserDeviceImage = bitmap,
+            userType = initialData.userType
+        )
         onDispose {
             viewModel.cleanUp()
         }

@@ -26,6 +26,11 @@ object SharedPrefsHelper {
     private const val BOOTSTRAP_DEVICE_ID = "_bootstrap_device_id"
     private const val BOOTSTRAP_DEVICE_PUBLIC_KEY = "_bootstrap_device_public_key"
 
+    //Bootstrap Device Data Storage
+    private const val ORG_DEVICE_ID = "_org_device_id"
+    private const val ORG_DEVICE_PUBLIC_KEY = "_org_device_public_key"
+
+
     //V3 Key Storage
     private const val V3_ROOT_SEED = "_v3_root_seed"
     private const val V3_ROOT_SEED_INIT_VECTOR = "_v3_root_seed_init_vector"
@@ -333,7 +338,7 @@ object SharedPrefsHelper {
     //endregion
 
 
-    //region bootstrap device id
+    //region previous device id
     fun clearPreviousDeviceId(email: String) {
         val editor = sharedPrefs.edit()
         editor.putString("${email.lowercase().trim()}$PREVIOUS_DEVICE_ID", "")
@@ -355,6 +360,55 @@ object SharedPrefsHelper {
         email: String
     ): String {
         return sharedPrefs.getString("${email.lowercase().trim()}$PREVIOUS_DEVICE_ID", "") ?: ""
+    }
+    //endregion
+
+    //region org device id
+    fun clearOrgDeviceId(email: String) {
+        val editor = sharedPrefs.edit()
+        editor.putString("${email.lowercase().trim()}$ORG_DEVICE_ID", "")
+        editor.apply()
+    }
+
+    fun saveOrgDeviceId(
+        email: String,
+        deviceId: String
+    ) {
+        val editor = sharedPrefs.edit()
+        editor.putString("${email.lowercase().trim()}$ORG_DEVICE_ID", deviceId)
+        editor.apply()
+    }
+
+    fun userHasOrgDeviceIdSaved(email: String) = retrieveOrgDeviceId(email).isNotEmpty()
+
+    fun retrieveOrgDeviceId(
+        email: String
+    ): String {
+        return sharedPrefs.getString("${email.lowercase().trim()}$ORG_DEVICE_ID", "") ?: ""
+    }
+    //endregion
+
+
+    //region public key for org device id
+    fun clearDeviceOrgPublicKey(email: String) {
+        val editor = sharedPrefs.edit()
+        editor.putString("${email.lowercase().trim()}$ORG_DEVICE_PUBLIC_KEY", "")
+        editor.apply()
+    }
+
+    fun saveOrgDevicePublicKey(
+        email: String,
+        publicKey: String
+    ) {
+        val editor = sharedPrefs.edit()
+        editor.putString("${email.lowercase().trim()}$ORG_DEVICE_PUBLIC_KEY", publicKey)
+        editor.apply()
+    }
+
+    fun retrieveOrgDevicePublicKey(
+        email: String
+    ): String {
+        return sharedPrefs.getString("${email.lowercase().trim()}$ORG_DEVICE_PUBLIC_KEY", "") ?: ""
     }
     //endregion
 }

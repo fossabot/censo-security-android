@@ -63,6 +63,7 @@ fun EntranceScreen(
                 UserDestination.KEY_MANAGEMENT_CREATION -> {
                     val keyCreationInitialData = KeyCreationInitialData(
                         verifyUserDetails = state.verifyUserResult.data,
+                        userType = state.userType.data ?: UserType.STANDARD,
                         bootstrapUserDeviceImageURI = state.bootstrapImageUrl
                     )
 

@@ -203,8 +203,8 @@ class DeviceRegistrationViewModel @Inject constructor(
                     //in case user was unable to upload previous keys, they will need to redo device image work
                     userRepository.clearLeftoverDeviceInfoIfPresent(email)
 
-                    userRepository.saveDeviceId(email = email, deviceId = keyName)
-                    userRepository.saveDevicePublicKey(
+                    userRepository.saveOrgDeviceId(email = email, deviceId = keyName)
+                    userRepository.saveOrgDevicePublicKey(
                         email = email,
                         publicKey = state.standardPublicKey
                     )
