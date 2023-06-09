@@ -1,4 +1,6 @@
 # App Environments and Package Ids
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FCenso-Inc%2Fcenso-security-android.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2FCenso-Inc%2Fcenso-security-android?ref=badge_shield)
+
     - Debug: com.censocustody.android.debug
     - PreRelease: com.censocustody.android.prerelease
     - PreProd: com.censocustody.android.preprod
@@ -85,3 +87,7 @@ Need to pass one argument: `--token` which is the firebase token needed to uploa
 # Testing Deep Link
 
 adb shell am start -W -a android.intent.action.VIEW -d "censo://login/[EMAIL_HERE]/[TOKEN_HERE]" com.censocustody.android.[VARIANT_SUFFIX]
+
+
+## License
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FCenso-Inc%2Fcenso-security-android.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2FCenso-Inc%2Fcenso-security-android?ref=badge_large)
