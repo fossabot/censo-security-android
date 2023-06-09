@@ -182,8 +182,12 @@ fun ApprovalRequestDetailsV2.getHeader(context: Context) =
             context.getString(R.string.restore_user)
         }
 
-        is ApprovalRequestDetailsV2.EnableRecoveryContract -> {
-            context.getString(R.string.enable_recovery_contract_header)
+        is ApprovalRequestDetailsV2.RecoveryContractPolicyUpdate -> {
+            if (this.isEnabled) {
+                context.getString(R.string.update_recovery_policy_header)
+            } else {
+                context.getString(R.string.enable_recovery_contract_header)
+            }
         }
 
         is ApprovalRequestDetailsV2.EthereumDAppRequest,

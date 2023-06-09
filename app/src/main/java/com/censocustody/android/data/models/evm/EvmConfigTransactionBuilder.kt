@@ -206,33 +206,6 @@ object EvmConfigTransactionBuilder {
         )
     }
 
-    fun getEnableRecoveryContractExecutionFromModuleDataSafeHash(
-        safeAddress: String,
-        recoveryThreshold: Int,
-        recoveryAddresses: List<String>,
-        orgName: String,
-        signingData: ApprovalRequestDetailsV2.SigningData.EthereumTransaction
-    ): ByteArray {
-        return EvmTransactionUtil.computeSafeTransactionHash(
-            chainId = signingData.chainId,
-            safeAddress = safeAddress,
-            to = safeAddress,
-            value = BigInteger.ZERO,
-            data = enableModuleTx(
-                calculateRecoveryContractAddress(
-                    getContractAddressFromName(signingData.contractAddresses, GnosisSafeConstants.censoRecoveryGuard),
-                    safeAddress,
-                    getContractAddressFromName(signingData.contractAddresses, GnosisSafeConstants.censoRecoveryFallbackHandler),
-                    getContractAddressFromName(signingData.contractAddresses, GnosisSafeConstants.censoSetup),
-                    orgName,
-                    recoveryAddresses,
-                    recoveryThreshold,
-                )
-            ),
-            nonce = signingData.safeNonce.toBigInteger()
-        )
-    }
-
     private fun getContractAddressFromName(addresses: List<ApprovalRequestDetailsV2.SigningData.ContractNameAndAddress>, name: String): EvmAddress {
         return addresses.firstOrNull { it.name.lowercase() == name.lowercase() }?.address ?: throw Exception("Address for $name not found")
     }

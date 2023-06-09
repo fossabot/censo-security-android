@@ -141,7 +141,7 @@ sealed class ApprovalRequestDetailsV2 {
         ).registerSubtype(
             RestoreUser::class.java, "RestoreUser"
         ).registerSubtype(
-            EnableRecoveryContract::class.java, "EnableRecoveryContract"
+            RecoveryContractPolicyUpdate::class.java, "RecoveryContractPolicyUpdate"
         ).registerSubtype(
             EthereumDAppRequest::class.java, "EthereumDAppRequest"
         ).registerSubtype(
@@ -440,12 +440,14 @@ sealed class ApprovalRequestDetailsV2 {
         val jpegThumbnail: String?
     ) : ApprovalRequestDetailsV2()
 
-    data class EnableRecoveryContract(
+    data class RecoveryContractPolicyUpdate(
         val recoveryThreshold: Int,
         val recoveryAddresses: List<String>,
-        val orgName: String,
+        val currentOnChainPolicies: List<OnChainPolicy>,
         val signingData: List<SigningData>,
-        val chainFees: List<ChainFee>,
+        val chainFees: List<ChainFee>?,
+        val recoveryContractAddress: String,
+        val isEnabled: Boolean
     ) : ApprovalRequestDetailsV2()
 
     data class EthereumDAppRequest(

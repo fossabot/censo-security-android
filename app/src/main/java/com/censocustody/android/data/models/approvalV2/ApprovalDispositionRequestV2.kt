@@ -396,33 +396,37 @@ data class ApprovalDispositionRequestV2(
                             }
                         } + listOf(approvalRequestSignature)
                     }
-                    is ApprovalRequestDetailsV2.EnableRecoveryContract -> {
+                    is ApprovalRequestDetailsV2.RecoveryContractPolicyUpdate -> {
                         val approvalRequestSignature = getApprovalRequestDetailsSignature()
                         requestType.signingData.mapNotNull { signingData ->
                             when (signingData) {
                                 is ApprovalRequestDetailsV2.SigningData.EthereumSigningData -> {
-                                    SignableDataResult.Ethereum(
-                                        EvmConfigTransactionBuilder.getEnableRecoveryContractExecutionFromModuleDataSafeHash(
-                                            signingData.transaction.orgVaultAddress!!,
-                                            requestType.recoveryThreshold,
-                                            requestType.recoveryAddresses,
-                                            requestType.orgName,
-                                            signingData.transaction
-                                        ),
-                                        approvalRequestSignature
-                                    )
+                                    requestType.currentOnChainPolicies.filterIsInstance<ApprovalRequestDetailsV2.OnChainPolicy.Ethereum>()
+                                        .firstOrNull()?.let {
+                                            SignableDataResult.Ethereum(
+                                                EvmConfigTransactionBuilder.getPolicyUpdateExecutionFromModuleDataSafeHash(
+                                                    signingData.transaction.orgVaultAddress!!,
+                                                    requestType.recoveryContractAddress,
+                                                    calculateVaultSafeTxs(it.owners, it.threshold, requestType.recoveryAddresses, requestType.recoveryThreshold),
+                                                    signingData.transaction
+                                                ),
+                                                approvalRequestSignature
+                                            )
+                                        }
                                 }
                                 is ApprovalRequestDetailsV2.SigningData.PolygonSigningData-> {
-                                    SignableDataResult.Polygon(
-                                        EvmConfigTransactionBuilder.getEnableRecoveryContractExecutionFromModuleDataSafeHash(
-                                            signingData.transaction.orgVaultAddress!!,
-                                            requestType.recoveryThreshold,
-                                            requestType.recoveryAddresses,
-                                            requestType.orgName,
-                                            signingData.transaction
-                                        ),
-                                        approvalRequestSignature
-                                    )
+                                    requestType.currentOnChainPolicies.filterIsInstance<ApprovalRequestDetailsV2.OnChainPolicy.Polygon>()
+                                        .firstOrNull()?.let {
+                                            SignableDataResult.Ethereum(
+                                                EvmConfigTransactionBuilder.getPolicyUpdateExecutionFromModuleDataSafeHash(
+                                                    signingData.transaction.orgVaultAddress!!,
+                                                    requestType.recoveryContractAddress,
+                                                    calculateVaultSafeTxs(it.owners, it.threshold, requestType.recoveryAddresses, requestType.recoveryThreshold),
+                                                    signingData.transaction
+                                                ),
+                                                approvalRequestSignature
+                                            )
+                                        }
                                 }
                                 else -> null
                             }
@@ -472,6 +476,10 @@ data class ApprovalDispositionRequestV2(
             targetPolicy.approvalsRequired
         )
         return startingPolicy.safeTransactions(updatedTargetPolicy).first
+    }
+
+    private fun calculateVaultSafeTxs(currentOwners: List<String>, currentThreshold: Int, targetOwners: List<String>, targetThreshold: Int): List<SafeTx> {
+        return  SafeTx.Policy(currentOwners, currentThreshold).safeTransactions(SafeTx.Policy(targetOwners, targetThreshold)).first
     }
 
     private fun calculateWalletSafeTxs(currentOwners: List<String>, currentThreshold: Int, targetPolicy: ApprovalRequestDetailsV2.WalletApprovalPolicy): List<SafeTx> {

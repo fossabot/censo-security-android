@@ -15,8 +15,8 @@ import com.censocustody.android.presentation.components.FactsData
 import com.censocustody.android.presentation.components.RowData
 
 @Composable
-fun EnableRecoveryContractDetailContent(
-    details: ApprovalRequestDetailsV2.EnableRecoveryContract
+fun UpdateRecoveryPolicyDetailContent(
+    details: ApprovalRequestDetailsV2.RecoveryContractPolicyUpdate
 ) {
     val header = details.getHeader(LocalContext.current)
     ApprovalContentHeader(header = header, topSpacing = 24, bottomSpacing = 8)

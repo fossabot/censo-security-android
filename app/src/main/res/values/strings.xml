@@ -284,6 +284,7 @@
     <string name="eth_sign_header">dApp Sign Message</string>
     <string name="eth_sign_typed_data_header">dApp Sign Data</string>
     <string name="enable_recovery_contract_header">Enable Recovery Policy</string>
+    <string name="update_recovery_policy_header">Update Recovery Policy</string>
     <string name="checking_sessions_loading">Connected to DApp.\n\nChecking sessions…</string>
     <string name="no_active_sessions_found">No Active Sessions Found For dApp</string>
     <string name="message_to_sign">Message</string>
